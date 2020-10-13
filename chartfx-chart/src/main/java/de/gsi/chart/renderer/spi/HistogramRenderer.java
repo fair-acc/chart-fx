@@ -465,14 +465,14 @@ public class HistogramRenderer extends AbstractDataSetManagement<HistogramRender
 
     protected static double getBinStart(final DataSet ds, final int index) {
         if (ds instanceof Histogram) {
-            return ((Histogram) ds).getBinLimits(DIM_X, false, index + 1); // '+1' because binIndex starts with '0' (under-flow bin)
+            return ((Histogram) ds).getBinLimits(DIM_X, Histogram.Boundary.LOWER, index + 1); // '+1' because binIndex starts with '0' (under-flow bin)
         }
         return ds.get(DIM_X, index) - estimateHalfBinWidth(ds, index);
     }
 
     protected static double getBinStop(final DataSet ds, final int index) {
         if (ds instanceof Histogram) {
-            return ((Histogram) ds).getBinLimits(DIM_X, true, index + 1); // '+1' because binIndex starts with '0' (under-flow bin)
+            return ((Histogram) ds).getBinLimits(DIM_X, Histogram.Boundary.UPPER, index + 1); // '+1' because binIndex starts with '0' (under-flow bin)
         }
         return ds.get(DIM_X, index) + estimateHalfBinWidth(ds, index);
     }

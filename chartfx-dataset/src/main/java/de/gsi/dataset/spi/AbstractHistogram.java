@@ -235,7 +235,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
             return binMin[dimIndex] + (binIndex - 0.5) * binDelta[dimIndex];
         }
 
-        return 0.5 * (getBinLimits(dimIndex, false, binIndex) + getBinLimits(dimIndex, true, binIndex));
+        return 0.5 * (getBinLimits(dimIndex, Boundary.LOWER, binIndex) + getBinLimits(dimIndex, Boundary.UPPER, binIndex));
     }
 
     @Override
@@ -272,12 +272,13 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         return this;
     }
 
-    public double getBinLimits(final int dimIndex, final boolean upperBound, final int binIndex) {
-        if (binIndex <= 0 && !upperBound) {
+    @Override
+    public double getBinLimits(final int dimIndex, final Boundary boundary, final int binIndex) {
+        if (binIndex <= 0 && boundary == Boundary.LOWER) {
             return Double.NEGATIVE_INFINITY;
         }
 
-        if (binIndex >= nAxisBins[dimIndex] - 1 && upperBound) {
+        if (binIndex >= nAxisBins[dimIndex] - 1 && boundary == Boundary.UPPER) {
             return Double.POSITIVE_INFINITY;
         }
 
@@ -286,10 +287,10 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
         }
 
         if (isEquiDistant()) {
-            return binMin[dimIndex] + (upperBound ? binIndex : binIndex - 1) * binDelta[dimIndex];
+            return binMin[dimIndex] + (boundary == Boundary.UPPER ? binIndex : binIndex - 1) * binDelta[dimIndex];
         }
 
-        return upperBound ? axisBins[DIM_X][binIndex + 1] : axisBins[DIM_X][binIndex];
+        return boundary == Boundary.UPPER ? axisBins[DIM_X][binIndex + 1] : axisBins[DIM_X][binIndex];
     }
 
     public HistogramOuterBounds getBoundsType() {

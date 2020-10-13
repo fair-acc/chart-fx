@@ -60,11 +60,11 @@ public interface Histogram extends DataSet, DataSetMetaData {
     /**
      *
      * @param dimIndex the dimension index
-     * @param upperBound {@code true}: for upper bound limits
+     * @param boundary for upper or lower bound limits
      * @param binIndex index
      * @return bin limits for axis and upper/lower bound for dimIndex bin
      */
-    double getBinLimits(final int dimIndex, final boolean upperBound, final int binIndex);
+    double getBinLimits(final int dimIndex, final Boundary boundary, final int binIndex);
 
     /**
      * Return content of bin number bin.
@@ -91,4 +91,9 @@ public interface Histogram extends DataSet, DataSetMetaData {
      * reset histogram content
      */
     void reset();
+
+    enum Boundary {
+        UPPER,
+        LOWER
+    }
 }

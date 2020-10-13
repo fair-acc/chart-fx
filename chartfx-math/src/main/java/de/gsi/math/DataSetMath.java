@@ -3,11 +3,14 @@ package de.gsi.math;
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
+import static de.gsi.dataset.Histogram.Boundary.LOWER;
+import static de.gsi.dataset.Histogram.Boundary.UPPER;
 import static de.gsi.math.DataSetMath.ErrType.EXP;
 import static de.gsi.math.DataSetMath.ErrType.EYN;
 import static de.gsi.math.DataSetMath.ErrType.EYP;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.jtransforms.fft.DoubleFFT_1D;
@@ -19,12 +22,14 @@ import de.gsi.dataset.EditableDataSet;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
+import de.gsi.dataset.spi.Histogram;
 import de.gsi.dataset.spi.utils.DoublePointError;
+import de.gsi.dataset.utils.NoDuplicatesList;
 import de.gsi.math.spectra.Apodization;
 import de.gsi.math.spectra.SpectrumTools;
 
 /**
- * Some math operation on DataSet and DataSetError
+ * Some math operation on DataSet, DataSetError and Histogram
  *
  * @author rstein
  */
@@ -41,6 +46,75 @@ public final class DataSetMath { // NOPMD - nomen est omen
      */
     private DataSetMath() {
         // private function, never called
+    }
+
+    public static DoubleErrorDataSet applyMathOperation(final DoubleErrorDataSet ret, final MathOp op, final double x1, final double y1, final double y2, final double eyn1, final double eyp1, final double eyn2, final double eyp2) {
+        // switch through math operations
+        switch (op) {
+        case ADD:
+            return ret.add(x1, y1 + y2, MathBase.hypot(eyn1, eyn2), MathBase.hypot(eyp1, eyp2));
+        case SUBTRACT:
+            return ret.add(x1, y1 - y2, MathBase.hypot(eyn1, eyn2), MathBase.hypot(eyp1, eyp2));
+        case MULTIPLY:
+            return ret.add(x1, y1 * y2, MathBase.hypot(y2 * eyn1, y1 * eyn2), MathBase.hypot(y2 * eyp1, y1 * eyp2));
+        case DIVIDE:
+            final double newY = y1 / y2;
+            final double nEYN = MathBase.hypot(eyn1 / y2, newY * eyn2 / y2);
+            final double nEYP = MathBase.hypot(eyp1 / y2, newY * eyp2 / y2);
+            return ret.add(x1, newY, nEYN, nEYP);
+        case SQR:
+            return ret.add(x1, MathBase.sqr(y1 + y2), 2 * MathBase.abs(y1 + y2) * MathBase.hypot(eyn1, eyn2), 2 * MathBase.abs(y1 + y2) * MathBase.hypot(eyp1, eyp2));
+        case SQRT:
+            return ret.add(x1, MathBase.sqrt(y1 + y2), MathBase.sqrt(MathBase.abs(y1 + y2)) * MathBase.hypot(eyn1, eyn2), MathBase.sqrt(MathBase.abs(y1 + y2)) * MathBase.hypot(eyp1, eyp2));
+        case LOG10:
+            double norm = 1.0 / MathBase.log(10);
+            final double nEYNLog = y1 + y2 > 0 ? norm / MathBase.abs(y1 + y2) * MathBase.hypot(eyn1, eyn2) : Double.NaN;
+            final double nEYPLog = y1 + y2 > 0 ? norm / MathBase.abs(y1 + y2) * MathBase.hypot(eyp1, eyp2) : Double.NaN;
+            return ret.add(x1, 10 * MathBase.log10(y1 + y2), nEYNLog, nEYPLog);
+        case DB:
+            final double normDb = 20.0 / MathBase.log(10);
+            final double nEYNDb = y1 + y2 > 0 ? normDb / MathBase.abs(y1 + y2) * MathBase.hypot(eyn1, eyn2) : Double.NaN;
+            final double nEYPDb = y1 + y2 > 0 ? normDb / MathBase.abs(y1 + y2) * MathBase.hypot(eyp1, eyp2) : Double.NaN;
+            return ret.add(x1, 20 * MathBase.log10(y1 + y2), nEYNDb, nEYPDb);
+        case IDENTITY:
+        default:
+            return ret.add(x1, y1 + y2, eyn1, eyp1);
+        }
+    }
+
+    // convenience short-hand notation for getting error variables (if defined for dataset)
+    protected static double error(final DataSet dataSet, final ErrType eType, final int index, final double x,
+            final boolean interpolate) {
+        if (!(dataSet instanceof DataSetError)) {
+            // data set does not have any error definition
+            return 0.0;
+        }
+        final DataSetError ds = (DataSetError) dataSet;
+        if (interpolate) {
+            switch (eType) {
+            case EXN:
+                return ds.getErrorNegative(DIM_X, x);
+            case EXP:
+                return ds.getErrorPositive(DIM_X, x);
+            case EYN:
+                return ds.getErrorNegative(DIM_Y, x);
+            case EYP:
+                return ds.getErrorPositive(DIM_Y, x);
+            }
+        } else {
+            switch (eType) {
+            case EXN:
+                return ds.getErrorNegative(DIM_X, index);
+            case EXP:
+                return ds.getErrorPositive(DIM_X, index);
+            case EYN:
+                return ds.getErrorNegative(DIM_Y, index);
+            case EYP:
+                return ds.getErrorPositive(DIM_Y, index);
+            }
+        }
+
+        return 0;
     }
 
     public static DataSet addFunction(final DataSet function1, final DataSet function2) {
@@ -82,7 +156,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
                     new double[ncount], new double[ncount], ncount, true);
         }
 
-        final int nAvg = Math.min(nUpdates, dataSets.size());
+        final int nAvg = MathBase.min(nUpdates, dataSets.size());
         final DataSet newFunction = dataSets.get(dataSets.size() - 1);
         final DoubleErrorDataSet retFunction = new DoubleErrorDataSet(functionName, newFunction.getDataCount() + 2);
 
@@ -94,7 +168,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             double eyp = 0.0;
 
             int count = 0;
-            for (int j = Math.max(0, dataSets.size() - nAvg); j < dataSets.size(); j++) {
+            for (int j = MathBase.max(0, dataSets.size() - nAvg); j < dataSets.size(); j++) {
                 final DataSet oldFunction = dataSets.get(j);
                 final double oldX = oldFunction.get(DIM_X, i);
                 final double oldY = oldX == newX ? oldFunction.get(DIM_Y, i) : oldFunction.getValue(DIM_X, newX);
@@ -116,9 +190,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 eyp /= count;
                 var /= count;
                 final double mean2 = mean * mean;
-                final double diff = Math.abs(var - mean2);
-                eyn = Math.sqrt(eyn * eyn + diff);
-                eyp = Math.sqrt(eyp * eyp + diff);
+                final double diff = MathBase.abs(var - mean2);
+                eyn = MathBase.sqrt(eyn * eyn + diff);
+                eyp = MathBase.sqrt(eyp * eyp + diff);
                 retFunction.add(newX, mean, eyn, eyp);
             }
         }
@@ -178,28 +252,16 @@ public final class DataSetMath { // NOPMD - nomen est omen
                     ((DoubleErrorDataSet) prevAverage2).set(i, newX, newY2, eyn, eyp);
                 }
             }
-            final double newEYN = Math.sqrt(Math.abs(newY2 - Math.pow(newY, 2)) + eyn * eyn);
-            final double newEYP = Math.sqrt(Math.abs(newY2 - Math.pow(newY, 2)) + eyp * eyp);
+            final double newEYN = MathBase.sqrt(MathBase.abs(newY2 - MathBase.pow(newY, 2)) + eyn * eyn);
+            final double newEYP = MathBase.sqrt(MathBase.abs(newY2 - MathBase.pow(newY, 2)) + eyp * eyp);
             retFunction.set(i, oldX, newY, newEYN, newEYP);
         }
 
         return retFunction;
     }
 
-    private static double[] cropToLength(final double[] in, final int length) {
-        // small helper routine to crop data array in case it's to long
-        if (in.length == length) {
-            return in;
-        }
-        return Arrays.copyOf(in, length);
-    }
-
     public static DataSet dbFunction(final DataSet function) {
         return mathFunction(function, 0.0, MathOp.DB);
-    }
-
-    public static DataSet inversedbFunction(final DataSet function) {
-        return mathFunction(function, 1.0, MathOp.INV_DB);
     }
 
     public static DataSet dbFunction(final DataSet function1, final DataSet function2) {
@@ -229,9 +291,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
         // final double yen1 = error(function, EYN, 1);
         // final double yep1 = error(function, EYP, 1);
         // final double deltaY0 = y1 - y0;
-        // final double deltaYEN = Math.sqrt(Math.pow(yen0, 2) + Math.pow(yen1,
+        // final double deltaYEN = MathBase.sqrt(MathBase.pow(yen0, 2) + MathBase.pow(yen1,
         // 2));
-        // final double deltaYEP = Math.sqrt(Math.pow(yep0, 2) + Math.pow(yep1,
+        // final double deltaYEP = MathBase.sqrt(MathBase.pow(yep0, 2) + MathBase.pow(yep1,
         // 2));
         // final double deltaX0 = function.get(DIM_X, 1) - function.get(DIM_X, 0);
         // retFunction.add(function.get(DIM_X, 0), sign * (deltaY0 / deltaX0),
@@ -251,13 +313,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double yenL = error(function, EYN, i - 1);
             final double yenC = error(function, EYN, i);
             final double yenR = error(function, EYN, i + 1);
-            final double yen = Math.sqrt(MathBase.sqr(yenL) + MathBase.sqr(yenC) + MathBase.sqr(yenR))
+            final double yen = MathBase.sqrt(MathBase.sqr(yenL) + MathBase.sqr(yenC) + MathBase.sqr(yenR))
                                / 4;
 
             final double yepL = error(function, EYP, i - 1);
             final double yepC = error(function, EYP, i);
             final double yepR = error(function, EYP, i + 1);
-            final double yep = Math.sqrt(MathBase.sqr(yepL) + MathBase.sqr(yepC) + MathBase.sqr(yepR))
+            final double yep = MathBase.sqrt(MathBase.sqr(yepL) + MathBase.sqr(yepC) + MathBase.sqr(yepR))
                                / 4;
 
             // simple derivative computation
@@ -311,41 +373,6 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return error(dataSet, eType, index, 0.0, false);
     }
 
-    // convenience short-hand notation for getting error variables (if defined for dataset)
-    protected static double error(final DataSet dataSet, final ErrType eType, final int index, final double x,
-            final boolean interpolate) {
-        if (!(dataSet instanceof DataSetError)) {
-            // data set does not have any error definition
-            return 0.0;
-        }
-        final DataSetError ds = (DataSetError) dataSet;
-        if (interpolate) {
-            switch (eType) {
-            case EXN:
-                return ds.getErrorNegative(DIM_X, x);
-            case EXP:
-                return ds.getErrorPositive(DIM_X, x);
-            case EYN:
-                return ds.getErrorNegative(DIM_Y, x);
-            case EYP:
-                return ds.getErrorPositive(DIM_Y, x);
-            }
-        } else {
-            switch (eType) {
-            case EXN:
-                return ds.getErrorNegative(DIM_X, index);
-            case EXP:
-                return ds.getErrorPositive(DIM_X, index);
-            case EYN:
-                return ds.getErrorNegative(DIM_Y, index);
-            case EYP:
-                return ds.getErrorPositive(DIM_Y, index);
-            }
-        }
-
-        return 0;
-    }
-
     /**
      * convenience short-hand notation for getting error variables (if defined for dataset)
      *
@@ -375,8 +402,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet filterFunction(final DataSet function, final double width, final Filter filterType) {
         final int n = function.getDataCount();
-        final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(
-                filterType.getTag() + "(" + function.getName() + "," + Double.toString(width) + ")", n);
+        final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(filterType.getTag() + "(" + function.getName() + "," + width + ")", n);
         for (int dim = 0; dim < filteredFunction.getDimension(); dim++) {
             final AxisDescription refAxisDescription = function.getAxisDescription(dim);
             filteredFunction.getAxisDescription(dim).set(refAxisDescription.getName(), refAxisDescription.getUnit());
@@ -396,7 +422,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             int count = 0;
             for (int j = 0; j < n; j++) {
                 final double time = xValues[j];
-                if (Math.abs(time0 - time) <= width) {
+                if (MathBase.abs(time0 - time) <= width) {
                     subArrayY[count] = yValues[j];
                     subArrayYn[count] = yen[j];
                     subArrayYp[count] = yep[j];
@@ -404,7 +430,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 }
             }
 
-            final double norm = count > 0 ? 1.0 / Math.sqrt(count) : 0.0;
+            final double norm = count > 0 ? 1.0 / MathBase.sqrt(count) : 0.0;
 
             switch (filterType) {
             case MEDIAN:
@@ -466,8 +492,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DataSet iirLowPassFilterFunction(final DataSet function, final double width) {
         final int n = function.getDataCount();
-        final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(
-                "iir" + Filter.MEAN.getTag() + "(" + function.getName() + "," + Double.toString(width) + ")", n);
+        final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet("iir" + Filter.MEAN.getTag() + "(" + function.getName() + "," + width + ")", n);
         if (n <= 1) {
             if (!(function instanceof GridDataSet)) {
                 filteredFunction.set(function);
@@ -511,9 +536,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
         // final double y = yValues[i];
         // smoothed += (x1 - x0) * (y - smoothed) / smoothing;
         // smoothed2 += (x1 - x0) * (y * y - smoothed2) / smoothing;
-        // final double newEYN = Math.sqrt(Math.abs(smoothed2 - smoothed *
+        // final double newEYN = MathBase.sqrt(MathBase.abs(smoothed2 - smoothed *
         // smoothed) + yen[i] * yen[i]);
-        // final double newEYP = Math.sqrt(Math.abs(smoothed2 - smoothed *
+        // final double newEYP = MathBase.sqrt(MathBase.abs(smoothed2 - smoothed *
         // smoothed) + yep[i] * yep[i]);
         //
         // filteredFunction.add(x1 - smoothing, smoothed, newEYN, newEYP);
@@ -546,10 +571,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double x1 = xValues[i];
             final double y = 0.5 * (yUp[i] + yDown[i]);
             final double mean2 = y * y;
-            final double y2 = 0.5 * Math.pow(ye1[i] + ye2[i], 1);
-            final double avgError2 = Math.abs(y2 - mean2);
-            final double newEYN = Math.sqrt(avgError2 + yen[i] * yen[i]);
-            final double newEYP = Math.sqrt(avgError2 + yep[i] * yep[i]);
+            final double y2 = 0.5 * MathBase.pow(ye1[i] + ye2[i], 1);
+            final double avgError2 = MathBase.abs(y2 - mean2);
+            final double newEYN = MathBase.sqrt(avgError2 + yen[i] * yen[i]);
+            final double newEYP = MathBase.sqrt(avgError2 + yep[i] * yep[i]);
 
             filteredFunction.add(x1, y, newEYN, newEYP);
         }
@@ -627,8 +652,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         double sign = 1.0;
 
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {
-            xMinLocal = Math.min(xMin, xMax);
-            xMaxLocal = Math.max(xMin, xMax);
+            xMinLocal = MathBase.min(xMin, xMax);
+            xMaxLocal = MathBase.max(xMin, xMax);
             if (xMin > xMax) {
                 sign = -1;
             }
@@ -663,8 +688,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double ep1 = error(function, EYP, 0);
 
             // assuming uncorrelated errors between bins
-            integralEN = Math.hypot(integralEN, step * en1);
-            integralEP = Math.hypot(integralEP, step * ep1);
+            integralEN = MathBase.hypot(integralEN, step * en1);
+            integralEP = MathBase.hypot(integralEP, step * ep1);
 
             retFunction.add(x0, integral, 0, 0);
         }
@@ -686,8 +711,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 integral += sign * 0.5 * step * (y0 + y1);
 
                 // assuming uncorrelated errors between bins
-                integralEN = Math.hypot(integralEN, 0.5 * step * (en1 + en2));
-                integralEP = Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
+                integralEN = MathBase.hypot(integralEN, 0.5 * step * (en1 + en2));
+                integralEP = MathBase.hypot(integralEP, 0.5 * step * (ep1 + ep2));
 
             } else if (x1 < xMinLocal && x0 < xMinLocal) {
                 // see below
@@ -697,16 +722,16 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 integral += sign * 0.5 * step * (function.getValue(DIM_X, xMinLocal) + y1);
 
                 // assuming uncorrelated errors between bins
-                integralEN = Math.hypot(integralEN, 0.5 * step * (en1 + en2));
-                integralEP = Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
+                integralEN = MathBase.hypot(integralEN, 0.5 * step * (en1 + en2));
+                integralEP = MathBase.hypot(integralEP, 0.5 * step * (ep1 + ep2));
             } else if (x0 < xMaxLocal && x1 > xMaxLocal) {
                 step = xMaxLocal - x0;
                 final double yAtMax = function.getValue(DIM_X, xMaxLocal);
                 integral += sign * 0.5 * step * (y0 + yAtMax);
 
                 // assuming uncorrelated errors between bins
-                integralEN = Math.hypot(integralEN, 0.5 * step * (en1 + en2));
-                integralEP = Math.hypot(integralEP, 0.5 * step * (ep1 + ep2));
+                integralEN = MathBase.hypot(integralEN, 0.5 * step * (en1 + en2));
+                integralEP = MathBase.hypot(integralEP, 0.5 * step * (ep1 + ep2));
 
                 retFunction.add(xMaxLocal, integral, integralEN, integralEP);
             }
@@ -724,14 +749,18 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double en1 = error(function, EYN, nLength - 1);
             final double ep1 = error(function, EYP, nLength - 1);
             // assuming uncorrelated errors between bins
-            integralEN = Math.hypot(integralEN, step * en1);
-            integralEP = Math.hypot(integralEP, step * ep1);
+            integralEN = MathBase.hypot(integralEN, step * en1);
+            integralEP = MathBase.hypot(integralEP, step * ep1);
 
             integral += 0.5 * step * (val1 + val2);
             retFunction.add(xMax, integral, integralEN, integralEP);
         }
 
         return retFunction;
+    }
+
+    public static DataSet inversedbFunction(final DataSet function) {
+        return mathFunction(function, 1.0, MathOp.INV_DB);
     }
 
     public static DataSet log10Function(final DataSet function) {
@@ -810,9 +839,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
         for (int i = 0; i < mag.length; i++) {
             // TODO: consider magnitude error estimate
             if (i < mag.length / 2) {
-                ret.add((i - mag.length / 2) * fsampling, mag[i + mag.length / 2], 0, 0);
+                ret.add((i - mag.length / 2.0) * fsampling, mag[i + mag.length / 2], 0, 0);
             } else {
-                ret.add((i - mag.length / 2) * fsampling, mag[i - mag.length / 2], 0, 0);
+                ret.add((i - mag.length / 2.0) * fsampling, mag[i - mag.length / 2], 0, 0);
             }
         }
 
@@ -823,83 +852,71 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return magnitudeSpectrum(function, Apodization.Hann, true, false);
     }
 
+    public static boolean sameHorizontalBase(final DataSet function1, final DataSet function2) {
+        if (function1.getDataCount() != function2.getDataCount()) {
+            return false;
+        }
+        for (int i = 0; i < function1.getDataCount(); i++) {
+            final double X1 = function1.get(DIM_X, i);
+            final double X2 = function2.get(DIM_X, i);
+            if (X1 != X2) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static DataSet mathFunction(final DataSet function1, final DataSet function2, final MathOp op) {
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(function1.getName() + op.getTag() + function2.getName(),
-                function1.getDataCount());
+        final DoubleErrorDataSet ret = new DoubleErrorDataSet(function1.getName() + op.getTag() + function2.getName(), function1.getDataCount());
         ret.getAxisDescription(DIM_X).set(function1.getAxisDescription(DIM_X));
-        ret.getAxisDescription(DIM_Y).set(function1.getAxisDescription(DIM_Y).getName(),
-                function1.getAxisDescription(DIM_Y).getUnit());
+        ret.getAxisDescription(DIM_Y).set(function1.getAxisDescription(DIM_Y).getName(), function1.getAxisDescription(DIM_Y).getUnit());
+
+        final boolean needsInterpolation = !sameHorizontalBase(function1, function2);
+        if (needsInterpolation) {
+            final List<Double> xValues = getCommonBase(function1, function2);
+            for (double x : xValues) {
+                final double Y1 = function1.getValue(DIM_Y, x);
+                final double Y2 = function2.getValue(DIM_Y, x);
+                final double eyn1 = error(function1, EYN, 0, x, needsInterpolation);
+                final double eyp1 = error(function1, EYP, 0, x, needsInterpolation);
+                final double eyn2 = error(function2, EYN, 0, x, needsInterpolation);
+                final double eyp2 = error(function2, EYP, 0, x, needsInterpolation);
+                applyMathOperation(ret, op, x, Y1, Y2, eyn1, eyp1, eyn2, eyp2);
+            }
+            return ret;
+        }
 
         for (int i = 0; i < function1.getDataCount(); i++) {
             final double X1 = function1.get(DIM_X, i);
-            final double X2 = function1.get(DIM_X, i);
-            final boolean inter = X1 != X2;
+            // not needed : final double X2 = function1.get(DIM_X, i) ...
             final double Y1 = function1.get(DIM_Y, i);
-            final double Y2 = inter ? function2.get(DIM_Y, i) : function2.getValue(DIM_Y, X1);
+            final double Y2 = function2.get(DIM_Y, i);
             final double eyn1 = error(function1, EYN, i);
             final double eyp1 = error(function1, EYP, i);
-            final double eyn2 = error(function2, EYN, i, X1, inter);
-            final double eyp2 = error(function2, EYP, i, X1, inter);
-            double newY;
-            double nEYN;
-            double nEYP;
-            double norm;
-
-            // switch through math operations
-            switch (op) {
-            case ADD:
-                newY = Y1 + Y2;
-                nEYN = Math.hypot(eyn1, eyn2);
-                nEYP = Math.hypot(eyp1, eyp2);
-                break;
-            case SUBTRACT:
-                newY = Y1 - Y2;
-                nEYN = Math.hypot(eyn1, eyn2);
-                nEYP = Math.hypot(eyp1, eyp2);
-                break;
-            case MULTIPLY:
-                newY = Y1 * Y2;
-                nEYN = Math.hypot(Y2 * eyn1, Y1 * eyn2);
-                nEYP = Math.hypot(Y2 * eyp1, Y1 * eyp2);
-                break;
-            case DIVIDE:
-                newY = Y1 / Y2;
-                nEYN = Math.hypot(eyn1 / Y2, newY * eyn2 / Y2);
-                nEYP = Math.hypot(eyp1 / Y2, newY * eyp2 / Y2);
-                break;
-            case SQR:
-                newY = MathBase.sqr(Y1 + Y2);
-                nEYN = 2 * Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2);
-                nEYP = 2 * Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2);
-                break;
-            case SQRT:
-                newY = MathBase.sqrt(Y1 + Y2);
-                nEYN = Math.sqrt(Math.abs(Y1 + Y2)) * Math.hypot(eyn1, eyn2);
-                nEYP = Math.sqrt(Math.abs(Y1 + Y2)) * Math.hypot(eyp1, eyp2);
-                break;
-            case LOG10:
-                norm = 1.0 / Math.log(10);
-                newY = MathBase.log10(Y1 + Y2);
-                nEYN = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2) : Double.NaN;
-                nEYP = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2) : Double.NaN;
-                break;
-            case DB:
-                norm = 20.0 / Math.log(10);
-                newY = 20 * MathBase.log10(Y1 + Y2);
-                nEYN = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyn1, eyn2) : Double.NaN;
-                nEYP = Y1 + Y2 > 0 ? norm / Math.abs(Y1 + Y2) * Math.hypot(eyp1, eyp2) : Double.NaN;
-                break;
-            default:
-                newY = Y1;
-                nEYN = eyn1;
-                nEYP = eyp1;
-                break;
-            }
-
-            ret.add(X1, newY, nEYN, nEYP);
+            final double eyn2 = error(function2, EYN, i, X1, needsInterpolation);
+            final double eyp2 = error(function2, EYP, i, X1, needsInterpolation);
+            applyMathOperation(ret, op, X1, Y1, Y2, eyn1, eyp1, eyn2, eyp2);
         }
 
         return ret;
+    }
+
+    public static List<Double> getCommonBase(final DataSet... functions) {
+        final List<Double> xValues = new NoDuplicatesList<>();
+        for (DataSet function : functions) {
+            for (int i = 0; i < function.getDataCount(); i++) {
+                if (function instanceof Histogram) {
+                    xValues.add(((Histogram) function).getBinLimits(DIM_X, LOWER, i));
+                    xValues.add(((Histogram) function).getBinCenter(DIM_X, i));
+                    xValues.add(((Histogram) function).getBinLimits(DIM_X, UPPER, i));
+                } else {
+                    xValues.add(function.get(DIM_X, i));
+                }
+            }
+        }
+        Collections.sort(xValues);
+        return xValues;
     }
 
     public static DataSet mathFunction(final DataSet function, final double value, final MathOp op) {
@@ -924,17 +941,17 @@ public final class DataSetMath { // NOPMD - nomen est omen
                     ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
         case SQR:
             for (int i = 0; i < eyn.length; i++) {
-                eyn[i] = 2 * Math.abs(y[i]) * eyn[i];
-                eyp[i] = 2 * Math.abs(y[i]) * eyp[i];
+                eyn[i] = 2 * MathBase.abs(y[i] + value) * eyn[i];
+                eyp[i] = 2 * MathBase.abs(y[i] + value) * eyp[i];
             }
-            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.sqr(y), eyn, eyp, ncount,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), value == 0.0 ? ArrayMath.sqr(y) : ArrayMath.sqr(ArrayMath.add(y, value)), eyn, eyp, ncount,
                     true);
         case SQRT:
             for (int i = 0; i < eyn.length; i++) {
-                eyn[i] = Math.sqrt(Math.abs(y[i])) * eyn[i];
-                eyp[i] = Math.sqrt(Math.abs(y[i])) * eyp[i];
+                eyn[i] = MathBase.sqrt(MathBase.abs(y[i] + value)) * eyn[i];
+                eyp[i] = MathBase.sqrt(MathBase.abs(y[i] + value)) * eyp[i];
             }
-            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.sqrt(y), eyn, eyp, ncount,
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), value == 0.0 ? ArrayMath.sqrt(y) : ArrayMath.sqrt(ArrayMath.add(y, value)), eyn, eyp, ncount,
                     true);
         case LOG10:
             for (int i = 0; i < eyn.length; i++) {
@@ -957,6 +974,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             }
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.inverseDecibel(y), eyn, eyp,
                     ncount, true);
+        case IDENTITY:
         default:
             // return copy if nothing else matches
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), function.getValues(DIM_Y),
@@ -1025,8 +1043,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         double xMaxLocal = function.get(DIM_X, nLength - 1);
 
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {
-            xMinLocal = Math.min(xMin, xMax);
-            xMaxLocal = Math.max(xMin, xMax);
+            xMinLocal = MathBase.min(xMin, xMax);
+            xMaxLocal = MathBase.max(xMin, xMax);
         } else if (Double.isFinite(xMin)) {
             xMinLocal = xMin;
         } else if (Double.isFinite(xMax)) {
@@ -1045,16 +1063,16 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return function;
     }
 
-    public static DataSet sqrFunction(final DataSet function) {
-        return mathFunction(function, 0.0, MathOp.SQR);
+    public static DataSet sqrFunction(final DataSet function, final double value) {
+        return mathFunction(function, value, MathOp.SQR);
     }
 
     public static DataSet sqrFunction(final DataSet function1, final DataSet function2) {
         return mathFunction(function1, function2, MathOp.SQR);
     }
 
-    public static DataSet sqrtFunction(final DataSet function) {
-        return mathFunction(function, 0.0, MathOp.SQRT);
+    public static DataSet sqrtFunction(final DataSet function, final double value) {
+        return mathFunction(function, value, MathOp.SQRT);
     }
 
     public static DataSet sqrtFunction(final DataSet function1, final DataSet function2) {
@@ -1069,11 +1087,19 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return mathFunction(function, value, MathOp.SUBTRACT);
     }
 
+    private static double[] cropToLength(final double[] in, final int length) {
+        // small helper routine to crop data array in case it's to long
+        if (in.length == length) {
+            return in;
+        }
+        return Arrays.copyOf(in, length);
+    }
+
     public enum ErrType {
         EXN,
         EXP,
         EYN,
-        EYP;
+        EYP
     }
 
     public enum Filter {
@@ -1085,13 +1111,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
         RMS("RMS"),
         GEOMMEAN("GeometricMean");
 
-        private String tag;
+        private final String tag;
 
         Filter(final String tag) {
             this.tag = tag;
         }
 
-        String getTag() {
+        public String getTag() {
             return tag;
         }
     }
@@ -1105,15 +1131,16 @@ public final class DataSetMath { // NOPMD - nomen est omen
         SQRT("SQRT"),
         LOG10("Log10"),
         DB("dB"),
-        INV_DB("dB^{-1}");
+        INV_DB("dB^{-1}"),
+        IDENTITY("Copy");
 
-        private String tag;
+        private final String tag;
 
         MathOp(final String tag) {
             this.tag = tag;
         }
 
-        String getTag() {
+        public String getTag() {
             return tag;
         }
     }
