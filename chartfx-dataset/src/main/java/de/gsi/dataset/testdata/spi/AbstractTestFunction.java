@@ -48,12 +48,12 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 
     @Override
     public final double getErrorNegative(final int dimIndex, final int index) {
-        return 0.1;
+        return 0.0;
     }
 
     @Override
     public final double getErrorPositive(final int dimIndex, final int index) {
-        return 0.1;
+        return 0.0;
     }
 
     @Override
