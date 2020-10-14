@@ -58,6 +58,12 @@ public interface Histogram extends DataSet, DataSetMetaData {
     double getBinCenter(final int dimIndex, final int binIndex);
 
     /**
+     * @param dimIndex the dimension index
+     * @return the number of bins for the given dimIndex (includes the under- and over-flow bin)
+     */
+    int getBinCount(final int dimIndex);
+
+    /**
      *
      * @param dimIndex the dimension index
      * @param boundary for upper or lower bound limits

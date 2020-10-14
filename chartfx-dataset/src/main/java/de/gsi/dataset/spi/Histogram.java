@@ -41,10 +41,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
         super(name, xBins);
         isHorizontal = horizontal;
         if (!isHorizontal) {
-            getAxisDescription(DIM_Y).set(getAxisDescription(DIM_X));
-            getAxisDescription(DIM_X).clear();
-            binMin[DIM_Y] = xBins[0];
-            binDelta[DIM_Y] = getAxisDescription(DIM_Y).getLength() / ((double) getDataCount());
+            flipAbscissaWithOrdinate();
         }
     }
 
@@ -75,10 +72,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
         super(name, nBins, minX, maxX, boundsType);
         isHorizontal = horizontal;
         if (!isHorizontal) {
-            getAxisDescription(DIM_Y).set(getAxisDescription(DIM_X));
-            getAxisDescription(DIM_X).clear();
-            binMin[DIM_Y] = minX;
-            binDelta[DIM_Y] = getAxisDescription(DIM_Y).getLength() / ((double) getDataCount());
+            flipAbscissaWithOrdinate();
         }
     }
 
@@ -156,7 +150,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
         if (getBinContent(0) > 0 && !retVal.contains(DataSetMetaData.TAG_UNDERSHOOT)) {
             retVal.add(DataSetMetaData.TAG_UNDERSHOOT);
         }
-        if (getBinContent(nAxisBins[DIM_X] - 1) > 0 && !retVal.contains(DataSetMetaData.TAG_OVERSHOOT)) {
+        if (getBinContent(data.length - 1) > 0 && !retVal.contains(DataSetMetaData.TAG_OVERSHOOT)) {
             retVal.add(DataSetMetaData.TAG_OVERSHOOT);
         }
         return retVal;
@@ -180,5 +174,11 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
         throw new UnsupportedOperationException("set is not implemented");
+    }
+
+    protected void flipAbscissaWithOrdinate() {
+        getAxisDescription(DIM_Y).set(getAxisDescription(DIM_X));
+        getAxisDescription(DIM_X).clear();
+        swap(axisBins, DIM_X, DIM_Y);
     }
 }
