@@ -85,7 +85,7 @@ public class OscilloscopeAxisTests {
         final OscilloscopeAxis axis = new OscilloscopeAxis("axis title", 0.0, 100.0, 10.0);
 
         assertDoesNotThrow(() -> axis.setSide(Side.BOTTOM));
-        assertDoesNotThrow(() -> axis.updateCachedVariables());
+        assertDoesNotThrow(axis::updateCachedVariables);
 
         final double zero = axis.getDisplayPosition(axis.getValueForDisplay(0));
         assertEquals(0.0, zero);
@@ -144,10 +144,10 @@ public class OscilloscopeAxisTests {
     public void setterGetterTests() {
         final OscilloscopeAxis axis = new OscilloscopeAxis("axis title", 0.0, 100.0, 10.0);
 
-        assertEquals(false, axis.isLogAxis());
+        assertFalse(axis.isLogAxis());
         assertEquals(LogAxisType.LINEAR_SCALE, axis.getLogAxisType());
 
-        assertEquals(false, axis.isInvertedAxis());
+        assertFalse(axis.isInvertedAxis());
         //        axis.invertAxis(true);
         //        assertEquals(true, axis.isInvertedAxis());
         //        axis.invertAxis(false);
@@ -166,18 +166,18 @@ public class OscilloscopeAxisTests {
         axis.setTickUnitSupplier(testTickUnitSupplier);
         assertEquals(testTickUnitSupplier, axis.getTickUnitSupplier());
 
-        assertDoesNotThrow(() -> axis.updateCachedVariables());
+        assertDoesNotThrow(axis::updateCachedVariables);
 
         assertDoesNotThrow(() -> axis.setSide(Side.BOTTOM));
-        assertDoesNotThrow(() -> axis.updateCachedVariables());
+        assertDoesNotThrow(axis::updateCachedVariables);
 
         assertDoesNotThrow(() -> axis.setSide(Side.LEFT));
-        assertDoesNotThrow(() -> axis.updateCachedVariables());
+        assertDoesNotThrow(axis::updateCachedVariables);
 
         assertNotNull(axis.getAxisTransform());
 
         // TODO: make proper sanity checks
-        assertNotNull(axis.calculateMajorTickValues(100, axis.getAxisRange()));
+        assertNotNull(axis.calculateMajorTickValues(100, axis.getRange()));
         assertNotNull(axis.calculateMinorTickValues());
     }
 }

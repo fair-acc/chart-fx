@@ -250,10 +250,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     @Override
     public void forceRedraw() {
-        invalidate();
-        getTickMarks().clear();
-        getMinorTickMarks().clear();
+        invalidateCaches();
         recomputeTickMarks();
+        invalidate();
         layoutChildren();
     }
 
@@ -343,42 +342,18 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
      * happen on next layout pass.
      *
-     * @param data The current set of all data that needs to be plotted on this axis
+     * @param data The current set of all data that needs to be plotted on this axis N.B. not needed anymore now stored in getAutoRange()
      */
     @Override
     public void invalidateRange(final List<Number> data) {
-        double dataMaxValue;
-        double dataMinValue;
-        if (data.isEmpty()) {
-            dataMaxValue = getMax();
-            dataMinValue = getMin();
-            getAutoRange().set(getMin(), getMax());
-        } else {
-            dataMinValue = Double.MAX_VALUE;
-            // We need to init to the lowest negative double (which is NOT Double.MIN_VALUE)
-            // in order to find the maximum (positive or negative)
-            dataMaxValue = -Double.MAX_VALUE;
-            getAutoRange().clear();
-
-            for (final Number dataValue : data) {
-                dataMinValue = Math.min(dataMinValue, dataValue.doubleValue());
-                dataMaxValue = Math.max(dataMaxValue, dataValue.doubleValue());
-            }
-
-            getAutoRange().add(dataMinValue);
-            getAutoRange().add(dataMaxValue);
-        }
-
         final boolean oldState = autoNotification().getAndSet(false);
-        final boolean change = set(dataMinValue, dataMaxValue);
-        if (change) {
-            data.clear();
+        getAutoRange().set(autoRange(getLength())); // derived axes may potentially pad and round limits
+        if (set(getAutoRange().getMin(), getAutoRange().getMax())) {
             getAutoRange().setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
-            invalidate();
-        }
-
-        if (getAutoRange().getMax() != getMax() || getAutoRange().getMin() != getMin()
-                || getAutoRange().getAxisLength() != getLength()) {
+            setScale(getAutoRange().getScale());
+            updateAxisLabelAndUnit();
+            // update cache in derived classes
+            updateCachedVariables();
             invalidate();
         }
 
@@ -461,12 +436,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             final double labelSize = getTickLabelFont().getSize() * 1.2; // N.B. was '2' in earlier implementations
             return autoRange(getAutoRange().getMin(), getAutoRange().getMax(), length, labelSize);
         }
-        return getAxisRange();
+        return getRange();
     }
 
-    protected AxisRange autoRange(final double minValue, final double maxValue, final double length, final double labelSize) {
-        return computeRange(minValue, maxValue, length, labelSize);
-    }
+    protected abstract AxisRange autoRange(final double minValue, final double maxValue, final double length, final double labelSize);
 
     /**
      * Calculate a list of all the data values for each tick mark in range
@@ -1136,14 +1109,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
-     * @return axsis range that is supposed to be shown
-     */
-    protected AxisRange getAxisRange() {
-        // TODO: switch between auto-range and user-defined range here
-        return new AxisRange(getMin(), getMax(), getLength(), getScale(), getTickUnit());
-    }
-
-    /**
      * Invoked during the layout pass to layout this axis and all its content.
      */
     @Override
@@ -1162,9 +1127,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double axisWidth = getWidth();
         final double axisHeight = getHeight();
         final double axisLength = side.isVertical() ? axisHeight : axisWidth; // [pixel]
-        // if we are not auto ranging we need to calculate the new scale
-        // calculate new scale
-        setScale(calculateNewScale(axisLength, getMin(), getMax()));
 
         // we have done all auto calcs, let Axis position major tickmarks
         final double preferredTickUnit = computePreferredTickUnit(axisLength);
@@ -1176,19 +1138,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             recomputedTicks = true;
 
             // get range
-            AxisRange newAxisRange;
-            if (isAutoRanging()) {
-                // auto range
-                newAxisRange = autoRange(axisLength);
-                // set current range to new range
-                set(newAxisRange.getLowerBound(), newAxisRange.getUpperBound());
-                setTickUnit(newAxisRange.getTickUnit());
-            } else {
-                newAxisRange = getAxisRange();
+            AxisRange newAxisRange = getRange();
+            final double mTickUnit = computePreferredTickUnit(axisLength);
+            if (getRange().getMin() != getMin() || getRange().getMax() != getMax()) {
+                set(getRange().getMin(), getRange().getMax());
             }
-
-            setTickUnit(computePreferredTickUnit(axisLength));
-
+            newAxisRange.tickUnit = mTickUnit;
+            setTickUnit(mTickUnit);
             newAxisRange.tickUnit = this.getTickUnit();
             updateAxisLabelAndUnit();
             recomputeTickMarks(newAxisRange);
@@ -1314,7 +1270,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return getSide().isHorizontal() ? tick.getWidth() : tick.getHeight();
     }
 
-    protected void recomputeTickMarks(final AxisRange range) {
+    protected void recomputeTickMarks(final AxisRange range) { // NOPMD -- complexity is unavoidable
         final Side side = getSide();
         if (side == null) {
             return;

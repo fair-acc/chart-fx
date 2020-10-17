@@ -478,11 +478,10 @@ public class XYChart extends Chart {
         final double oldMax = axis.getMax();
         final double oldLength = axis.getLength();
 
-        // TODO: add new auto-ranging here
         final boolean isHorizontal = axis.getSide().isHorizontal();
         final Side side = axis.getSide();
         axis.getAutoRange().clear();
-        dataSets.forEach(dataset -> {
+        dataSets.forEach(dataset -> dataset.lock().readLockGuard(() -> {
             if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
                 if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
                     dataset.recomputeLimits(DataSet.DIM_Z);
@@ -497,9 +496,7 @@ public class XYChart extends Chart {
                 axis.getAutoRange().add(dataset.getAxisDescription(nDim).getMin());
                 axis.getAutoRange().add(dataset.getAxisDescription(nDim).getMax());
             }
-        });
-        axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
-        axis.getUserRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
+        }));
 
         // handling of numeric axis and auto-range or auto-grow setting only
         if (!axis.isAutoRanging() && !axis.isAutoGrowRanging()) {
@@ -510,34 +507,15 @@ public class XYChart extends Chart {
             return;
         }
 
-        final List<Number> dataMinMax = new ArrayList<>();
-        dataSets.forEach(dataset -> dataset.lock().readLockGuardOptimistic(() -> {
-            if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
-                dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
-                dataMinMax.add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
-            } else {
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMin());
-                dataMinMax.add(dataset.getAxisDescription(isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y).getMax());
-            }
-        }));
-
         if (axis.isAutoGrowRanging()) {
-            dataMinMax.add(axis.getMin());
-            dataMinMax.add(axis.getMax());
+            axis.getAutoRange().add(axis.getMin());
+            axis.getAutoRange().add(axis.getMax());
         }
 
-        // work-around since we cannot overwrite the method 'autorange(min,max)' in ValueAxis
-        if (axis.isAutoGrowRanging()) {
-            double min = +Double.MAX_VALUE;
-            double max = -Double.MAX_VALUE;
-            for (final Number val : dataMinMax) {
-                min = Math.min(min, val.doubleValue());
-                max = Math.max(max, val.doubleValue());
-            }
-            axis.set(min, max);
-        } else {
-            axis.invalidateRange(dataMinMax);
-        }
+        axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
+        axis.getUserRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
+        axis.invalidateRange(null);
+
         if (oldMin != axis.getMin() || oldMax != axis.getMax() || oldLength != axis.getLength()) {
             axis.requestAxisLayout();
         }

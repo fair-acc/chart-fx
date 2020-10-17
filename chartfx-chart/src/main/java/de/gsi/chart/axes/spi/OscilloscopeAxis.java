@@ -444,4 +444,8 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
             offset = isVerticalAxis ? getHeight() : getWidth();
         }
     }
+
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length, final double labelSize) {
+        return computeRange(minValue, maxValue, length, labelSize);
+    }
 }

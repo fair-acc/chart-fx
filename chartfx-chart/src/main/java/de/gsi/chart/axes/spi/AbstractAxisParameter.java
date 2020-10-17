@@ -3,6 +3,7 @@ package de.gsi.chart.axes.spi;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.beans.property.*;
@@ -62,8 +63,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient Path minorTickStyle = new Path();
     private final transient AxisLabel axisLabel = new AxisLabel();
     /**
-     * This is the minimum/maximum current data value and it is used while auto ranging. Package private solely for test
-     * purposes TODO: replace concept with 'actual range', 'user-defined range', 'auto-range' (+min, max range limit for
+     * This is the minimum/maximum current data value and it is used while auto ranging. Package private solely for test purposes
+     *
      * auto).... actual is used to compute tick marks and defined by either user or auto (ie. auto axis is always being
      * computed), ALSO add maybe a zoom range (ie. limited by user-set/auto-range range)
      */
@@ -166,13 +167,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, this::requestAxisLayout);
 
     /** The scale factor from data units to visual units */
-    private final transient ReadOnlyDoubleWrapper scale = new ReadOnlyDoubleWrapper(this, "scale", 1) {
-        @Override
-        protected void invalidated() {
-            invalidate();
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
+    private final transient ReadOnlyDoubleWrapper scale = new ReadOnlyDoubleWrapper(this, "scale", 1);
 
     /**
      * The value for the upper bound of this axis, ie max value. This is automatically set if auto ranging is on.
@@ -319,7 +314,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
 
         setScale(newScale == 0 ? -1.0 : newScale);
-        updateCachedVariables();
     };
 
     /**
@@ -351,15 +345,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             invokeListener(new AxisChangeEvent(this));
         });
 
-        final ChangeListener<Number> autoRangeChangeListener = (ch, oldValue, newValue) -> {
-            if (isAutoUnitScaling()) {
-                updateAxisLabelAndUnit();
-            }
-        };
-
-        maxProperty().addListener(autoRangeChangeListener);
-        minProperty().addListener(autoRangeChangeListener);
-
         axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
 
         // bind limits to user-specified axis range
@@ -381,9 +366,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         majorTickStyle.applyCss();
         minorTickStyle.applyCss();
         axisLabel.applyCss();
-
-        widthProperty().addListener((ch, o, n) -> invalidate());
-        heightProperty().addListener((ch, o, n) -> invalidate());
 
         minProperty().addListener(scaleChangeListener);
         maxProperty().addListener(scaleChangeListener);
@@ -1302,6 +1284,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     protected static boolean equalString(final String str1, final String str2) {
-        return (str1 == null ? str2 == null : str1.equals(str2));
+        return Objects.equals(str1, str2);
     }
 }
