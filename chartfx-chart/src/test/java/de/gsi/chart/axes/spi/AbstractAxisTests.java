@@ -37,6 +37,7 @@ import de.gsi.chart.utils.FXUtils;
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(JavaFXInterceptorUtils.SelectiveJavaFxInterceptor.class)
 class AbstractAxisTests {
+    private static final int DEFAULT_AXIS_LENGTH = 1000;
     private static final int WIDTH = 300;
     private static final int HEIGHT = 200;
     private Pane pane;
@@ -47,7 +48,7 @@ class AbstractAxisTests {
         assertFalse(axis.isAutoRangeRounding());
         final AxisRange defaultrange = axis.autoRange(1000);
         assertNotNull(defaultrange);
-        assertEquals(0, defaultrange.getAxisLength()); // since not being attache to a pane
+        assertEquals(1.0, defaultrange.getAxisLength()); // since not being attache to a pane
         assertEquals(-5.0, defaultrange.getMin());
         assertEquals(-5.0, defaultrange.getLowerBound());
         assertEquals(+5.0, defaultrange.getMax());
@@ -71,7 +72,7 @@ class AbstractAxisTests {
 
         assertDoesNotThrow(() -> axis.computeTickMarks(autoRange, false));
 
-        List<Number> numberList = Collections.unmodifiableList(axis.calculateMajorTickValues(1000, autoRange));
+        List<Number> numberList = Collections.unmodifiableList(axis.calculateMajorTickValues(DEFAULT_AXIS_LENGTH, autoRange));
         axis.invalidateRange(new ArrayList<>(numberList));
     }
 
@@ -100,7 +101,7 @@ class AbstractAxisTests {
     }
 
     @Test
-    void testGetterSetters() {
+    void testGetterSetters() { // NOPMD NOSONAR -- number of assertions is part of the unit-test
         EmptyAbstractAxis axis = new EmptyAbstractAxis();
 
         assertTrue(axis.set(-5.0, +5.0));
@@ -180,7 +181,7 @@ class AbstractAxisTests {
     @Test
     void testTickMarks() {
         AbstractAxis axis = new EmptyAbstractAxis(-5.0, 5.0);
-        final AxisRange autoRange = axis.autoRange(1000);
+        final AxisRange autoRange = axis.autoRange(DEFAULT_AXIS_LENGTH);
 
         final List<TickMark> majorTickMarks = axis.computeTickMarks(autoRange, true);
         assertNotNull(majorTickMarks);
@@ -238,6 +239,11 @@ class AbstractAxisTests {
         public double computePreferredTickUnit(final double axisLength) {
             //return axisLength / Math.abs(getMax() - getMin()) / 10.0
             return 0.1; // simplification for testing
+        }
+
+        @Override
+        protected AxisRange autoRange(final double minValue, final double maxValue, final double length, final double labelSize) {
+            return computeRange(minValue, maxValue, DEFAULT_AXIS_LENGTH, labelSize);
         }
 
         @Override

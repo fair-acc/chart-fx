@@ -739,14 +739,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         // update axes range first because this may change the overall layout
         updateAxisRange();
-        for (final Axis axis : getAxes()) {
-            final boolean oldState = axis.autoNotification().getAndSet(false);
-            try {
-                axis.requestAxisLayout();
-            } finally {
-                axis.autoNotification().set(oldState);
-            }
-        }
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
 
         // update chart parent according to possible size changes

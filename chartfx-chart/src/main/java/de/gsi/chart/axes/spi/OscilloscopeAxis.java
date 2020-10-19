@@ -245,7 +245,8 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
             }
             return tickValues;
         }
-        for (double major = firstTick; major <= axisRange.getMax(); major += axisRange.getTickUnit()) {
+        final int maxTickCount = getMaxMajorTickLabelCount();
+        for (double major = firstTick; (major <= axisRange.getMax() && tickValues.size() <= maxTickCount); major += axisRange.getTickUnit()) {
             tickValues.add(major);
         }
         return tickValues;
@@ -265,13 +266,16 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
         final double firstMajorTick = Math.ceil(lowerBound / majorUnit) * majorUnit;
         final double minorUnit = majorUnit / getMinorTickCount();
 
-        for (double majorTick = firstMajorTick - majorUnit; majorTick < upperBound; majorTick += majorUnit) {
+        final int maxTickCount = getMaxMajorTickLabelCount();
+        final int maxMinorTickCount = getMaxMajorTickLabelCount() * getMinorTickCount();
+        int majorTickCount = 0;
+        for (double majorTick = firstMajorTick - majorUnit; (majorTick < upperBound && majorTickCount < maxTickCount); majorTick += majorUnit) {
             if (majorTick + majorUnit == majorTick) {
                 // major ticks numerically not resolvable
                 break;
             }
             final double nextMajorTick = majorTick + majorUnit;
-            for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+            for (double minorTick = majorTick + minorUnit; (minorTick < nextMajorTick && newMinorTickMarks.size() < maxMinorTickCount); minorTick += minorUnit) {
                 if (minorTick == majorTick) {
                     // minor ticks numerically not possible
                     break;
@@ -280,6 +284,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
                     newMinorTickMarks.add(minorTick);
                 }
             }
+            majorTickCount++;
         }
 
         return newMinorTickMarks;
@@ -287,7 +292,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     @Override
     public boolean set(final double min, final double max) {
-        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+        if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return super.set(min, max);
         }
         final AxisRange range = computeRange(min, max, getLength(), 0.0);
@@ -301,7 +306,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     @Override
     public boolean set(final String axisName, final String axisUnit, final double rangeMin, final double rangeMax) {
-        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+        if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return super.set(axisName, axisUnit, rangeMin, rangeMax);
         }
         final AxisRange range = computeRange(rangeMin, rangeMax, getLength(), 0.0);
@@ -311,7 +316,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     @Override
     public boolean setMax(final double value) {
-        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+        if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return super.setMax(value);
         }
         final AxisRange range = computeRange(getMin(), value, getLength(), 0.0);
@@ -320,7 +325,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     @Override
     public boolean setMin(final double value) {
-        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+        if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return super.setMin(value);
         }
         final AxisRange range = computeRange(value, getMax(), getLength(), 0.0);
@@ -365,7 +370,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     @Override
     protected void updateCachedVariables() {
-        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+        if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return;
         }
         cache.updateCachedAxisVariables();
@@ -443,5 +448,9 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
             offset = isVerticalAxis ? getHeight() : getWidth();
         }
+    }
+
+    protected AxisRange autoRange(final double minValue, final double maxValue, final double length, final double labelSize) {
+        return computeRange(minValue, maxValue, length, labelSize);
     }
 }

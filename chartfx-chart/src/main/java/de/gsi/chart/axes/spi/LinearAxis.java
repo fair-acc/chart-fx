@@ -482,16 +482,6 @@ public class LinearAxis extends AbstractAxis {
         return computeRangeImpl(minValue, maxValue, axisLength, labelSize);
     }
 
-    @Override
-    protected AxisRange getAxisRange() {
-        final AxisRange localRange = super.getAxisRange();
-        final double lower = localRange.getLowerBound();
-        final double upper = localRange.getUpperBound();
-        final double axisLength = localRange.getAxisLength();
-        final double scale = localRange.getScale();
-        return new AxisRange(lower, upper, axisLength, scale, getTickUnit());
-    }
-
     // -------------- STYLESHEET HANDLING
     // ------------------------------------------------------------------------------
 
