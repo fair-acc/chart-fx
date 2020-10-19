@@ -47,7 +47,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private transient AxisTransform axisTransform = linearTransform;
     protected boolean isUpdating;
 
-    private final BooleanProperty forceZeroInRange = new SimpleBooleanProperty(this, "forceZeroInRange", false) {
+    private final transient BooleanProperty forceZeroInRange = new SimpleBooleanProperty(this, "forceZeroInRange", false) {
         @Override
         protected void invalidated() {
             if (isAutoRanging() || isAutoGrowRanging()) {
@@ -59,7 +59,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
     protected boolean isLogAxis = false; // internal use (for performance reason
 
-    private final BooleanProperty logAxis = new SimpleBooleanProperty(this, "logAxis", isLogAxis) {
+    private final transient BooleanProperty logAxis = new SimpleBooleanProperty(this, "logAxis", isLogAxis) {
         @Override
         protected void invalidated() {
             isLogAxis = get();
@@ -429,7 +429,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         final List<Double> tickValues = new ArrayList<>(getMaxMajorTickLabelCount());
         if (isLogAxis) {
             if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {
-                return Arrays.asList(axisRange.getLowerBound());
+                return Arrays.asList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
             }
             double exp = Math.ceil(axisTransform.forward(axisRange.getLowerBound()));
             for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange
@@ -442,7 +442,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         }
 
         if (axisRange.getLowerBound() == axisRange.getUpperBound() || axisRange.getTickUnit() <= 0) {
-            return Arrays.asList(axisRange.getLowerBound());
+            return Arrays.asList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
         }
 
         final double firstTick = DefaultNumericAxis.computeFistMajorTick(axisRange.getLowerBound(),
@@ -453,7 +453,8 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             }
             return tickValues;
         }
-        for (double major = firstTick; major <= axisRange.getUpperBound(); major += axisRange.getTickUnit()) {
+        final int maxTickCount = getMaxMajorTickLabelCount();
+        for (double major = firstTick; (major <= axisRange.getUpperBound() && tickValues.size() <= maxTickCount); major += axisRange.getTickUnit()) {
             if (tickValues.size() > getMaxMajorTickLabelCount()) {
                 break;
             }
@@ -472,14 +473,16 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         final double lowerBound = getMin();
         final double upperBound = getMax();
         final double majorUnit = getTickUnit();
+        final int maxTickCount = getMaxMajorTickLabelCount();
+        final int maxMinorTickCount = getMaxMajorTickLabelCount() * getMinorTickCount();
 
         if (isLogAxis) {
             double exp = Math.floor(axisTransform.forward(lowerBound));
-            for (double majorTick = axisTransform.backward(exp); majorTick < upperBound; majorTick = axisTransform
-                                                                                                             .backward(++exp)) {
+            int majorTickCount = 0;
+            for (double majorTick = axisTransform.backward(exp); (majorTick < upperBound && majorTickCount <= maxTickCount); majorTick = axisTransform.backward(++exp)) {
                 final double nextMajorTick = axisTransform.backward(exp + 1);
                 final double minorUnit = (nextMajorTick - majorTick) / getMinorTickCount();
-                for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+                for (double minorTick = majorTick + minorUnit; (minorTick < nextMajorTick && newMinorTickMarks.size() < maxMinorTickCount); minorTick += minorUnit) {
                     if (minorTick == majorTick) {
                         // minor ticks numerically not possible
                         break;
@@ -488,18 +491,19 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                         newMinorTickMarks.add(minorTick);
                     }
                 }
+                majorTickCount++;
             }
         } else {
             final double firstMajorTick = DefaultNumericAxis.computeFistMajorTick(lowerBound, majorUnit);
             final double minorUnit = majorUnit / getMinorTickCount();
-
-            for (double majorTick = firstMajorTick - majorUnit; majorTick < upperBound; majorTick += majorUnit) {
+            int majorTickCount = 0;
+            for (double majorTick = firstMajorTick - majorUnit; (majorTick < upperBound && majorTickCount <= maxTickCount); majorTick += majorUnit) {
                 if (majorTick + majorUnit == majorTick) {
                     // major ticks numerically not resolvable
                     break;
                 }
                 final double nextMajorTick = majorTick + majorUnit;
-                for (double minorTick = majorTick + minorUnit; minorTick < nextMajorTick; minorTick += minorUnit) {
+                for (double minorTick = majorTick + minorUnit; (minorTick < nextMajorTick && newMinorTickMarks.size() < maxMinorTickCount); minorTick += minorUnit) {
                     if (minorTick == majorTick) {
                         // minor ticks numerically not possible
                         break;
@@ -508,6 +512,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                         newMinorTickMarks.add(minorTick);
                     }
                 }
+                majorTickCount++;
             }
         }
         return newMinorTickMarks;
@@ -552,7 +557,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
     @Override
     protected void updateCachedVariables() {
-        if (cache == null) { // lgtm [java/useless-null-check] -- called from static initializer
+        if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return;
         }
         cache.updateCachedAxisVariables();

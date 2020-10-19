@@ -378,7 +378,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     public void recomputeTickMarks() {
-        recomputeTickMarks(getRange());
+        final double axisLength = getSide().isVertical() ? getHeight() : getWidth(); // [pixel]
+        AxisRange newAxisRange = getRange();
+        final double mTickUnit = computePreferredTickUnit(axisLength);
+        if (getRange().getMin() != getMin() || getRange().getMax() != getMax()) {
+            set(getRange().getMin(), getRange().getMax());
+        }
+        newAxisRange.tickUnit = mTickUnit;
+        setTickUnit(mTickUnit);
+        newAxisRange.tickUnit = getTickUnit();
+        updateAxisLabelAndUnit();
+        recomputeTickMarks(newAxisRange);
     }
 
     /**
@@ -580,8 +590,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double axisLength = side.isVertical() ? height : width; // [pixel]
 
         final List<Double> oldTickValues = majorTickMark ? getTickMarkValues() : getMinorTickMarkValues();
-        final List<Double> newTickValues = majorTickMark ? calculateMajorTickValues(axisLength, range)
-                                                         : calculateMinorTickValues();
+        final List<Double> newTickValues = majorTickMark ? calculateMajorTickValues(axisLength, range) : calculateMinorTickValues();
 
         if (!oldTickValues.isEmpty() && !oldTickMarks.isEmpty() && newTickValues.equals(oldTickValues)) {
             // do not need to recompute TickMarks just reposition them
@@ -1137,17 +1146,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (lengthDiffers || rangeDiffers || tickUnitDiffers) {
             recomputedTicks = true;
 
-            // get range
-            AxisRange newAxisRange = getRange();
-            final double mTickUnit = computePreferredTickUnit(axisLength);
-            if (getRange().getMin() != getMin() || getRange().getMax() != getMax()) {
-                set(getRange().getMin(), getRange().getMax());
-            }
-            newAxisRange.tickUnit = mTickUnit;
-            setTickUnit(mTickUnit);
-            newAxisRange.tickUnit = this.getTickUnit();
-            updateAxisLabelAndUnit();
-            recomputeTickMarks(newAxisRange);
+            recomputeTickMarks();
 
             // mark all done
             oldAxisLength = axisLength;
