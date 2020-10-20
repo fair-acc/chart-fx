@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-public class BlockingQueueTests {
+public class BlockingQueueTests { // NOPMD NOSONAR -- nomen est omen
     private static final int N_ITERATIONS = 100_000;
     private final BlockingQueue<byte[]> outputQueue = new ArrayBlockingQueue<>(N_ITERATIONS);
     private final BlockingQueue<byte[]> inputQueue = new ArrayBlockingQueue<>(N_ITERATIONS);
@@ -49,9 +49,9 @@ public class BlockingQueueTests {
     }
 
     public static void main(String[] argv) {
-        for (int nThreads : new int[] { 1, 10, 100 }) {
+        for (int nThreads : new int[] { 1, 2, 4, 8, 10 }) {
             final BlockingQueueTests test = new BlockingQueueTests(nThreads);
-            System.out.println("running: " + BlockingQueueTests.class.getName() + " with nThreads = " + nThreads);
+            System.out.println("running: " + test.getClass().getName() + " with nThreads = " + nThreads);
 
             measure("nThreads=" + nThreads + " sync loop - simple", 3, () -> {
                 test.sendMessage("testString".getBytes(StandardCharsets.ISO_8859_1));
@@ -80,7 +80,7 @@ public class BlockingQueueTests {
     }
 
     private static void measure(final String topic, final int nExec, final Runnable... runnable) {
-        final long start = System.currentTimeMillis();
+        final long start = System.nanoTime();
 
         for (Runnable run : runnable) {
             for (int i = 0; i < nExec; i++) {
@@ -88,7 +88,8 @@ public class BlockingQueueTests {
             }
         }
 
-        final long stop = System.currentTimeMillis();
-        System.out.printf("%-40s:  %10d calls/second\n", topic, (stop - start) > 0 ? (1000 * nExec) / (stop - start) : -1);
+        final long stop = System.nanoTime();
+        final double diff = (stop - start) * 1e-9;
+        System.out.printf("%-40s:  %10d calls/second\n", topic, diff > 0 ? (int) (nExec / diff) : -1);
     }
 }
