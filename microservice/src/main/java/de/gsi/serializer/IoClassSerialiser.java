@@ -66,8 +66,8 @@ public class IoClassSerialiser {
         dataBuffer = ioBuffer;
         // add default IoSerialiser Implementations
         ioSerialisers.add(new BinarySerialiser(dataBuffer));
-        ioSerialisers.add(new CmwLightSerialiser(dataBuffer));
         ioSerialisers.add(new JsonSerialiser(dataBuffer));
+        ioSerialisers.add(new CmwLightSerialiser(dataBuffer));
         if (ioSerialiserTypeClass.length > 0) {
             setMatchedIoSerialiser(ioSerialiserTypeClass[0]);
         } else {
@@ -117,19 +117,20 @@ public class IoClassSerialiser {
      * if enabled ({@link #isAutoMatchSerialiser()} then set matching serialiser
      */
     public void autoUpdateSerialiser() {
+        ioSerialisers.forEach(s -> s.setBuffer(dataBuffer));
         if (!isAutoMatchSerialiser()) {
             return;
         }
         final int originalPosition = dataBuffer.position();
         for (IoSerialiser ioSerialiser : ioSerialisers) {
             try {
-                ioSerialiser.setBuffer(dataBuffer);
                 ioSerialiser.checkHeaderInfo();
                 this.setMatchedIoSerialiser(ioSerialiser);
                 LOGGER.atTrace().addArgument(matchedIoSerialiser).addArgument(matchedIoSerialiser.getBuffer().capacity()).log("set autoUpdateSerialiser() to {} - buffer capacity = {}");
+                dataBuffer.position(originalPosition);
                 return;
-            } catch (IllegalStateException e) {
-                LOGGER.atWarn().setCause(e).addArgument(ioSerialiser).log("could not match IoSerialiser '{}'");
+            } catch (Throwable e) { // NOPMD NOSONAR expected failures for protocol mismatch
+                LOGGER.atTrace().setCause(e).addArgument(ioSerialiser).log("could not match IoSerialiser '{}'");
             }
             dataBuffer.position(originalPosition);
         }
