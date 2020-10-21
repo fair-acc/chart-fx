@@ -100,6 +100,7 @@ public class TableViewer extends ChartPlugin {
         table.getSelectionModel().setCellSelectionEnabled(true);
         table.setEditable(true); // Generally the TableView is editable, actual editability is configured column-wise
         table.setItems(dsModel);
+        table.setVisible(false);
         Bindings.bindContent(table.getColumns(), dsModel.getColumns());
 
         chartProperty().addListener((change, oldChart, newChart) -> {
