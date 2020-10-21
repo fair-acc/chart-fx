@@ -115,11 +115,6 @@ public class TableViewer extends ChartPlugin {
                 if (isAddButtonsToToolBar()) {
                     newChart.getToolBar().getChildren().add(interactorButtons);
                 }
-                newChart.getPlotForeground().getChildren().add(table);
-                table.toFront();
-                table.setVisible(false); // table is initially invisible above the chart
-                table.prefWidthProperty().bind(newChart.getPlotForeground().widthProperty());
-                table.prefHeightProperty().bind(newChart.getPlotForeground().heightProperty());
             }
             dsModel.chartChanged(oldChart, newChart);
         });
@@ -215,6 +210,18 @@ public class TableViewer extends ChartPlugin {
         saveTableView.setOnAction(e -> this.exportGridToCSV());
 
         switchTableView.setOnAction(evt -> {
+            if (!table.isVisible()) {
+                getChart().getPlotForeground().getChildren().add(table);
+                table.toFront();
+                table.setVisible(false); // table is initially invisible above the chart
+                table.prefWidthProperty().bind(getChart().getPlotForeground().widthProperty());
+                table.prefHeightProperty().bind(getChart().getPlotForeground().heightProperty());
+            } else {
+                getChart().getPlotForeground().getChildren().remove(table);
+                table.prefWidthProperty().unbind();
+                table.prefHeightProperty().unbind();
+            }
+
             switchTableView.setGraphic(table.isVisible() ? tableView : graphView);
             table.setVisible(!table.isVisible());
             getChart().getPlotForeground().setMouseTransparent(!table.isVisible());
