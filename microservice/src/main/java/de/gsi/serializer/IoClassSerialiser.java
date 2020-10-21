@@ -49,7 +49,7 @@ public class IoClassSerialiser {
     protected IoBuffer dataBuffer;
     protected Consumer<FieldDescription> startMarkerFunction;
     protected Consumer<FieldDescription> endMarkerFunction;
-    private boolean autoMatchSerialiser = false;
+    private boolean autoMatchSerialiser = true;
     private boolean useCustomJsonSerialiser = false;
 
     /**

@@ -114,6 +114,8 @@ class IoSerialiserTests {
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
 
         final IoClassSerialiser serialiser = new IoClassSerialiser(buffer, BinarySerialiser.class);
+        // disable auto serialiser selection because otherwise it will get detected as CMWLightSerialiser (strangely only for FastByteBuffer)
+        serialiser.setAutoMatchSerialiser(false);
         assertEquals(bufferClass, buffer.getClass());
         assertEquals(bufferClass, serialiser.getDataBuffer().getClass());
 
