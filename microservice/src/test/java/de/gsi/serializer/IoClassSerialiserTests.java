@@ -19,6 +19,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import de.gsi.serializer.spi.*;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -34,10 +35,6 @@ import de.gsi.dataset.spi.utils.MultiArrayInt;
 import de.gsi.dataset.spi.utils.MultiArrayLong;
 import de.gsi.dataset.spi.utils.MultiArrayObject;
 import de.gsi.dataset.spi.utils.MultiArrayShort;
-import de.gsi.serializer.spi.BinarySerialiser;
-import de.gsi.serializer.spi.ByteBuffer;
-import de.gsi.serializer.spi.FastByteBuffer;
-import de.gsi.serializer.spi.WireDataFieldDescription;
 
 /**
  * @author rstein
@@ -45,6 +42,25 @@ import de.gsi.serializer.spi.WireDataFieldDescription;
 class IoClassSerialiserTests {
     private static final int BUFFER_SIZE = 20000;
     private static final String GLOBAL_LOCK = "lock";
+
+
+    @ParameterizedTest(name = "Serialiser class - {0}")
+    @ValueSource(classes = { CmwLightSerialiser.class, BinarySerialiser.class, JsonSerialiser.class})
+    @ResourceLock(value = GLOBAL_LOCK, mode = READ_WRITE)
+    void testChangingBuffers(final Class<? extends IoSerialiser> serialiserClass) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        final CustomClass2 classUnderTest = new CustomClass2(1.337, 42, "pi equals exactly three!");
+        final CustomClass2 classAfterTest = new CustomClass2();
+
+        IoClassSerialiser serialiser = new IoClassSerialiser(new FastByteBuffer(2 * BUFFER_SIZE), serialiserClass);
+        serialiser.serialiseObject(classUnderTest);
+        final byte[] bytes = serialiser.getDataBuffer().elements();
+
+        final IoClassSerialiser deserialiser = new IoClassSerialiser(new FastByteBuffer(0));
+        deserialiser.setDataBuffer(FastByteBuffer.wrap(bytes));
+        deserialiser.deserialiseObject(classAfterTest);
+
+        assertEquals(classUnderTest, classAfterTest);
+    }
 
     @ParameterizedTest(name = "IoBuffer class - {0}")
     @ValueSource(classes = { ByteBuffer.class, FastByteBuffer.class })
@@ -55,6 +71,7 @@ class IoClassSerialiserTests {
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(2 * BUFFER_SIZE);
 
         IoClassSerialiser serialiser = new IoClassSerialiser(buffer, BinarySerialiser.class);
+        serialiser.setAutoMatchSerialiser(false);
 
         final AtomicInteger writerCalled = new AtomicInteger(0);
         final AtomicInteger returnCalled = new AtomicInteger(0);
@@ -304,6 +321,44 @@ class IoClassSerialiserTests {
         @Override
         public String toString() {
             return "CustomClass(" + testDouble + ", " + testInt + ", " + testString + ")";
+        }
+    }
+
+    /**
+     * Duplicate of CustomClass, because Custom Class gets registered for a custom (de)serialiser and we don't want that for all tests.
+     */
+    public static class CustomClass2 {
+        public double testDouble;
+        public int testInt;
+        public String testString;
+
+        public CustomClass2() {
+            this(-1.0, -1, "null string"); // null instantiation
+        }
+        public CustomClass2(final double testDouble, final int testInt, final String testString) {
+            this.testDouble = testDouble;
+            this.testInt = testInt;
+            this.testString = testString;
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            final CustomClass2 that = (CustomClass2) o;
+            return Double.compare(that.testDouble, testDouble) == 0 && testInt == that.testInt && Objects.equals(testString, that.testString);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(testDouble, testInt, testString);
+        }
+
+        @Override
+        public String toString() {
+            return "CustomClass2(" + testDouble + ", " + testInt + ", " + testString + ")";
         }
     }
 
