@@ -64,7 +64,6 @@ import de.gsi.dataset.event.UpdateEvent;
  * @author akrimm
  */
 public class TableViewer extends ChartPlugin {
-    
     private static final Logger LOGGER = LoggerFactory.getLogger(TableViewer.class);
     // prevent allocating an infinite number of columns in case something goes wrong
     private static final int MAX_DATASETS_IN_TABLE = 100;
