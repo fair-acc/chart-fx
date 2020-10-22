@@ -7,6 +7,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -66,12 +67,13 @@ class TableViewerTest {
         fxRobot.interact(() -> fxRobot.clickOn(switchTableViewButton));
 
         // expect the table view to be present after clicking the button
-        FxAssert.verifyThat(chart.getPlotForeground(), NodeMatchers.hasChild(".table-view"));
+        verifyThatWithTimeout(chart.getPlotForeground(), NodeMatchers.hasChild(".table-view"));
 
         // hide/close table view again
         fxRobot.interact(() -> fxRobot.clickOn(switchTableViewButton));
 
         // expect the table view to be removed after clicking the button
+        fxRobot.sleep(50); // it might need some time to be gone
         FxAssert.verifyThat(chart.getPlotForeground(), Matchers.not(NodeMatchers.hasChild(".table-view")));
     }
 
@@ -79,6 +81,11 @@ class TableViewerTest {
         return fxRobot.from(toolbar) //
                 .lookup("." + BUTTON_BAR_STYLE_CLASS + " > ." + BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS) //
                 .queryButton();
+    }
+
+    private static void verifyThatWithTimeout(Node node, Matcher<Node> matcher) throws TimeoutException {
+        WaitForAsyncUtils.waitFor(1000, TimeUnit.MILLISECONDS, () -> matcher.matches(node));
+        FxAssert.verifyThat(node, matcher);
     }
 
     private static void waitForNodeToBeVisible(final Node switchTableViewButton) throws TimeoutException {
