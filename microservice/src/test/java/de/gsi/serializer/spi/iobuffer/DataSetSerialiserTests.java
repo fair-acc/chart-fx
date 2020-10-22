@@ -1,12 +1,5 @@
 package de.gsi.serializer.spi.iobuffer;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -35,6 +28,8 @@ import de.gsi.serializer.IoClassSerialiser;
 import de.gsi.serializer.spi.BinarySerialiser;
 import de.gsi.serializer.spi.ByteBuffer;
 import de.gsi.serializer.spi.FastByteBuffer;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Alexander Krimm
@@ -266,7 +261,9 @@ class DataSetSerialiserTests {
         // root.printFieldStructure();
 
         buffer.reset(); // reset to read position (==0)
-        serialiser.deserialiseObject(cpOrig);
+        final Object retOrig = serialiser.deserialiseObject(cpOrig);
+
+        assertSame(cpOrig, retOrig, "Deserialisation expected to be in-place");
 
         // check DataSet for equality
         if (!(cpOrig.source instanceof DataSetError)) {
@@ -324,7 +321,9 @@ class DataSetSerialiserTests {
         // root.printFieldStructure();
 
         buffer.reset(); // reset to read position (==0)
-        serialiser.deserialiseObject(cpOrig);
+        final Object retOrig = serialiser.deserialiseObject(cpOrig);
+
+        assertSame(cpOrig, retOrig, "Deserialisation expected to be in-place");
 
         // check DataSet for equality
         if (!(cpOrig.source instanceof DataSetError)) {

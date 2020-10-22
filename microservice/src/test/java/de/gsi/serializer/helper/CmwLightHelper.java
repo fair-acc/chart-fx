@@ -1,8 +1,5 @@
 package de.gsi.serializer.helper;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -17,6 +14,8 @@ import de.gsi.serializer.spi.CmwLightSerialiser;
 import de.gsi.serializer.spi.FastByteBuffer;
 import de.gsi.serializer.spi.ProtocolInfo;
 import de.gsi.serializer.spi.WireDataFieldDescription;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class CmwLightHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserQuickBenchmark.class); // N.B. SerialiserQuickBenchmark reference on purpose
@@ -129,7 +128,9 @@ public class CmwLightHelper {
         // fieldRoot.printFieldStructure();
 
         byteBuffer.reset();
-        ioSerialiser.deserialiseObject(outputObject);
+        final Object returnedObject = ioSerialiser.deserialiseObject(outputObject);
+
+        assertSame(outputObject, returnedObject, "Deserialisation expected to be in-place");
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
@@ -349,6 +350,7 @@ public class CmwLightHelper {
         final long startTime = System.nanoTime();
 
         for (int i = 0; i < iterations; i++) {
+            outputObject.clear();
             byteBuffer.reset();
             CmwLightHelper.serialiseCustom(cmwLightSerialiser, inputObject);
 
@@ -379,6 +381,7 @@ public class CmwLightHelper {
         cmwLightSerialiser.setPutFieldMetaData(true);
         final long startTime = System.nanoTime();
         for (int i = 0; i < iterations; i++) {
+            outputObject.clear();
             if (i == 1) {
                 // only stream meta-data the first iteration
                 cmwLightSerialiser.setPutFieldMetaData(false);
@@ -388,7 +391,11 @@ public class CmwLightHelper {
 
             byteBuffer.reset();
 
-            ioSerialiser.deserialiseObject(outputObject);
+            final Object returnedObject = ioSerialiser.deserialiseObject(outputObject);
+
+            if (outputObject != returnedObject) {
+                throw new IllegalStateException("Deserialisation expected to be in-place");
+            }
 
             if (!inputObject.string1.contentEquals(outputObject.string1)) {
                 // quick check necessary so that the above is not optimised by the Java JIT compiler to NOP

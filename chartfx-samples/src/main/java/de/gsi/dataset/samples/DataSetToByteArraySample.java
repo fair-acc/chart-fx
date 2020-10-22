@@ -102,7 +102,11 @@ public class DataSetToByteArraySample {
         byteBuffer.reset(); // '0' writing at start of buffer
         serialiser.serialiseObject(dsOrig);
         byteBuffer.reset(); // reset to read position (==0)
-        serialiser.deserialiseObject(cpOrig);
+        final Object retOrig = serialiser.deserialiseObject(cpOrig);
+
+       if (cpOrig != retOrig) {
+           throw new IllegalStateException("Deserialisation should be in-place");
+       }
 
         if (!(cpOrig.source instanceof DoubleErrorDataSet)) {
             throw new IllegalStateException(
@@ -142,7 +146,11 @@ public class DataSetToByteArraySample {
             serialiser.serialiseObject(dsOrig);
 
             byteBuffer.reset(); // reset to read position (==0)
-            serialiser.deserialiseObject(cpOrig);
+            final Object retOrig = serialiser.deserialiseObject(cpOrig);
+
+            if (retOrig != cpOrig) {
+                throw new IllegalStateException("Deserialisation should be in-place");
+            }
 
             if (!dsOrig.source.getName().equals(cpOrig.source.getName())) {
                 LOGGER.atError().addArgument(dsOrig.source.getName()).addArgument(cpOrig.source.getName()).log("ERROR DataSet '{}' does not match '{}' -> potential streaming error at index = " + i);

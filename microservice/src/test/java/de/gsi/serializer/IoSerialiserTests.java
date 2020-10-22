@@ -1,12 +1,7 @@
 package de.gsi.serializer;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import static de.gsi.dataset.DataSet.DIM_X;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Stream;
@@ -168,7 +163,9 @@ class IoSerialiserTests {
         ioClassSerialiser.serialiseObject(inputObject);
 
         buffer.flip();
-        ioClassSerialiser.deserialiseObject(outputObject);
+        final Object returnedObject = ioClassSerialiser.deserialiseObject(outputObject);
+
+        assertSame(outputObject, returnedObject, "Deserialisation should be in-place");
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
@@ -201,7 +198,9 @@ class IoSerialiserTests {
         //        }
 
         buffer.flip();
-        ioClassSerialiser.deserialiseObject(outputObject);
+        final Object returnedObject = ioClassSerialiser.deserialiseObject(outputObject);
+
+        assertSame(outputObject, returnedObject, "Deserialisation should be in-place");
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
 

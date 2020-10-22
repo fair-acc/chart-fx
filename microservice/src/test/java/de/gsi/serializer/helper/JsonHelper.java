@@ -157,6 +157,7 @@ public final class JsonHelper {
         final long startTime = System.nanoTime();
 
         for (int i = 0; i < iterations; i++) {
+            outputObject.clear();
             byteBuffer.reset();
             JsonHelper.serialiseCustom(jsonSerialiser, inputObject);
 
@@ -188,6 +189,7 @@ public final class JsonHelper {
         JsonStream.setMode(EncodingMode.REFLECTION_MODE);
         JsonIterator.setMode(DecodingMode.REFLECTION_MODE);
 
+        outputObject.clear();
         final long startTime = System.nanoTime();
         testPerformancePojoNoPrintout(iterations, inputObject, outputObject);
         if (iterations <= 1) {
@@ -209,6 +211,7 @@ public final class JsonHelper {
         JsonStream.setMode(EncodingMode.DYNAMIC_MODE);
         JsonIterator.setMode(DecodingMode.DYNAMIC_MODE_AND_MATCH_FIELD_WITH_HASH);
 
+        outputObject.clear();
         final long startTime = System.nanoTime();
         testPerformancePojoNoPrintout(iterations, inputObject, outputObject);
         if (iterations <= 1) {
