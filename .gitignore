@@ -17,6 +17,7 @@ local.properties
 .recommenders
 .project
 .pmd
+.eclipse-pmd
 
 ### IntelliJ ###
 /.idea/
