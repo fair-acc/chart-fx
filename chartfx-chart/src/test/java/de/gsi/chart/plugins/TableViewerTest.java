@@ -51,7 +51,7 @@ class TableViewerTest {
     }
 
     @Test
-    public void testThatTableIsOnlyAddedToSceneWhenActive() throws TimeoutException {
+    public void testThatTableIsOnlyAddedToSceneWhenActive() throws TimeoutException { // NOPMD JUnitTestsShouldIncludeAssert
         fxRobot.interact(() -> {
             chart.getPlugins().add(tableViewer);
             chart.setToolBarPinned(true);
