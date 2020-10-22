@@ -17,6 +17,7 @@ local.properties
 .recommenders
 .project
 .pmd
+.eclipse-pmd
 
 ### IntelliJ ###
 /.idea/
@@ -161,4 +162,7 @@ $RECYCLE.BIN/
 
 # intermediated scan results for coverity
 /*.tgz
+
+# Ignore test run results
+chartfx-chart/src/test/resources/de/
 
