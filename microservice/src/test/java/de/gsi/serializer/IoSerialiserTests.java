@@ -1,10 +1,6 @@
 package de.gsi.serializer;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 
@@ -114,6 +110,8 @@ class IoSerialiserTests {
         final IoBuffer buffer = bufferClass.getConstructor(int.class).newInstance(BUFFER_SIZE);
 
         final IoClassSerialiser serialiser = new IoClassSerialiser(buffer, BinarySerialiser.class);
+        // disable auto serialiser selection because otherwise it will get detected as CMWLightSerialiser (strangely only for FastByteBuffer)
+        serialiser.setAutoMatchSerialiser(false);
         assertEquals(bufferClass, buffer.getClass());
         assertEquals(bufferClass, serialiser.getDataBuffer().getClass());
 
@@ -166,7 +164,9 @@ class IoSerialiserTests {
         ioClassSerialiser.serialiseObject(inputObject);
 
         buffer.flip();
-        ioClassSerialiser.deserialiseObject(outputObject);
+        final Object returnedObject = ioClassSerialiser.deserialiseObject(outputObject);
+
+        assertSame(outputObject, returnedObject, "Deserialisation should be in-place");
 
         // second test - both vectors should have the same initial values after serialise/deserialise
         assertArrayEquals(inputObject.stringArray, outputObject.stringArray);
@@ -199,7 +199,9 @@ class IoSerialiserTests {
         //        }
 
         buffer.flip();
-        ioClassSerialiser.deserialiseObject(outputObject);
+        final Object returnedObject = ioClassSerialiser.deserialiseObject(outputObject);
+
+        assertSame(outputObject, returnedObject, "Deserialisation should be in-place");
 
         assertEquals(inputObject, outputObject, "TestDataClass input-output equality");
 
