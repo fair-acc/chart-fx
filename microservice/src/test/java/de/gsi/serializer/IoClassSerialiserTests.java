@@ -1,10 +1,6 @@
 package de.gsi.serializer;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.parallel.ResourceAccessMode.READ_WRITE;
 
 import java.lang.reflect.InvocationTargetException;
@@ -56,8 +52,9 @@ class IoClassSerialiserTests {
 
         final IoClassSerialiser deserialiser = new IoClassSerialiser(new FastByteBuffer(0));
         deserialiser.setDataBuffer(FastByteBuffer.wrap(bytes));
-        deserialiser.deserialiseObject(classAfterTest);
+        final Object returnedClass = deserialiser.deserialiseObject(classAfterTest);
 
+        assertSame(classAfterTest, returnedClass); // deserialisation should be in place
         assertEquals(classUnderTest, classAfterTest);
     }
 
@@ -210,7 +207,9 @@ class IoClassSerialiserTests {
         serialiser.deserialiseObject(destinationClass);
 
         buffer.reset(); // reset to read position (==0)
-        serialiser.deserialiseObject(destinationClass);
+        final Object returnedClass = serialiser.deserialiseObject(destinationClass);
+
+        assertSame(returnedClass, destinationClass); // deserialisation should be should be in-place
 
         assertEquals(sourceClass.integerBoxed, destinationClass.integerBoxed);
 
