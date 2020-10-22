@@ -15,7 +15,6 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import de.gsi.serializer.spi.*;
 import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -31,6 +30,7 @@ import de.gsi.dataset.spi.utils.MultiArrayInt;
 import de.gsi.dataset.spi.utils.MultiArrayLong;
 import de.gsi.dataset.spi.utils.MultiArrayObject;
 import de.gsi.dataset.spi.utils.MultiArrayShort;
+import de.gsi.serializer.spi.*;
 
 /**
  * @author rstein
@@ -39,9 +39,8 @@ class IoClassSerialiserTests {
     private static final int BUFFER_SIZE = 20000;
     private static final String GLOBAL_LOCK = "lock";
 
-
     @ParameterizedTest(name = "Serialiser class - {0}")
-    @ValueSource(classes = { CmwLightSerialiser.class, BinarySerialiser.class, JsonSerialiser.class})
+    @ValueSource(classes = { CmwLightSerialiser.class, BinarySerialiser.class, JsonSerialiser.class })
     @ResourceLock(value = GLOBAL_LOCK, mode = READ_WRITE)
     void testChangingBuffers(final Class<? extends IoSerialiser> serialiserClass) throws InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, NoSuchMethodException, SecurityException {
         final CustomClass2 classUnderTest = new CustomClass2(1.337, 42, "pi equals exactly three!");

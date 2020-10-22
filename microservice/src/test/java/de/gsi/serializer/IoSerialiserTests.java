@@ -1,7 +1,8 @@
 package de.gsi.serializer;
 
-import static de.gsi.dataset.DataSet.DIM_X;
 import static org.junit.jupiter.api.Assertions.*;
+
+import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.stream.Stream;

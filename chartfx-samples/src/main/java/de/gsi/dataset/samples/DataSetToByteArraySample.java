@@ -104,9 +104,9 @@ public class DataSetToByteArraySample {
         byteBuffer.reset(); // reset to read position (==0)
         final Object retOrig = serialiser.deserialiseObject(cpOrig);
 
-       if (cpOrig != retOrig) {
-           throw new IllegalStateException("Deserialisation should be in-place");
-       }
+        if (cpOrig != retOrig) {
+            throw new IllegalStateException("Deserialisation should be in-place");
+        }
 
         if (!(cpOrig.source instanceof DoubleErrorDataSet)) {
             throw new IllegalStateException(

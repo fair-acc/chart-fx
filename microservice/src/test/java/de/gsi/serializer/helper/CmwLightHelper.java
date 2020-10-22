@@ -1,5 +1,7 @@
 package de.gsi.serializer.helper;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -14,8 +16,6 @@ import de.gsi.serializer.spi.CmwLightSerialiser;
 import de.gsi.serializer.spi.FastByteBuffer;
 import de.gsi.serializer.spi.ProtocolInfo;
 import de.gsi.serializer.spi.WireDataFieldDescription;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 public class CmwLightHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(SerialiserQuickBenchmark.class); // N.B. SerialiserQuickBenchmark reference on purpose

@@ -1,5 +1,7 @@
 package de.gsi.serializer.spi.iobuffer;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.stream.Stream;
@@ -28,8 +30,6 @@ import de.gsi.serializer.IoClassSerialiser;
 import de.gsi.serializer.spi.BinarySerialiser;
 import de.gsi.serializer.spi.ByteBuffer;
 import de.gsi.serializer.spi.FastByteBuffer;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Alexander Krimm
