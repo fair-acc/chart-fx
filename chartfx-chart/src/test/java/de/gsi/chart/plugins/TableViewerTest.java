@@ -7,6 +7,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
+
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
@@ -21,11 +27,6 @@ import org.testfx.util.WaitForAsyncUtils;
 
 import de.gsi.chart.XYChart;
 import de.gsi.dataset.testdata.spi.CosineFunction;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 
 /**
  * Test the table viewer plugin
