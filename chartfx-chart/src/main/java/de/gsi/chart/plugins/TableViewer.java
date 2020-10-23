@@ -25,6 +25,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.ObservableListBase;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.Separator;
@@ -67,6 +68,10 @@ public class TableViewer extends ChartPlugin {
     // prevent allocating an infinite number of columns in case something goes wrong
     private static final int MAX_DATASETS_IN_TABLE = 100;
     protected static final int FONT_SIZE = 22;
+    /* default */ static final String BUTTON_SAVE_TABLE_VIEW_STYLE_CLASS = "save-table-view";
+    /* default */ static final String BUTTON_COPY_TO_CLIPBOARD_STYLE_CLASS = "copy-to-clip-board";
+    /* default */ static final String BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS = "switch-table-view";
+    /* default */ static final String BUTTON_BAR_STYLE_CLASS = "table-viewer-button-bar";
 
     protected static final int MIN_REFRESH_RATE_WARN = 20; // [ms] warn if refresh rate is set lower than this value
     private final FontIcon tableView = new FontIcon("fa-table:" + FONT_SIZE);
@@ -115,11 +120,6 @@ public class TableViewer extends ChartPlugin {
                 if (isAddButtonsToToolBar()) {
                     newChart.getToolBar().getChildren().add(interactorButtons);
                 }
-                newChart.getPlotForeground().getChildren().add(table);
-                table.toFront();
-                table.setVisible(false); // table is initially invisible above the chart
-                table.prefWidthProperty().bind(newChart.getPlotForeground().widthProperty());
-                table.prefHeightProperty().bind(newChart.getPlotForeground().heightProperty());
             }
             dsModel.chartChanged(oldChart, newChart);
         });
@@ -199,26 +199,42 @@ public class TableViewer extends ChartPlugin {
         final Separator separator = new Separator();
         separator.setOrientation(Orientation.VERTICAL);
         final HBox buttonBar = new HBox();
+        buttonBar.getStyleClass().add(BUTTON_BAR_STYLE_CLASS);
         buttonBar.setPadding(new Insets(1, 1, 1, 1));
         final Button switchTableView = new Button("", tableView);
+        switchTableView.getStyleClass().add(BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS);
         switchTableView.setPadding(new Insets(3, 3, 3, 3));
         switchTableView.setTooltip(new Tooltip("switches between graph and table view"));
 
         final Button copyToClipBoard = new Button("", clipBoardIcon);
+        copyToClipBoard.getStyleClass().add(BUTTON_COPY_TO_CLIPBOARD_STYLE_CLASS);
         copyToClipBoard.setPadding(new Insets(3, 3, 3, 3));
         copyToClipBoard.setTooltip(new Tooltip("copy selected content top system clipboard"));
         copyToClipBoard.setOnAction(e -> this.copySelectedToClipboard());
 
         final Button saveTableView = new Button("", saveIcon);
+        saveTableView.getStyleClass().add(BUTTON_SAVE_TABLE_VIEW_STYLE_CLASS);
         saveTableView.setPadding(new Insets(3, 3, 3, 3));
         saveTableView.setTooltip(new Tooltip("store actively shown content as .csv file"));
         saveTableView.setOnAction(e -> this.exportGridToCSV());
 
         switchTableView.setOnAction(evt -> {
-            switchTableView.setGraphic(table.isVisible() ? tableView : graphView);
-            table.setVisible(!table.isVisible());
-            getChart().getPlotForeground().setMouseTransparent(!table.isVisible());
-            table.setMouseTransparent(!table.isVisible());
+            final ObservableList<Node> plotForegroundChildren = getChart().getPlotForeground().getChildren();
+            final boolean isTablePresent = plotForegroundChildren.contains(table);
+            if (isTablePresent) {
+                plotForegroundChildren.remove(table);
+                table.prefWidthProperty().unbind();
+                table.prefHeightProperty().unbind();
+            } else {
+                plotForegroundChildren.add(table);
+                table.toFront();
+                table.prefWidthProperty().bind(getChart().getPlotForeground().widthProperty());
+                table.prefHeightProperty().bind(getChart().getPlotForeground().heightProperty());
+            }
+
+            switchTableView.setGraphic(isTablePresent ? tableView : graphView);
+            getChart().getPlotForeground().setMouseTransparent(!isTablePresent);
+            table.setMouseTransparent(!isTablePresent);
             dsModel.datasetsChanged(null);
         });
 
