@@ -54,6 +54,7 @@ public class EvtTypeFilter implements Filter {
         DEVICE_DATA,
         SETTING_SUPPLY_DATA,
         PROCESSED_DATA,
+        OTHER,
         UNKNOWN
     }
 
@@ -63,5 +64,9 @@ public class EvtTypeFilter implements Filter {
 
     public static Predicate<EvtTypeFilter> isDeviceData(final String typeName) {
         return t -> t.evtType == EvtType.DEVICE_DATA && Objects.equals(t.typeName, typeName);
+    }
+
+    public static boolean isDeviceData(final EvtTypeFilter t, final String typeName) {
+        return t.evtType == EvtType.DEVICE_DATA && Objects.equals(t.typeName, typeName);
     }
 }

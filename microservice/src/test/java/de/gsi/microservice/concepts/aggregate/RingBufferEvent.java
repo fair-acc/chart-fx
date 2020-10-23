@@ -10,8 +10,12 @@ import java.util.function.Predicate;
 
 import com.lmax.disruptor.EventHandler;
 import de.gsi.microservice.utils.SharedPointer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-public class RingBufferEvent implements FilterPredicate {
+public class RingBufferEvent implements FilterPredicate, Cloneable {
+    private final static Logger LOGGER = LoggerFactory.getLogger(RingBufferEvent.class);
+
     /**
      * local UTC event arrival time-stamp [ms]
      */
@@ -26,6 +30,7 @@ public class RingBufferEvent implements FilterPredicate {
      * list of known filters. N.B. this
      */
     public final Filter[] filters;
+    private final Class<? extends Filter>[] filterConfig;
 
     /**
      * domain object carried by this ring buffer event
@@ -43,6 +48,8 @@ public class RingBufferEvent implements FilterPredicate {
      */
     @SafeVarargs
     public RingBufferEvent(final Class<? extends Filter>... filterConfig) {
+        assert filterConfig != null;
+        this.filterConfig = filterConfig;
         this.filters = new Filter[filterConfig.length];
         for (int i = 0; i < filters.length; i++) {
             try {
@@ -52,6 +59,29 @@ public class RingBufferEvent implements FilterPredicate {
             }
         }
         clear();
+    }
+
+    @Override
+    public RingBufferEvent clone() { // NOSONAR NOPMD we do not want to call super (would be kind of stupid)
+        final RingBufferEvent retVal = new RingBufferEvent(this.filterConfig);
+        retVal.arrivalTimeStamp = arrivalTimeStamp;
+        retVal.parentSequenceNumber = parentSequenceNumber;
+        for (int i = 0; i < retVal.filters.length; i++) {
+            filters[i].copyTo(retVal.filters[i]);
+        }
+        retVal.payload = payload.getCopy();
+        retVal.throwables.addAll(throwables);
+        return retVal;
+    }
+
+    public void copyTo(RingBufferEvent other) {
+        other.arrivalTimeStamp = arrivalTimeStamp;
+        other.parentSequenceNumber = parentSequenceNumber;
+        for (int i = 0; i < other.filters.length; i++) {
+            filters[i].copyTo(other.filters[i]);
+        }
+        other.payload = payload.getCopy();
+        other.throwables.addAll(throwables);
     }
 
     public <T extends Filter> T getFilter(final Class<T> filterType) {
@@ -143,6 +173,7 @@ public class RingBufferEvent implements FilterPredicate {
      */
     public static class ClearEventHandler implements EventHandler<RingBufferEvent> {
         public void onEvent(RingBufferEvent event, long sequence, boolean endOfBatch) {
+            LOGGER.atTrace().addArgument(sequence).addArgument(endOfBatch).log("clearing RingBufferEvent sequence = {} endOfBatch = {}");
             event.clear();
         }
     }

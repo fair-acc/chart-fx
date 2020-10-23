@@ -10,6 +10,7 @@ import de.gsi.microservice.concepts.aggregate.Filter;
 
 public class CtxFilter implements Filter {
     public static final String WILD_CARD = "ALL";
+    public static final int WILD_CARD_VALUE = -1;
     public static final String SELECTOR_PREFIX = "FAIR.SELECTOR.";
     /** selector string, e.g.: 'FAIR.SELECTOR.C=0:S=1:P=3:T=101' */
     public String selector;
@@ -146,23 +147,23 @@ public class CtxFilter implements Filter {
     }
 
     public static Predicate<CtxFilter> matches(final int cid, final int sid, final int pid, final long bpcts) {
-        return t -> t.bpcts == bpcts && t.cid == cid && t.sid == sid && t.pid == pid;
+        return t -> t.bpcts == bpcts && t.cid == cid && wildCardMatch(t.sid, sid) && wildCardMatch(t.pid, pid);
     }
 
     public static Predicate<CtxFilter> matches(final int cid, final int sid, final long bpcts) {
-        return t -> t.bpcts == bpcts && t.cid == cid && t.sid == sid;
+        return t -> t.bpcts == bpcts && wildCardMatch(t.cid, cid) && wildCardMatch(t.sid, sid);
     }
 
     public static Predicate<CtxFilter> matches(final int cid, final long bpcts) {
-        return t -> t.bpcts == bpcts && t.cid == cid;
+        return t -> t.bpcts == bpcts && wildCardMatch(t.cid, cid);
     }
 
     public static Predicate<CtxFilter> matches(final int cid, final int sid, final int pid) {
-        return t -> t.cid == cid && t.sid == sid && t.pid == pid;
+        return t -> wildCardMatch(t.cid, cid) && wildCardMatch(t.sid, sid) && wildCardMatch(t.pid, pid);
     }
 
     public static Predicate<CtxFilter> matches(final int cid, final int sid) {
-        return t -> t.cid == cid && t.sid == sid;
+        return t -> wildCardMatch(t.cid, cid) && wildCardMatch(t.sid, sid);
     }
 
     public static Predicate<CtxFilter> matchesBpcts(final long bpcts) {
@@ -175,5 +176,9 @@ public class CtxFilter implements Filter {
 
     public static Predicate<CtxFilter> isNewerBpcts(final long bpcts) {
         return t -> t.bpcts > bpcts;
+    }
+
+    protected static boolean wildCardMatch(final int a, final int b) {
+        return a == b || a == WILD_CARD_VALUE || b == WILD_CARD_VALUE;
     }
 }
