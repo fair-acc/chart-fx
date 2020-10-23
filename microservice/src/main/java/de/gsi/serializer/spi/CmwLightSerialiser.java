@@ -389,8 +389,8 @@ public class CmwLightSerialiser implements IoSerialiser {
         }
         buffer.position(fieldRoot.getDataStartPosition());
         final int nEntries = buffer.getInt();
-        if (nEntries <= 0) {
-            throw new IllegalStateException("nEntries = " + nEntries + " <= 0!");
+        if (nEntries < 0) {
+            throw new IllegalStateException("nEntries = " + nEntries + " < 0!");
         }
         parent = lastFieldHeader = fieldRoot;
         for (int i = 0; i < nEntries; i++) {
