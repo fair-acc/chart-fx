@@ -111,7 +111,7 @@ import de.gsi.serializer.utils.ClassUtils;
  */
 @SuppressWarnings({ "PMD.CommentSize", "PMD.ExcessivePublicCount", "PMD.PrematureDeclaration" }) // variables need to be read from stream
 public class BinarySerialiser implements IoSerialiser {
-    public static final int VERSION_MAGIC_NUMBER = 0x00000000; // '0' since CmwLight cannot (usually) start with 0 length fields
+    public static final int VERSION_MAGIC_NUMBER = -1; // '-1' since CmwLight cannot have a negative number of entries
     public static final String PROTOCOL_NAME = "YaS"; // Yet another Serialiser implementation
     public static final byte VERSION_MAJOR = 1;
     public static final byte VERSION_MINOR = 0;
