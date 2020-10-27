@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import de.gsi.chart.axes.spi.AbstractAxis;
-import de.gsi.dataset.event.UpdateEvent;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -46,8 +44,10 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.AxisMode;
+import de.gsi.chart.axes.spi.AbstractAxis;
 import de.gsi.chart.ui.ObservableDeque;
 import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.event.UpdateEvent;
 
 /**
  * Zoom capabilities along X, Y or both axis. For every zoom-in operation the current X and Y range is remembered and
