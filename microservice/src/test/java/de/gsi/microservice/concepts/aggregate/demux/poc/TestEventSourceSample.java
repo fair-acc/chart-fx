@@ -13,7 +13,7 @@ public class TestEventSourceSample {
         disruptor.handleEventsWith(((event, sequence, endOfBatch) -> System.out.println(sequence + "@" + event.ingestionTime + ": " + event.payload)))
                 .handleEventsWith(aggProc)
                 .then(aggProc.workers)
-        .asSequenceBarrier();
+                .asSequenceBarrier();
 
         final RingBuffer<TestEventSource.IngestedEvent> rb = disruptor.start();
         testEventSource = new TestEventSource(TestEventSource.overlapping, true, rb);

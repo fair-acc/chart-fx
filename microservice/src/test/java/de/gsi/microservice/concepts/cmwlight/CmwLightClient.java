@@ -189,56 +189,56 @@ public class CmwLightClient {
             throw new RdaLightException("unparsable header: " + Arrays.toString(header) + "(" + new String(header) + ")", e);
         }
         switch (reqType) {
-            case RT_SESSION_CONFIRM:
-                LOGGER.atDebug().log("received session confirm");
-                // update session state
-                return null;
-            case RT_EVENT:
-                LOGGER.atDebug().log("received event");
-                return null;
-            case RT_REPLY:
-                LOGGER.atDebug().log("received reply");
-                if (descriptor.length != 3 || descriptor[1] != MT_BODY || descriptor[2] != MT_BODY_DATA_CONTEXT) {
-                    throw new RdaLightException("Notification update does not contain the proper data");
-                }
-                // todo return correct type
-                return createDataReply(id, updateType, data.pollFirst(), data.pollFirst());
-            case RT_EXCEPTION:
-                LOGGER.atDebug().log("received exc");
-                if (descriptor.length != 2 || descriptor[1] != MT_BODY_EXCEPTION) {
-                    throw new RdaLightException("Exception does not contain the proper data");
-                }
-                return createSubscriptionExceptionReply(id, data.pollFirst()); // todo return correct type
-            case RT_SUBSCRIBE:
-                // seems to be sent after subscription is accepted
-                LOGGER.atDebug().log("received subscription reply: " + Arrays.toString(header) + "(" + new String(header) + ")");
-                return null;
-            case RT_SUBSCRIBE_EXCEPTION:
-                LOGGER.atDebug().log("received subscription exception");
-                if (descriptor.length != 2 || descriptor[1] != MT_BODY_EXCEPTION) {
-                    throw new RdaLightException("Notification update does not contain the proper data");
-                }
-                return createSubscriptionExceptionReply(id, data.pollFirst());
-            case RT_NOTIFICATION_EXC:
-                LOGGER.atDebug().log("received notification exc");
-                if (descriptor.length != 2 || descriptor[1] != MT_BODY_EXCEPTION) {
-                    throw new RdaLightException("Notification update does not contain the proper data");
-                }
-                return createSubscriptionExceptionReply(id, data.pollFirst()); // todo return correct type
-            case RT_NOTIFICATION_DATA:
-                if (descriptor.length != 3 || descriptor[1] != MT_BODY || descriptor[2] != MT_BODY_DATA_CONTEXT) {
-                    throw new RdaLightException("Notification update does not contain the proper data");
-                }
-                long notificationId = -1;
-                if (options != null) {
-                    final FieldDescription notificationIdField = options.findChildField(NOTIFICATION_ID_TAG); //long
-                    notificationId = (long) ((WireDataFieldDescription) notificationIdField).data();
-                }
-                return createSubscriptionUpdateReply(id, updateType, notificationId, data.pollFirst(), data.pollFirst());
-            case RT_CONNECT:
-            case RT_SET:
-            default:
-                throw new RdaLightException("received unknown request type: " + reqType);
+        case RT_SESSION_CONFIRM:
+            LOGGER.atDebug().log("received session confirm");
+            // update session state
+            return null;
+        case RT_EVENT:
+            LOGGER.atDebug().log("received event");
+            return null;
+        case RT_REPLY:
+            LOGGER.atDebug().log("received reply");
+            if (descriptor.length != 3 || descriptor[1] != MT_BODY || descriptor[2] != MT_BODY_DATA_CONTEXT) {
+                throw new RdaLightException("Notification update does not contain the proper data");
+            }
+            // todo return correct type
+            return createDataReply(id, updateType, data.pollFirst(), data.pollFirst());
+        case RT_EXCEPTION:
+            LOGGER.atDebug().log("received exc");
+            if (descriptor.length != 2 || descriptor[1] != MT_BODY_EXCEPTION) {
+                throw new RdaLightException("Exception does not contain the proper data");
+            }
+            return createSubscriptionExceptionReply(id, data.pollFirst()); // todo return correct type
+        case RT_SUBSCRIBE:
+            // seems to be sent after subscription is accepted
+            LOGGER.atDebug().log("received subscription reply: " + Arrays.toString(header) + "(" + new String(header) + ")");
+            return null;
+        case RT_SUBSCRIBE_EXCEPTION:
+            LOGGER.atDebug().log("received subscription exception");
+            if (descriptor.length != 2 || descriptor[1] != MT_BODY_EXCEPTION) {
+                throw new RdaLightException("Notification update does not contain the proper data");
+            }
+            return createSubscriptionExceptionReply(id, data.pollFirst());
+        case RT_NOTIFICATION_EXC:
+            LOGGER.atDebug().log("received notification exc");
+            if (descriptor.length != 2 || descriptor[1] != MT_BODY_EXCEPTION) {
+                throw new RdaLightException("Notification update does not contain the proper data");
+            }
+            return createSubscriptionExceptionReply(id, data.pollFirst()); // todo return correct type
+        case RT_NOTIFICATION_DATA:
+            if (descriptor.length != 3 || descriptor[1] != MT_BODY || descriptor[2] != MT_BODY_DATA_CONTEXT) {
+                throw new RdaLightException("Notification update does not contain the proper data");
+            }
+            long notificationId = -1;
+            if (options != null) {
+                final FieldDescription notificationIdField = options.findChildField(NOTIFICATION_ID_TAG); //long
+                notificationId = (long) ((WireDataFieldDescription) notificationIdField).data();
+            }
+            return createSubscriptionUpdateReply(id, updateType, notificationId, data.pollFirst(), data.pollFirst());
+        case RT_CONNECT:
+        case RT_SET:
+        default:
+            throw new RdaLightException("received unknown request type: " + reqType);
         }
     }
 
