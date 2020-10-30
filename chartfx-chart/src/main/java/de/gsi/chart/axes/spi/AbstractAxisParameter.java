@@ -41,7 +41,7 @@ import de.gsi.dataset.utils.NoDuplicatesList;
 public abstract class AbstractAxisParameter extends Pane implements Axis {
     private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
     private static final CssPropertyFactory<AbstractAxisParameter> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
-    private static final int MAX_TICK_COUNT = 20;
+    protected static final int MAX_TICK_COUNT = 20;
     private static final double DEFAULT_MIN_RANGE = -1.0;
     private static final double DEFAULT_MAX_RANGE = +1.0;
     private static final double DEFAULT_TICK_UNIT = +5d;
