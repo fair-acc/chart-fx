@@ -23,6 +23,7 @@ import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
+import de.gsi.dataset.spi.utils.Tuple;
 
 /**
  * A tool tip label appearing next to the mouse cursor when placed over a data point's symbol. If symbols are not
@@ -102,9 +103,9 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
             return Optional.empty();
         }
         final XYChart xyChart = (XYChart) chart;
-        return xyChart.getRenderers().stream().flatMap(r -> Stream.of(r.getDatasets(), xyChart.getDatasets()) // combine global and renderer specific Datasets
-                                                                    .flatMap(List::stream)
-                                                                    .flatMap(d -> getPointsCloseToCursor(d, r, mouseLocation))) // get points in range of cursor
+        return xyChart.getRenderers().stream() // for all renderers
+                .flatMap(r -> Stream.of(r.getDatasets(), xyChart.getDatasets()).flatMap(List::stream) // combine global and renderer specific Datasets
+                                      .flatMap(d -> getPointsCloseToCursor(d, r, mouseLocation))) // get points in range of cursor
                 .reduce((p1, p2) -> p1.distanceFromMouse < p2.distanceFromMouse ? p1 : p2); // find closest point
     }
 
@@ -138,8 +139,8 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         return point;
     }
 
-    private static String formatDataPoint(final DataPoint dataPoint) {
-        return String.format("DataPoint@(%.3f,%.3f)", dataPoint.x, dataPoint.y);
+    private String formatDataPoint(final DataPoint dataPoint) {
+        return formatData(dataPoint.renderer, new Tuple<>(dataPoint.x, dataPoint.y));
     }
 
     protected String formatLabel(DataPoint dataPoint) {
@@ -149,22 +150,9 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     protected String getDataLabelSafe(final DataSet dataSet, final int index) {
         String labelString = dataSet.getDataLabel(index);
         if (labelString == null) {
-            return getDefaultDataLabel(dataSet, index);
+            return String.format("%s [%d]", dataSet.getName(), index);
         }
         return labelString;
-    }
-
-    /**
-     * Returns label of a data point specified by the index. The label can be used as a category name if
-     * CategoryStepsDefinition is used or for annotations displayed for data points.
-     *
-     * @param dataSet the given DataSet
-     * @param index data point index within the DataSet
-     * @return label of a data point specified by the index or <code>null</code> if none label has been specified for
-     *         this data point.
-     */
-    protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-        return String.format("%s (%d, %s, %s)", dataSet.getName(), index, dataSet.get(DataSet.DIM_X, index), dataSet.get(DataSet.DIM_Y, index));
     }
 
     /**

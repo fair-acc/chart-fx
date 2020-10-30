@@ -9,6 +9,7 @@ import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.MetricPrefix;
+import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.utils.Tuple;
 
@@ -135,6 +136,53 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
         // any other axes
         final StringBuilder result = new StringBuilder();
         for (final Axis axis : chart.getAxes()) {
+            final Side side = axis.getSide();
+            if (side == null) {
+                continue;
+            }
+
+            final String axisPrimaryLabel = axis.getName();
+            String axisUnit = axis.getUnit();
+            final String axisPrefix = MetricPrefix.getShortPrefix(axis.getUnitScaling());
+            final boolean isAutoScaling = axis.isAutoUnitScaling();
+            if (isAutoScaling && axisUnit == null) {
+                axisUnit = " a.u.";
+            }
+
+            result.append(axisPrimaryLabel).append(" = ");
+            result.append(side.isHorizontal() ? getXValueFormatter(axis).toString(data.getXValue()) : getYValueFormatter(axis).toString(data.getYValue()));
+            if (axisUnit != null) {
+                result.append(axisPrimaryLabel).append(" [").append(axisPrefix).append(axisUnit).append(']');
+            }
+            result.append('\n');
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * Formats the data to be displayed by this plugin. Uses the specified {@link #xValueFormatterProperty()} and {@link #yValueFormatterProperty()} to obtain the corresponding formatters.
+     * <p>
+     * Can be overridden to modify formatting of the data.
+     *
+     * @param renderer The renderer specifying the axes to format the data for
+     * @param data  the data point to be formatted
+     * @return formatted data
+     */
+    protected String formatData(final Renderer renderer, final Tuple<Number, Number> data) {
+        if (renderer.getAxes().size() == 2) { // special case of only two axes
+            // Get Axes for the Renderer
+            final Axis xAxis = renderer.getAxes().stream().filter(ax -> ax.getSide().isHorizontal()).findFirst().orElse(null);
+            final Axis yAxis = renderer.getAxes().stream().filter(ax -> ax.getSide().isVertical()).findFirst().orElse(null);
+            if (xAxis == null || yAxis == null) {
+                return String.format("DataPoint@(%.3f,%.3f)", data.getXValue(), data.getYValue());
+            }
+            return getXValueFormatter(xAxis).toString(data.getXValue()) + ", " + getYValueFormatter(yAxis).toString(data.getYValue());
+        }
+
+        // any other axes
+        final StringBuilder result = new StringBuilder();
+        for (final Axis axis : renderer.getAxes()) {
             final Side side = axis.getSide();
             if (side == null) {
                 continue;
