@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.Zoomer;
@@ -52,6 +53,9 @@ public class MultipleAxesSample extends Application {
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x axis");
         xAxis1.setAnimated(false);
+        final DefaultNumericAxis xAxis2 = new DefaultNumericAxis("x axis2");
+        xAxis2.setSide(Side.TOP);
+        xAxis2.setAnimated(false);
         final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("y axis", "random");
         yAxis1.setAnimated(false);
         final DefaultNumericAxis yAxis2 = new DefaultNumericAxis("y axis", "sine/cosine");
@@ -71,15 +75,16 @@ public class MultipleAxesSample extends Application {
         final ErrorDataSetRenderer errorRenderer2 = new ErrorDataSetRenderer();
         errorRenderer2.getAxes().add(yAxis2);
         final ErrorDataSetRenderer errorRenderer3 = new ErrorDataSetRenderer();
-        errorRenderer3.getAxes().add(yAxis3);
+        errorRenderer3.getAxes().addAll(xAxis2, yAxis3);
         chart.getRenderers().addAll(errorRenderer2, errorRenderer3);
 
         chart.getPlugins().add(new ParameterMeasurements());
+        chart.getPlugins().add(new DataPointTooltip());
         final Zoomer zoom = new Zoomer();
         // add axes that shall be excluded from the zoom action
         zoom.omitAxisZoomList().add(yAxis3);
         // alternatively (uncomment):
-        // Zoomer.setOmitZoom(yAxis3, true);
+        Zoomer.setOmitZoom(xAxis2, true);
         chart.getPlugins().add(zoom);
         chart.getToolBar().getChildren().add(new MyZoomCheckBox(zoom, yAxis3));
         chart.getPlugins().add(new EditAxis());
