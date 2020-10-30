@@ -99,7 +99,7 @@ class ScreenshotTest {
 
         File[] filelist = tmpdir.toAbsolutePath().toFile().listFiles();
         assertEquals(1, filelist.length);
-        assertEquals(new File(tmpdir.toAbsolutePath().toString(), "Cosine_-0.1.png"), filelist[0]);
+        assertEquals(new File(tmpdir.toAbsolutePath().toString(), "Cosine_0.0.png"), filelist[0]);
         try (InputStream file = new FileInputStream(filelist[0])) {
             Image imageRecovered = new Image(file);
             fxRobot.interact(() -> {
