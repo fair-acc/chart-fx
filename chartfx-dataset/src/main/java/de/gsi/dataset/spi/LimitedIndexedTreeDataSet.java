@@ -6,6 +6,7 @@ import java.util.NoSuchElementException;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
 import de.gsi.dataset.event.UpdatedDataEvent;
@@ -26,9 +27,10 @@ import de.gsi.dataset.utils.trees.IndexedTreeSet;
 public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndexedTreeDataSet> implements DataSet {
     private static final long serialVersionUID = -6372417982869679455L;
     protected transient IndexedNavigableSet<DataAtom> data = new IndexedTreeSet<>();
-    protected int maxQueueSize = Integer.MAX_VALUE;
+    protected int maxQueueSize;
     protected double maxLength = Double.MAX_VALUE;
     protected boolean subtractOffset = false;
+    protected boolean isSortedByX = true;
 
     /**
      * Creates a new instance of <code>DefaultDataSet</code>.
@@ -290,8 +292,12 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         return data.get(index).getStyle();
     }
 
+    public boolean isSortedByX() {
+        return isSortedByX;
+    }
+
     /**
-     * 
+     *
      * @return {@code true}: normalise x-Axis to last value
      */
     public boolean isSubtractOffset() {
@@ -300,7 +306,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * remove sub-range of data points
-     * 
+     *
      * @param fromIndex starting index
      * @param toIndex stopping index
      * @return itself (fluent design)
@@ -378,7 +384,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * removes all data points
-     * 
+     *
      * @return itself (fluent design)
      */
     public LimitedIndexedTreeDataSet reset() {
@@ -507,6 +513,33 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         return fireInvalidated(new UpdatedDataEvent(this));
     }
 
+    @Override
+    public DataSet set(final DataSet other, final boolean copy) {
+        if (other == null) {
+            throw new IllegalArgumentException("other must not be null");
+        }
+
+        this.lock().writeLockGuard(() -> other.lock().readLockGuard(() -> {
+            this.clearData();
+            if (other instanceof DataSetError) {
+                DataSetError oEds = (DataSetError) other;
+                for (int i = 0; i < other.getDataCount(); i++) {
+                    final double ex = Math.abs(Math.max(oEds.getErrorNegative(DIM_X, i), oEds.getErrorPositive(DIM_X, i)));
+                    final double ey = Math.abs(Math.max(oEds.getErrorNegative(DIM_Y, i), oEds.getErrorPositive(DIM_Y, i)));
+                    this.add(oEds.get(DIM_X, i), oEds.get(DIM_Y, i), ex, ey);
+                }
+            } else {
+                for (int i = 0; i < other.getDataCount(); i++) {
+                    this.add(other.get(DIM_X, i), other.get(DIM_Y, i));
+                }
+            }
+            super.copyDataLabelsAndStyles(other, copy);
+            super.copyMetaData(other);
+            super.copyAxisDescription(other);
+        }));
+        return this;
+    }
+
     /**
      * @param maxLength maximum X range before points are getting dropped
      * @return itself (fluent design)
@@ -525,8 +558,12 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
         return this;
     }
 
+    public void setSortedByX(final boolean sortedByX) {
+        isSortedByX = sortedByX;
+    }
+
     /**
-     * 
+     *
      * @param subtractOffset {@code true}: normalise x-Axis to last value
      */
     public void setSubtractOffset(boolean subtractOffset) {
@@ -551,10 +588,18 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             if (this == other) {
                 return 0;
             }
-            if (this.getX() < other.getX()) {
-                return -1;
-            } else if (this.getX() > other.getX()) {
-                return +1;
+            if (isSortedByX) {
+                if (this.getX() < other.getX()) {
+                    return -1;
+                } else if (this.getX() > other.getX()) {
+                    return +1;
+                }
+            } else {
+                if (this.getY() < other.getY()) {
+                    return -1;
+                } else if (this.getY() > other.getY()) {
+                    return +1;
+                }
             }
             return 0;
         }
@@ -617,10 +662,5 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 }
             }
         }
-    }
-
-    @Override
-    public DataSet set(final DataSet other, final boolean copy) {
-        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
     }
 }
