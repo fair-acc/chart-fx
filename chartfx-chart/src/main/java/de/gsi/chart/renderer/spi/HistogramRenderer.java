@@ -532,10 +532,11 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
             final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * nRange);
             final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * nRange);
 
-            for (int i = min; i < min + nRange - 1; i++) {
-                newX[2 * i] = abscissa.getDisplayPosition(ds.get(dimIndexAbscissa, i));
-                newY[2 * i] = ordinate.getDisplayPosition(ds.get(dimIndexOrdinate, i));
-                newX[2 * i + 1] = abscissa.getDisplayPosition(ds.get(dimIndexAbscissa, i + 1));
+            for (int i = 0; i < nRange - 1; i++) {
+                final int index = i + min;
+                newX[2 * i] = abscissa.getDisplayPosition(ds.get(dimIndexAbscissa, index));
+                newY[2 * i] = ordinate.getDisplayPosition(ds.get(dimIndexOrdinate, index));
+                newX[2 * i + 1] = abscissa.getDisplayPosition(ds.get(dimIndexAbscissa, index + 1));
                 newY[2 * i + 1] = newY[2 * i];
             }
             // last point
