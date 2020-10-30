@@ -1,11 +1,12 @@
-/**
+/*
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
-
 package de.gsi.chart.plugins;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -14,10 +15,12 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
-import javafx.util.Pair;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
 
@@ -83,99 +86,60 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         setPickingDistance(pickingDistance);
     }
 
-    private DataPoint findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
+    private Optional<DataPoint> findDataPoint(final MouseEvent event, final Bounds plotAreaBounds) {
         if (!plotAreaBounds.contains(event.getX(), event.getY())) {
-            return null;
+            return Optional.empty();
         }
 
         final Point2D mouseLocation = getLocationInPlotArea(event);
 
-        Chart chart = getChart();
-        return findNearestDataPointWithinPickingDistance(chart, mouseLocation);
+        return findNearestDataPointWithinPickingDistance(mouseLocation);
     }
 
-    private DataPoint findNearestDataPointWithinPickingDistance(final Chart chart, final Point2D mouseLocation) {
-        DataPoint nearestDataPoint = null;
+    private Optional<DataPoint> findNearestDataPointWithinPickingDistance(final Point2D mouseLocation) {
+        final Chart chart = getChart();
         if (!(chart instanceof XYChart)) {
-            return null;
+            return Optional.empty();
         }
         final XYChart xyChart = (XYChart) chart;
-        // final double xValue = toDataPoint(xyChart.getYAxis(),
-        // mouseLocation).getXValue().doubleValue();
-        // TODO: iterate through all axes, renderer and datasets
-        final double xValue = xyChart.getXAxis().getValueForDisplay(mouseLocation.getX());
-
-        for (final DataPoint dataPoint : findNeighborPoints(xyChart, xValue)) {
-            // Point2D displayPoint = toDisplayPoint(chart.getYAxis(),
-            // (X)dataPoint.x , dataPoint.y);
-            final double x = xyChart.getXAxis().getDisplayPosition(dataPoint.x);
-            final double y = xyChart.getYAxis().getDisplayPosition(dataPoint.y);
-            final Point2D displayPoint = new Point2D(x, y);
-            dataPoint.distanceFromMouse = displayPoint.distance(mouseLocation);
-            if (displayPoint.distance(mouseLocation) <= getPickingDistance()
-                    && (nearestDataPoint == null || dataPoint.distanceFromMouse < nearestDataPoint.distanceFromMouse)) {
-                nearestDataPoint = dataPoint;
-            }
-        }
-        return nearestDataPoint;
+        return xyChart.getRenderers().stream().flatMap(r -> Stream.of(r.getDatasets(), xyChart.getDatasets()) // combine global and renderer specific Datasets
+                                                                    .flatMap(List::stream)
+                                                                    .flatMap(d -> getPointsCloseToCursor(d, r, mouseLocation))) // get points in range of cursor
+                .reduce((p1, p2) -> p1.distanceFromMouse < p2.distanceFromMouse ? p1 : p2); // find closest point
     }
 
-    /**
-     * Handles series that have data sorted or not sorted with respect to X coordinate.
-     * 
-     * @param dataSet data set
-     * @param searchedX x coordinate
-     * @return return neighbouring data points
-     */
-    private Pair<DataPoint, DataPoint> findNeighborPoints(final DataSet dataSet, final double searchedX) {
-        if (dataSet instanceof GridDataSet) {
-            return new Pair<>(null, null); // TODO: correctly implement
+    private Stream<DataPoint> getPointsCloseToCursor(final DataSet d, final Renderer r, final Point2D mouseLocation) {
+        // Get Axes for the Renderer
+        final Axis xAxis = r.getAxes().stream().filter(ax -> ax.getSide().isHorizontal()).findFirst().orElse(null);
+        final Axis yAxis = r.getAxes().stream().filter(ax -> ax.getSide().isVertical()).findFirst().orElse(null);
+        if (xAxis == null || yAxis == null) {
+            return Stream.empty(); // ignore this renderer because there are no valid axes available
         }
-        int prevIndex = -1;
-        int nextIndex = -1;
-        double prevX = Double.MIN_VALUE;
-        double nextX = Double.MAX_VALUE;
-
-        final int nDataCount = dataSet.getDataCount();
-        for (int i = 0; i < nDataCount; i++) {
-            final double currentX = dataSet.get(DataSet.DIM_X, i);
-
-            if (currentX < searchedX) {
-                if (prevX < currentX) {
-                    prevIndex = i;
-                    prevX = currentX;
-                }
-            } else if (nextX > currentX) {
-                nextIndex = i;
-                nextX = currentX;
-            }
+        if (d instanceof GridDataSet) {
+            return Stream.empty(); // TODO: correct impl for grid data sets
         }
-        final DataPoint prevPoint = prevIndex == -1 ? null
-                                                    : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, prevIndex), dataSet.get(DataSet.DIM_Y, prevIndex), getDataLabelSafe(dataSet, prevIndex));
-        final DataPoint nextPoint = nextIndex == -1 || nextIndex == prevIndex ? null
-                                                                              : new DataPoint(getChart(), dataSet.get(DataSet.DIM_X, nextIndex), dataSet.get(DataSet.DIM_Y, nextIndex), getDataLabelSafe(dataSet, nextIndex));
-
-        return new Pair<>(prevPoint, nextPoint);
+        // get the screen x coordinates and dataset indices between which points can be in picking distance
+        final double xMin = xAxis.getValueForDisplay(mouseLocation.getX() - getPickingDistance());
+        final double xMax = xAxis.getValueForDisplay(mouseLocation.getX() + getPickingDistance());
+        final boolean sorted = r instanceof ErrorDataSetRenderer && ((ErrorDataSetRenderer) r).isAssumeSortedData();
+        final int minIdx = sorted ? Math.max(0, d.getIndex(DataSet.DIM_X, xMin) - 1) : 0;
+        final int maxIdx = sorted ? Math.min(d.getDataCount(), d.getIndex(DataSet.DIM_X, xMax) + 1) : d.getDataCount();
+        return IntStream.range(minIdx, maxIdx) // loop over all candidate points
+                .mapToObj(i -> getDataPointFromDataSet(r, d, i, xAxis, yAxis, mouseLocation)) // get points with distance to mouse
+                .filter(p -> p.distanceFromMouse <= getPickingDistance()); // filter out points which are too far away
     }
 
-    private List<DataPoint> findNeighborPoints(final XYChart chart, final double searchedX) {
-        final List<DataPoint> points = new LinkedList<>();
-        for (final DataSet dataSet : chart.getAllDatasets()) {
-            final Pair<DataPoint, DataPoint> neighborPoints = findNeighborPoints(dataSet, searchedX);
-            if (neighborPoints.getKey() != null) {
-                points.add(neighborPoints.getKey());
-            }
-            if (neighborPoints.getValue() != null) {
-                points.add(neighborPoints.getValue());
-            }
-        }
-        return points;
+    private DataPoint getDataPointFromDataSet(final Renderer renderer, final DataSet d, final int i, final Axis xAxis, final Axis yAxis, final Point2D mouseLocation) {
+        final DataPoint point = new DataPoint(renderer, d.get(DataSet.DIM_X, i), d.get(DataSet.DIM_Y, i), getDataLabelSafe(d, i));
+        final double x = xAxis.getDisplayPosition(point.x);
+        final double y = yAxis.getDisplayPosition(point.y);
+        final Point2D displayPoint = new Point2D(x, y);
+        point.distanceFromMouse = displayPoint.distance(mouseLocation);
+        return point;
     }
 
     private static String formatDataPoint(final DataPoint dataPoint) {
         return String.format("DataPoint@(%.3f,%.3f)", dataPoint.x, dataPoint.y);
-        // return formatData(dataPoint.chart.getYAxis(), dataPoint.x,
-        // dataPoint.y);
     }
 
     protected String formatLabel(DataPoint dataPoint) {
@@ -183,11 +147,11 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     }
 
     protected String getDataLabelSafe(final DataSet dataSet, final int index) {
-        String lable = dataSet.getDataLabel(index);
-        if (lable == null) {
+        String labelString = dataSet.getDataLabel(index);
+        if (labelString == null) {
             return getDefaultDataLabel(dataSet, index);
         }
-        return lable;
+        return labelString;
     }
 
     /**
@@ -200,8 +164,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
      *         this data point.
      */
     protected String getDefaultDataLabel(final DataSet dataSet, final int index) {
-        return String.format("%s (%d, %s, %s)", dataSet.getName(), index, Double.toString(dataSet.get(DataSet.DIM_X, index)),
-                Double.toString(dataSet.get(DataSet.DIM_Y, index)));
+        return String.format("%s (%d, %s, %s)", dataSet.getName(), index, dataSet.get(DataSet.DIM_X, index), dataSet.get(DataSet.DIM_Y, index));
     }
 
     /**
@@ -222,12 +185,6 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     public final DoubleProperty pickingDistanceProperty() {
         return pickingDistance;
     }
-
-    // @SuppressWarnings({ "rawtypes", "unchecked" })
-    // private List<Data<? extends Number, Y>> castXToNumber(final Series
-    // series) {
-    //     return series.getData();
-    // }
 
     /**
      * Sets the value of {@link #pickingDistanceProperty()}.
@@ -287,51 +244,31 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
 
     private void updateToolTip(final MouseEvent event) {
         final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
-        final DataPoint dataPoint = findDataPoint(event, plotAreaBounds);
+        final Optional<DataPoint> dataPoint = findDataPoint(event, plotAreaBounds);
 
-        if (dataPoint == null) {
+        if (dataPoint.isEmpty()) {
             getChartChildren().remove(label);
             return;
         }
-        updateLabel(event, plotAreaBounds, dataPoint);
+        updateLabel(event, plotAreaBounds, dataPoint.get());
         if (!getChartChildren().contains(label)) {
             getChartChildren().add(label);
             label.requestLayout();
         }
     }
 
-    protected class DataPoint {
-        protected final Chart chart;
-        protected final double x;
-        protected final double y;
-        protected final String label;
-        protected double distanceFromMouse;
+    public static class DataPoint {
+        public final Renderer renderer;
+        public final double x;
+        public final double y;
+        public final String label;
+        public double distanceFromMouse;
 
-        protected DataPoint(final Chart chart, final double x, final double y, final String label) {
-            this.chart = chart;
+        protected DataPoint(final Renderer renderer, final double x, final double y, final String label) {
+            this.renderer = renderer;
             this.x = x;
             this.y = y;
             this.label = label;
-        }
-
-        public Chart getChart() {
-            return chart;
-        }
-
-        public double getDistanceFromMouse() {
-            return distanceFromMouse;
-        }
-
-        public String getLabel() {
-            return label;
-        }
-
-        public double getX() {
-            return x;
-        }
-
-        public double getY() {
-            return y;
         }
     }
 }
