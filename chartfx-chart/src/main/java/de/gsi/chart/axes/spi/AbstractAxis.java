@@ -2,7 +2,7 @@ package de.gsi.chart.axes.spi;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.WeakHashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -36,6 +36,7 @@ import de.gsi.chart.axes.spi.format.DefaultTimeFormatter;
 import de.gsi.chart.ui.ResizableCanvas;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.event.AxisChangeEvent;
+import de.gsi.dataset.utils.SoftHashMap;
 
 /**
  * @author rstein
@@ -94,10 +95,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     };
 
     // cache for major tick marks
-    protected final transient WeakHashMap<String, TickMark> tickMarkStringCache = new WeakHashMap<>();
+    protected final transient Map<String, TickMark> tickMarkStringCache = new SoftHashMap<>(MAX_TICK_COUNT);
 
     // cache for minor tick marks (N.B. usually w/o string label)
-    protected final transient WeakHashMap<Double, TickMark> tickMarkDoubleCache = new WeakHashMap<>();
+    protected final transient Map<Double, TickMark> tickMarkDoubleCache = new SoftHashMap<>(MAX_TICK_COUNT * DEFAULT_MINOR_TICK_COUNT);
 
     public AbstractAxis() {
         super();
