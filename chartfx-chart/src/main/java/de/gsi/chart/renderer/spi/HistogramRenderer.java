@@ -42,7 +42,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * N.B. this is _not_ primarily optimised for speed, does not deploy caching, and is intended for DataSets
  * (and Histogram derivatives) with significantly less than 1k data points. Non-histogram DataSets are sorted by default
  * (can be overridden via #autoSortingProperty()).
- * Please have a look at the {@see ErrorDataSetRenderer} for larger DataSets,
+ * Please have a look at the ErrorDataSetRenderer for larger DataSets,
  *
  * @author rstein
  */
