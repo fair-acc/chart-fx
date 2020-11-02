@@ -183,7 +183,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         pickingDistanceProperty().set(distance);
     }
 
-    private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
+    protected void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
         label.setText(formatLabel(dataPoint));
         final double mouseX = event.getX();
         final double spaceLeft = mouseX - plotAreaBounds.getMinX();
