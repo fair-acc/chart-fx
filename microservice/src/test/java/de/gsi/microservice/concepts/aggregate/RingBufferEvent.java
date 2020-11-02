@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.lmax.disruptor.EventHandler;
+
 import de.gsi.microservice.utils.SharedPointer;
 
 public class RingBufferEvent implements FilterPredicate {
