@@ -20,6 +20,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -58,7 +59,6 @@ import de.gsi.dataset.remote.MimeType;
 
 import io.javalin.Javalin;
 import io.javalin.apibuilder.ApiBuilder;
-import io.javalin.core.compression.CompressionStrategy;
 import io.javalin.core.compression.Gzip;
 import io.javalin.core.event.HandlerMetaInfo;
 import io.javalin.core.security.Role;
@@ -136,11 +136,7 @@ public final class RestServer { // NOPMD -- nomen est omen
         // N.B. this is a workaround since javax.servlet.http.Cookie does not support the SameSite cookie field.
         // workaround inspired by: https://github.com/tipsy/javalin/issues/780
         final String cookieComment = "stores the servcer-side time stamp of the last valid update (required for long-polling)";
-        final String cookie = new StringBuilder().append(key).append("=").append(lastUpdateMillies) //
-                                      .append("; Comment=\"")
-                                      .append(cookieComment)
-                                      .append("\"; Expires=-1; SameSite=Strict;")
-                                      .toString();
+        final String cookie = key + "=" + lastUpdateMillies + "; Comment=\"" + cookieComment + "\"; Expires=-1; SameSite=Strict;";
         ctx.res.addHeader("Set-Cookie", cookie);
     }
 
@@ -169,12 +165,7 @@ public final class RestServer { // NOPMD -- nomen est omen
         }
 
         final String fullEndPointName = prefixPath(endpointName);
-        final Queue<SseClient> ret = EVENT_LISTENER_SSE.computeIfAbsent(fullEndPointName, key -> new ConcurrentLinkedQueue<>());
-
-        if (ret == null) {
-            throw new IllegalArgumentException(new StringBuilder().append("endpointName '").append(fullEndPointName).append("' not registered").toString());
-        }
-        return ret;
+        return EVENT_LISTENER_SSE.computeIfAbsent(fullEndPointName, key -> new ConcurrentLinkedQueue<>());
     }
 
     public static String getHostName() {
@@ -229,7 +220,7 @@ public final class RestServer { // NOPMD -- nomen est omen
 
     public static URI getLocalURI() {
         try {
-            return new URI(new StringBuilder().append("http://localhost:").append(getHostPort()).toString());
+            return new URI("http://localhost:" + getHostPort());
         } catch (final URISyntaxException e) {
             LOGGER.atError().setCause(e).log("getLocalURL()");
         }
@@ -239,7 +230,7 @@ public final class RestServer { // NOPMD -- nomen est omen
     public static URI getPublicURI() {
         final String ip = getLocalHostName();
         try (DatagramSocket socket = new DatagramSocket()) {
-            return new URI(new StringBuilder().append("https://").append(ip).append(":").append(getHostPort2()).toString());
+            return new URI("https://" + ip + ":" + getHostPort2());
         } catch (final URISyntaxException | SocketException e) {
             LOGGER.atError().setCause(e).log("getPublicURL()");
         }
@@ -286,9 +277,9 @@ public final class RestServer { // NOPMD -- nomen est omen
                               config.addStaticFiles("/public");
                               config.showJavalinBanner = false;
                               config.defaultContentType = getDefaultProtocol().toString();
-                              config.compressionStrategy(null, new Gzip(0));
-                              config.inner.compressionStrategy = CompressionStrategy.NONE;
-                              config.inner.compressionStrategy = CompressionStrategy.GZIP;
+                              config.compressionStrategy(null, new Gzip(2));
+                              // config.inner.compressionStrategy = CompressionStrategy.NONE // -- optional
+                              // config.inner.compressionStrategy = CompressionStrategy.GZIP // -- optional
                               config.server(RestServer::createHttp2Server);
                               config.registerPlugin(new RedirectToLowercasePathPlugin());
                               // show all routes on specified path
@@ -334,7 +325,7 @@ public final class RestServer { // NOPMD -- nomen est omen
     }
 
     public static void stopRestServer() {
-        if (RestServer.getInstance().server().server().isRunning()) {
+        if (Objects.requireNonNull(RestServer.getInstance().server()).server().isRunning()) {
             RestServer.getInstance().stop();
         }
     }
@@ -423,16 +414,11 @@ public final class RestServer { // NOPMD -- nomen est omen
     private static SslContextFactory createSslContextFactory() {
         final String keyStoreFile = System.getProperty(REST_KEY_STORE, null); // replace default with your real keystore
         final String keyStorePwdFile = System.getProperty(REST_KEY_STORE_PASSWORD, null); // replace default with your real password
-        if (keyStoreFile == null) {
-            LOGGER.atInfo().log("using internal keyStore -- PLEASE CHANGE FOR PRODUCTION -- THIS IS UNSAFE PRACTICE");
-        } else {
-            LOGGER.atInfo().addArgument(keyStoreFile).log("using keyStore at '{}'");
+        if (keyStoreFile == null || keyStorePwdFile == null) {
+            LOGGER.atInfo().addArgument(keyStoreFile).addArgument(keyStorePwdFile).log("using internal keyStore {} and/or keyStorePasswordFile {} -- PLEASE CHANGE FOR PRODUCTION -- THIS IS UNSAFE PRACTICE");
         }
-        if (keyStorePwdFile == null) {
-            LOGGER.atWarn().log("using internal keyStorePasswordFile -- PLEASE CHANGE FOR PRODUCTION -- THIS IS UNSAFE PRACTICE");
-        } else {
-            LOGGER.atInfo().addArgument(keyStorePwdFile).log("using keyStorePasswordFile at '{}'");
-        }
+        LOGGER.atInfo().addArgument(keyStoreFile).log("using keyStore at '{}'");
+        LOGGER.atInfo().addArgument(keyStorePwdFile).log("using keyStorePasswordFile at '{}'");
 
         boolean readComplete = true;
         String keyStorePwd = null;
@@ -447,13 +433,13 @@ public final class RestServer { // NOPMD -- nomen est omen
             LOGGER.atError().setCause(e).addArgument(keyStorePwdFile).log("error while reading key store password from '{}'");
         }
 
-        if (readComplete) {
+        if (readComplete && keyStorePwd != null) {
             // read the actual keyStore
             try (InputStream is = keyStoreFile == null ? RestServer.class.getResourceAsStream("/keystore.jks") //
                                                        : Files.newInputStream(Paths.get(keyStoreFile))) {
                 keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
                 keyStore.load(is, keyStorePwd.toCharArray());
-            } catch (final IOException | NoSuchAlgorithmException | CertificateException | KeyStoreException e) {
+            } catch (final NoSuchAlgorithmException | CertificateException | KeyStoreException | IOException e) {
                 readComplete = false;
                 LOGGER.atError().setCause(e).addArgument(keyStoreFile == null ? "internal" : keyStoreFile).log("error while reading key store from '{}'");
             }
@@ -486,9 +472,12 @@ public final class RestServer { // NOPMD -- nomen est omen
     }
 
     private static String getLocalHostName() {
-        String ip = null;
+        String ip;
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.connect(InetAddress.getByName("8.8.8.8"), 10_002); // NOPMD - bogus hardcoded IP acceptable in this context
+            if (socket.getLocalAddress() == null) {
+                throw new UnknownHostException("bogus exception can be ignored");
+            }
             ip = socket.getLocalAddress().getHostAddress();
 
             if (ip != null) {
