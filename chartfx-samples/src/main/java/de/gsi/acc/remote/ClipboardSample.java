@@ -39,6 +39,7 @@ import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.chart.utils.FXUtils;
+import de.gsi.dataset.event.UpdateEvent;
 import de.gsi.dataset.spi.LimitedIndexedTreeDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
@@ -58,7 +59,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  */
 public class ClipboardSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClipboardSample.class);
-    private static final boolean isRunningHeadless = System.getProperty("monocle.platform") != null;
+    private static final boolean isRunningHeadless = System.getProperty("monocle.platform") != null; // NOPMD NOSONAR -- nomen est omen
     private static final int DEBUG_UPDATE_RATE = 2000;
     private static final int N_SAMPLES = 750; // 750 samples @ 25 Hz <-> 30 s
     private static final int UPDATE_PERIOD = 40; // [ms]
@@ -155,15 +156,15 @@ public class ClipboardSample extends Application {
         System.setProperty("restServerPort2", "8443"); // the HTTP/2 port (encrypted)
         // for a full parameter description @see de.gsi.acc.remote.RestServer
         remoteView = new Clipboard("/", "status", root, UPDATE_PERIOD, TimeUnit.MILLISECONDS, true);
-        //remoteView = new Clipboard("/", "status", root, 5000, TimeUnit.MILLISECONDS, true);
+        //remoteView = new Clipboard("/", "status", root, 5000, TimeUnit.MILLISECONDS, true)
         if (!isRunningHeadless) {
-            chart.addListener(obs -> remoteView.handle(null));
+            chart.addListener(obs -> remoteView.handle(new UpdateEvent(remoteView, "regular clipboard update")));
         } else {
             new Timer("headless-update-timer", true).scheduleAtFixedRate(new TimerTask() {
 
             @Override
             public void run() {
-                remoteView.handle(null);
+                remoteView.handle(new UpdateEvent(remoteView, "headless clipboard update"));
             } }, 0, UPDATE_PERIOD);
         }
 
@@ -205,12 +206,11 @@ public class ClipboardSample extends Application {
             currentDataSet.autoNotification().set(true);
         } else {
             currentDataSet.autoNotification().set(false);
-            final double t = now;
-            final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
-            final double y2 = 100 * RollingBufferSample.rampFunctionBeamIntensity(t);
+            final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(now);
+            final double y2 = 100 * RollingBufferSample.rampFunctionBeamIntensity(now);
             final double ey = 1;
-            currentDataSet.add(t, y, ey, ey);
-            intensityDataSet.add(t, y2, ey, ey);
+            currentDataSet.add(now, y, ey, ey);
+            intensityDataSet.add(now, y2, ey, ey);
             currentDataSet.autoNotification().set(true);
         }
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
