@@ -14,6 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -390,8 +391,8 @@ public class Clipboard implements EventSource, EventListener {
      */
     public void addClipboardData(@NotNull final DataContainer data) {
         RestCommonThreadPool.getCommonPool().execute(() -> {
-            clipboardLock.lock();
             try {
+                clipboardLock.lock();
                 final String category = data.getCategory() == null ? CLIPBOARD_ROOT : data.getCategory();
                 final Cache<String, DataContainer> categoryMap = getClipboardCache(category);
                 final DataContainer ret = categoryMap.put(data.getExportNameData(), data);
@@ -447,7 +448,7 @@ public class Clipboard implements EventSource, EventListener {
     }
 
     public URI getLocalURI() {
-        return URI.create(RestServer.getLocalURI().toString() + prefixPath(getExportRoot()));
+        return URI.create(Objects.requireNonNull(RestServer.getLocalURI()).toString() + prefixPath(getExportRoot()));
     }
 
     public long getMaxUpdatePeriod() {
@@ -463,7 +464,7 @@ public class Clipboard implements EventSource, EventListener {
     }
 
     public URI getPublicURI() {
-        return URI.create(RestServer.getPublicURI().toString() + prefixPath(getExportRoot()));
+        return URI.create(Objects.requireNonNull(RestServer.getPublicURI()).toString() + prefixPath(getExportRoot()));
     }
 
     public Region getRegionToCapture() {
