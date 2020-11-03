@@ -35,7 +35,7 @@ public class RestUserHandlerImpl implements RestUserHandler {
     private static final String REST_USER_PASSWORD_FILE = getUserPasswordStore();
 
     private final Object usersLock = new Object();
-    private List<RestUser> users;
+    private List<RestUser> users = Collections.emptyList();
 
     /**
      * Authenticate the user by hashing the input password using the stored salt, 
@@ -43,9 +43,6 @@ public class RestUserHandlerImpl implements RestUserHandler {
      */
     @Override
     public boolean authenticate(@NotNull final String username, @NotNull final String password) {
-        if (username == null || password == null) {
-            return false;
-        }
         synchronized (usersLock) {
             final RestUser user = getUserByUsername(username);
             if (user == null) {
@@ -59,7 +56,7 @@ public class RestUserHandlerImpl implements RestUserHandler {
     @Override
     public Iterable<String> getAllUserNames() {
         synchronized (usersLock) {
-            if (users == null || users.isEmpty()) {
+            if (users.isEmpty()) {
                 readPasswordFile();
             }
             return users.stream().map(user -> user.userName).collect(Collectors.toList());
@@ -69,7 +66,7 @@ public class RestUserHandlerImpl implements RestUserHandler {
     @Override
     public RestUser getUserByUsername(final String userName) {
         synchronized (usersLock) {
-            if (users == null || users.isEmpty()) {
+            if (users.isEmpty()) {
                 readPasswordFile();
             }
             return users.stream().filter(b -> b.userName.equals(userName)).findFirst().orElse(null);
@@ -79,7 +76,7 @@ public class RestUserHandlerImpl implements RestUserHandler {
     @Override
     public Set<Role> getUserRolesByUsername(final String userName) {
         synchronized (usersLock) {
-            if (users == null || users.isEmpty()) {
+            if (users.isEmpty()) {
                 readPasswordFile();
             }
             Optional<RestUser> user = users.stream().filter(b -> b.userName.equals(userName)).findFirst();
@@ -100,22 +97,12 @@ public class RestUserHandlerImpl implements RestUserHandler {
                 final List<RestUser> newUserList = new ArrayList<>(10);
                 String userLine;
                 int lineCount = 0;
-                while ((userLine = br.readLine()) != null) {
+                while ((userLine = br.readLine()) != null) { // NOPMD NOSONAR -- early return/continue on purpose
                     if (userLine.startsWith("#")) {
                         continue;
                     }
-                    try {
-                        lineCount++;
-                        final String[] items = userLine.split(":");
-                        if (items.length < 4) { // NOPMD
-                            LOGGER.atWarn().addArgument(items.length).addArgument(lineCount).addArgument(userLine) //
-                                    .log("insufficient arguments ({} < 4)- parsing line {}: '{}'");
-                            continue;
-                        }
-                        newUserList.add(new RestUser(items[0], items[1], items[2], BasicRestRoles.getRoles(items[3]))); // NOPMD - needed
-                    } catch (Exception e) { // NOPMD - catch generic exception since a faulty login should not crash the rest of the REST service
-                        LOGGER.atWarn().setCause(e).addArgument(lineCount).addArgument(userLine).log("could not parse line {}: '{}'");
-                    }
+                    lineCount++;
+                    parsePasswordLine(newUserList, userLine, lineCount);
                 }
                 users = Collections.unmodifiableList(newUserList);
                 if (LOGGER.isDebugEnabled()) {
@@ -139,6 +126,9 @@ public class RestUserHandlerImpl implements RestUserHandler {
                 final String newSalt = BCrypt.gensalt();
                 final String newHashedPassword = BCrypt.hashpw(newPassword, newSalt);
                 final RestUser user = getUserByUsername(userName);
+                if (user == null) {
+                    return false;
+                }
                 user.salt = newSalt;
                 user.hashedPassword = newHashedPassword;
                 writePasswordFile();
@@ -162,8 +152,8 @@ public class RestUserHandlerImpl implements RestUserHandler {
                 if (file.createNewFile()) {
                     LOGGER.atInfo().addArgument(REST_USER_PASSWORD_FILE).log("needed to create new password file '{}'");
                 }
-            } catch (IOException | SecurityException e1) {
-                LOGGER.atError().setCause(e1).addArgument(REST_USER_PASSWORD_FILE).log("could not create user passwords file '{}'");
+            } catch (SecurityException | IOException e) {
+                LOGGER.atError().setCause(e).addArgument(REST_USER_PASSWORD_FILE).log("could not create user passwords file '{}'");
                 return;
             }
 
@@ -183,6 +173,19 @@ public class RestUserHandlerImpl implements RestUserHandler {
             } catch (IOException e) {
                 LOGGER.atError().setCause(e).addArgument(REST_USER_PASSWORD_FILE).log("could not store rest user passwords to '{}'");
             }
+        }
+    }
+
+    private void parsePasswordLine(final List<RestUser> newUserList, final String userLine, final int lineCount) {
+        try {
+            final String[] items = userLine.split(":");
+            if (items.length < 4) { // NOPMD
+                LOGGER.atWarn().addArgument(items.length).addArgument(lineCount).addArgument(userLine).log("insufficient arguments ({} < 4)- parsing line {}: '{}'");
+                return;
+            }
+            newUserList.add(new RestUser(items[0], items[1], items[2], BasicRestRoles.getRoles(items[3]))); // NOPMD - needed
+        } catch (Exception e) { // NOPMD - catch generic exception since a faulty login should not crash the rest of the REST service
+            LOGGER.atWarn().setCause(e).addArgument(lineCount).addArgument(userLine).log("could not parse line {}: '{}'");
         }
     }
 
