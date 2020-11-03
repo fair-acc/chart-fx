@@ -120,7 +120,7 @@ public class HistogramRendererBarSample extends Application {
             // skip first row
             String row = csvReader.readLine();
             // country,age,men 1980 [%],men 2000  [%],men 2050 [%],women 1980 [%],women 2000 [%],women 2050 [%],men 1980,men 2000,men 2050,women 1980,women 2000,women 2050
-            assert !row.isBlank() && row.contains("country");
+            assert row != null && !row.isBlank() && row.contains("country");
             while ((row = csvReader.readLine()) != null) {
                 String[] data = row.split(",");
                 final String country = data[0];
