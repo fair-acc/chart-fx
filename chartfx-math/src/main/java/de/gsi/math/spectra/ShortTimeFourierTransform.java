@@ -84,12 +84,11 @@ public class ShortTimeFourierTransform {
                 ((DoubleGridDataSet) output).clearMetaInfo();
                 return output;
             }
-            // return new DataSetBuilder("STFT(" + input.getName() + ")").setInitalCapacity(0).setInitalCapacity(0,0,0).setDimension(3).build(GridDataSet.class);
-            return new DoubleGridDataSet("STFT(" + input.getName() + ")", false, new double[2][0], new double[0]);
+            return new DoubleGridDataSet(getStftName(input), false, new double[2][0], new double[0]);
         }
         // get data from dataSet
         final int nSamples = input.getDataCount();
-        final double dt = (input.get(DIM_X, nSamples - 1) - input.get(DIM_X, 0)) / nSamples;
+        final double dt = (input.get(DIM_X, nSamples - 1) - input.get(DIM_X, 0)) / Math.max(nSamples, 1);
         final double[] real = input.getValues(DIM_Y);
         final double[] imag = input.getValues(DIM_Z);
         final double[] oldTimeAxis = output == null ? null : output.getValues(DIM_X);
@@ -104,7 +103,7 @@ public class ShortTimeFourierTransform {
         if (output instanceof DoubleGridDataSet) {
             result = (DoubleGridDataSet) output;
         } else {
-            result = new DataSetBuilder("STFT(" + input.getName() + ")").setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build(DoubleGridDataSet.class);
+            result = new DataSetBuilder(getStftName(input)).setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build(DoubleGridDataSet.class);
         }
         result.lock().writeLockGuard(() -> {
             // only update data arrays if at least one array was newly allocated
@@ -125,6 +124,10 @@ public class ShortTimeFourierTransform {
         });
 
         return result;
+    }
+
+    private static String getStftName(final DataSet input) {
+        return "STFT(" + input.getName() + ")";
     }
 
     public static double[] complex(final double[] real, final double[] imag, final double[] output, final int nFFT, final int step,
@@ -282,12 +285,11 @@ public class ShortTimeFourierTransform {
                 ((DoubleGridDataSet) output).clearMetaInfo();
                 return output;
             }
-            // return new DataSetBuilder("STFT(" + input.getName() + ")").setInitalCapacity(0).setDimension(3).build(GridDataSet.class);
-            return new DoubleGridDataSet("STFT(" + input.getName() + ")", false, new double[2][0], new double[0]);
+            return new DoubleGridDataSet(getStftName(input), false, new double[2][0], new double[0]);
         }
         // get data from dataSet
         final int nSamples = input.getDataCount();
-        final double dt = (input.get(DIM_X, nSamples - 1) - input.get(DIM_X, 0)) / nSamples;
+        final double dt = (input.get(DIM_X, nSamples - 1) - input.get(DIM_X, 0)) / Math.max(nSamples, 1);
         final double[] yData = input.getValues(DIM_Y);
         final double[] oldTimeAxis = output == null ? null : output.getValues(DIM_X);
         final double[] timeAxis = getTimeAxis(dt, nSamples, step, oldTimeAxis);
@@ -301,7 +303,7 @@ public class ShortTimeFourierTransform {
         if (output instanceof DoubleGridDataSet) {
             result = (DoubleGridDataSet) output;
         } else {
-            result = new DataSetBuilder("STFT(" + input.getName() + ")").setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build(DoubleGridDataSet.class);
+            result = new DataSetBuilder(getStftName(input)).setValues(DIM_X, frequencyAxis).setValues(DIM_Y, timeAxis).setValues(DIM_Z, amplitudeData).build(DoubleGridDataSet.class);
         }
         result.lock().writeLockGuard(() -> {
             // only update data arrays if at least one array was newly allocated
