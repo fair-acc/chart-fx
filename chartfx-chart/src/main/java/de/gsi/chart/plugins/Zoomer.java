@@ -1165,7 +1165,7 @@ public class Zoomer extends ChartPlugin {
     }
 
     private static void zoomOnAxis(final Axis axis, final ScrollEvent event) {
-        if (hasBoundedRange(axis)) {
+        if (hasBoundedRange(axis) || event.getDeltaY() == 0) {
             return;
         }
         final boolean isZoomIn = event.getDeltaY() > 0;
