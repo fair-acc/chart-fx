@@ -26,7 +26,7 @@ public class CssPropertyFactory<S extends Styleable> {
     protected final List<CssMetaData<? extends Styleable, ?>> unmodifiableList;
     protected final Map<String, CssMetaData<S, ?>> metaDataSet = new HashMap<>();
     protected final Map<String, PseudoClass> pseudoClasses = new HashMap<>();
-    protected final Map<Styleable, List<String>> propertyNames = new HashMap<>();
+    protected final Map<Styleable, List<String>> propertyNames = new WeakHashMap<>();
 
     /**
      * Create a property factory without any properties from the parent class.
@@ -395,7 +395,7 @@ public class CssPropertyFactory<S extends Styleable> {
                 } catch (IllegalAccessException e) {
                     LOGGER.atError().setCause(e).addArgument(s.getClass().getName()).addArgument(field).addArgument(propertyName).log("class {} field {} propertyName {}");
                 }
-                throw new IllegalStateException("styleableBean = " + styleableBean.getClass().getName() + " FX propertyName = '" + propertyName + "'  - could not get field object");
+                throw new IllegalStateException("styleableBean FX propertyName = '" + propertyName + "'  - could not get field object");
             };
 
             metaData.add(this);
