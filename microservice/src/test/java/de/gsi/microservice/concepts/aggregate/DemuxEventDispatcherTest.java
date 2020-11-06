@@ -32,7 +32,7 @@ import com.lmax.disruptor.util.DaemonThreadFactory;
  *
  * @author Alexander Krimm
  */
-class DemuxProcessorTest {
+class DemuxEventDispatcherTest {
     static Stream<Arguments> workingEventSamplesProvider() {
         return Stream.of(
                 arguments("ordinary", "a1 b1 c1 a2 b2 c2 a3 b3 c3", "a1 b1 c1; a2 b2 c2; a3 b3 c3", "", 1),
@@ -75,8 +75,8 @@ class DemuxProcessorTest {
                 DaemonThreadFactory.INSTANCE,
                 ProducerType.MULTI,
                 new TimeoutBlockingWaitStrategy(200, TimeUnit.MILLISECONDS));
-        final DemuxProcessor aggProc = new DemuxProcessor(disruptor.getRingBuffer());
-        final EventHandlerGroup<TestEventSource.IngestedEvent> endBarrier = disruptor.handleEventsWith(testHandler).handleEventsWith(aggProc).then(aggProc.workers);
+        final DemuxEventDispatcher aggProc = new DemuxEventDispatcher(disruptor.getRingBuffer());
+        final EventHandlerGroup<TestEventSource.IngestedEvent> endBarrier = disruptor.handleEventsWith(testHandler).handleEventsWith(aggProc).then(aggProc.getAggregationHander());
         RingBuffer<TestEventSource.IngestedEvent> rb = disruptor.start();
 
         // Use event source to publish demo events to the buffer.
@@ -84,7 +84,7 @@ class DemuxProcessorTest {
         assertDoesNotThrow(testEventSource::run);
 
         // wait for all events to be played and processed
-        Awaitility.await().atMost(Duration.ofSeconds(repeat)).until(() -> endBarrier.asSequenceBarrier().getCursor() == rb.getCursor() && Arrays.stream(aggProc.workers).allMatch(w -> w.bpcts == -1));
+        Awaitility.await().atMost(Duration.ofSeconds(repeat)).until(() -> endBarrier.asSequenceBarrier().getCursor() == rb.getCursor() && Arrays.stream(aggProc.getAggregationHander()).allMatch(w -> w.bpcts == -1));
         // compare aggregated results and timeouts
         assertThat(aggResults, containsInAnyOrder(Arrays.stream(aggregatesAll.split(";"))
                                                           .filter(s -> !s.isEmpty())

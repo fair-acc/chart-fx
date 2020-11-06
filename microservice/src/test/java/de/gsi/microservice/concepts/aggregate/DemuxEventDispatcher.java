@@ -17,25 +17,29 @@ import de.gsi.dataset.utils.Cache;
  *
  * @author Alexander Krimm
  */
-public class DemuxProcessor implements SequenceReportingEventHandler<TestEventSource.IngestedEvent> {
+public class DemuxEventDispatcher implements SequenceReportingEventHandler<TestEventSource.IngestedEvent> {
     private static final int N_WORKERS = 4; // number of workers defines the maximum number of aggregate events groups which can be overlapping
     private static final long TIMEOUT = 400;
     private static final int RETENTION_SIZE = 10;
     private static final int N_AGG_ELEMENTS = 3;
-    public final AggregationWorker[] workers;
-    private final List<AggregationWorker> freeWorkers = Collections.synchronizedList(new ArrayList<>(N_WORKERS));
+    private final AggregationHandler[] aggregationHandler;
+    private final List<AggregationHandler> freeWorkers = Collections.synchronizedList(new ArrayList<>(N_WORKERS));
     private final RingBuffer<TestEventSource.IngestedEvent> rb;
     // private Map<Long, Object> aggregatedBpcts = new SoftHashMap<>(RETENTION_SIZE);
     private Map<Long, Object> aggregatedBpcts = new Cache<>(RETENTION_SIZE);
     private Sequence seq;
 
-    public DemuxProcessor(final RingBuffer<TestEventSource.IngestedEvent> ringBuffer) {
+    public DemuxEventDispatcher(final RingBuffer<TestEventSource.IngestedEvent> ringBuffer) {
         rb = ringBuffer;
-        workers = new AggregationWorker[N_WORKERS];
+        aggregationHandler = new AggregationHandler[N_WORKERS];
         for (int i = 0; i < N_WORKERS; i++) {
-            workers[i] = new AggregationWorker();
-            freeWorkers.add(workers[i]);
+            aggregationHandler[i] = new AggregationHandler();
+            freeWorkers.add(aggregationHandler[i]);
         }
+    }
+
+    public AggregationHandler[] getAggregationHander() {
+        return aggregationHandler;
     }
 
     public void onEvent(final TestEventSource.IngestedEvent event, final long nextSequence, final boolean b) {
@@ -50,7 +54,7 @@ public class DemuxProcessor implements SequenceReportingEventHandler<TestEventSo
         }
         while (true) {
             if (!freeWorkers.isEmpty()) {
-                final AggregationWorker freeWorker = freeWorkers.remove(0);
+                final AggregationHandler freeWorker = freeWorkers.remove(0);
                 freeWorker.bpcts = eventBpcts;
                 freeWorker.aggStart = event.ingestionTime;
                 aggregatedBpcts.put(eventBpcts, new Object());
@@ -59,7 +63,7 @@ public class DemuxProcessor implements SequenceReportingEventHandler<TestEventSo
             }
             // no free worker available
             long waitTime = Long.MAX_VALUE;
-            for (AggregationWorker w : workers) {
+            for (AggregationHandler w : aggregationHandler) {
                 final long currentTime = System.currentTimeMillis();
                 final long diff = currentTime - w.aggStart;
                 waitTime = Math.min(waitTime, diff * 1000000);
@@ -77,7 +81,7 @@ public class DemuxProcessor implements SequenceReportingEventHandler<TestEventSo
         this.seq = sequence;
     }
 
-    public class AggregationWorker implements EventHandler<TestEventSource.IngestedEvent>, TimeoutHandler {
+    public class AggregationHandler implements EventHandler<TestEventSource.IngestedEvent>, TimeoutHandler {
         protected volatile long bpcts = -1; // [ms]
         protected volatile long aggStart = -1; // [ns]
         private List<TestEventSource.IngestedEvent> payloads = new ArrayList<>();
