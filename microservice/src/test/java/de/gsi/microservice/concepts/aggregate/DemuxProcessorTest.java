@@ -1,4 +1,4 @@
-package de.gsi.microservice.concepts.aggregate.demux.poc;
+package de.gsi.microservice.concepts.aggregate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -28,6 +28,10 @@ import com.lmax.disruptor.dsl.EventHandlerGroup;
 import com.lmax.disruptor.dsl.ProducerType;
 import com.lmax.disruptor.util.DaemonThreadFactory;
 
+/**
+ *
+ * @author Alexander Krimm
+ */
 class DemuxProcessorTest {
     static Stream<Arguments> workingEventSamplesProvider() {
         return Stream.of(
@@ -53,6 +57,7 @@ class DemuxProcessorTest {
         EventHandler<TestEventSource.IngestedEvent> testHandler = (ev, seq, eob) -> {
             System.out.println(ev);
             if (ev.payload instanceof List) {
+                @SuppressWarnings("unchecked")
                 final List<TestEventSource.IngestedEvent> agg = (List<TestEventSource.IngestedEvent>) ev.payload;
                 final Set<String> payloads = agg.stream().map(e -> (String) ((TestEventSource.Event) e.payload).payload).collect(Collectors.toSet());
                 aggResults.add(payloads);

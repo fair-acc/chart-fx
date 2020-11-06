@@ -1,4 +1,4 @@
-package de.gsi.microservice.concepts.aggregate.demux.poc;
+package de.gsi.microservice.concepts.aggregate;
 
 import java.util.*;
 import java.util.concurrent.locks.LockSupport;
@@ -14,6 +14,8 @@ import de.gsi.dataset.utils.Cache;
  *
  * For now events are aggregated into a list of Objects until a certain number of events is reached.
  * The final api should allow to specify different Objects to be placed into a result domain object.
+ *
+ * @author Alexander Krimm
  */
 public class DemuxProcessor implements SequenceReportingEventHandler<TestEventSource.IngestedEvent> {
     private static final int N_WORKERS = 4; // number of workers defines the maximum number of aggregate events groups which can be overlapping

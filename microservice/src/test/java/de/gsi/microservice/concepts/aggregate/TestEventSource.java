@@ -1,12 +1,15 @@
-package de.gsi.microservice.concepts.aggregate.demux.poc;
+package de.gsi.microservice.concepts.aggregate;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.concurrent.locks.LockSupport;
 
 import com.lmax.disruptor.RingBuffer;
 
 /**
  * An event Source to generate Events with different timing characteristics/orderings.
+ *
+ * @author Alexander Krimm
  */
 public class TestEventSource implements Runnable {
     private static final int DEFAULT_CHAIN = 3;
@@ -51,11 +54,7 @@ public class TestEventSource implements Runnable {
                 lastEvent = currentEvent.publishTime;
                 long diff = currentEvent.publishTime - System.currentTimeMillis();
                 if (diff > 0) {
-                    try {
-                        Thread.sleep(diff);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    LockSupport.parkNanos(1000000 * diff);
                 }
                 ringBuffer.publishEvent((event, sequence, arg0) -> {
                     event.ingestionTime = System.currentTimeMillis();
@@ -105,7 +104,7 @@ public class TestEventSource implements Runnable {
                 payload = keyvalue[1] + "(repetition count: " + repetitionCount + ")";
                 break;
             default:
-                throw new IllegalArgumentException("unable to process event keyvalue pair: " + keyvalue);
+                throw new IllegalArgumentException("unable to process event keyvalue pair: " + Arrays.toString(keyvalue));
             }
         }
         return new Event(sourceTime, publishTime, bpcts, chain, type, device, payload);
