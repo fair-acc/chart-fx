@@ -44,7 +44,7 @@ class MemoryLeakTests {
     }
 
     @Test
-    void simpleLeakTest(final FxRobot fxRobot){
+    void simpleLeakTest(final FxRobot fxRobot) {
         JMemoryBuddy.memoryTest(checker -> {
             AtomicReference<XYChart> chartRef = new AtomicReference<>();
             // add chart to scene
