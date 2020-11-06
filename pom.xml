@@ -348,6 +348,12 @@
             <version>${chartfx.awaitility.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>de.sandec</groupId>
+            <artifactId>JMemoryBuddy</artifactId>
+            <version>0.2.6</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <profiles>
