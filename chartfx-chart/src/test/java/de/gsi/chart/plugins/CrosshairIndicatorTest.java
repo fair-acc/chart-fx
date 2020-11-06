@@ -53,7 +53,7 @@ class CrosshairIndicatorTest {
 
         final HBox root = new HBox(boxLeft, chart);
 
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 500, 400);
         stage.setScene(scene);
         stage.show();
     }
@@ -86,12 +86,12 @@ class CrosshairIndicatorTest {
         assertTrue(plugin.getChartChildren().contains(label));
         final String text1 = label.getText();
         assertFalse(text1.isBlank());
-        robot.moveBy(+200, 10);
+        robot.moveBy(+100, 5);
         String text2 = label.getText();
         assertFalse(text2.isBlank());
         assertNotEquals(text1, text2);
 
-        robot.moveBy(-400, 10);
+        robot.moveBy(-200, 5);
         text2 = label.getText();
         assertFalse(text2.isBlank());
         assertNotEquals(text1, text2);
