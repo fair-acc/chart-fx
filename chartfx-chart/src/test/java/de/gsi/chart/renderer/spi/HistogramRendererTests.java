@@ -59,7 +59,7 @@ public class HistogramRendererTests {
     private static final int WAIT_N_FX_PULSES = 3;
     private static final double IMAGE_CMP_THRESHOLD = 0.5; // 1.0 is perfect identity
     private static final int WIDTH = 1000;
-    private static final int HEIGHT = 1000;
+    private static final int HEIGHT = 600;
     private static final int N_SAMPLES = 15;
     private GridPane root;
     private Image testImage;
