@@ -8,10 +8,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import com.lmax.disruptor.EventHandler;
-import de.gsi.microservice.utils.SharedPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.lmax.disruptor.EventHandler;
+
+import de.gsi.microservice.utils.SharedPointer;
 
 public class RingBufferEvent implements FilterPredicate, Cloneable {
     private final static Logger LOGGER = LoggerFactory.getLogger(RingBufferEvent.class);
