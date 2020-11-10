@@ -28,15 +28,15 @@ public class EvtTypeFilter implements Filter {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
+    public boolean equals(final Object obj) {
+        if (this == obj) {
             return true;
         }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(obj instanceof EvtTypeFilter)) {
             return false;
         }
-        final EvtTypeFilter that = (EvtTypeFilter) o;
-        return evtType == that.evtType && Objects.equals(typeName, that.typeName);
+        final EvtTypeFilter other = (EvtTypeFilter) obj;
+        return evtType == other.evtType && Objects.equals(typeName, other.typeName);
     }
 
     @Override
@@ -58,6 +58,14 @@ public class EvtTypeFilter implements Filter {
         UNKNOWN
     }
 
+    public static Predicate<EvtTypeFilter> isTimingData() {
+        return t -> t.evtType == EvtType.TIMING_EVENT;
+    }
+
+    public static Predicate<EvtTypeFilter> isTimingData(final String typeName) {
+        return t -> t.evtType == EvtType.TIMING_EVENT && Objects.equals(t.typeName, typeName);
+    }
+
     public static Predicate<EvtTypeFilter> isDeviceData() {
         return t -> t.evtType == EvtType.DEVICE_DATA;
     }
@@ -66,7 +74,11 @@ public class EvtTypeFilter implements Filter {
         return t -> t.evtType == EvtType.DEVICE_DATA && Objects.equals(t.typeName, typeName);
     }
 
-    public static boolean isDeviceData(final EvtTypeFilter t, final String typeName) {
-        return t.evtType == EvtType.DEVICE_DATA && Objects.equals(t.typeName, typeName);
+    public static Predicate<EvtTypeFilter> isSettingsData() {
+        return t -> t.evtType == EvtType.SETTING_SUPPLY_DATA;
+    }
+
+    public static Predicate<EvtTypeFilter> isSettingsData(final String typeName) {
+        return t -> t.evtType == EvtType.SETTING_SUPPLY_DATA && Objects.equals(t.typeName, typeName);
     }
 }

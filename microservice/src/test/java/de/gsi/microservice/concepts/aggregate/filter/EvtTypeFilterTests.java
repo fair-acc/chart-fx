@@ -53,6 +53,26 @@ class EvtTypeFilterTests {
         assertEquals(evtTypeFilter1, evtTypeFilter3);
     }
 
+    @Test
+    void predicateTsts() {
+        final EvtTypeFilter evtTypeFilter = new EvtTypeFilter();
+
+        evtTypeFilter.evtType = EvtTypeFilter.EvtType.TIMING_EVENT;
+        evtTypeFilter.typeName = "TimingEventName";
+        assertTrue(EvtTypeFilter.isTimingData().test(evtTypeFilter));
+        assertTrue(EvtTypeFilter.isTimingData("TimingEventName").test(evtTypeFilter));
+
+        evtTypeFilter.evtType = EvtTypeFilter.EvtType.DEVICE_DATA;
+        evtTypeFilter.typeName = "DeviceName";
+        assertTrue(EvtTypeFilter.isDeviceData().test(evtTypeFilter));
+        assertTrue(EvtTypeFilter.isDeviceData("DeviceName").test(evtTypeFilter));
+
+        evtTypeFilter.evtType = EvtTypeFilter.EvtType.SETTING_SUPPLY_DATA;
+        evtTypeFilter.typeName = "SettingName";
+        assertTrue(EvtTypeFilter.isSettingsData().test(evtTypeFilter));
+        assertTrue(EvtTypeFilter.isSettingsData("SettingName").test(evtTypeFilter));
+    }
+
     private static void assertInitialised(final EvtTypeFilter evtTypeFilter) {
         assertNull(evtTypeFilter.typeName);
         assertEquals(EvtTypeFilter.EvtType.UNKNOWN, evtTypeFilter.evtType);
