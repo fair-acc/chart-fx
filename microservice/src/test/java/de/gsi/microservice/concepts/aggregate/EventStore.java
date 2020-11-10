@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -102,7 +103,11 @@ public class EventStore {
         eventStreams = muxBuilder != null ? muxBuilder.build() : Cache.<String, Disruptor<RingBufferEvent>>builder().withPostListener(clearCacheElement).build();
     }
 
-    public List<RingBufferEvent> getHistory(final String muxCtx, final long sequence, final Predicate<RingBufferEvent> predicate, final int nHistory) {
+    public List<RingBufferEvent> getHistory(final String muxCtx, final Predicate<RingBufferEvent> predicate, final int nHistory) {
+        return getHistory(muxCtx, predicate, Long.MAX_VALUE, nHistory);
+    }
+
+    public List<RingBufferEvent> getHistory(final String muxCtx, final Predicate<RingBufferEvent> predicate, final long sequence, final int nHistory) {
         assert muxCtx != null && !muxCtx.isBlank();
         assert sequence >= 0 : "sequence = " + sequence;
         assert nHistory > 0 : "nHistory = " + nHistory;
@@ -125,6 +130,28 @@ public class EventStore {
             }
         }
         return history;
+    }
+
+    public Optional<RingBufferEvent> getLast(final String muxCtx, final Predicate<RingBufferEvent> predicate) {
+        return getLast(muxCtx, predicate, Long.MAX_VALUE);
+    }
+
+    public Optional<RingBufferEvent> getLast(final String muxCtx, final Predicate<RingBufferEvent> predicate, final long sequence) {
+        assert muxCtx != null && !muxCtx.isBlank();
+        final Disruptor<RingBufferEvent> localDisruptor = eventStreams.computeIfAbsent(muxCtx, ctxMappingFunction);
+        assert localDisruptor != null : "disruptor not found for multiplexing context = " + muxCtx;
+        final RingBuffer<RingBufferEvent> ringBuffer = localDisruptor.getRingBuffer();
+        assert ringBuffer.getCursor() > 0 : "uninitialised cursor: " + ringBuffer.getCursor();
+
+        // search for the most recent element that matches the provided predicate
+        long seqStart = Math.max(ringBuffer.getCursor() - ringBuffer.getBufferSize() - 1, 0);
+        for (long seq = ringBuffer.getCursor(); seqStart <= seq; seq--) {
+            final RingBufferEvent evt = ringBuffer.get(seq);
+            if (evt.parentSequenceNumber <= sequence && predicate.test(evt)) {
+                return Optional.of(evt.clone());
+            }
+        }
+        return Optional.empty();
     }
 
     public RingBuffer<RingBufferEvent> getRingBuffer() {
@@ -157,7 +184,7 @@ public class EventStore {
 
     public void start(final boolean startReaper) {
         // create single writer that is always executed first
-        EventHandlerGroup<RingBufferEvent> handlerGroup = disruptor.handleEventsWith((evt, seq, batch) -> {
+        EventHandler<RingBufferEvent> muxCtxWriter = (evt, seq, batch) -> {
             for (Function<RingBufferEvent, String> muxCtxFunc : muxCtxFunctions) {
                 final String muxCtx = muxCtxFunc.apply(evt);
                 // only single writer ... no further post-processors (all done in main eventStream)
@@ -173,7 +200,9 @@ public class EventStore {
                     throw new IllegalStateException("could not write event, sequence = " + seq + " muxCtx = " + muxCtx);
                 }
             }
-        });
+        };
+        allEventHandlers.add(muxCtxWriter);
+        EventHandlerGroup<RingBufferEvent> handlerGroup = disruptor.handleEventsWith(muxCtxWriter);
 
         // add other handler
         for (LocalEventHandlerGroup localHandlerGroup : listener) {
@@ -294,7 +323,7 @@ public class EventStore {
             }
             final String muxCtx = muxCtxFunction.apply(event);
             // history implementation V1: using dedicated/separate ring buffer
-            final List<RingBufferEvent> historyAlt = muxCtx == null ? Collections.singletonList(event) : eventStore.getHistory(muxCtx, sequence, filter, N_HISTORY); // NOSONAR NOPMD
+            final List<RingBufferEvent> historyAlt = muxCtx == null ? Collections.singletonList(event) : eventStore.getHistory(muxCtx, filter, sequence, N_HISTORY); // NOSONAR NOPMD
 
             // history implementation V2: local ring buffer fed by calling Event reference
             final RingBufferEvent eventCopy = event.clone();
