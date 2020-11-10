@@ -44,7 +44,7 @@ public class SharedPointer<T> {
     }
 
     public Class<?> getType() {
-        return payload.getClass();
+        return payload == null ? null : payload.getClass();
     }
 
     /**

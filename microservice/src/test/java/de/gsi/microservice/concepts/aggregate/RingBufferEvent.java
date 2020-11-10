@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -17,7 +18,6 @@ import de.gsi.microservice.utils.SharedPointer;
 
 public class RingBufferEvent implements FilterPredicate, Cloneable {
     private final static Logger LOGGER = LoggerFactory.getLogger(RingBufferEvent.class);
-
     /**
      * local UTC event arrival time-stamp [ms]
      */
@@ -66,13 +66,7 @@ public class RingBufferEvent implements FilterPredicate, Cloneable {
     @Override
     public RingBufferEvent clone() { // NOSONAR NOPMD we do not want to call super (would be kind of stupid)
         final RingBufferEvent retVal = new RingBufferEvent(this.filterConfig);
-        retVal.arrivalTimeStamp = arrivalTimeStamp;
-        retVal.parentSequenceNumber = parentSequenceNumber;
-        for (int i = 0; i < retVal.filters.length; i++) {
-            filters[i].copyTo(retVal.filters[i]);
-        }
-        retVal.payload = payload.getCopy();
-        retVal.throwables.addAll(throwables);
+        this.copyTo(retVal);
         return retVal;
     }
 
@@ -82,7 +76,8 @@ public class RingBufferEvent implements FilterPredicate, Cloneable {
         for (int i = 0; i < other.filters.length; i++) {
             filters[i].copyTo(other.filters[i]);
         }
-        other.payload = payload.getCopy();
+        other.payload = payload == null ? null : payload.getCopy();
+        other.throwables.clear();
         other.throwables.addAll(throwables);
     }
 
@@ -106,9 +101,13 @@ public class RingBufferEvent implements FilterPredicate, Cloneable {
         return predicate.test(filterType.cast(getFilter(filterType)));
     }
 
-    //    public <T> boolean test(Class<T> filterType, final Predicate<T> predicate) {
-    //        return predicate.test(filterType.cast(getFilter(filterType)));
-    //    }
+    /**
+     * @param payloadType required payload class-type
+     * @return {@code true} if payload is defined and matches type
+     */
+    public boolean matches(Class<?> payloadType) {
+        return payload != null && payload.getType() != null && payloadType.isAssignableFrom(payload.getType());
+    }
 
     public final void clear() {
         arrivalTimeStamp = 0L;
@@ -178,5 +177,46 @@ public class RingBufferEvent implements FilterPredicate, Cloneable {
             LOGGER.atTrace().addArgument(sequence).addArgument(endOfBatch).log("clearing RingBufferEvent sequence = {} endOfBatch = {}");
             event.clear();
         }
+    }
+
+    @Override
+    public boolean equals(final Object obj) { // NOSONAR NOPMD - npath complexity unavoidable for performance reasons
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof RingBufferEvent)) {
+            return false;
+        }
+        final RingBufferEvent other = (RingBufferEvent) obj;
+        if (hashCode() != other.hashCode()) {
+            return false;
+        }
+        if (arrivalTimeStamp != other.arrivalTimeStamp) {
+            return false;
+        }
+        if (parentSequenceNumber != other.parentSequenceNumber) {
+            return false;
+        }
+        if (!Arrays.equals(filters, other.filters)) {
+            return false;
+        }
+        if (!Arrays.equals(filterConfig, other.filterConfig)) {
+            return false;
+        }
+        if (payload != null ? !payload.equals(other.payload) : other.payload != null) {
+            return false;
+        }
+        return throwables.equals(other.throwables);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (arrivalTimeStamp ^ (arrivalTimeStamp >>> 32));
+        result = 31 * result + (int) (parentSequenceNumber ^ (parentSequenceNumber >>> 32));
+        result = 31 * result + Arrays.hashCode(filters);
+        result = 31 * result + Arrays.hashCode(filterConfig);
+        result = 31 * result + (payload != null ? payload.hashCode() : 0);
+        result = 31 * result + throwables.hashCode();
+        return result;
     }
 }
