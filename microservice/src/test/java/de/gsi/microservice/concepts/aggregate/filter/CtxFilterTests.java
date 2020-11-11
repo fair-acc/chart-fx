@@ -66,6 +66,15 @@ class CtxFilterTests {
     }
 
     @Test
+    void testHelper() {
+        assertTrue(CtxFilter.wildCardMatch(CtxFilter.WILD_CARD_VALUE, 2));
+        assertTrue(CtxFilter.wildCardMatch(CtxFilter.WILD_CARD_VALUE, -1));
+        assertTrue(CtxFilter.wildCardMatch(1, CtxFilter.WILD_CARD_VALUE));
+        assertTrue(CtxFilter.wildCardMatch(-1, CtxFilter.WILD_CARD_VALUE));
+        assertFalse(CtxFilter.wildCardMatch(3, 2));
+    }
+
+    @Test
     void testEqualsAndHash() {
         final long timeNowMicros = System.currentTimeMillis() * 1000;
         final CtxFilter ctx1 = new CtxFilter();
@@ -126,7 +135,7 @@ class CtxFilterTests {
         assertTrue(CtxFilter.matches(0, 1, timeNowMicros).test(ctx));
         assertTrue(CtxFilter.matches(0, 1, 2, timeNowMicros).test(ctx));
         assertTrue(CtxFilter.matches(0, 1, 2).test(ctx));
-        assertFalse(CtxFilter.matches(-1, 1, 2).test(ctx));
+        assertTrue(CtxFilter.matches(-1, 1, 2).test(ctx));
         assertFalse(CtxFilter.matches(0, 0, 2).test(ctx));
         assertFalse(CtxFilter.matches(0, 1, 0).test(ctx));
 
