@@ -30,6 +30,8 @@ class SharedPointerTests {
         // get second ownership
         final SharedPointer<Object> ref = sp.getCopy();
         assertEquals(testObject, ref.get(), "object identity copy");
+        assertEquals(testObject, ref.get(Integer.class), "object identity copy");
+        assertThrows(ClassCastException.class, () -> ref.get(Long.class));
         assertEquals(2, sp.getReferenceCount());
         assertDoesNotThrow(ref::release); // nothing should happen
         assertEquals(1, ref.getReferenceCount());

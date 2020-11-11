@@ -4,6 +4,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class SharedPointer<T> {
+    private static final String CLASS_NAME = SharedPointer.class.getSimpleName().intern();
     private T payload = null;
     private Consumer<Object> destroyFunction;
     private final AtomicInteger payloadUseCount = new AtomicInteger(0);
@@ -39,12 +40,16 @@ public class SharedPointer<T> {
         return payload;
     }
 
+    public <R> R get(Class<R> classType) {
+        return classType.cast(payload);
+    }
+
     public int getReferenceCount() {
         return payloadUseCount.get();
     }
 
     public Class<?> getType() {
-        return payload.getClass();
+        return payload == null ? null : payload.getClass();
     }
 
     /**
@@ -64,5 +69,13 @@ public class SharedPointer<T> {
             destroyFunction.accept(payload);
         }
         payload = null;
+    }
+
+    public String toString() {
+        if (payload == null) {
+            return CLASS_NAME + "[useCount= " + payloadUseCount.get() + ", has destructor=" + (destroyFunction != null) + ", <?>.class, null]";
+        }
+        return CLASS_NAME + "[useCount= " + payloadUseCount.get() + ", has destructor=" + (destroyFunction != null) + ", " //
+                + payload.getClass().getSimpleName() + ".class, '" + payload.toString() + "']";
     }
 }
