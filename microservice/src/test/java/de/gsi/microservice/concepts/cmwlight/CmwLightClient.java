@@ -20,24 +20,24 @@ public class CmwLightClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(CmwLightClient.class);
     private static final AtomicLong connectionIdGenerator = new AtomicLong(0); // global counter incremented for each connection
     private static final AtomicInteger requestIdGenerator = new AtomicInteger(0);
-    private final AtomicInteger channelId = new AtomicInteger(0); // connection local counter incremented for each channel
-    private final ZMQ.Context context;
-    private final ZMQ.Socket controlChannel;
-    private final AtomicReference<ConnectionState> connectionState = new AtomicReference<>(ConnectionState.DISCONNECTED);
-    private final String address;
-    private String sessionId;
-    private long connectionId;
-    Map<Long, Subscription> subscriptions = Collections.synchronizedMap(new HashMap<>()); // all subscriptions added to the server
+    protected final AtomicInteger channelId = new AtomicInteger(0); // connection local counter incremented for each channel
+    protected final ZMQ.Context context;
+    protected final ZMQ.Socket controlChannel;
+    protected final AtomicReference<ConnectionState> connectionState = new AtomicReference<>(ConnectionState.DISCONNECTED);
+    protected final String address;
+    protected String sessionId;
+    protected long connectionId;
+    protected final Map<Long, Subscription> subscriptions = Collections.synchronizedMap(new HashMap<>()); // all subscriptions added to the server
     // private final List<QueuedRequests> queuedRequests = new LimitedArrayList(); // all requests which are waiting for a reply/timeout from the server
-    private long lastHbReceived = -1;
-    private long lastHbSent = -1;
-    private final int heartbeatInterval = 1000; // time between to heartbeats in ms
-    private final int heartbeatAllowedMisses = 3; // number of heartbeats which can be missed before resetting the conection
-    private final long subscriptionTimeout = 1000; // maximum time after which a connection should be reconnected
-    private int backOff = 20;
+    protected long lastHbReceived = -1;
+    protected long lastHbSent = -1;
+    protected final int heartbeatInterval = 1000; // time between to heartbeats in ms
+    protected final int heartbeatAllowedMisses = 3; // number of heartbeats which can be missed before resetting the conection
+    protected final long subscriptionTimeout = 1000; // maximum time after which a connection should be reconnected
+    protected int backOff = 20;
 
     public void unsubscribe(final Subscription subscription) throws CmwLightProtocol.RdaLightException {
-        subscriptions.remove(subscription);
+        subscriptions.remove(subscription.id);
         sendUnsubscribe(subscription);
     }
 
@@ -195,10 +195,14 @@ public class CmwLightClient {
                     case SUBSCRIBED:
                         // do nothing
                         break;
+                    default:
+                        throw new IllegalStateException("unexpected subscription state: " + sub.subscriptionState);
                     }
                 }
             }
             break;
+        default:
+            throw new IllegalStateException("unexpected connection state: " + connectionState.get());
         }
         return false;
     }
