@@ -168,7 +168,7 @@ public class CmwLightProtocol {
         return parseMsg(ZMsg.recvMsg(socket, tout));
     }
 
-    public static CmwLightMessage parseMsg(final ZMsg data) throws RdaLightException {
+    public static CmwLightMessage parseMsg(final ZMsg data) throws RdaLightException { // NOPMD - NPath complexity acceptable (complex protocol)
         AssertUtils.notNull("data", data);
         final ZFrame firstFrame = data.pollFirst();
         if (firstFrame != null && Arrays.equals(firstFrame.getData(), new byte[] { MessageType.SERVER_CONNECT_ACK.value() })) {
@@ -299,9 +299,12 @@ public class CmwLightProtocol {
                 result.add(serialiseExceptionMessage(msg.exceptionMessage));
                 addDescriptor(result, FrameType.HEADER, FrameType.BODY_EXCEPTION);
                 break;
+            default:
             }
             return result;
+        default:
         }
+
         throw new RdaLightException("Invalid cmwMessage: " + msg);
     }
 
@@ -428,11 +431,12 @@ public class CmwLightProtocol {
             if (result == null) {
                 result = new HashMap<>();
             }
-            if (false) { // find out how to see if the field is itself a map
-                result.put(dataField.getFieldName(), readMap(dataField));
-            } else {
-                result.put(dataField.getFieldName(), ((WireDataFieldDescription) dataField).data());
-            }
+            //if ( 'condition' ) {
+            // find out how to see if the field is itself a map
+            // result.put(dataField.getFieldName(), readMap(dataField))
+            // } else {
+            result.put(dataField.getFieldName(), ((WireDataFieldDescription) dataField).data());
+            //}
         }
         return result;
     }
