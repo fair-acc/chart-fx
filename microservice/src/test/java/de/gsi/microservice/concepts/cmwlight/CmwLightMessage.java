@@ -283,7 +283,11 @@ public class CmwLightMessage {
             case SESSION_CONFIRM:
                 sb.append(", sessionBody='").append(sessionBody).append('\'');
                 break;
+            default:
+                throw new IllegalStateException("unknown client request message type: " + messageType);
             }
+        default:
+            throw new IllegalStateException("unknown message type: " + messageType);
         }
         return sb.toString();
     }
