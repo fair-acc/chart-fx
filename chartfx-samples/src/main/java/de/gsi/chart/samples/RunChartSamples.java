@@ -3,6 +3,10 @@ package de.gsi.chart.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import de.gsi.chart.samples.financial.AdvancedCandlestickSample;
+import de.gsi.chart.samples.financial.CandlestickSample;
+import de.gsi.chart.samples.financial.ColorChooserSample;
+import de.gsi.chart.samples.financial.HiLowSample;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -80,6 +84,9 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("WaterfallPerformanceSample", new WaterfallPerformanceSample()));
         buttons.getChildren().add(new MyButton("WriteDataSetToFileSample", new WriteDataSetToFileSample()));
         buttons.getChildren().add(new MyButton("ZoomerSample", new ZoomerSample()));
+        buttons.getChildren().add(new MyButton("CandlestickSample", new CandlestickSample()));
+        buttons.getChildren().add(new MyButton("HiLowSample", new HiLowSample()));
+        buttons.getChildren().add(new MyButton("AdvancedCandlestickSample", new AdvancedCandlestickSample()));
 
         final Scene scene = new Scene(root);
 

@@ -27,6 +27,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Paint;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
@@ -841,6 +842,10 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     public final void setTitleSide(final Side value) {
         titleSide.set(value);
+    }
+
+    public final void setTitlePaint(final Paint paint) {
+        titleLabel.setTextFill(paint);
     }
 
     public Chart setToolBarPinned(boolean value) {

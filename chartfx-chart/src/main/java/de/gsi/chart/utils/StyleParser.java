@@ -73,6 +73,14 @@ public final class StyleParser { // NOPMD
         }
     }
 
+    public static Color getColorPropertyValue(final String style, final String key, final Color defaultColor) {
+        Color color = getColorPropertyValue(style, key);
+        if (color == null) {
+            color = defaultColor;
+        }
+        return color;
+    }
+
     public static double[] getFloatingDecimalArrayPropertyValue(final String style, final String key) {
         if (style == null || key == null) {
             return null;
@@ -124,6 +132,14 @@ public final class StyleParser { // NOPMD
             }
             return null;
         }
+    }
+
+    public static double getFloatingDecimalPropertyValue(String style, String key, double defaultValue) {
+        Double value = getFloatingDecimalPropertyValue(style, key);
+        if (value == null) {
+            value = defaultValue;
+        }
+        return value;
     }
 
     public static Font getFontPropertyValue(final String style) {
