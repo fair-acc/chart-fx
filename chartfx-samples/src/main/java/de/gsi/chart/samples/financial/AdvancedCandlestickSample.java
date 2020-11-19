@@ -73,14 +73,14 @@ public class AdvancedCandlestickSample extends AbstractBasicFinancialApplication
                 if (ohlcvItem.getAddon().getAttribute(MARK_BAR, false)) {
                     double yy;
                     if (ohlcvItem.getClose() > ohlcvItem.getOpen()) {
-                        yy = yClose-(yClose-yOpen)/2;
+                        yy = yClose - (yClose - yOpen) / 2;
                         gc.setFill(Color.CRIMSON);
                     } else {
-                        yy = yOpen-(yOpen-yClose)/2;
+                        yy = yOpen - (yOpen - yClose) / 2;
                         gc.setFill(Color.YELLOW);
                     }
-                    double rectCorr = barWidthHalf/2.0;
-                    gc.fillRect(x0-rectCorr, yy-rectCorr, rectCorr*2.0, rectCorr*2.0);
+                    double rectCorr = barWidthHalf / 2.0;
+                    gc.fillRect(x0 - rectCorr, yy - rectCorr, rectCorr * 2.0, rectCorr * 2.0);
                 }
             }
         });

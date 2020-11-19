@@ -13,9 +13,9 @@ public class AttributeKeyTest {
             AttributeKey.create(String.class, "TEST_ATTR");
 
     // attribute with generics
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static final AttributeKey<Set<String>> TEST_COUNTER_LISTENERS =
-            AttributeKey.create((Class<Set<String>>)(Class) Set.class, "TEST_COUNTER_LISTENERS");
+            AttributeKey.create((Class<Set<String>>) (Class) Set.class, "TEST_COUNTER_LISTENERS");
 
     @Test
     public void create() {

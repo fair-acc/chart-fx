@@ -25,9 +25,11 @@ import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
 
 /**
  * Candlestick renderer
+ *
  * @see <a href="https://www.investopedia.com/terms/c/candlestick.asp">Candlestick Investopedia</a>
  */
-@SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.TooManyFields" }) // designated purpose of this class
+@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.ExcessiveParameterList"})
+// designated purpose of this class
 public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRenderer> implements Renderer {
 
     private static final double SHADOW_LINE_WIDTH = 2.5;
@@ -84,7 +86,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
 
     @Override
     public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+                                final ObservableList<DataSet> datasets) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
@@ -214,17 +216,17 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
     /**
      * Handle extension point PaintAfter
      *
-     * @param gc GraphicsContext
-     * @param ohlcvItem active domain object of ohlcv item
+     * @param gc            GraphicsContext
+     * @param ohlcvItem     active domain object of ohlcv item
      * @param localBarWidth width of bar
-     * @param barWidthHalf half width of bar
-     * @param x0 the center of the bar for X coordination
-     * @param yOpen coordination of Open price
-     * @param yClose coordination of Close price
-     * @param yLow coordination of Low price
-     * @param yHigh coordination of High price
-     * @param yDiff Difference of candle for painting candle body
-     * @param yMin minimal coordination for painting of candle body
+     * @param barWidthHalf  half width of bar
+     * @param x0            the center of the bar for X coordination
+     * @param yOpen         coordination of Open price
+     * @param yClose        coordination of Close price
+     * @param yLow          coordination of Low price
+     * @param yHigh         coordination of High price
+     * @param yDiff         Difference of candle for painting candle body
+     * @param yMin          minimal coordination for painting of candle body
      */
     protected void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double localBarWidth, double barWidthHalf,
                               double x0, double yOpen, double yClose, double yLow,
@@ -239,17 +241,17 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
      * Simple support for candle shadows painting. Without effects - performance problems.
      * The shadow has to be activated by parameter configuration candleShadowColor in css.
      *
-     * @param gc GraphicsContext
-     * @param shadowColor color for shadow
+     * @param gc            GraphicsContext
+     * @param shadowColor   color for shadow
      * @param localBarWidth width of bar
-     * @param barWidthHalf half width of bar
-     * @param x0 the center of the bar for X coordination
-     * @param yOpen coordination of Open price
-     * @param yClose coordination of Close price
-     * @param yLow coordination of Low price
-     * @param yHigh coordination of High price
-     * @param yDiff Difference of candle for painting candle body
-     * @param yMin minimal coordination for painting of candle body
+     * @param barWidthHalf  half width of bar
+     * @param x0            the center of the bar for X coordination
+     * @param yOpen         coordination of Open price
+     * @param yClose        coordination of Close price
+     * @param yLow          coordination of Low price
+     * @param yHigh         coordination of High price
+     * @param yDiff         Difference of candle for painting candle body
+     * @param yMin          minimal coordination for painting of candle body
      */
     private void paintCandleShadow(GraphicsContext gc, Color shadowColor, double localBarWidth, double barWidthHalf,
                                    double x0, double yOpen, double yClose, double yLow,
@@ -269,6 +271,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
 
     /**
      * Inject extension point for Paint after candle.
+     *
      * @param paintAfterEP service
      */
     public void addPaintAfterEp(PaintAfterEP paintAfterEP) {

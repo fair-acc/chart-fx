@@ -8,8 +8,8 @@ import java.util.Iterator;
  * This interface allows an iterator to be repeatedly reused.
  *
  * @param <E> the type to iterate over
- * @since 3.0
  * @version $Id: ResettableIterator.java 1543263 2013-11-19 00:47:55Z ggregory $
+ * @since 3.0
  */
 public interface ResettableIterator<E> extends Iterator<E> {
 

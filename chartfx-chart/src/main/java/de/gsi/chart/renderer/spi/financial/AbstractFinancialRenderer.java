@@ -26,6 +26,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
 
     /**
      * Inject PaintBar Marker service
+     *
      * @param paintBarMarker service implementation
      */
     public void setPaintBarMarker(PaintBarMarker paintBarMarker) {
@@ -34,22 +35,24 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
 
     /**
      * Simple algorithmic solution to calculate required chart area distances.
+     *
      * @param findAreaDistances service for calculation of find chart area distances.
-     * @param dataset for processing
-     * @param xAxis X-Axis DO
-     * @param yAxis Y-Axis DO
-     * @param xmin minimal value of X
-     * @param xmax maximal value of X
+     * @param dataset           for processing
+     * @param xAxis             X-Axis DO
+     * @param yAxis             Y-Axis DO
+     * @param xmin              minimal value of X
+     * @param xmax              maximal value of X
      * @return the calculated distances
      */
     protected double[] findAreaDistances(FindAreaDistances findAreaDistances,
-                                       OhlcvDataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
+                                         OhlcvDataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
         return findAreaDistances.findAreaDistances(dataset, xAxis, yAxis, xmin, xmax);
     }
 
     /**
      * Specific painting/coloring of the OHLCV/Candle Bars.
      * If you need specific bar selection visualization - implement this service and write your selection.
+     *
      * @param ohlcvItem actual ohlcv item for rendering
      * @return the specific paint bar Paint
      */
@@ -62,18 +65,19 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
 
     /**
      * Possibility paint volume to financial renderers
-     * @param gc GraphicsContext
-     * @param volumeLongColor volume color for Long Uptick OHLC
+     *
+     * @param gc               GraphicsContext
+     * @param volumeLongColor  volume color for Long Uptick OHLC
      * @param volumeShortColor volume color for Short Uptick OHLC
-     * @param yAxis Y-Axis DO
-     * @param distances distances estimated from finding service
-     * @param localBarWidth width of bar
-     * @param barWidthHalf half width of bar
-     * @param ohlcvItem active domain object of ohlcv item
-     * @param x0 the center of the bar for X coordination
+     * @param yAxis            Y-Axis DO
+     * @param distances        distances estimated from finding service
+     * @param localBarWidth    width of bar
+     * @param barWidthHalf     half width of bar
+     * @param ohlcvItem        active domain object of ohlcv item
+     * @param x0               the center of the bar for X coordination
      */
     protected void paintVolume(GraphicsContext gc, Color volumeLongColor, Color volumeShortColor, Axis yAxis, double[] distances, double localBarWidth,
-                             double barWidthHalf, IOhlcvItem ohlcvItem, double x0) {
+                               double barWidthHalf, IOhlcvItem ohlcvItem, double x0) {
         double volume = ohlcvItem.getVolume();
         double maxVolume = distances[1];
         double volumeHeight = (volume / maxVolume) * 0.3;
@@ -82,7 +86,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
         double zzVolume = volumeHeight * (max - min);
 
         gc.setFill(ohlcvItem.getOpen() < ohlcvItem.getClose() ? volumeLongColor : volumeShortColor);
-        gc.fillRect(x0 - barWidthHalf, min+zzVolume, localBarWidth, -zzVolume);
+        gc.fillRect(x0 - barWidthHalf, min + zzVolume, localBarWidth, -zzVolume);
     }
 
     // services --------------------------------------------------------
@@ -104,7 +108,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
                     minDistance = Math.min(minDistance, Math.abs(param1 - param0));
                 }
             }
-            return new double[] { minDistance };
+            return new double[]{minDistance};
         }
     }
 
@@ -124,7 +128,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
                     minDistance = Math.min(minDistance, Math.abs(param1 - param0));
                 }
             }
-            return new double[] { minDistance, maxVolume };
+            return new double[]{minDistance, maxVolume};
         }
     }
 

@@ -46,16 +46,16 @@ public class OhlcvDataSetTest {
     public void get() {
         IOhlcvItem ohlcvItem = datasetTested.get(0);
         assertEquals(ohlcv.getOhlcvItem(0), ohlcvItem);
-        ohlcvItem = datasetTested.get(datasetTested.getDataCount()-1);
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size()-1), ohlcvItem);
+        ohlcvItem = datasetTested.get(datasetTested.getDataCount() - 1);
+        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), ohlcvItem);
     }
 
     @Test
     public void testGetDimIndex() {
         assertEquals(ohlcv.getOhlcvItem(0).getTimeStamp().getTime() / 1000.0,
                 datasetTested.get(DataSet.DIM_X, 0), 1e-5);
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size()-1).getTimeStamp().getTime() / 1000.0,
-                datasetTested.get(DataSet.DIM_X, datasetTested.getDataCount()-1), 1e-5);
+        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1).getTimeStamp().getTime() / 1000.0,
+                datasetTested.get(DataSet.DIM_X, datasetTested.getDataCount() - 1), 1e-5);
         assertEquals(ohlcv.getOhlcvItem(0).getTimeStamp().getTime() / 1000.0,
                 datasetTested.get(OhlcvDataSet.DIM_X, 0), 1e-5);
         assertEquals(ohlcv.getOhlcvItem(0).getOpen(), datasetTested.get(OhlcvDataSet.DIM_Y_OPEN, 0), 1e-5);
@@ -76,8 +76,8 @@ public class OhlcvDataSetTest {
 
     @Test
     public void getLast() {
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size()-1), datasetTested.getLast());
-        ((Ohlcv)ohlcv).clear();
+        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.getLast());
+        ((Ohlcv) ohlcv).clear();
         assertNull(datasetTested.getLast());
     }
 
@@ -87,7 +87,7 @@ public class OhlcvDataSetTest {
         for (IOhlcvItem ohlcvItem : datasetTested) {
             items.add(ohlcvItem);
         }
-        assertEquals(((Ohlcv)ohlcv).getItems(), items);
+        assertEquals(((Ohlcv) ohlcv).getItems(), items);
     }
 
     @Test
@@ -113,8 +113,8 @@ public class OhlcvDataSetTest {
         LocalDate beforeDateLast = LocalDate.parse(dateString).minusDays(1);
 
         assertEquals(ohlcv.getOhlcvItem(0), datasetTested.get(datasetTested.getXIndex(toDate(date).getTime() / 1000.0)));
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size()-1), datasetTested.get(datasetTested.getXIndex(toDate(dateLast).getTime() / 1000.0)));
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size()-1), datasetTested.get(datasetTested.getXIndex(toDate(afterDateLast).getTime() / 1000.0)));
+        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.get(datasetTested.getXIndex(toDate(dateLast).getTime() / 1000.0)));
+        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.get(datasetTested.getXIndex(toDate(afterDateLast).getTime() / 1000.0)));
         assertEquals(ohlcv.getOhlcvItem(0), datasetTested.get(datasetTested.getXIndex(toDate(beforeDateLast).getTime() / 1000.0)));
     }
 

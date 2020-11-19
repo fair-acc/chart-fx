@@ -157,7 +157,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
             int toIdx = ohlcvDataSet.getXIndex(toTime);
             double min = Double.MAX_VALUE;
             double max = Double.MIN_VALUE;
-            for (int i = fromIdx; i <= toIdx ; i++) {
+            for (int i = fromIdx; i <= toIdx; i++) {
                 IOhlcvItem ohlcvItem = ohlcvDataSet.get(i);
                 if (max < ohlcvItem.getHigh()) {
                     max = ohlcvItem.getHigh();
@@ -181,6 +181,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
 
     /**
      * Load OHLC structures and indi calc
+     *
      * @throws IOException if loading fails
      */
     protected void loadTestData(String data, final OhlcvDataSet dataSet, DefaultDataSet indiSet) throws IOException {
@@ -205,6 +206,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
 
     /**
      * Create and apply renderers
+     *
      * @param chart for applying renderers
      */
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {

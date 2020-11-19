@@ -41,5 +41,6 @@ public class FinancialColorSchemeConstants {
         return staticFields.toArray(new String[0]);
     }
 
-    private FinancialColorSchemeConstants() {}
+    private FinancialColorSchemeConstants() {
+    }
 }

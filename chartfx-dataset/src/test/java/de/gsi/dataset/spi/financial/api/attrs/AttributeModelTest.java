@@ -23,9 +23,9 @@ public class AttributeModelTest {
             AttributeKey.create(AttributeModel.class, "TEST_SUB_MODEL");
 
     // attribute with generics
-    @SuppressWarnings({ "unchecked", "rawtypes" })
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static final AttributeKey<Set<String>> TEST_GENERIC_SET =
-            AttributeKey.create((Class<Set<String>>)(Class) Set.class, "TEST_GENERIC_SET");
+            AttributeKey.create((Class<Set<String>>) (Class) Set.class, "TEST_GENERIC_SET");
 
     private AttributeModel attrsTested;
 
@@ -205,8 +205,10 @@ public class AttributeModelTest {
 
     //--------------- helpers ----------------
 
-    private class Animal {}
+    private class Animal {
+    }
 
-    private class Cat extends Animal {}
+    private class Cat extends Animal {
+    }
 
 }

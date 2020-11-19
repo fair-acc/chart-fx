@@ -25,9 +25,11 @@ import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
 
 /**
  * High-Low renderer (OHLC-V/OI Chart)
+ *
  * @see <a href="https://www.investopedia.com/terms/o/ohlcchart.asp">OHLC Chart Ivestopedia</a>
  */
-@SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.TooManyFields" }) // designated purpose of this class
+@SuppressWarnings({"PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.ExcessiveParameterList"})
+// designated purpose of this class
 public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> implements Renderer {
 
     private static final double SHADOW_LINE_WIDTH = 2.5;
@@ -84,7 +86,7 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
 
     @Override
     public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+                                final ObservableList<DataSet> datasets) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
@@ -205,14 +207,14 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
     /**
      * Handle extension point PaintAfter
      *
-     * @param gc GraphicsContext
-     * @param ohlcvItem active domain object of ohlcv item
+     * @param gc           GraphicsContext
+     * @param ohlcvItem    active domain object of ohlcv item
      * @param barWidthHalf half width of bar
-     * @param x0 the center of the bar for X coordination
-     * @param yOpen coordination of Open price
-     * @param yClose coordination of Close price
-     * @param yLow coordination of Low price
-     * @param yHigh coordination of High price
+     * @param x0           the center of the bar for X coordination
+     * @param yOpen        coordination of Open price
+     * @param yClose       coordination of Close price
+     * @param yLow         coordination of Low price
+     * @param yHigh        coordination of High price
      */
     protected void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double barWidthHalf,
                               double x0, double yOpen, double yClose, double yLow,
@@ -226,30 +228,31 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
      * Simple support for HiLow OHLC shadows painting. Without effects - performance problems.
      * The shadow has to be activated by parameter configuration hiLowShadowColor in css.
      *
-     * @param gc GraphicsContext
-     * @param shadowColor color for shadow
+     * @param gc           GraphicsContext
+     * @param shadowColor  color for shadow
      * @param barWidthHalf half width of bar
-     * @param x0 the center of the bar for X coordination
-     * @param yOpen coordination of Open price
-     * @param yClose coordination of Close price
-     * @param yLow coordination of Low price
-     * @param yHigh coordination of High price
+     * @param x0           the center of the bar for X coordination
+     * @param yOpen        coordination of Open price
+     * @param yClose       coordination of Close price
+     * @param yLow         coordination of Low price
+     * @param yHigh        coordination of High price
      */
     protected void paintHiLowShadow(GraphicsContext gc, Color shadowColor, double barWidthHalf,
-                                  double x0, double yOpen, double yClose, double yLow,
-                                  double yHigh) {
+                                    double x0, double yOpen, double yClose, double yLow,
+                                    double yHigh) {
         double trans = SHADOW_TRANS_PERCENT * barWidthHalf;
         gc.setLineWidth(SHADOW_LINE_WIDTH);
         gc.setStroke(shadowColor);
-        gc.strokeLine(x0+trans, yLow+trans, x0+trans, yHigh+trans);
-        gc.strokeLine(x0-barWidthHalf+trans, yOpen+trans, x0+trans, yOpen+trans);
-        gc.strokeLine(x0+trans, yClose+trans, x0+barWidthHalf+trans, yClose+trans);
+        gc.strokeLine(x0 + trans, yLow + trans, x0 + trans, yHigh + trans);
+        gc.strokeLine(x0 - barWidthHalf + trans, yOpen + trans, x0 + trans, yOpen + trans);
+        gc.strokeLine(x0 + trans, yClose + trans, x0 + barWidthHalf + trans, yClose + trans);
     }
 
     // injections --------------------------------------------
 
     /**
      * Inject extension point for Paint after bar.
+     *
      * @param paintAfterEP service
      */
     public void addPaintAfterEp(PaintAfterEP paintAfterEP) {
@@ -263,8 +266,8 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
     @FunctionalInterface
     public interface PaintAfterEP {
         void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double barWidthHalf,
-                                  double x0, double yOpen, double yClose, double yLow,
-                                  double yHigh);
+                        double x0, double yOpen, double yClose, double yLow,
+                        double yHigh);
     }
 
 }

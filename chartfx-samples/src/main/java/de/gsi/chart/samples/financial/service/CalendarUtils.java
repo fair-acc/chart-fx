@@ -14,6 +14,7 @@ public class CalendarUtils {
      * Create the calendar interval instance by date interval pattern:
      * yyyy/MM/dd-yyyy/MM/dd
      * for example: 2017/12/01-2017/12/22
+     *
      * @param dateIntervalPattern String
      * @return calendar interval instance
      * @throws ParseException parsing fails
@@ -31,6 +32,6 @@ public class CalendarUtils {
             calendarList.add(DateUtils.truncate(cal, Calendar.DATE));
         }
 
-        return new Calendar[] { calendarList.get(0), calendarList.get(1) };
+        return new Calendar[]{calendarList.get(0), calendarList.get(1)};
     }
 }

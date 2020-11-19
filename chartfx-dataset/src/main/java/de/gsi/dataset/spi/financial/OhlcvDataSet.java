@@ -32,6 +32,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
 
     /**
      * Set the domain object with OHLCV data.
+     *
      * @param ohlcv connection with OHLCV data from financial framework.
      */
     public void setData(IOhlcv ohlcv) {
@@ -54,6 +55,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
 
     /**
      * Change category or time based axis handling.
+     *
      * @param categoryBased if true; category based indexes are used. Default false.
      */
     public void setCategoryBased(boolean categoryBased) {
@@ -92,7 +94,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
         if (size == 0) {
             return null;
         }
-        return ohlcv.getOhlcvItem(size-1);
+        return ohlcv.getOhlcvItem(size - 1);
     }
 
     @Override
@@ -107,7 +109,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
 
     @Override
     public DataSet set(DataSet other, boolean copy) {
-        this.ohlcv = ((OhlcvDataSet)other).ohlcv;
+        this.ohlcv = ((OhlcvDataSet) other).ohlcv;
         return this;
     }
 

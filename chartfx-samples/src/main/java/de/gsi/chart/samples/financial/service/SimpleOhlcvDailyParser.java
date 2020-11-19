@@ -37,8 +37,8 @@ public class SimpleOhlcvDailyParser {
      * Correct parse of each line has to be used and inserted to this method.
      */
     private static IOhlcv convertTsRowStream(String title,
-                                                  Stream<String> rowStream,
-                                                  TradeStationRowParser parser) throws NumberFormatException {
+                                             Stream<String> rowStream,
+                                             TradeStationRowParser parser) throws NumberFormatException {
         var ref = new TSConvertSettings(true, true);
         String symbol = new File(title).getName().replaceFirst("[.][^.]+$", "");
         Calendar cal = Calendar.getInstance();
