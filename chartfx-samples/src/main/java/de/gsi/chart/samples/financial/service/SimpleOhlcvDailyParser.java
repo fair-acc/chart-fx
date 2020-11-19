@@ -27,8 +27,8 @@ public class SimpleOhlcvDailyParser {
         String resource = String.format(CHART_SAMPLE_PATH, future);
 
         try (InputStreamReader is = new InputStreamReader(StreamUtils.getInputStream(resource));
-             Stream<String> lines = new BufferedReader(is).lines()) {
-            return convertTsRowStream(future, lines, new DailyOhlcvItemRowParser());
+             BufferedReader br = new BufferedReader(is)) {
+            return convertTsRowStream(future, br.lines(), new DailyOhlcvItemRowParser());
         }
     }
 

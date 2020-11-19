@@ -31,7 +31,7 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Calendar;
 
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorScheme.getDefaultColorSchemes;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
 
 public abstract class AbstractBasicFinancialApplication extends Application {
 

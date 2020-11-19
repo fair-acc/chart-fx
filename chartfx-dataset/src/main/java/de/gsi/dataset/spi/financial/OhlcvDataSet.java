@@ -78,8 +78,9 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
                 return ohlcvItem.getVolume();
             case DIM_Y_OI:
                 return ohlcvItem.getOpenInterest();
+            default:
+                throw new IllegalArgumentException("Dimension not allowed! dimIndex=" + dimIndex);
         }
-        throw new IllegalArgumentException("Dimension not allowed! dimIndex=" + dimIndex);
     }
 
     public IOhlcvItem get(int index) {

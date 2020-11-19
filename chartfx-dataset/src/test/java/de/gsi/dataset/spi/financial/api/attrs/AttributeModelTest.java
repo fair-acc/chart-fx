@@ -3,9 +3,7 @@ package de.gsi.dataset.spi.financial.api.attrs;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -21,6 +19,9 @@ public class AttributeModelTest {
     public static final AttributeKey<Animal> TEST_ATTR_ANIMAL =
             AttributeKey.create(Animal.class, "TEST_ATTR_ANIMAL");
 
+    public static final AttributeKey<AttributeModel> TEST_SUB_MODEL =
+            AttributeKey.create(AttributeModel.class, "TEST_SUB_MODEL");
+
     // attribute with generics
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public static final AttributeKey<Set<String>> TEST_GENERIC_SET =
@@ -33,6 +34,14 @@ public class AttributeModelTest {
         attrsTested = AttributeModel.configure()
                 .setAttribute(TEST_ATTR, "TEST")
                 .setAttribute(TEST_GENERIC_SET, new HashSet<>());
+    }
+
+    @Test
+    public void testSecondConstructor() {
+        Map<AttributeKey<?>, Object> map = new HashMap<>();
+        map.put(TEST_ATTR, "TEST3");
+        AttributeModel attrsTested3 = new AttributeModel(map);
+        assertEquals(1, attrsTested3.getAttributes().size());
     }
 
     @Test
@@ -80,6 +89,7 @@ public class AttributeModelTest {
         assertNull(attrsTested.getAttribute(TEST_ATTR2));
         assertEquals(0.2d, attrsTested.getAttributeAndSet(TEST_ATTR2, 0.2d), 1e-5d);
         assertEquals(0.2d, attrsTested.getAttribute(TEST_ATTR2), 1e-5d);
+        assertEquals(0.2d, attrsTested.getAttributeAndSet(TEST_ATTR2, 0.3d), 1e-5d);
     }
 
     @Test
@@ -96,15 +106,23 @@ public class AttributeModelTest {
         Cat cat2 = attrsTested.getAttribute(TEST_ATTR_ANIMAL, Cat.class, cat1);
         assertEquals(cat1, cat2);
         assertNull(attrsTested.getAttribute(TEST_ATTR_ANIMAL));
+        Cat cat3 = new Cat();
+        attrsTested.setAttribute(TEST_ATTR_ANIMAL, cat1);
+        cat2 = attrsTested.getAttribute(TEST_ATTR_ANIMAL, Cat.class, cat3);
+        assertEquals(cat1, cat2);
     }
 
     @Test
     public void setAttribute() {
+        assertThrows(IllegalArgumentException.class, () -> attrsTested.setAttribute(null, ""));
         assertEquals(2, attrsTested.getAttributes().size());
         assertNull(attrsTested.getAttribute(TEST_ATTR_ANIMAL));
         attrsTested.setAttribute(TEST_ATTR_ANIMAL, new Cat());
         assertNotNull(attrsTested.getAttribute(TEST_ATTR_ANIMAL));
         assertEquals(3, attrsTested.getAttributes().size());
+        // remove key from the model
+        attrsTested.setAttribute(TEST_ATTR_ANIMAL, null);
+        assertNull(attrsTested.getAttribute(TEST_ATTR_ANIMAL));
     }
 
     @Test
@@ -135,21 +153,54 @@ public class AttributeModelTest {
     }
 
     @Test
+    public void mergeSubModel() {
+        // submodel testing
+        Cat cat1 = new Cat();
+        AttributeModel attrsTested2 = AttributeModel.configure()
+                .setAttribute(TEST_ATTR_ANIMAL, cat1)
+                .setAttribute(TEST_ATTR, "TEST2")
+                .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
+
+        AttributeModel submodel = new AttributeModel();
+        submodel.setAttribute(TEST_ATTR, "TEST_SUB1");
+        attrsTested2.setAttribute(TEST_SUB_MODEL, submodel);
+
+        attrsTested.merge(attrsTested2);
+        assertEquals(4, attrsTested.getAttributes().size());
+        assertEquals(cat1, attrsTested.getAttribute(TEST_ATTR_ANIMAL));
+        assertEquals(new HashSet<>(Arrays.asList(TEST_ATTR, TEST_GENERIC_SET, TEST_ATTR_ANIMAL, TEST_SUB_MODEL)), attrsTested.getAttributes());
+        assertEquals("TEST2", attrsTested.getAttribute(TEST_ATTR));
+        assertEquals(new HashSet<>(Arrays.asList("E1", "E2")), attrsTested.getAttribute(TEST_GENERIC_SET));
+        assertEquals(submodel.getAttribute(TEST_ATTR), attrsTested.getAttribute(TEST_SUB_MODEL).getAttribute(TEST_ATTR));
+    }
+
+    @Test
     public void deepCopyAttributes() {
         Cat cat1 = new Cat();
         AttributeModel attrsTested2 = AttributeModel.configure()
                 .setAttribute(TEST_ATTR_ANIMAL, cat1)
                 .setAttribute(TEST_ATTR, "TEST2")
                 .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
+
+        AttributeModel submodel = new AttributeModel();
+        submodel.setAttribute(TEST_ATTR, "TEST_SUB1");
+        attrsTested2.setAttribute(TEST_SUB_MODEL, submodel);
+
         attrsTested = attrsTested2.deepCopyAttributes();
-        assertEquals(3, attrsTested.getAttributes().size());
+        assertEquals(4, attrsTested.getAttributes().size());
         assertEquals(cat1, attrsTested.getAttribute(TEST_ATTR_ANIMAL));
-        assertEquals(new HashSet<>(Arrays.asList(TEST_ATTR, TEST_GENERIC_SET, TEST_ATTR_ANIMAL)), attrsTested.getAttributes());
+        assertEquals(new HashSet<>(Arrays.asList(TEST_ATTR, TEST_GENERIC_SET, TEST_ATTR_ANIMAL, TEST_SUB_MODEL)), attrsTested.getAttributes());
         assertEquals("TEST2", attrsTested.getAttribute(TEST_ATTR));
         assertEquals(new HashSet<>(Arrays.asList("E1", "E2")), attrsTested.getAttribute(TEST_GENERIC_SET));
+        assertEquals(submodel.getAttribute(TEST_ATTR), attrsTested.getAttribute(TEST_SUB_MODEL).getAttribute(TEST_ATTR));
 
         // attribute models are not compared by content! Just by instance!
         assertNotEquals(attrsTested2, attrsTested);
+    }
+
+    @Test
+    public void testToString() {
+        assertNotNull(attrsTested.toString());
     }
 
     //--------------- helpers ----------------

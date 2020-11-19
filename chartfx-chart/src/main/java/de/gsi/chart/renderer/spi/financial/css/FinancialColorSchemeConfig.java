@@ -12,7 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorScheme.*;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.*;
 import static de.gsi.dataset.utils.StreamUtils.CLASSPATH_PREFIX;
 
 public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {

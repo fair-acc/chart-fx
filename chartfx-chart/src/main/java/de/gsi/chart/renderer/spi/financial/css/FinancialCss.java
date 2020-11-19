@@ -95,4 +95,6 @@ public class FinancialCss { // NOPMD decide not to rename it for the time being
      * HiLow (OHLC) relative width against actual scaled view. Defined in percentage range: {@literal <}0.0, 1.0{@literal >}
      */
     public static final String DATASET_HILOW_BAR_WIDTH_PERCENTAGE = "hiLowBarWidthPercent";
+
+    private FinancialCss() {}
 }

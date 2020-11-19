@@ -4,7 +4,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
-import de.gsi.chart.renderer.spi.financial.css.FinancialColorScheme;
+import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
@@ -28,7 +28,7 @@ public class AdvancedCandlestickSample extends AbstractBasicFinancialApplication
         timeRange = "2020/06/24-2020/11/12";
 
         final BorderPane root = new BorderPane();
-        root.setCenter(getDefaultFinancialTestChart(FinancialColorScheme.SAND));
+        root.setCenter(getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND));
 
         return root;
     }

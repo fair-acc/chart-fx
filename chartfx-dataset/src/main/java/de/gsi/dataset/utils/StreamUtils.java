@@ -35,9 +35,8 @@ public class StreamUtils {
                 resourceInZip = resourceInZip.substring(1);
             }
             resource = resource.substring(0, zipSuffixIdx);
-            try {
+            try (ZipFile zipFile = new ZipFile(resource)) {
                 // do not close zip, it is closed by input stream!
-                ZipFile zipFile = new ZipFile(resource);
                 is = zipFile.getInputStream(zipFile.getEntry(resourceInZip));
             } catch (IOException e) {
                 throw new FileNotFoundException(

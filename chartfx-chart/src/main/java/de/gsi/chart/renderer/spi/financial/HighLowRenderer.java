@@ -44,6 +44,10 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
         this(false);
     }
 
+    public boolean isPaintVolume() {
+        return paintVolume;
+    }
+
     @Override
     public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
         final Canvas canvas = new Canvas(width, height);
@@ -108,11 +112,9 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
 
             dataset.lock().readLockGuardOptimistic(() -> {
                 // update categories in case of category axes for the first (index == '0') indexed data set
-                if (lindex == 0) {
-                    if (xyChart.getXAxis() instanceof CategoryAxis) {
-                        final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
-                        axis.updateCategories(dataset);
-                    }
+                if (lindex == 0 && xyChart.getXAxis() instanceof CategoryAxis) {
+                    final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
+                    axis.updateCategories(dataset);
                 }
 
                 gc.save();

@@ -1,19 +1,15 @@
 package de.gsi.chart.utils;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.Map;
-
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test StyleParser
@@ -73,6 +69,7 @@ class StyleParserTest {
         assertEquals(Color.web("red"), StyleParser.getColorPropertyValue(testStyle, "color2"));
         assertEquals(Color.web("red"), StyleParser.getColorPropertyValue("color=red", "color"));
         assertEquals(Color.web("black"), StyleParser.getColorPropertyValue("color=black", "borderColor", Color.web("black")));
+        assertEquals(Color.web("black"), StyleParser.getColorPropertyValue("color=black", "color", Color.web("white")));
         assertEquals(null, StyleParser.getColorPropertyValue("color=red", "color2"));
         assertEquals(null, StyleParser.getColorPropertyValue("color=reddish", "color"));
         assertEquals(null, StyleParser.getColorPropertyValue(testStyle, null));
@@ -86,6 +83,7 @@ class StyleParserTest {
         assertEquals(0.1, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float1"), 1e-5);
         assertEquals(null, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float2"));
         assertEquals(11.0, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float2", 11.0), 1e-5);
+        assertEquals(0.1, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float1", 11.0), 1e-5);
 
         assertEquals(true, StyleParser.getBooleanPropertyValue(testStyle, "bool1"));
         assertEquals(null, StyleParser.getBooleanPropertyValue(testStyle, null));

@@ -13,7 +13,7 @@ import java.util.List;
  * @see FinancialColorSchemeAware whole extension if your injected configuration service.
  * @see FinancialColorSchemeConfig possibility to inherit your configuration extension.
  */
-public class FinancialColorScheme {
+public class FinancialColorSchemeConstants {
 
     public static final String OLDSCHOOL = "OLDSCHOOL";
 
@@ -31,7 +31,7 @@ public class FinancialColorScheme {
      * @return default color schemes information
      */
     public static String[] getDefaultColorSchemes() {
-        Field[] declaredFields = FinancialColorScheme.class.getDeclaredFields();
+        Field[] declaredFields = FinancialColorSchemeConstants.class.getDeclaredFields();
         List<String> staticFields = new ArrayList<>();
         for (Field field : declaredFields) {
             if (java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
@@ -41,5 +41,5 @@ public class FinancialColorScheme {
         return staticFields.toArray(new String[0]);
     }
 
-    private FinancialColorScheme() {}
+    private FinancialColorSchemeConstants() {}
 }
