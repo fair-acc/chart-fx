@@ -9,7 +9,6 @@ import java.util.Date;
  * @see SimpleDateFormat is not thread safe. For parallel processing of data streams is necessary to use threadlocal processing.
  */
 public class ConcurrentDateFormatAccess {
-
     private final String simpleDateFormatString;
 
     public ConcurrentDateFormatAccess(String dateFormatMask) {
@@ -21,7 +20,6 @@ public class ConcurrentDateFormatAccess {
     }
 
     private final ThreadLocal<DateFormat> df = new ThreadLocal<>() {
-
         @Override
         public DateFormat get() {
             return super.get();

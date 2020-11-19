@@ -1,11 +1,11 @@
 package de.gsi.dataset.spi.financial;
 
+import java.util.Iterator;
+
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-
-import java.util.Iterator;
 
 /**
  * Dataset Domain Object for encapsulation of IOhlcv API structure.
@@ -14,7 +14,6 @@ import java.util.Iterator;
  * @see IOhlcvItem API provides OHLCV item domain object access.
  */
 public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Iterable<IOhlcvItem> {
-
     public static final int DIM_Y_OPEN = 1;
     public static final int DIM_Y_HIGH = 2;
     public static final int DIM_Y_LOW = 3;
@@ -64,22 +63,22 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
     public double get(int dimIndex, int index) {
         IOhlcvItem ohlcvItem = ohlcv.getOhlcvItem(index);
         switch (dimIndex) {
-            case DIM_X:
-                return isCategoryBased ? index : ohlcvItem.getTimeStamp().getTime() / 1000.0;
-            case DIM_Y_OPEN:
-                return ohlcvItem.getOpen();
-            case DIM_Y_HIGH:
-                return ohlcvItem.getHigh();
-            case DIM_Y_LOW:
-                return ohlcvItem.getLow();
-            case DIM_Y_CLOSE:
-                return ohlcvItem.getClose();
-            case DIM_Y_VOLUME:
-                return ohlcvItem.getVolume();
-            case DIM_Y_OI:
-                return ohlcvItem.getOpenInterest();
-            default:
-                throw new IllegalArgumentException("Dimension not allowed! dimIndex=" + dimIndex);
+        case DIM_X:
+            return isCategoryBased ? index : ohlcvItem.getTimeStamp().getTime() / 1000.0;
+        case DIM_Y_OPEN:
+            return ohlcvItem.getOpen();
+        case DIM_Y_HIGH:
+            return ohlcvItem.getHigh();
+        case DIM_Y_LOW:
+            return ohlcvItem.getLow();
+        case DIM_Y_CLOSE:
+            return ohlcvItem.getClose();
+        case DIM_Y_VOLUME:
+            return ohlcvItem.getVolume();
+        case DIM_Y_OI:
+            return ohlcvItem.getOpenInterest();
+        default:
+            throw new IllegalArgumentException("Dimension not allowed! dimIndex=" + dimIndex);
         }
     }
 
@@ -92,7 +91,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
         if (size == 0) {
             return null;
         }
-        return ohlcv.getOhlcvItem(size-1);
+        return ohlcv.getOhlcvItem(size - 1);
     }
 
     @Override
@@ -107,7 +106,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
 
     @Override
     public DataSet set(DataSet other, boolean copy) {
-        this.ohlcv = ((OhlcvDataSet)other).ohlcv;
+        this.ohlcv = ((OhlcvDataSet) other).ohlcv;
         return this;
     }
 
@@ -121,5 +120,4 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
     public int getXIndex(double x) {
         return getIndex(DIM_X, x);
     }
-
 }

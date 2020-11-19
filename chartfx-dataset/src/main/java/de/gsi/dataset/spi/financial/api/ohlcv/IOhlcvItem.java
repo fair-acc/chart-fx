@@ -1,14 +1,13 @@
 package de.gsi.dataset.spi.financial.api.ohlcv;
 
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
-
 import java.util.Date;
+
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 
 /**
  * OHLCV Item data. Basic API Domain object for standard visualization processing.
  */
 public interface IOhlcvItem {
-
     /**
      * @return get timestamp of this ohlcv item
      */

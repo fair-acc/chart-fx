@@ -1,5 +1,17 @@
 package de.gsi.chart.renderer.spi.financial;
 
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
+
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -11,24 +23,12 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
 
 /**
  * Candlestick renderer
  * @see <a href="https://www.investopedia.com/terms/c/candlestick.asp">Candlestick Investopedia</a>
  */
 public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRenderer> implements Renderer {
-
     private static final double SHADOW_LINE_WIDTH = 2.5;
     private static final double SHADOW_TRANS_PERCENT = 0.5;
 
@@ -106,7 +106,8 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         int index = 0;
 
         for (final DataSet ds : localDataSetList) {
-            if (!(ds instanceof OhlcvDataSet)) continue;
+            if (!(ds instanceof OhlcvDataSet))
+                continue;
             final OhlcvDataSet dataset = (OhlcvDataSet) ds;
             final int lindex = index;
 
@@ -134,7 +135,8 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
 
                 if (dataset.getDataCount() > 0) {
                     int i = dataset.getXIndex(xmin);
-                    if (i < 0) i = 0;
+                    if (i < 0)
+                        i = 0;
 
                     double[] distances = null;
                     double minRequiredWidth = 0.0;
@@ -207,7 +209,6 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         return localDataSetList;
     }
 
-
     /**
      * Handle extension point PaintAfter
      *
@@ -224,8 +225,8 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
      * @param yMin minimal coordination for painting of candle body
      */
     protected void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double localBarWidth, double barWidthHalf,
-                              double x0, double yOpen, double yClose, double yLow,
-                              double yHigh, double yDiff, double yMin) {
+            double x0, double yOpen, double yClose, double yLow,
+            double yHigh, double yDiff, double yMin) {
         for (PaintAfterEP paintAfterEP : paintAfterEPS) {
             paintAfterEP.paintAfter(gc, ohlcvItem, localBarWidth, barWidthHalf,
                     x0, yOpen, yClose, yLow, yHigh, yDiff, yMin);
@@ -249,8 +250,8 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
      * @param yMin minimal coordination for painting of candle body
      */
     private void paintCandleShadow(GraphicsContext gc, Color shadowColor, double localBarWidth, double barWidthHalf,
-                                   double x0, double yOpen, double yClose, double yLow,
-                                   double yHigh, double yDiff, double yMin) {
+            double x0, double yOpen, double yClose, double yLow,
+            double yHigh, double yDiff, double yMin) {
         double trans = SHADOW_TRANS_PERCENT * barWidthHalf;
         gc.setLineWidth(SHADOW_LINE_WIDTH);
         gc.setFill(shadowColor);
@@ -281,8 +282,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
     @FunctionalInterface
     public interface PaintAfterEP {
         void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double localBarWidth, double barWidthHalf,
-                        double x0, double yOpen, double yClose, double yLow,
-                        double yHigh, double yDiff, double yMin);
+                double x0, double yOpen, double yClose, double yLow,
+                double yHigh, double yDiff, double yMin);
     }
-
 }

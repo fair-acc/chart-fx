@@ -1,13 +1,12 @@
 package de.gsi.chart.renderer.spi.financial.utils;
 
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
-
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
 
-public class FinancialTestUtils {
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 
+public class FinancialTestUtils {
     public static IOhlcv createTestOhlcv() {
         LocalDate date = LocalDate.parse("2020-11-19");
         return new Ohlcv()

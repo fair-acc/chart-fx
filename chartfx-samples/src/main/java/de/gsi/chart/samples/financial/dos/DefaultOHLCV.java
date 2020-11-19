@@ -1,9 +1,9 @@
 package de.gsi.chart.samples.financial.dos;
 
+import java.util.*;
+
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
-
-import java.util.*;
 
 /**
  * Basic example OHLCV domain object implementation for chart samples.
@@ -11,7 +11,6 @@ import java.util.*;
  * middle layer which implements IOhlcv API and encapsulate real OHLCV implementation of your financial framework.
  */
 public class DefaultOHLCV implements IOhlcv {
-
     private OHLCVItem[] ohlcvItems = new OHLCVItem[0];
 
     private String id;
@@ -72,7 +71,7 @@ public class DefaultOHLCV implements IOhlcv {
     public String getAssetName() {
         return assetName;
     }
-    
+
     public String getSymbol() {
         return symbol;
     }
@@ -83,7 +82,7 @@ public class DefaultOHLCV implements IOhlcv {
     }
 
     public OHLCVItem getBackOhlcvItem(int sampleId) {
-      return getOhlcvItem(size()-1-sampleId);
+        return getOhlcvItem(size() - 1 - sampleId);
     }
 
     public OHLCVItem[] getOhlcvItemsArray() {
@@ -124,7 +123,7 @@ public class DefaultOHLCV implements IOhlcv {
     }
 
     public double getBackValue(int sampleId) {
-      return getValue(size()-1-sampleId);
+        return getValue(size() - 1 - sampleId);
     }
 
     public OHLCVItem getLastValue() {
@@ -150,14 +149,14 @@ public class DefaultOHLCV implements IOhlcv {
         int i = Arrays.binarySearch(ohlcvItems, item, ohlcvTimestampComparator);
         // solve boundaries
         if (i < 0) {
-            if (Math.abs(i)-1 == ohlcvItems.length) {
-                return -1*(stateAttributes.size+1);
+            if (Math.abs(i) - 1 == ohlcvItems.length) {
+                return -1 * (stateAttributes.size + 1);
             }
-            return -(-i-stateAttributes.lowerBound);
+            return -(-i - stateAttributes.lowerBound);
         }
         i = i - stateAttributes.lowerBound;
         if (i >= stateAttributes.size) {
-            return -1*(stateAttributes.size+1);
+            return -1 * (stateAttributes.size + 1);
         }
         return i;
     }
@@ -242,13 +241,13 @@ public class DefaultOHLCV implements IOhlcv {
         ohlcvItems[index] = ohlcvItem;
         minMaxValueChanged(ohlcvItem);
     }
-    
+
     public void setMinValue(double minValue) {
-      stateAttributes.minValue = minValue;
+        stateAttributes.minValue = minValue;
     }
 
     public void setMaxValue(double maxValue) {
-      stateAttributes.maxValue = maxValue;
+        stateAttributes.maxValue = maxValue;
     }
 
     public double getMinValue() {
@@ -262,35 +261,35 @@ public class DefaultOHLCV implements IOhlcv {
     //------------------- IOhlcvRangeSupport ------------------------
 
     public static class OHLCVStateAttributes {
-      public boolean consolidated = false;
-      public int lowerBound = 0;
-      public int upperBound = -1;
-      public int userUpperBound = -1;
-      public int size;
-      public int lastValueIndex;
-      public double minValue = Double.NaN;
-      public double maxValue = Double.NaN;
-      
-      @Override
-      public String toString() {
-        return "OHLCVStateAttributes [consolidated=" + consolidated + ", lowerBound="
-            + lowerBound + ", upperBound=" + upperBound + ", userUpperBound=" + userUpperBound + ", size=" + size + ", lastValueIndex="
-            + lastValueIndex + ", minValue=" + minValue + ", maxValue=" + maxValue + "]";
-      }
+        public boolean consolidated = false;
+        public int lowerBound = 0;
+        public int upperBound = -1;
+        public int userUpperBound = -1;
+        public int size;
+        public int lastValueIndex;
+        public double minValue = Double.NaN;
+        public double maxValue = Double.NaN;
+
+        @Override
+        public String toString() {
+            return "OHLCVStateAttributes [consolidated=" + consolidated + ", lowerBound="
+                    + lowerBound + ", upperBound=" + upperBound + ", userUpperBound=" + userUpperBound + ", size=" + size + ", lastValueIndex="
+                    + lastValueIndex + ", minValue=" + minValue + ", maxValue=" + maxValue + "]";
+        }
     }
 
     public static IOhlcv createShellCopyRangedOHLCV(DefaultOHLCV rOHLCV) {
-      DefaultOHLCV rangedOHLCV = new DefaultOHLCV();
-      rangedOHLCV.setAssetName(rOHLCV.assetName);
-      rangedOHLCV.setDescription(rOHLCV.title);
-      rangedOHLCV.setId(rOHLCV.title);
-      rangedOHLCV.setName(rOHLCV.title);
-      rangedOHLCV.setSymbol(rOHLCV.symbol);
-      rangedOHLCV.setTitle(rOHLCV.title);
-      rangedOHLCV.setOhlcvItems(rOHLCV.ohlcvItems);
-      rangedOHLCV.stateAttributes = rOHLCV.stateAttributes;
+        DefaultOHLCV rangedOHLCV = new DefaultOHLCV();
+        rangedOHLCV.setAssetName(rOHLCV.assetName);
+        rangedOHLCV.setDescription(rOHLCV.title);
+        rangedOHLCV.setId(rOHLCV.title);
+        rangedOHLCV.setName(rOHLCV.title);
+        rangedOHLCV.setSymbol(rOHLCV.symbol);
+        rangedOHLCV.setTitle(rOHLCV.title);
+        rangedOHLCV.setOhlcvItems(rOHLCV.ohlcvItems);
+        rangedOHLCV.stateAttributes = rOHLCV.stateAttributes;
 
-      return rangedOHLCV;
+        return rangedOHLCV;
     }
 
     public static IOhlcv createOHLCV(
@@ -311,7 +310,6 @@ public class DefaultOHLCV implements IOhlcv {
     }
 
     public IOhlcv createRestrictedOHLCV(int[] range) {
-
         DefaultOHLCV rangedOHLCV = new DefaultOHLCV();
         rangedOHLCV.stateAttributes.lowerBound = range[0];
         rangedOHLCV.stateAttributes.upperBound = range[1];
@@ -339,7 +337,7 @@ public class DefaultOHLCV implements IOhlcv {
     }
 
     public void clearUserUpperBound() {
-      stateAttributes.userUpperBound = -1;
+        stateAttributes.userUpperBound = -1;
         datasetChanged();
     }
 
@@ -352,30 +350,29 @@ public class DefaultOHLCV implements IOhlcv {
     }
 
     public void increaseUserUpperBound(int i) {
-      stateAttributes.userUpperBound += i;
+        stateAttributes.userUpperBound += i;
         datasetChanged();
     }
 
     protected void datasetChanged() {
         if (stateAttributes.userUpperBound == -1) {
             if (stateAttributes.upperBound == -1) {
-              stateAttributes.size = ohlcvItems.length - stateAttributes.lowerBound;
+                stateAttributes.size = ohlcvItems.length - stateAttributes.lowerBound;
 
             } else {
-              stateAttributes.size = stateAttributes.upperBound + 1 - stateAttributes.lowerBound;
+                stateAttributes.size = stateAttributes.upperBound + 1 - stateAttributes.lowerBound;
             }
         } else {
-          stateAttributes.size = stateAttributes.userUpperBound + 1 - stateAttributes.lowerBound;
+            stateAttributes.size = stateAttributes.userUpperBound + 1 - stateAttributes.lowerBound;
         }
         stateAttributes.lastValueIndex = stateAttributes.size - 1 + stateAttributes.lowerBound;
     }
-    
+
     //-----------------------------------------------------------------
 
     private OhlcvTimestampComparator ohlcvTimestampComparator = null;
 
     private static class OhlcvTimestampComparator implements Comparator<OHLCVItem> {
-
         public int field;
 
         public OhlcvTimestampComparator(int field) {
@@ -429,5 +426,4 @@ public class DefaultOHLCV implements IOhlcv {
     public String toString() {
         return "OHLCV [id=" + id + ", name=" + name + ", title=" + title + ", assetName=" + assetName + ", symbol=" + symbol + "]";
     }
-
 }

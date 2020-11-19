@@ -1,5 +1,17 @@
 package de.gsi.chart.renderer.spi.financial;
 
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
+
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -11,24 +23,12 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
 
 /**
  * High-Low renderer (OHLC-V/OI Chart)
  * @see <a href="https://www.investopedia.com/terms/o/ohlcchart.asp">OHLC Chart Ivestopedia</a>
  */
 public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> implements Renderer {
-
     private static final double SHADOW_LINE_WIDTH = 2.5;
     private static final double SHADOW_TRANS_PERCENT = 0.5;
 
@@ -106,7 +106,8 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
         int index = 0;
 
         for (final DataSet ds : localDataSetList) {
-            if (!(ds instanceof OhlcvDataSet)) continue;
+            if (!(ds instanceof OhlcvDataSet))
+                continue;
             final OhlcvDataSet dataset = (OhlcvDataSet) ds;
             final int lindex = index;
 
@@ -136,7 +137,8 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
 
                 if (dataset.getDataCount() > 0) {
                     int i = dataset.getXIndex(xmin);
-                    if (i < 0) i = 0;
+                    if (i < 0)
+                        i = 0;
 
                     double[] distances = null;
                     double minRequiredWidth = 0.0;
@@ -212,8 +214,8 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
      * @param yHigh coordination of High price
      */
     protected void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double barWidthHalf,
-                              double x0, double yOpen, double yClose, double yLow,
-                              double yHigh) {
+            double x0, double yOpen, double yClose, double yLow,
+            double yHigh) {
         for (PaintAfterEP paintAfterEP : paintAfterEPS) {
             paintAfterEP.paintAfter(gc, ohlcvItem, barWidthHalf, x0, yOpen, yClose, yLow, yHigh);
         }
@@ -233,14 +235,14 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
      * @param yHigh coordination of High price
      */
     protected void paintHiLowShadow(GraphicsContext gc, Color shadowColor, double barWidthHalf,
-                                  double x0, double yOpen, double yClose, double yLow,
-                                  double yHigh) {
+            double x0, double yOpen, double yClose, double yLow,
+            double yHigh) {
         double trans = SHADOW_TRANS_PERCENT * barWidthHalf;
         gc.setLineWidth(SHADOW_LINE_WIDTH);
         gc.setStroke(shadowColor);
-        gc.strokeLine(x0+trans, yLow+trans, x0+trans, yHigh+trans);
-        gc.strokeLine(x0-barWidthHalf+trans, yOpen+trans, x0+trans, yOpen+trans);
-        gc.strokeLine(x0+trans, yClose+trans, x0+barWidthHalf+trans, yClose+trans);
+        gc.strokeLine(x0 + trans, yLow + trans, x0 + trans, yHigh + trans);
+        gc.strokeLine(x0 - barWidthHalf + trans, yOpen + trans, x0 + trans, yOpen + trans);
+        gc.strokeLine(x0 + trans, yClose + trans, x0 + barWidthHalf + trans, yClose + trans);
     }
 
     // injections --------------------------------------------
@@ -262,8 +264,7 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
     @FunctionalInterface
     public interface PaintAfterEP {
         void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double barWidthHalf,
-                                  double x0, double yOpen, double yClose, double yLow,
-                                  double yHigh);
+                double x0, double yOpen, double yClose, double yLow,
+                double yHigh);
     }
-
 }

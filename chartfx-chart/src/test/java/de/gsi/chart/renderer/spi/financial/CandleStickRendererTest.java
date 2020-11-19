@@ -1,5 +1,19 @@
 package de.gsi.chart.renderer.spi.financial;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.SAND;
+
+import javafx.scene.Scene;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.Start;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.CategoryAxis;
@@ -8,22 +22,10 @@ import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
-import javafx.scene.Scene;
-import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
-
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.SAND;
-import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 public class CandleStickRendererTest {
-
     private OhlcvDataSet ohlcvDataSet;
     private CandleStickRenderer renderer;
 
@@ -56,7 +58,7 @@ public class CandleStickRendererTest {
 
         // Extension point usage
         renderer.addPaintAfterEp((gc, ohlcvItem, localBarWidth, barWidthHalf,
-                                             x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {
+                                         x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {
             assertNotNull(gc);
         });
 
@@ -85,8 +87,7 @@ public class CandleStickRendererTest {
     void addPaintAfterEp() {
         // just check that call of method
         renderer.addPaintAfterEp((gc, ohlcvItem, localBarWidth, barWidthHalf,
-                                  x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {});
+                                         x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {});
         assertFalse(renderer.paintAfterEPS.isEmpty());
     }
-
 }

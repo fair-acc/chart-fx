@@ -1,5 +1,9 @@
 package de.gsi.chart.renderer.spi.financial;
 
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.AbstractDataSetManagement;
@@ -7,9 +11,6 @@ import de.gsi.chart.renderer.spi.financial.service.PaintBarMarker;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 /**
  * The ancestor for common financial renderers.
@@ -19,7 +20,6 @@ import javafx.scene.paint.Paint;
  * - Extension-point before/after painting - extend specific renderers by your changes to add EP rules.
  */
 public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractDataSetManagement<R> implements Renderer {
-
     /**
      * Simple algorithmic solution to calculate required chart area distances.
      * @param findAreaDistances service for calculation of find chart area distances.
@@ -31,7 +31,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
      * @return the calculated distances
      */
     protected double[] findAreaDistances(FindAreaDistances findAreaDistances,
-                                       OhlcvDataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
+            OhlcvDataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
         return findAreaDistances.findAreaDistances(dataset, xAxis, yAxis, xmin, xmax);
     }
 
@@ -61,7 +61,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
      * @param x0 the center of the bar for X coordination
      */
     protected void paintVolume(GraphicsContext gc, Color volumeLongColor, Color volumeShortColor, Axis yAxis, double[] distances, double localBarWidth,
-                             double barWidthHalf, IOhlcvItem ohlcvItem, double x0) {
+            double barWidthHalf, IOhlcvItem ohlcvItem, double x0) {
         double volume = ohlcvItem.getVolume();
         double maxVolume = distances[1];
         double volumeHeight = (volume / maxVolume) * 0.3;
@@ -70,7 +70,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
         double zzVolume = volumeHeight * (max - min);
 
         gc.setFill(ohlcvItem.getOpen() < ohlcvItem.getClose() ? volumeLongColor : volumeShortColor);
-        gc.fillRect(x0 - barWidthHalf, min+zzVolume, localBarWidth, -zzVolume);
+        gc.fillRect(x0 - barWidthHalf, min + zzVolume, localBarWidth, -zzVolume);
     }
 
     // services --------------------------------------------------------

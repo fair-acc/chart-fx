@@ -96,5 +96,6 @@ public class FinancialCss { // NOPMD decide not to rename it for the time being
      */
     public static final String DATASET_HILOW_BAR_WIDTH_PERCENTAGE = "hiLowBarWidthPercent";
 
-    private FinancialCss() {}
+    private FinancialCss() {
+    }
 }

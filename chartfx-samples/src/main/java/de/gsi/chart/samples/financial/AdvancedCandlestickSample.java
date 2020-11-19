@@ -1,5 +1,12 @@
 package de.gsi.chart.samples.financial;
 
+import java.util.Calendar;
+
+import javafx.application.Application;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -9,17 +16,9 @@ import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-import javafx.application.Application;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-
-import java.util.Calendar;
 
 public class AdvancedCandlestickSample extends AbstractBasicFinancialApplication {
-
-    public static final AttributeKey<Boolean> MARK_BAR =
-            AttributeKey.create(Boolean.class, "MARK_BAR");
+    public static final AttributeKey<Boolean> MARK_BAR = AttributeKey.create(Boolean.class, "MARK_BAR");
 
     /**
      * Prepare charts to the root.
@@ -67,20 +66,20 @@ public class AdvancedCandlestickSample extends AbstractBasicFinancialApplication
 
         // example of extension point PaintAfter - Paint yellow square if the bar is selected by addon model attribute
         candleStickRenderer.addPaintAfterEp((gc, ohlcvItem, localBarWidth, barWidthHalf,
-                                             x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {
+                                                    x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {
             // addon extension with MARK BAR settings
             if (ohlcvItem.getAddon() != null) {
                 if (ohlcvItem.getAddon().getAttribute(MARK_BAR, false)) {
                     double yy;
                     if (ohlcvItem.getClose() > ohlcvItem.getOpen()) {
-                        yy = yClose-(yClose-yOpen)/2;
+                        yy = yClose - (yClose - yOpen) / 2;
                         gc.setFill(Color.CRIMSON);
                     } else {
-                        yy = yOpen-(yOpen-yClose)/2;
+                        yy = yOpen - (yOpen - yClose) / 2;
                         gc.setFill(Color.YELLOW);
                     }
-                    double rectCorr = barWidthHalf/2.0;
-                    gc.fillRect(x0-rectCorr, yy-rectCorr, rectCorr*2.0, rectCorr*2.0);
+                    double rectCorr = barWidthHalf / 2.0;
+                    gc.fillRect(x0 - rectCorr, yy - rectCorr, rectCorr * 2.0, rectCorr * 2.0);
                 }
             }
         });

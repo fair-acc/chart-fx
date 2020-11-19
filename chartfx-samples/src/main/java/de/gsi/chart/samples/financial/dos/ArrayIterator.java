@@ -39,8 +39,7 @@ import java.util.NoSuchElementException;
  * @author Stephen Colebourne
  */
 public class ArrayIterator implements ResettableIterator {
-
-    /** The array to iterate over */    
+    /** The array to iterate over */
     protected Object array;
     /** The start index to loop from */
     protected int startIndex = 0;
@@ -48,7 +47,7 @@ public class ArrayIterator implements ResettableIterator {
     protected int endIndex = 0;
     /** The current iterator index */
     protected int index = 0;
-    
+
     // Constructors
     // ----------------------------------------------------------------------
     /**
@@ -60,7 +59,7 @@ public class ArrayIterator implements ResettableIterator {
     public ArrayIterator() {
         super();
     }
-   
+
     /**
      * Constructs an ArrayIterator that will iterate over the values in the
      * specified array.
@@ -123,18 +122,14 @@ public class ArrayIterator implements ResettableIterator {
      * @param type  the index type (for error messages)
      * @throws IndexOutOfBoundsException if the index is invalid
      */
-    protected void checkBound(final int bound, final String type ) {
+    protected void checkBound(final int bound, final String type) {
         if (bound > this.endIndex) {
             throw new ArrayIndexOutOfBoundsException(
-              "Attempt to make an ArrayIterator that " + type +
-              "s beyond the end of the array. "
-            );
+                    "Attempt to make an ArrayIterator that " + type + "s beyond the end of the array. ");
         }
         if (bound < 0) {
             throw new ArrayIndexOutOfBoundsException(
-              "Attempt to make an ArrayIterator that " + type +
-              "s before the start of the array. "
-            );
+                    "Attempt to make an ArrayIterator that " + type + "s before the start of the array. ");
         }
     }
 
@@ -184,7 +179,7 @@ public class ArrayIterator implements ResettableIterator {
     public Object getArray() {
         return array;
     }
-    
+
     /**
      * Sets the array that the ArrayIterator should iterate over.
      * <p>
@@ -209,12 +204,11 @@ public class ArrayIterator implements ResettableIterator {
         this.array = array;
         this.index = 0;
     }
-    
+
     /**
      * Resets the iterator back to the start index.
      */
     public void reset() {
         this.index = this.startIndex;
     }
-
 }

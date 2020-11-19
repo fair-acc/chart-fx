@@ -1,18 +1,15 @@
 package de.gsi.dataset.spi.financial.api.attrs;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 class TypeKeyTest {
+    public static final AttributeKey<String> TEST_ATTR = AttributeKey.create(String.class, "TEST_ATTR");
 
-    public static final AttributeKey<String> TEST_ATTR =
-            AttributeKey.create(String.class, "TEST_ATTR");
-
-    public static final AttributeKey<String> TEST_ATTR_SAME =
-            AttributeKey.create(String.class, "TEST_ATTR");
+    public static final AttributeKey<String> TEST_ATTR_SAME = AttributeKey.create(String.class, "TEST_ATTR");
 
     @BeforeEach
     void setUp() {
