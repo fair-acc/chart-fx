@@ -14,10 +14,6 @@ class TypeKeyTest {
     public static final AttributeKey<String> TEST_ATTR_SAME =
             AttributeKey.create(String.class, "TEST_ATTR");
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @Test
     void testTypeKey() {
         assertEquals(String.class, TEST_ATTR.getType());
@@ -35,7 +31,7 @@ class TypeKeyTest {
 
     @Test
     void testHashCode() {
-        TEST_ATTR.hashCode();
+        assertNotEquals(0, TEST_ATTR.hashCode());
     }
 
     @Test

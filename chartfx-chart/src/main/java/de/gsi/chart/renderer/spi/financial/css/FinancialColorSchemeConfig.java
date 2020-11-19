@@ -150,6 +150,8 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
                     ((AbstractAxisParameter)chart.getYAxis()).setTickLabelFill(Color.rgb(194, 194, 194));
                 }
                 break;
+            default:
+                throw new IllegalArgumentException("Theme is not implemented yet. Theme=" + theme);
         }
     }
 

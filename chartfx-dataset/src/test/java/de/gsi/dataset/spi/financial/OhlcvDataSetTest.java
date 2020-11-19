@@ -3,7 +3,6 @@ package de.gsi.dataset.spi.financial;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-import de.gsi.dataset.spi.financial.utils.FinancialTestUtils;
 import de.gsi.dataset.spi.financial.utils.Ohlcv;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -98,7 +97,7 @@ public class OhlcvDataSetTest {
 
     @Test
     public void set() {
-        IOhlcv ohlcv2 = FinancialTestUtils.createTestOhlcv();
+        IOhlcv ohlcv2 = createTestOhlcv();
         OhlcvDataSet dataSet2 = new OhlcvDataSet("test2");
         dataSet2.setData(ohlcv2);
         datasetTested.set(dataSet2, false);

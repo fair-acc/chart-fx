@@ -27,6 +27,7 @@ import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
  * Candlestick renderer
  * @see <a href="https://www.investopedia.com/terms/c/candlestick.asp">Candlestick Investopedia</a>
  */
+@SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.TooManyFields" }) // designated purpose of this class
 public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRenderer> implements Renderer {
 
     private static final double SHADOW_LINE_WIDTH = 2.5;
@@ -34,6 +35,8 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
 
     private final boolean paintVolume;
     private final FindAreaDistances findAreaDistances;
+
+    protected List<PaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     public CandleStickRenderer(boolean paintVolume) {
         this.paintVolume = paintVolume;
@@ -263,8 +266,6 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
     }
 
     // injections --------------------------------------------
-
-    protected List<PaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     /**
      * Inject extension point for Paint after candle.

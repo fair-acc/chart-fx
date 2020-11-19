@@ -27,6 +27,7 @@ import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
  * High-Low renderer (OHLC-V/OI Chart)
  * @see <a href="https://www.investopedia.com/terms/o/ohlcchart.asp">OHLC Chart Ivestopedia</a>
  */
+@SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.TooManyFields" }) // designated purpose of this class
 public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> implements Renderer {
 
     private static final double SHADOW_LINE_WIDTH = 2.5;
@@ -34,6 +35,8 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
 
     private final boolean paintVolume;
     private final FindAreaDistances findAreaDistances;
+
+    protected List<PaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     public HighLowRenderer(boolean paintVolume) {
         this.paintVolume = paintVolume;
@@ -244,8 +247,6 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
     }
 
     // injections --------------------------------------------
-
-    protected List<PaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     /**
      * Inject extension point for Paint after bar.

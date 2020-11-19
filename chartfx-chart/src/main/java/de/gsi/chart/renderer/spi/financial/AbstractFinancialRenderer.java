@@ -20,6 +20,18 @@ import javafx.scene.paint.Paint;
  */
 public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractDataSetManagement<R> implements Renderer {
 
+    //------------------ injections ------------------
+
+    protected PaintBarMarker paintBarMarker;
+
+    /**
+     * Inject PaintBar Marker service
+     * @param paintBarMarker service implementation
+     */
+    public void setPaintBarMarker(PaintBarMarker paintBarMarker) {
+        this.paintBarMarker = paintBarMarker;
+    }
+
     /**
      * Simple algorithmic solution to calculate required chart area distances.
      * @param findAreaDistances service for calculation of find chart area distances.
@@ -116,15 +128,4 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
         }
     }
 
-    // injections ------------------------------------------------------
-
-    protected PaintBarMarker paintBarMarker;
-
-    /**
-     * Inject PaintBar Marker service
-     * @param paintBarMarker service implementation
-     */
-    public void setPaintBarMarker(PaintBarMarker paintBarMarker) {
-        this.paintBarMarker = paintBarMarker;
-    }
 }
