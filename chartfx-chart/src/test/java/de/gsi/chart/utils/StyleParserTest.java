@@ -1,15 +1,16 @@
 package de.gsi.chart.utils;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.Map;
+
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test StyleParser
