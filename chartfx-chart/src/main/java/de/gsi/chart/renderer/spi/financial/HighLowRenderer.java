@@ -179,14 +179,12 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
                         Paint barPaint = getPaintBarColor(ohlcvItem);
 
                         // the ohlc body
-                        gc.setStroke(barPaint != null ? barPaint : yOpen > yClose ? longBodyColor
-                                                                                  : shortBodyColor);
+                        gc.setStroke(barPaint != null ? barPaint : yOpen > yClose ? longBodyColor : shortBodyColor);
                         gc.setLineWidth(bodyLineWidth);
                         gc.strokeLine(x0, yLow, x0, yHigh);
 
                         // paint open/close tick
-                        gc.setStroke(barPaint != null ? barPaint : yOpen > yClose ? longTickColor
-                                                                                  : shortTickColor);
+                        gc.setStroke(barPaint != null ? barPaint : yOpen > yClose ? longTickColor : shortTickColor);
                         gc.setLineWidth(tickLineWidth);
                         gc.strokeLine(x0 - barWidthHalf, yOpen, x0, yOpen);
                         gc.strokeLine(x0, yClose, x0 + barWidthHalf, yClose);
