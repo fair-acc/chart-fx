@@ -1,22 +1,23 @@
 package de.gsi.dataset.spi.financial;
 
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-import de.gsi.dataset.spi.financial.utils.Ohlcv;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import static de.gsi.dataset.spi.financial.utils.FinancialTestUtils.createTestOhlcv;
+import static de.gsi.dataset.spi.financial.utils.FinancialTestUtils.toDate;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.gsi.dataset.spi.financial.utils.FinancialTestUtils.createTestOhlcv;
-import static de.gsi.dataset.spi.financial.utils.FinancialTestUtils.toDate;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
+import de.gsi.dataset.spi.financial.utils.Ohlcv;
 
 public class OhlcvDataSetTest {
-
     private OhlcvDataSet datasetTested;
     private IOhlcv ohlcv;
 
@@ -117,5 +118,4 @@ public class OhlcvDataSetTest {
         assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.get(datasetTested.getXIndex(toDate(afterDateLast).getTime() / 1000.0)));
         assertEquals(ohlcv.getOhlcvItem(0), datasetTested.get(datasetTested.getXIndex(toDate(beforeDateLast).getTime() / 1000.0)));
     }
-
 }

@@ -1,16 +1,15 @@
 package de.gsi.chart.samples.financial.dos;
 
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
 /**
  * Common wrapper of OHLC/V-OI object
  */
 public class OHLCVItem implements IOhlcvItem {
-
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
 
     private final Date timeStamp;
@@ -116,14 +115,12 @@ public class OHLCVItem implements IOhlcvItem {
 
     @Override
     public String toString() {
-        return "OHLCV [timeStamp=" + dateFormat.format(timeStamp) + ", open=" + open + ", high=" + high +
-                ", low=" + low + ", close=" + close + ", volume=" + volume + ", bidVol=" + volumeDown + ", askVol=" + volumeUp + ", openInterest="
+        return "OHLCV [timeStamp=" + dateFormat.format(timeStamp) + ", open=" + open + ", high=" + high + ", low=" + low + ", close=" + close + ", volume=" + volume + ", bidVol=" + volumeDown + ", askVol=" + volumeUp + ", openInterest="
                 + openInterest + "]";
     }
 
     public String toStringShort() {
-        return dateFormat.format(timeStamp) + ", " + open + ", " + high + ", " + low + ", " + close +
-                ", V=" + volume + ", OI=" + openInterest + "]";
+        return dateFormat.format(timeStamp) + ", " + open + ", " + high + ", " + low + ", " + close + ", V=" + volume + ", OI=" + openInterest + "]";
     }
 
     @Override
@@ -175,5 +172,4 @@ public class OHLCVItem implements IOhlcvItem {
             return false;
         return true;
     }
-
 }

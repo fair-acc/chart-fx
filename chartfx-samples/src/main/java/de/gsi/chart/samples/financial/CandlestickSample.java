@@ -1,15 +1,15 @@
 package de.gsi.chart.samples.financial;
 
+import javafx.application.Application;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
-import javafx.application.Application;
 
 public class CandlestickSample extends AbstractBasicFinancialApplication {
-
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {
         // create and apply renderers
         CandleStickRenderer candleStickRenderer = new CandleStickRenderer();

@@ -1,5 +1,22 @@
 package de.gsi.chart.samples.financial;
 
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Calendar;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.Pane;
+import javafx.stage.Stage;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
@@ -17,24 +34,8 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Calendar;
-
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
 
 public abstract class AbstractBasicFinancialApplication extends Application {
-
     protected static final int prefChartWidth = 640; //1024
     protected static final int prefChartHeight = 480; //768
     protected static final int prefSceneWidth = 1920;
@@ -77,7 +78,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         // show all default financial color schemes
         final FlowPane root = new FlowPane();
         root.setAlignment(Pos.CENTER);
-        Chart[] charts = Arrays.stream(getDefaultColorSchemes()).map(this::getDefaultFinancialTestChart).toArray(Chart[]::new);
+        Chart[] charts = Arrays.stream(getDefaultColorSchemes()).map(this::getDefaultFinancialTestChart).toArray(Chart[] ::new);
         root.getChildren().addAll(charts);
 
         return root;
@@ -147,7 +148,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
      * Show required part of the OHLC resource
      */
     protected void showPredefinedTimeRange(String dateIntervalPattern, OhlcvDataSet ohlcvDataSet,
-                                           DefaultNumericAxis xaxis, DefaultNumericAxis yaxis) {
+            DefaultNumericAxis xaxis, DefaultNumericAxis yaxis) {
         try {
             Calendar[] fromTo = CalendarUtils.createByDateInterval(dateIntervalPattern);
             double fromTime = fromTo[0].getTime().getTime() / 1000.0;

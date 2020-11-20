@@ -1,7 +1,6 @@
 package de.gsi.dataset.spi.financial.api.attrs;
 
 public abstract class TypeKey<T> implements Comparable<TypeKey<T>> {
-
     private final Class<T> type;
     private final String name;
 
@@ -23,7 +22,7 @@ public abstract class TypeKey<T> implements Comparable<TypeKey<T>> {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof TypeKey<?>)) {
+        if (!(obj instanceof TypeKey<?>) ) {
             return false;
         }
         TypeKey<?> other = (TypeKey<?>) obj;
@@ -47,5 +46,4 @@ public abstract class TypeKey<T> implements Comparable<TypeKey<T>> {
     public int compareTo(TypeKey<T> typeKey) {
         return this.toString().compareTo(typeKey.toString());
     }
-
 }

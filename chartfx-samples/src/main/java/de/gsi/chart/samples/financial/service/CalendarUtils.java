@@ -1,15 +1,14 @@
 package de.gsi.chart.samples.financial.service;
 
-import org.apache.commons.lang3.time.DateUtils;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CalendarUtils {
+import org.apache.commons.lang3.time.DateUtils;
 
+public class CalendarUtils {
     /**
      * Create the calendar interval instance by date interval pattern:
      * yyyy/MM/dd-yyyy/MM/dd
@@ -32,6 +31,6 @@ public class CalendarUtils {
             calendarList.add(DateUtils.truncate(cal, Calendar.DATE));
         }
 
-        return new Calendar[]{calendarList.get(0), calendarList.get(1)};
+        return new Calendar[] { calendarList.get(0), calendarList.get(1) };
     }
 }

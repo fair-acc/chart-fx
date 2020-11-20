@@ -1,15 +1,14 @@
 package de.gsi.dataset.spi.financial.utils;
 
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Ohlcv implements IOhlcv {
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
+public class Ohlcv implements IOhlcv {
     final List<IOhlcvItem> items = new ArrayList<>();
 
     @Override

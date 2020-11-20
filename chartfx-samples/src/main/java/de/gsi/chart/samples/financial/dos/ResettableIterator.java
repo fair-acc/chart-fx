@@ -12,11 +12,9 @@ import java.util.Iterator;
  * @since 3.0
  */
 public interface ResettableIterator<E> extends Iterator<E> {
-
     /**
      * Resets the iterator back to the position at which the iterator
      * was created.
      */
     void reset();
-
 }

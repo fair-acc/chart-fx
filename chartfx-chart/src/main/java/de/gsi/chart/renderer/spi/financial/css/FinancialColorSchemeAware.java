@@ -3,7 +3,6 @@ package de.gsi.chart.renderer.spi.financial.css;
 import de.gsi.chart.XYChart;
 
 public interface FinancialColorSchemeAware {
-
     /**
      * Apply theme to the whole chart domain object and attached renders. The renders have to be present before
      * applying this theme process.
@@ -24,5 +23,4 @@ public interface FinancialColorSchemeAware {
      * @throws Exception if processing fails
      */
     void applyTo(String theme, XYChart chart) throws Exception;
-
 }

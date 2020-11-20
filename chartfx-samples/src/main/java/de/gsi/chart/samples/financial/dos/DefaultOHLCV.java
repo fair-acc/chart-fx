@@ -1,9 +1,9 @@
 package de.gsi.chart.samples.financial.dos;
 
+import java.util.*;
+
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
-
-import java.util.*;
 
 /**
  * Basic example OHLCV domain object implementation for chart samples.
@@ -11,7 +11,6 @@ import java.util.*;
  * middle layer which implements IOhlcv API and encapsulate real OHLCV implementation of your financial framework.
  */
 public class DefaultOHLCV implements IOhlcv {
-
     private OHLCVItem[] ohlcvItems = new OHLCVItem[0];
 
     private String id;
@@ -100,7 +99,7 @@ public class DefaultOHLCV implements IOhlcv {
         return Arrays.asList(getOhlcvItemsArray());
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public Iterator iterator() {
         if (stateAttributes.upperBound == -1) {
             return new ArrayIterator(ohlcvItems, stateAttributes.lowerBound);
@@ -311,7 +310,6 @@ public class DefaultOHLCV implements IOhlcv {
     }
 
     public IOhlcv createRestrictedOHLCV(int[] range) {
-
         DefaultOHLCV rangedOHLCV = new DefaultOHLCV();
         rangedOHLCV.stateAttributes.lowerBound = range[0];
         rangedOHLCV.stateAttributes.upperBound = range[1];
@@ -375,7 +373,6 @@ public class DefaultOHLCV implements IOhlcv {
     private OhlcvTimestampComparator ohlcvTimestampComparator = null;
 
     private static class OhlcvTimestampComparator implements Comparator<OHLCVItem> {
-
         public int field;
 
         public OhlcvTimestampComparator(int field) {
@@ -429,5 +426,4 @@ public class DefaultOHLCV implements IOhlcv {
     public String toString() {
         return "OHLCV [id=" + id + ", name=" + name + ", title=" + title + ", assetName=" + assetName + ", symbol=" + symbol + "]";
     }
-
 }

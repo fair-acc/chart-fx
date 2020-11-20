@@ -1,39 +1,33 @@
 package de.gsi.dataset.spi.financial.api.attrs;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 public class AttributeModelTest {
-
     // normal attribute
-    public static final AttributeKey<String> TEST_ATTR =
-            AttributeKey.create(String.class, "TEST_ATTR");
+    public static final AttributeKey<String> TEST_ATTR = AttributeKey.create(String.class, "TEST_ATTR");
 
-    public static final AttributeKey<Double> TEST_ATTR2 =
-            AttributeKey.create(Double.class, "TEST_ATTR2");
+    public static final AttributeKey<Double> TEST_ATTR2 = AttributeKey.create(Double.class, "TEST_ATTR2");
 
-    public static final AttributeKey<Animal> TEST_ATTR_ANIMAL =
-            AttributeKey.create(Animal.class, "TEST_ATTR_ANIMAL");
+    public static final AttributeKey<Animal> TEST_ATTR_ANIMAL = AttributeKey.create(Animal.class, "TEST_ATTR_ANIMAL");
 
-    public static final AttributeKey<AttributeModel> TEST_SUB_MODEL =
-            AttributeKey.create(AttributeModel.class, "TEST_SUB_MODEL");
+    public static final AttributeKey<AttributeModel> TEST_SUB_MODEL = AttributeKey.create(AttributeModel.class, "TEST_SUB_MODEL");
 
     // attribute with generics
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static final AttributeKey<Set<String>> TEST_GENERIC_SET =
-            AttributeKey.create((Class<Set<String>>) (Class) Set.class, "TEST_GENERIC_SET");
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final AttributeKey<Set<String>> TEST_GENERIC_SET = AttributeKey.create((Class<Set<String>>) (Class) Set.class, "TEST_GENERIC_SET");
 
     private AttributeModel attrsTested;
 
     @BeforeEach
     public void setUp() {
         attrsTested = AttributeModel.configure()
-                .setAttribute(TEST_ATTR, "TEST")
-                .setAttribute(TEST_GENERIC_SET, new HashSet<>());
+                              .setAttribute(TEST_ATTR, "TEST")
+                              .setAttribute(TEST_GENERIC_SET, new HashSet<>());
     }
 
     @Test
@@ -48,8 +42,8 @@ public class AttributeModelTest {
     public void configure() {
         assertNotNull(AttributeModel.configure());
         attrsTested = AttributeModel.configure()
-                .setAttribute(TEST_ATTR, "TEST")
-                .setAttribute(TEST_GENERIC_SET, new HashSet<>());
+                              .setAttribute(TEST_ATTR, "TEST")
+                              .setAttribute(TEST_GENERIC_SET, new HashSet<>());
 
         assertEquals(2, attrsTested.getAttributes().size());
         assertEquals("TEST", attrsTested.getAttribute(TEST_ATTR));
@@ -141,9 +135,9 @@ public class AttributeModelTest {
     public void merge() {
         Cat cat1 = new Cat();
         AttributeModel attrsTested2 = AttributeModel.configure()
-                .setAttribute(TEST_ATTR_ANIMAL, cat1)
-                .setAttribute(TEST_ATTR, "TEST2")
-                .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
+                                              .setAttribute(TEST_ATTR_ANIMAL, cat1)
+                                              .setAttribute(TEST_ATTR, "TEST2")
+                                              .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
         attrsTested.merge(attrsTested2);
         assertEquals(3, attrsTested.getAttributes().size());
         assertEquals(cat1, attrsTested.getAttribute(TEST_ATTR_ANIMAL));
@@ -157,9 +151,9 @@ public class AttributeModelTest {
         // submodel testing
         Cat cat1 = new Cat();
         AttributeModel attrsTested2 = AttributeModel.configure()
-                .setAttribute(TEST_ATTR_ANIMAL, cat1)
-                .setAttribute(TEST_ATTR, "TEST2")
-                .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
+                                              .setAttribute(TEST_ATTR_ANIMAL, cat1)
+                                              .setAttribute(TEST_ATTR, "TEST2")
+                                              .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
 
         AttributeModel submodel = new AttributeModel();
         submodel.setAttribute(TEST_ATTR, "TEST_SUB1");
@@ -178,9 +172,9 @@ public class AttributeModelTest {
     public void deepCopyAttributes() {
         Cat cat1 = new Cat();
         AttributeModel attrsTested2 = AttributeModel.configure()
-                .setAttribute(TEST_ATTR_ANIMAL, cat1)
-                .setAttribute(TEST_ATTR, "TEST2")
-                .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
+                                              .setAttribute(TEST_ATTR_ANIMAL, cat1)
+                                              .setAttribute(TEST_ATTR, "TEST2")
+                                              .setAttribute(TEST_GENERIC_SET, new HashSet<>(Arrays.asList("E1", "E2")));
 
         AttributeModel submodel = new AttributeModel();
         submodel.setAttribute(TEST_ATTR, "TEST_SUB1");
@@ -210,5 +204,4 @@ public class AttributeModelTest {
 
     private class Cat extends Animal {
     }
-
 }

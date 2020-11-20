@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 
 public class AttributeModel implements Cloneable {
-
     private Map<AttributeKey<?>, Object> attributes;
 
     public AttributeModel() {
@@ -189,7 +188,7 @@ public class AttributeModel implements Cloneable {
     /**
      * @return copy attributes model - deep copy of objects
      */
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized AttributeModel deepCopyAttributes() {
         //Cloner cloner = new Cloner();
         //HashMap<AttributeKey<?>, Object> _attributes = (HashMap)cloner.deepClone(attributes);
@@ -205,7 +204,7 @@ public class AttributeModel implements Cloneable {
         return copiedModel;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public Object clone() {
         try {
@@ -222,5 +221,4 @@ public class AttributeModel implements Cloneable {
     public String toString() {
         return "AttributeModel [attributes=" + attributes + "]";
     }
-
 }

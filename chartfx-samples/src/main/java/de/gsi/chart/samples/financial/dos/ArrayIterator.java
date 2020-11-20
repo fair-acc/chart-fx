@@ -38,7 +38,6 @@ import java.util.NoSuchElementException;
  * @since Commons Collections 1.0
  */
 public class ArrayIterator implements ResettableIterator {
-
     /**
      * The array to iterate over
      */
@@ -134,15 +133,11 @@ public class ArrayIterator implements ResettableIterator {
     protected void checkBound(final int bound, final String type) {
         if (bound > this.endIndex) {
             throw new ArrayIndexOutOfBoundsException(
-                    "Attempt to make an ArrayIterator that " + type +
-                            "s beyond the end of the array. "
-            );
+                    "Attempt to make an ArrayIterator that " + type + "s beyond the end of the array. ");
         }
         if (bound < 0) {
             throw new ArrayIndexOutOfBoundsException(
-                    "Attempt to make an ArrayIterator that " + type +
-                            "s before the start of the array. "
-            );
+                    "Attempt to make an ArrayIterator that " + type + "s before the start of the array. ");
         }
     }
 
@@ -226,5 +221,4 @@ public class ArrayIterator implements ResettableIterator {
     public void reset() {
         this.index = this.startIndex;
     }
-
 }

@@ -1,21 +1,18 @@
 package de.gsi.dataset.spi.financial.api.attrs;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class AttributeKeyTest {
-
     // normal attribute
-    public static final AttributeKey<String> TEST_ATTR =
-            AttributeKey.create(String.class, "TEST_ATTR");
+    public static final AttributeKey<String> TEST_ATTR = AttributeKey.create(String.class, "TEST_ATTR");
 
     // attribute with generics
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static final AttributeKey<Set<String>> TEST_COUNTER_LISTENERS =
-            AttributeKey.create((Class<Set<String>>) (Class) Set.class, "TEST_COUNTER_LISTENERS");
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public static final AttributeKey<Set<String>> TEST_COUNTER_LISTENERS = AttributeKey.create((Class<Set<String>>) (Class) Set.class, "TEST_COUNTER_LISTENERS");
 
     @Test
     public void create() {

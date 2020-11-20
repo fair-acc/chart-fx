@@ -1,9 +1,13 @@
 package de.gsi.chart.plugins;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.dataset.testdata.spi.CosineFunction;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Path;
+
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
@@ -11,6 +15,7 @@ import javafx.scene.input.DataFormat;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
@@ -19,13 +24,10 @@ import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
-
-import static org.junit.jupiter.api.Assertions.*;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.dataset.testdata.spi.CosineFunction;
 
 /**
  * Test the screenshot plugin

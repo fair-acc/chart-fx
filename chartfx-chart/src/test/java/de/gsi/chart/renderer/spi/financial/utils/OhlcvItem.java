@@ -1,13 +1,12 @@
 package de.gsi.chart.renderer.spi.financial.utils;
 
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-
 import java.util.Date;
 import java.util.Objects;
 
-public class OhlcvItem implements IOhlcvItem {
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
+public class OhlcvItem implements IOhlcvItem {
     private final Date timestamp;
     private final double open;
     private final double high;
@@ -78,16 +77,12 @@ public class OhlcvItem implements IOhlcvItem {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         OhlcvItem ohlcvItem = (OhlcvItem) o;
-        return Double.compare(ohlcvItem.open, open) == 0 &&
-                Double.compare(ohlcvItem.high, high) == 0 &&
-                Double.compare(ohlcvItem.low, low) == 0 &&
-                Double.compare(ohlcvItem.close, close) == 0 &&
-                Double.compare(ohlcvItem.volume, volume) == 0 &&
-                Double.compare(ohlcvItem.oi, oi) == 0 &&
-                Objects.equals(timestamp, ohlcvItem.timestamp);
+        return Double.compare(ohlcvItem.open, open) == 0 && Double.compare(ohlcvItem.high, high) == 0 && Double.compare(ohlcvItem.low, low) == 0 && Double.compare(ohlcvItem.close, close) == 0 && Double.compare(ohlcvItem.volume, volume) == 0 && Double.compare(ohlcvItem.oi, oi) == 0 && Objects.equals(timestamp, ohlcvItem.timestamp);
     }
 
     @Override

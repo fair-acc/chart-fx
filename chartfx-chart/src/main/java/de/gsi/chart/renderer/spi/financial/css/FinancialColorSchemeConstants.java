@@ -14,7 +14,6 @@ import java.util.List;
  * @see FinancialColorSchemeConfig possibility to inherit your configuration extension.
  */
 public class FinancialColorSchemeConstants {
-
     public static final String OLDSCHOOL = "OLDSCHOOL";
 
     public static final String CLEARLOOK = "CLEARLOOK";

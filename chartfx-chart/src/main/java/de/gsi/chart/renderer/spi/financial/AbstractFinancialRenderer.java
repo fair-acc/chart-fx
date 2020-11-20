@@ -45,7 +45,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
      * @return the calculated distances
      */
     protected double[] findAreaDistances(FindAreaDistances findAreaDistances,
-                                         OhlcvDataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
+                                       OhlcvDataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
         return findAreaDistances.findAreaDistances(dataset, xAxis, yAxis, xmin, xmax);
     }
 
@@ -77,7 +77,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
      * @param x0               the center of the bar for X coordination
      */
     protected void paintVolume(GraphicsContext gc, Color volumeLongColor, Color volumeShortColor, Axis yAxis, double[] distances, double localBarWidth,
-                               double barWidthHalf, IOhlcvItem ohlcvItem, double x0) {
+                             double barWidthHalf, IOhlcvItem ohlcvItem, double x0) {
         double volume = ohlcvItem.getVolume();
         double maxVolume = distances[1];
         double volumeHeight = (volume / maxVolume) * 0.3;

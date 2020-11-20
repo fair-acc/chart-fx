@@ -1,13 +1,12 @@
 package de.gsi.dataset.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.*;
 import java.util.zip.ZipFile;
 
-public class StreamUtils {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+public class StreamUtils {
     private static final Logger logger = LoggerFactory.getLogger(StreamUtils.class);
 
     public static final String CLASSPATH_PREFIX = "classpath:";
@@ -51,5 +50,4 @@ public class StreamUtils {
         }
         return is;
     }
-
 }

@@ -1,5 +1,20 @@
 package de.gsi.chart.renderer.spi.financial.css;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.BLACKBERRY;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
+
+import javafx.scene.Scene;
+import javafx.stage.Stage;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.framework.junit5.ApplicationExtension;
+import org.testfx.framework.junit5.Start;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
@@ -8,23 +23,10 @@ import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
-
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.BLACKBERRY;
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 class FinancialColorSchemeConfigTest {
-
     private FinancialColorSchemeConfig financialColorSchemeConfig;
     private OhlcvDataSet ohlcvDataSet;
     private Renderer renderer;
@@ -56,31 +58,27 @@ class FinancialColorSchemeConfigTest {
         for (String colorScheme : getDefaultColorSchemes()) {
             financialColorSchemeConfig.applySchemeToDataset(colorScheme, null, ohlcvDataSet, renderer);
         }
-        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset(
-                "NOT_EXIST", null, ohlcvDataSet, renderer));
+        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", null, ohlcvDataSet, renderer));
 
         renderer = new HighLowRenderer();
         for (String colorScheme : getDefaultColorSchemes()) {
             financialColorSchemeConfig.applySchemeToDataset(colorScheme, null, ohlcvDataSet, renderer);
         }
-        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset(
-                "NOT_EXIST", null, ohlcvDataSet, renderer));
+        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", null, ohlcvDataSet, renderer));
     }
 
     @Test
     void testApplySchemeToDataset() {
         for (String colorScheme : getDefaultColorSchemes()) {
-            financialColorSchemeConfig.applySchemeToDataset(colorScheme,  ohlcvDataSet, renderer);
+            financialColorSchemeConfig.applySchemeToDataset(colorScheme, ohlcvDataSet, renderer);
         }
-        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset(
-                "NOT_EXIST", ohlcvDataSet, renderer));
+        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", ohlcvDataSet, renderer));
 
         renderer = new HighLowRenderer();
         for (String colorScheme : getDefaultColorSchemes()) {
             financialColorSchemeConfig.applySchemeToDataset(colorScheme, ohlcvDataSet, renderer);
         }
-        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset(
-                "NOT_EXIST", ohlcvDataSet, renderer));
+        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", ohlcvDataSet, renderer));
     }
 
     @TestFx
@@ -100,5 +98,4 @@ class FinancialColorSchemeConfigTest {
             financialColorSchemeConfig.applyTo(colorScheme, chart);
         }
     }
-
 }
