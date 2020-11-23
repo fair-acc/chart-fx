@@ -5,7 +5,6 @@ package de.gsi.dataset.spi.financial.api.attrs;
  * Common dynamic extension of API to transmit additional (addon) data.
  */
 public interface AttributeModelAware {
-
     /**
      * @return OHLCV addon. If not available, null is return.
      */
