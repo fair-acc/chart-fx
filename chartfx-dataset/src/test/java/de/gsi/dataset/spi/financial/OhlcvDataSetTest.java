@@ -3,9 +3,7 @@ package de.gsi.dataset.spi.financial;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.spi.financial.utils.FinancialTestUtils.createTestOhlcv;
-import static de.gsi.dataset.spi.financial.utils.FinancialTestUtils.toDate;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 

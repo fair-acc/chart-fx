@@ -1,28 +1,24 @@
 package de.gsi.chart;
 
-import de.gsi.chart.axes.Axis;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.ParameterMeasurements;
-import de.gsi.chart.plugins.TableViewer;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.ui.geometry.Side;
-import de.gsi.chart.ui.utils.JavaFXInterceptorUtils;
-import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
-import de.gsi.chart.ui.utils.TestFx;
+import static org.junit.jupiter.api.Assertions.*;
+
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import de.gsi.chart.axes.Axis;
+import de.gsi.chart.ui.geometry.Side;
+import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
+@SuppressWarnings({ "PMD.UncommentedEmptyMethodBody" })
 public class ChartTest {
-
     private TestChart chart;
 
     @BeforeEach

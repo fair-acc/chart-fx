@@ -6,7 +6,6 @@ import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConsta
 
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,10 +19,8 @@ import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
-import de.gsi.chart.renderer.spi.financial.service.PaintBarMarker;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
-import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 
 @ExtendWith(ApplicationExtension.class)

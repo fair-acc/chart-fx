@@ -21,6 +21,7 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
  *     <li>Extension-point before/after painting - extend specific renderers by your changes to add EP rules.</li>
  * </ul>
  */
+@SuppressWarnings({ "PMD.ExcessiveParameterList" })
 public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractDataSetManagement<R> implements Renderer {
     protected PaintBarMarker paintBarMarker;
 
