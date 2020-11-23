@@ -77,8 +77,8 @@ class StyleParserTest {
         assertEquals(null, StyleParser.getColorPropertyValue(null, "color2"));
         assertEquals(null, StyleParser.getColorPropertyValue(null, "invalidColor"));
 
-        assertEquals(2, StyleParser.getIntegerPropertyValue(testStyle, "index1"), 1e-5);
-        assertEquals(0xFE, StyleParser.getIntegerPropertyValue(testStyle, "index2"), 1e-5);
+        assertEquals(2, StyleParser.getIntegerPropertyValue(testStyle, "index1"));
+        assertEquals(0xFE, StyleParser.getIntegerPropertyValue(testStyle, "index2"));
         assertEquals(10e7, StyleParser.getFloatingDecimalPropertyValue(testStyle, "float1"), 1e-5);
         assertEquals(10.333, StyleParser.getFloatingDecimalPropertyValue(testStyle, "float2"), 1e-5);
         assertEquals(0.1, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float1"), 1e-5);

@@ -159,7 +159,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
             double min = Double.MAX_VALUE;
             double max = Double.MIN_VALUE;
             for (int i = fromIdx; i <= toIdx; i++) {
-                IOhlcvItem ohlcvItem = ohlcvDataSet.get(i);
+                IOhlcvItem ohlcvItem = ohlcvDataSet.getItem(i);
                 if (max < ohlcvItem.getHigh()) {
                     max = ohlcvItem.getHigh();
                 }
@@ -210,9 +210,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
      *
      * @param chart for applying renderers
      */
-    protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {
-        /* OVERRIDE IT */
-    }
+    protected abstract void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet);
 
     /**
      * @param args the command line arguments

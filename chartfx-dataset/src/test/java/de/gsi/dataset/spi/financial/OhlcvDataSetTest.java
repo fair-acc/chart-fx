@@ -44,10 +44,10 @@ public class OhlcvDataSetTest {
     }
 
     @Test
-    public void get() {
-        IOhlcvItem ohlcvItem = datasetTested.get(0);
+    public void getItem() {
+        IOhlcvItem ohlcvItem = datasetTested.getItem(0);
         assertEquals(ohlcv.getOhlcvItem(0), ohlcvItem);
-        ohlcvItem = datasetTested.get(datasetTested.getDataCount() - 1);
+        ohlcvItem = datasetTested.getItem(datasetTested.getDataCount() - 1);
         assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), ohlcvItem);
     }
 
@@ -76,10 +76,10 @@ public class OhlcvDataSetTest {
     }
 
     @Test
-    public void getLast() {
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.getLast());
+    public void getLastItem() {
+        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.getLastItem());
         ((Ohlcv) ohlcv).clear();
-        assertNull(datasetTested.getLast());
+        assertNull(datasetTested.getLastItem());
     }
 
     @Test
@@ -103,19 +103,5 @@ public class OhlcvDataSetTest {
         dataSet2.setData(ohlcv2);
         datasetTested.set(dataSet2, false);
         assertEquals(ohlcv2, datasetTested.getData());
-    }
-
-    @Test
-    public void getXIndex() {
-        String dateString = "2020-11-19";
-        LocalDate date = LocalDate.parse(dateString);
-        LocalDate dateLast = LocalDate.parse(dateString).plusDays(4);
-        LocalDate afterDateLast = LocalDate.parse(dateString).plusDays(5);
-        LocalDate beforeDateLast = LocalDate.parse(dateString).minusDays(1);
-
-        assertEquals(ohlcv.getOhlcvItem(0), datasetTested.get(datasetTested.getXIndex(toDate(date).getTime() / 1000.0)));
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.get(datasetTested.getXIndex(toDate(dateLast).getTime() / 1000.0)));
-        assertEquals(ohlcv.getOhlcvItem(ohlcv.size() - 1), datasetTested.get(datasetTested.getXIndex(toDate(afterDateLast).getTime() / 1000.0)));
-        assertEquals(ohlcv.getOhlcvItem(0), datasetTested.get(datasetTested.getXIndex(toDate(beforeDateLast).getTime() / 1000.0)));
     }
 }

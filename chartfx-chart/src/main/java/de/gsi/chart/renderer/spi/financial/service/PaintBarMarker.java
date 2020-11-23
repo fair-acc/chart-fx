@@ -2,16 +2,16 @@ package de.gsi.chart.renderer.spi.financial.service;
 
 import javafx.scene.paint.Paint;
 
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-
 /**
  * Specific painting/coloring of OHLCV/Candle bars.
+ * Addon and extension possibilities.
+ * The PaintBar is know techniques in the trading frameworks and platforms.
  */
 public interface PaintBarMarker {
     /**
      * Provides paint by selected OHLCV item domain object.
-     * @param ohlcvItem selected OHLCV item (possibility to use addon, or timestamp).
+     * @param data domain object for Renderer Extension Points
      * @return paint bar
      */
-    Paint getPaintBy(IOhlcvItem ohlcvItem);
+    Paint getPaintBy(OhlcvRendererEpData data);
 }

@@ -16,9 +16,9 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.samples.financial.AdvancedCandlestickSample;
-import de.gsi.chart.samples.financial.CandlestickSample;
-import de.gsi.chart.samples.financial.HiLowSample;
+import de.gsi.chart.samples.financial.FinancialAdvancedCandlestickSample;
+import de.gsi.chart.samples.financial.FinancialCandlestickSample;
+import de.gsi.chart.samples.financial.FinancialHiLowSample;
 import de.gsi.chart.utils.PeriodicScreenCapture;
 
 /**
@@ -57,6 +57,9 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("ErrorDataSetRendererSample", new ErrorDataSetRendererSample()));
         buttons.getChildren()
                 .add(new MyButton("ErrorDataSetRendererStylingSample", new ErrorDataSetRendererStylingSample()));
+        buttons.getChildren().add(new MyButton("FinancialCandlestickSample", new FinancialCandlestickSample()));
+        buttons.getChildren().add(new MyButton("FinancialHiLowSample", new FinancialHiLowSample()));
+        buttons.getChildren().add(new MyButton("FinancialAdvancedCandlestickSample", new FinancialAdvancedCandlestickSample()));
         buttons.getChildren().add(new MyButton("FxmlSample", new FxmlSample()));
         buttons.getChildren().add(new MyButton("GridRendererSample", new GridRendererSample()));
         buttons.getChildren().add(new MyButton("HexagonSamples", new HexagonSamples()));
@@ -83,9 +86,6 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("WaterfallPerformanceSample", new WaterfallPerformanceSample()));
         buttons.getChildren().add(new MyButton("WriteDataSetToFileSample", new WriteDataSetToFileSample()));
         buttons.getChildren().add(new MyButton("ZoomerSample", new ZoomerSample()));
-        buttons.getChildren().add(new MyButton("CandlestickSample", new CandlestickSample()));
-        buttons.getChildren().add(new MyButton("HiLowSample", new HiLowSample()));
-        buttons.getChildren().add(new MyButton("AdvancedCandlestickSample", new AdvancedCandlestickSample()));
 
         final Scene scene = new Scene(root);
 

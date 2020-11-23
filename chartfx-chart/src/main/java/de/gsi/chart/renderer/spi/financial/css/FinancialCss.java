@@ -2,6 +2,18 @@ package de.gsi.chart.renderer.spi.financial.css;
 
 public class FinancialCss { // NOPMD decide not to rename it for the time being
 
+    // Common ----------------------------------------------------------------
+
+    /**
+     * The line width  which is used for painting base shadow of the dataset
+     */
+    public static final String DATASET_SHADOW_LINE_WIDTH = "shadowLineWidth";
+
+    /**
+     * Transposition of original object to paint shadowed object in percent
+     */
+    public static final String DATASET_SHADOW_TRANSPOSITION_PERCENT = "shadowTransPercent";
+
     // Candlesticks ----------------------------------------------------------
 
     /**

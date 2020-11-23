@@ -4,8 +4,11 @@ import java.util.Iterator;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.AbstractDataSet;
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 
 /**
  * Dataset Domain Object for encapsulation of IOhlcv API structure.
@@ -13,7 +16,7 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
  * @see IOhlcv API provides OHLCV domain object access.
  * @see IOhlcvItem API provides OHLCV item domain object access.
  */
-public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Iterable<IOhlcvItem> {
+public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Iterable<IOhlcvItem>, IOhlcvItemAware, AttributeModelAware {
     public static final int DIM_Y_OPEN = 1;
     public static final int DIM_Y_HIGH = 2;
     public static final int DIM_Y_LOW = 3;
@@ -26,7 +29,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
     private boolean isCategoryBased = false;
 
     public OhlcvDataSet(String title) {
-        super(title, 2);
+        super(title, 7);
     }
 
     /**
@@ -84,18 +87,6 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
         }
     }
 
-    public IOhlcvItem get(int index) {
-        return ohlcv.getOhlcvItem(index);
-    }
-
-    public IOhlcvItem getLast() {
-        int size = ohlcv.size();
-        if (size == 0) {
-            return null;
-        }
-        return ohlcv.getOhlcvItem(size - 1);
-    }
-
     @Override
     public Iterator<IOhlcvItem> iterator() {
         return ohlcv.iterator();
@@ -121,5 +112,28 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
      */
     public int getXIndex(double x) {
         return getIndex(DIM_X, x);
+    }
+
+    @Override
+    public AttributeModel getAddon() {
+        return ohlcv.getAddon();
+    }
+
+    @Override
+    public AttributeModel getAddonOrCreate() {
+        return ohlcv.getAddonOrCreate();
+    }
+
+    @Override
+    public IOhlcvItem getItem(int index) {
+        return ohlcv.getOhlcvItem(index);
+    }
+
+    public IOhlcvItem getLastItem() {
+        int size = ohlcv.size();
+        if (size == 0) {
+            return null;
+        }
+        return ohlcv.getOhlcvItem(size - 1);
     }
 }

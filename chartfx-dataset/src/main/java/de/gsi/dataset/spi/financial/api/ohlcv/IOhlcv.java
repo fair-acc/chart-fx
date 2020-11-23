@@ -1,11 +1,12 @@
 package de.gsi.dataset.spi.financial.api.ohlcv;
 
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 
 /**
  * Domain Object implements this API for providing of OHLCV information data.
  */
-public interface IOhlcv extends Iterable<IOhlcvItem> {
+public interface IOhlcv extends Iterable<IOhlcvItem>, AttributeModelAware {
     /**
      * @param index index of the ohlcv item
      * @return provides ohlcv item

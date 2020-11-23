@@ -53,13 +53,10 @@ public class HighLowRendererTest {
         chart.getRenderers().add(renderer);
 
         // PaintBar extension usage
-        renderer.setPaintBarMarker(
-                ohlcvItem -> ohlcvItem.getOpen() - ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null);
+        renderer.setPaintBarMarker(d -> d.ds.get(OhlcvDataSet.DIM_Y_OPEN, d.index) - d.ds.get(OhlcvDataSet.DIM_Y_CLOSE, d.index) > 100.0 ? Color.MAGENTA : null);
 
         // Extension point usage
-        renderer.addPaintAfterEp((gc, ohlcvItem, barWidthHalf, x0, yOpen, yClose, yLow, yHigh) -> {
-            assertNotNull(gc);
-        });
+        renderer.addPaintAfterEp(data -> assertNotNull(data.gc));
 
         new FinancialColorSchemeConfig().applyTo(SAND, chart);
 
@@ -80,12 +77,5 @@ public class HighLowRendererTest {
     @Test
     void getThis() {
         assertEquals(HighLowRenderer.class, renderer.getThis().getClass());
-    }
-
-    @Test
-    void addPaintAfterEp() {
-        // just check that call of method
-        renderer.addPaintAfterEp((gc, ohlcvItem, barWidthHalf, x0, yOpen, yClose, yLow, yHigh) -> {});
-        assertFalse(renderer.paintAfterEPS.isEmpty());
     }
 }

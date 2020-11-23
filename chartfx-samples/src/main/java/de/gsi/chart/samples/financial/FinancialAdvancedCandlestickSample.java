@@ -17,7 +17,7 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
-public class AdvancedCandlestickSample extends AbstractBasicFinancialApplication {
+public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialApplication {
     public static final AttributeKey<Boolean> MARK_BAR = AttributeKey.create(Boolean.class, "MARK_BAR");
 
     /**
@@ -50,8 +50,7 @@ public class AdvancedCandlestickSample extends AbstractBasicFinancialApplication
         // Example of extension possibilities
 
         // PaintBar Service Usage
-        candleStickRenderer.setPaintBarMarker(
-                ohlcvItem -> ohlcvItem.getOpen() - ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null);
+        candleStickRenderer.setPaintBarMarker(d -> d.ohlcvItem.getOpen() - d.ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null);
 
         // PaintAfter Extension Point Usage
         // select every friday with yellow square point in the middle of candle
@@ -65,21 +64,20 @@ public class AdvancedCandlestickSample extends AbstractBasicFinancialApplication
         }
 
         // example of extension point PaintAfter - Paint yellow square if the bar is selected by addon model attribute
-        candleStickRenderer.addPaintAfterEp((gc, ohlcvItem, localBarWidth, barWidthHalf,
-                                                    x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {
+        candleStickRenderer.addPaintAfterEp(d -> {
             // addon extension with MARK BAR settings
-            if (ohlcvItem.getAddon() != null) {
-                if (ohlcvItem.getAddon().getAttribute(MARK_BAR, false)) {
+            if (d.ohlcvItem.getAddon() != null) {
+                if (d.ohlcvItem.getAddon().getAttribute(MARK_BAR, false)) {
                     double yy;
-                    if (ohlcvItem.getClose() > ohlcvItem.getOpen()) {
-                        yy = yClose - (yClose - yOpen) / 2;
-                        gc.setFill(Color.CRIMSON);
+                    if (d.ohlcvItem.getClose() > d.ohlcvItem.getOpen()) {
+                        yy = d.yClose - (d.yClose - d.yOpen) / 2;
+                        d.gc.setFill(Color.CRIMSON);
                     } else {
-                        yy = yOpen - (yOpen - yClose) / 2;
-                        gc.setFill(Color.YELLOW);
+                        yy = d.yOpen - (d.yOpen - d.yClose) / 2;
+                        d.gc.setFill(Color.YELLOW);
                     }
-                    double rectCorr = barWidthHalf / 2.0;
-                    gc.fillRect(x0 - rectCorr, yy - rectCorr, rectCorr * 2.0, rectCorr * 2.0);
+                    double rectCorr = d.barWidthHalf / 2.0;
+                    d.gc.fillRect(d.xCenter - rectCorr, yy - rectCorr, rectCorr * 2.0, rectCorr * 2.0);
                 }
             }
         });

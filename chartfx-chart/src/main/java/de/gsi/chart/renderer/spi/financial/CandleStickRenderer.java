@@ -1,6 +1,7 @@
 package de.gsi.chart.renderer.spi.financial;
 
 import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
+import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -17,28 +18,44 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.renderer.Renderer;
+import de.gsi.chart.renderer.spi.financial.service.OhlcvRendererEpData;
+import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEP;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
- * Candlestick renderer
+ * <h1>Candlestick renderer</h1>
+ *<p>
+ * A candlestick chart (also called Japanese candlestick chart) is a style of financial chart used to describe price movements of a security,
+ * derivative, or currency.
+ *<p>
+ * If the asset closed higher than it opened, the body is hollow or unfilled, with the opening price at the bottom of the body and the closing price at the top.
+ * If the asset closed lower than it opened, the body is solid or filled, with the opening price at the top and the closing price at the bottom.
+ * Thus, the color of the candle represents the price movement relative to the prior period's close and the "fill" (solid or hollow)
+ * of the candle represents the price direction of the period in isolation (solid for a higher open and lower close; hollow for a lower open and a higher close).
+ * <p>
+ * A black/green (or red) candle represents a price action with a lower closing price than the prior candle's close.
+ * A white (or green) candle represents a higher closing price than the prior candle's close.
+ * <p>
+ * In practice, any color can be assigned to rising or falling price candles. A candlestick need not have either a body or a wick.
+ * Generally, the longer the body of the candle, the more intense the trading.
  *
  * @see <a href="https://www.investopedia.com/terms/c/candlestick.asp">Candlestick Investopedia</a>
+ *
+ * @author A.Fischer
  */
 @SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.ExcessiveParameterList" })
 // designated purpose of this class
 public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRenderer> implements Renderer {
-    private static final double SHADOW_LINE_WIDTH = 2.5;
-    private static final double SHADOW_TRANS_PERCENT = 0.5;
-
     private final boolean paintVolume;
     private final FindAreaDistances findAreaDistances;
 
-    protected List<PaintAfterEP> paintAfterEPS = new ArrayList<>();
+    protected List<RendererPaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     public CandleStickRenderer(boolean paintVolume) {
         this.paintVolume = paintVolume;
@@ -111,21 +128,29 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         int index = 0;
 
         for (final DataSet ds : localDataSetList) {
-            if (!(ds instanceof OhlcvDataSet))
+            if (ds.getDimension() > 7)
                 continue;
-            final OhlcvDataSet dataset = (OhlcvDataSet) ds;
             final int lindex = index;
 
-            dataset.lock().readLockGuardOptimistic(() -> {
+            ds.lock().readLockGuardOptimistic(() -> {
                 // update categories in case of category axes for the first (index == '0') indexed data set
                 if (lindex == 0 && xyChart.getXAxis() instanceof CategoryAxis) {
                     final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
-                    axis.updateCategories(dataset);
+                    axis.updateCategories(ds);
                 }
+                AttributeModelAware attrs = null;
+                if (ds instanceof AttributeModelAware) {
+                    attrs = (AttributeModelAware) ds;
+                }
+                IOhlcvItemAware itemAware = null;
+                if (ds instanceof IOhlcvItemAware) {
+                    itemAware = (IOhlcvItemAware) ds;
+                }
+                boolean isEpAvailable = !paintAfterEPS.isEmpty() || paintBarMarker != null;
 
                 gc.save();
                 // default styling level
-                String style = dataset.getStyle();
+                String style = ds.getStyle();
                 DefaultRenderColorScheme.setLineScheme(gc, style, lindex);
                 DefaultRenderColorScheme.setGraphicsContextAttributes(gc, style);
                 // financial styling level
@@ -137,49 +162,72 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
                 Color candleVolumeLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_LONG_COLOR, Color.rgb(139, 199, 194, 0.2));
                 Color candleVolumeShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_SHORT_COLOR, Color.rgb(235, 160, 159, 0.2));
                 double barWidthPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_CANDLESTICK_BAR_WIDTH_PERCENTAGE, 0.5d);
+                double shadowLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_LINE_WIDTH, 2.5d);
+                double shadowTransPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_TRANSPOSITION_PERCENT, 0.5d);
 
-                if (dataset.getDataCount() > 0) {
-                    int i = dataset.getXIndex(xmin);
-                    if (i < 0)
-                        i = 0;
+                if (ds.getDataCount() > 0) {
+                    int iMin = ds.getIndex(DIM_X, xmin);
+                    if (iMin < 0)
+                        iMin = 0;
+                    int iMax = Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount());
 
                     double[] distances = null;
                     double minRequiredWidth = 0.0;
                     if (lindex == 0) {
-                        distances = findAreaDistances(findAreaDistances, dataset, xAxis, yAxis, xmin, xmax);
+                        distances = findAreaDistances(findAreaDistances, ds, xAxis, yAxis, xmin, xmax);
                         minRequiredWidth = distances[0];
                     }
                     double localBarWidth = minRequiredWidth * barWidthPercent;
                     double barWidthHalf = localBarWidth / 2.0;
 
-                    for (; i < Math.min(dataset.getXIndex(xmax) + 1, dataset.getDataCount()); i++) {
-                        IOhlcvItem ohlcvItem = dataset.get(i);
-                        double x0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
-                        double yOpen = yAxis.getDisplayPosition(ohlcvItem.getOpen());
-                        double yClose = yAxis.getDisplayPosition(ohlcvItem.getClose());
-                        double yLow = yAxis.getDisplayPosition(ohlcvItem.getLow());
-                        double yHigh = yAxis.getDisplayPosition(ohlcvItem.getHigh());
+                    for (int i = iMin; i < iMax; i++) {
+                        double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                        double yOpen = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_OPEN, i));
+                        double yHigh = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_HIGH, i));
+                        double yLow = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_LOW, i));
+                        double yClose = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_CLOSE, i));
 
                         double yDiff = yOpen - yClose;
                         double yMin = yDiff > 0 ? yClose : yOpen;
 
+                        // prepare extension point data (if EPs available)
+                        OhlcvRendererEpData data = null;
+                        if (isEpAvailable) {
+                            data = new OhlcvRendererEpData();
+                            data.gc = gc;
+                            data.ds = ds;
+                            data.attrs = attrs;
+                            data.ohlcvItemAware = itemAware;
+                            data.ohlcvItem = itemAware != null ? itemAware.getItem(i) : null;
+                            data.index = i;
+                            data.barWidth = localBarWidth;
+                            data.barWidthHalf = barWidthHalf;
+                            data.xCenter = x0;
+                            data.yOpen = yOpen;
+                            data.yHigh = yHigh;
+                            data.yLow = yLow;
+                            data.yClose = yClose;
+                            data.yDiff = yDiff;
+                            data.yMin = yMin;
+                        }
+
                         // paint volume
                         if (paintVolume) {
                             assert distances != null;
-                            paintVolume(gc, candleVolumeLongColor, candleVolumeShortColor, yAxis, distances, localBarWidth, barWidthHalf, ohlcvItem, x0);
+                            paintVolume(gc, ds, i, candleVolumeLongColor, candleVolumeShortColor, yAxis, distances, localBarWidth, barWidthHalf, x0);
                         }
 
                         // paint shadow
                         if (candleShadowColor != null) {
                             double lineWidth = gc.getLineWidth();
                             paintCandleShadow(gc,
-                                    candleShadowColor,
+                                    candleShadowColor, shadowLineWidth, shadowTransPercent,
                                     localBarWidth, barWidthHalf, x0, yOpen, yClose, yLow, yHigh, yDiff, yMin);
                             gc.setLineWidth(lineWidth);
                         }
 
                         // choose color of the bar
-                        Paint barPaint = getPaintBarColor(ohlcvItem);
+                        Paint barPaint = getPaintBarColor(data);
 
                         if (yDiff > 0) {
                             gc.setFill(barPaint != null ? barPaint : candleLongColor);
@@ -198,8 +246,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
 
                         // extension point - paint after painting of candle
                         if (!paintAfterEPS.isEmpty()) {
-                            paintAfter(gc, ohlcvItem, localBarWidth, barWidthHalf,
-                                    x0, yOpen, yClose, yLow, yHigh, yDiff, yMin);
+                            paintAfter(data);
                         }
                     }
                 }
@@ -217,24 +264,11 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
     /**
      * Handle extension point PaintAfter
      *
-     * @param gc            GraphicsContext
-     * @param ohlcvItem     active domain object of ohlcv item
-     * @param localBarWidth width of bar
-     * @param barWidthHalf  half width of bar
-     * @param x0            the center of the bar for X coordination
-     * @param yOpen         coordination of Open price
-     * @param yClose        coordination of Close price
-     * @param yLow          coordination of Low price
-     * @param yHigh         coordination of High price
-     * @param yDiff         Difference of candle for painting candle body
-     * @param yMin          minimal coordination for painting of candle body
+     * @param data filled domain object which is provided to external extension points.
      */
-    protected void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double localBarWidth, double barWidthHalf,
-            double x0, double yOpen, double yClose, double yLow,
-            double yHigh, double yDiff, double yMin) {
-        for (PaintAfterEP paintAfterEP : paintAfterEPS) {
-            paintAfterEP.paintAfter(gc, ohlcvItem, localBarWidth, barWidthHalf,
-                    x0, yOpen, yClose, yLow, yHigh, yDiff, yMin);
+    protected void paintAfter(OhlcvRendererEpData data) {
+        for (RendererPaintAfterEP paintAfterEP : paintAfterEPS) {
+            paintAfterEP.paintAfter(data);
         }
     }
 
@@ -242,23 +276,25 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
      * Simple support for candle shadows painting. Without effects - performance problems.
      * The shadow has to be activated by parameter configuration candleShadowColor in css.
      *
-     * @param gc            GraphicsContext
-     * @param shadowColor   color for shadow
-     * @param localBarWidth width of bar
-     * @param barWidthHalf  half width of bar
-     * @param x0            the center of the bar for X coordination
-     * @param yOpen         coordination of Open price
-     * @param yClose        coordination of Close price
-     * @param yLow          coordination of Low price
-     * @param yHigh         coordination of High price
-     * @param yDiff         Difference of candle for painting candle body
-     * @param yMin          minimal coordination for painting of candle body
+     * @param gc                 GraphicsContext
+     * @param shadowColor        color for shadow
+     * @param shadowLineWidth    line width for painting shadow
+     * @param shadowTransPercent object transposition for painting shadow in percentage
+     * @param localBarWidth      width of bar
+     * @param barWidthHalf       half width of bar
+     * @param x0                 the center of the bar for X coordination
+     * @param yOpen              coordination of Open price
+     * @param yClose             coordination of Close price
+     * @param yLow               coordination of Low price
+     * @param yHigh              coordination of High price
+     * @param yDiff              Difference of candle for painting candle body
+     * @param yMin               minimal coordination for painting of candle body
      */
-    private void paintCandleShadow(GraphicsContext gc, Color shadowColor, double localBarWidth, double barWidthHalf,
+    protected void paintCandleShadow(GraphicsContext gc, Color shadowColor, double shadowLineWidth, double shadowTransPercent, double localBarWidth, double barWidthHalf,
             double x0, double yOpen, double yClose, double yLow,
             double yHigh, double yDiff, double yMin) {
-        double trans = SHADOW_TRANS_PERCENT * barWidthHalf;
-        gc.setLineWidth(SHADOW_LINE_WIDTH);
+        double trans = shadowTransPercent * barWidthHalf;
+        gc.setLineWidth(shadowLineWidth);
         gc.setFill(shadowColor);
         gc.setStroke(shadowColor);
         gc.strokeLine(x0 + trans, yLow + trans,
@@ -268,25 +304,14 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         gc.fillRect(x0 - barWidthHalf + trans, yMin + trans, localBarWidth, Math.abs(yDiff));
     }
 
-    // injections --------------------------------------------
+    //-------------- injections --------------------------------------------
 
     /**
      * Inject extension point for Paint after candle.
      *
      * @param paintAfterEP service
      */
-    public void addPaintAfterEp(PaintAfterEP paintAfterEP) {
+    public void addPaintAfterEp(RendererPaintAfterEP paintAfterEP) {
         paintAfterEPS.add(paintAfterEP);
-    }
-
-    /**
-     * Extension point service
-     * Placement: Paint After candle painting
-     */
-    @FunctionalInterface
-    public interface PaintAfterEP {
-        void paintAfter(GraphicsContext gc, IOhlcvItem ohlcvItem, double localBarWidth, double barWidthHalf,
-                double x0, double yOpen, double yClose, double yLow,
-                double yHigh, double yDiff, double yMin);
     }
 }

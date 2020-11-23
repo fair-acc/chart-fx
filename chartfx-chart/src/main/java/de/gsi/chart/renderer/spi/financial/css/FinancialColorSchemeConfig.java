@@ -26,7 +26,7 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
         // driven-by CandleStickRenderer
         if (renderer instanceof CandleStickRenderer) {
             switch (theme) {
-            case OLDSCHOOL:
+            case CLASSIC:
                 dataSet.setStyle("strokeWidth=1.6; candleLongColor=green; candleShortColor=red; candleLongWickColor=green; "
                                  + "candleShortWickColor=red; candleVolumeLongColor=rgba(139,199,194,0.4); candleVolumeShortColor=rgba(235,160,159,0.4)");
                 break;
@@ -53,7 +53,7 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
         // driven-by HighLowRenderer
         else if (renderer instanceof HighLowRenderer) {
             switch (theme) {
-            case OLDSCHOOL:
+            case CLASSIC:
                 dataSet.setStyle("highLowBodyLineWidth=1.6; highLowTickLineWidth=2.0; highLowLongColor=green; highLowLongTickColor=green; "
                                  + "highLowShortColor=red; highLowShortTickColor=red; highLowVolumeLongColor=rgba(139,199,194,0.4); highLowVolumeShortColor=rgba(235,160,159,0.4)");
                 break;
@@ -96,7 +96,7 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
         // predefine axis, grid, an additional chart params
         switch (theme) {
         case CLEARLOOK:
-        case OLDSCHOOL:
+        case CLASSIC:
             // not yet specific configuration
             break;
 

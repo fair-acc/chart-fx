@@ -6,6 +6,7 @@ import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConsta
 
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,8 +20,10 @@ import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
+import de.gsi.chart.renderer.spi.financial.service.PaintBarMarker;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 
 @ExtendWith(ApplicationExtension.class)
@@ -53,14 +56,10 @@ public class CandleStickRendererTest {
         chart.getRenderers().add(renderer);
 
         // PaintBar extension usage
-        renderer.setPaintBarMarker(
-                ohlcvItem -> ohlcvItem.getOpen() - ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null);
+        renderer.setPaintBarMarker(d -> d.ohlcvItem.getOpen() - d.ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null);
 
         // Extension point usage
-        renderer.addPaintAfterEp((gc, ohlcvItem, localBarWidth, barWidthHalf,
-                                         x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {
-            assertNotNull(gc);
-        });
+        renderer.addPaintAfterEp(data -> assertNotNull(data.gc));
 
         new FinancialColorSchemeConfig().applyTo(SAND, chart);
 
@@ -81,13 +80,5 @@ public class CandleStickRendererTest {
     @Test
     void getThis() {
         assertEquals(CandleStickRenderer.class, renderer.getThis().getClass());
-    }
-
-    @Test
-    void addPaintAfterEp() {
-        // just check that call of method
-        renderer.addPaintAfterEp((gc, ohlcvItem, localBarWidth, barWidthHalf,
-                                         x0, yOpen, yClose, yLow, yHigh, yDiff, yMin) -> {});
-        assertFalse(renderer.paintAfterEPS.isEmpty());
     }
 }
