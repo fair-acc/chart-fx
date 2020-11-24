@@ -39,7 +39,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  * Thus, the color of the candle represents the price movement relative to the prior period's close and the "fill" (solid or hollow)
  * of the candle represents the price direction of the period in isolation (solid for a higher open and lower close; hollow for a lower open and a higher close).
  * <p>
- * A black/green (or red) candle represents a price action with a lower closing price than the prior candle's close.
+ * A black (or red) candle represents a price action with a lower closing price than the prior candle's close.
  * A white (or green) candle represents a higher closing price than the prior candle's close.
  * <p>
  * In practice, any color can be assigned to rising or falling price candles. A candlestick need not have either a body or a wick.
@@ -128,7 +128,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         int index = 0;
 
         for (final DataSet ds : localDataSetList) {
-            if (ds.getDimension() > 7)
+            if (ds.getDimension() < 7)
                 continue;
             final int lindex = index;
 

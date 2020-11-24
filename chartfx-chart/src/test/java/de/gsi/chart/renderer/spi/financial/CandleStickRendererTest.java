@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.opentest4j.AssertionFailedError;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
@@ -21,24 +22,23 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
+import de.gsi.chart.ui.utils.TestFx;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 public class CandleStickRendererTest {
-    private OhlcvDataSet ohlcvDataSet;
-    private CandleStickRenderer renderer;
-
-    @BeforeEach
-    public void setUp() {
-        ohlcvDataSet = new OhlcvDataSet("ohlc1");
-        ohlcvDataSet.setData(FinancialTestUtils.createTestOhlcv());
-        renderer = new CandleStickRenderer(true);
-    }
+    private CandleStickRenderer rendererTested;
+    private XYChart chart;
 
     @Start
     public void start(Stage stage) throws Exception {
-        setUp();
+        OhlcvDataSet ohlcvDataSet = new OhlcvDataSet("ohlc1");
+        ohlcvDataSet.setData(FinancialTestUtils.createTestOhlcv());
+        rendererTested = new CandleStickRenderer(true);
+
         // check flow in the category too
         final CategoryAxis xAxis = new CategoryAxis("time [iso]");
         xAxis.setTickLabelRotation(90);
@@ -47,21 +47,50 @@ public class CandleStickRendererTest {
         final DefaultNumericAxis yAxis = new DefaultNumericAxis("price", "points");
 
         // prepare chart structure
-        XYChart chart = new XYChart(xAxis, yAxis);
+        chart = new XYChart(xAxis, yAxis);
 
-        renderer.getDatasets().add(ohlcvDataSet);
-        chart.getRenderers().add(renderer);
+        rendererTested.getDatasets().add(ohlcvDataSet);
+        chart.getRenderers().add(rendererTested);
 
         // PaintBar extension usage
-        renderer.setPaintBarMarker(d -> d.ohlcvItem.getOpen() - d.ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null);
+        rendererTested.setPaintBarMarker(d -> d.ohlcvItem != null ? d.ohlcvItem.getOpen() - d.ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null : null);
 
         // Extension point usage
-        renderer.addPaintAfterEp(data -> assertNotNull(data.gc));
+        rendererTested.addPaintAfterEp(data -> assertNotNull(data.gc));
 
         new FinancialColorSchemeConfig().applyTo(SAND, chart);
 
         stage.setScene(new Scene(chart));
         stage.show();
+    }
+
+    @TestFx
+    public void checkMinimalDimRequired() {
+        rendererTested.getDatasets().clear();
+        rendererTested.getDatasets().add(new AbstractDataSet<OhlcvDataSet>("testDim", 6) {
+            @Override
+            public double get(int dimIndex, int index) {
+                return 0;
+            }
+
+            @Override
+            public int getDataCount() {
+                return 1;
+            }
+
+            @Override
+            public DataSet set(DataSet other, boolean copy) {
+                return null;
+            }
+        });
+        var ref = new Object() {
+            AssertionFailedError e = null;
+        };
+        rendererTested.addPaintAfterEp(data -> ref.e = new AssertionFailedError("The renderer method cannot be call, because dimensions are lower as required!"));
+        chart.layoutChildren();
+        if (ref.e != null) {
+            throw ref.e;
+        }
     }
 
     @Test
@@ -76,6 +105,6 @@ public class CandleStickRendererTest {
 
     @Test
     void getThis() {
-        assertEquals(CandleStickRenderer.class, renderer.getThis().getClass());
+        assertEquals(CandleStickRenderer.class, rendererTested.getThis().getClass());
     }
 }

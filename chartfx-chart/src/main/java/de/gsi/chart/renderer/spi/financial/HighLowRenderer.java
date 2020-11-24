@@ -123,7 +123,7 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
         int index = 0;
 
         for (final DataSet ds : localDataSetList) {
-            if (ds.getDimension() > 7)
+            if (ds.getDimension() < 7)
                 continue;
             final int lindex = index;
 
