@@ -1,9 +1,6 @@
 package de.gsi.chart.utils;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Map;
 
@@ -72,6 +69,8 @@ class StyleParserTest {
 
         assertEquals(Color.web("red"), StyleParser.getColorPropertyValue(testStyle, "color2"));
         assertEquals(Color.web("red"), StyleParser.getColorPropertyValue("color=red", "color"));
+        assertEquals(Color.web("black"), StyleParser.getColorPropertyValue("color=black", "borderColor", Color.web("black")));
+        assertEquals(Color.web("black"), StyleParser.getColorPropertyValue("color=black", "color", Color.web("white")));
         assertEquals(null, StyleParser.getColorPropertyValue("color=red", "color2"));
         assertEquals(null, StyleParser.getColorPropertyValue("color=reddish", "color"));
         assertEquals(null, StyleParser.getColorPropertyValue(testStyle, null));
@@ -80,10 +79,12 @@ class StyleParserTest {
 
         assertEquals(2, StyleParser.getIntegerPropertyValue(testStyle, "index1"));
         assertEquals(0xFE, StyleParser.getIntegerPropertyValue(testStyle, "index2"));
-        assertEquals(10e7, StyleParser.getFloatingDecimalPropertyValue(testStyle, "float1"));
-        assertEquals(10.333, StyleParser.getFloatingDecimalPropertyValue(testStyle, "float2"));
-        assertEquals(0.1, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float1"));
+        assertEquals(10e7, StyleParser.getFloatingDecimalPropertyValue(testStyle, "float1"), 1e-5);
+        assertEquals(10.333, StyleParser.getFloatingDecimalPropertyValue(testStyle, "float2"), 1e-5);
+        assertEquals(0.1, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float1"), 1e-5);
         assertEquals(null, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float2"));
+        assertEquals(11.0, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float2", 11.0), 1e-5);
+        assertEquals(0.1, StyleParser.getFloatingDecimalPropertyValue("float1=0.1", "float1", 11.0), 1e-5);
 
         assertEquals(true, StyleParser.getBooleanPropertyValue(testStyle, "bool1"));
         assertEquals(null, StyleParser.getBooleanPropertyValue(testStyle, null));

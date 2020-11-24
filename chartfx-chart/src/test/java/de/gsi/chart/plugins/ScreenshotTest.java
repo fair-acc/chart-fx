@@ -1,8 +1,6 @@
 package de.gsi.chart.plugins;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -15,6 +13,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.DataFormat;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
@@ -26,6 +25,7 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import de.gsi.chart.XYChart;
+import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 
@@ -136,6 +136,9 @@ class ScreenshotTest {
             assertEquals("testDataSet_4.5_4.500000e-06.png", screenshotPlugin.generateScreenshotName());
             screenshotPlugin.setPattern("");
             chart.setTitle("");
+            chart.setTitleSide(Side.RIGHT);
+            chart.setTitlePaint(Color.BLUE);
+
             assertEquals("testDataSet", screenshotPlugin.generateScreenshotName()); //first data set name
             chart.getDatasets().clear();
             chart.setId("");

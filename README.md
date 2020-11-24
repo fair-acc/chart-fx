@@ -11,7 +11,7 @@
 # ChartFx
 
 ChartFx is a scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
-Based on earlier Swing-based designs used at GSI and CERN, it is a re-write of JavaFX's default [Chart](https://docs.oracle.com/javase/8/javafx/api/javafx/scene/chart/Chart.html) implementation and aims to preserve the feature-rich and extensible functionality of earlier and other similar Swing-based libraries while addressing the performance bottlenecks and API issues. 
+Based on earlier Swing-based designs used at GSI and CERN, it is a re-write of JavaFX's default [Chart](https://docs.oracle.com/javase/8/javafx/api/javafx/scene/chart/Chart.html) implementation and aims to preserve the feature-rich and extensible functionality of earlier and other similar Swing-based libraries while addressing the performance bottlenecks and API issues.
 The motivation for the re-design has been presented at [IPAC'19](https://ipac19.org/) ([paper](docs/THPRB028.pdf), [poster](docs/THPRB028_poster.pdf)).
 
 <figure>
@@ -234,6 +234,28 @@ mvn exec:java
 
 </table>
 
+### Financial related examples
+Financial charts are types of charts that visually track various business and financial metrics like liquidity, price movement, expenses, cash flow, and others over a given a period of the time. Financial charts are a great way to express a story about business or financial markets (instruments, financial assets).
+
+The chart-fx samples submodule contains financial charts and toolbox samples.
+
+If you want to try them yourself run:
+
+```bash
+mvn compile install
+mvn exec:java
+```
+
+<table>
+<tr>
+<td><figure><img src="docs/pics/FinancialCandlestickSample.png" alt="FinancialCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/financial/FinancialCandlestickSample.java">FinancialCandlestickSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/FinancialHiLowSample.png" alt="FinancialHiLowSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/financial/FinancialHiLowSample.java">FinancialHiLowSample.java</a></figcaption></figure></td>
+</tr>
+<tr>
+<td><figure><img src="docs/pics/FinancialAdvancedCandlestickSample.png" alt="FinancialAdvancedCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/financial/FinancialAdvancedCandlestickSample.java">FinancialAdvancedCandlestickSample.java</a></figcaption></figure></td>
+</tr>
+</table>
+
 ### Math- & Signal-Processing related examples
 The math samples can be started by running:
 
@@ -288,7 +310,7 @@ Besides the extended functionality outlined above, the ChartFx optimisation goal
   	<img src="docs/pics/chartfx-performance1a.png" alt="JavaFX-ChartFx performance comparison for 2 Hz" width=90%/>
   	<figcaption>Performance comparison @ 2 Hz update rate.</figcaption>
 </figure></td></tr>
-</table> 
+</table>
 
 While the ChartFx implementation already achieved a better functionality and a by two orders of magnitude improved performance for very large datasets, the basic test scenario has also been checked against popular existing Java-Swing and non-Java based UI charting frameworks. The Figure below provides a summary of the evaluated chart libraries for update rates at 25 Hz and 1k samples.
 
@@ -300,8 +322,8 @@ While the ChartFx implementation already achieved a better functionality and a b
 </figure>
 
 ## Some thoughts
-While starting out to improve the JDK's JavaFX Chart functionality and performance through initially extending, then gradually replacing bottle-necks, and eventually re-designing and replacing the original implementations, the resulting ChartFx library provides a substantially larger functionality and achieved an about two orders of magnitude performance improvement. 
-Nevertheless, improved functionality aside, a direct performance comparison even for the best-case JavaFX scenario (static axes) with other non-JavaFX libraries demonstrated the raw JavaFX graphics performance -- despite the redesign -- being still behind the existing Java Swing-based JDataViewer and most noticeable the Qt Charts implementations. The library will continued to be maintained here at GitHub and further used for existing and future JavaFX-based control room UIs at GSI. 
+While starting out to improve the JDK's JavaFX Chart functionality and performance through initially extending, then gradually replacing bottle-necks, and eventually re-designing and replacing the original implementations, the resulting ChartFx library provides a substantially larger functionality and achieved an about two orders of magnitude performance improvement.
+Nevertheless, improved functionality aside, a direct performance comparison even for the best-case JavaFX scenario (static axes) with other non-JavaFX libraries demonstrated the raw JavaFX graphics performance -- despite the redesign -- being still behind the existing Java Swing-based JDataViewer and most noticeable the Qt Charts implementations. The library will continued to be maintained here at GitHub and further used for existing and future JavaFX-based control room UIs at GSI.
 The gained experience and interfaces will provide a starting point for a planned C++-based counter-part implementation using Qt or another suitable low-level charting library.
 
 ## Working on the source
@@ -354,7 +376,7 @@ The Plugin Base class provides you with access to the chart object using `getCha
 Your plugin should always add a Listener to the chartProperty, because when it is created there will not be an associated
 chart, so at creation time, calls to e.g. `getChart()` will return null.
 Using a custom plugin boils down to adding it to the chart by doing `chart.getPlugins().add(new MyPlugin())`.
-If you wrote a plugin which might be useful for other users of chart-fx please consider doing a pull request against chart-fx. 
+If you wrote a plugin which might be useful for other users of chart-fx please consider doing a pull request against chart-fx.
 
 Renderers are the components which do the actual heavy lifting in drawing the components of the graph to the canvas.
 A chart can have multiple renderers added using `chart.getRenderers().add(...)`
