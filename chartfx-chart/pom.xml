@@ -12,6 +12,9 @@
     <groupId>de.gsi.chart</groupId>
     <artifactId>chartfx-chart</artifactId>
     <name>chartfx-chart</name>
+    <properties>
+        <project.moduleName>de.gsi.chartfx.chart</project.moduleName>
+    </properties>
 
     <description>This charting library ${project.artifactId}- is an extension
 		in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities.

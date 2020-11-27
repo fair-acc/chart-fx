@@ -12,6 +12,9 @@
     <groupId>de.gsi.math</groupId>
     <artifactId>chartfx-math</artifactId>
     <name>math</name>
+    <properties>
+        <project.moduleName>de.gsi.chartfx.math</project.moduleName>
+    </properties>
 
     <description>
         A small set of math routines that can operate directly on the DataSet primitive for fitting,

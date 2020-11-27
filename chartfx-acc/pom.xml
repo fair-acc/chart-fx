@@ -11,6 +11,9 @@
     <groupId>de.gsi.acc</groupId>
     <artifactId>chartfx-acc</artifactId>
     <name>acc</name>
+    <properties>
+        <project.moduleName>de.gsi.chartfx.acc</project.moduleName>
+    </properties>
 
     <description>
         Collection of accelerator specific widget and functionalities that directly depend on chart-fx or which no other suitable place has been identified (yet).

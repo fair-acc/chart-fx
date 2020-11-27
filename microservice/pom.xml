@@ -23,6 +23,7 @@
         <micrometer.version>1.5.1</micrometer.version>
         <velocity.version>2.0</velocity.version>
         <okHttp3.version>4.8.1</okHttp3.version>
+        <project.moduleName>de.gsi.microservice</project.moduleName>
     </properties>
 
     <dependencies>

@@ -34,6 +34,7 @@
         <changelist>-SNAPSHOT</changelist>
         <sha1 />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.moduleName>de.gsi.chartfx</project.moduleName>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
@@ -127,7 +128,7 @@
                                 <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             </manifest>
                             <manifestEntries>
-                              <Automatic-Module-Name>${project.groupId}.${project.artifactId}</Automatic-Module-Name>
+                              <Automatic-Module-Name>${project.moduleName}</Automatic-Module-Name>
                             </manifestEntries>
                         </archive>
                     </configuration>
