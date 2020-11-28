@@ -238,6 +238,10 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
                 }
                 gc.restore();
             });
+            // possibility to re-arrange y-axis by min/max of dataset (after paint)
+            if (computeLocalRange()) {
+                applyLocalYRange(ds, yAxis, xmin, xmax);
+            }
             index++;
         }
         if (ProcessingProfiler.getDebugState()) {

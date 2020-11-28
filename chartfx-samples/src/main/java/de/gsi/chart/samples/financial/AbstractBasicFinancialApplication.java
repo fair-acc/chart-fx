@@ -1,51 +1,81 @@
 package de.gsi.chart.samples.financial;
 
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Calendar;
-
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.Pane;
-import javafx.stage.Stage;
-
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
+import de.gsi.chart.axes.AxisMode;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.axes.spi.format.DefaultTimeFormatter;
+import de.gsi.chart.plugins.ChartPlugin;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.EditAxis;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.spi.financial.AbstractFinancialRenderer;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeAware;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
+import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.service.CalendarUtils;
 import de.gsi.chart.samples.financial.service.SimpleOhlcvDailyParser;
+import de.gsi.chart.samples.financial.service.SimpleOhlcvReplayDataSet;
+import de.gsi.chart.samples.financial.service.SimpleOhlcvReplayDataSet.DataInput;
+import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
+import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.utils.ProcessingProfiler;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.time.ZoneOffset;
+import java.util.Arrays;
+import java.util.Calendar;
+
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
+import static de.gsi.chart.ui.ProfilerInfoBox.DebugLevel.VERSION;
 
 public abstract class AbstractBasicFinancialApplication extends Application {
-    protected static final int prefChartWidth = 640; //1024
-    protected static final int prefChartHeight = 480; //768
-    protected static final int prefSceneWidth = 1920;
-    protected static final int prefSceneHeight = 1080;
 
-    protected static String resource = "@ES-[TF1D]";
-    protected static String timeRange = "2020/08/24-2020/11/12";
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicFinancialApplication.class);
+
+    protected int prefChartWidth = 640; //1024
+    protected int prefChartHeight = 480; //768
+    protected int prefSceneWidth = 1920;
+    protected int prefSceneHeight = 1080;
+
+    private final double UPDATE_PERIOD = 1.0; // replay multiple
+    protected int DEBUG_UPDATE_RATE = 500;
+
+    protected String resource = "@ES-[TF1D]";
+    protected String timeRange = "2020/08/24 0:00-2020/11/12 0:00";
+    protected String tt;
+    protected String replayFrom;
+    protected IntradayPeriod period;
+    protected OhlcvDataSet ohlcvDataSet;
 
     // injection
     private final FinancialColorSchemeAware financialColorScheme = new FinancialColorSchemeConfig();
+
+    private final Spinner<Double> updatePeriod = new Spinner<>(1.0, 500.0, UPDATE_PERIOD, 1.0);
+    private final CheckBox localRange = new CheckBox("auto-y");
+
+    private boolean timerActivated = false;
 
     @Override
     public void start(final Stage primaryStage) {
@@ -57,7 +87,6 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
         startTime = ProcessingProfiler.getTimeStamp();
 
-        // create and prepare chart to the root
         Pane root = prepareCharts();
 
         final Scene scene = new Scene(root, prefSceneWidth, prefSceneHeight);
@@ -66,9 +95,61 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         startTime = ProcessingProfiler.getTimeStamp();
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> Platform.exit());
+        primaryStage.setOnCloseRequest(this::closeDemo);
         primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
+
+        // ensure correct state after restart demo
+        stopTimer();
+    }
+
+    protected void closeDemo(final WindowEvent evt) {
+        if (evt.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST) && LOGGER.isInfoEnabled()) {
+            LOGGER.atInfo().log("requested demo to shut down");
+        }
+        stopTimer();
+        Platform.exit();
+    }
+
+    protected ToolBar getTestToolBar(Chart chart, AbstractFinancialRenderer<?> renderer, boolean replaySupport) {
+        ToolBar testVariableToolBar = new ToolBar();
+        localRange.setSelected(renderer.computeLocalRange());
+        localRange.setTooltip(new Tooltip("select for auto-adjusting min/max the y-axis (prices)"));
+        localRange.selectedProperty().bindBidirectional(renderer.computeLocalRangeProperty());
+        localRange.selectedProperty().addListener((ch, old, selection) -> {
+            for (ChartPlugin plugin : chart.getPlugins()) {
+                if (plugin instanceof Zoomer) {
+                    ((Zoomer) plugin).setAxisMode(selection ? AxisMode.X : AxisMode.XY);
+                }
+            }
+            chart.requestLayout();
+        });
+
+        Button periodicTimer = null;
+        if (replaySupport) {
+            // repetitively generate new data
+            periodicTimer = new Button("replay");
+            periodicTimer.setTooltip(new Tooltip("replay instrument data in realtime"));
+            periodicTimer.setOnAction(evt -> pauseResumeTimer());
+
+            updatePeriod.valueProperty().addListener((ch, o, n) -> updateTimer());
+            updatePeriod.setEditable(true);
+            updatePeriod.setPrefWidth(80);
+        }
+
+        final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox(DEBUG_UPDATE_RATE);
+        profilerInfoBox.setDebugLevel(VERSION);
+
+        final Pane spacer = new Pane();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+
+        if (replaySupport) {
+            testVariableToolBar.getItems().addAll(localRange, periodicTimer, updatePeriod, new Label("[multiply]"), spacer, profilerInfoBox);
+        } else {
+            testVariableToolBar.getItems().addAll(localRange, spacer, profilerInfoBox);
+        }
+
+        return testVariableToolBar;
     }
 
     /**
@@ -89,12 +170,30 @@ public abstract class AbstractBasicFinancialApplication extends Application {
      */
     protected Chart getDefaultFinancialTestChart(final String theme) {
         // load datasets
-        final OhlcvDataSet ohlcvDataSet = new OhlcvDataSet(resource);
-        final DefaultDataSet indiSet = new DefaultDataSet("MA(24)");
-        try {
-            loadTestData(resource, ohlcvDataSet, indiSet);
-        } catch (IOException e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
+        DefaultDataSet indiSet = null;
+        if (resource.startsWith("REALTIME")) {
+            try {
+                Interval<Calendar> timeRangeInt = CalendarUtils.createByDateTimeInterval(timeRange);
+                Interval<Calendar> ttInt = CalendarUtils.createByTimeInterval(tt);
+                Calendar replayFromCal = CalendarUtils.createByDateTime(replayFrom);
+                ohlcvDataSet = new SimpleOhlcvReplayDataSet(
+                        DataInput.valueOf(resource.substring("REALTIME-".length())),
+                        period,
+                        timeRangeInt,
+                        ttInt,
+                        replayFromCal
+                );
+            } catch (ParseException e) {
+                throw new IllegalArgumentException(e.getMessage(), e);
+            }
+        } else {
+            ohlcvDataSet = new OhlcvDataSet(resource);
+            indiSet = new DefaultDataSet("MA(24)");
+            try {
+                loadTestData(resource, ohlcvDataSet, indiSet);
+            } catch (IOException e) {
+                throw new IllegalArgumentException(e.getMessage(), e);
+            }
         }
 
         // prepare axis
@@ -102,6 +201,12 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         xAxis1.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
         xAxis1.setAutoRangeRounding(false);
         xAxis1.setTimeAxis(true);
+
+        // set localised time offset
+        if (xAxis1.isTimeAxis() && xAxis1.getAxisLabelFormatter() instanceof DefaultTimeFormatter) {
+            final DefaultTimeFormatter axisFormatter = (DefaultTimeFormatter) xAxis1.getAxisLabelFormatter();
+            axisFormatter.setTimeZoneOffset(ZoneOffset.ofHoursMinutes(2, 0));
+        }
 
         // category axis support tests
         //final CategoryAxis xAxis = new CategoryAxis("time [iso]");
@@ -119,7 +224,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         chart.setAnimated(false);
 
         // prepare plugins
-        chart.getPlugins().add(new Zoomer());
+        chart.getPlugins().add(new Zoomer(AxisMode.X));
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new DataPointTooltip());
 
@@ -139,7 +244,9 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         }
 
         // zoom to specific time range
-        showPredefinedTimeRange(timeRange, ohlcvDataSet, xAxis1, yAxis1);
+        if (timeRange != null) {
+            showPredefinedTimeRange(timeRange, ohlcvDataSet, xAxis1, yAxis1);
+        }
 
         return chart;
     }
@@ -150,9 +257,9 @@ public abstract class AbstractBasicFinancialApplication extends Application {
     protected void showPredefinedTimeRange(String dateIntervalPattern, OhlcvDataSet ohlcvDataSet,
             DefaultNumericAxis xaxis, DefaultNumericAxis yaxis) {
         try {
-            Calendar[] fromTo = CalendarUtils.createByDateInterval(dateIntervalPattern);
-            double fromTime = fromTo[0].getTime().getTime() / 1000.0;
-            double toTime = fromTo[1].getTime().getTime() / 1000.0;
+            Interval<Calendar> fromTo = CalendarUtils.createByDateTimeInterval(dateIntervalPattern);
+            double fromTime = fromTo.from.getTime().getTime() / 1000.0;
+            double toTime = fromTo.to.getTime().getTime() / 1000.0;
 
             int fromIdx = ohlcvDataSet.getXIndex(fromTime);
             int toIdx = ohlcvDataSet.getXIndex(toTime);
@@ -167,13 +274,11 @@ public abstract class AbstractBasicFinancialApplication extends Application {
                     min = ohlcvItem.getLow();
                 }
             }
-            xaxis.setAutoRanging(false);
             xaxis.set(fromTime, toTime);
-            yaxis.setAutoRanging(false);
             yaxis.set(min, max);
 
-            xaxis.forceRedraw();
-            yaxis.forceRedraw();
+            xaxis.setAutoRanging(false);
+            yaxis.setAutoRanging(false);
 
         } catch (ParseException e) {
             throw new IllegalArgumentException(e.getMessage(), e);
@@ -211,6 +316,38 @@ public abstract class AbstractBasicFinancialApplication extends Application {
      * @param chart for applying renderers
      */
     protected abstract void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet);
+
+    //--------- replay support ---------
+
+    private void pauseResumeTimer() {
+        if (!timerActivated) {
+            startTimer();
+        } else if (ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
+            ((SimpleOhlcvReplayDataSet) ohlcvDataSet).pauseResume();
+        }
+    }
+
+    private void updateTimer() {
+        if (timerActivated) {
+            startTimer();
+        }
+    }
+
+    private void startTimer() {
+        if (ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
+            SimpleOhlcvReplayDataSet realtimeDataSet = (SimpleOhlcvReplayDataSet) ohlcvDataSet;
+            realtimeDataSet.setUpdatePeriod(updatePeriod.getValue());
+            timerActivated = true;
+        }
+    }
+
+    private void stopTimer() {
+        if (timerActivated && ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
+            timerActivated = false;
+            SimpleOhlcvReplayDataSet realtimeDataSet = (SimpleOhlcvReplayDataSet) ohlcvDataSet;
+            realtimeDataSet.stop();
+        }
+    }
 
     /**
      * @param args the command line arguments

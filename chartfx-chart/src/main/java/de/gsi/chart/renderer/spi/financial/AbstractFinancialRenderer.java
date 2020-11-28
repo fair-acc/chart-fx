@@ -1,9 +1,5 @@
 package de.gsi.chart.renderer.spi.financial;
 
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.AbstractDataSetManagement;
@@ -11,6 +7,15 @@ import de.gsi.chart.renderer.spi.financial.service.OhlcvRendererEpData;
 import de.gsi.chart.renderer.spi.financial.service.PaintBarMarker;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * The ancestor for common financial renderers.
@@ -24,6 +29,35 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 @SuppressWarnings({ "PMD.ExcessiveParameterList" })
 public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractDataSetManagement<R> implements Renderer {
     protected PaintBarMarker paintBarMarker;
+
+    private final BooleanProperty computeLocalYRange = new SimpleBooleanProperty(this, "computeLocalYRange", true);
+
+    /**
+     * Indicates if the chart should compute the min/max y-Axis for the local (true) or global (false) visible range
+     *
+     * @return computeLocalRange property
+     */
+    public BooleanProperty computeLocalRangeProperty() {
+        return computeLocalYRange;
+    }
+
+    /**
+     * Returns the value of the {@link #computeLocalRangeProperty()}.
+     *
+     * @return {@code true} if the local range calculation is applied, {@code false} otherwise
+     */
+    public boolean computeLocalRange() {
+        return computeLocalRangeProperty().get();
+    }
+
+    /**
+     * Sets the value of the {@link #computeLocalRangeProperty()}.
+     *
+     * @param value {@code true} if the local range calculation is applied, {@code false} otherwise
+     */
+    public void setComputeLocalRange(final boolean value) {
+        computeLocalRangeProperty().set(value);
+    }
 
     /**
      * Inject PaintBar Marker service
@@ -93,6 +127,31 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
         gc.fillRect(x0 - barWidthHalf, min + zzVolume, barWidth, -zzVolume);
     }
 
+    /**
+     * Re-arrange y-axis by min/max of dataset
+     *
+     * @param ds    DataSet domain object which contains volume data
+     * @param yAxis Y-Axis DO
+     * @param xmin  actual minimal point of x-axis
+     * @param xmax  acutal maximal point of x-axis
+     */
+    protected void applyLocalYRange(DataSet ds, Axis yAxis, double xmin, double xmax) {
+        double minYRange = Double.MAX_VALUE;
+        double maxYRange = Double.MIN_VALUE;
+        for (int i = ds.getIndex(DataSet.DIM_X, xmin) + 1; i < Math.min(ds.getIndex(DataSet.DIM_X, xmax) + 1, ds.getDataCount()); i++) {
+            double low = ds.get(OhlcvDataSet.DIM_Y_LOW, i);
+            double high = ds.get(OhlcvDataSet.DIM_Y_HIGH, i);
+            if (minYRange > low) {
+                minYRange = low;
+            }
+            if (maxYRange < high) {
+                maxYRange = high;
+            }
+        }
+        double space = (maxYRange - minYRange) * 0.05;
+        yAxis.set(minYRange - space, maxYRange + space);
+    }
+
     // services --------------------------------------------------------
 
     @FunctionalInterface
@@ -103,36 +162,68 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
     protected static class XMinAreaDistances implements FindAreaDistances {
         @Override
         public double[] findAreaDistances(DataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
-            double minDistance = Integer.MAX_VALUE;
-            for (int i = dataset.getIndex(DataSet.DIM_X, xmin) + 1; i < Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1, dataset.getDataCount()); i++) {
+            int imin = dataset.getIndex(DataSet.DIM_X, xmin) + 1;
+            int imax = Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1, dataset.getDataCount());
+            int diff = imax - imin;
+            int incr = diff > 30 ? (int)Math.round(Math.floor(diff / 30.0)) : 1;
+            List<Double> distances = new ArrayList<>();
+            for (int i = imin; i < imax; i= i + incr) {
                 final double param0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i - 1));
                 final double param1 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
-
                 if (param0 != param1) {
-                    minDistance = Math.min(minDistance, Math.abs(param1 - param0));
+                    distances.add(Math.abs(param1 - param0));
                 }
             }
-            return new double[] { minDistance };
+            double popularDistance = 0.0;
+            if (!distances.isEmpty()) {
+                Collections.sort(distances);
+                popularDistance = getMostPopularElement(distances);
+            }
+            return new double[] { popularDistance };
         }
     }
 
     protected static class XMinVolumeMaxAreaDistances implements FindAreaDistances {
         @Override
         public double[] findAreaDistances(DataSet dataset, Axis xAxis, Axis yAxis, double xmin, double xmax) {
-            double minDistance = Integer.MAX_VALUE;
-            double maxVolume = Integer.MIN_VALUE;
-            for (int i = dataset.getIndex(DataSet.DIM_X, xmin) + 1; i < Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1, dataset.getDataCount()); i++) {
-                final double param0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i - 1));
-                final double param1 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
+            // get most popular are distance
+            double[] xminAreaDistances = new XMinAreaDistances().findAreaDistances(dataset, xAxis, yAxis, xmin, xmax);
+            // find max volume
+            double maxVolume = Double.MIN_VALUE;
+            int imin = dataset.getIndex(DataSet.DIM_X, xmin) + 1;
+            int imax = Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1, dataset.getDataCount());
+            for (int i = imin; i < imax; i++) {
                 double volume = dataset.get(OhlcvDataSet.DIM_Y_VOLUME, i);
                 if (maxVolume < volume) {
                     maxVolume = volume;
                 }
-                if (param0 != param1) {
-                    minDistance = Math.min(minDistance, Math.abs(param1 - param0));
-                }
             }
-            return new double[] { minDistance, maxVolume };
+            return new double[] { xminAreaDistances[0], maxVolume };
         }
+    }
+
+    protected static Double getMostPopularElement(List<Double> a) {
+        int counter = 0;
+        int maxcounter = -1;
+        Double curr;
+        Double maxvalue;
+        maxvalue = curr = a.get(0);
+        for (Double e : a) {
+            if (Math.abs(curr - e) < 1e-10) {
+                counter++;
+            } else {
+                if (counter > maxcounter) {
+                    maxcounter = counter;
+                    maxvalue = curr;
+                }
+                counter = 0;
+                curr = e;
+            }
+        }
+        if (counter > maxcounter) {
+            maxvalue = curr;
+        }
+
+        return maxvalue;
     }
 }
