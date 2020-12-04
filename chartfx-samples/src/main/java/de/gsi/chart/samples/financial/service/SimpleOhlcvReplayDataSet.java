@@ -7,6 +7,7 @@ import de.gsi.chart.samples.financial.service.consolidate.IncrementalOhlcvConsol
 import de.gsi.chart.samples.financial.service.consolidate.OhlcvTimeframeConsolidation;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
 import de.gsi.dataset.event.AddedDataEvent;
+import de.gsi.dataset.spi.financial.OhlcvChangeListener;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
@@ -18,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * Very simple financial replay data set.
@@ -43,6 +46,8 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
     protected transient TickOhlcvDataProvider tickOhlcvDataProvider;
     protected transient IncrementalOhlcvConsolidation consolidation;
 
+    protected Set<OhlcvChangeListener> ohlcvChangeListeners = new LinkedHashSet<>();
+
     protected int maxXIndex = 0;
 
     public enum DataInput {
@@ -56,6 +61,10 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(SimpleOhlcvReplayDataSet.class.getSimpleName()).log("started '{}'");
         }
+    }
+
+    public void addOhlcvChangeListener(OhlcvChangeListener ohlcvChangeListener) {
+        ohlcvChangeListeners.add(ohlcvChangeListener);
     }
 
     public void fillTestData(IntradayPeriod period, Interval<Calendar> timeRange, Interval<Calendar> tt, Calendar replayFrom) {
@@ -87,16 +96,25 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
                 });
     }
 
-    protected void tick() throws IOException, TickDataFinishedException {
+    protected void tick() throws Exception {
         OHLCVItem increment = tickOhlcvDataProvider.get();
-        //lock().writeLockGuard(() -> { //not write lock blinking
+        //lock().writeLockGuard(() -> { // not write lock blinking
         consolidation.consolidate(ohlcv, increment);
         // recalculate limits
         if (maxXIndex < ohlcv.size()) {
             maxXIndex = ohlcv.size();
+            // best performance solution
             getAxisDescription(DIM_X).set(get(DIM_X, 0), get(DIM_X, maxXIndex-1));
         }
+        // notify last tick listeners
+        fireOhlcvTickEvent(increment);
         //});
+    }
+
+    protected void fireOhlcvTickEvent(IOhlcvItem ohlcvItem) throws Exception {
+        for (OhlcvChangeListener listener : ohlcvChangeListeners) {
+            listener.tickEvent(ohlcvItem);
+        }
     }
 
     public DataInput getInputSource() {
@@ -180,11 +198,10 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
                             Thread.currentThread().interrupt();
                         }
                     }
-                } catch (IOException e) {
-                    throw new IllegalArgumentException(e);
-
                 } catch (TickDataFinishedException e) {
                     stop();
+                } catch (Exception e) {
+                    throw new IllegalArgumentException(e);
                 }
             }
         };
