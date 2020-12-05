@@ -12,6 +12,9 @@
     </parent>
     <artifactId>chartfx-samples</artifactId>
     <name>chartfx-samples</name>
+    <properties>
+        <project.moduleName>de.gsi.chartfx.samples</project.moduleName>
+    </properties>
 
     <description>
 		Small sample applications to showcase the features of the chart-fx library.

@@ -11,6 +11,9 @@
     <groupId>de.gsi.dataset</groupId>
     <artifactId>chartfx-dataset</artifactId>
     <name>dataset</name>
+    <properties>
+        <project.moduleName>de.gsi.chartfx.dataset</project.moduleName>
+    </properties>
 
     <description>
 		Container for handling different types of datasets with metadata, uncertainties, etc.
