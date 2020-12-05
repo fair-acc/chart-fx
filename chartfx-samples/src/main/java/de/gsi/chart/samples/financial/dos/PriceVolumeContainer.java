@@ -9,8 +9,11 @@ public class PriceVolumeContainer {
     private double pocVolume = -Double.MAX_VALUE;
 
     /**
-   * Add volume up and down to specific price
-   */
+     * Add volume up and down to specific price
+     * @param price value
+     * @param volumeDown tick down volume
+     * @param volumeUp tick up volume
+     */
     public void addPriceVolume(double price, double volumeDown, double volumeUp) {
         PriceVolume priceVolume = priceVolumeMap.get(price);
         if (priceVolume == null) {

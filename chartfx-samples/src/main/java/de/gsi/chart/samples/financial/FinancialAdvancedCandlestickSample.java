@@ -1,5 +1,14 @@
 package de.gsi.chart.samples.financial;
 
+import java.util.Calendar;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
@@ -11,14 +20,6 @@ import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-import javafx.application.Application;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-
-import java.util.Calendar;
 
 public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialApplication {
     public static final AttributeKey<Boolean> MARK_BAR = AttributeKey.create(Boolean.class, "MARK_BAR");
@@ -26,7 +27,7 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
     /**
      * Prepare charts to the root.
      */
-    protected Pane prepareCharts() {
+    protected Scene prepareScene() {
         timeRange = "2020/06/24 0:00-2020/11/12 0:00";
 
         final Chart chart = getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND);
@@ -39,7 +40,7 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
         VBox.setVgrow(chart, Priority.SOMETIMES);
         root.getChildren().addAll(testVariableToolBar, chart);
 
-        return root;
+        return new Scene(root, prefSceneWidth, prefSceneHeight);
     }
 
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {

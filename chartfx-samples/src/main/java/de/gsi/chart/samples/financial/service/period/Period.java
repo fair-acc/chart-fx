@@ -1,9 +1,9 @@
 package de.gsi.chart.samples.financial.service.period;
 
 public abstract class Period {
-
     public enum PeriodType {
-        EOD, INTRA
+        EOD,
+        INTRA
     }
 
     private final PeriodType type;
@@ -23,7 +23,9 @@ public abstract class Period {
         return type;
     }
 
-    /** get period in millis */
+    /**
+     * @return get period in millis
+     */
     public abstract long getMillis();
 
     @Override
@@ -45,5 +47,4 @@ public abstract class Period {
         Period other = (Period) obj;
         return type == other.type;
     }
-
 }

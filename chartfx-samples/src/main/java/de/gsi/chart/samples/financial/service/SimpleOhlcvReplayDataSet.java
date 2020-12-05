@@ -1,5 +1,16 @@
 package de.gsi.chart.samples.financial.service;
 
+import java.io.IOException;
+import java.util.Calendar;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.samples.financial.dos.DefaultOHLCV;
 import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.dos.OHLCVItem;
@@ -12,15 +23,6 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.Calendar;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * Very simple financial replay data set.
@@ -104,7 +106,7 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
         if (maxXIndex < ohlcv.size()) {
             maxXIndex = ohlcv.size();
             // best performance solution
-            getAxisDescription(DIM_X).set(get(DIM_X, 0), get(DIM_X, maxXIndex-1));
+            getAxisDescription(DIM_X).set(get(DIM_X, 0), get(DIM_X, maxXIndex - 1));
         }
         // notify last tick listeners
         fireOhlcvTickEvent(increment);

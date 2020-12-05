@@ -1,12 +1,13 @@
 package de.gsi.chart.samples.financial.dos;
 
+import java.util.*;
+
+import org.apache.commons.lang3.time.DateUtils;
+
 import de.gsi.chart.samples.financial.service.period.EodPeriod;
 import de.gsi.chart.samples.financial.service.period.Period;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
-import org.apache.commons.lang3.time.DateUtils;
-
-import java.util.*;
 
 /**
  * Basic example OHLCV domain object implementation for chart samples.
@@ -385,7 +386,6 @@ public class DefaultOHLCV implements IOhlcv {
     private OhlcvTimestampComparator ohlcvTimestampComparator = null;
 
     private class OhlcvTimestampComparator implements Comparator<OHLCVItem> {
-
         public int field;
 
         public OhlcvTimestampComparator(int field) {

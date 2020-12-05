@@ -1,13 +1,13 @@
 package de.gsi.chart.samples.financial.service.consolidate;
 
+import java.util.Calendar;
+
 import de.gsi.chart.samples.financial.dos.DefaultOHLCV;
 import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.dos.OHLCVItem;
 import de.gsi.chart.samples.financial.service.consolidate.OhlcvTimeframeConsolidation.OhlcvConsolidationComputation;
 import de.gsi.chart.samples.financial.service.consolidate.OhlcvTimeframeConsolidation.StandardOhlcvConsolidationComputation;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
-
-import java.util.Calendar;
 
 /**
  * Incremental consolidation based class for OHLCV structures.
@@ -22,8 +22,8 @@ public abstract class AbstractIncrementalOhlcvConsolidation implements Increment
     private OHLCVItem lastItem;
 
     public AbstractIncrementalOhlcvConsolidation(OhlcvConsolidationComputation consolidationComputation,
-                                                 IntradayPeriod period, Interval<Calendar> tt,
-                                                 OhlcvConsolidationAddon[] ohlcvConsolidationAddons) {
+            IntradayPeriod period, Interval<Calendar> tt,
+            OhlcvConsolidationAddon[] ohlcvConsolidationAddons) {
         this.period = period;
         this.consolidationComputation = consolidationComputation == null ? new StandardOhlcvConsolidationComputation() : consolidationComputation;
         this.ohlcvConsolidationAddons = ohlcvConsolidationAddons;
@@ -105,6 +105,7 @@ public abstract class AbstractIncrementalOhlcvConsolidation implements Increment
      *
      * @param lastItem      of consolidated structure
      * @param incrementItem tick which will be increased to the consolidation structure
+     * @return consolidated ohlcv item
      */
     protected OHLCVItem processConsolidation(OHLCVItem lastItem, OHLCVItem incrementItem) {
         // use servant for this processing

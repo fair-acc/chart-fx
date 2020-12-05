@@ -1,5 +1,30 @@
 package de.gsi.chart.samples.financial;
 
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
+import static de.gsi.chart.ui.ProfilerInfoBox.DebugLevel.VERSION;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.time.ZoneOffset;
+import java.util.Arrays;
+import java.util.Calendar;
+
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.AxisLabelOverlapPolicy;
@@ -26,32 +51,8 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.Calendar;
-
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
-import static de.gsi.chart.ui.ProfilerInfoBox.DebugLevel.VERSION;
 
 public abstract class AbstractBasicFinancialApplication extends Application {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicFinancialApplication.class);
 
     protected int prefChartWidth = 640; //1024
@@ -59,7 +60,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
     protected int prefSceneWidth = 1920;
     protected int prefSceneHeight = 1080;
 
-    private final double UPDATE_PERIOD = 1.0; // replay multiple
+    private final double UPDATE_PERIOD = 10.0; // replay multiple
     protected int DEBUG_UPDATE_RATE = 500;
 
     protected String resource = "@ES-[TF1D]";
@@ -87,9 +88,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
         startTime = ProcessingProfiler.getTimeStamp();
 
-        Pane root = prepareCharts();
-
-        final Scene scene = new Scene(root, prefSceneWidth, prefSceneHeight);
+        Scene scene = prepareScene();
         ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
 
         startTime = ProcessingProfiler.getTimeStamp();
@@ -154,19 +153,23 @@ public abstract class AbstractBasicFinancialApplication extends Application {
 
     /**
      * Prepare charts to the root.
+     *
+     * @return prepared scene for sample app
      */
-    protected Pane prepareCharts() {
+    protected Scene prepareScene() {
         // show all default financial color schemes
         final FlowPane root = new FlowPane();
         root.setAlignment(Pos.CENTER);
         Chart[] charts = Arrays.stream(getDefaultColorSchemes()).map(this::getDefaultFinancialTestChart).toArray(Chart[] ::new);
         root.getChildren().addAll(charts);
 
-        return root;
+        return new Scene(root, prefSceneWidth, prefSceneHeight);
     }
 
     /**
      * Default financial chart configuration
+     *
+     * @param theme defines theme which has to be used for sample app
      */
     protected Chart getDefaultFinancialTestChart(final String theme) {
         // load datasets
@@ -181,8 +184,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
                         period,
                         timeRangeInt,
                         ttInt,
-                        replayFromCal
-                );
+                        replayFromCal);
             } catch (ParseException e) {
                 throw new IllegalArgumentException(e.getMessage(), e);
             }
@@ -253,6 +255,11 @@ public abstract class AbstractBasicFinancialApplication extends Application {
 
     /**
      * Show required part of the OHLC resource
+     *
+     * @param dateIntervalPattern from to pattern for time range
+     * @param ohlcvDataSet domain object with filled ohlcv data
+     * @param xaxis X-axis for settings
+     * @param yaxis Y-axis for settings
      */
     protected void showPredefinedTimeRange(String dateIntervalPattern, OhlcvDataSet ohlcvDataSet,
             DefaultNumericAxis xaxis, DefaultNumericAxis yaxis) {
@@ -288,6 +295,9 @@ public abstract class AbstractBasicFinancialApplication extends Application {
     /**
      * Load OHLC structures and indi calc
      *
+     * @param data required data
+     * @param dataSet dataset which will be filled by this data
+     * @param indiSet example of indicator calculation
      * @throws IOException if loading fails
      */
     protected void loadTestData(String data, final OhlcvDataSet dataSet, DefaultDataSet indiSet) throws IOException {

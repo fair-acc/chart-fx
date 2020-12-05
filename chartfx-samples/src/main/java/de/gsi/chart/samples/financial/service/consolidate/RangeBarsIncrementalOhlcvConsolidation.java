@@ -1,11 +1,11 @@
 package de.gsi.chart.samples.financial.service.consolidate;
 
+import java.util.Calendar;
+
 import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.dos.OHLCVItem;
 import de.gsi.chart.samples.financial.service.consolidate.OhlcvTimeframeConsolidation.OhlcvConsolidationComputation;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
-
-import java.util.Calendar;
 
 public class RangeBarsIncrementalOhlcvConsolidation extends AbstractIncrementalOhlcvConsolidation {
     private final double rangeBarsLength;
@@ -14,8 +14,8 @@ public class RangeBarsIncrementalOhlcvConsolidation extends AbstractIncrementalO
     private double high;
 
     public RangeBarsIncrementalOhlcvConsolidation(OhlcvConsolidationComputation consolidationComputation,
-                                                  IntradayPeriod period, double minMoveTick, Interval<Calendar> tt,
-                                                  OhlcvConsolidationAddon[] ohlcvConsolidationAddons) {
+            IntradayPeriod period, double minMoveTick, Interval<Calendar> tt,
+            OhlcvConsolidationAddon[] ohlcvConsolidationAddons) {
         super(consolidationComputation, period, tt, ohlcvConsolidationAddons);
         this.rangeBarsLength = period.getPeriodValue() * minMoveTick;
     }

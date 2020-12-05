@@ -1,14 +1,13 @@
 package de.gsi.chart.samples.financial.service.period;
 
 public class IntradayPeriod extends Period {
-
     public enum IntradayPeriodEnum {
-    	T,  // ticks
-    	S,  // seconds
-        M,  // minutes
-        H,  // hours
+        T, // ticks
+        S, // seconds
+        M, // minutes
+        H, // hours
         RB, // range bars
-        V   // volume
+        V // volume
     }
 
     private final IntradayPeriodEnum period;
@@ -27,13 +26,13 @@ public class IntradayPeriod extends Period {
     }
 
     public IntradayPeriod(IntradayPeriodEnum period, double periodValue, Double minimalMoveSymbol,
-    		boolean extendedCalculation, String calculationAddonServicesType) {
-      super(PeriodType.INTRA);
-      this.period = period;
-      this.periodValue = periodValue;
-      this.minimalMoveSymbol = minimalMoveSymbol;
-      this.extendedCalculation = extendedCalculation;
-      this.calculationAddonServicesType = calculationAddonServicesType;
+            boolean extendedCalculation, String calculationAddonServicesType) {
+        super(PeriodType.INTRA);
+        this.period = period;
+        this.periodValue = periodValue;
+        this.minimalMoveSymbol = minimalMoveSymbol;
+        this.extendedCalculation = extendedCalculation;
+        this.calculationAddonServicesType = calculationAddonServicesType;
     }
 
     public IntradayPeriodEnum getPeriod() {
@@ -48,28 +47,28 @@ public class IntradayPeriod extends Period {
      * @return provides type of ADDONs for OHLC calculation services
      */
     public String getCalculationAddonServicesType() {
-      return calculationAddonServicesType;
+        return calculationAddonServicesType;
     }
 
     /**
      * @return minimal move of market is necessary for range bars
      */
     public Double getMinimalMoveSymbol() {
-      return minimalMoveSymbol;
+        return minimalMoveSymbol;
     }
 
     /**
      * @return defines calculation of extended bid ask volumes for order flow
      */
     public boolean isExtendedCalculation() {
-      return extendedCalculation;
+        return extendedCalculation;
     }
 
     @Override
     public long getMillis() {
         switch (period) {
         case S:
-        	return 1000 * Math.round(periodValue);
+            return 1000 * Math.round(periodValue);
         case M:
             return 60 * 1000 * Math.round(periodValue);
         case H:
@@ -117,10 +116,9 @@ public class IntradayPeriod extends Period {
         if (periodString == null || "".equals(periodString)) {
             return new IntradayPeriod(IntradayPeriodEnum.T, 1);
         }
-        String periodSymbol = periodString.substring(periodString.length()-1);
-        double periodValue = Double.parseDouble(periodString.substring(0, periodString.length()-1));
+        String periodSymbol = periodString.substring(periodString.length() - 1);
+        double periodValue = Double.parseDouble(periodString.substring(0, periodString.length() - 1));
 
         return new IntradayPeriod(IntradayPeriodEnum.valueOf(periodSymbol), periodValue);
     }
-
 }

@@ -1,9 +1,5 @@
 package de.gsi.chart.samples.financial.service;
 
-import de.gsi.chart.samples.financial.dos.Interval;
-import de.gsi.chart.samples.financial.dos.OHLCVItem;
-import javafx.beans.property.DoubleProperty;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,6 +8,11 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Date;
+
+import javafx.beans.property.DoubleProperty;
+
+import de.gsi.chart.samples.financial.dos.Interval;
+import de.gsi.chart.samples.financial.dos.OHLCVItem;
 
 /**
  * Create OHLCV from Sierra Chart SCID files
@@ -118,7 +119,7 @@ public class SCIDByNio {
     /**
      * Create instance of tick ohlcv data provider for replay stream
      *
-     * @param requiredTimestamps <from, to> interval
+     * @param requiredTimestamps [from, to] interval
      * @param replayStarTime     Date - point of replay timing start
      * @param replaySpeed        multiply of replay simulation (with real timing!)
      * @return tick data provider
@@ -183,7 +184,7 @@ public class SCIDByNio {
         long bidVolume;
         long askVolume;
 
-        int bytesRead = -1;
+        int bytesRead;
         do {
             bytesRead = fileChannel.read(bufferRecordDouble);
             if (bytesRead == -1) {
@@ -256,7 +257,7 @@ public class SCIDByNio {
         // timestamp conversion to date structure
         Date timestamp = new Date(convertWindowsTimeToMilliseconds(dt));
 
-        // assembly one ohlcv item domeain object
+        // assembly one ohlcv item domain object
         return new OHLCVItem(timestamp, open, high, low, close, totalVolume, 0, askVolume, bidVolume);
     }
 
@@ -286,6 +287,9 @@ public class SCIDByNio {
      * Thanks to @see
      * http://svn.codehaus.org/groovy/modules/scriptom/branches/SCRIPTOM
      * -1.5.4-ANT/src/com/jacob/com/DateUtilities.java
+     *
+     * @param comTime time in windows time for convert to java format
+     * @return java format of windows format with usage of specific timezone
      */
     public long convertWindowsTimeToMilliseconds(double comTime) {
         comTime = comTime - 25569D;

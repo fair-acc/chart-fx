@@ -1,8 +1,8 @@
 package de.gsi.chart.samples.financial.service;
 
-import de.gsi.chart.samples.financial.dos.OHLCVItem;
-
 import java.io.IOException;
+
+import de.gsi.chart.samples.financial.dos.OHLCVItem;
 
 /**
  * Provides actual tick data 

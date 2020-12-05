@@ -1,10 +1,10 @@
 package de.gsi.chart.samples.financial.dos;
 
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
 /**
  * Common wrapper of OHLC/V-OI object

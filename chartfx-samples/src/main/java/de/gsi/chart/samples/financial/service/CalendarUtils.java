@@ -1,14 +1,15 @@
 package de.gsi.chart.samples.financial.service;
 
-import de.gsi.chart.samples.financial.dos.Interval;
-import org.apache.commons.lang3.time.DateUtils;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang3.time.DateUtils;
+
+import de.gsi.chart.samples.financial.dos.Interval;
 
 public class CalendarUtils {
     /**

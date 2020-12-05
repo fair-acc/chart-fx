@@ -1,15 +1,15 @@
 package de.gsi.chart.samples.financial.service.consolidate;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.dos.OHLCVItem;
 import de.gsi.chart.samples.financial.dos.OHLCVItemExtended;
 import de.gsi.chart.samples.financial.dos.PriceVolumeContainer;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 public class OhlcvTimeframeConsolidation {
     private OhlcvTimeframeConsolidation() {

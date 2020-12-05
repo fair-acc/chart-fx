@@ -1,5 +1,14 @@
 package de.gsi.chart.samples.financial;
 
+import static de.gsi.chart.samples.financial.service.period.IntradayPeriod.IntradayPeriodEnum.M;
+
+import javafx.application.Application;
+import javafx.geometry.HPos;
+import javafx.scene.Scene;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -13,25 +22,16 @@ import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
-import javafx.application.Application;
-import javafx.geometry.HPos;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-
-import static de.gsi.chart.samples.financial.service.period.IntradayPeriod.IntradayPeriodEnum.M;
 
 public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialApplication {
-
     /**
      * Prepare charts to the root.
      */
-    protected Pane prepareCharts() {
+    protected Scene prepareScene() {
         String title = "Replay OHLC/V Tick Data in real-time (press 'replay' button)";
+        String priceFormat = "%1.1f";
         resource = "REALTIME_OHLC_TICK";
-//        timeRange = "2016/07/29 13:00-2016/07/29 17:00";
-        timeRange = "2016/07/28 18:13-2016/07/29 17:00";
+        timeRange = "2016/07/29 00:00-2016/07/29 20:15";
         tt = "00:00-23:59"; // time template whole day session
         replayFrom = "2016/07/29 13:58";
         period = new IntradayPeriod(M, 2.0);
@@ -47,35 +47,35 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         // prepare financial y-value indicator
         Axis yAxis = chart.getAxes().get(1);
         if (ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
-            final YWatchValueIndicator yValueIndicator = new YWatchValueIndicator(yAxis, 0.0);
-            chart.getPlugins().add(yValueIndicator);
-            ((SimpleOhlcvReplayDataSet) ohlcvDataSet).addOhlcvChangeListener(
-                    // watch close price, without FX waiting
-                    ohlcvItem -> FXUtils.runFX(() -> {
-                        yValueIndicator.setValue(ohlcvItem.getClose());
-                        yValueIndicator.setText(String.format("%1.1f", ohlcvItem.getClose()));
-                    }));
+            final YWatchValueIndicator closeIndicator = new YWatchValueIndicator(yAxis, priceFormat);
+            closeIndicator.setId("price");
+            closeIndicator.setLineVisible(false);
+            closeIndicator.setEditable(false);
+            chart.getPlugins().add(closeIndicator);
+            ((SimpleOhlcvReplayDataSet) ohlcvDataSet).addOhlcvChangeListener(ohlcvItem -> FXUtils.runFX(() -> closeIndicator.setMarkerValue(ohlcvItem.getClose())));
         }
+
+        // manual levels
+        chart.getPlugins().add(new YWatchValueIndicator(yAxis, priceFormat, 4727.5));
+        chart.getPlugins().add(new YWatchValueIndicator(yAxis, priceFormat, 4715.0));
+
         // simple S/R ranges
-        final YRangeIndicator support = new YRangeIndicator(yAxis, 4710, 4711, "daily support");
-        support.setLabelHorizontalAnchor(HPos.LEFT);
-        support.setLabelHorizontalPosition(0.01);
-        //chart.lookup(".range-indicator-rect").setStyle("-fx-fill: #62f441;");
-        //lineChart.setStyle(".chart-series-line {-fx-stroke-width: 0.5px;}");
-        //chart.getYAxis().lookup(".axis-label").setStyle("-fx-text-fill: " + toRGBCode(lineColor) + "; -fx-font-weight: bold;");
-
-        final YRangeIndicator resistance = new YRangeIndicator(yAxis, 4731, 4733, "daily resistance");
-        resistance.setLabelHorizontalAnchor(HPos.LEFT);
-        resistance.setLabelHorizontalPosition(0.01);
-
-        chart.getPlugins().add(support);
-        chart.getPlugins().add(resistance);
+        chart.getPlugins().add(createRsLevel(yAxis, 4710, 4711, "Daily Support"));
+        chart.getPlugins().add(createRsLevel(yAxis, 4731, 4733, "Daily Resistance"));
 
         VBox root = new VBox();
         VBox.setVgrow(chart, Priority.SOMETIMES);
         root.getChildren().addAll(testVariableToolBar, chart);
 
-        return root;
+        return new Scene(root, prefSceneWidth, prefSceneHeight);
+    }
+
+    protected YRangeIndicator createRsLevel(Axis yAxis, double lowerBound, double upperBound, String description) {
+        final YRangeIndicator rangeIndi = new YRangeIndicator(yAxis, lowerBound, upperBound, description);
+        rangeIndi.setLabelHorizontalAnchor(HPos.LEFT);
+        rangeIndi.setLabelHorizontalPosition(0.01);
+
+        return rangeIndi;
     }
 
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {

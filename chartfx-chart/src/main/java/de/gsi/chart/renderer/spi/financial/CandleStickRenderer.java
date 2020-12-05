@@ -1,5 +1,18 @@
 package de.gsi.chart.renderer.spi.financial;
 
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
+import static de.gsi.dataset.DataSet.DIM_X;
+
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -14,18 +27,6 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-
-import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
-import static de.gsi.dataset.DataSet.DIM_X;
 
 /**
  * <h1>Candlestick renderer</h1>

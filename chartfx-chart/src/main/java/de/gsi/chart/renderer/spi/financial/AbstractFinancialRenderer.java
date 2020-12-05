@@ -1,5 +1,15 @@
 package de.gsi.chart.renderer.spi.financial;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.AbstractDataSetManagement;
@@ -7,15 +17,6 @@ import de.gsi.chart.renderer.spi.financial.service.OhlcvRendererEpData;
 import de.gsi.chart.renderer.spi.financial.service.PaintBarMarker;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * The ancestor for common financial renderers.
@@ -165,9 +166,9 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
             int imin = dataset.getIndex(DataSet.DIM_X, xmin) + 1;
             int imax = Math.min(dataset.getIndex(DataSet.DIM_X, xmax) + 1, dataset.getDataCount());
             int diff = imax - imin;
-            int incr = diff > 30 ? (int)Math.round(Math.floor(diff / 30.0)) : 1;
+            int incr = diff > 30 ? (int) Math.round(Math.floor(diff / 30.0)) : 1;
             List<Double> distances = new ArrayList<>();
-            for (int i = imin; i < imax; i= i + incr) {
+            for (int i = imin; i < imax; i = i + incr) {
                 final double param0 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i - 1));
                 final double param1 = xAxis.getDisplayPosition(dataset.get(DataSet.DIM_X, i));
                 if (param0 != param1) {

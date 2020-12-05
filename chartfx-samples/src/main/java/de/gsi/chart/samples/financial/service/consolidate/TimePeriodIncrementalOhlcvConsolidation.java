@@ -1,12 +1,12 @@
 package de.gsi.chart.samples.financial.service.consolidate;
 
+import java.util.Calendar;
+import java.util.Date;
+
 import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.dos.OHLCVItem;
 import de.gsi.chart.samples.financial.service.consolidate.OhlcvTimeframeConsolidation.OhlcvConsolidationComputation;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
-
-import java.util.Calendar;
-import java.util.Date;
 
 public class TimePeriodIncrementalOhlcvConsolidation extends AbstractIncrementalOhlcvConsolidation {
     private final Calendar calFrom = Calendar.getInstance(); // FROM
