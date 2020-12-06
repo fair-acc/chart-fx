@@ -51,17 +51,21 @@ public class FinancialTestUtils {
         return Date.from(ldate.atStartOfDay(ZoneId.systemDefault()).toInstant());
     }
 
+    @SuppressWarnings({ "PMD.UncommentedEmptyMethodBody" })
     public static class TestChart extends Chart {
         @Override
         public void updateAxisRange() {
+            // use for test only
         }
 
         @Override
         protected void axesChanged(ListChangeListener.Change<? extends Axis> change) {
+            // use for test only
         }
 
         @Override
         protected void redrawCanvas() {
+            // use for test only
         }
 
         public Label getTitlePaint() {
