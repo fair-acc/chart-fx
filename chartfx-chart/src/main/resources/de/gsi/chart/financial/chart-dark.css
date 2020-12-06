@@ -1,49 +1,49 @@
 .axis-label {
-    -fx-fill: #C2C2C2FF;
-    -fx-axis-label-alignment: center;
+  -fx-fill: #c2c2c2ff;
+  -fx-axis-label-alignment: center;
 }
 
 .value-watch-indicator-label {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-border-radius: 0.0;
-    -fx-font-size: 11.0;
-    -fx-font-weight: bold;
-    -fx-text-fill: white;
-    -fx-text-alignment: center;
-    -fx-padding: 2 4.0 1.0 8.0;
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-border-radius: 0;
+  -fx-font-size: 11;
+  -fx-font-weight: bold;
+  -fx-text-fill: white;
+  -fx-text-alignment: center;
+  -fx-padding: 2 4 1 8;
 }
 
 .value-watch-indicator-line {
-    -fx-stroke-width: 1;
-    -fx-stroke: #a8a8a8;
-    -fx-stroke-dash-array: 8;
+  -fx-stroke-width: 1;
+  -fx-stroke: #a8a8a8;
+  -fx-stroke-dash-array: 8;
 }
 
 .value-watch-indicator-marker {
-    -fx-stroke-width: 0.5;
-    -fx-stroke: black;
-    -fx-fill: #ce0614;
+  -fx-stroke-width: 0.5;
+  -fx-stroke: black;
+  -fx-fill: #ce0614;
 }
 
 .price-value-watch-indicator-marker {
-    -fx-stroke-width: 0.5;
-    -fx-stroke: black;
-    -fx-fill: #3bdacd;
+  -fx-stroke-width: 0.5;
+  -fx-stroke: black;
+  -fx-fill: #3bdacd;
 }
 
 .range-indicator-label {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-border-radius: 0.0;
-    -fx-font-size: 12.0;
-    -fx-font-weight: bold;
-    -fx-text-fill: white;
-    -fx-text-alignment: center;
-    -fx-padding: 1.0 2.0 1.0 2.0;
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-border-radius: 0;
+  -fx-font-size: 12;
+  -fx-font-weight: bold;
+  -fx-text-fill: white;
+  -fx-text-alignment: center;
+  -fx-padding: 1 2 1 2;
 }
 
 .range-indicator-rect {
-    -fx-stroke: transparent;
-    -fx-fill: #9c1d1d70;
+  -fx-stroke: transparent;
+  -fx-fill: #9c1d1d70;
 }

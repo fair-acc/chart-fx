@@ -1,10 +1,8 @@
 package de.gsi.chart.samples;
 
-import de.gsi.chart.samples.financial.FinancialAdvancedCandlestickSample;
-import de.gsi.chart.samples.financial.FinancialCandlestickSample;
-import de.gsi.chart.samples.financial.FinancialHiLowSample;
-import de.gsi.chart.samples.financial.FinancialRealtimeCandlestickSample;
-import de.gsi.chart.utils.PeriodicScreenCapture;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -14,11 +12,15 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import de.gsi.chart.samples.financial.FinancialAdvancedCandlestickSample;
+import de.gsi.chart.samples.financial.FinancialCandlestickSample;
+import de.gsi.chart.samples.financial.FinancialHiLowSample;
+import de.gsi.chart.samples.financial.FinancialRealtimeCandlestickSample;
+import de.gsi.chart.utils.PeriodicScreenCapture;
 
 /**
  * @author rstein

@@ -37,7 +37,7 @@ public class SCIDByNio {
         timeZone = cal.get(Calendar.ZONE_OFFSET);
 
         File f = new File(resource);
-        FileInputStream fis = new FileInputStream(f);
+        FileInputStream fis = new FileInputStream(f); // lgtm[java/output-resource-leak]
 
         //----------------------------------
         fileChannel = fis.getChannel();
