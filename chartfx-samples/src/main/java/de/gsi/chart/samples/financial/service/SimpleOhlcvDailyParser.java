@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial.service;
 
 import java.io.BufferedReader;
@@ -16,6 +19,11 @@ import de.gsi.chart.samples.financial.dos.OHLCVItem;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.utils.StreamUtils;
 
+/**
+ * Simple Tradestation OHLC data parser.
+ *
+ * @author afischer
+ */
 public class SimpleOhlcvDailyParser {
     private static final String CHART_SAMPLE_PATH = StreamUtils.CLASSPATH_PREFIX + "de/gsi/chart/samples/financial/%s.csv";
 

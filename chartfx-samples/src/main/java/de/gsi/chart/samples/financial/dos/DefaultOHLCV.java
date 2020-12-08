@@ -2,6 +2,10 @@ package de.gsi.chart.samples.financial.dos;
 
 import java.util.*;
 
+import org.apache.commons.lang3.time.DateUtils;
+
+import de.gsi.chart.samples.financial.service.period.EodPeriod;
+import de.gsi.chart.samples.financial.service.period.Period;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 
@@ -20,6 +24,7 @@ public class DefaultOHLCV implements IOhlcv {
     private String assetName;
     private String symbol;
     private String studyCategory;
+    private Period period = new EodPeriod(); // DAILY
     private OHLCVStateAttributes stateAttributes = new OHLCVStateAttributes();
     private AttributeModel addon;
 
@@ -74,6 +79,10 @@ public class DefaultOHLCV implements IOhlcv {
 
     public String getSymbol() {
         return symbol;
+    }
+
+    public Period getPeriod() {
+        return period;
     }
 
     @Override
@@ -181,6 +190,10 @@ public class DefaultOHLCV implements IOhlcv {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public void setPeriod(Period period) {
+        this.period = period;
     }
 
     public void setDescription(String description) {
@@ -372,7 +385,7 @@ public class DefaultOHLCV implements IOhlcv {
 
     private OhlcvTimestampComparator ohlcvTimestampComparator = null;
 
-    private static class OhlcvTimestampComparator implements Comparator<OHLCVItem> {
+    private class OhlcvTimestampComparator implements Comparator<OHLCVItem> {
         public int field;
 
         public OhlcvTimestampComparator(int field) {
@@ -381,7 +394,7 @@ public class DefaultOHLCV implements IOhlcv {
 
         @Override
         public int compare(OHLCVItem o1, OHLCVItem o2) {
-            return o1.getTimeStamp().compareTo(o2.getTimeStamp());
+            return DateUtils.truncatedCompareTo(o1.getTimeStamp(), o2.getTimeStamp(), field);
         }
     }
 
@@ -391,6 +404,7 @@ public class DefaultOHLCV implements IOhlcv {
         int result = 1;
         result = prime * result + ((assetName == null) ? 0 : assetName.hashCode());
         result = prime * result + ((id == null) ? 0 : id.hashCode());
+        result = prime * result + ((period == null) ? 0 : period.hashCode());
         result = prime * result + ((symbol == null) ? 0 : symbol.hashCode());
         return result;
     }
@@ -414,6 +428,11 @@ public class DefaultOHLCV implements IOhlcv {
                 return false;
         } else if (!id.equals(other.id))
             return false;
+        if (period == null) {
+            if (other.period != null)
+                return false;
+        } else if (!period.equals(other.period))
+            return false;
         if (symbol == null) {
             if (other.symbol != null)
                 return false;
@@ -424,6 +443,6 @@ public class DefaultOHLCV implements IOhlcv {
 
     @Override
     public String toString() {
-        return "OHLCV [id=" + id + ", name=" + name + ", title=" + title + ", assetName=" + assetName + ", symbol=" + symbol + "]";
+        return "OHLCV [id=" + id + ", name=" + name + ", title=" + title + ", assetName=" + assetName + ", symbol=" + symbol + ", period=" + period + "]";
     }
 }

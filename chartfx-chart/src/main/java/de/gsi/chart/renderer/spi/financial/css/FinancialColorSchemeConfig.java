@@ -3,6 +3,8 @@ package de.gsi.chart.renderer.spi.financial.css;
 import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.*;
 import static de.gsi.dataset.utils.StreamUtils.CLASSPATH_PREFIX;
 
+import java.util.Locale;
+
 import javafx.geometry.Insets;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
@@ -17,6 +19,9 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.utils.StreamUtils;
 
 public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
+    protected static final String CSS_STYLESHEET = "de/gsi/chart/financial/%s.css";
+    protected static final String CSS_STYLESHEET_CHART = "chart";
+
     public void applySchemeToDataset(String theme, String customColorScheme, DataSet dataSet, Renderer renderer) {
         // customization
         if (customColorScheme != null) {
@@ -93,6 +98,14 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
                 applySchemeToDataset(theme, customColorScheme, dataset, renderer);
             }
         }
+
+        // apply css styling by theme
+        String cssStyleSheet = String.format(CSS_STYLESHEET, CSS_STYLESHEET_CHART + "-" + theme.toLowerCase(Locale.ROOT));
+        if (getClass().getClassLoader().getResource(cssStyleSheet) == null) { // fallback
+            cssStyleSheet = String.format(CSS_STYLESHEET, CSS_STYLESHEET_CHART);
+        }
+        chart.getStylesheets().add(cssStyleSheet);
+
         // predefine axis, grid, an additional chart params
         switch (theme) {
         case CLEARLOOK:

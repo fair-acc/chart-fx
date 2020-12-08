@@ -1,15 +1,22 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial;
 
 import java.util.Calendar;
 
 import javafx.application.Application;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.Pane;
+import javafx.scene.Scene;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
+import de.gsi.chart.renderer.spi.financial.AbstractFinancialRenderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import de.gsi.dataset.spi.DefaultDataSet;
@@ -17,19 +24,31 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
+/**
+ * Advanced configuration of Candlestick renderer. Support for PaintBars and extension points.
+ *
+ * @author afischer
+ */
 public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialApplication {
     public static final AttributeKey<Boolean> MARK_BAR = AttributeKey.create(Boolean.class, "MARK_BAR");
 
     /**
      * Prepare charts to the root.
      */
-    protected Pane prepareCharts() {
-        timeRange = "2020/06/24-2020/11/12";
+    protected Scene prepareScene() {
+        timeRange = "2020/06/24 0:00-2020/11/12 0:00";
 
-        final BorderPane root = new BorderPane();
-        root.setCenter(getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND));
+        final Chart chart = getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND);
+        final AbstractFinancialRenderer<?> renderer = (AbstractFinancialRenderer<?>) chart.getRenderers().get(0);
 
-        return root;
+        // prepare top financial toolbar
+        ToolBar testVariableToolBar = getTestToolBar(chart, renderer, false);
+
+        VBox root = new VBox();
+        VBox.setVgrow(chart, Priority.SOMETIMES);
+        root.getChildren().addAll(testVariableToolBar, chart);
+
+        return new Scene(root, prefSceneWidth, prefSceneHeight);
     }
 
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {

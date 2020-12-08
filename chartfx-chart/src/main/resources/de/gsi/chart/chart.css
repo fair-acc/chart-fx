@@ -93,6 +93,29 @@
     -fx-fill: dodgerblue;
 }
 
+.value-watch-indicator-label {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-border-radius: 0.0;
+    -fx-font-size: 11.0;
+    -fx-font-weight: bold;
+    -fx-text-fill: white;
+    -fx-text-alignment: center;
+    -fx-padding: 2.5 4.0 1.0 8.0;
+}
+
+.value-watch-indicator-line {
+    -fx-stroke-width: 1;
+    -fx-stroke: black;
+    -fx-stroke-dash-array: 8;
+}
+
+.value-watch-indicator-marker {
+    -fx-stroke-width: 0.5;
+    -fx-stroke: black;
+    -fx-fill: #416ef4ff;
+}
+
 .range-indicator-rect {
     -fx-stroke: transparent;
     -fx-fill: #416ef468;

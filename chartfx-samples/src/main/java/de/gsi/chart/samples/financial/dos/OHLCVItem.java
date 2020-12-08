@@ -22,6 +22,7 @@ public class OHLCVItem implements IOhlcvItem {
     private double volumeDown; // bid volume
     private final double openInterest;
     private boolean gap;
+    private OHLCVItemExtended extended;
     private AttributeModel addon;
 
     public OHLCVItem(Date timeStamp, double open, double high, double low, double close, double volume, double openInterest) {
@@ -61,6 +62,14 @@ public class OHLCVItem implements IOhlcvItem {
             addon = new AttributeModel();
         }
         return addon;
+    }
+
+    public OHLCVItemExtended getExtended() {
+        return extended;
+    }
+
+    public void setExtended(OHLCVItemExtended extended) {
+        this.extended = extended;
     }
 
     public Date getTimeStamp() {

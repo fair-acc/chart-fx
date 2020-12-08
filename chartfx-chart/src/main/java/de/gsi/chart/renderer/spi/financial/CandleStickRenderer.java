@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.renderer.spi.financial;
 
 import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
@@ -47,7 +50,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  *
  * @see <a href="https://www.investopedia.com/terms/c/candlestick.asp">Candlestick Investopedia</a>
  *
- * @author A.Fischer
+ * @author afischer
  */
 @SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.ExcessiveParameterList" })
 // designated purpose of this class
@@ -252,6 +255,10 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
                 }
                 gc.restore();
             });
+            // possibility to re-arrange y-axis by min/max of dataset (after paint)
+            if (computeLocalRange()) {
+                applyLocalYRange(ds, yAxis, xmin, xmax);
+            }
             index++;
         }
         if (ProcessingProfiler.getDebugState()) {

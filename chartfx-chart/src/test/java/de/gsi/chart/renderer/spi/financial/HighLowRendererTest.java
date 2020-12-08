@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.SAND;
 
+import java.security.InvalidParameterException;
+import java.util.Calendar;
+
 import javafx.scene.Scene;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -19,36 +22,51 @@ import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
+import de.gsi.chart.renderer.spi.financial.utils.CalendarUtils;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
+import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils.TestChart;
+import de.gsi.chart.renderer.spi.financial.utils.Interval;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
+import de.gsi.dataset.utils.ProcessingProfiler;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
 public class HighLowRendererTest {
     private HighLowRenderer rendererTested;
     private XYChart chart;
+    private OhlcvDataSet ohlcvDataSet;
 
     @Start
     public void start(Stage stage) throws Exception {
-        OhlcvDataSet ohlcvDataSet = new OhlcvDataSet("ohlc1");
+        ProcessingProfiler.setDebugState(true);
+        ohlcvDataSet = new OhlcvDataSet("ohlc1");
         ohlcvDataSet.setData(FinancialTestUtils.createTestOhlcv());
-        rendererTested = new HighLowRenderer();
+        rendererTested = new HighLowRenderer(true);
+        rendererTested.setComputeLocalRange(false);
+        rendererTested.setComputeLocalRange(true);
 
-        // check flow in the category too
-        final CategoryAxis xAxis = new CategoryAxis("time [iso]");
-        xAxis.setTickLabelRotation(90);
-        xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
+        assertNull(rendererTested.getPaintBarColor(null));
+
+        final DefaultNumericAxis xAxis = new DefaultNumericAxis("time", "iso");
+        xAxis.setTimeAxis(true);
+        xAxis.setAutoRangeRounding(false);
+        xAxis.setAutoRanging(false);
+        Interval<Calendar> xrange = CalendarUtils.createByDateInterval("2020/11/18-2020/11/25");
+        xAxis.set(xrange.from.getTime().getTime() / 1000.0, xrange.to.getTime().getTime() / 1000.0);
 
         final DefaultNumericAxis yAxis = new DefaultNumericAxis("price", "points");
+        yAxis.setAutoRanging(false);
 
         // prepare chart structure
         chart = new XYChart(xAxis, yAxis);
+        chart.getGridRenderer().setDrawOnTop(false);
 
         rendererTested.getDatasets().add(ohlcvDataSet);
+        chart.getRenderers().clear();
         chart.getRenderers().add(rendererTested);
 
         // PaintBar extension usage
@@ -59,8 +77,19 @@ public class HighLowRendererTest {
 
         new FinancialColorSchemeConfig().applyTo(SAND, chart);
 
-        stage.setScene(new Scene(chart));
+        stage.setScene(new Scene(chart, 800, 600));
         stage.show();
+    }
+
+    @TestFx
+    public void categoryAxisTest() {
+        final CategoryAxis xAxis = new CategoryAxis("time [iso]");
+        xAxis.setTickLabelRotation(90);
+        xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
+        ohlcvDataSet.setCategoryBased(true);
+
+        chart.getAxes().add(0, xAxis);
+        chart.layoutChildren();
     }
 
     @TestFx
@@ -100,6 +129,11 @@ public class HighLowRendererTest {
         assertFalse(highLowRenderer.isPaintVolume());
         highLowRenderer = new HighLowRenderer();
         assertFalse(highLowRenderer.isPaintVolume());
+    }
+
+    @Test
+    public void noXyChartInstance() {
+        assertThrows(InvalidParameterException.class, () -> rendererTested.render(null, new TestChart(), 0, null));
     }
 
     @Test
