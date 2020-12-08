@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial;
 
 import javafx.application.Application;
@@ -9,6 +12,11 @@ import de.gsi.chart.renderer.spi.financial.HighLowRenderer;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 
+/**
+ * OHLC (HiLo) Renderer Sample
+ *
+ * @author afischer
+ */
 public class FinancialHiLowSample extends AbstractBasicFinancialApplication {
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {
         // create and apply renderers

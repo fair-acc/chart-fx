@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.renderer.spi.financial;
 
 import java.util.ArrayList;
@@ -26,6 +29,8 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
  *     <li>Shadows - specific fast shadow paintings without fx-effects</li>
  *     <li>Extension-point before/after painting - extend specific renderers by your changes to add EP rules.</li>
  * </ul>
+ *
+ * @author afischer
  */
 @SuppressWarnings({ "PMD.ExcessiveParameterList" })
 public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractDataSetManagement<R> implements Renderer {

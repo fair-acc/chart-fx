@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial;
 
 import java.util.Calendar;
@@ -21,6 +24,11 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
+/**
+ * Advanced configuration of Candlestick renderer. Support for PaintBars and extension points.
+ *
+ * @author afischer
+ */
 public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialApplication {
     public static final AttributeKey<Boolean> MARK_BAR = AttributeKey.create(Boolean.class, "MARK_BAR");
 

@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial.service;
 
 import java.io.IOException;
@@ -18,15 +21,16 @@ import de.gsi.chart.samples.financial.service.consolidate.IncrementalOhlcvConsol
 import de.gsi.chart.samples.financial.service.consolidate.OhlcvTimeframeConsolidation;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
 import de.gsi.dataset.event.AddedDataEvent;
-import de.gsi.dataset.spi.financial.OhlcvChangeListener;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 
 /**
- * Very simple financial replay data set.
+ * Very simple financial OHLC replay data set.
  * The service is used just for simple testing of OHLC chart changes and performance.
+ *
+ * @author afischer
  */
 public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<IOhlcvItem>, IOhlcvItemAware, AttributeModelAware {
     private static final Logger LOGGER = LoggerFactory.getLogger(SimpleOhlcvReplayDataSet.class);

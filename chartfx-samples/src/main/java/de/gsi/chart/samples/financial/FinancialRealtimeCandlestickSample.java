@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial;
 
 import static de.gsi.chart.samples.financial.service.period.IntradayPeriod.IntradayPeriodEnum.M;
@@ -23,6 +26,13 @@ import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 
+/**
+ * Tick OHLC/V realtime processing. Demonstration of re-sample data to 2M timeframe.
+ * Support/Resistance range levels added.
+ * YWatchValueIndicator for better visualization of y-values, auto-handling of close prices and manual settings of price levels.
+ *
+ * @author afischer
+ */
 public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialApplication {
     /**
      * Prepare charts to the root.

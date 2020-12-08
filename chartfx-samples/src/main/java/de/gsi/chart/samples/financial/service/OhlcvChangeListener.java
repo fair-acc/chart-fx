@@ -1,4 +1,4 @@
-package de.gsi.dataset.spi.financial;
+package de.gsi.chart.samples.financial.service;
 
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 

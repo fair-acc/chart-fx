@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial.service;
 
 import java.io.File;
@@ -15,7 +18,9 @@ import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.dos.OHLCVItem;
 
 /**
- * Create OHLCV from Sierra Chart SCID files
+ * Create OHLCV from Sierra Chart SCID files (intraday tick format).
+ *
+ * @author afischer
  */
 public class SCIDByNio {
     private FileChannel fileChannel;
@@ -23,13 +28,13 @@ public class SCIDByNio {
     private ByteBuffer bufferRecordDouble;
     private ByteBuffer bufferRecordFloat;
     private ByteBuffer bufferRecordULong;
-    private Calendar cal = Calendar.getInstance();
+    private final Calendar cal = Calendar.getInstance();
     private int timeZone;
 
     private String title;
     private String symbol;
 
-    @SuppressWarnings("resource")
+    @SuppressWarnings({ "lgtm[java/output-resource-leak", "resource" })
     public void openNewChannel(String resource) throws IOException {
         title = new File(resource).getName();
         symbol = title.replaceFirst("[.][^.]+$", "");

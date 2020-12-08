@@ -1,3 +1,7 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
+
 package de.gsi.chart.samples.financial;
 
 import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
@@ -52,6 +56,13 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
+/**
+ * Base class for demonstration of financial charts.
+ * This abstract class assemblies and configures important chart components and elements for financial charts.
+ * Any part can be overridden and modified for final Sample test.
+ *
+ * @author afischer
+ */
 public abstract class AbstractBasicFinancialApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicFinancialApplication.class);
 

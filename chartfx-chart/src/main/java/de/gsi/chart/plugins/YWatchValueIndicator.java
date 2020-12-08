@@ -27,7 +27,8 @@ import de.gsi.dataset.event.EventSource;
  * {@code XYChartPane}. For example class {@code y-value-indicator-label1} can be used to style label of the second
  * instance of this indicator added to the chart pane.
  *
- * @author afischer (modified from mhrabia)
+ * @author mhrabia
+ * @author afischer (modified)
  */
 public class YWatchValueIndicator extends AbstractSingleValueIndicator implements EventSource, ValueIndicator {
     protected static final String STYLE_CLASS_LABEL = "value-watch-indicator-label";

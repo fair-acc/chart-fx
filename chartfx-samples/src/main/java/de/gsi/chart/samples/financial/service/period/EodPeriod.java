@@ -1,5 +1,13 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial.service.period;
 
+/**
+ * End-of-Day Periods Domain object
+ *
+ * @author afischer
+ */
 public class EodPeriod extends Period {
     public static final EodPeriod DAILY = new EodPeriod();
 

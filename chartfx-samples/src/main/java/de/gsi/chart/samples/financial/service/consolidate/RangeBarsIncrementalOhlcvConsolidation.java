@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial.service.consolidate;
 
 import java.util.Calendar;
@@ -6,6 +9,12 @@ import de.gsi.chart.samples.financial.dos.Interval;
 import de.gsi.chart.samples.financial.dos.OHLCVItem;
 import de.gsi.chart.samples.financial.service.consolidate.OhlcvTimeframeConsolidation.OhlcvConsolidationComputation;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
+
+/**
+ * Range-Bars based financial charts
+ *
+ * @author afischer
+ */
 
 public class RangeBarsIncrementalOhlcvConsolidation extends AbstractIncrementalOhlcvConsolidation {
     private final double rangeBarsLength;
