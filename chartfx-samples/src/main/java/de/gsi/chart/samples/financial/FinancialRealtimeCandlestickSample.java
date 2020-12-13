@@ -3,15 +3,6 @@
  */
 package de.gsi.chart.samples.financial;
 
-import static de.gsi.chart.samples.financial.service.period.IntradayPeriod.IntradayPeriodEnum.M;
-
-import javafx.application.Application;
-import javafx.geometry.HPos;
-import javafx.scene.Scene;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -20,11 +11,27 @@ import de.gsi.chart.plugins.YWatchValueIndicator;
 import de.gsi.chart.renderer.spi.financial.AbstractFinancialRenderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants;
+import de.gsi.chart.samples.financial.dos.OrderContainer;
+import de.gsi.chart.samples.financial.dos.PositionContainer;
+import de.gsi.chart.samples.financial.service.OhlcvChangeListener;
 import de.gsi.chart.samples.financial.service.SimpleOhlcvReplayDataSet;
+import de.gsi.chart.samples.financial.service.execution.BacktestExecutionPlatform;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.DefaultDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
+import javafx.application.Application;
+import javafx.geometry.HPos;
+import javafx.scene.Scene;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+
+import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.ORDERS;
+import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.POSITIONS;
+import static de.gsi.chart.samples.financial.service.period.IntradayPeriod.IntradayPeriodEnum.M;
 
 /**
  * Tick OHLC/V realtime processing. Demonstration of re-sample data to 2M timeframe.
@@ -33,7 +40,11 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
  *
  * @author afischer
  */
-public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialApplication {
+public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialApplication implements OhlcvChangeListener {
+
+    private BacktestExecutionPlatform executionPlatform;
+    private AttributeModel context;
+
     /**
      * Prepare charts to the root.
      */
@@ -57,12 +68,27 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         // prepare financial y-value indicator
         Axis yAxis = chart.getAxes().get(1);
         if (ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
+            SimpleOhlcvReplayDataSet replayDataSet = ((SimpleOhlcvReplayDataSet) ohlcvDataSet);
+            // close prices visualization
             final YWatchValueIndicator closeIndicator = new YWatchValueIndicator(yAxis, priceFormat);
             closeIndicator.setId("price");
             closeIndicator.setLineVisible(false);
             closeIndicator.setEditable(false);
             chart.getPlugins().add(closeIndicator);
-            ((SimpleOhlcvReplayDataSet) ohlcvDataSet).addOhlcvChangeListener(ohlcvItem -> FXUtils.runFX(() -> closeIndicator.setMarkerValue(ohlcvItem.getClose())));
+            replayDataSet.addOhlcvChangeListener(ohlcvItem -> FXUtils.runFX(() -> closeIndicator.setMarkerValue(ohlcvItem.getClose())));
+
+            // define context
+            context = new AttributeModel()
+                    .setAttribute(ORDERS, new OrderContainer())
+                    .setAttribute(POSITIONS, new PositionContainer());
+
+            // trade plan processing
+            replayDataSet.addOhlcvChangeListener(this);
+
+            // execution platform (has to be last added to dataset)
+            executionPlatform = new BacktestExecutionPlatform();
+            executionPlatform.setContext(context);
+            replayDataSet.addOhlcvChangeListener(executionPlatform);
         }
 
         // manual levels
@@ -97,10 +123,15 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         chart.getRenderers().add(candleStickRenderer);
     }
 
+    @Override
+    public void tickEvent(IOhlcvItem ohlcvItem) throws Exception {
+    }
+
     /**
      * @param args the command line arguments
      */
     public static void main(final String[] args) {
         Application.launch(args);
     }
+
 }
