@@ -112,11 +112,11 @@ public abstract class MultiArray<T> {
         this.elements = elements;
         this.offset = offset;
         strides = new int[dimensions.length];
-        strides[0] = 1;
-        for (int i = 1; i < dimensions.length; i++) {
-            strides[i] = strides[i - 1] * dimensions[i - 1];
+        strides[dimensions.length - 1] = 1;
+        for (int i = dimensions.length - 2; i >= 0; i--) {
+            strides[i] = strides[i + 1] * dimensions[i + 1];
         }
-        this.elementCount = strides[dimensions.length - 1] * dimensions[dimensions.length - 1];
+        this.elementCount = strides[0] * dimensions[0];
     }
 
     /**
@@ -146,12 +146,16 @@ public abstract class MultiArray<T> {
      */
     public int getIndex(final int[] indices) {
         int index = offset;
-        for (int i = 0; i < dimensions.length; i++) {
+        int multiplier = 1;
+
+        for (int i = indices.length - 1; i >= 0; i--) {
             if (indices[i] < 0 || indices[i] >= dimensions[i]) {
                 throw new IndexOutOfBoundsException("Index " + indices[i] + " for dimension " + i + " out of bounds " + dimensions[i]);
             }
-            index += indices[i] * strides[i];
+            index += indices[i] * multiplier;
+            multiplier *= dimensions[i];
         }
+
         return index;
     }
 
@@ -167,13 +171,10 @@ public abstract class MultiArray<T> {
             return new int[dimensions.length];
         }
         final int[] indices = new int[dimensions.length];
-        int ind = index - offset;
-        for (int i = dimensions.length - 1; i >= 0; i--) {
-            if (dimensions[i] == 0) {
-                throw new IndexOutOfBoundsException();
-            }
-            indices[i] = ind / strides[i];
-            ind = ind % strides[i];
+        int lindex = index - offset;
+        for (int i = 0; i < dimensions.length; i++) {
+            indices[i] = lindex / strides[i];
+            lindex -= indices[i] * strides[i];
         }
         return indices;
     }

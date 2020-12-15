@@ -1,6 +1,9 @@
 package de.gsi.dataset.spi.utils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +29,7 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 2, 3, 2 }, arrayDouble.getDimensions());
         assertEquals(33, arrayDouble.get(new int[] { 1, 2, 1 }));
         assertEquals(7, arrayDouble.get(new int[] { 0, 1, 0 }));
-        assertEquals(8, arrayDouble.get(new int[] { 1, 0, 0 }));
+        assertEquals(1, arrayDouble.get(new int[] { 1, 0, 0 }));
         arrayDouble.set(new int[] { 1, 1, 1 }, 1.337);
         assertEquals(1.337, arrayDouble.get(new int[] { 1, 1, 1 }));
         assertArrayEquals(new double[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 1.337, 22, 33 }, arrayDouble.elements());
@@ -44,10 +47,10 @@ class MultiArrayTest {
         final MultiArray<double[]> array = MultiArray.wrap(new double[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayDouble.MultiArray2DDouble);
         final MultiArrayDouble.MultiArray2DDouble array2d = (MultiArrayDouble.MultiArray2DDouble) array;
-        assertArrayEquals(new double[] { 7, 6 }, array2d.getRow(1));
+        assertArrayEquals(new double[] { 6, 5, 4 }, array2d.getRow(1));
         assertEquals(4, array.getOffset());
-        assertEquals(8, ((MultiArrayDouble) array).get(new int[] { 1, 0 }));
-        assertEquals(8, array2d.get(1, 0));
+        assertEquals(6, ((MultiArrayDouble) array).get(new int[] { 1, 0 }));
+        assertEquals(6, array2d.get(1, 0));
         assertEquals(4, ((MultiArrayDouble) array).get(new int[] { 1, 2 }));
         assertEquals(4, array2d.get(1, 2));
         array2d.set(1, 2, 1.337);
@@ -79,7 +82,7 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 2, 3, 2 }, arrayInt.getDimensions());
         assertEquals(33, arrayInt.get(new int[] { 1, 2, 1 }));
         assertEquals(7, arrayInt.get(new int[] { 0, 1, 0 }));
-        assertEquals(8, arrayInt.get(new int[] { 1, 0, 0 }));
+        assertEquals(1, arrayInt.get(new int[] { 1, 0, 0 }));
         arrayInt.set(new int[] { 1, 1, 1 }, 1337);
         assertEquals(1337, arrayInt.get(new int[] { 1, 1, 1 }));
         assertArrayEquals(new int[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 1337, 22, 33 }, arrayInt.elements());
@@ -97,10 +100,10 @@ class MultiArrayTest {
         final MultiArray<int[]> array = MultiArray.wrap(new int[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayInt.MultiArray2DInt);
         final MultiArrayInt.MultiArray2DInt array2d = (MultiArrayInt.MultiArray2DInt) array;
-        assertArrayEquals(new int[] { 7, 6 }, array2d.getRow(1));
+        assertArrayEquals(new int[] { 6, 5, 4 }, array2d.getRow(1));
         assertEquals(4, array.getOffset());
-        assertEquals(8, ((MultiArrayInt) array).get(new int[] { 1, 0 }));
-        assertEquals(8, array2d.get(1, 0));
+        assertEquals(6, ((MultiArrayInt) array).get(new int[] { 1, 0 }));
+        assertEquals(6, array2d.get(1, 0));
         assertEquals(4, ((MultiArrayInt) array).get(new int[] { 1, 2 }));
         assertEquals(4, array2d.get(1, 2));
         array2d.set(1, 2, 1337);
@@ -138,7 +141,7 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 2, 3, 2 }, arrayFloat.getDimensions());
         assertEquals(33, arrayFloat.get(new int[] { 1, 2, 1 }));
         assertEquals(7, arrayFloat.get(new int[] { 0, 1, 0 }));
-        assertEquals(8, arrayFloat.get(new int[] { 1, 0, 0 }));
+        assertEquals(1, arrayFloat.get(new int[] { 1, 0, 0 }));
         arrayFloat.set(new int[] { 1, 1, 1 }, 1.337f);
         assertEquals(1.337f, arrayFloat.get(new int[] { 1, 1, 1 }));
         assertArrayEquals(new float[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 1.337f, 22, 33 }, arrayFloat.elements());
@@ -156,10 +159,10 @@ class MultiArrayTest {
         final MultiArray<float[]> array = MultiArray.wrap(new float[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayFloat.MultiArray2DFloat);
         final MultiArrayFloat.MultiArray2DFloat array2d = (MultiArrayFloat.MultiArray2DFloat) array;
-        assertArrayEquals(new float[] { 7, 6 }, array2d.getRow(1));
+        assertArrayEquals(new float[] { 6, 5, 4 }, array2d.getRow(1));
         assertEquals(4, array.getOffset());
-        assertEquals(8, ((MultiArrayFloat) array).get(new int[] { 1, 0 }));
-        assertEquals(8, array2d.get(1, 0));
+        assertEquals(6, ((MultiArrayFloat) array).get(new int[] { 1, 0 }));
+        assertEquals(6, array2d.get(1, 0));
         assertEquals(4, ((MultiArrayFloat) array).get(new int[] { 1, 2 }));
         assertEquals(4, array2d.get(1, 2));
         array2d.set(1, 2, 1.337f);
@@ -197,7 +200,7 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 2, 3, 2 }, arrayLong.getDimensions());
         assertEquals(33, arrayLong.get(new int[] { 1, 2, 1 }));
         assertEquals(7, arrayLong.get(new int[] { 0, 1, 0 }));
-        assertEquals(8, arrayLong.get(new int[] { 1, 0, 0 }));
+        assertEquals(1, arrayLong.get(new int[] { 1, 0, 0 }));
         arrayLong.set(new int[] { 1, 1, 1 }, 1337);
         assertEquals(1337, arrayLong.get(new int[] { 1, 1, 1 }));
         assertArrayEquals(new long[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 1337, 22, 33 }, arrayLong.elements());
@@ -215,10 +218,10 @@ class MultiArrayTest {
         final MultiArray<long[]> array = MultiArray.wrap(new long[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayLong.MultiArray2DLong);
         final MultiArrayLong.MultiArray2DLong array2d = (MultiArrayLong.MultiArray2DLong) array;
-        assertArrayEquals(new long[] { 7, 6 }, array2d.getRow(1));
+        assertArrayEquals(new long[] { 6, 5, 4 }, array2d.getRow(1));
         assertEquals(4, array.getOffset());
-        assertEquals(8, ((MultiArrayLong) array).get(new int[] { 1, 0 }));
-        assertEquals(8, array2d.get(1, 0));
+        assertEquals(6, ((MultiArrayLong) array).get(new int[] { 1, 0 }));
+        assertEquals(6, array2d.get(1, 0));
         assertEquals(4, ((MultiArrayLong) array).get(new int[] { 1, 2 }));
         assertEquals(4, array2d.get(1, 2));
         array2d.set(1, 2, 1337);
@@ -256,7 +259,7 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 2, 3, 2 }, arrayObject.getDimensions());
         assertEquals("o", arrayObject.get(new int[] { 1, 2, 1 }));
         assertEquals("f", arrayObject.get(new int[] { 0, 1, 0 }));
-        assertEquals("e", arrayObject.get(new int[] { 1, 0, 0 }));
+        assertEquals("j", arrayObject.get(new int[] { 1, 0, 0 }));
         arrayObject.set(new int[] { 1, 1, 1 }, "foobar");
         assertEquals("foobar", arrayObject.get(new int[] { 1, 1, 1 }));
         assertArrayEquals(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "foobar", "n", "o" }, arrayObject.elements());
@@ -274,10 +277,10 @@ class MultiArrayTest {
         final MultiArray<String[]> array = MultiArray.wrap(new String[] { "a", "b", "c", "d", "e", "f", "g", "h", "i", "j" }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayObject.MultiArray2DObject);
         final MultiArrayObject.MultiArray2DObject array2d = (MultiArrayObject.MultiArray2DObject) array;
-        assertArrayEquals(new String[] { "g", "h" }, array2d.getRow(1));
+        assertArrayEquals(new String[] { "h", "i", "j" }, array2d.getRow(1));
         assertEquals(4, array.getOffset());
-        assertEquals("f", ((MultiArrayObject) array).get(new int[] { 1, 0 }));
-        assertEquals("f", array2d.get(1, 0));
+        assertEquals("h", ((MultiArrayObject) array).get(new int[] { 1, 0 }));
+        assertEquals("h", array2d.get(1, 0));
         assertEquals("j", ((MultiArrayObject) array).get(new int[] { 1, 2 }));
         assertEquals("j", array2d.get(1, 2));
         array2d.set(1, 2, "foobar");
