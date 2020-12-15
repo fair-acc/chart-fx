@@ -52,7 +52,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
      */
     public DoubleGridDataSet(String name, int nDims, int[] shape) {
         super(name, nDims);
-        this.shape = shape;
+        this.shape = reverseOrder(shape);
         if (shape.length > nDims) {
             throw new IllegalArgumentException("nDims must be greater or equal to grid shape");
         }
@@ -66,7 +66,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
             grid[i] = IntStream.range(0, shape[i]).asDoubleStream().toArray();
         }
         for (int i = shape.length; i < nDims; i++) {
-            values[i - shape.length] = MultiArrayDouble.wrap(new double[dataCount], 0, shape);
+            values[i - shape.length] = MultiArrayDouble.wrap(new double[dataCount], 0, this.shape);
         }
     }
 
@@ -79,7 +79,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
     public DoubleGridDataSet(String name, int[] shape, final boolean copy, double[]... vals) {
         super(name, shape.length + vals.length);
         final int nDims = shape.length + vals.length;
-        this.shape = shape.clone();
+        this.shape = reverseOrder(shape.clone());
 
         grid = new double[shape.length][];
         values = new MultiArrayDouble[vals.length];
@@ -93,7 +93,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
             if (vals[i - shape.length].length != dataCount) {
                 throw new IllegalArgumentException("Dimension missmatch between grid and values");
             }
-            values[i - shape.length] = MultiArrayDouble.wrap(copy ? vals[i - shape.length].clone() : vals[i - shape.length], 0, shape);
+            values[i - shape.length] = MultiArrayDouble.wrap(copy ? vals[i - shape.length].clone() : vals[i - shape.length], 0, this.shape);
         }
     }
 
@@ -169,7 +169,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
             if (nDims != grid.length + vals.length) {
                 throw new IllegalArgumentException("grid + value dimensions must match dataset dimensions");
             }
-            shape = Arrays.stream(grid).mapToInt(doubles -> doubles.length).toArray();
+            shape = reverseOrder(Arrays.stream(grid).mapToInt(doubles -> doubles.length).toArray());
             this.grid = copy ? new double[shape.length][] : grid;
             dataCount = 1;
             for (int i = 0; i < shape.length; i++) {
@@ -256,5 +256,13 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
 
     public void clearData() {
         set(false, new double[shape.length][0], new double[1][0]);
+    }
+
+    private static int[] reverseOrder(final int[] input) {
+        final int[] result = new int[input.length];
+        for (int i = 0; i < input.length; i++) {
+            result[i] = input[input.length - 1 - i];
+        }
+        return result;
     }
 }

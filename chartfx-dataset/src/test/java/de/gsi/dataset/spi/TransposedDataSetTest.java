@@ -1,5 +1,8 @@
 package de.gsi.dataset.spi;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -10,19 +13,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
-import static de.gsi.dataset.DataSet.DIM_Z;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Test;
-
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Alexander Krimm
@@ -226,28 +224,32 @@ public class TransposedDataSetTest {
         // generate 3D dataset
         final double[] xvalues = new double[] { 1, 2, 3, 4 };
         final double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
-        final double[] zvalues = new double[] { 1, 2, 3, 4, //
-            5, 6, 7, 8, //
-            9, 10, 11, 12, //
-            -1, -2, -3, -4, //
-            1337, 2337, 4242, 2323 };
+        final double[] zvalues = new double[] {
+            //
+            1, 2, 3, 4, // row 0
+            5, 6, 7, 8, // row 1
+            9, 10, 11, 12, // row 2
+            -1, -2, -3, -4, // row 3
+            1337, 2337, 4242, 2323 // row 4
+        };
         final GridDataSet dataset = new DataSetBuilder("testdataset") //
                                             .setValuesNoCopy(DIM_X, xvalues) //
                                             .setValuesNoCopy(DIM_Y, yvalues) //
                                             .setValuesNoCopy(DIM_Z, zvalues) //
                                             .build(GridDataSet.class);
         assertThat(dataset, instanceOf(GridDataSet.class));
+        assertEquals(4242.0, dataset.get(DIM_Z, 4, 2));
         // transpose dataset and test indexing
         TransposedDataSet datasetTransposed = TransposedDataSet.transpose(dataset);
         assertThat(datasetTransposed, instanceOf(GridDataSet.class));
         final GridDataSet gridDatasetTransposed = (GridDataSet) datasetTransposed;
-        assertThat(gridDatasetTransposed.getShape(), equalTo(new int[] { 5, 4 }));
+        assertThat(gridDatasetTransposed.getShape(), equalTo(new int[] { 4, 5 }));
         assertEquals("testdataset", datasetTransposed.getName());
         assertEquals(20, datasetTransposed.getDataCount());
         // assertEquals(4242, datasetTransposed.get(DIM_Z, 14));
         // assertEquals(6, datasetTransposed.get(DIM_Z, 6));
         // assertEquals(7, datasetTransposed.get(DIM_Z, 11));
-        assertEquals(4242.0, gridDatasetTransposed.get(DIM_Z, 4, 2));
+        assertEquals(4242.0, gridDatasetTransposed.get(DIM_Z, 2, 4));
         assertEquals(4, gridDatasetTransposed.getGrid(DIM_Y, 3));
         assertEquals(4, gridDatasetTransposed.getGrid(DIM_X, 4));
         assertEquals(3, gridDatasetTransposed.getGridIndex(DIM_Y, 3.9));
