@@ -55,14 +55,14 @@ class DoubleGridDataSetTests {
     @Test
     void nonPermutableShape() {
         double[] data = new double[] {
-                // first slice
-                1, 2, 3, 4, //first row
-                5, 6, 7, 8, //
-                9, 10, 11, 12, //
-                // second slice
-                13,14,15,16, // first row
-                17,18,19,20, //
-                21,22,23,24 //
+            // first slice
+            1, 2, 3, 4, //first row
+            5, 6, 7, 8, //
+            9, 10, 11, 12, //
+            // second slice
+            13, 14, 15, 16, // first row
+            17, 18, 19, 20, //
+            21, 22, 23, 24 //
         };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", new int[] { 4, 3, 2 }, false, data);
         assertSame(data, dataset.getValues(3));
@@ -86,14 +86,14 @@ class DoubleGridDataSetTests {
     @Test
     void testEquidistantFullDataConstructor() {
         double[] data = new double[] {
-                // first slice
-                1, 2, // first row
-                3, 4, // second row
-                5, 6, // third row
-                // second slice
-                7, 8, // first row
-                9, 10, // second row
-                11, 12 // third row
+            // first slice
+            1, 2, // first row
+            3, 4, // second row
+            5, 6, // third row
+            // second slice
+            7, 8, // first row
+            9, 10, // second row
+            11, 12 // third row
         };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", new int[] { 2, 3, 2 }, false, data);
 
@@ -121,14 +121,14 @@ class DoubleGridDataSetTests {
     @Test
     void testFullDataConstructor() {
         double[] data = new double[] {
-                // first slice
-                1, 2, // first row
-                3, 4, // second row
-                5, 6, // third row
-                // second slice
-                7, 8, // first row
-                9, 10, // second row
-                11, 12 // third row
+            // first slice
+            1, 2, // first row
+            3, 4, // second row
+            5, 6, // third row
+            // second slice
+            7, 8, // first row
+            9, 10, // second row
+            11, 12 // third row
         };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", false, new double[][] { { 0.1, 0.2 }, { 1.1, 2.2, 3.3 }, { -0.5, 0.5 } }, data);
 

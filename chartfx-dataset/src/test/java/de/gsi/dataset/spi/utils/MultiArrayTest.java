@@ -83,9 +83,10 @@ class MultiArrayTest {
                         5, 4, // column 2
                         // row 1
                         1, 2, // column 0
-                        3,11, // column 1
+                        3, 11, // column 1
                         22, 33 // column 2
-                }, 3, new int[] { 2, 3, 2 });
+                },
+                3, new int[] { 2, 3, 2 });
         assertTrue(array instanceof MultiArrayInt);
         assertEquals(3, array.getOffset());
         final MultiArrayInt arrayInt = (MultiArrayInt) array;
@@ -112,8 +113,9 @@ class MultiArrayTest {
                 new int[] {
                         0, 0, 0, 0, // offset
                         9, 8, 7, // row 0
-                        6, 5, 4  // row 1
-                }, 4, new int[] { 2, 3 });
+                        6, 5, 4 // row 1
+                },
+                4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayInt.MultiArray2DInt);
         final MultiArrayInt.MultiArray2DInt array2d = (MultiArrayInt.MultiArray2DInt) array;
         assertArrayEquals(new int[] { 6, 5, 4 }, array2d.getRow(1));
