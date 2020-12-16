@@ -189,14 +189,26 @@ public class MultiArrayProto extends MultiArray<double[]> { //// codegen: subst:
 
         protected MultiArray2DProto(final double[] elements, final int[] dimensions, final int offset) { //// codegen: subst:U:double[]:U[]
             super(elements, dimensions, offset);
-            stride = dimensions[0];
+            stride = dimensions[1];
         }
 
-        public double get(final int column, final int row) {
+        /**
+         *
+         * @param row rowIndex
+         * @param column columnIndex
+         * @return value at M(rowIndex,columnIndex)
+         */
+        public double get(final int row, final int column) {
             return elements[offset + column + row * stride];
         }
 
-        public void set(final int column, final int row, final double value) {
+        /**
+         *
+         * @param row rowIndex
+         * @param column columnIndex
+         * @param value new value: M(rowIndex,columnIndex) == value
+         */
+        public void set(final int row, final int column, final double value) {
             elements[offset + column + row * stride] = value;
         }
 
