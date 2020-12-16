@@ -6,12 +6,7 @@ import static de.gsi.dataset.DataSet.DIM_Z;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,9 +20,9 @@ import org.junit.jupiter.api.Test;
 /**
  * @author Alexander Krimm
  */
-public class TransposedDataSetTest {
+class TransposedDataSetTest {
     @Test
-    public void testWithDataSet2D() {
+    void testWithDataSet2D() {
         DataSet dataSet = new DataSetBuilder("Test Default Data Set") //
                                   .setValuesNoCopy(DIM_X, new double[] { 1, 2, 3 }) //
                                   .setValuesNoCopy(DIM_Y, new double[] { 4, 7, 6 }) //
@@ -103,12 +98,12 @@ public class TransposedDataSetTest {
         assertEquals("", transposed2.getStyle());
         assertDoesNotThrow(() -> transposed2.setStyle("fx-color: red"));
         assertEquals("fx-color: red", transposed2.getStyle());
-        assertEquals(null, transposed2.getStyle(0));
-        assertEquals(null, transposed2.getDataLabel(0));
+        assertNull(transposed2.getStyle(0));
+        assertNull(transposed2.getDataLabel(0));
     }
 
     @Test
-    public void testWithDataSet3D() {
+    void testWithDataSet3D() {
         // generate 3D dataset
         double[] xvalues = new double[] { 1, 2, 3, 4 };
         double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
@@ -220,17 +215,16 @@ public class TransposedDataSetTest {
     }
 
     @Test
-    public void testWithGridDataSet() {
+    void testWithGridDataSet() {
         // generate 3D dataset
         final double[] xvalues = new double[] { 1, 2, 3, 4 };
         final double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
         final double[] zvalues = new double[] {
-            //
-            1, 2, 3, 4, // row 0
-            5, 6, 7, 8, // row 1
-            9, 10, 11, 12, // row 2
-            -1, -2, -3, -4, // row 3
-            1337, 2337, 4242, 2323 // row 4
+                1, 2, 3, 4, // row 1
+                5, 6, 7, 8,  // row 2
+                9, 10, 11, 12,  // row 3
+                -1, -2, -3, -4,  // row 4
+                1337, 2337, 4242, 2323  // row 5
         };
         final GridDataSet dataset = new DataSetBuilder("testdataset") //
                                             .setValuesNoCopy(DIM_X, xvalues) //
@@ -238,18 +232,18 @@ public class TransposedDataSetTest {
                                             .setValuesNoCopy(DIM_Z, zvalues) //
                                             .build(GridDataSet.class);
         assertThat(dataset, instanceOf(GridDataSet.class));
-        assertEquals(4242.0, dataset.get(DIM_Z, 4, 2));
+        assertEquals(4242.0, dataset.get(DIM_Z, 2, 4));
         // transpose dataset and test indexing
         TransposedDataSet datasetTransposed = TransposedDataSet.transpose(dataset);
         assertThat(datasetTransposed, instanceOf(GridDataSet.class));
         final GridDataSet gridDatasetTransposed = (GridDataSet) datasetTransposed;
-        assertThat(gridDatasetTransposed.getShape(), equalTo(new int[] { 4, 5 }));
+        assertThat(gridDatasetTransposed.getShape(), equalTo(new int[] { 5, 4 }));
         assertEquals("testdataset", datasetTransposed.getName());
         assertEquals(20, datasetTransposed.getDataCount());
         // assertEquals(4242, datasetTransposed.get(DIM_Z, 14));
         // assertEquals(6, datasetTransposed.get(DIM_Z, 6));
         // assertEquals(7, datasetTransposed.get(DIM_Z, 11));
-        assertEquals(4242.0, gridDatasetTransposed.get(DIM_Z, 2, 4));
+        assertEquals(4242.0, gridDatasetTransposed.get(DIM_Z, 4, 2));
         assertEquals(4, gridDatasetTransposed.getGrid(DIM_Y, 3));
         assertEquals(4, gridDatasetTransposed.getGrid(DIM_X, 4));
         assertEquals(3, gridDatasetTransposed.getGridIndex(DIM_Y, 3.9));
@@ -292,8 +286,7 @@ public class TransposedDataSetTest {
         assertThrows(IndexOutOfBoundsException.class, () -> gridDatasetTransposed.getGrid(DIM_X, 4));
         assertThrows(IndexOutOfBoundsException.class, () -> gridDatasetTransposed.get(DIM_Z, 1, 5));
         assertThrows(IndexOutOfBoundsException.class, () -> gridDatasetTransposed.get(DIM_Z, 4, 0));
-        // TODO: check event generation. all events should be passed through and every transposition/permutation should
-        // also trigger an event
+        // TODO: check event generation. all events should be passed through and every transposition/permutation should also trigger an event
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> datasetTransposed.setPermutation(new int[] { 0, 1 }));
         assertThrows(IllegalArgumentException.class, () -> datasetTransposed.setPermutation(new int[] { 0, 1, 3 }));
         assertThrows(IllegalArgumentException.class, () -> datasetTransposed.setPermutation(new int[] { 0, 2, 1 }));
@@ -301,7 +294,7 @@ public class TransposedDataSetTest {
     }
 
     @Test
-    public void testWithMultiDimDataSet() {
+    void testWithMultiDimDataSet() {
         // generate 3D dataset
         final double[] xvalues = new double[] { 1, 2, 3, 4, 5, 6 };
         final double[] yvalues = new double[] { -3, -2, -0, 2, 4, 5 };
@@ -350,7 +343,7 @@ public class TransposedDataSetTest {
     }
 
     @Test
-    public void testInvalidData() {
+    void testInvalidData() {
         assertThrows(IllegalArgumentException.class, () -> TransposedDataSet.transpose(null));
         assertThrows(IllegalArgumentException.class, () -> TransposedDataSet.permute(null, new int[] { 1, 0 }));
         assertThrows(IllegalArgumentException.class, () -> TransposedDataSet.permute(new DefaultDataSet("test", 5), null));

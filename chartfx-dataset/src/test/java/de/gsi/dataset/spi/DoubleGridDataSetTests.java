@@ -25,7 +25,7 @@ import de.gsi.dataset.event.UpdateEvent;
  */
 class DoubleGridDataSetTests {
     @Test
-    public void testEmptyGridConstructor() {
+    void testEmptyGridConstructor() {
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", 3);
         assertEquals("testGridDataSet", dataset.getName());
         assertArrayEquals(new int[] { 0, 0 }, dataset.getShape());
@@ -34,7 +34,8 @@ class DoubleGridDataSetTests {
     }
 
     @Test
-    public void testZeroInitializedConstructor() {
+    void testZeroInitializedConstructor() {
+        // create a grid data set with 3rows x 4columns x 2slices
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", 5, new int[] { 3, 4, 2 });
         assertEquals("testGridDataSet", dataset.getName());
         assertArrayEquals(new int[] { 3, 4, 2 }, dataset.getShape());
@@ -52,8 +53,48 @@ class DoubleGridDataSetTests {
     }
 
     @Test
-    public void testEquidistantFullDataConstructor() {
-        double[] data = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    void nonPermutableShape() {
+        double[] data = new double[] {
+                // first slice
+                1, 2, 3, 4, //first row
+                5, 6, 7, 8, //
+                9, 10, 11, 12, //
+                // second slice
+                13,14,15,16, // first row
+                17,18,19,20, //
+                21,22,23,24 //
+        };
+        DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", new int[] { 4, 3, 2 }, false, data);
+        assertSame(data, dataset.getValues(3));
+        assertEquals("testGridDataSet", dataset.getName());
+        assertArrayEquals(new int[] { 4, 3, 2 }, dataset.getShape());
+        assertEquals(4, dataset.getDimension());
+        assertEquals(4 * 3 * 2, dataset.getDataCount());
+        assertArrayEquals(new double[] { 0, 1, 2, 3 }, dataset.getGridValues(DIM_X));
+
+        // test grid values
+        assertEquals(3, dataset.get(DIM_X, 19));
+        assertEquals(2, dataset.get(DIM_Y, 21));
+        assertEquals(1, dataset.get(DIM_Z, 17));
+
+        // test data values
+        assertEquals(2, dataset.get(3, 1, 0, 0));
+        assertEquals(5, dataset.get(3, 0, 1, 0));
+        assertEquals(13, dataset.get(3, 0, 0, 1));
+    }
+
+    @Test
+    void testEquidistantFullDataConstructor() {
+        double[] data = new double[] {
+                // first slice
+                1, 2, // first row
+                3, 4, // second row
+                5, 6, // third row
+                // second slice
+                7, 8, // first row
+                9, 10, // second row
+                11, 12 // third row
+        };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", new int[] { 2, 3, 2 }, false, data);
 
         assertSame(data, dataset.getValues(3));
@@ -78,8 +119,17 @@ class DoubleGridDataSetTests {
     }
 
     @Test
-    public void testFullDataConstructor() {
-        double[] data = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
+    void testFullDataConstructor() {
+        double[] data = new double[] {
+                // first slice
+                1, 2, // first row
+                3, 4, // second row
+                5, 6, // third row
+                // second slice
+                7, 8, // first row
+                9, 10, // second row
+                11, 12 // third row
+        };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", false, new double[][] { { 0.1, 0.2 }, { 1.1, 2.2, 3.3 }, { -0.5, 0.5 } }, data);
 
         assertEquals("testGridDataSet", dataset.getName());
@@ -93,6 +143,8 @@ class DoubleGridDataSetTests {
         assertEquals(6.0, dataset.get(3, 5));
         assertEquals(0.1, dataset.get(DIM_X, 2));
         assertEquals(2.0, dataset.get(3, 1, 0, 0));
+        assertEquals(3.0, dataset.get(3, 0, 1, 0));
+        assertEquals(11.0, dataset.get(3, 0, 2, 1));
         assertEquals(12.0, dataset.get(3, 1, 2, 1));
         assertEquals(0.2, dataset.get(DIM_X, 1, 2, 1));
         assertEquals(-0.5, dataset.get(DIM_Z, 0, 2, 0));
@@ -114,7 +166,7 @@ class DoubleGridDataSetTests {
     }
 
     @Test
-    public void testCopyConstructor() {
+    void testCopyConstructor() {
         double[] data = new double[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", false, new double[][] { { 0.1, 0.2 }, { 1.1, 2.2, 3.3 }, { -0.5, 0.5 } }, data);
         dataset.addDataLabel(10, "test");
@@ -128,7 +180,7 @@ class DoubleGridDataSetTests {
     }
 
     @Test
-    public void testSettersAndListeners() {
+    void testSettersAndListeners() {
         double[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", false, new double[][] { { 0.1, 0.2 }, { 1.1, 2.2, 3.3 }, { -0.5, 0.5 } }, data);
 
