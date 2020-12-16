@@ -1,21 +1,23 @@
 package de.gsi.dataset.spi;
 
-import static de.gsi.dataset.DataSet.DIM_X;
-import static de.gsi.dataset.DataSet.DIM_Y;
-import static de.gsi.dataset.DataSet.DIM_Z;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
+import static de.gsi.dataset.DataSet.DIM_X;
+import static de.gsi.dataset.DataSet.DIM_Y;
+import static de.gsi.dataset.DataSet.DIM_Z;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.Test;
+
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
-import org.junit.jupiter.api.Test;
 
 /**
  * @author Alexander Krimm
@@ -220,11 +222,11 @@ class TransposedDataSetTest {
         final double[] xvalues = new double[] { 1, 2, 3, 4 };
         final double[] yvalues = new double[] { -3, -2, -0, 2, 4 };
         final double[] zvalues = new double[] {
-                1, 2, 3, 4, // row 1
-                5, 6, 7, 8,  // row 2
-                9, 10, 11, 12,  // row 3
-                -1, -2, -3, -4,  // row 4
-                1337, 2337, 4242, 2323  // row 5
+            1, 2, 3, 4, // row 1
+            5, 6, 7, 8, // row 2
+            9, 10, 11, 12, // row 3
+            -1, -2, -3, -4, // row 4
+            1337, 2337, 4242, 2323 // row 5
         };
         final GridDataSet dataset = new DataSetBuilder("testdataset") //
                                             .setValuesNoCopy(DIM_X, xvalues) //
