@@ -14,7 +14,7 @@ import de.gsi.dataset.spi.utils.MultiArrayDouble;
  * The dimension of the dataSet is n+m.
  *
  * The data is stored in a row-major container, but as the renderer interface expects column major, the data is transposed
- * on internally in the DoubleGridDataSet.
+ * internally in the DoubleGridDataSet.
  *
  * @author Alexander Krimm
  */
@@ -51,7 +51,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
     /**
      * @param name name for this DataSet
      * @param nDims number of Dimensions
-     * @param shape Shape of the grid
+     * @param shape Shape of the grid, length cannot exceed number of dimensions: double[nGrid] {n_x, n_y, ...}
      */
     public DoubleGridDataSet(String name, int nDims, int[] shape) {
         super(name, nDims);
@@ -76,18 +76,18 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
 
     /**
      * @param name name for the dataSet
-     * @param shape shape of the grid
-     * @param copy whether to copy the values in vals
-     * @param vals values
+     * @param shape shape of the grid: double[nGrid] {n_x, n_y, ...}
+     * @param copy whether to copy the values in values
+     * @param values values in column-major order (2d case: double[n_x * n_y]{z(0,0), z(1,0) ... z(m-1,n), z(m,n)})
      */
-    public DoubleGridDataSet(String name, int[] shape, final boolean copy, double[]... vals) {
-        super(name, shape.length + vals.length);
-        final int nDims = shape.length + vals.length;
+    public DoubleGridDataSet(String name, int[] shape, final boolean copy, double[]... values) {
+        super(name, shape.length + values.length);
+        final int nDims = shape.length + values.length;
         this.shape = shape.clone();
         final int[] containerShape = reverseOrder(shape);
 
         grid = new double[shape.length][];
-        values = new MultiArrayDouble[vals.length];
+        this.values = new MultiArrayDouble[values.length];
 
         dataCount = 1;
         for (int i = 0; i < shape.length; i++) {
@@ -95,22 +95,22 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
             grid[i] = IntStream.range(0, shape[i]).asDoubleStream().toArray();
         }
         for (int i = shape.length; i < nDims; i++) {
-            if (vals[i - shape.length].length != dataCount) {
+            if (values[i - shape.length].length != dataCount) {
                 throw new IllegalArgumentException("Dimension missmatch between grid and values");
             }
-            values[i - shape.length] = MultiArrayDouble.wrap(copy ? vals[i - shape.length].clone() : vals[i - shape.length], 0, containerShape);
+            this.values[i - shape.length] = MultiArrayDouble.wrap(copy ? values[i - shape.length].clone() : values[i - shape.length], 0, containerShape);
         }
     }
 
     /**
      * @param name name for the dataSet
-     * @param copy whether to copy the values from grid and vals
-     * @param grid values for the grid
-     * @param vals values
+     * @param copy whether to copy the values from grid and values
+     * @param grid values for the grid double[nGrid][m/n/...] {{x_0 ... x_n}, {y_0 ... y_m}, ...}
+     * @param values values in column-major order (2d case: double[n_x * n_y]{z(0,0), z(1,0) ... z(m-1,n), z(m,n)})
      */
-    public DoubleGridDataSet(final String name, final boolean copy, final double[][] grid, final double[]... vals) {
-        super(name, grid.length + vals.length);
-        set(copy, grid, vals);
+    public DoubleGridDataSet(final String name, final boolean copy, final double[][] grid, final double[]... values) {
+        super(name, grid.length + values.length);
+        set(copy, grid, values);
     }
 
     @Override

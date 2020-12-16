@@ -74,7 +74,18 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayInt() {
-        final MultiArray<int[]> array = MultiArray.wrap(new int[] { 123, 321, 213, 9, 8, 7, 6, 5, 4, 1, 2, 3, 11, 22, 33 }, 3, new int[] { 2, 3, 2 });
+        final MultiArray<int[]> array = MultiArray.wrap(
+                new int[] {
+                        123, 321, 213, // offset
+                        //row 0
+                        9, 8, // column 0
+                        7, 6, // column 1
+                        5, 4, // column 2
+                        // row 1
+                        1, 2, // column 0
+                        3,11, // column 1
+                        22, 33 // column 2
+                }, 3, new int[] { 2, 3, 2 });
         assertTrue(array instanceof MultiArrayInt);
         assertEquals(3, array.getOffset());
         final MultiArrayInt arrayInt = (MultiArrayInt) array;
@@ -97,7 +108,12 @@ class MultiArrayTest {
 
     @Test
     void testMultiArrayInt2D() {
-        final MultiArray<int[]> array = MultiArray.wrap(new int[] { 0, 0, 0, 0, 9, 8, 7, 6, 5, 4 }, 4, new int[] { 2, 3 });
+        final MultiArray<int[]> array = MultiArray.wrap(
+                new int[] {
+                        0, 0, 0, 0, // offset
+                        9, 8, 7, // row 0
+                        6, 5, 4  // row 1
+                }, 4, new int[] { 2, 3 });
         assertTrue(array instanceof MultiArrayInt.MultiArray2DInt);
         final MultiArrayInt.MultiArray2DInt array2d = (MultiArrayInt.MultiArray2DInt) array;
         assertArrayEquals(new int[] { 6, 5, 4 }, array2d.getRow(1));
