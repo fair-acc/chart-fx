@@ -26,6 +26,8 @@ import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 
+import static de.gsi.chart.samples.financial.service.SimpleOhlcvReplayDataSet.DataInput.OHLC_TICK;
+
 /**
  * Very simple financial OHLC replay data set.
  * The service is used just for simple testing of OHLC chart changes and performance.
@@ -41,7 +43,8 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
 
     private final DoubleProperty replayMultiply = new SimpleDoubleProperty(this, "replayMultiply", 1.0);
 
-    private DataInput inputSource = DataInput.OHLC_TICK;
+    private DataInput inputSource = OHLC_TICK;
+    private String resource;
     protected DefaultOHLCV ohlcv;
 
     protected volatile boolean running = false;
@@ -77,13 +80,16 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
         lock().writeLockGuard(
                 () -> {
                     try {
+                        if (getInputSource() == OHLC_TICK) {
+                            resource = DATA_SOURCE_OHLC_TICK;
+                        }
                         // create services
                         scid = new SCIDByNio();
-                        scid.openNewChannel(String.format(DATA_SOURCE_PATH, DATA_SOURCE_OHLC_TICK));
+                        scid.openNewChannel(String.format(DATA_SOURCE_PATH, resource));
                         tickOhlcvDataProvider = scid.createTickDataReplayStream(timeRange, replayFrom.getTime(), replayMultiply);
 
                         ohlcv = new DefaultOHLCV();
-                        ohlcv.setTitle(DATA_SOURCE_OHLC_TICK);
+                        ohlcv.setTitle(resource);
 
                         consolidation = OhlcvTimeframeConsolidation.createConsolidation(period, tt, null);
 
@@ -121,6 +127,10 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
         for (OhlcvChangeListener listener : ohlcvChangeListeners) {
             listener.tickEvent(ohlcvItem);
         }
+    }
+
+    public String getResource() {
+        return resource;
     }
 
     public DataInput getInputSource() {

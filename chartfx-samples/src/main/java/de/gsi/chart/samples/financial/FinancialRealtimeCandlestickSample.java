@@ -11,11 +11,15 @@ import de.gsi.chart.plugins.YWatchValueIndicator;
 import de.gsi.chart.renderer.spi.financial.AbstractFinancialRenderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants;
+import de.gsi.chart.samples.financial.dos.Order;
 import de.gsi.chart.samples.financial.dos.OrderContainer;
+import de.gsi.chart.samples.financial.dos.OrderExpression;
 import de.gsi.chart.samples.financial.dos.PositionContainer;
+import de.gsi.chart.samples.financial.service.CalendarUtils;
 import de.gsi.chart.samples.financial.service.OhlcvChangeListener;
 import de.gsi.chart.samples.financial.service.SimpleOhlcvReplayDataSet;
 import de.gsi.chart.samples.financial.service.execution.BacktestExecutionPlatform;
+import de.gsi.chart.samples.financial.service.execution.BasicOrderExecutionService;
 import de.gsi.chart.samples.financial.service.period.IntradayPeriod;
 import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.spi.DefaultDataSet;
@@ -28,6 +32,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+
+import java.text.ParseException;
+import java.util.Calendar;
+import java.util.stream.Collectors;
 
 import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.ORDERS;
 import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.POSITIONS;
@@ -43,7 +51,10 @@ import static de.gsi.chart.samples.financial.service.period.IntradayPeriod.Intra
 public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialApplication implements OhlcvChangeListener {
 
     private BacktestExecutionPlatform executionPlatform;
+    private BasicOrderExecutionService orderExecutionService;
     private AttributeModel context;
+    private String asset;
+    private int marketPosition = 0;
 
     /**
      * Prepare charts to the root.
@@ -89,6 +100,10 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
             executionPlatform = new BacktestExecutionPlatform();
             executionPlatform.setContext(context);
             replayDataSet.addOhlcvChangeListener(executionPlatform);
+
+            // basic handling of orders example
+            asset = replayDataSet.getResource(); // just example, it is more complex in real platform
+            orderExecutionService = new BasicOrderExecutionService(context, executionPlatform);
         }
 
         // manual levels
@@ -123,8 +138,33 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         chart.getRenderers().add(candleStickRenderer);
     }
 
+    private boolean firstTick = true;
+    private Calendar entryTimestamp;
+    private Calendar exitTimestamp;
+
     @Override
     public void tickEvent(IOhlcvItem ohlcvItem) throws Exception {
+        if (firstTick) {
+            exitTimestamp = CalendarUtils.createByDateTime("2016/07/29 14:24");
+            entryTimestamp = CalendarUtils.createByDateTime("2016/07/29 14:06");
+            firstTick = false;
+        }
+        if (marketPosition == 0 && entryTimestamp != null && ohlcvItem.getTimeStamp().getTime() >= entryTimestamp.getTime().getTime()) {
+            orderExecutionService.performOrder(ohlcvItem.getTimeStamp(), asset, OrderExpression.buyMarket(1));
+            marketPosition = 1;
+            entryTimestamp = null;
+            System.out.println(context.getAttribute(ORDERS).getOrders().stream()
+                    .map(Order::toString).collect(Collectors.joining(System.lineSeparator())));
+            System.out.println(context.getAttribute(POSITIONS));
+        }
+        if (marketPosition == 1 && ohlcvItem.getTimeStamp().getTime() >= exitTimestamp.getTime().getTime()) {
+            orderExecutionService.performOrder(ohlcvItem.getTimeStamp(), asset, OrderExpression.sellMarket(1));
+            marketPosition = 0;
+            exitTimestamp = null;
+            System.out.println(context.getAttribute(ORDERS).getOrders().stream()
+                    .map(Order::toString).collect(Collectors.joining(System.lineSeparator())));
+            System.out.println(context.getAttribute(POSITIONS));
+        }
     }
 
     /**

@@ -11,8 +11,8 @@ import java.util.*;
  * @author afischer
  */
 public class OrderContainer {
-    private final Map<Integer, Order> orders = new LinkedHashMap<Integer, Order>();
-    private final HashSet<Order> openedOrders = new LinkedHashSet<Order>();
+    private final Map<Integer, Order> orders = new LinkedHashMap<>();
+    private final HashSet<Order> openedOrders = new LinkedHashSet<>();
 
     public void addOrder(Order order) {
         openedOrders.add(order);
@@ -38,7 +38,7 @@ public class OrderContainer {
     }
 
     public Set<Order> getOpenedAndFilledOrders() {
-        Set<Order> openOrders = new LinkedHashSet<Order>();
+        Set<Order> openOrders = new LinkedHashSet<>();
         for (Order order : getOrders()) {
             if (OrderStatus.OPENED == order.getStatus() || OrderStatus.FILLED == order.getStatus()) {
                 openOrders.add(order);
@@ -48,7 +48,7 @@ public class OrderContainer {
     }
 
     public Set<Order> getOpenedAndFilledOrdersByMarket(String symbol) {
-        Set<Order> marketOrders = new LinkedHashSet<Order>();
+        Set<Order> marketOrders = new LinkedHashSet<>();
         if (symbol != null) {
             for (Order order : getOpenedAndFilledOrders()) {
                 if (order.getSymbol().equals(symbol)) {

@@ -1,3 +1,6 @@
+/**
+ * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
+ */
 package de.gsi.chart.samples.financial.service.execution;
 
 import de.gsi.chart.samples.financial.dos.*;
@@ -8,40 +11,42 @@ import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import java.util.Date;
 import java.util.Set;
 
+/**
+ * Basic example of order execution processing
+ *
+ * @author afischer
+ */
 public class BasicOrderExecutionService {
 
     private AttributeModel context;
     private OrderContainer orderContainer;
     private PositionContainer positionContainer;
-    private String assetName;
     private String accountId;
     private ExecutionPlatform executionPlatform;
 
-    public void afterPropertiesSet() throws Exception {
-        orderContainer = context.getAttribute(StandardTradePlanAttributes.ORDERS);
-        positionContainer = context.getAttribute(StandardTradePlanAttributes.POSITIONS);
-        assetName = context.getAttribute(StandardTradePlanAttributes.ASSET_NAME);
-        accountId = context.getAttribute(StandardTradePlanAttributes.ACCOUNT_ID);
-        if (orderContainer == null || positionContainer == null) {
-            throw new IllegalArgumentException("The orders or positions containers are not prepared for common order execution service!");
-        }
-    }
-
-    public void setContext(AttributeModel context) {
+    public BasicOrderExecutionService(AttributeModel context, ExecutionPlatform executionPlatform) {
         this.context = context;
+        this.executionPlatform = executionPlatform;
+        afterPropertiesSet();
     }
 
-    public Order createOrder(String name, Date entryTime, String symbol, OrderExpression orderExpression) {
+    private void afterPropertiesSet() {
+        orderContainer = context.getRequiredAttribute(StandardTradePlanAttributes.ORDERS);
+        positionContainer = context.getRequiredAttribute(StandardTradePlanAttributes.POSITIONS);
+        accountId = context.getAttribute(StandardTradePlanAttributes.ACCOUNT_ID, "account");
+    }
+
+    public Order createOrder(String name, Date entryTime, String asset, OrderExpression orderExpression) {
         Integer orderId = InternalOrderIdGenerator.generateId();
-        return new Order(orderId, name, entryTime, symbol, orderExpression, accountId);
+        return new Order(orderId, name, entryTime, asset, orderExpression, accountId);
     }
 
-    public ExecutionResult performOrder(String name, Date entryTime, String symbol, OrderExpression orderExpression) {
-        return performOrder(createOrder(name, entryTime, symbol, orderExpression));
+    public ExecutionResult performOrder(String name, Date entryTime, String asset, OrderExpression orderExpression) {
+        return performOrder(createOrder(name, entryTime, asset, orderExpression));
     }
 
-    public ExecutionResult performOrder(Date entryTime, String symbol, OrderExpression orderExpression) {
-        return performOrder(createOrder(null, entryTime, symbol, orderExpression));
+    public ExecutionResult performOrder(Date entryTime, String asset, OrderExpression orderExpression) {
+        return performOrder(createOrder(null, entryTime, asset, orderExpression));
     }
 
     public ExecutionResult performOrder(Order order) {
@@ -56,8 +61,8 @@ public class BasicOrderExecutionService {
         return executionPlatform.cancelOrder(order);
     }
 
-    public void flatPositions() {
-        Set<Position> openedPositions = positionContainer.getFastOpenedPositionByMarketSymbol(assetName);
+    public void flatPositions(String asset) {
+        Set<Position> openedPositions = positionContainer.getFastOpenedPositionByMarketSymbol(asset);
         for (Position position : openedPositions) {
             if (position.getPositionType() == 1) { // Long
                 performOrder(position.getEntryTime(), position.getSymbol(), OrderExpression.sellMarket(position.getPositionQuantity()));
@@ -67,11 +72,4 @@ public class BasicOrderExecutionService {
             }
         }
     }
-
-    //--------------------------- injections -------------------------------
-
-    public void setExecutionPlatform(ExecutionPlatform executionPlatform) {
-        this.executionPlatform = executionPlatform;
-    }
-
 }
