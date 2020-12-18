@@ -42,7 +42,7 @@ public class CandleStickRendererTest {
 
     @Start
     public void start(Stage stage) throws Exception {
-        ProcessingProfiler.setDebugState(true);
+        ProcessingProfiler.setDebugState(false); // enable for detailed renderer tracing
         ohlcvDataSet = new OhlcvDataSet("ohlc1");
         ohlcvDataSet.setData(FinancialTestUtils.createTestOhlcv());
         rendererTested = new CandleStickRenderer(true);
