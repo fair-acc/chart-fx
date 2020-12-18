@@ -30,7 +30,7 @@
     </modules>
 
     <properties>
-        <revision>11.2.0</revision>
+        <revision>master</revision>
         <changelist>-SNAPSHOT</changelist>
         <sha1 />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -370,7 +370,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
