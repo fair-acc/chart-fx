@@ -9,7 +9,7 @@
     <version>${revision}${sha1}${changelist}</version>
     <packaging>pom</packaging>
     <name>chartfx</name>
-    <description>This charting library ${project.artifactId}- is an extension
+    <description>The chart-fx charting library is an extension
         in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities.
         Emphasis was put on plotting performance for both large number of data points and real-time displays,
         as well as scientific accuracies leading to error bar/surface plots, and other scientific plotting
@@ -111,6 +111,11 @@
             <plugins>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
                     <configuration>
@@ -168,23 +173,6 @@
                         <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
                     </configuration>
                 </plugin>
-                <plugin>
-                    <groupId>org.owasp</groupId>
-                    <artifactId>dependency-check-maven</artifactId>
-                    <version>5.3.1</version>
-                    <configuration>
-                        <failBuildOnCVSS>8</failBuildOnCVSS>
-                        <suppressionFiles>dependency-check-suppressions.xml</suppressionFiles>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>owaspcheck</id>
-                            <goals>
-                                <goal>check</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin> <!-- Use current plugin version because of MNG-5346-->
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-plugin-plugin</artifactId>
@@ -233,42 +221,10 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar-no-fork</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam>
-                    <skip>true</skip> </configuration> -->
-                <executions>
-                    <execution>
-                        <id>attach-javadocs</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                        <!-- <configuration> <additionalparam>-Xdoclint:none</additionalparam>
-                            <skip>true</skip> </configuration> -->
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${chartfx.surefire.version}</version>
                 <configuration>
-                    <!-- Jacoco prepare-agent builds some command-line params without -->
-                    <!-- which jacoco will not instrument. Hence it is important
-                        to add -->
-                    <!-- those command-line params here (${argLine} holds those params) -->
+                    <!-- Jacoco prepare-agent builds some command-line params without which jacoco will not instrument. Hence it is important to add those command-line params here (${argLine} holds those params) -->
                     <argLine>${argLine} -Duser.language=en -Duser.country=US -Xms256m -Xmx2048m -XX:G1HeapRegionSize=32m -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw</argLine>
                     <forkCount>1</forkCount>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
@@ -279,23 +235,12 @@
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>${chartfx.jacoco.version}</version>
-                <configuration>
-                    <excludes>
-                        <!-- <exclude>de/gsi/chart/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/math/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/chart/samples/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/dataset/samples/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/math/samples/**/*</exclude> -->
-                        <!-- <exclude>de/gsi/acc/ui/samples/**/*</exclude> -->
-                    </excludes>
-                </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-
                     <execution>
                         <id>report</id>
                         <phase>test</phase>
@@ -307,17 +252,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <!-- Override old batik version included by javafxsvg due to CVEs -->
-                <groupId>org.apache.xmlgraphics</groupId>
-                <artifactId>batik-transcoder</artifactId>
-                <version>1.12</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -359,10 +293,11 @@
 
     <profiles>
         <profile>
-            <id>release</id>
+            <id>releaseGithub</id>
             <activation>
                 <property>
                     <name>release</name>
+                    <value>github</value>
                 </property>
             </activation>
             <build>
@@ -380,6 +315,52 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <distributionManagement>
+               <repository>
+                 <id>github</id>
+                 <name>GSI Github repository</name>
+                 <url>https://maven.pkg.github.com/GSI-CS-CO/chart-fx</url>
+               </repository>
+            </distributionManagement>
+        </profile>
+        <profile>
+            <id>releaseOSSRH</id>
+            <activation>
+                <property>
+                    <name>release</name>
+                    <value>ossrh</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <version>1.6</version>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
                     </plugin>
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
@@ -394,13 +375,12 @@
                     </plugin>
                 </plugins>
             </build>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>ossrh</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                </snapshotRepository>
+            </distributionManagement>
         </profile>
     </profiles>
-
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
 </project>
