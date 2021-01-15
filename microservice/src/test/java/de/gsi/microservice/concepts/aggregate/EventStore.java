@@ -59,8 +59,8 @@ public class EventStore {
     public final Disruptor<RingBufferEvent> disruptor;
     public final List<EventHandler<RingBufferEvent>> allEventHandlers = new NoDuplicatesList<>();
     public final List<Function<RingBufferEvent, String>> muxCtxFunctions = new NoDuplicatesList<>();
-    private final Class<? extends Filter>[] filterConfig;
-    public final Cache<String, Disruptor<RingBufferEvent>> eventStreams;
+    private Class<? extends Filter>[] filterConfig = null;
+    public Cache<String, Disruptor<RingBufferEvent>> eventStreams;
     protected Function<String, Disruptor<RingBufferEvent>> ctxMappingFunction = ctx -> {
         // mux contexts -> create copy into separate disruptor/ringbuffer if necessary
         // N.B. only single writer ... no further post-processors (all done in main eventStream)
