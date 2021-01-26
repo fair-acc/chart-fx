@@ -1,22 +1,13 @@
 package de.gsi.chart.plugins;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
 import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Labeled;
-import javafx.scene.control.TableView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -35,6 +26,14 @@ import de.gsi.chart.plugins.TableViewer.ColumnType;
 import de.gsi.chart.plugins.TableViewer.DataSetsRow;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Labeled;
+import javafx.scene.control.TableView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 
 /**
  * Test the table viewer plugin
@@ -125,6 +124,29 @@ class TableViewerTest {
         FxAssert.verifyThat(tableView.getSelectionModel().getSelectedItem(), Matchers.notNullValue());
         DataSetsRow selectedItem = tableView.getSelectionModel().getSelectedItem();
         assertEquals(valueAtX1, selectedItem.getValue(dataset, ColumnType.Y));
+    }
+
+    @Test
+    public void testThatDataSetsRowHashCodeEqualsWorks() throws TimeoutException {
+        fxRobot.interact(() -> {
+            chart.getPlugins().add(tableViewer);
+            chart.setToolBarPinned(true);
+        });
+
+        // Open the table view
+        final Button switchTableViewButton = locateTableViewButton(chart.getToolBar());
+        waitForNodeToBeVisible(switchTableViewButton); // Wait for the slowly opening toolbar to show
+        fxRobot.clickOn(switchTableViewButton);
+        WaitForAsyncUtils.waitForFxEvents();
+
+        verifyThatWithTimeout(chart.getPlotForeground(), NodeMatchers.hasChild(".table-view"));
+
+        @SuppressWarnings("unchecked")
+        TableView<DataSetsRow> tableView = (TableView<DataSetsRow>) tableViewer.getTable();
+        tableView.getSelectionModel().select(0);
+        DataSetsRow anyRowItem = tableView.getSelectionModel().getSelectedItem();
+        assertEquals(anyRowItem.hashCode(), anyRowItem.hashCode());
+        assertTrue(anyRowItem.equals(anyRowItem));
     }
 
     private Button locateTableViewButton(final FlowPane toolbar) {
