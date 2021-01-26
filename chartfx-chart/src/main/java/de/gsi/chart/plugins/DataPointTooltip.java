@@ -107,11 +107,9 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         final XYChart xyChart = (XYChart) chart;
         final ObservableList<DataSet> xyChartDatasets = xyChart.getDatasets();
         return xyChart.getRenderers().stream() // for all renderers
-                .flatMap(renderer -> {
-                    return Stream.of(renderer.getDatasets(), xyChartDatasets) //
-                            .flatMap(List::stream) // combine global and renderer specific Datasets
-                            .flatMap(dataset -> getPointsCloseToCursor(dataset, renderer, mouseLocation));
-                }) // get points in range of cursor
+                .flatMap(renderer -> Stream.of(renderer.getDatasets(), xyChartDatasets) //
+                        .flatMap(List::stream) // combine global and renderer specific Datasets
+                        .flatMap(dataset -> getPointsCloseToCursor(dataset, renderer, mouseLocation))) // get points in range of cursor
                 .reduce((p1, p2) -> p1.distanceFromMouse < p2.distanceFromMouse ? p1 : p2); // find closest point
     }
 
@@ -140,7 +138,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         }
         
         return IntStream.range(minIdx, maxIdx) // loop over all candidate points
-                .mapToObj(i -> getDataPointFromDataSet(renderer, dataset, i, xAxis, yAxis, mouseLocation)) // get points with distance to mouse
+                .mapToObj(i -> getDataPointFromDataSet(renderer, dataset, xAxis, yAxis, mouseLocation, i)) // get points with distance to mouse
                 .filter(p -> p.distanceFromMouse <= getPickingDistance()); // filter out points which are too far away
     }
 
@@ -156,13 +154,22 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         return renderer.getAxes().stream().filter(ax -> ax.getSide().isHorizontal()).findFirst().orElse(null);
     }
 
-    private DataPoint getDataPointFromDataSet(final Renderer renderer, final DataSet d, final int i, final Axis xAxis, final Axis yAxis, final Point2D mouseLocation) {
-        final DataPoint point = new DataPoint(renderer, d.get(DataSet.DIM_X, i), d.get(DataSet.DIM_Y, i), getDataLabelSafe(d, i));
-        final double x = xAxis.getDisplayPosition(point.x);
-        final double y = yAxis.getDisplayPosition(point.y);
-        final Point2D displayPoint = new Point2D(x, y);
-        point.distanceFromMouse = displayPoint.distance(mouseLocation);
-        return point;
+    private DataPoint getDataPointFromDataSet(final Renderer renderer, final DataSet dataset, final Axis xAxis, final Axis yAxis, final Point2D mouseLocation, final int index) {
+        final double xValue = dataset.get(DataSet.DIM_X, index);
+        final double yValue = dataset.get(DataSet.DIM_Y, index);
+        
+        final double displayPositionX = xAxis.getDisplayPosition(xValue);
+        final double displayPositionY = yAxis.getDisplayPosition(yValue);
+        final double distanceFromMouseLocation = new Point2D(displayPositionX, displayPositionY).distance(mouseLocation);
+        
+        final String dataLabelSafe = getDataLabelSafe(dataset, index);
+        
+        return new DataPoint( //
+                renderer, //
+                xValue, //
+                yValue, //
+                dataLabelSafe, //
+                distanceFromMouseLocation);
     }
 
     private String formatDataPoint(final DataPoint dataPoint) {
@@ -278,11 +285,12 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         public final String label;
         public double distanceFromMouse;
 
-        protected DataPoint(final Renderer renderer, final double x, final double y, final String label) {
+        public DataPoint(Renderer renderer, double x, double y, String label, double distanceFromMouse) {
             this.renderer = renderer;
             this.x = x;
             this.y = y;
             this.label = label;
+            this.distanceFromMouse = distanceFromMouse;
         }
     }
 }
