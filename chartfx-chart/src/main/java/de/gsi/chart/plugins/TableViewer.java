@@ -742,7 +742,7 @@ public class TableViewer extends ChartPlugin {
         public boolean equals(final Object o) {
             if (o instanceof DataSetsRow) {
                 final DataSetsRow dsr = (DataSetsRow) o;
-                return ((dsr.getRow() == row) && model.equals(dsr.getModel()));
+                return ((dsr.getRow() == row) && model == dsr.getModel());
             }
             return false;
         }
@@ -762,7 +762,7 @@ public class TableViewer extends ChartPlugin {
         @Override
         public int hashCode() {
             int hash = 7;
-            hash = 31 * hash + model.hashCode();
+            hash = 31 * hash + System.identityHashCode(model);
             hash = 31 * hash + row;
             return hash;
         }
