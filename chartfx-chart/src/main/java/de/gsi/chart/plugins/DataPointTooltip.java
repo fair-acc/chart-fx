@@ -5,6 +5,7 @@ package de.gsi.chart.plugins;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -125,21 +126,26 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
             return Stream.empty(); // TODO: correct impl for grid data sets
         }
         
-        int minIdx = 0;
-        int maxIdx = dataset.getDataCount();
-        
-        if (isDataSorted(renderer)) {
-            // get the screen x coordinates and dataset indices between which points can be in picking distance
-            final double xMin = xAxis.getValueForDisplay(mouseLocation.getX() - getPickingDistance());
-            final double xMax = xAxis.getValueForDisplay(mouseLocation.getX() + getPickingDistance());
+        return dataset.lock().readLockGuard(() -> {
+            int minIdx = 0;
+            int maxIdx = dataset.getDataCount();
             
-            minIdx = Math.max(0, dataset.getIndex(DataSet.DIM_X, xMin) - 1);
-            maxIdx = Math.min(dataset.getDataCount(), dataset.getIndex(DataSet.DIM_X, xMax) + 1);
-        }
-        
-        return IntStream.range(minIdx, maxIdx) // loop over all candidate points
-                .mapToObj(i -> getDataPointFromDataSet(renderer, dataset, xAxis, yAxis, mouseLocation, i)) // get points with distance to mouse
-                .filter(p -> p.distanceFromMouse <= getPickingDistance()); // filter out points which are too far away
+            if (isDataSorted(renderer)) {
+                // get the screen x coordinates and dataset indices between which points can be in picking distance
+                final double xMin = xAxis.getValueForDisplay(mouseLocation.getX() - getPickingDistance());
+                final double xMax = xAxis.getValueForDisplay(mouseLocation.getX() + getPickingDistance());
+                
+                minIdx = Math.max(0, dataset.getIndex(DataSet.DIM_X, xMin) - 1);
+                maxIdx = Math.min(dataset.getDataCount(), dataset.getIndex(DataSet.DIM_X, xMax) + 1);
+            }
+            
+            return IntStream.range(minIdx, maxIdx) // loop over all candidate points
+                    .mapToObj(i -> getDataPointFromDataSet(renderer, dataset, xAxis, yAxis, mouseLocation, i)) // get points with distance to mouse
+                    .filter(p -> p.distanceFromMouse <= getPickingDistance())  // filter out points which are too far away
+                    .map(dataPoint -> dataPoint.withFormattedLabel(formatLabel(dataPoint)))
+                    .collect(Collectors.toList()) // Realize list so that calculations are done within the data set lock
+                    .stream();
+        });
     }
 
     private boolean isDataSorted(final Renderer renderer) {
@@ -217,7 +223,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
     }
 
     protected void updateLabel(final MouseEvent event, final Bounds plotAreaBounds, final DataPoint dataPoint) {
-        label.setText(formatLabel(dataPoint));
+        label.setText(dataPoint.formattedLabel);
         final double mouseX = event.getX();
         final double spaceLeft = mouseX - plotAreaBounds.getMinX();
         final double spaceRight = plotAreaBounds.getWidth() - spaceLeft;
@@ -283,14 +289,24 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         public final double x;
         public final double y;
         public final String label;
-        public double distanceFromMouse;
-
-        public DataPoint(Renderer renderer, double x, double y, String label, double distanceFromMouse) {
+        public final String formattedLabel; // may be empty
+        public final double distanceFromMouse;
+        
+        public DataPoint(Renderer renderer, double x, double y, String label, double distanceFromMouse, String formattedLabel) {
             this.renderer = renderer;
             this.x = x;
             this.y = y;
             this.label = label;
             this.distanceFromMouse = distanceFromMouse;
+            this.formattedLabel = formattedLabel;
+        }
+
+        public DataPoint(Renderer renderer, double x, double y, String label, double distanceFromMouse) {
+            this(renderer, x, y, label, distanceFromMouse, "");
+        }
+        
+        public DataPoint withFormattedLabel(String formattedLabel) {
+            return new DataPoint(renderer, x, y, formattedLabel, distanceFromMouse, formattedLabel);
         }
     }
 }
