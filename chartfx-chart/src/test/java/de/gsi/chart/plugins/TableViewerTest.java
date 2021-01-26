@@ -1,13 +1,21 @@
 package de.gsi.chart.plugins;
 
-import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
-import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
+import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableView;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -24,12 +32,6 @@ import org.testfx.util.WaitForAsyncUtils;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.plugins.TableViewer.DataSetsRow;
 import de.gsi.dataset.testdata.spi.CosineFunction;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableView;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 
 /**
  * Test the table viewer plugin
@@ -84,7 +86,7 @@ class TableViewerTest {
         fxRobot.sleep(200); // it might need some time to be gone
         FxAssert.verifyThat(chart.getPlotForeground(), Matchers.not(NodeMatchers.hasChild(".table-view")));
     }
-    
+
     @Test
     public void testThatDataSetsRowHashCodeEqualsWorks() throws TimeoutException {
         fxRobot.interact(() -> {
@@ -99,7 +101,7 @@ class TableViewerTest {
         WaitForAsyncUtils.waitForFxEvents();
 
         verifyThatWithTimeout(chart.getPlotForeground(), NodeMatchers.hasChild(".table-view"));
-        
+
         @SuppressWarnings("unchecked")
         TableView<DataSetsRow> tableView = (TableView<DataSetsRow>) tableViewer.getTable();
         tableView.getSelectionModel().select(0);
