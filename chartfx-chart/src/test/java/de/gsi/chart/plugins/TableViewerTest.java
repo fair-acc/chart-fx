@@ -3,6 +3,8 @@ package de.gsi.chart.plugins;
 import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
 import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.Callable;
@@ -143,10 +145,21 @@ class TableViewerTest {
 
         @SuppressWarnings("unchecked")
         TableView<DataSetsRow> tableView = (TableView<DataSetsRow>) tableViewer.getTable();
+
+        // Equals/hashCode with self is true
         tableView.getSelectionModel().select(0);
-        DataSetsRow anyRowItem = tableView.getSelectionModel().getSelectedItem();
-        assertEquals(anyRowItem.hashCode(), anyRowItem.hashCode());
-        assertTrue(anyRowItem.equals(anyRowItem));
+        DataSetsRow firstRowItem = tableView.getSelectionModel().getSelectedItem();
+        assertEquals(firstRowItem.hashCode(), firstRowItem.hashCode());
+        assertTrue(firstRowItem.equals(firstRowItem));
+
+        // Equals/hashCode with other row is false
+        tableView.getSelectionModel().clearAndSelect(1);
+        DataSetsRow secondRowItem = tableView.getSelectionModel().getSelectedItem();
+        assertNotEquals(firstRowItem.hashCode(), secondRowItem.hashCode());
+        assertFalse(firstRowItem.equals(secondRowItem));
+
+        // Equals with other type is false
+        assertFalse(firstRowItem.equals(new Object()));
     }
 
     private Button locateTableViewButton(final FlowPane toolbar) {
