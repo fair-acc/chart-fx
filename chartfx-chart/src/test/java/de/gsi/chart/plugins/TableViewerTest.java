@@ -1,15 +1,25 @@
 package de.gsi.chart.plugins;
 
-import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
-import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
+import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+
+import javafx.scene.Node;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Labeled;
+import javafx.scene.control.TableView;
+import javafx.scene.input.MouseButton;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
@@ -28,14 +38,6 @@ import de.gsi.chart.plugins.TableViewer.ColumnType;
 import de.gsi.chart.plugins.TableViewer.DataSetsRow;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Labeled;
-import javafx.scene.control.TableView;
-import javafx.scene.input.MouseButton;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 
 /**
  * Test the table viewer plugin
