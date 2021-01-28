@@ -159,7 +159,7 @@ public class PositionFinancialDataSet extends AbstractDataSet<PositionFinancialD
         if (dimIndex == DIM_X) { // return coordination by index
             return positionRendered == null ? -1.0 : positionRendered.index;
         }
-        return positionRendered.price;
+        return positionRendered == null ? -1.0 : positionRendered.price;
     }
 
     @Override
