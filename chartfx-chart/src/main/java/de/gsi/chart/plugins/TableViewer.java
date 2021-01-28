@@ -225,7 +225,7 @@ public class TableViewer extends ChartPlugin {
                 plotForegroundChildren.remove(table);
                 table.prefWidthProperty().unbind();
                 table.prefHeightProperty().unbind();
-            } else {
+            } else { // !isTablePresent means add the table
                 plotForegroundChildren.add(table);
                 table.toFront();
                 table.prefWidthProperty().bind(getChart().getPlotForeground().widthProperty());
@@ -233,8 +233,8 @@ public class TableViewer extends ChartPlugin {
             }
 
             switchTableView.setGraphic(isTablePresent ? tableView : graphView);
-            getChart().getPlotForeground().setMouseTransparent(!isTablePresent);
-            table.setMouseTransparent(!isTablePresent);
+            getChart().getPlotForeground().setMouseTransparent(isTablePresent);
+            table.setMouseTransparent(isTablePresent);
             dsModel.datasetsChanged(null);
         });
 
