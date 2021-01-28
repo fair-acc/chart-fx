@@ -50,6 +50,7 @@ import de.gsi.dataset.DataSet;
  * @see <a href="https://www.investopedia.com/terms/p/position.asp">Position Investopedia</a>
  * @author afischer
  */
+@SuppressWarnings({ "PMD.NPathComplexity" })
 public class PositionFinancialRendererPaintAfterEP implements RendererPaintAfterEP, DataSetAware {
     protected final DataSet ds;
     protected final XYChart chart;

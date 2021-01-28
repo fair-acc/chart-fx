@@ -33,7 +33,6 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 @ExtendWith(JavaFXInterceptorUtils.SelectiveJavaFxInterceptor.class)
 class PositionFinancialRendererPaintAfterEPTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(PositionFinancialRendererPaintAfterEPTest.class);
-    private PositionFinancialRendererPaintAfterEP positionPaintAfterEPTested;
     private XYChart chart;
     private OhlcvDataSet ohlcvDataSet;
 
@@ -78,7 +77,7 @@ class PositionFinancialRendererPaintAfterEPTest {
         Assertions.assertEquals(1, positionList.get(2).compareTo(positionList.get(1)));
 
         // create test instance!
-        positionPaintAfterEPTested = new PositionFinancialRendererPaintAfterEP(positionFinancialDataSet, chart);
+        PositionFinancialRendererPaintAfterEP positionPaintAfterEPTested = new PositionFinancialRendererPaintAfterEP(positionFinancialDataSet, chart);
 
         candleStickRenderer.getDatasets().add(ohlcvDataSet);
         chart.getRenderers().clear();

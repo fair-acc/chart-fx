@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.BLACKBERRY;
 import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
 
-import de.gsi.chart.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
-import de.gsi.chart.renderer.spi.financial.utils.PositionFinancialDataSetDummy;
+import java.util.ArrayList;
+
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -21,12 +21,12 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
 import de.gsi.chart.renderer.spi.financial.HighLowRenderer;
+import de.gsi.chart.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
+import de.gsi.chart.renderer.spi.financial.utils.PositionFinancialDataSetDummy;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
-
-import java.util.ArrayList;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
@@ -49,8 +49,7 @@ class FinancialColorSchemeConfigTest {
         setUp();
         chart = new XYChart();
         // possibility to configure extension points
-        ((CandleStickRenderer) renderer).addPaintAfterEp(
-                new PositionFinancialRendererPaintAfterEP(new PositionFinancialDataSetDummy(new ArrayList<>()), chart));
+        ((CandleStickRenderer) renderer).addPaintAfterEp(new PositionFinancialRendererPaintAfterEP(new PositionFinancialDataSetDummy(new ArrayList<>()), chart));
         renderer.getDatasets().add(ohlcvDataSet);
         chart.getRenderers().add(renderer); // one possibility
         chart.getDatasets().add(ohlcvDataSet); // second possibility

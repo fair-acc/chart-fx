@@ -3,23 +3,22 @@
  */
 package de.gsi.chart.samples.financial.service.execution;
 
+import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.ORDERS;
+import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.POSITIONS;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import de.gsi.chart.samples.financial.dos.Order;
 import de.gsi.chart.samples.financial.dos.OrderContainer;
 import de.gsi.chart.samples.financial.dos.PositionContainer;
 import de.gsi.chart.samples.financial.service.execution.ExecutionResult.ExecutionResultEnum;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
-
-import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.ORDERS;
-import static de.gsi.chart.samples.financial.service.StandardTradePlanAttributes.POSITIONS;
-
 /**
  * @author afischer
  */
 public abstract class AbstractExecutionPlatform implements ExecutionPlatform {
-
     protected AttributeModel context;
     protected OrderContainer orders = null;
     protected PositionContainer positions = null;
@@ -135,5 +134,4 @@ public abstract class AbstractExecutionPlatform implements ExecutionPlatform {
      * @return result
      */
     protected abstract ExecutionResult executeOrderCancellation(Order order);
-
 }

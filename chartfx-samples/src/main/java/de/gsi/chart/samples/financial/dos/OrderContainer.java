@@ -3,9 +3,9 @@
  */
 package de.gsi.chart.samples.financial.dos;
 
-import de.gsi.chart.samples.financial.dos.Order.OrderStatus;
-
 import java.util.*;
+
+import de.gsi.chart.samples.financial.dos.Order.OrderStatus;
 
 /**
  * @author afischer
