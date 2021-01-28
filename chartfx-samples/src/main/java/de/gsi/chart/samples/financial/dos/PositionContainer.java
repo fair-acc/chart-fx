@@ -1,9 +1,9 @@
 package de.gsi.chart.samples.financial.dos;
 
-import de.gsi.chart.samples.financial.dos.Position.PositionStatus;
-
 import java.io.Serializable;
 import java.util.*;
+
+import de.gsi.chart.samples.financial.dos.Position.PositionStatus;
 
 public class PositionContainer implements Serializable {
     private static final long serialVersionUID = -6964168549256831250L;

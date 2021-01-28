@@ -3,6 +3,8 @@
  */
 package de.gsi.chart.samples.financial.service;
 
+import static de.gsi.chart.samples.financial.service.SimpleOhlcvReplayDataSet.DataInput.OHLC_TICK;
+
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
@@ -25,8 +27,6 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
-
-import static de.gsi.chart.samples.financial.service.SimpleOhlcvReplayDataSet.DataInput.OHLC_TICK;
 
 /**
  * Very simple financial OHLC replay data set.
