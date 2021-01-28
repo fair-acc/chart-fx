@@ -74,6 +74,7 @@ public class CandleStickRendererTest {
 
         // Extension point usage
         rendererTested.addPaintAfterEp(data -> assertNotNull(data.gc));
+        assertEquals(1, rendererTested.getPaintAfterEps().size());
 
         new FinancialColorSchemeConfig().applyTo(SAND, chart);
 

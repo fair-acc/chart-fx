@@ -114,4 +114,27 @@ public class CalendarUtils {
 
         return cal;
     }
+
+    /**
+     * Create the calendar instance by datetime pattern:
+     * MM/dd/yyyy HH:mm
+     * for example: 12/01/2017 15:30
+     *
+     * @param datetimePattern String
+     * @return calendar interval instance
+     * @throws ParseException parsing fails
+     */
+    public static Calendar createByTradeStationDateTime(String datetimePattern) throws ParseException {
+        if (datetimePattern == null) {
+            throw new ParseException("The resource datetime pattern is null", -1);
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+        Date fromTotime = sdf.parse(datetimePattern);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(fromTotime);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE),
+                cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), 0);
+
+        return cal;
+    }
 }
