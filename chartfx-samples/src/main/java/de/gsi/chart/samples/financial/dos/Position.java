@@ -3,15 +3,16 @@
  */
 package de.gsi.chart.samples.financial.dos;
 
-import de.gsi.chart.samples.financial.service.ConcurrentDateFormatAccess;
-import de.gsi.chart.samples.financial.service.period.Period;
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
-import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.time.DateUtils;
-
 import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
+
+import org.apache.commons.lang3.SerializationUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
+import de.gsi.chart.samples.financial.service.ConcurrentDateFormatAccess;
+import de.gsi.chart.samples.financial.service.period.Period;
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 
 /**
  * @author afischer
@@ -27,6 +28,8 @@ public class Position implements Comparable<Position>, Serializable {
     }
 
     private final int positionId;
+    private final long positionEntryIndex;
+    private long positionExitIndex = -1;
     private Integer timePosId;
     private final Date entryTime;
     private Date exitTime;
@@ -49,9 +52,10 @@ public class Position implements Comparable<Position>, Serializable {
     transient private Order exitOrder;
     transient private AttributeModel addons; // append transient data about position for calculations
 
-    public Position(int positionId, String entryUserName, Date entryTime, int positionType,
+    public Position(int positionId, Long positionEntryIndex, String entryUserName, Date entryTime, int positionType,
             String symbol, String accountId, Double entryPrice, int positionQuantity) {
         this.positionId = positionId;
+        this.positionEntryIndex = positionEntryIndex == null ? entryTime.getTime() : positionEntryIndex;
         this.entryUserName = entryUserName;
         this.entryTime = entryTime;
         this.positionType = positionType;
@@ -61,9 +65,9 @@ public class Position implements Comparable<Position>, Serializable {
         this.positionQuantity = positionQuantity;
     }
 
-    public Position(int positionId, String entryUserName, String strategy, Date entryTime, int positionType,
+    public Position(int positionId, Long positionIndex, String entryUserName, String strategy, Date entryTime, int positionType,
             String symbol, String accountId, Double entryPrice, int positionQuantity) {
-        this(positionId, entryUserName, entryTime, positionType, symbol, accountId, entryPrice, positionQuantity);
+        this(positionId, positionIndex, entryUserName, entryTime, positionType, symbol, accountId, entryPrice, positionQuantity);
         this.strategy = strategy;
     }
 
@@ -125,6 +129,14 @@ public class Position implements Comparable<Position>, Serializable {
         return exitTime;
     }
 
+    public void setPositionExitIndex(long positionExitIndex) {
+        this.positionExitIndex = positionExitIndex;
+    }
+
+    public long getPositionExitIndex() {
+        return positionExitIndex;
+    }
+
     public void setExitTime(Date exitTime) {
         this.exitTime = exitTime;
     }
@@ -177,6 +189,10 @@ public class Position implements Comparable<Position>, Serializable {
 
     public int getPositionId() {
         return positionId;
+    }
+
+    public long getPositionEntryIndex() {
+        return positionEntryIndex;
     }
 
     public Date getEntryTime() {
@@ -257,6 +273,10 @@ public class Position implements Comparable<Position>, Serializable {
         if (getClass() != position.getClass())
             return false;
         Position other = position;
+        if (positionEntryIndex != other.positionEntryIndex)
+            return false;
+        if (positionExitIndex != other.positionExitIndex)
+            return false;
         if (accountId == null) {
             if (other.accountId != null)
                 return false;
@@ -342,11 +362,11 @@ public class Position implements Comparable<Position>, Serializable {
 
     @Override
     public String toString() {
-        return "Position [positionId=" + positionId + ", timePosId=" + timePosId + ", entryUserName=" + entryUserName + ", strategy=" + strategy
+        return "Position [positionId=" + positionId + ", positionEntryIndex=" + positionEntryIndex + ", positionExitIndex=" + positionExitIndex + ", timePosId=" + timePosId + ", entryUserName=" + entryUserName + ", strategy=" + strategy
                 + ", entryTime=" + (entryTime != null ? dateFormat.format(entryTime) : "NO ENTRY") + ", exitTime=" + (exitTime != null ? dateFormat.format(exitTime) : "NO EXIT") + ", positionType="
                 + positionType + ", positionStatus=" + positionStatus + ", symbol=" + symbol + ", accountId=" + accountId
                 + ", positionQuantity=" + positionQuantity + ", entryPrice=" + entryPrice + ", exitPrice=" + exitPrice
-                + ", MaxPositionProfit=" + mfe + ", MAE=" + mae + ", risk=" + risk
+                + ", MFE=" + mfe + ", MAE=" + mae + ", risk=" + risk
                 + ", period=" + period + ", pl=" + pl + ", isLive=" + isLive + "]";
     }
 }

@@ -3,13 +3,13 @@
  */
 package de.gsi.chart.samples.financial.service.execution;
 
+import java.util.Date;
+import java.util.Set;
+
 import de.gsi.chart.samples.financial.dos.*;
 import de.gsi.chart.samples.financial.service.StandardTradePlanAttributes;
 import de.gsi.chart.samples.financial.service.order.InternalOrderIdGenerator;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
-
-import java.util.Date;
-import java.util.Set;
 
 /**
  * Basic example of order execution processing
@@ -17,7 +17,6 @@ import java.util.Set;
  * @author afischer
  */
 public class BasicOrderExecutionService {
-
     private AttributeModel context;
     private OrderContainer orderContainer;
     private PositionContainer positionContainer;
@@ -38,7 +37,7 @@ public class BasicOrderExecutionService {
 
     public Order createOrder(String name, Date entryTime, String asset, OrderExpression orderExpression) {
         Integer orderId = InternalOrderIdGenerator.generateId();
-        return new Order(orderId, name, entryTime, asset, orderExpression, accountId);
+        return new Order(orderId, null, name, entryTime, asset, orderExpression, accountId);
     }
 
     public ExecutionResult performOrder(String name, Date entryTime, String asset, OrderExpression orderExpression) {

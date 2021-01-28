@@ -15,6 +15,10 @@ import de.gsi.chart.axes.spi.AbstractAxisParameter;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
 import de.gsi.chart.renderer.spi.financial.HighLowRenderer;
+import de.gsi.chart.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
+import de.gsi.chart.renderer.spi.financial.service.DataSetAware;
+import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEP;
+import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEPAware;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.utils.StreamUtils;
 
@@ -80,6 +84,42 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
                 break;
             default:
                 throw new IllegalArgumentException("HighLowRenderer: Not implemented yet. ColorScheme=" + theme);
+            }
+        }
+
+        // extension points configuration support
+        if (renderer instanceof RendererPaintAfterEPAware) {
+            for (RendererPaintAfterEP paintAfterEp : ((RendererPaintAfterEPAware) renderer).getPaintAfterEps()) {
+                if (paintAfterEp instanceof DataSetAware) {
+                    DataSet dataSetEp = ((DataSetAware) paintAfterEp).getDataSet();
+                    // driven-by HighLowRenderer PositionFinancialRendererPaintAfterEP
+                    if (paintAfterEp instanceof PositionFinancialRendererPaintAfterEP) {
+                        switch (theme) {
+                        case CLASSIC:
+                            dataSetEp.setStyle("positionTriangleLongColor=blue; positionTriangleShortColor=#a10000; positionTriangleExitColor=black; positionArrowLongColor=blue; "
+                                               + "positionArrowShortColor=red; positionArrowExitColor=black; positionLabelTradeDescriptionColor=black; positionOrderLinkageProfitColor=blue; positionOrderLinkageLossColor=#a10000");
+                            break;
+                        case CLEARLOOK:
+                            dataSetEp.setStyle("positionTriangleLongColor=green; positionTriangleShortColor=red; positionTriangleExitColor=black; positionArrowLongColor=green; "
+                                               + "positionArrowShortColor=red; positionArrowExitColor=black; positionLabelTradeDescriptionColor=black; positionOrderLinkageProfitColor=green; positionOrderLinkageLossColor=red");
+                            break;
+                        case SAND:
+                            dataSetEp.setStyle("positionTriangleLongColor=green; positionTriangleShortColor=red; positionTriangleExitColor=black; positionArrowLongColor=green; "
+                                               + "positionArrowShortColor=red; positionArrowExitColor=black; positionLabelTradeDescriptionColor=black; positionOrderLinkageProfitColor=green; positionOrderLinkageLossColor=red");
+                            break;
+                        case BLACKBERRY:
+                            dataSetEp.setStyle("positionTriangleLongColor=green; positionTriangleShortColor=red; positionTriangleExitColor=white; positionArrowLongColor=green; "
+                                               + "positionArrowShortColor=red; positionArrowExitColor=white; positionLabelTradeDescriptionColor=white; positionOrderLinkageProfitColor=green; positionOrderLinkageLossColor=red");
+                            break;
+                        case DARK:
+                            dataSetEp.setStyle("positionTriangleLongColor=green; positionTriangleShortColor=red; positionTriangleExitColor=white; positionArrowLongColor=green; "
+                                               + "positionArrowShortColor=red; positionArrowExitColor=white; positionLabelTradeDescriptionColor=white; positionOrderLinkageProfitColor=green; positionOrderLinkageLossColor=red");
+                            break;
+                        default:
+                            throw new IllegalArgumentException("PositionFinancialRendererPaintAfterEP: Not implemented yet. ColorScheme=" + theme);
+                        }
+                    }
+                }
             }
         }
     }

@@ -108,6 +108,78 @@ public class FinancialCss { // NOPMD decide not to rename it for the time being
      */
     public static final String DATASET_HILOW_BAR_WIDTH_PERCENTAGE = "hiLowBarWidthPercent";
 
+    // Position / Order Renderers ----------------------------------------------------------
+
+    /**
+     * Position renderer the main ratio for resizing of the final position paint
+     */
+    public static final String DATASET_POSITION_PAINT_MAIN_RATIO = "positionPaintMainRatio";
+
+    /**
+     * Small triangle defines the filled price for entry long position color
+     */
+    public static final String DATASET_POSITION_TRIANGLE_LONG_COLOR = "positionTriangleLongColor";
+
+    /**
+     * Small triangle defines the filled price for entry short position color
+     */
+    public static final String DATASET_POSITION_TRIANGLE_SHORT_COLOR = "positionTriangleShortColor";
+
+    /**
+     * Small triangle defines the filled price for exit long and short positions color
+     */
+    public static final String DATASET_POSITION_TRIANGLE_EXIT_COLOR = "positionTriangleExitColor";
+
+    /**
+     * The arrow shows bars where the trade is present, this is a entry long position color
+     */
+    public static final String DATASET_POSITION_ARROW_LONG_COLOR = "positionArrowLongColor";
+
+    /**
+     * The arrow shows bars where the trade is present, this is a entry short position color
+     */
+    public static final String DATASET_POSITION_ARROW_SHORT_COLOR = "positionArrowShortColor";
+
+    /**
+     * The arrow shows bars where the trade is present, this is a exit long and short positions color
+     */
+    public static final String DATASET_POSITION_ARROW_EXIT_COLOR = "positionArrowExitColor";
+
+    /**
+     * Trade Order description text color
+     */
+    public static final String DATASET_POSITION_LABEL_TRADE_DESCRIPTION_COLOR = "positionLabelTradeDescriptionColor";
+
+    /**
+     * Text which is shown for trade order description, long positions
+     */
+    public static final String DATASET_POSITION_LABEL_LONG_TEXT = "positionLabelLongText";
+
+    /**
+     * Text which is shown for trade order description, short positions
+     */
+    public static final String DATASET_POSITION_LABEL_SHORT_TEXT = "positionLabelShortText";
+
+    /**
+     * The linkage line between entry and exit orders for specific position, the color for profitable position
+     */
+    public static final String DATASET_POSITION_ORDER_LINKAGE_PROFIT_COLOR = "positionOrderLinkageProfitColor";
+
+    /**
+     * The linkage line between entry and exit orders for specific position, the color for loss position
+     */
+    public static final String DATASET_POSITION_ORDER_LINKAGE_LOSS_COLOR = "positionOrderLinkageLossColor";
+
+    /**
+     * The linkage line between entry and exit orders for specific position, the dash line style
+     */
+    public static final String DATASET_POSITION_ORDER_LINKAGE_LINE_DASH = "positionOrderLinkageLineDash";
+
+    /**
+     * The linkage line between entry and exit orders for specific position, the line width
+     */
+    public static final String DATASET_POSITION_ORDER_LINKAGE_LINE_WIDTH = "positionOrderLinkageLineWidth";
+
     private FinancialCss() {
     }
 }

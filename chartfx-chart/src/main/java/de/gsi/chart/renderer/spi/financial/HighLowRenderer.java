@@ -23,6 +23,7 @@ import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.financial.service.OhlcvRendererEpData;
 import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEP;
+import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEPAware;
 import de.gsi.chart.renderer.spi.utils.DefaultRenderColorScheme;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
@@ -49,7 +50,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  */
 @SuppressWarnings({ "PMD.ExcessiveMethodLength", "PMD.NPathComplexity", "PMD.ExcessiveParameterList" })
 // designated purpose of this class
-public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> implements Renderer {
+public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> implements Renderer, RendererPaintAfterEPAware {
     private final boolean paintVolume;
     private final FindAreaDistances findAreaDistances;
 
@@ -197,6 +198,8 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
                             data.ohlcvItemAware = itemAware;
                             data.ohlcvItem = itemAware != null ? itemAware.getItem(i) : null;
                             data.index = i;
+                            data.minIndex = iMin;
+                            data.maxIndex = iMax;
                             data.barWidth = localBarWidth;
                             data.barWidthHalf = barWidthHalf;
                             data.xCenter = x0;
@@ -292,12 +295,13 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
 
     //-------------- injections --------------------------------------------
 
-    /**
-     * Inject extension point for Paint after bar.
-     *
-     * @param paintAfterEP service
-     */
+    @Override
     public void addPaintAfterEp(RendererPaintAfterEP paintAfterEP) {
         paintAfterEPS.add(paintAfterEP);
+    }
+
+    @Override
+    public List<RendererPaintAfterEP> getPaintAfterEps() {
+        return paintAfterEPS;
     }
 }

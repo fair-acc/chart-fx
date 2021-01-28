@@ -3,18 +3,19 @@
  */
 package de.gsi.chart.samples.financial.service.order;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import de.gsi.chart.samples.financial.dos.Order;
 import de.gsi.chart.samples.financial.dos.Order.OrderStatus;
 import de.gsi.chart.samples.financial.dos.OrderExpression.OrderBuySell;
 import de.gsi.chart.samples.financial.dos.Position;
 import de.gsi.chart.samples.financial.dos.Position.PositionStatus;
 import de.gsi.chart.samples.financial.dos.PositionContainer;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
 
 /**
  * @author afischer
@@ -83,6 +84,7 @@ public class ResolvePositionService {
 
     private static void closePositionOperation(PositionContainer positionContainer, Position position, Order order) {
         // close position operations
+        position.setPositionExitIndex(order.getLastActivityTime().getTime());
         position.setExitTime(order.getLastActivityTime());
         position.setExitPrice(order.getAverageFillPrice());
         position.setExitOrder(order);
@@ -120,10 +122,11 @@ public class ResolvePositionService {
         // position type 1=LONG and -1=SHORT
         int positionType = order.getOrderExpression().getBuySell().equals(OrderBuySell.BUY) ? 1 : -1;
         // create position instance
-        Position position = new Position(InternalPositionIdGenerator.generateId(), order.getUserName(), order.getLastActivityTime(),
+        Position position = new Position(InternalPositionIdGenerator.generateId(), order.getOrderIndex(), order.getUserName(), order.getLastActivityTime(),
                 positionType, order.getSymbol(), order.getAccountId(), order.getAverageFillPrice(), order.getOrderExpression().getOrderQuantity());
         // crosslinkage can be helpful with fast resolving of exit orders vs entry orders
         position.setEntryOrder(order);
+        order.setEntryOfPosition(position); // cross linkage
 
         return position;
     }
@@ -136,9 +139,10 @@ public class ResolvePositionService {
      */
     public static Position duplicatePosition(Position position) {
         // create position instance
-        Position position2 = new Position(InternalPositionIdGenerator.generateId(), position.getEntryUserName(), position.getEntryTime(),
+        Position position2 = new Position(InternalPositionIdGenerator.generateId(), position.getPositionEntryIndex(), position.getEntryUserName(), position.getEntryTime(),
                 position.getPositionType(), position.getSymbol(), position.getAccountId(), position.getEntryPrice(), position.getPositionQuantity());
         position2.setPositionStatus(position.getPositionStatus());
+        position2.setPositionExitIndex(position.getExitTime() != null ? position.getExitTime().getTime() : -1L);
         position2.setExitTime(position.getExitTime());
         position2.setExitPrice(position.getExitPrice());
         // cross linkages

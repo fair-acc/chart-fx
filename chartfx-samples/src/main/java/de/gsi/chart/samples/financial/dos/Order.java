@@ -17,6 +17,7 @@ public class Order {
     }
 
     private final int internalOrderId;
+    private final long orderIndex;
     private final String userName;
     private final Date entryTime;
     private final String symbol;
@@ -30,21 +31,24 @@ public class Order {
     private OHLCVItem ohlcvItem;
 
     private boolean isExitOrder = false;
+    private Position entryOfPosition;
     private Position exitOfPosition;
 
     /**
      * Create exchange order
      *
      * @param internalOrderId String
+     * @param orderIndex      Long
      * @param userName        String
      * @param entryTime       Date
      * @param symbol          String
      * @param orderExpression OrderExpression
      * @param accountId       String
      */
-    public Order(int internalOrderId, String userName, Date entryTime, String symbol,
+    public Order(int internalOrderId, Long orderIndex, String userName, Date entryTime, String symbol,
             OrderExpression orderExpression, String accountId) {
         this.internalOrderId = internalOrderId;
+        this.orderIndex = orderIndex == null ? entryTime.getTime() : orderIndex;
         this.userName = userName;
         this.entryTime = entryTime;
         this.symbol = symbol;
@@ -69,6 +73,10 @@ public class Order {
         return internalOrderId;
     }
 
+    public long getOrderIndex() {
+        return orderIndex;
+    }
+
     public String getUserName() {
         return userName;
     }
@@ -79,6 +87,14 @@ public class Order {
 
     public String getServiceOrderId() {
         return serviceOrderId;
+    }
+
+    public Position getEntryOfPosition() {
+        return entryOfPosition;
+    }
+
+    public void setEntryOfPosition(Position entryOfPosition) {
+        this.entryOfPosition = entryOfPosition;
     }
 
     public Position getExitOfPosition() {
@@ -151,14 +167,12 @@ public class Order {
         if (getClass() != obj.getClass())
             return false;
         Order other = (Order) obj;
-        if (internalOrderId != other.internalOrderId)
-            return false;
-        return true;
+        return internalOrderId == other.internalOrderId;
     }
 
     @Override
     public String toString() {
-        return "Order [internalOrderId=" + internalOrderId + ", userName=" + userName + ", serviceOrderId=" + serviceOrderId + ", entryTime=" + entryTime + ", symbol=" + symbol
+        return "Order [internalOrderId=" + internalOrderId + ", orderIndex=" + orderIndex + ", userName=" + userName + ", serviceOrderId=" + serviceOrderId + ", entryTime=" + entryTime + ", symbol=" + symbol
                 + ", orderExpression=" + orderExpression + ", accountId=" + accountId + ", lastActivityTime=" + lastActivityTime + ", status=" + status
                 + ", averageFillPrice=" + averageFillPrice + "]";
     }
