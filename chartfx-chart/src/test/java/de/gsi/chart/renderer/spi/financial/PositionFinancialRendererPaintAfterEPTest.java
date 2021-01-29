@@ -1,13 +1,18 @@
 package de.gsi.chart.renderer.spi.financial;
 
 import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.SAND;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.AbstractDataSet;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,6 +105,27 @@ class PositionFinancialRendererPaintAfterEPTest {
 
         chart.getAxes().add(0, xAxis);
         chart.layoutChildren();
+    }
+
+    @Test
+    public void illegalDataSetTest() {
+        DataSet illegalDataSet = new AbstractDataSet<PositionFinancialDataSetDummy>("testIllegalModel", 2) {
+            @Override
+            public double get(int dimIndex, int index) {
+                return 0;
+            }
+
+            @Override
+            public int getDataCount() {
+                return 1;
+            }
+
+            @Override
+            public DataSet set(DataSet other, boolean copy) {
+                return null;
+            }
+        };
+        assertThrows(IllegalArgumentException.class, () -> new PositionFinancialRendererPaintAfterEP(illegalDataSet, chart));
     }
 
     private PositionRendered fillPositionRendered(int positionId, int index, int entryExit, double quantity, int posType, double price, boolean closed, Double[] joinedEntries) {
