@@ -1,13 +1,12 @@
 package de.gsi.chart.renderer.spi.financial;
 
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.SAND;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.SAND;
 
 import java.security.InvalidParameterException;
 import java.util.*;
 
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.spi.AbstractDataSet;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -31,6 +30,8 @@ import de.gsi.chart.renderer.spi.financial.utils.Interval;
 import de.gsi.chart.renderer.spi.financial.utils.PositionFinancialDataSetDummy;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils;
 import de.gsi.chart.ui.utils.TestFx;
+import de.gsi.dataset.DataSet;
+import de.gsi.dataset.spi.AbstractDataSet;
 import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
