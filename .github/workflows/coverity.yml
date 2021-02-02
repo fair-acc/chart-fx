@@ -1,0 +1,66 @@
+---
+name: Static analysis with Coverity
+
+on:
+  workflow_dispatch: # allow to request runs manually from the actions tab
+  push:
+    tags: 11\.[0-9]+\.[0-9]+ # run on each version release
+  schedule:
+    - cron: '0 0 15 * *' # request run on the 15. of every month
+
+jobs:
+  coverityscan:
+    name: Static analysis with Coverity
+    runs-on: ubuntu-18.04
+    environment: coverity # environment needs to be manually triggered only use on demand
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set version environment for version string
+        run: |
+          export REV=${GITHUB_REF#refs/*/}
+          echo "REVISION=${REV/\//-}" >> $GITHUB_ENV
+          if [[ "${GITHUB_REF#refs/tags/}" =~ ^11\.[0-9]*\.[0-9]*$ ]]; then
+            echo "CHANGELIST=" >> $GITHUB_ENV
+          else
+            echo "CHANGELIST=-SNAPSHOT" >> $GITHUB_ENV
+          fi
+          echo "github ref: ${GITHUB_REF}"
+          echo "setting env:"
+          cat ${GITHUB_ENV}
+      - name: Cache the Maven packages to speed up build
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Set up JDK11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Download Coverity Build Tool
+        run: |
+          wget -q https://scan.coverity.com/download/java/Linux --post-data "token=$TOKEN&project=chart-fx" -O cov-analysis-linux64.tar.gz
+          mkdir cov-analysis-linux64
+          tar xzf cov-analysis-linux64.tar.gz --strip 1 -C cov-analysis-linux64
+        env:
+          TOKEN: ${{ secrets.COVERITY_TOKEN }}
+      - name: Build with cov-build
+        run: |
+          export PATH=`pwd`/cov-analysis-linux64/bin:$PATH
+          cov-build --dir cov-int mvn clean test --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST}
+      - name: Submit the result to Coverity Scan
+        run: |
+          tar czvf chartfx.tgz cov-int
+          curl -sS \
+            --form project=chart-fx \
+            --form token=$TOKEN \
+            --form email=${COVERITY_EMAIL} \
+            --form file=@chartfx.tgz \
+            --form version=${{ github.ref }}\
+            --form description="Description" \
+            https://scan.coverity.com/builds?project=chart-fx
+        env:
+          TOKEN: ${{ secrets.COVERITY_TOKEN }}
+          COVERITY_EMAIL: ${{ secrets.COVERITY_SCAN_NOTIFICATION_EMAIL }}
+
+...

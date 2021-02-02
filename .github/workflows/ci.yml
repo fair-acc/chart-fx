@@ -1,7 +1,7 @@
 ---
 name: Java CI
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   test:
@@ -13,14 +13,107 @@ jobs:
       fail-fast: false
       max-parallel: 4
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
-
+    environment: coverage # open environment, no critical secrets
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: 25
+      - name: Set version environment for version string
+        run: |
+          export REV=${GITHUB_REF#refs/*/}
+          echo "REVISION=${REV/\//-}" >> $GITHUB_ENV
+          if [[ "${GITHUB_REF#refs/tags/}" =~ ^11\.[0-9]*\.[0-9]*$ ]]; then
+            echo "CHANGELIST=" >> $GITHUB_ENV
+          else
+            echo "CHANGELIST=-SNAPSHOT" >> $GITHUB_ENV
+          fi
+          echo "github ref: ${GITHUB_REF}"
+          echo "setting env:"
+          cat ${GITHUB_ENV}
+      - name: Cache the Maven packages to speed up build
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}
       - name: Test with Maven
-        run: mvn test -Dgpg.skip=true -Dmaven.javadoc.skip=true -B --file pom.xml
+        run: mvn -Dgpg.skip=true --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} package
+      - name: Generate coverage report
+        if: matrix.java == 11
+        run: mvn jacoco:report-aggregate
+      - uses: codecov/codecov-action@v1
+        if: matrix.java == 11
+      - name: Run Codacy Analysis CLI
+        if: matrix.java == 11
+        uses: codacy/codacy-analysis-cli-action@master
+        with:
+          output: results.sarif
+          format: sarif
+          # Adjust severity of non-security issues
+          gh-code-scanning-compat: true
+          # Force 0 exit code to allow SARIF file generation
+          # This will handover control about PR rejection to the GitHub side
+          max-allowed-issues: 2147483647
+      - name: Upload SARIF results file
+        if: matrix.java == 11
+        uses: github/codeql-action/upload-sarif@main
+        with:
+          sarif_file: results.sarif
+
+  publish:
+    name: Deploy to github packages and Sonatype OSSRH
+    needs: test
+    runs-on: ubuntu-18.04
+    environment: deploy
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set version environment for version string
+        run: |
+          export REV=${GITHUB_REF#refs/*/}
+          echo "REVISION=${REV/\//-}" >> $GITHUB_ENV
+          if [[ "${GITHUB_REF#refs/tags/}" =~ ^11\.[0-9]*\.[0-9]*$ ]]; then
+            echo "CHANGELIST=" >> $GITHUB_ENV
+          else
+            echo "CHANGELIST=-SNAPSHOT" >> $GITHUB_ENV
+          fi
+          echo "github ref: ${GITHUB_REF}"
+          echo "setting env:"
+          cat ${GITHUB_ENV}
+      - name: Cache the Maven packages to speed up build
+        uses: actions/cache@v1
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Set up JDK11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+          gpg-private-key: ${{ secrets.GPG_KEY }}
+          gpg-passphrase: GPG_PASS
+      - name: Deploy to Github Packages
+        run: if [ -z "$CHANGELIST" ]; then mvn -DskipTests --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} -Drelease=github deploy; fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GPG_PASS: ${{ secrets.GPG_PASSPHRASE }}
+      - name: Set up JDK to publish to OSSRH
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+          server-id: ossrh
+          server-username: SONATYPE_USER
+          server-password: SONATYPE_PASS
+          # gpg-private-key: ${{ secrets.GPG_KEY }} # gpg key was already added in the first java-setup phase, will fail the cleanup if added again
+          gpg-passphrase: GPG_PASS
+      - name: Deploy to Maven Central
+        run: mvn -DskipTests --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} -Drelease=ossrh deploy
+        env:
+          GPG_PASS: ${{ secrets.GPG_PASSPHRASE }}
+          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
+          SONATYPE_PASS: ${{ secrets.SONATYPE_PASS }}
 
 ...
