@@ -1,6 +1,9 @@
 package de.gsi.chart.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
 import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
@@ -125,6 +128,40 @@ class TableViewerTest {
         FxAssert.verifyThat(tableView.getSelectionModel().getSelectedItem(), Matchers.notNullValue());
         DataSetsRow selectedItem = tableView.getSelectionModel().getSelectedItem();
         assertEquals(valueAtX1, selectedItem.getValue(dataset, ColumnType.Y));
+    }
+
+    @Test
+    public void testThatDataSetsRowHashCodeEqualsWorks() throws TimeoutException {
+        fxRobot.interact(() -> {
+            chart.getPlugins().add(tableViewer);
+            chart.setToolBarPinned(true);
+        });
+
+        // Open the table view
+        final Button switchTableViewButton = locateTableViewButton(chart.getToolBar());
+        waitForNodeToBeVisible(switchTableViewButton); // Wait for the slowly opening toolbar to show
+        fxRobot.clickOn(switchTableViewButton);
+        WaitForAsyncUtils.waitForFxEvents();
+
+        verifyThatWithTimeout(chart.getPlotForeground(), NodeMatchers.hasChild(".table-view"));
+
+        @SuppressWarnings("unchecked")
+        TableView<DataSetsRow> tableView = (TableView<DataSetsRow>) tableViewer.getTable();
+
+        // Equals/hashCode with self is true
+        tableView.getSelectionModel().select(0);
+        DataSetsRow firstRowItem = tableView.getSelectionModel().getSelectedItem();
+        assertEquals(firstRowItem.hashCode(), firstRowItem.hashCode());
+        assertTrue(firstRowItem.equals(firstRowItem));
+
+        // Equals/hashCode with other row is false
+        tableView.getSelectionModel().clearAndSelect(1);
+        DataSetsRow secondRowItem = tableView.getSelectionModel().getSelectedItem();
+        assertNotEquals(firstRowItem.hashCode(), secondRowItem.hashCode());
+        assertFalse(firstRowItem.equals(secondRowItem));
+
+        // Equals with other type is false
+        assertFalse(firstRowItem.equals(new Object()));
     }
 
     private Button locateTableViewButton(final FlowPane toolbar) {
