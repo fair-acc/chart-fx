@@ -1,8 +1,10 @@
 package de.gsi.chart.renderer.spi.financial.utils;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.Calendar;
 import java.util.Date;
 
 import javafx.application.Platform;
@@ -16,6 +18,7 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class FinancialTestUtils {
+    private static final String TS_TIMESTAMP_FORMAT = "MM/dd/yyyy HH:mm";
     private static final int N_SAMPLES = 10_000; // default: 10000
 
     public static IOhlcv createTestOhlcv() {
@@ -82,7 +85,7 @@ public class FinancialTestUtils {
     // Syntax "09/01/2020,16:00,3483.00000,3519.75000,3474.00000,3516.75000,1283622,2696614"
     public static OhlcvItem parseOhlcvItem(String ohlcvItemString) throws ParseException {
         String[] parts = ohlcvItemString.split(",");
-        return new OhlcvItem(CalendarUtils.createByTradeStationDateTime(parts[0] + " " + parts[1]).getTime(),
+        return new OhlcvItem(createByTradeStationDateTime(parts[0] + " " + parts[1]).getTime(),
                 Double.parseDouble(parts[2]), Double.parseDouble(parts[3]), Double.parseDouble(parts[4]),
                 Double.parseDouble(parts[5]), Double.parseDouble(parts[6]), Double.parseDouble(parts[7]));
     }
@@ -131,5 +134,21 @@ public class FinancialTestUtils {
         public Label getTitlePaint() {
             return titleLabel;
         }
+    }
+
+    //-------------- helpers ----------------
+
+    private static Calendar createByTradeStationDateTime(String datetimePattern) throws ParseException {
+        if (datetimePattern == null) {
+            throw new ParseException("The resource datetime pattern is null", -1);
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat(TS_TIMESTAMP_FORMAT);
+        Date fromTotime = sdf.parse(datetimePattern);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(fromTotime);
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE),
+                cal.get(Calendar.HOUR_OF_DAY), cal.get(Calendar.MINUTE), 0);
+
+        return cal;
     }
 }

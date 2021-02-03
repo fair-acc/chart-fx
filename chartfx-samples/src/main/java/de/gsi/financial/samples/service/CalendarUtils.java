@@ -1,4 +1,4 @@
-package de.gsi.chart.renderer.spi.financial.utils;
+package de.gsi.financial.samples.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -6,6 +6,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
+import org.apache.commons.lang3.time.DateUtils;
+
+import de.gsi.financial.samples.dos.Interval;
 
 public class CalendarUtils {
     /**
@@ -27,11 +31,7 @@ public class CalendarUtils {
         for (String time : parts) {
             Calendar cal = Calendar.getInstance();
             cal.setTime(sdf.parse(time));
-            cal.set(Calendar.HOUR_OF_DAY, 0);
-            cal.set(Calendar.MINUTE, 0);
-            cal.set(Calendar.SECOND, 0);
-            cal.set(Calendar.MILLISECOND, 0);
-            calendarList.add(cal);
+            calendarList.add(DateUtils.truncate(cal, Calendar.DATE));
         }
 
         return new Interval<>(calendarList.get(0), calendarList.get(1));

@@ -3,6 +3,7 @@ package de.gsi.chart.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import de.gsi.financial.samples.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -16,7 +17,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.samples.financial.*;
 import de.gsi.chart.utils.PeriodicScreenCapture;
 
 /**

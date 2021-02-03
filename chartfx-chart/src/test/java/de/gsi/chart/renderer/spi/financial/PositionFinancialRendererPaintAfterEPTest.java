@@ -102,7 +102,6 @@ class PositionFinancialRendererPaintAfterEPTest {
         xAxis.setTickLabelRotation(90);
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
         ohlcvDataSet.setCategoryBased(true);
-
         chart.getAxes().add(0, xAxis);
         chart.layoutChildren();
     }

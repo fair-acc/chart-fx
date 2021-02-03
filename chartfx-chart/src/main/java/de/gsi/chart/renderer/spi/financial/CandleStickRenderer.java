@@ -1,6 +1,3 @@
-/**
- * LGPL-3.0, 2020/21, GSI-CS-CO/Chart-fx, BTA HF OpenSource Java-FX Branch, Financial Charts
- */
 package de.gsi.chart.renderer.spi.financial;
 
 import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
