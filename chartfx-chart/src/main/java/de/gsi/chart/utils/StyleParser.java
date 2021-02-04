@@ -207,6 +207,14 @@ public final class StyleParser { // NOPMD
         return map.get(key.toLowerCase(Locale.UK));
     }
 
+    public static String getPropertyValue(final String style, final String key, String defaultValue) {
+        String value = getPropertyValue(style, key);
+        if (value == null) {
+            value = defaultValue;
+        }
+        return value;
+    }
+
     public static double[] getStrokeDashPropertyValue(final String style, final String key) {
         if (style == null || key == null) {
             return null;

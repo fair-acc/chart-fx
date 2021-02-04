@@ -16,6 +16,8 @@ public class OhlcvRendererEpData {
     public AttributeModelAware attrs; // addon (if available)
     public IOhlcvItemAware ohlcvItemAware; // get item by index (if available)
     public IOhlcvItem ohlcvItem; // item domain object (if available)
+    public int minIndex; // min index of rendered bar
+    public int maxIndex; // max index of rendered bar
     public int index; // index of rendered bar
     public double barWidth; // width of bar
     public double barWidthHalf; // half of bar

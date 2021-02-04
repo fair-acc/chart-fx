@@ -35,6 +35,12 @@ class StyleParserTest {
 
         assertEquals(null, StyleParser.getPropertyValue(testStyle, null));
         assertEquals(null, StyleParser.getPropertyValue(null, "color1"));
+        assertEquals("defaultColor1", StyleParser.getPropertyValue(null, "color1", "defaultColor1"));
+        assertEquals("blue", StyleParser.getPropertyValue(testStyle, "color1", "defaultColor1"));
+        assertEquals("blue", StyleParser.getPropertyValue(testStyle, "color1", null));
+        assertEquals("defaultColor1", StyleParser.getPropertyValue(testStyle, "colorDef", "defaultColor1"));
+        assertEquals(null, StyleParser.getPropertyValue(null, "color1", null));
+        assertEquals(null, StyleParser.getPropertyValue(testStyle, "booleanProperty", null));
         assertEquals(0, StyleParser.getIntegerPropertyValue(testStyle, "stroke"));
         assertEquals(null, StyleParser.getIntegerPropertyValue(testStyle, null));
         assertEquals(null, StyleParser.getIntegerPropertyValue(null, "stroke"));

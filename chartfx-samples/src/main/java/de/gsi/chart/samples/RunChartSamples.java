@@ -3,6 +3,7 @@ package de.gsi.chart.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import de.gsi.financial.samples.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -16,10 +17,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.samples.financial.FinancialAdvancedCandlestickSample;
-import de.gsi.chart.samples.financial.FinancialCandlestickSample;
-import de.gsi.chart.samples.financial.FinancialHiLowSample;
-import de.gsi.chart.samples.financial.FinancialRealtimeCandlestickSample;
 import de.gsi.chart.utils.PeriodicScreenCapture;
 
 /**
@@ -61,6 +58,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("FinancialCandlestickSample", new FinancialCandlestickSample()));
         buttons.getChildren().add(new MyButton("FinancialHiLowSample", new FinancialHiLowSample()));
         buttons.getChildren().add(new MyButton("FinancialAdvancedCandlestickSample", new FinancialAdvancedCandlestickSample()));
+        buttons.getChildren().add(new MyButton("FinancialPositionSample", new FinancialPositionSample()));
         buttons.getChildren().add(new MyButton("FinancialRealtimeCandlestickSample", new FinancialRealtimeCandlestickSample()));
         buttons.getChildren().add(new MyButton("FxmlSample", new FxmlSample()));
         buttons.getChildren().add(new MyButton("GridRendererSample", new GridRendererSample()));
