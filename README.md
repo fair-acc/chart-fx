@@ -7,6 +7,7 @@
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1cac6d33dc824411bb56f9c939d02121?branch=master)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=GSI-CS-CO/chart-fx&amp;utm_campaign=Badge_Grade)
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/GSI-CS-CO/chart-fx.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/GSI-CS-CO/chart-fx/context:java)
 [![Coverity Build Status](https://scan.coverity.com/projects/chart-fx/badge.svg)](https://scan.coverity.com/projects/chart-fx)
+[![Join the chat at https://gitter.im/fair-acc/chart](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fair-acc/chart?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 # ChartFx
 
