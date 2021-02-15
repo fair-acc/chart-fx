@@ -56,13 +56,13 @@ class SimpleDataSetEstimatorsTest {
     @Test
     public void getCenterOfMassTest() {
         // DataSet is symmetrical, so CoM should be in the center
-        assertEquals(N_SAMPLES / 2, SimpleDataSetEstimators.computeCentreOfMass(triangle), 1);
+        assertEquals(N_SAMPLES / 2.0, SimpleDataSetEstimators.computeCentreOfMass(triangle), 1);
         // check if NaN is ignored
-        assertEquals(N_SAMPLES / 2, SimpleDataSetEstimators.computeCentreOfMass(triangleWithNaN), 1);
+        assertEquals(N_SAMPLES / 2.0, SimpleDataSetEstimators.computeCentreOfMass(triangleWithNaN), 1);
         // first half of dataset is rectangular triangle CoM at 0.5*2/3
-        assertEquals(N_SAMPLES / 3, SimpleDataSetEstimators.computeCentreOfMass(triangle, 0, N_SAMPLES / 2), 1);
+        assertEquals(N_SAMPLES / 3.0, SimpleDataSetEstimators.computeCentreOfMass(triangle, 0, N_SAMPLES / 2), 1);
         // same, but do not use indices but x-values
-        assertEquals(N_SAMPLES / 3, SimpleDataSetEstimators.computeCentreOfMass(triangle, 0.0, N_SAMPLES / 2.0), 1);
+        assertEquals(N_SAMPLES / 3.0, SimpleDataSetEstimators.computeCentreOfMass(triangle, 0.0, N_SAMPLES / 2.0), 1);
         // Assert with empty DataSet, expect NaN
         assertEquals(Double.NaN, SimpleDataSetEstimators.computeCentreOfMass(emptyDataSet));
     }

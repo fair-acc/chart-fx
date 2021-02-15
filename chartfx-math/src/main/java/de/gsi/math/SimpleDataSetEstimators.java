@@ -440,7 +440,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
             final double min, final double max) {
         if (!Double.isFinite(min) || min < 0.0 || min > 1.0 || !Double.isFinite(max) || max < 0.0 || max > 1.0
                 || max <= min) {
-            throw new IllegalArgumentException(new StringBuilder().append("[min=").append(min).append(",max=").append(max).append("] must be within [0.0, 1.0]").toString());
+            throw new IllegalArgumentException("[min=" + min + ",max=" + max + "] must be within [0.0, 1.0]");
         }
         final double minVal = SimpleDataSetEstimators.getMinimum(dataSet, indexMin, indexMax);
         final double maxVal = SimpleDataSetEstimators.getMaximum(dataSet, indexMin, indexMax);
@@ -513,6 +513,10 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         final double valRef = dataSet.get(DIM_Y, indexMin);
         final double val = dataSet.get(DIM_Y, indexMax);
 
+        if (valRef == 0.0) {
+            return Double.NaN;
+        }
+
         return (isAbsoluteTransmission ? val : val - valRef) / valRef * 100.0; // in [%]
     }
 
@@ -556,7 +560,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
             return index;
         }
         final double left = Math.pow(data[index - 1], 1);
-        final double center = Math.pow(data[index - 0], 1);
+        final double center = Math.pow(data[index], 1);
         final double right = Math.pow(data[index + 1], 1);
         double val = index;
         val += 0.5 * Math.log(right / left) / Math.log(Math.pow(center, 2) / (left * right));

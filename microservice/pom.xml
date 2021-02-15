@@ -90,8 +90,6 @@
             <version>0.4</version>
         </dependency>
 
-
-
         <!-- alternate Javalin dependency injection - add all and remove those not necessary -->
         <dependency>
             <groupId>io.javalin</groupId>

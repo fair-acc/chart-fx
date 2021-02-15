@@ -132,7 +132,7 @@ public class CodeGenerator extends AbstractMojo {
         for (final Path source : getSourceFiles(inputPath, PROTO_UTILCLASS_SUFFIX)) { // loop over all prototoype classes
             // Create output package
             final Path relativePath = inputPath.relativize(source);
-            final String packageName = relativePath.getParent().toString().replaceAll("(\\\\|/)", ".");
+            final String packageName = relativePath.getParent().toString().replaceAll("([\\\\/])", ".");
             Path outputDirectory = getOutputDirectory(outputPath, relativePath);
 
             // Find name to be generated
@@ -178,14 +178,13 @@ public class CodeGenerator extends AbstractMojo {
     }
 
     private List<Path> getSourceFiles(final Path inputPath, final String protoUtilclassSuffix) throws MojoExecutionException {
-        final PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:**" + protoUtilclassSuffix + JAVA_FILE_SUFFIX);
-        final List<Path> sources;
         try {
-            sources = Files.walk(inputPath).filter(matcher::matches).collect(Collectors.toList());
+            FileSystem fs = FileSystems.getDefault(); //
+            final PathMatcher matcher = fs.getPathMatcher("glob:**" + protoUtilclassSuffix + JAVA_FILE_SUFFIX);
+            return Files.walk(inputPath).filter(matcher::matches).collect(Collectors.toList());
         } catch (IOException e) {
             throw new MojoExecutionException("Could not enumerate files", e);
         }
-        return sources;
     }
 
     /**
@@ -217,7 +216,7 @@ public class CodeGenerator extends AbstractMojo {
                     inputType = null;
                     outputTypes = null;
                 }
-            } else if (inputType != null && outputTypes != null) {
+            } else if (inputType != null) {
                 section.add(line);
             }
             writer.write(line);

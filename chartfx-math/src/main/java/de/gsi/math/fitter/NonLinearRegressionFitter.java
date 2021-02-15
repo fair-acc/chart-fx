@@ -1,6 +1,7 @@
 package de.gsi.math.fitter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import de.gsi.math.ArrayConversion;
 import de.gsi.math.Math;
@@ -21,7 +22,7 @@ public class NonLinearRegressionFitter {
     // HISTOGRAM CONSTRUCTION
     // Tolerance used in including an upper point in last histogram bin when it is outside due to riunding erors
     protected static double histTol = 1.0001D;
-    protected int nData0 = 0; // number of y data points inputed (in a single array if multiple y arrays)
+    protected int nData0; // number of y data points inputed (in a single array if multiple y arrays)
     protected int nData = 0; // number of y data points (nData0 times the number of y arrays)
     protected int nXarrays = 1; // number of x arrays
     protected int nYarrays = 1; // number of y arrays
@@ -106,11 +107,11 @@ public class NonLinearRegressionFitter {
     protected int[] sumPenaltyCheck = null; // = -1 values below the multiple constraint boundary not allowed
     // = +1 values above the multiple constraint boundary not allowed
     protected double penaltyWeight = 1.0e30; // weight for the penalty functions
-    protected int[] penaltyParam = null; // indices of paramaters subject to single parameter constraint
-    protected int[][] sumPenaltyParam = null; // indices of paramaters subject to multiple parameter constraint
-    protected double[][] sumPlusOrMinus = null; // valueall before each parameter in multiple parameter summation
+    protected int[] penaltyParam = null; // indices of parameters subject to single parameter constraint
+    protected int[][] sumPenaltyParam = null; // indices of parameters subject to multiple parameter constraint
+    protected double[][] sumPlusOrMinus = null; // value before each parameter in multiple parameter summation
 
-    protected int[] sumPenaltyNumber = null; // number of paramaters in each multiple parameter constraint
+    protected int[] sumPenaltyNumber = null; // number of parameters in each multiple parameter constraint
     protected double[] constraints = null; // single parameter constraint values
     protected double[] sumConstraints = null; // multiple parameter constraint values
 
@@ -150,8 +151,8 @@ public class NonLinearRegressionFitter {
 
     protected boolean ignoreDofFcheck = false; // when set to true, the check on whether degrees of freedom are greater than zero is ignored
 
-    protected boolean nFactorOption = false; // = true varaiance, covariance and standard deviation denominator = n
-    // = false varaiance, covariance and standard deviation denominator = n-1
+    protected boolean nFactorOption = false; // = true variance, covariance and standard deviation denominator = n
+    // = false variance, covariance and standard deviation denominator = n-1
 
     /**
      * Constructor with data with x as 1D array and no weights provided
@@ -165,9 +166,7 @@ public class NonLinearRegressionFitter {
         final double[][] xData = new double[1][n];
         final double[] weight = new double[n];
 
-        for (int i = 0; i < n; i++) {
-            xData[0][i] = xxData[i];
-        }
+        System.arraycopy(xxData, 0, xData[0], 0, n);
 
         weightOpt = false;
         weightFlag = 0;
@@ -189,9 +188,7 @@ public class NonLinearRegressionFitter {
         nData0 = yData.length;
         final int n = xxData.length;
         final double[][] xData = new double[1][n];
-        for (int i = 0; i < n; i++) {
-            xData[0][i] = xxData[i];
-        }
+        System.arraycopy(xxData, 0, xData[0], 0, n);
 
         weight = checkForZeroWeights(weight);
         if (weightOpt) {
@@ -431,20 +428,20 @@ public class NonLinearRegressionFitter {
 
         // First element reserved for method number if other methods than 'cliff' are added later
         if (penalties.isEmpty()) {
-            penalties.add(Integer.valueOf(constraintMethod));
+            penalties.add(constraintMethod);
         }
 
         // add constraint
         if (penalties.size() == 1) {
-            penalties.add(Integer.valueOf(1));
+            penalties.add(1);
         } else {
-            int nPC = ((Integer) penalties.get(1)).intValue();
+            int nPC = (Integer) penalties.get(1);
             nPC++;
-            penalties.set(1, Integer.valueOf(nPC));
+            penalties.set(1, nPC);
         }
-        penalties.add(Integer.valueOf(paramIndex));
-        penalties.add(Integer.valueOf(conDir));
-        penalties.add(Double.valueOf(constraint));
+        penalties.add(paramIndex);
+        penalties.add(conDir);
+        penalties.add(constraint);
         if (paramIndex > maxConstraintIndex) {
             maxConstraintIndex = paramIndex;
         }
@@ -470,22 +467,22 @@ public class NonLinearRegressionFitter {
 
         // First element reserved for method number if other methods than 'cliff' are added later
         if (sumPenalties.isEmpty()) {
-            sumPenalties.add(Integer.valueOf(constraintMethod));
+            sumPenalties.add(constraintMethod);
         }
 
         // add constraint
         if (sumPenalties.size() == 1) {
-            sumPenalties.add(Integer.valueOf(1));
+            sumPenalties.add(1);
         } else {
-            int nPC = ((Integer) sumPenalties.get(1)).intValue();
+            int nPC = (Integer) sumPenalties.get(1);
             nPC++;
-            sumPenalties.set(1, Integer.valueOf(nPC));
+            sumPenalties.set(1, nPC);
         }
-        sumPenalties.add(Integer.valueOf(nCon));
+        sumPenalties.add(nCon);
         sumPenalties.add(paramIndices);
         sumPenalties.add(plusOrMinus);
-        sumPenalties.add(Integer.valueOf(conDir));
-        sumPenalties.add(Double.valueOf(constraint));
+        sumPenalties.add(conDir);
+        sumPenalties.add(constraint);
         final int maxI = Math.maximum(paramIndices);
         if (maxI > maxConstraintIndex) {
             maxConstraintIndex = maxI;
@@ -647,7 +644,7 @@ public class NonLinearRegressionFitter {
      */
     public void checkZeroNeg(final double[] xx, final double[] yy, final double[] ww) {
         int jj = 0;
-        boolean test = true;
+        boolean test;
         for (int i = 0; i < nData; i++) {
             if (yy[i] <= 0.0D) {
                 if (i <= jj) {
@@ -692,9 +689,7 @@ public class NonLinearRegressionFitter {
         final double[][] xData = new double[1][n];
         final double[] weight = new double[n];
 
-        for (int i = 0; i < n; i++) {
-            xData[0][i] = xxData[i];
-        }
+        System.arraycopy(xxData, 0, xData[0], 0, n);
 
         weightOpt = false;
         for (int i = 0; i < n; i++) {
@@ -716,9 +711,7 @@ public class NonLinearRegressionFitter {
         nData0 = yData.length;
         final int n = xxData.length;
         final double[][] xData = new double[1][n];
-        for (int i = 0; i < n; i++) {
-            xData[0][i] = xxData[i];
-        }
+        System.arraycopy(xxData, 0, xData[0], 0, n);
 
         weight = checkForZeroWeights(weight);
         if (weightOpt) {
@@ -948,16 +941,16 @@ public class NonLinearRegressionFitter {
      * @param xd ???
      */
     protected void generalLinearStats(final double[][] xd) {
-        double sde = 0.0D, sum = 0.0D, yCalctemp = 0.0D;
+        double sde, sum, yCalctemp;
         final double[][] h = new double[nTerms][nTerms];
-        double[][] stat = new double[nTerms][nTerms];
+        double[][] stat;
         covar = new double[nTerms][nTerms];
         corrCoeff = new double[nTerms][nTerms];
         final double[] coeffSd = new double[nTerms];
         final double[] coeff = new double[nTerms];
 
-        for (int i = 0; i < nTerms; i++) {
-            coeff[i] = best[i];
+        if (nTerms >= 0) {
+            System.arraycopy(best, 0, coeff, 0, nTerms);
         }
 
         if (weightOpt) {
@@ -1020,9 +1013,7 @@ public class NonLinearRegressionFitter {
             }
 
             for (int i = 0; i < nTerms; i++) {
-                for (int j = 0; j < nTerms; j++) {
-                    covar[i][j] = stat[i][j];
-                }
+                System.arraycopy(stat[i], 0, covar[i], 0, nTerms);
             }
 
             for (int i = 0; i < nTerms; i++) {
@@ -1104,7 +1095,7 @@ public class NonLinearRegressionFitter {
      * @return chi square estimate
      */
     public double getChiSquare() {
-        double ret = 0.0D;
+        double ret;
         if (weightOpt) {
             ret = chiSquare;
         } else {
@@ -1116,17 +1107,17 @@ public class NonLinearRegressionFitter {
     }
 
     /**
-     * Get the chi square probablity
+     * Get the chi square probability
      *
-     * @return chi square probablity
+     * @return chi square probability
      */
     public double getchiSquareProb() {
-        double ret = 0.0D;
+        double ret;
         if (weightOpt) {
             ret = 1.0D - Math.chisquareQuantile(chiSquare, nData - nXarrays);
         } else {
             System.out.println(
-                    "A Chi Square probablity cannot be calculated as data are neither true frequencies nor weighted");
+                    "A Chi Square probability cannot be calculated as data are neither true frequencies nor weighted");
             System.out.println("A value of -1 is returned as Reduced Chi Square");
             ret = -1.0D;
         }
@@ -1152,9 +1143,9 @@ public class NonLinearRegressionFitter {
     }
 
     /**
-     * Get the cofficients of variations of the best estimates of the unknown parameters
+     * Get the coefficients of variations of the best estimates of the unknown parameters
      *
-     * @return cofficients of variations of the best estimates
+     * @return coefficients of variations of the best estimates
      */
     public double[] getCoeffVar() {
         final double[] coeffVar = new double[nTerms];
@@ -1236,7 +1227,7 @@ public class NonLinearRegressionFitter {
     public double getMultipleF() {
         if (nXarrays == 1) {
             System.out.println(
-                    "NonLinearRegression.getMultipleF - The regression is not a multple regession: NaN returned");
+                    "NonLinearRegression.getMultipleF - The regression is not a multiple regression: NaN returned");
         }
         return multipleF;
     }
@@ -1356,7 +1347,7 @@ public class NonLinearRegressionFitter {
      * @return reduced chi square estimate
      */
     public double getReducedChiSquare() {
-        double ret = 0.0D;
+        double ret;
         if (weightOpt) {
             ret = reducedChiSquare;
         } else {
@@ -1369,9 +1360,9 @@ public class NonLinearRegressionFitter {
     }
 
     /**
-     * Get the unweighed residuals, y(experimental) - y(calculated)
+     * Get the unweighted residuals, y(experimental) - y(calculated)
      *
-     * @return unweighed residuals, y(experimental) - y(calculated)
+     * @return unweighted residuals, y(experimental) - y(calculated)
      */
     public double[] getResiduals() {
         final double[] temp = new double[nData];
@@ -1416,9 +1407,9 @@ public class NonLinearRegressionFitter {
     }
 
     /**
-     * Get the unweighed sum of squares of the residuals
+     * Get the unweighted sum of squares of the residuals
      *
-     * @return unweighed sum of squares of the residuals
+     * @return unweighted sum of squares of the residuals
      */
     public double getSumOfSquares() {
         return sumOfSquares;
@@ -1480,8 +1471,8 @@ public class NonLinearRegressionFitter {
      */
     public double[] getYcalc() {
         final double[] temp = new double[nData];
-        for (int i = 0; i < nData; i++) {
-            temp[i] = yCalc[i];
+        if (nData >= 0) {
+            System.arraycopy(yCalc, 0, temp, 0, nData);
         }
         return temp;
     }
@@ -1511,7 +1502,7 @@ public class NonLinearRegressionFitter {
      */
     public boolean infinityCheck(final double yPeak, final int peaki) {
         boolean flag = false;
-        if (yPeak == 1.0D / 0.0D || yPeak == -1.0D / 0.0D) {
+        if (yPeak == Double.POSITIVE_INFINITY || yPeak == Double.NEGATIVE_INFINITY) {
             int ii = peaki + 1;
             if (peaki == nData - 1) {
                 ii = peaki - 1;
@@ -1630,7 +1621,7 @@ public class NonLinearRegressionFitter {
 
             covar = new double[nTerms][nTerms];
             corrCoeff = new double[nTerms][nTerms];
-            ;
+
             for (int i = 0; i < nTerms; i++) {
                 bestSd[i] = Double.NaN;
                 pseudoSd[i] = Double.NaN;
@@ -1666,21 +1657,21 @@ public class NonLinearRegressionFitter {
         // Set any single parameter constraint parameters
         if (penalty) {
             Integer itemp = (Integer) penalties.get(1);
-            nConstraints = itemp.intValue();
+            nConstraints = itemp;
             penaltyParam = new int[nConstraints];
             penaltyCheck = new int[nConstraints];
             constraints = new double[nConstraints];
-            Double dtemp = null;
+            Double dtemp;
             int j = 2;
             for (int i = 0; i < nConstraints; i++) {
                 itemp = (Integer) penalties.get(j);
-                penaltyParam[i] = itemp.intValue();
+                penaltyParam[i] = itemp;
                 j++;
                 itemp = (Integer) penalties.get(j);
-                penaltyCheck[i] = itemp.intValue();
+                penaltyCheck[i] = itemp;
                 j++;
                 dtemp = (Double) penalties.get(j);
-                constraints[i] = dtemp.doubleValue();
+                constraints[i] = dtemp;
                 j++;
             }
         }
@@ -1688,19 +1679,19 @@ public class NonLinearRegressionFitter {
         // Set any multiple parameter constraint parameters
         if (sumPenalty) {
             Integer itemp = (Integer) sumPenalties.get(1);
-            nSumConstraints = itemp.intValue();
+            nSumConstraints = itemp;
             sumPenaltyParam = new int[nSumConstraints][];
             sumPlusOrMinus = new double[nSumConstraints][];
             sumPenaltyCheck = new int[nSumConstraints];
             sumPenaltyNumber = new int[nSumConstraints];
             sumConstraints = new double[nSumConstraints];
-            int[] itempArray = null;
-            double[] dtempArray = null;
-            Double dtemp = null;
+            int[] itempArray;
+            double[] dtempArray;
+            Double dtemp;
             int j = 2;
             for (int i = 0; i < nSumConstraints; i++) {
                 itemp = (Integer) sumPenalties.get(j);
-                sumPenaltyNumber[i] = itemp.intValue();
+                sumPenaltyNumber[i] = itemp;
                 j++;
                 itempArray = (int[]) sumPenalties.get(j);
                 sumPenaltyParam[i] = itempArray;
@@ -1709,18 +1700,16 @@ public class NonLinearRegressionFitter {
                 sumPlusOrMinus[i] = dtempArray;
                 j++;
                 itemp = (Integer) sumPenalties.get(j);
-                sumPenaltyCheck[i] = itemp.intValue();
+                sumPenaltyCheck[i] = itemp;
                 j++;
                 dtemp = (Double) sumPenalties.get(j);
-                sumConstraints[i] = dtemp.doubleValue();
+                sumConstraints[i] = dtemp;
                 j++;
             }
         }
 
         // Store unscaled start values
-        for (int i = 0; i < np; i++) {
-            startH[i] = start[i];
-        }
+        System.arraycopy(start, 0, startH, 0, np);
 
         // scale initial estimates and step sizes
         if (scaleOpt > 0) {
@@ -1728,6 +1717,7 @@ public class NonLinearRegressionFitter {
             for (int i = 0; i < np; i++) {
                 if (start[i] == 0.0D) {
                     testzero = true;
+                    break;
                 }
             }
             if (testzero) {
@@ -1767,7 +1757,7 @@ public class NonLinearRegressionFitter {
         }
 
         // initial simplex
-        double sho = 0.0D;
+        double sho;
         for (int i = 0; i < np; ++i) {
             sho = start[i];
             pstar[i] = sho;
@@ -1793,14 +1783,14 @@ public class NonLinearRegressionFitter {
 
         // loop over allowed iterations
         double ynewlo = 0.0D; // current value lowest y
-        double ystar = 0.0D; // Nelder and Mead y*
-        double y2star = 0.0D; // Nelder and Mead y**
-        double ylo = 0.0D; // Nelder and Mead y(low)
+        double ystar; // Nelder and Mead y*
+        double y2star; // Nelder and Mead y**
+        double ylo; // Nelder and Mead y(low)
         // variables used in calculating the variance of the simplex at a putative minimum
-        double curMin = 00D, sumnm = 0.0D, summnm = 0.0D, zn = 0.0D;
+        double curMin, sumnm, summnm, zn;
         int ilo = 0; // index of low apex
-        int ihi = 0; // index of high apex
-        int ln = 0; // counter for a check on low and high apices
+        int ihi; // index of high apex
+        int ln; // counter for a check on low and high apices
         boolean test = true; // test becomes false on reaching minimum
 
         while (test) {
@@ -2013,7 +2003,7 @@ public class NonLinearRegressionFitter {
      * @return pseudo linear statistics
      */
     protected int pseudoLinearStats(final Object regFun) {
-        double f1 = 0.0D, f2 = 0.0D, f3 = 0.0D, f4 = 0.0D; // intermdiate values in numerical differentiation
+        double f1, f2, f3, f4; // intermediate values in numerical differentiation
         int flag = 0; // returned as 0 if method fully successful;
         // negative if partially successful or unsuccessful: check posVarFlag and invertFlag
         // -1 posVarFlag or invertFlag is false;
@@ -2021,7 +2011,7 @@ public class NonLinearRegressionFitter {
         final int np = nTerms;
 
         final double[] f = new double[np];
-        double[] pmin = new double[np];
+        double[] pmin;
         final double[] coeffSd = new double[np];
         final double[] xd = new double[nXarrays];
         double[][] stat = new double[np][np];
@@ -2035,12 +2025,10 @@ public class NonLinearRegressionFitter {
         pmin = best.clone();
 
         // gradient both sides of the minimum
-        double hold0 = 1.0D;
-        double hold1 = 1.0D;
+        double hold0;
+        double hold1;
         for (int i = 0; i < np; ++i) {
-            for (int k = 0; k < np; ++k) {
-                f[k] = pmin[k];
-            }
+            System.arraycopy(pmin, 0, f, 0, np);
             hold0 = pmin[i];
             if (hold0 == 0.0D) {
                 hold0 = step[i];
@@ -2060,9 +2048,7 @@ public class NonLinearRegressionFitter {
         lastSSnoConstraint = sumOfSquares;
         for (int i = 0; i < np; ++i) {
             for (int j = 0; j < np; ++j) {
-                for (int k = 0; k < np; ++k) {
-                    f[k] = pmin[k];
-                }
+                System.arraycopy(pmin, 0, f, 0, np);
                 hold0 = f[i];
                 if (hold0 == 0.0D) {
                     hold0 = step[i];
@@ -2213,7 +2199,7 @@ public class NonLinearRegressionFitter {
             // TODO: check purpose of matrixCheck
             // this.invertFlag = cov.getMatrixCheck();
 
-            if (invertFlag == false) {
+            if (!invertFlag) {
                 flag--;
             }
             stat = cov.getArrayCopy();
@@ -2261,7 +2247,7 @@ public class NonLinearRegressionFitter {
                 }
             }
         }
-        if (posVarFlag == false) {
+        if (!posVarFlag) {
             flag--;
         }
 
@@ -2286,9 +2272,7 @@ public class NonLinearRegressionFitter {
             final int m = penalties.size();
 
             // remove single parameter constraints
-            for (int i = m - 1; i >= 0; i--) {
-                penalties.remove(i);
-            }
+            penalties.subList(0, m).clear();
         }
         penalty = false;
         nConstraints = 0;
@@ -2298,9 +2282,7 @@ public class NonLinearRegressionFitter {
             final int m = sumPenalties.size();
 
             // remove multiple parameter constraints
-            for (int i = m - 1; i >= 0; i--) {
-                sumPenalties.remove(i);
-            }
+            sumPenalties.subList(0, m).clear();
         }
         sumPenalty = false;
         nSumConstraints = 0;
@@ -2347,9 +2329,7 @@ public class NonLinearRegressionFitter {
                 throw new IllegalArgumentException(
                         "An x [" + j + "] length " + n + " and the y data length, " + nData + ", do not agree");
             }
-            for (int i = 0; i < nData; i++) {
-                this.xData[j][i] = xData[j][i];
-            }
+            System.arraycopy(xData[j], 0, this.xData[j], 0, nData);
         }
     }
 
@@ -2470,9 +2450,7 @@ public class NonLinearRegressionFitter {
             }
         } else {
             if (trFrOld) {
-                for (int i = 0; i < weight.length; i++) {
-                    weight[i] = 1.0D;
-                }
+                Arrays.fill(weight, 1.0D);
                 weightOpt = false;
             }
         }
@@ -2489,7 +2467,6 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         final int n = start.length;
         final int nMaxx = nMax;
         final double fToll = fTol;
@@ -2500,7 +2477,7 @@ public class NonLinearRegressionFitter {
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMaxx);
+        nelderMead(g, start, stepp, fToll, nMaxx);
     }
 
     /**
@@ -2515,7 +2492,6 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         final int n = start.length;
         final int nMaxx = nMax;
         final double[] stepp = new double[n];
@@ -2525,7 +2501,7 @@ public class NonLinearRegressionFitter {
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMaxx);
+        nelderMead(g, start, stepp, fTol, nMaxx);
     }
 
     /**
@@ -2541,7 +2517,6 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         final int n = start.length;
         final double[] stepp = new double[n];
         for (int i = 0; i < n; i++) {
@@ -2550,7 +2525,7 @@ public class NonLinearRegressionFitter {
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMax);
+        nelderMead(g, start, stepp, fTol, nMax);
     }
 
     /**
@@ -2565,13 +2540,12 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         final double fToll = fTol;
         final int nMaxx = nMax;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMaxx);
+        nelderMead(g, start, step, fToll, nMaxx);
     }
 
     /**
@@ -2587,12 +2561,11 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         final int nMaxx = nMax;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMaxx);
+        nelderMead(g, start, step, fTol, nMaxx);
     }
 
     /**
@@ -2610,11 +2583,10 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMax);
+        nelderMead(g, start, step, fTol, nMax);
     }
 
     /**
@@ -2630,12 +2602,11 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         final double fToll = fTol;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMax);
+        nelderMead(g, start, step, fToll, nMax);
     }
 
     /**
@@ -2650,7 +2621,6 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle multiply dimensioned y arrays\nsimplex2 should have been called");
         }
-        final Object regFun = g;
         final int n = start.length;
         final double fToll = fTol;
         final double[] stepp = new double[n];
@@ -2659,7 +2629,7 @@ public class NonLinearRegressionFitter {
         }
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMax);
+        nelderMead(g, start, stepp, fToll, nMax);
     }
 
     /**
@@ -2675,7 +2645,6 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
-        final Object regFun = g;
         final int n = start.length;
         final int nMaxx = nMax;
         final double fToll = fTol;
@@ -2686,7 +2655,7 @@ public class NonLinearRegressionFitter {
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMaxx);
+        nelderMead(g, start, stepp, fToll, nMaxx);
     }
 
     // FIT TO SPECIAL FUNCTIONS
@@ -2705,7 +2674,6 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
-        final Object regFun = g;
         final int n = start.length;
         final int nMaxx = nMax;
         final double[] stepp = new double[n];
@@ -2715,7 +2683,7 @@ public class NonLinearRegressionFitter {
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMaxx);
+        nelderMead(g, start, stepp, fTol, nMaxx);
     }
 
     /**
@@ -2733,7 +2701,6 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
-        final Object regFun = g;
         final int n = start.length;
         final double[] stepp = new double[n];
         for (int i = 0; i < n; i++) {
@@ -2742,7 +2709,7 @@ public class NonLinearRegressionFitter {
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fTol, nMax);
+        nelderMead(g, start, stepp, fTol, nMax);
     }
 
     /**
@@ -2759,13 +2726,12 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
-        final Object regFun = g;
         final double fToll = fTol;
         final int nMaxx = nMax;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMaxx);
+        nelderMead(g, start, step, fToll, nMaxx);
     }
 
     /**
@@ -2783,12 +2749,11 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
-        final Object regFun = g;
         final int nMaxx = nMax;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMaxx);
+        nelderMead(g, start, step, fTol, nMaxx);
     }
 
     /**
@@ -2808,11 +2773,10 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
-        final Object regFun = g;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fTol, nMax);
+        nelderMead(g, start, step, fTol, nMax);
     }
 
     /**
@@ -2830,12 +2794,11 @@ public class NonLinearRegressionFitter {
             throw new IllegalArgumentException(
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
-        final Object regFun = g;
         final double fToll = fTol;
         linNonLin = false;
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, step, fToll, nMax);
+        nelderMead(g, start, step, fToll, nMax);
     }
 
     /**
@@ -2853,7 +2816,6 @@ public class NonLinearRegressionFitter {
                     "This method cannot handle singly dimensioned y array\nsimplex should have been called");
         }
 
-        final Object regFun = g;
         final int n = start.length;
         final double fToll = fTol;
         final double[] stepp = new double[n];
@@ -2862,7 +2824,7 @@ public class NonLinearRegressionFitter {
         }
         zeroCheck = false;
         degreesOfFreedom = nData - start.length;
-        nelderMead(regFun, start, stepp, fToll, nMax);
+        nelderMead(g, start, stepp, fToll, nMax);
     }
 
     /**
@@ -2885,7 +2847,7 @@ public class NonLinearRegressionFitter {
         final double tempFunctVal = lastSSnoConstraint;
         boolean test = true;
         if (penalty) {
-            int k = 0;
+            int k;
             for (int i = 0; i < nConstraints; i++) {
                 k = penaltyParam[i];
                 switch (penaltyCheck[i]) {
@@ -2917,8 +2879,8 @@ public class NonLinearRegressionFitter {
 
         // multiple parameter penalty functions
         if (sumPenalty) {
-            int kk = 0;
-            double pSign = 0;
+            int kk;
+            double pSign;
             double sumPenaltySum = 0.0D;
             for (int i = 0; i < nSumConstraints; i++) {
                 for (int j = 0; j < sumPenaltyNumber[i]; j++) {
@@ -3001,9 +2963,7 @@ public class NonLinearRegressionFitter {
                     }
 
                     for (int dim = 0; dim < dimIn; dim++) {
-                        int index = dim * length + i;
-                        index = i;
-                        ss += MathBase.sqr((yData[index] - g2.getValue(xd, index)) / weight[index]);
+                        ss += MathBase.sqr((yData[i] - g2.getValue(xd, i)) / weight[i]);
                     }
                 }
             }
@@ -3029,9 +2989,8 @@ public class NonLinearRegressionFitter {
         final ArrayList<Object> ret = new ArrayList<>();
         final int n = data.length;
 
-        //
-        double peak = 0.0D; // peak: larger of maximum and any abs(negative minimum)
-        int peaki = -1; // index of above
+        double peak; // peak: larger of maximum and any abs(negative minimum)
+        int peaki; // index of above
         double shift = 0.0D; // shift to make all positive if a mixture of positive and negative
         double max = data[0]; // maximum
         int maxi = 0; // index of above
@@ -3040,7 +2999,7 @@ public class NonLinearRegressionFitter {
         int signCheckPos = 0; // number of negative values
         int signCheckNeg = 0; // number of positive values
         int signCheckZero = 0; // number of zero values
-        int signFlag = -1; // 0 all positive; 1 all negative; 2 positive and negative
+        int signFlag; // 0 all positive; 1 all negative; 2 positive and negative
         double mean = 0.0D; // mean value
 
         for (int i = 0; i < n; i++) {
@@ -3087,15 +3046,15 @@ public class NonLinearRegressionFitter {
         }
 
         // transfer results to the ArrayList
-        ret.add(Double.valueOf(min));
-        ret.add(Integer.valueOf(mini));
-        ret.add(Double.valueOf(max));
-        ret.add(Integer.valueOf(maxi));
-        ret.add(Double.valueOf(peak));
-        ret.add(Integer.valueOf(peaki));
-        ret.add(Integer.valueOf(signFlag));
-        ret.add(Double.valueOf(shift));
-        ret.add(Double.valueOf(mean));
+        ret.add(min);
+        ret.add(mini);
+        ret.add(max);
+        ret.add(maxi);
+        ret.add(peak);
+        ret.add(peaki);
+        ret.add(signFlag);
+        ret.add(shift);
+        ret.add(mean);
 
         return ret;
     }
@@ -3121,7 +3080,7 @@ public class NonLinearRegressionFitter {
         ymax /= 2.0D;
 
         double halflow = -1.0D;
-        double temp = -1.0D;
+        double temp;
         int ihl = -1;
         if (imax > 0) {
             ihl = imax - 1;
@@ -3137,7 +3096,6 @@ public class NonLinearRegressionFitter {
         }
 
         double halfhigh = -1.0D;
-        temp = -1.0D;
         int ihh = -1;
         if (imax < n - 1) {
             ihh = imax + 1;
@@ -3162,6 +3120,9 @@ public class NonLinearRegressionFitter {
             halfw += halfhigh;
             nd++;
         }
+        if (nd == 0) {
+            return Double.NaN;
+        }
         halfw /= nd;
 
         return halfw;
@@ -3171,7 +3132,7 @@ public class NonLinearRegressionFitter {
         final int nData = yData.length;
         final boolean flag = true;
 
-        // Set all weights to square root of frequency of occurence
+        // Set all weights to square root of frequency of occurrence
         for (int ii = 0; ii < nData; ii++) {
             weight[ii] = Math.sqrt(Math.abs(yData[ii]));
         }
@@ -3228,12 +3189,12 @@ public class NonLinearRegressionFitter {
      * @param w ???
      */
     protected static void sort(final double[] x, final double[] y, final double[] w) {
-        int index = 0;
+        int index;
         int lastIndex = -1;
         final int n = x.length;
-        double holdx = 0.0D;
-        double holdy = 0.0D;
-        double holdw = 0.0D;
+        double holdx;
+        double holdy;
+        double holdw;
 
         while (lastIndex < n - 1) {
             index = lastIndex + 1;

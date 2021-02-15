@@ -1376,9 +1376,6 @@ public class NonLinearRegressionFitter2 {
         final DoubleStorage1D xDataLocal = new DoubleStorage1D(xData);
         final DoubleStorage1D yDataLocal = new DoubleStorage1D(xData);
         final DoubleStorage1D weightLocal = new DoubleStorage1D(weights);
-        if (weights == null) {
-            System.err.println("weights are null");
-        }
         setData(xDataLocal, yDataLocal, weightLocal);
     }
 
@@ -1984,6 +1981,9 @@ public class NonLinearRegressionFitter2 {
         if (ihh != -1) {
             halfw += halfhigh;
             nd++;
+        }
+        if (nd == 0) {
+            return Double.NaN;
         }
         halfw /= nd;
 

@@ -349,6 +349,9 @@ public final class SerialiserHelper {
 
     private static WireDataFieldDescription getFieldHeader(IoSerialiser ioSerialiser) {
         WireDataFieldDescription field = ioSerialiser.getFieldHeader();
+        if (field == null) {
+            throw new UnsupportedOperationException("IoSerializer does not support access to individual fields");
+        }
         ioSerialiser.getBuffer().position(field.getDataStartPosition());
         return field;
     }

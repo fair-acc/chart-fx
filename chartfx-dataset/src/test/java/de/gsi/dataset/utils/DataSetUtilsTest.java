@@ -1,11 +1,6 @@
 package de.gsi.dataset.utils;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -90,6 +85,7 @@ class DataSetUtilsTest {
         DataSetUtils.writeDataSetToByteArray(dataSet, byteBuffer, binary, useFloat);
         DataSet dataSetRead = DataSetUtils.readDataSetFromByteArray(byteBuffer.toByteArray());
         // assert that DataSet was written and read correctly
+        assertNotNull(dataSetRead);
         assertEquals(dataSet, dataSetRead);
         assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
@@ -151,6 +147,7 @@ class DataSetUtilsTest {
         DataSetUtils.writeDataSetToFile(dataSet, tmpdir, filename, binary);
         DataSet dataSetRead = DataSetUtils.readDataSetFromFile(tmpdir.toAbsolutePath().toString() + '/' + filename);
         // assert that DataSet was written and read correctly
+        assertNotNull(dataSetRead);
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
         assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
         for (int dim = 0; dim < dataSet.getDimension(); dim++) {

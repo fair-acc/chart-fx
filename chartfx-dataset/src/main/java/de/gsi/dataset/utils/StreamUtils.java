@@ -43,7 +43,7 @@ public class StreamUtils {
                         "Zip resource not found for " + source + " IOException=" + e.getMessage());
             }
         } else {
-            is = new FileInputStream(new File(source));
+            is = new FileInputStream(source);
         }
         if (is == null) {
             logger.error("The resource is not found: " + source);
