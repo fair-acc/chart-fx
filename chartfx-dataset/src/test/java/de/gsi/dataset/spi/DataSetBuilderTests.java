@@ -2,11 +2,7 @@ package de.gsi.dataset.spi;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -84,22 +80,22 @@ class DataSetBuilderTests {
     @Test
     void testExceptions() {
         // provide z-data for 2 dim dataSet
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setValues(DIM_Z, new double[] { 0.0, 3 }).setDimension(2).build());
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setValues(DIM_Z, new double[] { 0.0, 3 }).setDimension(2).build()));
         // Provide X Errors
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setNegError(DIM_X, new float[] { 0.0f, 3f }).setInitalCapacity(2).setDimension(2).build());
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setNegError(DIM_X, new double[] { 0.0, 3 }).setInitalCapacity(2).setDimension(2).build());
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setNegError(DIM_X, new float[] { 0.0f, 3f }).setInitalCapacity(2).setDimension(2).build()));
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setNegError(DIM_X, new double[] { 0.0, 3 }).setInitalCapacity(2).setDimension(2).build()));
         // Provide negative dimIndex for axisDescriptions
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setAxisMax(-5, 12).build());
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setAxisMax(-5, 12).build()));
         // request float error data set
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setUseFloat(true).setEnableErrors(true).build());
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setUseFloat(true).setEnableErrors(true).build()));
         // request errors for multi dim data set
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setDimension(3).setEnableErrors(true).build());
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setDimension(3).setEnableErrors(true).build()));
         // request float multi dim data set
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setDimension(3).setUseFloat(true).build());
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setDimension(3).setUseFloat(true).build()));
         // request type without errors but add errors
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setNegError(DIM_Y, new float[] { 1, 2 }).build(DefaultDataSet.class));
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setNegError(DIM_Y, new float[] { 1, 2 }).build(DefaultDataSet.class)));
         // request Editable Data Set
-        assertThrows(UnsupportedOperationException.class, () -> new DataSetBuilder().setValues(DIM_Y, new float[] { 1, 2 }).build(DoubleErrorDataSet.class));
+        assertThrows(UnsupportedOperationException.class, () -> assertNotNull(new DataSetBuilder().setValues(DIM_Y, new float[] { 1, 2 }).build(DoubleErrorDataSet.class)));
     }
 
     @Test
@@ -149,7 +145,7 @@ class DataSetBuilderTests {
         assertArrayEquals(new double[] { 1.337, 23.42, 0.0 }, dataset.getValues(DIM_Y));
         assertEquals(3, dataset.getDataCount());
         assertEquals(2, dataset.getDimension());
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(DIM_X, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(DIM_X, 3)));
         assertFalse(dataset instanceof DataSetError);
     }
 
@@ -170,7 +166,7 @@ class DataSetBuilderTests {
         assertArrayEquals(new double[] { 1.337, 23.42, 0.0 }, dataset.getValues(DIM_Y));
         assertEquals(3, dataset.getDataCount());
         assertEquals(2, dataset.getDimension());
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(DIM_X, 3));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(DIM_X, 3)));
         assertTrue(dataset instanceof DataSetError);
     }
 
@@ -190,7 +186,7 @@ class DataSetBuilderTests {
         assertEquals(3, gridDataset.getShape(DIM_X));
         assertEquals(2, gridDataset.getShape(DIM_Y));
         assertEquals(6, dataset.getDataCount());
-        assertThrows(IndexOutOfBoundsException.class, () -> gridDataset.getGrid(DIM_X, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, gridDataset.getGrid(DIM_X, 6)));
     }
 
     @Test
@@ -206,7 +202,7 @@ class DataSetBuilderTests {
         assertArrayEquals(new double[] { 11, 22, 33, 44, 55, 66 }, dataset.getValues(DIM_Z));
         assertEquals(6, dataset.getDataCount());
         assertEquals(3, dataset.getDimension());
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(DIM_X, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(DIM_X, 6)));
     }
 
     @Test
@@ -225,7 +221,7 @@ class DataSetBuilderTests {
         assertArrayEquals(new double[] { 0, 0, 0, 0, 0, 0 }, dataset.getValues(4));
         assertEquals(6, dataset.getDataCount());
         assertEquals(5, dataset.getDimension());
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(DIM_X, 6));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(DIM_X, 6)));
         assertTrue(dataset instanceof MultiDimDoubleDataSet);
     }
 

@@ -281,7 +281,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     protected boolean unequalToLockHoldingThread(final Thread thread1) {
         synchronized (stampedLock) {
-            return thread1 != writeLockedByThread;
+            return thread1 != writeLockedByThread; // NOPMD - deliberate use of object identity
         }
     }
 }

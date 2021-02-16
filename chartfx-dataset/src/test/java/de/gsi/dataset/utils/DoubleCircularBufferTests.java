@@ -81,7 +81,7 @@ public class DoubleCircularBufferTests {
         assertEquals(0, buffer.available());
         assertEquals(0, buffer.writePosition());
 
-        assertThrows(IllegalArgumentException.class, () -> buffer.getIndex(-1));
+        assertThrows(IllegalArgumentException.class, () -> assertNotEquals(0, buffer.getIndex(-1)));
     }
 
     @BeforeEach

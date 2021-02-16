@@ -1,10 +1,6 @@
 package de.gsi.dataset.spi;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -46,8 +42,8 @@ class DoubleGridDataSetTests {
         assertArrayEquals(new double[3 * 4 * 2], dataset.getValues(4));
         assertEquals(0.0, dataset.get(3, 5));
         assertEquals(0.0, dataset.get(3, 2, 3, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(3, 25));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(3, 1, 4, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(3, 25)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(3, 1, 4, 0)));
 
         assertThrows(IllegalArgumentException.class, () -> new DoubleGridDataSet("testGridDataSet", 2, new int[] { 2, 3, 2 }));
     }
@@ -113,8 +109,8 @@ class DoubleGridDataSetTests {
         DoubleGridDataSet dataset2 = new DoubleGridDataSet("testGridDataSet", new int[] { 2, 3, 2 }, true, data);
         assertNotSame(data, dataset2.getValues(3));
 
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(3, 25));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(3, 1, 4, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(3, 25)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(3, 1, 4, 0)));
         assertThrows(IllegalArgumentException.class, () -> new DoubleGridDataSet("testGridDataSet", new int[] { 2, 3, 2 }, false, new double[] { 2, 3, 2 }));
     }
 
@@ -153,13 +149,13 @@ class DoubleGridDataSetTests {
         assertEquals(1, dataset.getGridIndex(DIM_Y, 2.3));
         assertEquals(1, dataset.getGridIndex(DIM_X, 2.3));
         assertEquals(0, dataset.getGridIndex(DIM_X, 0.0));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(3, 25));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.getGrid(2, 25));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.getGrid(3, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.getGridValues(3));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.getGridIndex(3, 2.0));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(3, 25)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.getGrid(2, 25)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.getGrid(3, 1)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.getGridValues(3)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.getGridIndex(3, 2.0)));
         assertEquals(0.0, dataset.getGridIndex(1, Double.NaN));
-        assertThrows(IndexOutOfBoundsException.class, () -> dataset.get(3, 1, 4, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0.0, dataset.get(3, 1, 4, 0)));
 
         assertThrows(IllegalArgumentException.class,
                 () -> new DoubleGridDataSet("testGridDataSet", false, new double[][] { { 0.1, 0.2 }, { 1.1, 2.2, 3.3 }, { -0.5, 0.5 } }, new double[] { 2, 3, 2 }));

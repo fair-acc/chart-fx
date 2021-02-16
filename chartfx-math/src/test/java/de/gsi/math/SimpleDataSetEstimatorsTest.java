@@ -1,8 +1,6 @@
 package de.gsi.math;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -245,18 +243,18 @@ class SimpleDataSetEstimatorsTest {
                 2.01);
         // Error Cases
         assertThrows(IllegalArgumentException.class,
-                () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, Double.NaN, 0.9));
+                () -> assertNotEquals(0.0, SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, Double.NaN, 0.9)));
         assertThrows(IllegalArgumentException.class,
-                () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, -0.1, 0.9));
-        assertThrows(IllegalArgumentException.class, () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, Double.POSITIVE_INFINITY));
+                () -> assertNotEquals(0.0, SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, -0.1, 0.9)));
+        assertThrows(IllegalArgumentException.class, () -> assertNotEquals(0.0, SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, Double.POSITIVE_INFINITY)));
         assertThrows(IllegalArgumentException.class,
-                () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, 1.01));
+                () -> assertNotEquals(0.0, SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, 1.01)));
         assertThrows(IllegalArgumentException.class,
-                () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.9, 0.8));
+                () -> assertNotEquals(0.0, SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.9, 0.8)));
         assertThrows(IllegalArgumentException.class,
-                () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 1.1, 0.8));
+                () -> assertNotEquals(0.0, SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 1.1, 0.8)));
         assertThrows(IllegalArgumentException.class,
-                () -> SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, -0.1));
+                () -> assertNotEquals(0.0, SimpleDataSetEstimators.getSimpleRiseTime(triangle, 0, N_SAMPLES - 1, 0.1, -0.1)));
     }
 
     @Test
@@ -295,7 +293,7 @@ class SimpleDataSetEstimatorsTest {
         assertEquals(Double.NaN, SimpleDataSetEstimators.rootMeanSquare(new double[] {}, 0));
         assertEquals(Double.NaN, SimpleDataSetEstimators.rootMeanSquare(array, 0));
         assertThrows(IndexOutOfBoundsException.class,
-                () -> SimpleDataSetEstimators.rootMeanSquare(array, array.length + 3));
+                () -> assertNotEquals(0.0, SimpleDataSetEstimators.rootMeanSquare(array, array.length + 3)));
     }
 
     @Test
@@ -310,7 +308,7 @@ class SimpleDataSetEstimatorsTest {
         assertArrayEquals(new double[] {}, SimpleDataSetEstimators.sort(toSort, 0, false));
         assertArrayEquals(new double[] {}, SimpleDataSetEstimators.sort(new double[] {}, 0, false));
         assertThrows(IllegalArgumentException.class,
-                () -> SimpleDataSetEstimators.sort(toSort, toSort.length + 3, false));
+                () -> assertNotNull(SimpleDataSetEstimators.sort(toSort, toSort.length + 3, false)));
         assertArrayEquals(sortedFirstFive, SimpleDataSetEstimators.sort(toSort, 5, false));
     }
 
