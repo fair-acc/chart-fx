@@ -101,7 +101,7 @@ class MultiArrayTest {
         assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(15)));
         assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(2)));
         assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, 2, 2 })));
-        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, -1, 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, -1, 0 })));
     }
 
     @Test
