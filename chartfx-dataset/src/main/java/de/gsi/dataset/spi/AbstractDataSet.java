@@ -352,7 +352,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * checks for equal 'get' values with tolerance band, may be overwritten by derived classes
-     * 
+     *
      * @param other class
      * @param epsilon tolerance threshold
      * @return {@code true} if equal
@@ -480,14 +480,14 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         final int prime = 31;
         int result = 1;
         result = prime * result + axesDescriptions.hashCode();
-        result = prime * result + ((dataLabels == null) ? 0 : dataLabels.hashCode());
+        result = prime * result + dataLabels.hashCode();
         result = prime * result + dimension;
-        result = prime * result + ((editConstraints == null) ? 0 : editConstraints.hashCode());
-        result = prime * result + ((errorList == null) ? 0 : errorList.hashCode());
-        result = prime * result + ((infoList == null) ? 0 : infoList.hashCode());
+        result = prime * result + Objects.hashCode(editConstraints);
+        result = prime * result + errorList.hashCode();
+        result = prime * result + infoList.hashCode();
         result = prime * result + metaInfoMap.hashCode();
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((warningList == null) ? 0 : warningList.hashCode());
+        result = prime * result + Objects.hashCode(name);
+        result = prime * result + warningList.hashCode();
         return result;
     }
 
