@@ -1,8 +1,8 @@
 package de.gsi.dataset.spi.utils;
 
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 /**
  * @author akrimm
