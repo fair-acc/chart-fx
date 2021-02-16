@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.WritableValue;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
@@ -41,8 +40,7 @@ public class CssToColorHelper extends Parent {
 
     public ObjectProperty<Color> namedColorProperty() {
         if (namedColor == null) {
-            namedColor = new StyleableObjectProperty<Color>(CssToColorHelper.DEFAULT_NAMED_COLOR) {
-
+            namedColor = new StyleableObjectProperty<>(CssToColorHelper.DEFAULT_NAMED_COLOR) {
                 @Override
                 public Object getBean() {
                     return CssToColorHelper.this;
@@ -68,19 +66,17 @@ public class CssToColorHelper extends Parent {
     }
 
     private static class StyleableProperties {
-        private static final CssMetaData<CssToColorHelper, Color> NAMED_COLOR = new CssMetaData<CssToColorHelper, Color>(
+        private static final CssMetaData<CssToColorHelper, Color> NAMED_COLOR = new CssMetaData<>(
                 "-named-color", ColorConverter.getInstance(), CssToColorHelper.DEFAULT_NAMED_COLOR) {
-
             @Override
             public StyleableProperty<Color> getStyleableProperty(CssToColorHelper n) {
-                return (StyleableProperty<Color>) (WritableValue<Color>) n.namedColorProperty();
+                return (StyleableProperty<Color>) n.namedColorProperty();
             }
 
             @Override
             public boolean isSettable(CssToColorHelper n) {
                 return n.namedColor == null || !n.namedColor.isBound();
             }
-
         };
 
         private static final List<CssMetaData<? extends Styleable, ?>> STYLEABLES;

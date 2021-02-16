@@ -42,12 +42,7 @@ public class EMDSample extends AbstractDemoApplication {
         // the empirical-mode-decomposition (EEMD) computation
         final EEMD trafoHHT = new EEMD();
 
-        new Thread() {
-            @Override
-            public void run() {
-                dataset = trafoHHT.getScalogram(yValues, nQuantx, nQuanty);
-            }
-        }.start();
+        new Thread(() -> dataset = trafoHHT.getScalogram(yValues, nQuantx, nQuanty)).start();
 
         try {
             do {
@@ -143,27 +138,26 @@ public class EMDSample extends AbstractDemoApplication {
         final double[] yModel = new double[MAX_POINTS];
 
         for (int i = 0; i < yValues.length; i++) {
-            final double x = i;
-            double offset = 0;
+            double offset;
             double error = 0.1 * RANDOM.nextGaussian();
 
             // linear chirp with discontinuity
             offset = (i > 500) ? -20 : 0;
-            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(Math.TWO_PI * 2e-4 * x * (x + offset)) : 0;
+            yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(Math.TWO_PI * 2e-4 * (double) i * ((double) i + offset)) : 0;
 
             // single tone at 0.25
-            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(Math.TWO_PI * 0.25 * x) : 0;
+            yModel[i] += (i > 50 && i < 500) ? Math.sin(Math.TWO_PI * 0.25 * (double) i) : 0;
             // yModel[i] = Math.sin(TMath.TwoPi() * 0.3* x);
 
             // modulation around 0.4
-            double mod = Math.cos(Math.TWO_PI * 0.01 * x);
+            double mod = Math.cos(Math.TWO_PI * 0.01 * (double) i);
             if (i < 470) {
                 mod = 0.0;
             }
-            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(Math.TWO_PI * (0.4 - 5e-4 * mod) * x) : 0;
+            yModel[i] += (i > 300 && i < 900) ? Math.sin(Math.TWO_PI * (0.4 - 5e-4 * mod) * (double) i) : 0;
 
             // quadratic chirp starting at 0.1
-            yModel[i] += 0.5 * Math.sin(Math.TWO_PI * ((0.1 + 5e-8 * x * x) * x));
+            yModel[i] += 0.5 * Math.sin(Math.TWO_PI * ((0.1 + 5e-8 * (double) i * (double) i) * (double) i));
 
             yModel[i] = yModel[i] + error;
         }

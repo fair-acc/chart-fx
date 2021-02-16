@@ -66,9 +66,7 @@ public class FastMathTests {
 
         MathBaseFast.setPrecision(oldPrecision);
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            MathBaseFast.setPrecision(-1);
-        });
+        assertThrows(IllegalArgumentException.class, () -> MathBaseFast.setPrecision(-1));
     }
 
     @Test

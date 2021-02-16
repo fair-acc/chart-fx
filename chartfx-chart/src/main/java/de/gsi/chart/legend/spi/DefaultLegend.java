@@ -57,7 +57,7 @@ public class DefaultLegend extends FlowPane implements Legend {
     };
 
     /** The legend items to display in this legend */
-    private final ObjectProperty<ObservableList<LegendItem>> items = new SimpleObjectProperty<ObservableList<LegendItem>>(
+    private final ObjectProperty<ObservableList<LegendItem>> items = new SimpleObjectProperty<>(
             this, "items") {
         private ObservableList<LegendItem> oldItems = null;
 
@@ -83,7 +83,7 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     public DefaultLegend() {
         super(GAP, GAP);
-        setItems(FXCollections.<LegendItem>observableArrayList());
+        setItems(FXCollections.observableArrayList());
         getStyleClass().setAll("chart-legend");
         setAlignment(Pos.CENTER);
     }
@@ -163,7 +163,7 @@ public class DefaultLegend extends FlowPane implements Legend {
             final DataSet series = dataSets.get(seriesIndex);
             final String style = series.getStyle();
             final Boolean show = StyleParser.getBooleanPropertyValue(style, XYChartCss.DATASET_SHOW_IN_LEGEND);
-            if (show != null && !show.booleanValue()) {
+            if (show != null && !show) {
                 continue;
             }
 
@@ -185,7 +185,7 @@ public class DefaultLegend extends FlowPane implements Legend {
             for (final DataSet series : renderer.getDatasets()) {
                 final String style = series.getStyle();
                 final Boolean show = StyleParser.getBooleanPropertyValue(style, XYChartCss.DATASET_SHOW_IN_LEGEND);
-                if (show != null && !show.booleanValue()) {
+                if (show != null && !show) {
                     continue;
                 }
 
@@ -207,6 +207,7 @@ public class DefaultLegend extends FlowPane implements Legend {
             for (final String item : newItems) {
                 if (!oldItems.contains(item)) {
                     diffLegend = true;
+                    break;
                 }
             }
         }

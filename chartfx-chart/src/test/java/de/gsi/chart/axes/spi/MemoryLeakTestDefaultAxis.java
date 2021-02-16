@@ -67,7 +67,7 @@ public class MemoryLeakTestDefaultAxis extends Application { // NOPMD -nomen est
         return 0.001 * System.currentTimeMillis(); // [s]
     }
 
-    private class TestAxis extends DefaultNumericAxis {
+    private static class TestAxis extends DefaultNumericAxis {
         public TestAxis() {
             super("test axis", now(), now() + 1, 0.05);
         }

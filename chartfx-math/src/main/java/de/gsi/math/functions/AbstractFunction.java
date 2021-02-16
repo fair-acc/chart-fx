@@ -3,7 +3,6 @@ package de.gsi.math.functions;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -19,7 +18,7 @@ import de.gsi.math.utils.UpdateListener;
 @SuppressWarnings("PMD.ShortVariable")
 public abstract class AbstractFunction implements Function {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFunction.class);
-    private static List<Function> fallFunctions = new ArrayList<>();
+    private static final List<Function> fallFunctions = new ArrayList<>();
     private String funcName = "none";
     private int fnbOfParameter = -1;
     protected double[] fparameter;
@@ -80,7 +79,7 @@ public abstract class AbstractFunction implements Function {
      */
     public void addFunction(final Function object) {
         synchronized (fallFunctions) {
-            if (fallFunctions.indexOf(object) < 0) {
+            if (!fallFunctions.contains(object)) {
                 fallFunctions.add(object);
             }
         }
@@ -93,7 +92,7 @@ public abstract class AbstractFunction implements Function {
      */
     public void addListener(final UpdateListener object) {
         synchronized (flistener) {
-            if (flistener.indexOf(object) < 0) {
+            if (!flistener.contains(object)) {
                 flistener.add(object);
             }
         }
@@ -205,9 +204,8 @@ public abstract class AbstractFunction implements Function {
      */
     public void invokeListener() {
         synchronized (flistener) {
-            final Iterator<UpdateListener> flist = flistener.listIterator();
-            while (flist.hasNext()) {
-                flist.next().Update(this);
+            for (final UpdateListener updateListener : flistener) {
+                updateListener.Update(this);
             }
         }
     }
@@ -247,7 +245,7 @@ public abstract class AbstractFunction implements Function {
      */
     public void removeFunction(final Function object) {
         synchronized (fallFunctions) {
-            if (fallFunctions.indexOf(object) >= 0) {
+            if (fallFunctions.contains(object)) {
                 fallFunctions.remove(object);
             }
         }
@@ -260,7 +258,7 @@ public abstract class AbstractFunction implements Function {
      */
     public void removeListener(final UpdateListener object) {
         synchronized (flistener) {
-            if (flistener.indexOf(object) >= 0) {
+            if (flistener.contains(object)) {
                 flistener.remove(object);
             }
         }

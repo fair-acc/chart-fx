@@ -3,11 +3,7 @@ package de.gsi.dataset.utils.trees;
 /**
  * User: Vitaly Sazanovich Date: 07/02/13 Time: 19:23 Email: Vitaly.Sazanovich@gmail.com
  */
-import java.util.AbstractCollection;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * <p>
@@ -50,7 +46,6 @@ import java.util.Set;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractMap<K, V> implements Map<K, V> {
-
     /**
      * Each of these fields are initialized to contain an instance of the appropriate view the first time this view is
      * requested. The views are stateless, so there's no reason to create more than one of each.
@@ -195,9 +190,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
         }
 
         try {
-            final Iterator<Entry<K, V>> i = entrySet().iterator();
-            while (i.hasNext()) {
-                final Entry<K, V> e = i.next();
+            for (final Entry<K, V> e : entrySet()) {
                 final K key = e.getKey();
                 final V value = e.getValue();
                 if (value == null) {
@@ -266,9 +259,8 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     @Override
     public int hashCode() {
         int h = 0;
-        final Iterator<Entry<K, V>> i = entrySet().iterator();
-        while (i.hasNext()) {
-            h += i.next().hashCode();
+        for (final Entry<K, V> kvEntry : entrySet()) {
+            h += kvEntry.hashCode();
         }
         return h;
     }
@@ -298,7 +290,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     public Set<K> keySet() {
         if (keySet == null) {
             keySet = new AbstractSet<>() {
-
                 @Override
                 public boolean contains(final Object k) {
                     return AbstractMap.this.containsKey(k);
@@ -307,7 +298,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
                 @Override
                 public Iterator<K> iterator() {
                     return new Iterator<>() {
-
                         private final Iterator<Entry<K, V>> i = entrySet().iterator();
 
                         @Override
@@ -478,7 +468,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
     public Collection<V> values() {
         if (values == null) {
             values = new AbstractCollection<>() {
-
                 @Override
                 public boolean contains(final Object v) {
                     return AbstractMap.this.containsValue(v);
@@ -487,7 +476,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
                 @Override
                 public Iterator<V> iterator() {
                     return new Iterator<>() {
-
                         private final Iterator<Entry<K, V>> i = entrySet().iterator();
 
                         @Override
@@ -516,17 +504,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
         return values;
     }
 
-    /**
-     * Utility method for SimpleEntry and SimpleImmutableEntry. Test for equality, checking for nulls.
-     * 
-     * @param o1 object1 to be checked
-     * @param o2 object2 to be checked
-     * @return true if equal
-     */
-    private static boolean eq(final Object o1, final Object o2) {
-        return o1 == null ? o2 == null : o1.equals(o2);
-    }
-
     // Implementation Note: SimpleEntry and SimpleImmutableEntry
     // are distinct unrelated classes, even though they share
     // some code. Since you can't add or subtract final-ness
@@ -545,7 +522,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * @since 1.6
      */
     public static class SimpleEntry<K, V> implements Entry<K, V>, java.io.Serializable {
-
         private static final long serialVersionUID = -8499721149061103585L;
 
         private final K key;
@@ -595,7 +571,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
                 return false;
             }
             final Map.Entry<K, V> e = (Map.Entry<K, V>) o;
-            return AbstractMap.eq(key, e.getKey()) && AbstractMap.eq(value, e.getValue());
+            return Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue());
         }
 
         /**
@@ -660,7 +636,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
         public String toString() {
             return key + "=" + value;
         }
-
     }
 
     /**
@@ -673,7 +648,6 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
      * @since 1.6
      */
     public static class SimpleImmutableEntry<K, V> implements Entry<K, V>, java.io.Serializable {
-
         private static final long serialVersionUID = 7138329143949025153L;
 
         private final K key;
@@ -723,7 +697,7 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
                 return false;
             }
             final Map.Entry<K, V> e = (Map.Entry<K, V>) o;
-            return AbstractMap.eq(key, e.getKey()) && AbstractMap.eq(value, e.getValue());
+            return Objects.equals(key, e.getKey()) && Objects.equals(value, e.getValue());
         }
 
         /**
@@ -789,7 +763,5 @@ public abstract class AbstractMap<K, V> implements Map<K, V> {
         public String toString() {
             return key + "=" + value;
         }
-
     }
-
 }

@@ -88,7 +88,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
 
     @Override
     public List<String> getErrorList() {
-        return Collections.<String>emptyList();
+        return Collections.emptyList();
     }
 
     @Override
@@ -99,7 +99,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
 
     @Override
     public List<String> getInfoList() {
-        return Collections.<String>emptyList();
+        return Collections.emptyList();
     }
 
     /**

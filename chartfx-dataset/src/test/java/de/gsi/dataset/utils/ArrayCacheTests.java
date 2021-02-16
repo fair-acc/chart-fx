@@ -26,8 +26,8 @@ public class ArrayCacheTests {
 
         final double[] copy = ArrayCache.getCachedDoubleArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 
     @Test
@@ -44,8 +44,8 @@ public class ArrayCacheTests {
 
         final float[] copy = ArrayCache.getCachedFloatArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 
     @Test
@@ -62,8 +62,8 @@ public class ArrayCacheTests {
 
         final short[] copy = ArrayCache.getCachedShortArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 
     @Test
@@ -80,8 +80,8 @@ public class ArrayCacheTests {
 
         final int[] copy = ArrayCache.getCachedIntArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 
     @Test
@@ -98,8 +98,8 @@ public class ArrayCacheTests {
 
         final long[] copy = ArrayCache.getCachedLongArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 
     @Test
@@ -116,8 +116,8 @@ public class ArrayCacheTests {
 
         final byte[] copy = ArrayCache.getCachedByteArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 
     @Test
@@ -134,8 +134,8 @@ public class ArrayCacheTests {
 
         final boolean[] copy = ArrayCache.getCachedBooleanArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 
     @Test
@@ -152,7 +152,7 @@ public class ArrayCacheTests {
 
         final String[] copy = ArrayCache.getCachedStringArray(uniqueIdentifier, 100);
 
-        assertEquals((Object) original, (Object) copy, "pointer equivalency");
-        assertNotEquals((Object) original, (Object) fakeCopy, "pointer difference ");
+        assertEquals(original, copy, "pointer equivalency");
+        assertNotEquals(original, fakeCopy, "pointer difference ");
     }
 }

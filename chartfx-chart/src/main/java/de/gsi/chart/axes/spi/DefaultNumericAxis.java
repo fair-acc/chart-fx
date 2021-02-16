@@ -1,7 +1,6 @@
 package de.gsi.chart.axes.spi;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -429,7 +428,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         final List<Double> tickValues = new ArrayList<>(getMaxMajorTickLabelCount());
         if (isLogAxis) {
             if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {
-                return Arrays.asList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
+                return Collections.singletonList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
             }
             double exp = Math.ceil(axisTransform.forward(axisRange.getLowerBound()));
             for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange
@@ -442,7 +441,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         }
 
         if (axisRange.getLowerBound() == axisRange.getUpperBound() || axisRange.getTickUnit() <= 0) {
-            return Arrays.asList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
+            return Collections.singletonList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
         }
 
         final double firstTick = DefaultNumericAxis.computeFistMajorTick(axisRange.getLowerBound(),

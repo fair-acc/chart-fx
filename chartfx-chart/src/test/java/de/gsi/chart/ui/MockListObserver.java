@@ -104,7 +104,7 @@ public class MockListObserver<E> implements ListChangeListener<E> {
     public void checkAddRemove(final int idx, final ObservableList<E> list, final List<E> removed, final int from, final int to) {
         List<E> removedValidated = removed;
         if (removed == null) {
-            removedValidated = Collections.<E>emptyList();
+            removedValidated = Collections.emptyList();
         }
         assertFalse(tooManyCalls);
         Call<E> call = calls.get(idx);

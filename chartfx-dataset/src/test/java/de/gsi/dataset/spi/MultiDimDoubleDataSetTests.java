@@ -37,7 +37,7 @@ class MultiDimDoubleDataSetTests {
         assertThrows(IllegalArgumentException.class, () -> dataset.add(2, 1, 2, 4));
         assertThrows(IllegalArgumentException.class, () -> dataset.add(2, 1, 2, 3, 5, 6, 7));
         assertThrows(IllegalArgumentException.class, () -> dataset.add(2.0, 1, 2, 3, 5, 6, 7));
-        assertThrows(IllegalArgumentException.class, () -> dataset.add());
+        assertThrows(IllegalArgumentException.class, dataset::add);
 
         // add points (multiple)
         dataset.add(new double[][] { { 11, 12 }, { 21, 22 }, { 31, 32 }, { 41, 42 } });

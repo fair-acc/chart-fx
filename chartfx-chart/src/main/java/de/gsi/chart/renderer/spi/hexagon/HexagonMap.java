@@ -17,7 +17,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
 public class HexagonMap {
-
     public final int hexagonSize;
     public int graphicsXpadding = 0;
     public int graphicsYpadding = 0;
@@ -175,8 +174,7 @@ public class HexagonMap {
     }
 
     public void registerCanvasMouseLiner(final Canvas canvas) {
-
-        canvas.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<MouseEvent>() {
+        canvas.addEventFilter(MouseEvent.MOUSE_MOVED, new EventHandler<>() {
             private Hexagon oldHexagon = null;
 
             @Override
@@ -187,7 +185,6 @@ public class HexagonMap {
 
                 final Hexagon hexagon = getHexagonContainingPixel(x, y);
                 if (hexagon != null) {
-
                     if (oldHexagon != null) {
                         gc.save();
                         gc.setFill(oldHexagon.getFill());
@@ -228,7 +225,6 @@ public class HexagonMap {
                 // }
                 // }
             }
-
         });
     }
 
@@ -342,7 +338,11 @@ public class HexagonMap {
     }
 
     public enum Direction {
-        NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST, WEST
+        NORTHWEST,
+        NORTHEAST,
+        EAST,
+        SOUTHEAST,
+        SOUTHWEST,
+        WEST
     }
-
 }

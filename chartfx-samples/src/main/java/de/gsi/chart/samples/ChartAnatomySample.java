@@ -145,7 +145,7 @@ public class ChartAnatomySample extends Application {
         Application.launch(args);
     }
 
-    private class MyLabel extends Label {
+    private static class MyLabel extends Label {
         public MyLabel(final String label) {
             super(label);
             VBox.setVgrow(this, Priority.ALWAYS);

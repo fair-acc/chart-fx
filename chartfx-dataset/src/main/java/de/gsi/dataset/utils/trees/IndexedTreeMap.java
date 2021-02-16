@@ -3,19 +3,7 @@ package de.gsi.dataset.utils.trees;
 /**
  * User: Vitaly Sazanovich Date: 07/02/13 Time: 19:16 Email: Vitaly.Sazanovich@gmail.com
  */
-import java.util.AbstractCollection;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.ConcurrentModificationException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
-import java.util.NoSuchElementException;
-import java.util.Set;
-import java.util.SortedMap;
-import java.util.SortedSet;
+import java.util.*;
 
 /**
  * <p>
@@ -216,7 +204,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
      * @throws java.io.IOException ???
      * @throws ClassNotFoundException ???
      */
-    private final Entry<K, V> buildFromSorted(int level, int lo, int hi, int redLevel, Iterator<?> it,
+    private Entry<K, V> buildFromSorted(int level, int lo, int hi, int redLevel, Iterator<?> it,
             java.io.ObjectInputStream str, V defaultVal) throws java.io.IOException, ClassNotFoundException {
         /*
          * Strategy: The root is the middlemost element. To get to it, we have to first recursively construct the entire
@@ -1276,7 +1264,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
         final int mapSize = map.size();
         if (size == 0 && mapSize != 0 && map instanceof SortedMap) {
             final Comparator<?> c = ((SortedMap<? extends K, ? extends V>) map).comparator();
-            if (c == comparator || c != null && c.equals(comparator)) {
+            if (Objects.equals(c, comparator)) {
                 ++modCount;
                 try {
                     buildFromSorted(mapSize, map.entrySet().iterator(), null, null);
@@ -1701,7 +1689,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
      * @return true if equal
      */
     public static boolean valEquals(Object o1, Object o2) {
-        return o1 == null ? o2 == null : o1.equals(o2);
+        return Objects.equals(o1, o2);
     }
 
     /**
@@ -2331,8 +2319,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
         }
 
         public final IndexedTreeMap.Entry<K, V> absHighest() {
-            final IndexedTreeMap.Entry<K, V> e = toEnd ? m.getLastEntry()
-                                                       : hiInclusive ? m.getFloorEntry(hi) : m.getLowerEntry(hi);
+            final IndexedTreeMap.Entry<K, V> e = toEnd         ? m.getLastEntry()
+                                                 : hiInclusive ? m.getFloorEntry(hi)
+                                                               : m.getLowerEntry(hi);
             return e == null || tooLow(e.key) ? null : e;
         }
 
@@ -2342,7 +2331,8 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
          * @return entry
          */
         public final IndexedTreeMap.Entry<K, V> absHighFence() {
-            return toEnd ? null : hiInclusive ? m.getHigherEntry(hi) : m.getCeilingEntry(hi);
+            return toEnd ? null : hiInclusive ? m.getHigherEntry(hi)
+                                              : m.getCeilingEntry(hi);
         }
 
         public final IndexedTreeMap.Entry<K, V> absLower(K key) {
@@ -2354,8 +2344,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
         }
 
         public final IndexedTreeMap.Entry<K, V> absLowest() {
-            final IndexedTreeMap.Entry<K, V> e = fromStart ? m.getFirstEntry()
-                                                           : loInclusive ? m.getCeilingEntry(lo) : m.getHigherEntry(lo);
+            final IndexedTreeMap.Entry<K, V> e = fromStart     ? m.getFirstEntry()
+                                                 : loInclusive ? m.getCeilingEntry(lo)
+                                                               : m.getHigherEntry(lo);
             return e == null || tooHigh(e.key) ? null : e;
         }
 
@@ -2365,7 +2356,8 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
          * @return entry
          */
         public final IndexedTreeMap.Entry<K, V> absLowFence() {
-            return fromStart ? null : loInclusive ? m.getLowerEntry(lo) : m.getFloorEntry(lo);
+            return fromStart ? null : loInclusive ? m.getLowerEntry(lo)
+                                                  : m.getFloorEntry(lo);
         }
 
         @Override
@@ -2555,9 +2547,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
         public final boolean tooHigh(Object key) {
             if (!toEnd) {
                 final int c = m.compare(key, hi);
-                if (c > 0 || c == 0 && !hiInclusive) {
-                    return true;
-                }
+                return c > 0 || c == 0 && !hiInclusive;
             }
             return false;
         }
@@ -2565,9 +2555,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
         public final boolean tooLow(Object key) {
             if (!fromStart) {
                 final int c = m.compare(key, lo);
-                if (c < 0 || c == 0 && !loInclusive) {
-                    return true;
-                }
+                return c < 0 || c == 0 && !loInclusive;
             }
             return false;
         }
@@ -2656,10 +2644,8 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
                 if (size == -1 || sizeModCount != m.modCount) {
                     sizeModCount = m.modCount;
                     size = 0;
-                    final Iterator<?> i = iterator();
-                    while (i.hasNext()) {
+                    for (final Entry<K, V> kvEntry : this) {
                         size++;
-                        i.next();
                     }
                 }
                 return size;

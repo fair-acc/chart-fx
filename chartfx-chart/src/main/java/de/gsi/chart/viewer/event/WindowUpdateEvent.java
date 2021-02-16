@@ -73,6 +73,6 @@ public class WindowUpdateEvent extends UpdateEvent {
         WINDOW_MAXIMISING,
         WINDOW_MAXIMISED,
         WINDOW_CLOSING,
-        WINDOW_CLOSED;
+        WINDOW_CLOSED
     }
 }

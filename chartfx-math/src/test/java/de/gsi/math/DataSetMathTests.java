@@ -33,7 +33,7 @@ class DataSetMathTests {
         void apply(int index, double a, double b) throws Throwable;
     }
 
-    private class IdentityFunction extends AbstractTestFunction<IdentityFunction> {
+    private static class IdentityFunction extends AbstractTestFunction<IdentityFunction> {
         private final double value;
         private final double timeOffset;
 

@@ -104,9 +104,7 @@ public class DataSetLockTest {
 
         assertEquals(1, myLockImpl.getWriterCount());
 
-        myLock.writeLockGuard(() -> {
-            sleep(100);
-        });
+        myLock.writeLockGuard(() -> sleep(100));
 
         double retVal = myLock.writeLockGuard(() -> {
             sleep(100);
@@ -205,7 +203,7 @@ public class DataSetLockTest {
 
         Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> myLockImpl.getReaderCount() == 0);
         Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> myLockImpl.getWriterCount() == 0);
-        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(() -> dataSet.isAutoNotification());
+        Awaitility.await().atMost(1, TimeUnit.SECONDS).until(dataSet::isAutoNotification);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("finished - testDataSetLock()");

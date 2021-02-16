@@ -85,14 +85,14 @@ public class EditDataSetSample extends Application {
                 // example to fix first and last five point, as well as the
                 // resilient
                 // point at index 25
-                return (index <= 4 || index >= dataSet2.getDataCount() - 6 || index == 25) ? false : true;
+                return index > 4 && index < dataSet2.getDataCount() - 6 && index != 25;
             }
 
             @Override
             public boolean canDelete(int index) {
                 // can delete all points except the first and last five points
                 // as well as resilient point at index 25
-                return (index <= 4 || index >= dataSet2.getDataCount() - 6 || index == 25) ? false : true;
+                return index > 4 && index < dataSet2.getDataCount() - 6 && index != 25;
             }
 
             @Override

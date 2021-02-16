@@ -1,24 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.SeparatorMenuItem?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.layout.BorderPane?>
-<?import de.gsi.chart.XYChart?>
+
 <?import de.gsi.chart.axes.spi.DefaultNumericAxis?>
-<?import de.gsi.chart.axes.AxisMode?>
-<?import de.gsi.chart.renderer.spi.ErrorDataSetRenderer?>
-<?import de.gsi.chart.plugins.Zoomer?>
 <?import de.gsi.chart.plugins.DataPointTooltip?>
-<?import de.gsi.chart.plugins.ParameterMeasurements?>
 <?import de.gsi.chart.plugins.EditAxis?>
-<?import de.gsi.chart.viewer.DataView?>
-<?import de.gsi.chart.viewer.DataViewWindow?>
-<?import de.gsi.chart.viewer.DataViewer?>
-<?import de.gsi.chart.ui.geometry.Side?>
-
-
+<?import de.gsi.chart.plugins.ParameterMeasurements?>
+<?import de.gsi.chart.plugins.Zoomer?>
+<?import de.gsi.chart.renderer.spi.ErrorDataSetRenderer?>
+<?import de.gsi.chart.XYChart?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.BorderPane?>
 <BorderPane xmlns="http://javafx.com/javafx/11" xmlns:fx="http://javafx.com/fxml/1">
     <top>
         <MenuBar>

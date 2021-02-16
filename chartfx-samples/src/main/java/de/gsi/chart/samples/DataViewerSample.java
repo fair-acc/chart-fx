@@ -332,7 +332,7 @@ public class DataViewerSample extends Application {
         DETACHED
     }
 
-    private class TestChart extends XYChart {
+    private static class TestChart extends XYChart {
         private TestChart() {
             super();
             getPlugins().add(new ParameterMeasurements());
@@ -342,7 +342,7 @@ public class DataViewerSample extends Application {
         }
     }
 
-    private class UpdateTask extends TimerTask {
+    private static class UpdateTask extends TimerTask {
         private final TestDataSet<?>[] dataSets;
         private int count;
 

@@ -50,11 +50,11 @@ public class DataView extends VBox {
     private final FlowPane minimisedElements = new FlowPane();
     private final ObjectProperty<Pane> contentPane = new SimpleObjectProperty<>(this, "contenPane");
     private final ObjectProperty<DataView> activeSubView = new SimpleObjectProperty<>(this, "activeView");
-    private final ObservableList<DataView> subDataViews = FXCollections.observableList(new NoDuplicatesList<DataView>());
-    private final ObservableList<Node> visibleNodes = FXCollections.observableList(new NoDuplicatesList<Node>());
-    private final ObservableList<DataViewWindow> visibleChildren = FXCollections.observableList(new NoDuplicatesList<DataViewWindow>());
-    private final ObservableList<DataViewWindow> minimisedChildren = FXCollections.observableList(new NoDuplicatesList<DataViewWindow>());
-    private final ObservableList<DataViewWindow> undockedChildren = FXCollections.observableList(new NoDuplicatesList<DataViewWindow>());
+    private final ObservableList<DataView> subDataViews = FXCollections.observableList(new NoDuplicatesList<>());
+    private final ObservableList<Node> visibleNodes = FXCollections.observableList(new NoDuplicatesList<>());
+    private final ObservableList<DataViewWindow> visibleChildren = FXCollections.observableList(new NoDuplicatesList<>());
+    private final ObservableList<DataViewWindow> minimisedChildren = FXCollections.observableList(new NoDuplicatesList<>());
+    private final ObservableList<DataViewWindow> undockedChildren = FXCollections.observableList(new NoDuplicatesList<>());
     private final ObjectProperty<DataViewWindow> maximizedChild = new SimpleObjectProperty<>(this, "maximizedView") {
         private Optional<DataView> lastActiveView = Optional.empty();
 
@@ -94,9 +94,7 @@ public class DataView extends VBox {
         VBox.setVgrow(minimisedElements, Priority.NEVER);
         HBox.setHgrow(minimisedElements, Priority.NEVER);
         minimisedElements.setPrefWrapLength(0.0);
-        final ChangeListener<Number> widthChange = (ch, o, n) -> {
-            minimisedElements.setPrefWrapLength(n.doubleValue());
-        };
+        final ChangeListener<Number> widthChange = (ch, o, n) -> minimisedElements.setPrefWrapLength(n.doubleValue());
         this.contentPaneProperty().addListener((ch, o, n) -> {
             if (o != null) {
                 o.widthProperty().removeListener(widthChange);
@@ -134,7 +132,7 @@ public class DataView extends VBox {
             }
 
             if (getMaximizedChild() == null) {
-                getVisibleChildren().stream().forEach(child -> {
+                getVisibleChildren().forEach(child -> {
                     if (!getActiveView().getContentPane().getChildren().contains(child)) {
                         getActiveView().getContentPane().getChildren().add(child);
                     }
@@ -382,7 +380,7 @@ public class DataView extends VBox {
             while (change.next()) {
                 minimisedElements.getChildren().removeAll(change.getRemoved());
 
-                change.getAddedSubList().stream().forEach(view -> {
+                change.getAddedSubList().forEach(view -> {
                     view.setParentView(this);
                     if (!view.isMinimised() && view.getWindowState().equals(WindowState.WINDOW_RESTORED)) {
                         view.setMinimised(true);
@@ -402,7 +400,7 @@ public class DataView extends VBox {
 
                 change.getRemoved().forEach(view -> view.setDetached(false));
 
-                change.getAddedSubList().stream().forEach(view -> {
+                change.getAddedSubList().forEach(view -> {
                     view.setParentView(this);
                     view.setDetached(true);
                 });

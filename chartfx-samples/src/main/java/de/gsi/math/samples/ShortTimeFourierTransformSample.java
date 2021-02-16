@@ -250,7 +250,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
         final Random rnd = new Random();
         for (int i = 0; i < yModel.length; i++) {
-            final double x = i * 1 / rate;
+            final double x = i / rate;
             double offset = 0;
             final double error = 0.1 * rnd.nextGaussian();
 
@@ -265,7 +265,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
             // modulation around 0.4
             final double mod = Math.cos(MathBase.TWO_PI * 0.01e6 * x);
-            yModel[i] += (i > 0.3 * maxPoints && i < 0.9 * maxPoints) ? 1.0 * Math.sin(MathBase.TWO_PI * (0.4 - 5e-4 * mod) * 45e4 * x) : 0;
+            yModel[i] += (i > 0.3 * maxPoints && i < 0.9 * maxPoints) ? Math.sin(MathBase.TWO_PI * (0.4 - 5e-4 * mod) * 45e4 * x) : 0;
 
             // quadratic chirp starting at 0.1
             yModel[i] += 0.5 * Math.sin(MathBase.TWO_PI * ((0.1 + 5e3 * x * x) * 1e6 * x));
@@ -275,7 +275,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
         final double[] tValues = new double[yModel.length];
         for (int i = 0; i < tValues.length; i++) {
-            tValues[i] = i * 1 / rate;
+            tValues[i] = i / rate;
         }
         dataSetToUpdate.set(new double[][] { tValues, yModel, imModel });
         dataSetToUpdate.getAxisDescription(DataSet.DIM_X).set("time", "s");

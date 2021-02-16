@@ -3,7 +3,6 @@ package de.gsi.chart.renderer.spi.hexagon;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.gsi.chart.renderer.spi.hexagon.HexagonMap.Direction;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.GraphicsContext;
@@ -12,13 +11,14 @@ import javafx.scene.paint.Paint;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 
+import de.gsi.chart.renderer.spi.hexagon.HexagonMap.Direction;
+
 /**
  * A Hexagon is the building block of the grid.
  */
 public class Hexagon extends Polygon {
-
     private static double[] sinAngle = { 0.5 * Math.sqrt(3), 0.5 * Math.sqrt(3), 0, -0.5 * Math.sqrt(3),
-            -0.5 * Math.sqrt(3), 0, 0.5 * Math.sqrt(3) };
+        -0.5 * Math.sqrt(3), 0, 0.5 * Math.sqrt(3) };
     private static double[] cosAngle = { 0.5, -0.5, -1, -0.5, 0.5, 1, 0.5 };
     public final GridPosition position;
     private HexagonMap map;
@@ -107,7 +107,7 @@ public class Hexagon extends Polygon {
             }
         }
 
-        drawHexagon(gc, list.toArray(new Direction[list.size()]));
+        drawHexagon(gc, list.toArray(new Direction[0]));
 
         gc.restore();
     }
@@ -446,8 +446,7 @@ public class Hexagon extends Polygon {
         return "Hexagon q:" + position.q + " r:" + position.r;
     }
 
-    class UIupdater implements Runnable {
-
+    static class UIupdater implements Runnable {
         private final Hexagon h;
         private final Color c;
 
@@ -461,5 +460,4 @@ public class Hexagon extends Polygon {
             h.setFill(c);
         }
     }
-
 }

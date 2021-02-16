@@ -51,10 +51,8 @@ public class FXUtilsTests {
         FXUtils.assertJavaFxThread();
         FXUtils.keepJavaFxAlive();
 
-        FXUtils.runAndWait(() -> {
-            // execute Runnable in JavaFX thread
-            FXUtils.assertJavaFxThread();
-        });
+        // execute Runnable in JavaFX thread
+        FXUtils.runAndWait(FXUtils::assertJavaFxThread);
 
         assertTrue(FXUtils.runAndWait(() -> {
             // execute Supplier in JavaFX thread
@@ -68,21 +66,15 @@ public class FXUtilsTests {
             return a;
         }));
 
-        FXUtils.runFX(() -> {
-            // execute Runnable in runLater in JavaFX thread
-            FXUtils.assertJavaFxThread();
-        });
+        // execute Runnable in runLater in JavaFX thread
+        FXUtils.runFX(FXUtils::assertJavaFxThread);
 
         Awaitility.setDefaultPollDelay(100, TimeUnit.MILLISECONDS);
         Awaitility.pollInSameThread();
         // FXUtils.waitForFxTicks(testLabel.getScene(), 3);
-        Awaitility.waitAtMost(200, TimeUnit.MILLISECONDS).until(() -> {
-            return FXUtils.waitForFxTicks(testLabel.getScene(), 3);
-        });
+        Awaitility.waitAtMost(200, TimeUnit.MILLISECONDS).until(() -> FXUtils.waitForFxTicks(testLabel.getScene(), 3));
 
-        Awaitility.await().atMost(200, TimeUnit.MILLISECONDS).until(() -> {
-            return FXUtils.waitForFxTicks(testLabel.getScene(), 3, 100);
-        });
+        Awaitility.await().atMost(200, TimeUnit.MILLISECONDS).until(() -> FXUtils.waitForFxTicks(testLabel.getScene(), 3, 100));
 
         // test assertions
         assertThrows(IllegalStateException.class, () -> FXUtils.runFX(() -> {
@@ -100,12 +92,10 @@ public class FXUtilsTests {
     public void testOutsideFxThread() throws Exception {
         assertFalse(Platform.isFxApplicationThread());
 
-        assertThrows(IllegalStateException.class, () -> FXUtils.assertJavaFxThread());
+        assertThrows(IllegalStateException.class, FXUtils::assertJavaFxThread);
 
-        FXUtils.runAndWait(() -> {
-            // execute Runnable in JavaFX thread
-            FXUtils.assertJavaFxThread();
-        });
+        // execute Runnable in JavaFX thread
+        FXUtils.runAndWait(FXUtils::assertJavaFxThread);
 
         try {
             final Boolean result = FXUtils.runAndWait(() -> {
@@ -136,22 +126,16 @@ public class FXUtilsTests {
             return a;
         }));
 
-        FXUtils.runFX(() -> {
-            // execute Runnable in runLater in JavaFX thread
-            FXUtils.assertJavaFxThread();
-        });
+        // execute Runnable in runLater in JavaFX thread
+        FXUtils.runFX(FXUtils::assertJavaFxThread);
 
         Awaitility.setDefaultPollDelay(100, TimeUnit.MILLISECONDS);
         Awaitility.pollInSameThread();
         // FXUtils.waitForFxTicks(testLabel.getScene(), 3);
-        Awaitility.waitAtMost(200, TimeUnit.MILLISECONDS).until(() -> {
-            return FXUtils.waitForFxTicks(testLabel.getScene(), 3);
-        });
+        Awaitility.waitAtMost(200, TimeUnit.MILLISECONDS).until(() -> FXUtils.waitForFxTicks(testLabel.getScene(), 3));
 
         LOGGER.atInfo().log("following [FXUtils-thread] 'FXUtils::waitForTicks(..) interrupted by timeout' warning is the normal library behaviour");
-        Awaitility.await().atMost(200, TimeUnit.MILLISECONDS).until(() -> {
-            return FXUtils.waitForFxTicks(testLabel.getScene(), 3, 100);
-        });
+        Awaitility.await().atMost(200, TimeUnit.MILLISECONDS).until(() -> FXUtils.waitForFxTicks(testLabel.getScene(), 3, 100));
 
         // check for own time-out
         assertFalse(FXUtils.waitForFxTicks(testLabel.getScene(), 1000, 20));

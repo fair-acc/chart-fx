@@ -223,9 +223,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         }
 
         // read source vector
-        for (int i = 0; i < length; i++) {
-            workingSpace[2 * length + i] = source[i];
-        }
+        System.arraycopy(source, 0, workingSpace, 2 * length + 0, length);
 
         // create matrix at*a and vector at*y
         for (int i = 0; i < length; i++) {
@@ -252,9 +250,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         }
 
         // move vector at*y
-        for (int i = 0; i < length; i++) {
-            workingSpace[2 * length + i] = workingSpace[3 * length + i];
-        }
+        System.arraycopy(workingSpace, 3 * length + 0, workingSpace, 2 * length + 0, length);
 
         // initialization of resulting vector
         for (int i = 0; i < length; i++) {
@@ -303,9 +299,7 @@ public class TSpectrum { // NOPMD - nomen est omen
                         workingSpace[3 * length + i] = lda;
                     }
                 }
-                for (int i = 0; i < length; i++) {
-                    workingSpace[i] = workingSpace[3 * length + i];
-                }
+                System.arraycopy(workingSpace, 3 * length + 0, workingSpace, 0, length);
             }
         }
 
@@ -369,9 +363,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         }
 
         // read source vector
-        for (int i = 0; i < length; i++) {
-            workingSpace[2 * length + i] = source[i];
-        }
+        System.arraycopy(source, 0, workingSpace, 2 * length + 0, length);
 
         // initialization of resulting vector
         for (int i = 0; i < length; i++) {
@@ -424,9 +416,7 @@ public class TSpectrum { // NOPMD - nomen est omen
                     }
                     workingSpace[3 * length + i] = lda;
                 }
-                for (int i = 0; i < length; i++) {
-                    workingSpace[i] = workingSpace[3 * length + i];
-                }
+                System.arraycopy(workingSpace, 3 * length + 0, workingSpace, 0, length);
             }
         }
 
@@ -439,9 +429,7 @@ public class TSpectrum { // NOPMD - nomen est omen
         }
 
         // write back resulting spectrum
-        for (int i = 0; i < length; i++) {
-            source[i] = workingSpace[length + i];
-        }
+        System.arraycopy(workingSpace, length + 0, source, 0, length);
         final double[] returnVector = destination == null || destination.length < length ? new double[length]
                                                                                          : destination;
         System.arraycopy(workingSpace, 0, returnVector, 0, length);
@@ -508,9 +496,8 @@ public class TSpectrum { // NOPMD - nomen est omen
                     workingSpace[j] = a;
                 }
             }
-            for (int j = startIndex; j < length - startIndex; j++) {
-                workingSpace[length + j] = workingSpace[j];
-            }
+            if (length - startIndex - startIndex >= 0)
+                System.arraycopy(workingSpace, startIndex, workingSpace, length + startIndex, length - startIndex - startIndex);
             if (direction == Direction.INCREASING) {
                 startIndex += 1;
             } else {
@@ -626,9 +613,8 @@ public class TSpectrum { // NOPMD - nomen est omen
                     workingSpace[j] = a;
                 }
             }
-            for (int j = startIndex; j < length - startIndex; j++) {
-                workingSpace[length + j] = workingSpace[j];
-            }
+            if (length - startIndex - startIndex >= 0)
+                System.arraycopy(workingSpace, startIndex, workingSpace, length + startIndex, length - startIndex - startIndex);
             if (direction == Direction.INCREASING) {
                 startIndex += 1;
             } else {
@@ -814,9 +800,8 @@ public class TSpectrum { // NOPMD - nomen est omen
                     workingSpace[j] = a;
                 }
             }
-            for (int j = startIndex; j < length - startIndex; j++) {
-                workingSpace[length + j] = workingSpace[j];
-            }
+            if (length - startIndex - startIndex >= 0)
+                System.arraycopy(workingSpace, startIndex, workingSpace, length + startIndex, length - startIndex - startIndex);
 
             if (direction == Direction.INCREASING) {
                 startIndex += 1;
@@ -1093,9 +1078,8 @@ public class TSpectrum { // NOPMD - nomen est omen
                     workingSpace[j] = a;
                 }
             }
-            for (int j = startIndex; j < length - startIndex; j++) {
-                workingSpace[length + j] = workingSpace[j];
-            }
+            if (length - startIndex - startIndex >= 0)
+                System.arraycopy(workingSpace, startIndex, workingSpace, length + startIndex, length - startIndex - startIndex);
 
             if (direction == Direction.INCREASING) {
                 startIndex += 1;
@@ -1268,9 +1252,8 @@ public class TSpectrum { // NOPMD - nomen est omen
                         workingSpace[j] = a;
                     }
                 }
-                for (int j = i; j < sizeExt - i; j++) {
-                    workingSpace[sizeExt + j] = workingSpace[j];
-                }
+                if (sizeExt - i - i >= 0)
+                    System.arraycopy(workingSpace, i, workingSpace, sizeExt + i, sizeExt - i - i);
             }
             for (int j = 0; j < sizeExt; j++) {
                 if (j < shift) {
@@ -1301,14 +1284,12 @@ public class TSpectrum { // NOPMD - nomen est omen
             }
         }
 
-        for (int i = 0; i < sizeExt; i++) {
-            workingSpace[i + 6 * sizeExt] = workingSpace[i + sizeExt];
-        }
+        if (sizeExt >= 0)
+            System.arraycopy(workingSpace, 0 + sizeExt, workingSpace, 0 + 6 * sizeExt, sizeExt);
 
         if (markov) {
-            for (int j = 0; j < sizeExt; j++) {
-                workingSpace[2 * sizeExt + j] = workingSpace[sizeExt + j];
-            }
+            if (sizeExt >= 0)
+                System.arraycopy(workingSpace, sizeExt + 0, workingSpace, 2 * sizeExt + 0, sizeExt);
 
             double signalMax = 0;
             double plocha = 0.0;
@@ -1378,9 +1359,7 @@ public class TSpectrum { // NOPMD - nomen est omen
             for (int j = 0; j < sizeExt; j++) {
                 workingSpace[sizeExt + j] = workingSpace[j] * plocha;
             }
-            for (int j = 0; j < sizeExt; j++) {
-                workingSpace[2 * sizeExt + j] = workingSpace[sizeExt + j];
-            }
+            System.arraycopy(workingSpace, sizeExt + 0, workingSpace, 2 * sizeExt + 0, sizeExt);
             if (backgroundRemove) {
                 for (int i = 1; i <= numberIterations; i++) {
                     for (int j = i; j < sizeExt - i; j++) {
@@ -1391,9 +1370,8 @@ public class TSpectrum { // NOPMD - nomen est omen
                         }
                         workingSpace[j] = a;
                     }
-                    for (int j = i; j < sizeExt - i; j++) {
-                        workingSpace[sizeExt + j] = workingSpace[j];
-                    }
+                    if (sizeExt - i - i >= 0)
+                        System.arraycopy(workingSpace, i, workingSpace, sizeExt + i, sizeExt - i - i);
                 }
                 for (int j = 0; j < sizeExt; j++) {
                     workingSpace[sizeExt + j] = workingSpace[2 * sizeExt + j] - workingSpace[sizeExt + j];
@@ -1514,9 +1492,8 @@ public class TSpectrum { // NOPMD - nomen est omen
                     workingSpace[3 * sizeExt + i] = lda;
                 }
             }
-            for (int i = 0; i < sizeExt; i++) {
-                workingSpace[i] = workingSpace[3 * sizeExt + i];
-            }
+            if (sizeExt >= 0)
+                System.arraycopy(workingSpace, 3 * sizeExt + 0, workingSpace, 0, sizeExt);
         }
 
         // shift resulting spectrum
@@ -1879,14 +1856,14 @@ public class TSpectrum { // NOPMD - nomen est omen
 
     public enum Direction {
         INCREASING,
-        DECREASING;
+        DECREASING
     }
 
     public enum FilterOrder {
         ORDER_2,
         ORDER_4,
         ORDER_6,
-        ORDER_8;
+        ORDER_8
     }
 
     public enum SmoothWindow {

@@ -23,7 +23,6 @@ import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
-import de.gsi.dataset.DataSetMetaData;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.locks.DataSetLock;
@@ -129,10 +128,8 @@ class DataSetBuilderTests {
         assertEquals("testdataset", dataset.getName());
         assertEquals(3, dataset.getDataCount());
         assertEquals(2, dataset.getDimension());
-        assertTrue(dataset instanceof FloatDataSet);
-        final FloatDataSet floatDataSet = (FloatDataSet) dataset;
-        assertArrayEquals(new float[] { 0, 1, 2 }, floatDataSet.getFloatValues(DIM_X));
-        assertArrayEquals(new float[] { 1.337f, 23.42f, 0.0f }, floatDataSet.getFloatValues(DIM_Y));
+        assertArrayEquals(new float[] { 0, 1, 2 }, dataset.getFloatValues(DIM_X));
+        assertArrayEquals(new float[] { 1.337f, 23.42f, 0.0f }, dataset.getFloatValues(DIM_Y));
     }
 
     @Test

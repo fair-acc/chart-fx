@@ -1,24 +1,23 @@
 package de.gsi.math.storage;
 
 public interface VoxelArrayND {
+    VoxelArrayND copy();
 
-    public VoxelArrayND copy();
+    double[] get(int[] index);
 
-    public double[] get(int[] index);
+    int[] getInverseLocalIndex(int index);
 
-    public int[] getInverseLocalIndex(int index);
+    double[] getLocal(int localIndex);
 
-    public double[] getLocal(int localIndex);
+    int getLocalIndex(int[] index);
 
-    public int getLocalIndex(int[] index);
+    int getLocalStorageDim();
 
-    public int getLocalStorageDim();
+    int getValueDimension();
 
-    public int getValueDimension();
+    void initialiseWithValue(double val);
 
-    public void initialiseWithValue(double val);
+    void set(int[] index, double[] val);
 
-    public void set(int[] index, double val[]);
-
-    public void setLocal(int localIndex, double[] val);
+    void setLocal(int localIndex, double[] val);
 }

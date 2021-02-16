@@ -99,7 +99,7 @@ public class TimeAxisRangeSample extends Application {
         Application.launch(args);
     }
 
-    protected class TimeAxis extends DefaultNumericAxis {
+    protected static class TimeAxis extends DefaultNumericAxis {
         public TimeAxis(String label, final double min, final double max, final double tick) {
             super(label, min, max, tick);
             this.setAutoRangeRounding(true);

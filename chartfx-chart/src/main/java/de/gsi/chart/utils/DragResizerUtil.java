@@ -44,7 +44,7 @@ public class DragResizerUtil {
     private static final double MIN_HEIGHT = 20;
     private static final double MIN_WIDTH = 30;
     private final Node node;
-    protected static final OnDragResizeEventListener DEFAULT_LISTENER = new DragResizerUtil().new DefaultListener();
+    protected static final OnDragResizeEventListener DEFAULT_LISTENER = new DefaultListener();
     private final OnDragResizeEventListener listener;
 
     private double clickX;
@@ -334,7 +334,7 @@ public class DragResizerUtil {
         void onResize(final Node node, final double x, final double y, final double width, final double height);
     }
 
-    private class DefaultListener implements OnDragResizeEventListener {
+    private static class DefaultListener implements OnDragResizeEventListener {
         @Override
         public void onDrag(final Node node, final double x, final double y, final double width, final double height) {
             setNodeSize(node, x, y, width, height);

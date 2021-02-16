@@ -29,13 +29,13 @@ public class LimitedQueueTests {
         assertEquals(3, testQueue.getLimit());
 
         assertEquals(0, testQueue.size());
-        assertTrue(testQueue.add(Double.valueOf(1.0)));
+        assertTrue(testQueue.add(1.0));
         assertEquals(1, testQueue.size());
-        assertTrue(testQueue.add(Double.valueOf(2.0)));
+        assertTrue(testQueue.add(2.0));
         assertEquals(2, testQueue.size());
-        assertTrue(testQueue.add(Double.valueOf(3.0)));
+        assertTrue(testQueue.add(3.0));
         assertEquals(3, testQueue.size());
-        assertTrue(testQueue.add(Double.valueOf(4.0)));
+        assertTrue(testQueue.add(4.0));
         assertEquals(3, testQueue.size());
     }
 }

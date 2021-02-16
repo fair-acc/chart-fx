@@ -265,7 +265,7 @@ public class Cache<K, V> implements Map<K, V> {
 
         // call registered pre-listener
         if (preListener != null) {
-            removalMap.entrySet().forEach(entry -> preListener.accept(entry.getKey(), entry.getValue()));
+            removalMap.forEach(preListener::accept);
         }
 
         toBeRemoved.forEach(key -> {
@@ -275,7 +275,7 @@ public class Cache<K, V> implements Map<K, V> {
 
         // call registered post-listener
         if (postListener != null) {
-            removalMap.entrySet().forEach(entry -> postListener.accept(entry.getKey(), entry.getValue()));
+            removalMap.forEach(postListener::accept);
         }
     }
 

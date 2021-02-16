@@ -238,7 +238,7 @@ public class CDFWavelet {
         x[n - 1] += 2 * a * x[n - 2];
     }
 
-    public static void main(final String argv[]) {
+    public static void main(final String[] argv) {
         final CDFWavelet wtf = new CDFWavelet();
         final double[] x = new double[32];
 
@@ -248,27 +248,27 @@ public class CDFWavelet {
         }
 
         // Prints original signal x
-        System.out.printf("Original signal:\n");
+        System.out.print("Original signal:\n");
         for (int i = 0; i < 32; i++) {
             System.out.printf("x[%d]=%f\n", i, x[i]);
         }
-        System.out.printf("\n");
+        System.out.print("\n");
 
         // Do the forward 9/7 transform
         wtf.fwt97(x, 32);
 
         // Prints the wavelet coefficients
-        System.out.printf("Wavelets coefficients:\n");
+        System.out.print("Wavelets coefficients:\n");
         for (int i = 0; i < 32; i++) {
             System.out.printf("wc[%d]=%f\n", i, x[i]);
         }
-        System.out.printf("\n");
+        System.out.print("\n");
 
         // Do the inverse 9/7 transform
         wtf.iwt97(x, 32);
 
         // Prints the reconstructed signal
-        System.out.printf("Reconstructed signal:\n");
+        System.out.print("Reconstructed signal:\n");
         for (int i = 0; i < 32; i++) {
             System.out.printf("xx[%d]=%f\n", i, x[i]);
         }

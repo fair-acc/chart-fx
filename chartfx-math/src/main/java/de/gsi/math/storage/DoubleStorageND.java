@@ -97,15 +97,12 @@ public class DoubleStorageND implements VoxelArrayND {
     @Override
     public void initialiseWithValue(double val) {
         for (int i = 0; i < fdata.length; i++) {
-            for (int j = 0; j < fdata[i].length; j++) {
-                fdata[i][j] = val;
-            }
+            Arrays.fill(fdata[i], val);
         }
-
     }
 
     @Override
-    public void set(int[] index, double val[]) {
+    public void set(int[] index, double[] val) {
         if (val.length != this.fdimOut) {
             throw new InvalidParameterException("invalid value dimension " + val.length);
         }
@@ -118,7 +115,7 @@ public class DoubleStorageND implements VoxelArrayND {
         fdata[localIndex] = val;
     }
 
-    public static void main(String argv[]) {
+    public static void main(String[] argv) {
         DoubleStorageND test1 = new DoubleStorageND(new int[] { 3, 5 }, 10);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 5; j++) {
@@ -143,5 +140,4 @@ public class DoubleStorageND implements VoxelArrayND {
             System.out.printf("2:inverse tupple index %3d mapped to (%d,%d,%d)\n", i, lindex[0], lindex[1], lindex[2]);
         }
     }
-
 }

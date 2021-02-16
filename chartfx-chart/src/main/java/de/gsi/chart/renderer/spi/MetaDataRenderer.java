@@ -371,7 +371,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         // chart.requestLayout();
     }
 
-    class InfoHBox extends HBox {
+    static class InfoHBox extends HBox {
         public InfoHBox() {
             super();
             setMouseTransparent(true);
@@ -391,7 +391,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         }
     }
 
-    protected class MetaLabel extends Label {
+    protected static class MetaLabel extends Label {
         public MetaLabel(final String text) {
             super(text);
             setMouseTransparent(true);

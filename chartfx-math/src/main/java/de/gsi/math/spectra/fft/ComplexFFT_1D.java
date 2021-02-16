@@ -13,7 +13,6 @@ public class ComplexFFT_1D {
 
     // compute the circular convolution of x and y
     public static Complex[] cconvolve(final Complex[] x, final Complex[] y) {
-
         // should probably pad x and y with 0s so that they have same length
         // and are powers of 2
         if (x.length != y.length) {
@@ -41,17 +40,13 @@ public class ComplexFFT_1D {
         final Complex ZERO = new Complex(0, 0);
 
         final Complex[] a = new Complex[2 * x.length];
-        for (int i = 0; i < x.length; i++) {
-            a[i] = x[i];
-        }
+        System.arraycopy(x, 0, a, 0, x.length);
         for (int i = x.length; i < 2 * x.length; i++) {
             a[i] = ZERO;
         }
 
         final Complex[] b = new Complex[2 * y.length];
-        for (int i = 0; i < y.length; i++) {
-            b[i] = y[i];
-        }
+        System.arraycopy(y, 0, b, 0, y.length);
         for (int i = y.length; i < 2 * y.length; i++) {
             b[i] = ZERO;
         }
@@ -196,7 +191,6 @@ public class ComplexFFT_1D {
         }
 
         return y;
-
     }
 
     // test client
@@ -252,7 +246,5 @@ public class ComplexFFT_1D {
             System.out.println(d[i]);
         }
         System.out.println();
-
     }
-
 }

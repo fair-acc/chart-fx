@@ -3,7 +3,6 @@ package de.gsi.chart.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import de.gsi.financial.samples.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -18,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.utils.PeriodicScreenCapture;
+import de.gsi.financial.samples.*;
 
 /**
  * @author rstein
@@ -112,26 +112,23 @@ public class RunChartSamples extends Application {
                     stage.show();
 
                     if (makeScreenShot.isSelected()) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(2000);
-                                    Platform.runLater(() -> {
-                                        LOGGER.atInfo()
-                                                .log("make screen shot to file of " + run.getClass().getSimpleName());
-                                        final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
-                                                run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
-                                                DEFAULT_PERIOD, false);
-                                        screenCapture.performScreenCapture();
-                                    });
-                                } catch (final InterruptedException e) {
-                                    if (LOGGER.isErrorEnabled()) {
-                                        LOGGER.atError().setCause(e).log("InterruptedException");
-                                    }
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(2000);
+                                Platform.runLater(() -> {
+                                    LOGGER.atInfo()
+                                            .log("make screen shot to file of " + run.getClass().getSimpleName());
+                                    final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
+                                            run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
+                                            DEFAULT_PERIOD, false);
+                                    screenCapture.performScreenCapture();
+                                });
+                            } catch (final InterruptedException e12) {
+                                if (LOGGER.isErrorEnabled()) {
+                                    LOGGER.atError().setCause(e12).log("InterruptedException");
                                 }
                             }
-                        }.start();
+                        }).start();
                     }
                 } catch (final Exception e1) {
                     if (LOGGER.isErrorEnabled()) {

@@ -2,10 +2,7 @@ package de.gsi.chart.samples;
 
 import static de.gsi.dataset.spi.AbstractHistogram.HistogramOuterBounds.BINS_ALIGNED_WITH_BOUNDARY;
 
-import java.text.DateFormatSymbols;
 import java.util.*;
-
-import javax.tools.Tool;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -14,25 +11,17 @@ import javafx.collections.FXCollections;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.CategoryAxis;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.ParameterMeasurements;
 import de.gsi.chart.plugins.Zoomer;
-import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.LineStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
-import de.gsi.chart.renderer.spi.MetaDataRenderer;
-import de.gsi.chart.utils.FXUtils;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.AbstractHistogram;
 import de.gsi.dataset.spi.Histogram;
-import de.gsi.dataset.testdata.spi.RandomDataGenerator;
 import de.gsi.math.Math;
 
 public class HistogramBasicSample extends Application {
@@ -138,9 +127,7 @@ public class HistogramBasicSample extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
 
-        primaryStage.setOnCloseRequest(evt -> {
-            Platform.exit();
-        });
+        primaryStage.setOnCloseRequest(evt -> Platform.exit());
     }
 
     /**

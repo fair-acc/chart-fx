@@ -6,8 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
 import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
 
-import java.io.IOException;
-
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -64,7 +62,7 @@ public class ContourDataSetRendererTests {
 
     @Start
     public void start(Stage stage) {
-        assertDoesNotThrow(() -> new ContourDataSetRenderer());
+        assertDoesNotThrow(ContourDataSetRenderer::new);
         renderer = new ContourDataSetRenderer();
         renderer.getDatasets().add(getTestDataSet());
         chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
@@ -77,17 +75,17 @@ public class ContourDataSetRendererTests {
 
     @ParameterizedTest
     @EnumSource(ContourType.class)
-    public void testRendererNominal(final ContourType contourType) throws IOException, Exception {
+    public void testRendererNominal(final ContourType contourType) throws Exception {
         testRenderer(contourType, false);
     }
 
     @ParameterizedTest
     @EnumSource(ContourType.class)
-    public void testRendererAlt(final ContourType contourType) throws IOException, Exception {
+    public void testRendererAlt(final ContourType contourType) throws Exception {
         testRenderer(contourType, true);
     }
 
-    private void testRenderer(final ContourType contourType, final boolean altImplementation) throws IOException, Exception {
+    private void testRenderer(final ContourType contourType, final boolean altImplementation) throws Exception {
         renderer.setAltImplementation(altImplementation);
         renderer.setContourType(contourType);
         final String contourTypeString = renderer.getContourType().toString();

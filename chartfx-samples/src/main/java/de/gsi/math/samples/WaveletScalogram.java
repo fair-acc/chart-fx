@@ -63,12 +63,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
         // the wavelet scalogram computation
         final ContinuousWavelet wtrafo = new ContinuousWavelet();
 
-        new Thread() {
-            @Override
-            public void run() {
-                fdataset = wtrafo.getScalogram(yValues, nQuantx, nQuanty, nu, fmin, fmax);
-            }
-        }.start();
+        new Thread(() -> fdataset = wtrafo.getScalogram(yValues, nQuantx, nQuanty, nu, fmin, fmax)).start();
 
         do {
             sleep(1000);
@@ -167,11 +162,11 @@ public class WaveletScalogram extends AbstractDemoApplication {
             yModel[i] = (i > 100 && i < 700) ? 0.7 * Math.sin(Math.TWO_PI * 2e-4 * x * (x + offset)) : 0;
 
             // single tone at 0.25
-            yModel[i] += (i > 50 && i < 500) ? 1.0 * Math.sin(Math.TWO_PI * 0.25 * x) : 0;
+            yModel[i] += (i > 50 && i < 500) ? Math.sin(Math.TWO_PI * 0.25 * x) : 0;
 
             // modulation around 0.4
             final double mod = Math.cos(Math.TWO_PI * 0.01 * x);
-            yModel[i] += (i > 300 && i < 900) ? 1.0 * Math.sin(Math.TWO_PI * (0.4 - 5e-4 * mod) * x) : 0;
+            yModel[i] += (i > 300 && i < 900) ? Math.sin(Math.TWO_PI * (0.4 - 5e-4 * mod) * x) : 0;
 
             // quadratic chirp starting at 0.1
             yModel[i] += 0.5 * Math.sin(Math.TWO_PI * ((0.1 + 5e-8 * x * x) * x));

@@ -151,9 +151,11 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         gc.save();
         switch (getSide()) {
         case LEFT:
+        case CENTER_VER:
             gc.translate(-gradientWidth, 0);
             break;
         case RIGHT:
+        case CENTER_HOR:
             gc.translate(gradientWidth, 0);
             break;
         case TOP:
@@ -161,12 +163,6 @@ public class ColorGradientAxis extends DefaultNumericAxis {
             break;
         case BOTTOM:
             gc.translate(0, gradientWidth);
-            break;
-        case CENTER_HOR:
-            gc.translate(gradientWidth, 0);
-            break;
-        case CENTER_VER:
-            gc.translate(-gradientWidth, 0);
             break;
         default:
             break;

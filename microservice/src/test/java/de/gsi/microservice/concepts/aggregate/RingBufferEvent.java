@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.slf4j.Logger;
@@ -203,7 +204,7 @@ public class RingBufferEvent implements FilterPredicate, Cloneable {
         if (!Arrays.equals(filterConfig, other.filterConfig)) {
             return false;
         }
-        if (payload != null ? !payload.equals(other.payload) : other.payload != null) {
+        if (!Objects.equals(payload, other.payload)) {
             return false;
         }
         return throwables.equals(other.throwables);

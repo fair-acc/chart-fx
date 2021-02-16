@@ -63,10 +63,13 @@ public class GeneralPath /* extends Path2D */ {
     }
 
     enum PathType {
-        GC_LINETO, GC_MOVETO, GC_BEGINPATH, GC_CLOSEPATH
+        GC_LINETO,
+        GC_MOVETO,
+        GC_BEGINPATH,
+        GC_CLOSEPATH
     }
 
-    private class Segment {
+    private static class Segment {
         public double x;
         public double y;
         public PathType type;

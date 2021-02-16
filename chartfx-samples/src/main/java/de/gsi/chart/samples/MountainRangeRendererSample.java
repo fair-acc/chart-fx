@@ -177,12 +177,12 @@ public class MountainRangeRendererSample extends Application {
     private static double[] toDouble(final String[] stringValues) {
         final double[] numberValues = new double[stringValues.length];
         for (int i = 0; i < stringValues.length; i++) {
-            numberValues[i] = Double.valueOf(stringValues[i]);
+            numberValues[i] = Double.parseDouble(stringValues[i]);
         }
         return numberValues;
     }
 
-    public class DefaultData extends AbstractDataSet<DefaultData> implements GridDataSet {
+    public static class DefaultData extends AbstractDataSet<DefaultData> implements GridDataSet {
         private static final long serialVersionUID = 2094218221674496366L;
         private final double[] xValues;
         private final double[] yValues;

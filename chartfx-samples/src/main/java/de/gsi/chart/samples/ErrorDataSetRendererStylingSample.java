@@ -97,9 +97,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
             break;
         }
 
-        final List<DataSetError> dataSetToLoad = dataSet;
         Platform.runLater(() -> {
-            chart.getRenderers().get(0).getDatasets().setAll(dataSetToLoad);
+            chart.getRenderers().get(0).getDatasets().setAll(dataSet);
             chart.requestLayout();
         });
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
@@ -144,7 +143,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         final Spinner<Double> autoRangePadding = new Spinner<>(0, 100.0, axis.getAutoRangePadding(), 0.05);
         autoRangePadding.valueProperty().addListener((ch, old, value) -> {
-            axis.setAutoRangePadding(value.doubleValue());
+            axis.setAutoRangePadding(value);
             chart.requestLayout();
         });
         pane.addToParameterPane("   auto-range padding): ", autoRangePadding);
@@ -509,10 +508,10 @@ public class ErrorDataSetRendererStylingSample extends Application {
         GAUSS,
         SINE,
         COSINE,
-        MIX_TRIGONOMETRIC;
+        MIX_TRIGONOMETRIC
     }
 
-    private class ParameterTab extends Tab {
+    private static class ParameterTab extends Tab {
         private final GridPane parameterGrid = new GridPane();
         private int rowIndex;
 

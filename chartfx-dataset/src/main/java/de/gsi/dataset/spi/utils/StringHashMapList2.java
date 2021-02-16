@@ -39,7 +39,6 @@ public class StringHashMapList2 implements Map<Integer, String> {
         } else {
             throw new IllegalArgumentException("element with index " + fromIndex + " already exists");
         }
-
     }
 
     @Override
@@ -80,12 +79,12 @@ public class StringHashMapList2 implements Map<Integer, String> {
         if (!(key instanceof Integer)) {
             return null;
         }
-        final int externalIndex = ((Integer) key).intValue();
+        final int externalIndex = (Integer) key;
         final int index = getLocalIndexForExternalIndex(externalIndex);
         return index < 0 ? null : data.get(index);
     }
 
-    private final int getLocalIndexForExternalIndex(final int externalIndex) {
+    private int getLocalIndexForExternalIndex(final int externalIndex) {
         // binary search
         int low = 0;
         int high = indices.size() - 1;
@@ -202,5 +201,4 @@ public class StringHashMapList2 implements Map<Integer, String> {
     public Collection<String> values() {
         return data;
     }
-
 }

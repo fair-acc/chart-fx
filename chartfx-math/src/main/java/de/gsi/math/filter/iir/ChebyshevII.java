@@ -191,7 +191,7 @@ public class ChebyshevII extends Cascade {
         setLayout(digitalProto, directFormType);
     }
 
-    private class AnalogLowPass extends LayoutBase {
+    private static class AnalogLowPass extends LayoutBase {
         private final int nPoles;
 
         // ------------------------------------------------------------------------------

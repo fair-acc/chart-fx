@@ -73,8 +73,7 @@ public class EEMD {
                     final Spline lower = new Spline(spmin[0], spmin[1]);
 
                     for (int i = 0; i < xsize; i++) {
-                        final double x = i;
-                        final double mean_ul = (upper.getValue(x) + lower.getValue(x)) / 2.0;
+                        final double mean_ul = (upper.getValue(i) + lower.getValue(i)) / 2.0;
                         xstart[i] -= mean_ul;
                     }
                     // final double residual = TMath.Mean(xstart);

@@ -406,7 +406,7 @@ public class EditDataSet extends TableViewer {
         SHIFTY
     }
 
-    class ShiftConstraintListCell extends ListCell<ShiftConstraint> {
+    static class ShiftConstraintListCell extends ListCell<ShiftConstraint> {
         public ShiftConstraintListCell() {
             super();
             setContentDisplay(ContentDisplay.LEFT);
@@ -795,7 +795,7 @@ public class EditDataSet extends TableViewer {
         return new Point2D(limitedX, limitedY);
     }
 
-    public class DataPoint {
+    public static class DataPoint {
         private final Chart chart;
         private final double x;
         private final double y;

@@ -1,5 +1,8 @@
 package de.gsi.chart.samples.legacy.utils;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.ErrorStyle;
@@ -8,8 +11,6 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.renderer.spi.ReducingLineRenderer;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.testdata.spi.SineFunction;
-import javafx.application.Application;
-import javafx.scene.Node;
 
 public class TestChart extends AbstractTestApplication implements ChartTestCase {
     protected int nSamples = MAX_DATA_POINTS_100K;
@@ -24,7 +25,6 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
     }
 
     public TestChart(final boolean altRenderer) {
-
         chart = new XYChart(xAxis, yAxis);
         chart.legendVisibleProperty().set(true);
         chart.setAnimated(false);
@@ -38,9 +38,7 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
             ReducingLineRenderer renderer = new ReducingLineRenderer();
             renderer.setMaxPoints(750);
             chart.getRenderers().set(0, renderer);
-            chart.getCanvas().widthProperty().addListener((ch, o, n) -> {
-                renderer.setMaxPoints(Math.max(750, (int) (n.doubleValue() / 5)));
-            });
+            chart.getCanvas().widthProperty().addListener((ch, o, n) -> renderer.setMaxPoints(Math.max(750, (int) (n.doubleValue() / 5.0))));
 
             // xAxis.setLabel("x-axis (new Chart - ErrorDataSetRenderer -
             // parallel)");
@@ -73,7 +71,6 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
 
     @Override
     public Node getChart(int nSamples) {
-
         return chart;
     }
 

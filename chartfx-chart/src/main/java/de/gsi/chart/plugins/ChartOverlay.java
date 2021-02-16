@@ -29,11 +29,9 @@ import javafx.scene.layout.Pane;
  * @author Grzegorz Kruk
  */
 public class ChartOverlay extends ChartPlugin {
-
     private final ObjectProperty<Node> node = new SimpleObjectProperty<>(this, "node");
 
-    private final ObjectProperty<OverlayArea> overlayArea = new SimpleObjectProperty<OverlayArea>(this, "overlayArea") {
-
+    private final ObjectProperty<OverlayArea> overlayArea = new SimpleObjectProperty<>(this, "overlayArea") {
         @Override
         protected void invalidated() {
             layoutChildren();
@@ -139,6 +137,7 @@ public class ChartOverlay extends ChartPlugin {
      * Defines possible areas to be overlaid.
      */
     public enum OverlayArea {
-        CHART_PANE, PLOT_AREA
+        CHART_PANE,
+        PLOT_AREA
     }
 }

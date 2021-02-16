@@ -70,7 +70,7 @@ public class ManyVsLargeFrameEvaluation {
 
         final long stop = System.currentTimeMillis();
         if (VERBOSE_PRINTOUT) {
-            System.out.printf("%-40s:  %10d calls/second\n", topic, (1000 * nExec) / (stop - start));
+            System.out.printf("%-40s:  %10d calls/second\n", topic, (1000L * nExec) / (stop - start));
         }
     }
 

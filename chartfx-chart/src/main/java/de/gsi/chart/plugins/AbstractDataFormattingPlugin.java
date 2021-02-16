@@ -175,7 +175,7 @@ public abstract class AbstractDataFormattingPlugin extends ChartPlugin {
             final Axis xAxis = renderer.getAxes().stream().filter(ax -> ax.getSide().isHorizontal()).findFirst().orElse(null);
             final Axis yAxis = renderer.getAxes().stream().filter(ax -> ax.getSide().isVertical()).findFirst().orElse(null);
             if (xAxis == null || yAxis == null) {
-                return String.format("DataPoint@(%.3f,%.3f)", data.getXValue(), data.getYValue());
+                return String.format("DataPoint@(%.3f,%.3f)", data.getXValue().doubleValue(), data.getYValue().doubleValue());
             }
             return getXValueFormatter(xAxis).toString(data.getXValue()) + ", " + getYValueFormatter(yAxis).toString(data.getYValue());
         }

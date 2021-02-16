@@ -28,7 +28,6 @@ import ar.com.hjg.pngj.ImageLineInt;
 import ar.com.hjg.pngj.PngWriter;
 import ar.com.hjg.pngj.chunks.PngChunkPLTE;
 import ar.com.hjg.pngj.chunks.PngChunkTRNS;
-import ar.com.hjg.pngj.pixels.PixelsWriterDefault;
 
 /**
  * Writes a JavaFx Image into a ByteBuffer or file
@@ -155,7 +154,7 @@ public final class WriteFxImage {
         final ByteBuffer outputByteBuffer = byteBuffer == null ? ByteBuffer.allocate(getCompressedSizeBound(w, h, alpha)) : byteBuffer;
         try (ByteBufferOutputStream os = new ByteBufferOutputStream(outputByteBuffer, false)) {
             PngWriter png = new PngWriter(os, new ImageInfo(w, h, 8, alpha, false, false));
-            ((PixelsWriterDefault) png.getPixelsWriter()).setFilterType(filterType == null ? FilterType.FILTER_NONE : filterType);
+            png.getPixelsWriter().setFilterType(filterType == null ? FilterType.FILTER_NONE : filterType);
             png.setIdatMaxSize(0x10000);
             png.setCompLevel(compressionLevel);
 
@@ -265,7 +264,7 @@ public final class WriteFxImage {
             // N.B. alpha with palette has a bug, thus forcing it here
             ImageInfo imageInfo = new ImageInfo(w, h, 8, false /*alpha*/, false, true);
             PngWriter pngWriter = new PngWriter(os, imageInfo);
-            ((PixelsWriterDefault) pngWriter.getPixelsWriter()).setFilterType(filterType);
+            pngWriter.getPixelsWriter().setFilterType(filterType);
             pngWriter.setIdatMaxSize(requiredSize > 2 * 0x10000 ? 0x10000 : 32_000);
             pngWriter.setCompLevel(compressionLevel);
 

@@ -1188,7 +1188,7 @@ public class Zoomer extends ChartPlugin {
      * small class used to remember whether the autorange axis was on/off to be able to restore the original state on
      * unzooming
      */
-    public class ZoomState {
+    public static class ZoomState {
         protected double zoomRangeMin;
         protected double zoomRangeMax;
         protected boolean wasAutoRanging;

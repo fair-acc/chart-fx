@@ -133,8 +133,8 @@ public class ArrayUtilsTests {
 
         Double[] doubleObjectArray1 = new Double[length];
         Double[] doubleObjectArray2 = new Double[length];
-        Arrays.fill(doubleObjectArray1, Double.valueOf(1.0));
-        ArrayUtils.fillArray(doubleObjectArray2, Double.valueOf(1.0));
+        Arrays.fill(doubleObjectArray1, 1.0);
+        ArrayUtils.fillArray(doubleObjectArray2, 1.0);
         assertArrayEquals(doubleObjectArray1, doubleObjectArray2, "double object array");
 
         if (LOGGER.isDebugEnabled()) {

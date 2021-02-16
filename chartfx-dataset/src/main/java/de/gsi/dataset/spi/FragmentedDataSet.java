@@ -6,7 +6,7 @@ package de.gsi.dataset.spi;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Comparator;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSet2D;
@@ -39,8 +39,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
         lock().writeLockGuard(() -> {
             list.add(set);
             /* Trace data is expected to be sorted in ascending order */
-            Collections.sort(list,
-                    (o1, o2) -> Double.compare(o1.getAxisDescription(DIM_X).getMin(), o2.getAxisDescription(DIM_X).getMin()));
+            list.sort(Comparator.comparingDouble(o -> o.getAxisDescription(DIM_X).getMin()));
             dataCount += set.getDataCount();
             getAxisDescription(DIM_X).add(set.getAxisDescription(DIM_X).getMax());
             getAxisDescription(DIM_X).add(set.getAxisDescription(DIM_X).getMin());

@@ -509,7 +509,6 @@ public class MyGenericClass {
                     ']';
         }
 
-        @SuppressWarnings("hiding")
         public class BoxedPrimitivesSubSubClass {
             protected Boolean dummyBoxedBooleanL2 = true;
             protected Byte dummyBoxedByteL2 = (byte) 0;
@@ -523,7 +522,6 @@ public class MyGenericClass {
             public BoxedPrimitivesSubSubSubClass boxedPrimitivesSubSubSubClass = new BoxedPrimitivesSubSubSubClass();
             public BoxedPrimitivesSubSubSubClass boxedPrimitivesSubSubSubClassNull; // to check instantiation
 
-            @SuppressWarnings("hiding")
             public class BoxedPrimitivesSubSubSubClass {
                 protected Boolean dummyBoxedBooleanL3 = false;
                 protected Byte dummyBoxedByteL3 = (byte) 0;

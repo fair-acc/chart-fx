@@ -1132,7 +1132,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return group;
     }
 
-    protected class ChartHBox extends HBox {
+    protected static class ChartHBox extends HBox {
         public ChartHBox(Node... nodes) {
             super();
             setAlignment(Pos.CENTER);
@@ -1147,7 +1147,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         }
     }
 
-    protected class ChartVBox extends VBox {
+    protected static class ChartVBox extends VBox {
         public ChartVBox(Node... nodes) {
             super();
             setAlignment(Pos.CENTER);

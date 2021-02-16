@@ -39,7 +39,6 @@ import java.util.Set;
  */
 @SuppressWarnings("unchecked")
 public abstract class AbstractSet<E> extends AbstractCollection<E> implements Set<E> {
-
     /**
      * Sole constructor. (For invocation by subclass constructors, typically implicit.)
      */
@@ -97,9 +96,7 @@ public abstract class AbstractSet<E> extends AbstractCollection<E> implements Se
     @Override
     public int hashCode() {
         int h = 0;
-        final Iterator<E> i = iterator();
-        while (i.hasNext()) {
-            final E obj = i.next();
+        for (final E obj : this) {
             if (obj != null) {
                 h += obj.hashCode();
             }
@@ -150,5 +147,4 @@ public abstract class AbstractSet<E> extends AbstractCollection<E> implements Se
         }
         return modified;
     }
-
 }

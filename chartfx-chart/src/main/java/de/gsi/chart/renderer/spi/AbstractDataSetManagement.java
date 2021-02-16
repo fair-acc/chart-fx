@@ -22,7 +22,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  */
 public abstract class AbstractDataSetManagement<R extends Renderer> implements Renderer {
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
-    protected BooleanProperty showInLegend = new SimpleBooleanProperty(this, "showInLegend", true);
+    protected final BooleanProperty showInLegend = new SimpleBooleanProperty(this, "showInLegend", true);
 
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
 

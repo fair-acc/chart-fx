@@ -312,13 +312,10 @@ public class TRandom {
             final double expmean = MathBase.exp(-mean);
             double pir = 1;
             n = -1;
-            while (true) {
+            do {
                 n++;
                 pir *= Rndm();
-                if (pir <= expmean) {
-                    break;
-                }
-            }
+            } while (!(pir <= expmean));
             return n;
         }
         // for large value we use inversion method
@@ -369,13 +366,10 @@ public class TRandom {
             final double expmean = MathBase.exp(-mean);
             double pir = 1;
             n = -1;
-            while (true) {
+            do {
                 n++;
                 pir *= Rndm();
-                if (pir <= expmean) {
-                    break;
-                }
-            }
+            } while (!(pir <= expmean));
             return n;
         }
         // for large value we use inversion method

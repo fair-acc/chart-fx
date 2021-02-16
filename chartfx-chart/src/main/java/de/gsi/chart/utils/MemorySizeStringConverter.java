@@ -17,7 +17,6 @@ import javafx.util.StringConverter;
  * @author braeun
  */
 public class MemorySizeStringConverter extends StringConverter<Number> {
-
     private int precision = 1;
 
     private Unit unit = Unit.BEST;
@@ -46,16 +45,14 @@ public class MemorySizeStringConverter extends StringConverter<Number> {
     private void buildFormat(int precision) {
         final StringBuilder sb = new StringBuilder(32);
         sb.append("0.");
-        for (int i = 0; i < precision; i++) {
-            sb.append('0');
-        }
+        sb.append("0".repeat(Math.max(0, precision)));
         format.applyPattern(sb.toString());
     }
 
     @Override
     public Number fromString(String string) {
         throw new UnsupportedOperationException("Parsing memory size string not implemented yet");
-//    return Double.parseDouble(string);
+        //    return Double.parseDouble(string);
     }
 
     public int getPrecision() {
@@ -115,7 +112,10 @@ public class MemorySizeStringConverter extends StringConverter<Number> {
     }
 
     public enum Unit {
-        BEST, BYTE, KILOBYTE, MEGABYTE, GIGABYTE
+        BEST,
+        BYTE,
+        KILOBYTE,
+        MEGABYTE,
+        GIGABYTE
     }
-
 }

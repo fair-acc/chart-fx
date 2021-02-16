@@ -262,7 +262,7 @@ public class SpectrumTools {
             ret[toPos + n2 - 1] = ret[toPos + n2 - 2];
         } else {
             // full DC/Nyquist frequency treatment
-            ret[toPos + 0] = data[fromPos];
+            ret[toPos] = data[fromPos];
             ret[toPos + n2 - 1] = data[fromPos + 1];
         }
     }
@@ -427,11 +427,11 @@ public class SpectrumTools {
             if (index > 0) {
                 if (useRealAmplitudes) {
                     testDataY[index - 1] = 0.5 * magnitude[index];
-                    testDataY[index + 0] = 1.0 * magnitude[index];
+                    testDataY[index] = magnitude[index];
                     testDataY[index + 1] = 0.5 * magnitude[index];
                 } else {
                     testDataY[index - 1] = 0.5;
-                    testDataY[index + 0] = 1.0;
+                    testDataY[index] = 1.0;
                     testDataY[index + 1] = 0.5;
                 }
             }
@@ -512,11 +512,11 @@ public class SpectrumTools {
 
         if (index > 0 && index < data.length - 1) {
             double sum = Math.pow(data[index - 1], 1);
-            sum += Math.pow(data[index - 0], 1);
+            sum += Math.pow(data[index], 1);
             sum += Math.pow(data[index + 1], 1);
 
             double val = data[index - 1] * (index - 1);
-            val += data[index + 0] * (index + 0);
+            val += data[index] * (index);
             val += data[index + 1] * (index + 1);
             val /= sum;
             return val * tresolution;
@@ -537,7 +537,7 @@ public class SpectrumTools {
 
         if (index > 0 && index < data.length - 1) {
             final double left = Math.pow(data[index - 1], 1);
-            final double center = Math.pow(data[index - 0], 1);
+            final double center = Math.pow(data[index], 1);
             final double right = Math.pow(data[index + 1], 1);
 
             double val = index;
@@ -560,7 +560,7 @@ public class SpectrumTools {
         if (index > 0 && index < data.length - 1) {
             final double pin = MathBase.PI / data.length;
             final double left = Math.pow(data[index - 1], 1);
-            final double center = Math.pow(data[index - 0], 1);
+            final double center = Math.pow(data[index], 1);
             final double right = Math.pow(data[index + 1], 1);
 
             if (left < right) {
@@ -587,7 +587,7 @@ public class SpectrumTools {
 
         if (index > 0 && index < data.length - 1) {
             final double left = Math.pow(data[index - 1], 1);
-            final double center = Math.pow(data[index - 0], 1);
+            final double center = Math.pow(data[index], 1);
             final double right = Math.pow(data[index + 1], 1);
 
             return (index + 0.5 * (right - left) / (2 * center - left - right)) * tresolution;

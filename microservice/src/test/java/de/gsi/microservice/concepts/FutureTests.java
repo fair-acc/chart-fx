@@ -143,7 +143,7 @@ public class FutureTests { // NOPMD NOSONAR -- nomen est omen
         System.out.printf("%-40s:  %10d calls/second\n", topic, diff > 0 ? (int) (nExec / diff) : -1);
     }
 
-    private class CustomFuture<T> implements Future<T> {
+    private static class CustomFuture<T> implements Future<T> {
         private final Lock lock = new ReentrantLock();
         private final Condition processorNotifyCondition = lock.newCondition();
         private final AtomicBoolean running = new AtomicBoolean(false);

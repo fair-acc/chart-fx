@@ -30,7 +30,7 @@ public class CacheCollection<T> extends AbstractCollection<T> {
                 }
                 // N.B. here: specific choice of using 'SoftReferene'
                 // derived classes may overwrite this function and replace this with e.g. WeakReferene or simialr
-                return contents.add(new SoftReference<T>(recoveredObject));
+                return contents.add(new SoftReference<>(recoveredObject));
             }
         }
         return false;

@@ -181,12 +181,12 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
             // update label valueTextField
             String valueLabel;
             if (axis instanceof DefaultNumericAxis && axisUnit != null) {
-                final double unitScale = ((DefaultNumericAxis) axis).getUnitScaling();
+                final double unitScale = axis.getUnitScaling();
                 final String axisPrefix = MetricPrefix.getShortPrefix(unitScale);
                 // convert value according to scale factor
                 final double scaledValue = val / unitScale;
 
-                FXUtils.runFX(() -> getValueField().setUnit(new StringBuilder().append(axisPrefix).append(unit).toString()));
+                FXUtils.runFX(() -> getValueField().setUnit(axisPrefix + unit));
                 final AxisLabelFormatter axisFormatter = ((DefaultNumericAxis) axis).getAxisLabelFormatter();
                 valueLabel = axisFormatter.toString(scaledValue);
             } else {

@@ -22,7 +22,7 @@ import de.gsi.dataset.locks.DataSetLock;
 public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> extends AbstractDataSet<D>
         implements DataSetError {
     private static final long serialVersionUID = -5592816592868472957L;
-    private ErrorType[] errorType;
+    private final ErrorType[] errorType;
 
     /**
      * Creates a new instance of <code>AbstractDataSet</code>.

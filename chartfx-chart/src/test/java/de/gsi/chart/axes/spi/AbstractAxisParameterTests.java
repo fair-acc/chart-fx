@@ -320,7 +320,7 @@ class AbstractAxisParameterTests {
         assertNotNull(axis.getMinorTickStyle());
     }
 
-    protected class EmptyAbstractAxisParameter extends AbstractAxisParameter {
+    protected static class EmptyAbstractAxisParameter extends AbstractAxisParameter {
         @Override
         public void drawAxis(GraphicsContext gc, double axisWidth, double axisHeight) {
             // deliberately not implemented

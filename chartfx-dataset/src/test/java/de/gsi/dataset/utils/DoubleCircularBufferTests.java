@@ -18,10 +18,10 @@ import org.junit.jupiter.api.Test;
  * @author rstein
  */
 public class DoubleCircularBufferTests {
+    private static final int FILL_BUFFER_LENGTH = 35;
     private DoubleCircularBuffer buffer1;
     private final int bufferLength = 10;
     private DoubleCircularBuffer buffer2;
-    private final int fillBufferLength = 35;
 
     @Test
     public void contstructorTests() {
@@ -97,8 +97,8 @@ public class DoubleCircularBufferTests {
     public void testCircularBuffer() {
         assertEquals(bufferLength, buffer1.remainingCapacity());
         assertEquals(0, buffer1.available());
-        final double[] input = new double[fillBufferLength];
-        final double[] input2 = new double[fillBufferLength + 5];
+        final double[] input = new double[FILL_BUFFER_LENGTH];
+        final double[] input2 = new double[FILL_BUFFER_LENGTH + 5];
 
         buffer1.put(-2.0);
         buffer1.put(-1.0);
@@ -111,15 +111,15 @@ public class DoubleCircularBufferTests {
         assertEquals(bufferLength - 2, buffer1.remainingCapacity());
         assertEquals(2, buffer1.available());
 
-        for (int i = 0; i < fillBufferLength; i++) {
-            buffer1.put(Double.valueOf(i));
-            input[i] = (double) i;
+        for (int i = 0; i < FILL_BUFFER_LENGTH; i++) {
+            buffer1.put(i);
+            input[i] = i;
         }
 
         assertEquals(0, buffer1.remainingCapacity());
         assertEquals(bufferLength, buffer1.available());
 
-        buffer2.put(input, fillBufferLength);
+        buffer2.put(input, FILL_BUFFER_LENGTH);
 
         assertEquals(0, buffer2.remainingCapacity());
         assertEquals(bufferLength, buffer2.available());
@@ -132,7 +132,7 @@ public class DoubleCircularBufferTests {
         assertEquals(0, buffer2.available());
         assertEquals(0, buffer2.writePosition());
 
-        buffer2.put(input2, fillBufferLength);
+        buffer2.put(input2, FILL_BUFFER_LENGTH);
         assertEquals(5, buffer2.writePosition());
         assertEquals(bufferLength, buffer2.available());
     }

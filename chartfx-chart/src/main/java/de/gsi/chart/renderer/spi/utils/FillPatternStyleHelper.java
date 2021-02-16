@@ -2,7 +2,6 @@ package de.gsi.chart.renderer.spi.utils;
 
 import java.util.WeakHashMap;
 
-import de.gsi.dataset.utils.AssertUtils;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
@@ -10,6 +9,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Line;
+
+import de.gsi.dataset.utils.AssertUtils;
 
 public final class FillPatternStyleHelper {
     private static final int HATCH_WINDOW_SIZE = 8;
@@ -23,7 +24,7 @@ public final class FillPatternStyleHelper {
     private static Image createDefaultHatch(final Paint color, final double strokeWidth) {
         WeakHashMap<Double, Image> checkCache = FillPatternStyleHelper.defaultHatchCacheWithStrokeWidth.get(color);
         if (checkCache != null) {
-            final Image val = checkCache.get(Double.valueOf(strokeWidth));
+            final Image val = checkCache.get(strokeWidth);
             if (val != null) {
                 // found existing Image with given parameter
                 return val;
@@ -50,11 +51,11 @@ public final class FillPatternStyleHelper {
         // add retVal to cache
         if (checkCache == null) {
             final WeakHashMap<Double, Image> temp = new WeakHashMap<>();
-            temp.put(Double.valueOf(strokeWidth), retVal);
+            temp.put(strokeWidth, retVal);
             FillPatternStyleHelper.defaultHatchCacheWithStrokeWidth.put(color, temp);
             // checkCache = new WeakHashMap<>();
         } else {
-            checkCache.put(Double.valueOf(strokeWidth), retVal);
+            checkCache.put(strokeWidth, retVal);
         }
 
         return retVal;
@@ -146,10 +147,8 @@ public final class FillPatternStyleHelper {
                     pane.getChildren().add(line);
                 }
             } else {
-                final int x1 = minx;
-                final int x2 = maxx;
                 for (int i = miny; i < maxy; i += step) {
-                    final Line line = new Line(x1, i, x2, i);
+                    final Line line = new Line(minx, i, maxx, i);
                     line.setStroke(color);
                     line.setStrokeWidth(strokeWidth);
                     pane.getChildren().add(line);
@@ -175,7 +174,6 @@ public final class FillPatternStyleHelper {
                 pane.getChildren().add(line);
             }
         } else {
-            hatchAngle = 0;
             final int step = hatchSpacing;
             final int diff = (maxy - miny) / 2;
             final int center = miny + diff;
@@ -188,10 +186,8 @@ public final class FillPatternStyleHelper {
                 line.setStrokeWidth(strokeWidth);
             }
 
-            final int x1 = minx;
-            final int x2 = maxx;
             for (int i = miny; i < maxy; i += step) {
-                final Line line = new Line(x1, i, x2, i);
+                final Line line = new Line(minx, i, maxx, i);
                 line.setStroke(color);
                 line.setStrokeWidth(strokeWidth);
             }
@@ -241,7 +237,14 @@ public final class FillPatternStyleHelper {
     }
 
     public enum FillPattern {
-        SOLID, HATCH, HATCH0, HATCH30, HATCH45, HATCH60, HATCH90, HATCHCROSS1, HATCHCROSS2,
+        SOLID,
+        HATCH,
+        HATCH0,
+        HATCH30,
+        HATCH45,
+        HATCH60,
+        HATCH90,
+        HATCHCROSS1,
+        HATCHCROSS2,
     }
-
 }

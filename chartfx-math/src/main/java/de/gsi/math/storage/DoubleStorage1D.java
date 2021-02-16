@@ -58,9 +58,7 @@ public class DoubleStorage1D implements VoxelArrayND {
 
     @Override
     public void initialiseWithValue(double val) {
-        for (int i = 0; i < fdata.length; i++) {
-            fdata[i] = val;
-        }
+        Arrays.fill(fdata, val);
     }
 
     public void set(int index, double val) {
@@ -80,5 +78,4 @@ public class DoubleStorage1D implements VoxelArrayND {
     public void setLocal(int localIndex, double[] val) {
         fdata[localIndex] = val[0];
     }
-
 }

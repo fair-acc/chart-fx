@@ -67,7 +67,7 @@ public class TestEventSource implements Runnable {
 
     private Event generateEventFromToken(final String[] tokens, final long timeOffset, final long lastEvent, final int repetitionCount) {
         String device = tokens[0].substring(0, 1);
-        long bpcts = Long.parseLong(tokens[0].substring(1)) + repetitionCount * 1000;
+        long bpcts = Long.parseLong(tokens[0].substring(1)) + repetitionCount * 1000L;
         int type = device.charAt(0);
         String payload = device + bpcts;
         long sourceTime = lastEvent + DEFAULT_DELTA;
@@ -89,7 +89,7 @@ public class TestEventSource implements Runnable {
                 publishTime = Long.parseLong(keyvalue[1]) + timeOffset;
                 break;
             case "bpcts":
-                bpcts = Long.parseLong(keyvalue[1]) + repetitionCount * 1000;
+                bpcts = Long.parseLong(keyvalue[1]) + repetitionCount * 1000L;
                 break;
             case "chain":
                 chain = Integer.parseInt(keyvalue[1]);

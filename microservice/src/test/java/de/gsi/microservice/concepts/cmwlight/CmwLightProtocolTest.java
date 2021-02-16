@@ -58,8 +58,8 @@ class CmwLightProtocolTest {
                 "testprop",
                 Map.of(CmwLightProtocol.FieldName.SESSION_BODY_TAG.value(), Collections.<String, Object>emptyMap()));
         ZMsg serialised = CmwLightProtocol.serialiseMsg(subscriptionMsg);
-        serialised.stream().forEach(frame -> System.out.println(frame.getString(Charset.defaultCharset())));
-        serialised.stream().forEach(frame -> System.out.println(Arrays.toString(frame.getData())));
+        serialised.forEach(frame -> System.out.println(frame.getString(Charset.defaultCharset())));
+        serialised.forEach(frame -> System.out.println(Arrays.toString(frame.getData())));
         final CmwLightMessage restored = CmwLightProtocol.parseMsg(serialised);
         assertEquals(subscriptionMsg, restored);
     }

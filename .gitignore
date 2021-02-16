@@ -15,7 +15,6 @@ local.properties
 .settings/
 .loadpath
 .recommenders
-.project
 .pmd
 .eclipse-pmd
 

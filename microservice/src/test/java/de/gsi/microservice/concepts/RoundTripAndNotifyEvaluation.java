@@ -4,10 +4,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.zeromq.*;
-import org.zeromq.SocketType;
-import org.zeromq.ZContext;
-import org.zeromq.ZFrame;
-import org.zeromq.ZMQ;
 import org.zeromq.ZMQ.Socket;
 
 /**
@@ -99,7 +95,7 @@ class RoundTripAndNotifyEvaluation {
 
         final long stop = System.currentTimeMillis();
         if (VERBOSE_PRINTOUT) {
-            System.out.printf("%-40s:  %10d calls/second\n", topic, (1000 * nExec) / (stop - start));
+            System.out.printf("%-40s:  %10d calls/second\n", topic, (1000L * nExec) / (stop - start));
         }
     }
 

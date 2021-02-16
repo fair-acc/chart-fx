@@ -49,7 +49,7 @@ public class MarchingSquares {
 
         // IMPORTANT: pad data to ensure resulting linear strings are closed
         final double guard = min - 1;
-        final double padded[][] = MarchingSquares.pad(data, guard);
+        final double[][] padded = MarchingSquares.pad(data, guard);
 
         result = doConcurrent(padded);
 
@@ -225,7 +225,7 @@ public class MarchingSquares {
         }
     }
 
-    private final class Task implements Callable<Result> {
+    private static final class Task implements Callable<Result> {
         private final int ndx;
         private final double[][] data;
         private final double level;
@@ -244,7 +244,7 @@ public class MarchingSquares {
                 path = new PathGenerator().generalPath(MarchingSquares.contour(data, level));
             } catch (final Exception x) {
                 final String m = "Failed making contour at index #" + ndx + " for level " + level + ": "
-                        + x.getLocalizedMessage();
+                                 + x.getLocalizedMessage();
                 throw new IllegalArgumentException(m, x);
             }
             return new Result(ndx, path);

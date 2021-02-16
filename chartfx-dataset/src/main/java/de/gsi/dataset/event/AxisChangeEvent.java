@@ -13,7 +13,7 @@ package de.gsi.dataset.event;
 public class AxisChangeEvent extends UpdateEvent {
     private static final long serialVersionUID = 233444066954702782L;
 
-    private int dim;
+    private final int dim;
 
     /**
      * generates new update event

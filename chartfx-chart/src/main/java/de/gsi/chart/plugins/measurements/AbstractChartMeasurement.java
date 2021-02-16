@@ -32,7 +32,6 @@ import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
@@ -94,7 +93,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     protected int lastLayoutRow;
     protected final int requiredNumberOfIndicators;
     protected final int requiredNumberOfDataSets;
-    private final EventListener sliderChanged = new EventRateLimiter(this::handle, DEFAULT_UPDATE_RATE_LIMIT);
+    private final EventListener sliderChanged = new EventRateLimiter(this, DEFAULT_UPDATE_RATE_LIMIT);
     protected final GridPane gridPane = new GridPane();
     private final ParameterMeasurements plugin;
     private final String measurementName;
@@ -126,7 +125,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             getValueField().setDataSetName("<unknown data set>");
         } else {
             n.addListener(this);
-            getValueField().setDataSetName(new StringBuilder().append('<').append(n.getName()).append('>').toString());
+            getValueField().setDataSetName('<' + n.getName() + '>');
         }
     };
     private final ListChangeListener<? super AbstractSingleValueIndicator> valueIndicatorsUserChangeListener = (final Change<? extends AbstractSingleValueIndicator> change) -> {
@@ -244,7 +243,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         }
 
         final Optional<ButtonType> result = alert.showAndWait();
-        if (!result.isPresent() || result.get().getButtonData() == null) {
+        if (result.isEmpty() || result.get().getButtonData() == null) {
             defaultAction(result);
             alert.close();
             return Optional.empty();
@@ -371,7 +370,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             final double min = Math.min(lower, upper);
 
             sliderIndicator = axisMode == X ? new XValueIndicator(axis, min) : new YValueIndicator(axis, min);
-            sliderIndicator.setText(new StringBuilder().append(measurementName).append('#').append(requestedIndex).toString());
+            sliderIndicator.setText(measurementName + '#' + requestedIndex);
             sliderIndicator.setValue(min + (requestedIndex + 0.5) * middle);
             sliderIndicator.setAutoRemove(true);
 

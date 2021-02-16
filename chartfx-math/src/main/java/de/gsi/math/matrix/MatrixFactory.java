@@ -1,7 +1,6 @@
 package de.gsi.math.matrix;
 
 public class MatrixFactory {
-
     /**
      * Construct a matrix from a copy of a 2-D array.
      * 
@@ -18,9 +17,7 @@ public class MatrixFactory {
             if (A[i].length != n) {
                 throw new IllegalArgumentException("All rows must have the same length.");
             }
-            for (int j = 0; j < n; j++) {
-                C[i][j] = A[i][j];
-            }
+            System.arraycopy(A[i], 0, C[i], 0, n);
         }
         return X;
     }
@@ -59,5 +56,4 @@ public class MatrixFactory {
         }
         return A;
     }
-
 }

@@ -6,10 +6,13 @@ package de.gsi.chart.renderer;
  * @author rstein
  */
 public enum ErrorStyle {
-    NONE("NONE"), ERRORBARS("ERRORBARS"), ERRORSURFACE("ERRORSURFACE"), ERRORCOMBO("ERRORCOMBO");
+    NONE("NONE"),
+    ERRORBARS("ERRORBARS"),
+    ERRORSURFACE("ERRORSURFACE"),
+    ERRORCOMBO("ERRORCOMBO");
     private final String value;
 
-    private ErrorStyle(final String value) {
+    ErrorStyle(final String value) {
         this.value = value;
     }
 

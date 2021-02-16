@@ -204,9 +204,9 @@ public class CacheTests {
         assertEquals(3, Cache.clamp(1, 3, 4));
 
         // test clamp(long ... ) routine
-        assertEquals(1l, Cache.clamp(1l, 3l, 0l));
-        assertEquals(2l, Cache.clamp(1l, 3l, 2l));
-        assertEquals(3l, Cache.clamp(1l, 3l, 4l));
+        assertEquals(1L, Cache.clamp(1L, 3L, 0L));
+        assertEquals(2L, Cache.clamp(1L, 3L, 2L));
+        assertEquals(3L, Cache.clamp(1L, 3L, 4L));
     }
 
     @Test

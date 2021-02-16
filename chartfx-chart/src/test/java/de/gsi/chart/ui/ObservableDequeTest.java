@@ -22,8 +22,8 @@ class ObservableDequeTest {
         deque = new ObservableDeque<>(new ArrayDeque<>());
         mlo = new MockListObserver<>();
         deque.addListener(mlo);
-        deque.add(Integer.valueOf(1));
-        deque.addAll(Integer.valueOf(1), Integer.valueOf(3));
+        deque.add(1);
+        deque.addAll(1, 3);
         mlo.clear();
     }
 
@@ -38,7 +38,7 @@ class ObservableDequeTest {
     public void testClear() {
         assertEquals(deque.size(), 3);
         deque.clear();
-        mlo.check1AddRemove(deque, Arrays.asList(Integer.valueOf(1), Integer.valueOf(1), Integer.valueOf(3)), 0, 0);
+        mlo.check1AddRemove(deque, Arrays.asList(1, 1, 3), 0, 0);
         assertEquals(deque.size(), 0);
     }
 }

@@ -3,10 +3,11 @@ package de.gsi.chart.axes.spi.format;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
+import javafx.util.StringConverter;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.utils.NumberFormatter;
-import javafx.util.StringConverter;
 
 /**
  * @author rstein
@@ -16,8 +17,8 @@ public class DefaultLogFormatter extends AbstractFormatter {
     private static final String FORMAT_SMALL_SCALE = "0.######";
     private static final String FORMAT_LARGE_SCALE = "0.0E0";
     public static final int DEFAULT_SMALL_LOG_AXIS = 4; // [orders of
-                                                        // magnitude], e.g. '4'
-                                                        // <-> [1,10000]
+            // magnitude], e.g. '4'
+            // <-> [1,10000]
     private final DecimalFormat formatterSmall = new DecimalFormat(DefaultLogFormatter.FORMAT_SMALL_SCALE);
     private final DecimalFormat formatterLarge = new DecimalFormat(DefaultLogFormatter.FORMAT_LARGE_SCALE);
     private MyDecimalFormat formatter = new MyDecimalFormat(formatterSmall);
@@ -37,7 +38,6 @@ public class DefaultLogFormatter extends AbstractFormatter {
      */
     public DefaultLogFormatter(final Axis axis) {
         super(axis);
-
     }
 
     @Override
@@ -73,7 +73,7 @@ public class DefaultLogFormatter extends AbstractFormatter {
         return labelCache.get(formatter, object.doubleValue());
     }
 
-    private class MyDecimalFormat extends StringConverter<Number> implements NumberFormatter {
+    private static class MyDecimalFormat extends StringConverter<Number> implements NumberFormatter {
         private DecimalFormat localFormatter;
 
         public MyDecimalFormat(final DecimalFormat formatter) {
@@ -127,7 +127,5 @@ public class DefaultLogFormatter extends AbstractFormatter {
         public String toString(Number object) {
             return localFormatter.format(object.doubleValue());
         }
-
     }
-
 }

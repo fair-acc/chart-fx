@@ -573,7 +573,7 @@ class CachedDataPoints {
                 XYChartCss.DATASET_LAYOUT_OFFSET);
         final Integer dsIndexLocal = StyleParser.getIntegerPropertyValue(defaultStyle, XYChartCss.DATASET_INDEX);
 
-        dataSetStyleIndex = layoutOffset == null ? 0 : layoutOffset.intValue();
-        dataSetIndex = dsIndexLocal == null ? dsIndex : dsIndexLocal.intValue();
+        dataSetStyleIndex = layoutOffset == null ? 0 : layoutOffset;
+        dataSetIndex = dsIndexLocal == null ? dsIndex : dsIndexLocal;
     }
 }

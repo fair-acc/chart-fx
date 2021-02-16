@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.XYChart;
-import de.gsi.chart.plugins.TableViewer;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 import de.gsi.dataset.testdata.spi.SineFunction;
@@ -35,19 +34,17 @@ public class ReproduceTableViewerBug extends Application {
     private static final String START_TIMER = "start timer";
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 100; // [ms]
-    private int nSamples = 400;
+    private static final int N_SAMPLES = 400;
     private Timer timer;
 
     private void generateData(final XYChart chart) {
         long startTime = ProcessingProfiler.getTimeStamp();
         final List<DataSetError> dataSet = new ArrayList<>();
-        dataSet.add(new SineFunction("dyn. sine function", nSamples, true));
+        dataSet.add(new SineFunction("dyn. sine function", N_SAMPLES, true));
         if (System.currentTimeMillis() % 400 < 200) { // toggle second function every 2s
-            dataSet.add(new CosineFunction("dyn. cosine function", nSamples, true));
+            dataSet.add(new CosineFunction("dyn. cosine function", N_SAMPLES, true));
         }
-        Platform.runLater(() -> {
-            chart.getRenderers().get(0).getDatasets().setAll(dataSet);
-        });
+        Platform.runLater(() -> chart.getRenderers().get(0).getDatasets().setAll(dataSet));
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 

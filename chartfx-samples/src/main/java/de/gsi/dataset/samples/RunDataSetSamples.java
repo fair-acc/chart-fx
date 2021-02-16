@@ -3,10 +3,6 @@ package de.gsi.dataset.samples;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import de.gsi.chart.utils.PeriodicScreenCapture;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -16,6 +12,11 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.gsi.chart.utils.PeriodicScreenCapture;
 
 /**
  * @author rstein
@@ -54,11 +55,9 @@ public class RunDataSetSamples extends Application {
      */
     public static void main(final String[] args) {
         Application.launch(args);
-
     }
 
     protected class MyButton extends Button {
-
         public MyButton(final String buttonText, final Runnable run) {
             super(buttonText);
             setOnAction(e -> new Thread(run).start());
@@ -73,35 +72,29 @@ public class RunDataSetSamples extends Application {
                     stage.show();
 
                     if (makeScreenShot.isSelected()) {
-                        new Thread() {
-
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(2000);
-                                    Platform.runLater(() -> {
-                                        LOGGER.atInfo()
-                                                .log("make screen shot to file of " + run.getClass().getSimpleName());
-                                        final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
-                                                run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
-                                                DEFAULT_PERIOD, false);
-                                        screenCapture.performScreenCapture();
-                                    });
-                                } catch (final InterruptedException e) {
-                                    if (LOGGER.isErrorEnabled()) {
-                                        LOGGER.atError().setCause(e).log("InterruptedException");
-                                    }
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(2000);
+                                Platform.runLater(() -> {
+                                    LOGGER.atInfo()
+                                            .log("make screen shot to file of " + run.getClass().getSimpleName());
+                                    final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
+                                            run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
+                                            DEFAULT_PERIOD, false);
+                                    screenCapture.performScreenCapture();
+                                });
+                            } catch (final InterruptedException e12) {
+                                if (LOGGER.isErrorEnabled()) {
+                                    LOGGER.atError().setCause(e12).log("InterruptedException");
                                 }
                             }
-                        }.start();
-
+                        }).start();
                     }
                 } catch (final Exception e1) {
                     if (LOGGER.isErrorEnabled()) {
                         LOGGER.atError().setCause(e1).log("InterruptedException");
                     }
                 }
-
             });
         }
     }

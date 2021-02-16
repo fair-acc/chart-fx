@@ -3,6 +3,7 @@ package de.gsi.chart.utils;
 import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -29,7 +30,7 @@ public final class StyleParser { // NOPMD
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final String DEFAULT_FONT = "Helvetia";
     private static final Pattern AT_LEAST_ONE_WHITESPACE_PATTERN = Pattern.compile("\\s+");
-    private static final Pattern QUOTES_PATTERN = Pattern.compile("[\"\']");
+    private static final Pattern QUOTES_PATTERN = Pattern.compile("[\"']");
     private static final Pattern STYLE_ASSIGNMENT_PATTERN = Pattern.compile("[=:]");
 
     private StyleParser() {
@@ -166,11 +167,7 @@ public final class StyleParser { // NOPMD
         }
 
         final String font = StyleParser.getPropertyValue(style, XYChartCss.FONT);
-        if (font == null) {
-            return Font.font(StyleParser.DEFAULT_FONT, fontWeight, fontPosture, fontSize);
-        }
-
-        return Font.font(font, fontWeight, fontPosture, fontSize);
+        return Font.font(Objects.requireNonNullElse(font, StyleParser.DEFAULT_FONT), fontWeight, fontPosture, fontSize);
     }
 
     public static Integer getIntegerPropertyValue(final String style, final String key) {
@@ -227,7 +224,7 @@ public final class StyleParser { // NOPMD
         }
 
         try {
-            return Arrays.asList(value.split(",\\s*")).stream().map(String::trim).mapToDouble(Double::parseDouble).toArray();
+            return Arrays.stream(value.split(",\\s*")).map(String::trim).mapToDouble(Double::parseDouble).toArray();
         } catch (final IllegalArgumentException ex) {
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);

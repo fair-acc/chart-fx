@@ -118,7 +118,7 @@ public class AbstractErrorDataSetRendererParameterTests {
     /**
      * basic test class, only supports limited getter/setter/property functions
      */
-    public class TestErrorDataSetRendererParameter extends AbstractErrorDataSetRendererParameter<TestErrorDataSetRendererParameter> {
+    public static class TestErrorDataSetRendererParameter extends AbstractErrorDataSetRendererParameter<TestErrorDataSetRendererParameter> {
         @Override
         public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
             throw new UnsupportedOperationException();

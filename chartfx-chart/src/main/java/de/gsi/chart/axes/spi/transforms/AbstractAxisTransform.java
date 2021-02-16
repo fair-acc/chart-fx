@@ -7,8 +7,7 @@ import de.gsi.chart.axes.AxisTransform;
  * @author rstein
  */
 public abstract class AbstractAxisTransform implements AxisTransform {
-
-    protected Axis axis;
+    protected final Axis axis;
     protected double rangeMin = -Double.MAX_VALUE;
     protected double rangeMax = +Double.MAX_VALUE;
 
@@ -16,7 +15,6 @@ public abstract class AbstractAxisTransform implements AxisTransform {
         this.axis = axis;
         axis.minProperty().addListener((ch, o, n) -> rangeMin = n.doubleValue());
         axis.maxProperty().addListener((ch, o, n) -> rangeMax = n.doubleValue());
-
     }
 
     @Override

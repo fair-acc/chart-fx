@@ -14,6 +14,7 @@ import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
@@ -37,7 +38,7 @@ public class ProfilerInfoBoxTests {
 
     @Start
     public void start(Stage stage) {
-        assertDoesNotThrow(() -> new ProfilerInfoBox());
+        assertDoesNotThrow((ThrowingSupplier<ProfilerInfoBox>) ProfilerInfoBox::new);
         scene = new Scene(pane, 600, 100);
         stage.setScene(scene);
         stage.show();
@@ -72,7 +73,7 @@ public class ProfilerInfoBoxTests {
     }
     @TestFx
     public void testSetterGetter() {
-        assertDoesNotThrow(() -> new ProfilerInfoBox());
+        assertDoesNotThrow((ThrowingSupplier<ProfilerInfoBox>) ProfilerInfoBox::new);
         assertDoesNotThrow(() -> new ProfilerInfoBox(1000));
         assertDoesNotThrow(() -> new ProfilerInfoBox(new Scene(new Pane(), 100, 100)));
 
@@ -111,17 +112,17 @@ public class ProfilerInfoBoxTests {
         assertThrows(IllegalArgumentException.class, () -> new SimplePerformanceMeter(null, 20));
         final SimplePerformanceMeter meter = new SimplePerformanceMeter(scene, 20);
 
-        assertDoesNotThrow(() -> SimplePerformanceMeter.getProcessCpuLoadInternal());
-        assertDoesNotThrow(() -> meter.isSceneDirty());
-        assertDoesNotThrow(() -> meter.getActualFrameRate());
-        assertDoesNotThrow(() -> meter.getAverageFrameRate());
-        assertDoesNotThrow(() -> meter.getAverageFxFrameRate());
-        assertDoesNotThrow(() -> meter.getAverageProcessCpuLoad());
-        assertDoesNotThrow(() -> meter.getAverageSystemCpuLoad());
-        assertDoesNotThrow(() -> meter.getFxFrameRate());
-        assertDoesNotThrow(() -> meter.getProcessCpuLoad());
-        assertDoesNotThrow(() -> meter.getSystemCpuLoad());
-        assertDoesNotThrow(() -> meter.resetAverages());
+        assertDoesNotThrow(SimplePerformanceMeter::getProcessCpuLoadInternal);
+        assertDoesNotThrow(meter::isSceneDirty);
+        assertDoesNotThrow(meter::getActualFrameRate);
+        assertDoesNotThrow(meter::getAverageFrameRate);
+        assertDoesNotThrow(meter::getAverageFxFrameRate);
+        assertDoesNotThrow(meter::getAverageProcessCpuLoad);
+        assertDoesNotThrow(meter::getAverageSystemCpuLoad);
+        assertDoesNotThrow(meter::getFxFrameRate);
+        assertDoesNotThrow(meter::getProcessCpuLoad);
+        assertDoesNotThrow(meter::getSystemCpuLoad);
+        assertDoesNotThrow(meter::resetAverages);
 
         assertNotNull(meter.actualFrameRateProperty());
         assertNotNull(meter.averageFactorProperty());
@@ -130,7 +131,7 @@ public class ProfilerInfoBoxTests {
         assertNotNull(meter.averageProcessCpuLoadProperty());
         assertNotNull(meter.averageSystemCpuLoadProperty());
 
-        assertDoesNotThrow(() -> meter.deregisterListener());
-        assertDoesNotThrow(() -> meter.deregisterListener());
+        assertDoesNotThrow(meter::deregisterListener);
+        assertDoesNotThrow(meter::deregisterListener);
     }
 }

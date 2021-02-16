@@ -22,7 +22,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
 
     private boolean changeIsLocal = false;
 
-    private final ObjectProperty<ObservableList<String>> categories = new ObjectPropertyBase<ObservableList<String>>() {
+    private final ObjectProperty<ObservableList<String>> categories = new ObjectPropertyBase<>() {
         @Override
         public Object getBean() {
             return CategoryAxis.this;
@@ -41,7 +41,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
         this((String) null);
         setTickUnit(1.0);
         changeIsLocal = true;
-        setCategories(FXCollections.<String>observableArrayList());
+        setCategories(FXCollections.observableArrayList());
         changeIsLocal = false;
     }
 
@@ -108,7 +108,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
     public void setCategories(final List<String> categories) {
         if (categories == null) {
             forceAxisCategories = false;
-            setCategories(FXCollections.<String>observableArrayList());
+            setCategories(FXCollections.observableArrayList());
             return;
         }
         forceAxisCategories = true;
@@ -126,12 +126,12 @@ public final class CategoryAxis extends DefaultNumericAxis {
     public void setCategories(final ObservableList<String> categoryList) {
         if (categoryList == null) {
             forceAxisCategories = false;
-            setCategories(FXCollections.<String>observableArrayList());
+            setCategories(FXCollections.observableArrayList());
             return;
         }
 
         this.setMaxMajorTickLabelCount(categoryList.size() + 1); // number of categories + unknown category
-        setTickLabelFormatter(new StringConverter<Number>() {
+        setTickLabelFormatter(new StringConverter<>() {
             @Override
             public Number fromString(String string) {
                 for (int i = 0; i < getCategories().size(); i++) {

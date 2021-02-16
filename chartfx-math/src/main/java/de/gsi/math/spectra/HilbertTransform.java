@@ -141,7 +141,6 @@ public class HilbertTransform extends Convolution {
 
         // ensures that the convolution is done on multiples of two (faster)
         final int fft_samples = ConcurrencyUtils.nextPow2(3 * nsamples);
-        ;
 
         // Hilbert filter kernel (Fourier domain)
         final double[] filter = Convolution.getHilbertFilter(fft_samples);

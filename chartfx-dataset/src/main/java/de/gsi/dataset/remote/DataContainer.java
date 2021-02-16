@@ -2,8 +2,6 @@ package de.gsi.dataset.remote;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -18,13 +16,13 @@ import java.util.TimeZone;
 public class DataContainer implements Serializable {
     private static final long serialVersionUID = -4443375672892579564L;
     private String selector; // N.B. first, so that selector can be de-serialised early on
-    private String exportName;
-    private String category;
-    private long updatePeriod;
-    private List<Data> data;
+    private final String exportName;
+    private final String category;
+    private final long updatePeriod;
+    private final List<Data> data;
     private String rbacToken;
     // end data container
-    private long timeStampCreation;
+    private final long timeStampCreation;
     private long timeStampLastAccess;
 
     public DataContainer(final String exportNameData, final long updatePeriod, final byte[] imageByteArray, final int imageByteArraySize) {
@@ -36,7 +34,7 @@ public class DataContainer implements Serializable {
         this.exportName = checkField("exportName", exportName);
         this.category = fixPreAndPost(checkField("category", category));
         this.updatePeriod = updatePeriod;
-        this.data = Collections.unmodifiableList(Arrays.asList(data));
+        this.data = List.of(data);
 
         // using deliberately internal server time, since we generate cookies and long-polling out of this
         timeStampCreation = System.currentTimeMillis();
@@ -151,7 +149,7 @@ public class DataContainer implements Serializable {
         if (p < 0) {
             p = 0;
         }
-        return name.substring(p, name.length()).replace("/", "");
+        return name.substring(p).replace("/", "");
     }
 
     protected static String getCategory(final String name) {

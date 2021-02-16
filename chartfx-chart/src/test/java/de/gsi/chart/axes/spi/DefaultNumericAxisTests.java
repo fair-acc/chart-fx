@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +20,7 @@ public class DefaultNumericAxisTests {
 
     @Test
     public void basicConstructorTests() {
-        assertDoesNotThrow(() -> new DefaultNumericAxis());
+        assertDoesNotThrow((ThrowingSupplier<DefaultNumericAxis>) DefaultNumericAxis::new);
         assertDoesNotThrow(() -> new DefaultNumericAxis(-10, +10, 1.0));
         assertDoesNotThrow(() -> new DefaultNumericAxis("axis name"));
         assertDoesNotThrow(() -> new DefaultNumericAxis("axis name", -10, +10, 1.0));

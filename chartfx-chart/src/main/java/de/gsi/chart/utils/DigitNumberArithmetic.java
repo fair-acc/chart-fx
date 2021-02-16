@@ -18,7 +18,7 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
         final int exp1 = (int) Math.log10(Math.abs(num1)) + 1;
         final int exp2 = (int) Math.log10(Math.abs(num2)) + 1;
         if (Math.signum(num1) != Math.signum(num2) || exp1 != exp2) {
-            return new Tuple<>(Double.valueOf(Math.max(exp1, exp2)), Double.valueOf(0));
+            return new Tuple<>((double) Math.max(exp1, exp2), (double) 0);
         }
 
         final double inum1 = Math.floor(num1);
@@ -31,12 +31,12 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
          * significant: 15.0 - 17.5 - 20.0 - 22.5 - ...
          */
         if (inum1 != inum2) {
-            return new Tuple<>(Double.valueOf(Math.max(exp1, exp2)), Double.valueOf(0));
+            return new Tuple<>((double) Math.max(exp1, exp2), (double) 0);
         }
 
         if (frac1 == 0 && frac2 == 0) {
             // System.err.println("both fractions are zero " + num1 + " - " + num2);
-            return new Tuple<>(Double.valueOf(Math.max(exp1, exp2)), Double.valueOf(0));
+            return new Tuple<>((double) Math.max(exp1, exp2), (double) 0);
         } else {
             // System.err.println("fractions are non-zero " + frac1 + " - " + frac2);
         }
@@ -65,7 +65,7 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
         // System.err.println(String.format("number %s vs %s differ at least in %d-th digit\n", stringNum1, stringNum2,
         // count));
 
-        return new Tuple<>(Double.valueOf(Math.max(exp1, exp2)), Double.valueOf(count));
+        return new Tuple<>((double) Math.max(exp1, exp2), (double) count);
     }
 
     public static int getNumberOfSignificantDigits(final double val) {
@@ -88,7 +88,7 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
             final String msg = String.format("%f %E has %d significant digits", num, num, digits);
             System.out.println(msg);
         }
-        System.out.println("");
+        System.out.println();
 
         final double[][] test2 = { { 1.23, 1.24 }, { 1000, 1001 }, { 0.001, 0.0011 }, { 5.001, 5.0011 },
             { 10.001, 10.0011 }, { 1, 1.0 + 1e-5 }, { 5.0 / 3.0, 5.0 / 3.0 + 1e-5 },
@@ -98,7 +98,7 @@ public final class DigitNumberArithmetic { //NOPMD nomen est omen
             final String msg = String.format("%f %f differs in digit %d", pair[0], pair[1], digits);
             System.out.println(msg);
         }
-        System.out.println("");
+        System.out.println();
         final double val1 = 123456789e9;
         System.out.println("1: val1=" + String.format("%f", val1));
         System.out.println("2: val1=" + String.format("%100.50f", val1));
