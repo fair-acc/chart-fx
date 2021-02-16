@@ -15,7 +15,7 @@ public class TRandom1 extends TRandom {
     protected final double fMantissaBit24;
     protected final double fMantissaBit12;
 
-    final long fgSeedTable[][] = { { 9876, 54321 }, { 1299961164, 253987020 }, { 669708517, 2079157264 },
+    final long[][] fgSeedTable = new long[][] { { 9876, 54321 }, { 1299961164, 253987020 }, { 669708517, 2079157264 },
         { 190904760, 417696270 }, { 1289741558, 1376336092 }, { 1803730167, 324952955 }, { 489854550, 582847132 },
         { 1348037628, 1661577989 }, { 350557787, 1155446919 }, { 591502945, 634133404 }, { 1901084678, 862916278 },
         { 1988640932, 1785523494 }, { 1873836227, 508007031 }, { 1146416592, 967585720 },
@@ -84,7 +84,7 @@ public class TRandom1 extends TRandom {
         fMantissaBit12 = Math.pow(0.5, 12.);
         fTheSeeds = fSeed;
         long seed;
-        long seedlist[] = { 0, 0 };
+        long[] seedlist = { 0, 0 };
 
         fLuxury = 3;
         int cycle = Math.abs(fgNumEngines / fgMaxIndex);
@@ -117,7 +117,7 @@ public class TRandom1 extends TRandom {
         fMantissaBit24 = Math.pow(0.5, 24.);
         fMantissaBit12 = Math.pow(0.5, 12.);
 
-        long seedlist[] = { 0, 0 };
+        long[] seedlist = { 0, 0 };
 
         fTheSeeds = fSeed;
         fLuxury = lux;
@@ -297,7 +297,7 @@ public class TRandom1 extends TRandom {
         final int ecuyer_c = 12211;
         final int ecuyer_d = 2147483563;
 
-        final int lux_levels[] = { 0, 24, 73, 199, 365 };
+        final int[] lux_levels = { 0, 24, 73, 199, 365 };
 
         long[] int_seed_table = new long[24];
 
@@ -360,7 +360,7 @@ public class TRandom1 extends TRandom {
         final int ecuyer_c = 12211;
         final int ecuyer_d = 2147483563;
 
-        final int lux_levels[] = { 0, 24, 73, 199, 365 };
+        final int[] lux_levels = { 0, 24, 73, 199, 365 };
         int i;
         long[] int_seed_table = new long[24];
         long k_multiple, next_seed;

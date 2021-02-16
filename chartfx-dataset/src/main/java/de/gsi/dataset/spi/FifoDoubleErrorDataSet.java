@@ -222,7 +222,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         this.maxDistance = maxDistance;
     }
 
-    protected class DataBlob extends DoublePointError {
+    protected static class DataBlob extends DoublePointError {
         protected String style;
         protected String tag;
 

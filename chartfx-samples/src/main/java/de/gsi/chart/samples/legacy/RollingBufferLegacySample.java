@@ -52,7 +52,7 @@ public class RollingBufferLegacySample extends Application {
     private HBox getHeaderBar(Scene scene) {
         final AddToQueue addToQueue = new AddToQueue();
         final Button newDataSet = new Button("new DataSet");
-        newDataSet.setOnAction(evt -> Platform.runLater(addToQueue::run));
+        newDataSet.setOnAction(evt -> Platform.runLater(addToQueue));
 
         final Button startTimer = new Button("timer");
         startTimer.setOnAction(evt -> {
@@ -63,7 +63,7 @@ public class RollingBufferLegacySample extends Application {
                 timer.scheduleAtFixedRate(new TimerTask() {
                     @Override
                     public void run() {
-                        Platform.runLater(addToQueue::run);
+                        Platform.runLater(addToQueue);
                     }
                 }, 0, UPDATE_PERIOD);
             } else {
@@ -112,7 +112,7 @@ public class RollingBufferLegacySample extends Application {
         xAxis.setTickLabelRotation(45);
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
-        xAxis.setTickLabelFormatter(new StringConverter<Number>() {
+        xAxis.setTickLabelFormatter(new StringConverter<>() {
             @Override
             public Number fromString(String string) {
                 return null;
@@ -135,7 +135,7 @@ public class RollingBufferLegacySample extends Application {
         // xAxis.setMinorTickVisible(false);
 
         final NumberAxis yAxis = new NumberAxis();
-        yAxis.setTickLabelFormatter(new StringConverter<Number>() {
+        yAxis.setTickLabelFormatter(new StringConverter<>() {
             DecimalFormat formatter = new DecimalFormat("0.##E0");
 
             @Override
@@ -150,7 +150,7 @@ public class RollingBufferLegacySample extends Application {
         });
 
         // Create a LineChart
-        final LineChart<Number, Number> lineChart = new LineChart<Number, Number>(xAxis, yAxis) {
+        final LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis) {
             // Override to remove symbols on each data point
             @Override
             protected void dataItemAdded(final Series<Number, Number> series, final int itemIndex,

@@ -127,7 +127,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
     /**
      * example fitting function y = scale/(sqrt(2*pi*sigma)*exp(- 0.5*(x-mu)^2/sigma^2)
      */
-    protected class MyGaussianFunction extends AbstractFunction1D {
+    protected static class MyGaussianFunction extends AbstractFunction1D {
         public MyGaussianFunction(final String name, final double[] parameter) {
             super(name, new double[3]);
             // declare parameter names
@@ -156,7 +156,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
             final double sigma = fparameter[1];
             final double scale = fparameter[2];
 
-            return scale * 1.0 / (Math.sqrt(MathBase.TWO_PI) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
+            return scale / (Math.sqrt(MathBase.TWO_PI) * sigma) * Math.exp(-0.5 * Math.pow((x - mu) / sigma, 2));
         }
     }
 }

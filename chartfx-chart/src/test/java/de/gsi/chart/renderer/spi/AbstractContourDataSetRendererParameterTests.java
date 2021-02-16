@@ -72,7 +72,7 @@ public class AbstractContourDataSetRendererParameterTests {
     /**
      * basic test class, only supports limited getter/setter/property functions
      */
-    public class TestContourDataSetRendererParameter extends AbstractContourDataSetRendererParameter<TestContourDataSetRendererParameter> {
+    public static class TestContourDataSetRendererParameter extends AbstractContourDataSetRendererParameter<TestContourDataSetRendererParameter> {
         @Override
         public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
             throw new UnsupportedOperationException();

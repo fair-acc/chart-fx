@@ -125,7 +125,7 @@ public class HistogramRendererSample extends Application {
         Application.launch(args);
     }
 
-    public class SummingDataSet extends MathDataSet { // NOSONAR NOPMD -- too many parents is out of our control (Java intrinsic)
+    public static class SummingDataSet extends MathDataSet { // NOSONAR NOPMD -- too many parents is out of our control (Java intrinsic)
         public SummingDataSet(final String name, final DataSet... functions) {
             super(name, (dataSets, returnFunction) -> {
                 if (dataSets.isEmpty()) {

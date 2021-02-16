@@ -175,7 +175,7 @@ public class WaveletTransform extends WaveletCoefficients {
         return 0;
     }
 
-    int d_dec_a(final double input[], final int input_len, final Wavelet wavelet, final double output[],
+    int d_dec_a(final double[] input, final int input_len, final Wavelet wavelet, final double[] output,
             final int output_len, final MODE mode) {
         // check output length
         if (output_len != dwt_buffer_length(input_len, wavelet.getDecompHP().length, mode)) {
@@ -187,7 +187,7 @@ public class WaveletTransform extends WaveletCoefficients {
     }
 
     // Decomposition of input with highpass filter
-    int d_dec_d(final double input[], final int input_len, final Wavelet wavelet, final double output[],
+    int d_dec_d(final double[] input, final int input_len, final Wavelet wavelet, final double[] output,
             final int output_len, final MODE mode) {
         // check output length
         if (output_len != dwt_buffer_length(input_len, wavelet.getDecompHP().length, mode)) {
@@ -203,8 +203,8 @@ public class WaveletTransform extends WaveletCoefficients {
     // If fix_size_diff is 1 then coeffs arrays can differ by one in length (this
     // is useful in multilevel decompositions and reconstructions of odd-length signals)
     // Requires zoer-filled output buffer
-    int d_idwt(final double coeffs_a[], final int coeffs_a_len, final double coeffs_d[], final int coeffs_d_len,
-            final Wavelet wavelet, final double output[], final int output_len, final MODE mode,
+    int d_idwt(final double[] coeffs_a, final int coeffs_a_len, final double[] coeffs_d, final int coeffs_d_len,
+            final Wavelet wavelet, final double[] output, final int output_len, final MODE mode,
             final int fix_size_diff) {
         int input_len;
 
@@ -264,7 +264,7 @@ public class WaveletTransform extends WaveletCoefficients {
         return 0;
     }
 
-    int d_rec_a(final double coeffs_a[], final int coeffs_len, final Wavelet wavelet, final double output[],
+    int d_rec_a(final double[] coeffs_a, final int coeffs_len, final Wavelet wavelet, final double[] output,
             final int output_len) {
         // check output length
         if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconLP().length)) {
@@ -277,7 +277,7 @@ public class WaveletTransform extends WaveletCoefficients {
 
     // Decomposition of input with lowpass filter
 
-    int d_rec_d(final double coeffs_d[], final int coeffs_len, final Wavelet wavelet, final double output[],
+    int d_rec_d(final double[] coeffs_d, final int coeffs_len, final Wavelet wavelet, final double[] output,
             final int output_len) {
         // check for output length
         if (output_len != reconstruction_buffer_length(coeffs_len, wavelet.getReconHP().length)) {
@@ -290,8 +290,8 @@ public class WaveletTransform extends WaveletCoefficients {
 
     // basic SWT step
     // TODO: optimize
-    int d_swt_(final double input[], final int input_len, final double filter[], final int filter_len,
-            final double output[], final int output_len, final int level) {
+    int d_swt_(final double[] input, final int input_len, final double[] filter, final int filter_len,
+            final double[] output, final int output_len, final int level) {
         double[] e_filter;
         int i, e_filter_len;
 
@@ -333,7 +333,7 @@ public class WaveletTransform extends WaveletCoefficients {
 
     // Approximation at specified level
     // input - approximation coeffs from upper level or signal if level == 1
-    int d_swt_a(final double input[], final int input_len, final Wavelet wavelet, final double output[],
+    int d_swt_a(final double[] input, final int input_len, final Wavelet wavelet, final double[] output,
             final int output_len, final int level) {
         return d_swt_(input, input_len, wavelet.getDecompLP(), wavelet.getDecompLP().length, output, output_len, level);
     }
@@ -342,7 +342,7 @@ public class WaveletTransform extends WaveletCoefficients {
 
     // Details at specified level
     // input - approximation coeffs from upper level or signal if level == 1
-    int d_swt_d(final double input[], final int input_len, final Wavelet wavelet, final double output[],
+    int d_swt_d(final double[] input, final int input_len, final Wavelet wavelet, final double[] output,
             final int output_len, final int level) {
         return d_swt_(input, input_len, wavelet.getDecompHP(), wavelet.getDecompHP().length, output, output_len, level);
     }
@@ -352,7 +352,7 @@ public class WaveletTransform extends WaveletCoefficients {
      * 
      * @param s input vector
      */
-    public void daubTrans(final double s[]) {
+    public void daubTrans(final double[] s) {
         final int N = s.length;
         int n;
         for (n = N; n >= fwavelet.getLength(); n >>= 1) {
@@ -654,12 +654,10 @@ public class WaveletTransform extends WaveletCoefficients {
             return 0;
         }
 
-        switch (mode) {
-        case MODE_PERIODIZATION:
+        if (mode == MODE.MODE_PERIODIZATION) {
             return (int) Math.ceil(input_len / 2.);
-        default:
-            return (int) Math.floor((input_len + filter_len - 1) / 2.);
         }
+        return (int) Math.floor((input_len + filter_len - 1) / 2.);
     }
 
     int dwt_max_level(final int input_len, final int filter_len) {
@@ -675,12 +673,10 @@ public class WaveletTransform extends WaveletCoefficients {
             return 0;
         }
 
-        switch (mode) {
-        case MODE_PERIODIZATION:
+        if (mode == MODE.MODE_PERIODIZATION) {
             return 2 * coeffs_len;
-        default:
-            return 2 * coeffs_len - filter_len + 2;
         }
+        return 2 * coeffs_len - filter_len + 2;
     }
 
     /**
@@ -688,7 +684,7 @@ public class WaveletTransform extends WaveletCoefficients {
      * 
      * @param coef input vector
      */
-    public void invDaubTrans(final double coef[]) {
+    public void invDaubTrans(final double[] coef) {
         final int N = coef.length;
         int n;
         for (n = fwavelet.getLength(); n <= N; n <<= 1) {
@@ -726,13 +722,13 @@ public class WaveletTransform extends WaveletCoefficients {
         }
     }
 
-    protected void invTransform(final double a[], final int n) {
+    protected void invTransform(final double[] a, final int n) {
         if (n >= 4) {
             int i, j;
             final int half = n >> 1;
             final int halfPls1 = half + 1;
 
-            final double tmp[] = new double[n];
+            final double[] tmp = new double[n];
 
             // last smooth val last coef. first smooth first coef
             tmp[0] = a[half - 1] * Ih0 + a[n - 1] * Ih1 + a[0] * Ih2 + a[half] * Ih3;
@@ -795,7 +791,7 @@ public class WaveletTransform extends WaveletCoefficients {
      * @param a input signal, which will be replaced by its output transform
      * @param n length of the signal, and must be a power of 2
      */
-    protected void transform(final double a[], final int n) {
+    protected void transform(final double[] a, final int n) {
         final int nfilter = fwavelet.getLength(); // wavelet filter length
         final double[] h = fwavelet.getDecompHP();
         final double[] g = fwavelet.getDecompLP();
@@ -806,7 +802,7 @@ public class WaveletTransform extends WaveletCoefficients {
             int i;
             final int half = n >> 1;
 
-            final double tmp[] = new double[n];
+            final double[] tmp = new double[n];
 
             i = 0;
             for (int j = 0; j < n - nfilter - 1; j = j + 2) {

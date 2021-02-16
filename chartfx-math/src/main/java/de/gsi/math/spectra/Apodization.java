@@ -30,9 +30,9 @@ public enum Apodization {
 
     private static Map<ApodizationArrayDescription, double[]> windowCache = new WeakHashMap<>();
 
-    private String fname;
+    private final String fname;
 
-    private Apodization(final String name) {
+    Apodization(final String name) {
         fname = name;
     }
 
@@ -71,26 +71,19 @@ public enum Apodization {
         switch (this) {
         case Hamming:
             return getIndex(i, n);
-        case Hann:
-            return getIndex(i, n);
         case HannExp: {
             final double a = MathBase.TWO_PI / (n - 1);
-            return 1.0 * Math.pow(Math.sin(a * i), m);
+            return Math.pow(Math.sin(a * i), m);
         }
-        case Nuttall:
-            return getIndex(i, n);
-        case BlackmanHarris:
-            return getIndex(i, n);
-        case BlackmanNuttall:
-            return getIndex(i, n);
-        case FlatTop:
-            return getIndex(i, n);
-        case Blackman:
-            return getIndex(i, n);
-        case Exponential:
-            return getIndex(i, n);
         default:
         case Rectangular:
+        case Exponential:
+        case Blackman:
+        case FlatTop:
+        case BlackmanNuttall:
+        case BlackmanHarris:
+        case Nuttall:
+        case Hann:
             return getIndex(i, n);
         }
     }
@@ -117,7 +110,7 @@ public enum Apodization {
         }
         case HannExp: {
             final double a = MathBase.TWO_PI / (n - 1);
-            return 1.0 * Math.pow(MathBase.sin(a * i), 2.0);
+            return Math.pow(MathBase.sin(a * i), 2.0);
         }
         case Blackman: {
             final double a = MathBase.TWO_PI / (n - 1);

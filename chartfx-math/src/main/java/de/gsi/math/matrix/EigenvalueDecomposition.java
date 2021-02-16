@@ -13,7 +13,6 @@ package de.gsi.math.matrix;
  **/
 
 public class EigenvalueDecomposition implements java.io.Serializable {
-
     /*
      * ------------------------ Class variables ------------------------
      */
@@ -93,9 +92,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
 
         if (issymmetric) {
             for (int i = 0; i < n; i++) {
-                for (int j = 0; j < n; j++) {
-                    V[i][j] = A[i][j];
-                }
+                System.arraycopy(A[i], 0, V[i], 0, n);
             }
 
             // Tridiagonalize.
@@ -205,7 +202,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
      */
 
     private void hqr2() {
-
         // This is derived from the Algol procedure hqr2,
         // by Martin and Wilkinson, Handbook for Auto. Comp.,
         // Vol.ii-Linear Algebra, and the corresponding
@@ -238,7 +234,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
 
         int iter = 0;
         while (n >= low) {
-
             // Look for single small sub-diagonal element
 
             int l = n;
@@ -335,7 +330,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
                 // No convergence yet
 
             } else {
-
                 // Form shift
 
                 x = H[n][n];
@@ -397,7 +391,7 @@ public class EigenvalueDecomposition implements java.io.Serializable {
                         break;
                     }
                     if (Math.abs(H[m][m - 1]) * (Math.abs(q) + Math.abs(r)) < eps
-                            * (Math.abs(p) * (Math.abs(H[m - 1][m - 1]) + Math.abs(z) + Math.abs(H[m + 1][m + 1])))) {
+                                                                                      * (Math.abs(p) * (Math.abs(H[m - 1][m - 1]) + Math.abs(z) + Math.abs(H[m + 1][m + 1])))) {
                         break;
                     }
                     m--;
@@ -582,7 +576,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
                             H[i][n - 1] = cdivr;
                             H[i][n] = cdivi;
                         } else {
-
                             // Solve complex equations
 
                             x = H[i][i + 1];
@@ -622,10 +615,8 @@ public class EigenvalueDecomposition implements java.io.Serializable {
         // Vectors of isolated roots
 
         for (int i = 0; i < nn; i++) {
-            if (i < low | i > high) {
-                for (int j = i; j < nn; j++) {
-                    V[i][j] = H[i][j];
-                }
+            if (i<low | i> high) {
+                System.arraycopy(H[i], i, V[i], i, nn - i);
             }
         }
 
@@ -643,7 +634,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
     }
 
     private void orthes() {
-
         // This is derived from the Algol procedures orthes and ortran,
         // by Martin and Wilkinson, Handbook for Auto. Comp.,
         // Vol.ii-Linear Algebra, and the corresponding
@@ -653,7 +643,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
         int high = n - 1;
 
         for (int m = low + 1; m <= high - 1; m++) {
-
             // Scale column.
 
             double scale = 0.0;
@@ -661,7 +650,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
                 scale = scale + Math.abs(H[i][m - 1]);
             }
             if (scale != 0.0) {
-
                 // Compute Householder transformation.
 
                 double h = 0.0;
@@ -734,22 +722,19 @@ public class EigenvalueDecomposition implements java.io.Serializable {
     }
 
     private void tql2() {
-
         // This is derived from the Algol procedures tql2, by
         // Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
         // Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
         // Fortran subroutine in EISPACK.
 
-        for (int i = 1; i < n; i++) {
-            e[i - 1] = e[i];
-        }
+        if (n - 1 >= 0)
+            System.arraycopy(e, 1, e, 0, n - 1);
         e[n - 1] = 0.0;
 
         double f = 0.0;
         double tst1 = 0.0;
         double eps = Math.pow(2.0, -52.0);
         for (int l = 0; l < n; l++) {
-
             // Find small subdiagonal element
 
             tst1 = Math.max(tst1, Math.abs(d[l]) + Math.abs(e[l]));
@@ -852,20 +837,17 @@ public class EigenvalueDecomposition implements java.io.Serializable {
     }
 
     private void tred2() {
-
         // This is derived from the Algol procedures tred2 by
         // Bowdler, Martin, Reinsch, and Wilkinson, Handbook for
         // Auto. Comp., Vol.ii-Linear Algebra, and the corresponding
         // Fortran subroutine in EISPACK.
 
-        for (int j = 0; j < n; j++) {
-            d[j] = V[n - 1][j];
-        }
+        if (n >= 0)
+            System.arraycopy(V[n - 1], 0, d, 0, n);
 
         // Householder reduction to tridiagonal form.
 
         for (int i = n - 1; i > 0; i--) {
-
             // Scale to avoid under/overflow.
 
             double scale = 0.0;
@@ -881,7 +863,6 @@ public class EigenvalueDecomposition implements java.io.Serializable {
                     V[j][i] = 0.0;
                 }
             } else {
-
                 // Generate Householder vector.
 
                 for (int k = 0; k < i; k++) {

@@ -71,7 +71,7 @@ public class MatrixD extends AbstractMatrix {
      * @param m Number of rows.
      * @exception IllegalArgumentException Array length must be a multiple of m.
      */
-    public MatrixD(final double vals[], final int m) {
+    public MatrixD(final double[] vals, final int m) {
         this(vals, m, true);
     }
 
@@ -83,7 +83,7 @@ public class MatrixD extends AbstractMatrix {
      * @param rowMajor true: data is stored row-wise (C/C++), false: data is stored column-wise (Fortran)
      * @exception IllegalArgumentException Array length must be a multiple of m.
      */
-    public MatrixD(final double vals[], final int m, final boolean rowMajor) {
+    public MatrixD(final double[] vals, final int m, final boolean rowMajor) {
         super.m = m;
         super.n = m != 0 ? vals.length / m : 0;
         if (m * n != vals.length) {
@@ -324,9 +324,8 @@ public class MatrixD extends AbstractMatrix {
         final MatrixD X = new MatrixD(m, n);
         final double[][] C = X.getArray();
         for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                C[i][j] = element[i][j];
-            }
+            if (n >= 0)
+                System.arraycopy(element[i], 0, C[i], 0, n);
         }
         return X;
     }
@@ -464,9 +463,8 @@ public class MatrixD extends AbstractMatrix {
         final double[][] B = X.getArray();
         try {
             for (int i = 0; i < r.length; i++) {
-                for (int j = j0; j <= j1; j++) {
-                    B[i][j - j0] = element[r[i]][j];
-                }
+                if (j1 + 1 - j0 >= 0)
+                    System.arraycopy(element[r[i]], j0, B[i], j0 - j0, j1 + 1 - j0);
             }
         } catch (final ArrayIndexOutOfBoundsException e) {
             throw new ArrayIndexOutOfBoundsException("Submatrix indices");
@@ -1022,7 +1020,6 @@ public class MatrixD extends AbstractMatrix {
 
         // Ignore initial empty lines
         while (tokenizer.nextToken() == StreamTokenizer.TT_EOL) {
-            ;
         }
         if (tokenizer.ttype == StreamTokenizer.TT_EOF) {
             throw new java.io.IOException("Unexpected EOF on matrix read.");
@@ -1032,7 +1029,7 @@ public class MatrixD extends AbstractMatrix {
         } while (tokenizer.nextToken() == StreamTokenizer.TT_WORD);
 
         final int n = v.size(); // Now we've got the number of columns!
-        Double row[] = new Double[n];
+        Double[] row = new Double[n];
         v.removeAllElements();
         for (int j = 0; j < n; j++) {
             // extract the elements of the 1st row.

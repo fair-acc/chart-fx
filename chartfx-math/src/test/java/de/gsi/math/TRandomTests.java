@@ -102,7 +102,7 @@ public class TRandomTests {
     @Test
     public void testInteger() {
         TRandom rnd = new TRandom(SEED);
-        final long imax = Long.MAX_VALUE - 1234378439l;
+        final long imax = Long.MAX_VALUE - 1234378439L;
         for (int i = 0; i < N_SAMPLES; i++) {
             long r = rnd.Integer(imax);
             assertTrue(r > 0 && r < imax);

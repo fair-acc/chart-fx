@@ -13,7 +13,6 @@ package de.gsi.math.matrix;
  */
 
 public class LUDecomposition implements java.io.Serializable {
-
     /*
      * ------------------------ Class variables ------------------------
      */
@@ -54,7 +53,6 @@ public class LUDecomposition implements java.io.Serializable {
      */
 
     public LUDecomposition(MatrixD A) {
-
         // Use a "left-looking", dot-product, Crout/Doolittle algorithm.
 
         LU = A.getArrayCopy();
@@ -71,7 +69,6 @@ public class LUDecomposition implements java.io.Serializable {
         // Outer loop.
 
         for (int j = 0; j < n; j++) {
-
             // Make a copy of the j-th column to localize references.
 
             for (int i = 0; i < m; i++) {
@@ -217,9 +214,8 @@ public class LUDecomposition implements java.io.Serializable {
 
     public int[] getPivot() {
         int[] p = new int[m];
-        for (int i = 0; i < m; i++) {
-            p[i] = piv[i];
-        }
+        if (m >= 0)
+            System.arraycopy(piv, 0, p, 0, m);
         return p;
     }
 

@@ -133,58 +133,54 @@ public class ContinuousWavelet {
                 final int lastIdx = thread == nthreads - 1 ? max : firstIdx + k;
                 final int thread_id = thread;
 
-                futures[thread] = ConcurrencyUtils.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        if (fdecon[thread_id] == null) {
-                            fdecon[thread_id] = new Convolution();
+                futures[thread] = ConcurrencyUtils.submit(() -> {
+                    if (fdecon[thread_id] == null) {
+                        fdecon[thread_id] = new Convolution();
+                    }
+
+                    for (int j = firstIdx; j < lastIdx; j++) {
+                        final double f0 = 0.5 * j / nQuanty;
+                        // update status variable
+                        if (thread_id == 0) {
+                            fstatus = (int) ((double) j / (double) lastIdx * 100);
                         }
+                        final double[] filter = Convolution.getMorletFilter(filterDim, f0, nu);
+                        final double[] wtransformed = fdecon[thread_id].transformFull(data, filter,
+                                cyclicBoundaries);
 
-                        for (int j = firstIdx; j < lastIdx; j++) {
-                            final double f0 = 0.5 * j / nQuanty;
-                            // update status variable
-                            if (thread_id == 0) {
-                                fstatus = (int) ((double) j / (double) lastIdx * 100);
-                            }
-                            final double[] filter = Convolution.getMorletFilter(filterDim, f0, nu);
-                            final double[] wtransformed = fdecon[thread_id].transformFull(data, filter,
-                                    cyclicBoundaries);
-
-                            // compute magnitude spectra
-                            if (f0 != 0) {
-                                if (nQuantx != filterDim) {
-                                    final int nbin = filterDim / nQuantx;
-                                    for (int i = 0; i < nQuantx; i++) {
-                                        final int index = i * nbin;
-                                        final int i2 = index << 1;
-                                        double power = 0.0;
-                                        for (int l = 0; l < nbin; l++) {
-                                            final int l2 = l << 1;
-                                            final double Re = wtransformed[i2 + l2];
-                                            final double Im = wtransformed[i2 + l2 + 1];
-
-                                            power += MathBase.sqr(Re) + MathBase.sqr(Im);
-                                        }
-                                        power /= nbin;
-
-                                        ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
-                                    }
-                                } else {
-                                    for (int i = 0; i < filterDim; i++) {
-                                        final int index = i;
-                                        final int i2 = index << 1;
-                                        final double Re = wtransformed[i2];
-                                        final double Im = wtransformed[i2 + 1];
-
-                                        final double power = MathBase.sqr(Re) + MathBase.sqr(Im);
-                                        ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
-                                    }
-                                }
-
-                            } else {
+                        // compute magnitude spectra
+                        if (f0 != 0) {
+                            if (nQuantx != filterDim) {
+                                final int nbin = filterDim / nQuantx;
                                 for (int i = 0; i < nQuantx; i++) {
-                                    ret[j - min][i] = Double.NaN;
+                                    final int index = i * nbin;
+                                    final int i2 = index << 1;
+                                    double power = 0.0;
+                                    for (int l = 0; l < nbin; l++) {
+                                        final int l2 = l << 1;
+                                        final double Re = wtransformed[i2 + l2];
+                                        final double Im = wtransformed[i2 + l2 + 1];
+
+                                        power += MathBase.sqr(Re) + MathBase.sqr(Im);
+                                    }
+                                    power /= nbin;
+
+                                    ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
                                 }
+                            } else {
+                                for (int i = 0; i < filterDim; i++) {
+                                    final int i2 = i << 1;
+                                    final double Re = wtransformed[i2];
+                                    final double Im = wtransformed[i2 + 1];
+
+                                    final double power = MathBase.sqr(Re) + MathBase.sqr(Im);
+                                    ret[j - min][i] = 10 * MathBase.log10(power + 1e-99);
+                                }
+                            }
+
+                        } else {
+                            for (int i = 0; i < nQuantx; i++) {
+                                ret[j - min][i] = Double.NaN;
                             }
                         }
                     }
@@ -226,8 +222,7 @@ public class ContinuousWavelet {
                         }
                     } else {
                         for (int i = 0; i < filterDim; i++) {
-                            final int index = i;
-                            final int i2 = index << 1;
+                            final int i2 = i << 1;
                             final double Re = wtransformed[i2];
                             final double Im = wtransformed[i2 + 1];
 
@@ -283,7 +278,7 @@ public class ContinuousWavelet {
      * @return whether class is busy computing a spectra
      */
     public boolean isBusy() {
-        return fstatus < 100 ? true : false;
+        return fstatus < 100;
     }
 
     public Complex MexicanHat(final double x) {

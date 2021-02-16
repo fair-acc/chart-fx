@@ -3,14 +3,7 @@ package de.gsi.dataset.utils.trees;
 /**
  * User: Vitaly Sazanovich Date: 07/02/13 Time: 19:26 Email: Vitaly.Sazanovich@gmail.com
  */
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.NavigableSet;
-import java.util.NoSuchElementException;
-import java.util.SortedSet;
+import java.util.*;
 
 /**
  * A {@link java.util.NavigableSet} implementation based on a {@link IndexedTreeMap}. The elements are ordered using
@@ -76,7 +69,6 @@ import java.util.SortedSet;
 @SuppressWarnings("unchecked")
 public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
         implements IndexedNavigableSet<E>, Cloneable, java.io.Serializable {
-
     // Dummy value to associate with an Object in the backing Map
     private static final Object PRESENT = new Object();
 
@@ -96,7 +88,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
      * will throw a {@code ClassCastException}.
      */
     public IndexedTreeSet() {
-        this(new IndexedTreeMap<E, Object>());
+        this(new IndexedTreeMap<>());
     }
 
     /**
@@ -126,7 +118,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
      *        natural ordering} of the elements will be used.
      */
     public IndexedTreeSet(Comparator<? super E> comparator) {
-        this(new IndexedTreeMap<E, Object>(comparator));
+        this(new IndexedTreeMap<>(comparator));
     }
 
     /**
@@ -186,7 +178,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
             final IndexedTreeMap<E, Object> map = (IndexedTreeMap<E, Object>) m;
             final Comparator<? super E> cc = (Comparator<? super E>) set.comparator();
             final Comparator<? super E> mc = map.comparator();
-            if (cc == mc || cc != null && cc.equals(mc)) {
+            if (Objects.equals(cc, mc)) {
                 map.addAllForTreeSet(set, IndexedTreeSet.PRESENT);
                 return true;
             }

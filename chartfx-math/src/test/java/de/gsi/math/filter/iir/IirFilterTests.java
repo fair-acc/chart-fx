@@ -478,15 +478,15 @@ public class IirFilterTests {
 
     @Test
     public void testConstructors() {
-        assertDoesNotThrow(() -> new Butterworth());
-        assertDoesNotThrow(() -> new Bessel());
-        assertDoesNotThrow(() -> new ChebyshevI());
-        assertDoesNotThrow(() -> new ChebyshevII());
+        assertDoesNotThrow(Butterworth::new);
+        assertDoesNotThrow(Bessel::new);
+        assertDoesNotThrow(ChebyshevI::new);
+        assertDoesNotThrow(ChebyshevII::new);
     }
 
     @Test
     public void testHelperMethodBiquad() {
-        assertDoesNotThrow(() -> new Biquad());
+        assertDoesNotThrow(Biquad::new);
         assertDoesNotThrow(() -> new Biquad().setIdentity());
     }
 

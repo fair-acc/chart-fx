@@ -28,31 +28,22 @@ import de.gsi.serializer.spi.WireDataFieldDescription;
  */
 @Deprecated(since = "2020")
 public class CmwLightClient {
-    private final ZContext context = new ZContext();
     private final ZMQ.Socket controlChannel;
     private final AtomicInteger connectionState = new AtomicInteger(0);
 
     // Message Types in the descriptor (Last part of a message containing the type of each sub message)
-    private static final byte MT_HEADER = 0;
-    private static final byte MT_BODY = 1; //
-    private static final byte MT_BODY_DATA_CONTEXT = 2;
-    private static final byte MT_BODY_REQUEST_CONTEXT = 3;
-    private static final byte MT_BODY_EXCEPTION = 4;
+    public static final byte MT_HEADER = 0;
+    public static final byte MT_BODY = 1; //
+    public static final byte MT_BODY_DATA_CONTEXT = 2;
+    public static final byte MT_BODY_REQUEST_CONTEXT = 3;
+    public static final byte MT_BODY_EXCEPTION = 4;
 
     // TRANSPORT frames are only used internally in the cmw dispatcher socket
-    private final byte SERVER_CONNECT_ACK = (byte) 0x01;
-    private final byte SERVER_REP = (byte) 0x02;
-    private final byte SERVER_HB = (byte) 0x03;
-    private final byte CLIENT_CONNECT = (byte) 0x20;
-    private final byte CLIENT_REQ = (byte) 0x21;
-    private final byte CLIENT_HB = (byte) 0x22;
-    // private final byte SERVER_TRANSPORT_CLOSE_ALL = (byte) 0x11;
-    // private final byte SERVER_TRANSPORT_REP = (byte) 0x12;
-    // private final byte SERVER_TRANSPORT_MULTI_REP = (byte) 0x13;
-    // private final byte CLIENT_TRANSPORT_CONNECT = (byte) 0x30;
-    // private final byte CLIENT_TRANSPORT_CLOSE = (byte) 0x31;
-    // private final byte CLIENT_TRANSPORT_CLOSE_ALL = (byte) 0x32;
-    // private final byte CLIENT_TRANSPORT_REQ = (byte) 0x33;
+    public static final byte SERVER_REP = (byte) 0x02;
+    public static final byte SERVER_HB = (byte) 0x03;
+    public static final byte CLIENT_CONNECT = (byte) 0x20;
+    public static final byte CLIENT_REQ = (byte) 0x21;
+    public static final byte CLIENT_HB = (byte) 0x22;
 
     // Field names for the Request Header
     public static final String EVENT_TYPE_TAG = "eventType";
@@ -96,6 +87,7 @@ public class CmwLightClient {
 
     public CmwLightClient() {
         System.out.println("create new context");
+        final ZContext context = new ZContext();
         controlChannel = context.createSocket(SocketType.DEALER);
         System.out.println("setup socket");
         controlChannel.setSndHWM(0);

@@ -1,6 +1,5 @@
 package de.gsi.chart.samples;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javafx.application.Application;

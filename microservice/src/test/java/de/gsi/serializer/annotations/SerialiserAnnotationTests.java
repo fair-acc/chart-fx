@@ -89,7 +89,7 @@ class SerialiserAnnotationTests {
     }
 
     @Description("this class is used to test field annotation")
-    public class AnnotatedDataClass {
+    public static class AnnotatedDataClass {
         @MetaInfo(unit = "GeV/u", description = "energy description", direction = "OUT", groups = "A")
         public double energy;
 

@@ -115,7 +115,6 @@ package de.gsi.math.spectra.wavelet;
  * </p>
  */
 public class DaubechiesWavelet {
-
     protected final double sqrt_3 = Math.sqrt(3);
     protected final double denom = 4 * Math.sqrt(2);
     //
@@ -154,7 +153,7 @@ public class DaubechiesWavelet {
      * 
      * @param s input vector (result replaces original)
      */
-    public void daubTrans(final double s[]) {
+    public void daubTrans(final double[] s) {
         final int N = s.length;
         int n;
         for (n = N; n >= 4; n >>= 1) {
@@ -167,7 +166,7 @@ public class DaubechiesWavelet {
      * 
      * @param coef input vector (result replaces original)
      */
-    public void invDaubTrans(final double coef[]) {
+    public void invDaubTrans(final double[] coef) {
         final int N = coef.length;
         int n;
         for (n = 4; n <= N; n <<= 1) {
@@ -175,13 +174,13 @@ public class DaubechiesWavelet {
         }
     }
 
-    protected void invTransform(final double a[], final int n) {
+    protected void invTransform(final double[] a, final int n) {
         if (n >= 4) {
             int i, j;
             final int half = n >> 1;
             final int halfPls1 = half + 1;
 
-            final double tmp[] = new double[n];
+            final double[] tmp = new double[n];
 
             // last smooth val last coef. first smooth first coef
             tmp[0] = a[half - 1] * Ih0 + a[n - 1] * Ih1 + a[0] * Ih2 + a[half] * Ih3;
@@ -209,12 +208,12 @@ public class DaubechiesWavelet {
      * @param a input vector
      * @param n size of input vector
      */
-    protected void transform(final double a[], final int n) {
+    protected void transform(final double[] a, final int n) {
         if (n >= 4) {
             int i, j;
             final int half = n >> 1;
 
-            final double tmp[] = new double[n];
+            final double[] tmp = new double[n];
             System.err.printf("h0 = %f h1 = %f h2 = %f h3= %f\n", h0, h1, h2, h3);
             i = 0;
             for (j = 0; j < n - 3; j = j + 2) {

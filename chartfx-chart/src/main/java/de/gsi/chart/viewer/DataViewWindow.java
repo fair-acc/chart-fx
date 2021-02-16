@@ -316,14 +316,12 @@ public class DataViewWindow extends BorderPane implements EventSource {
         windowDecorationProperty().addListener((ch, o, n) -> {
             switch (n) {
             case NONE:
+            case FRAME:
                 setTop(null);
                 break;
             case BAR_WO_CLOSE:
                 setTop(getWindowDecorationBar());
                 removeCloseWindowButton();
-                break;
-            case FRAME:
-                setTop(null);
                 break;
             case BAR:
             default:
@@ -632,7 +630,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
     @Override
     public String toString() {
-        return new StringBuilder().append(DataViewWindow.class.getSimpleName()).append("(\"").append(this.getName()).append("\")").toString();
+        return DataViewWindow.class.getSimpleName() + "(\"" + this.getName() + "\")";
     }
 
     @Override

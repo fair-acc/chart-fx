@@ -28,7 +28,7 @@ public class ArrayMathTests {
 
     @Test
     public void constructorTest() {
-        assertThrows(IllegalStateException.class, () -> new ArrayMath());
+        assertThrows(IllegalStateException.class, ArrayMath::new);
     }
 
     @Test

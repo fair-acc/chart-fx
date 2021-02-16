@@ -9,7 +9,7 @@ import java.util.Arrays;
  * @author rstein
  * @param <E> the generic Object to be stored
  */
-public class CircularBuffer<E extends Object> {
+public class CircularBuffer<E> {
     private final E[] elements;
     private final int capacity;
     private int writePos; // buffer has once being fully written
@@ -20,7 +20,6 @@ public class CircularBuffer<E extends Object> {
      * @param initalElements adds element the buffer should be initialised with
      * @param capacity maximum capacity of the buffer
      */
-    @SuppressWarnings("unchecked")
     public CircularBuffer(E[] initalElements, final int capacity) {
         this(capacity);
         put(initalElements, initalElements.length);

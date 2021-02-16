@@ -11,7 +11,7 @@ import de.gsi.math.matrix.SingularValueDecomposition;
 
 /**
  * Simple linear regression fitter The fit is based on a local gradient matrix that is computed using the supplied
- * function. This fit works fine for polyonimal function or other functions where scale-type factors need to be fitted
+ * function. This fit works fine for polynomial function or other functions where scale-type factors need to be fitted
  * For non-linear fits (e.g. Gaussian, etc. ), please use 'NonLinearRegressionFitter'
  *
  * @author rstein last modified: 2011-07-25 exported fitted parameter values, errors, added Tikhonov regularisation,
@@ -63,7 +63,7 @@ public class LinearRegressionFitter {
      *         the fitted yValues matrix[2]: a computed estimate of the fitted yValues errors
      */
     public synchronized double[][] fit(final Function func, final double[] xValues, final double[] yValues) {
-        // invoke genereal private fitter function
+        // invoke general private fitter function
         fitLocal(func, xValues, yValues);
 
         // compute fit estimates and transfer them to local variables
@@ -103,14 +103,14 @@ public class LinearRegressionFitter {
 
         if (returnFunction == null) {
             throw new InvalidParameterException("LinearRegressionFitter::fit(Function, Function, double[], double[]) - "
-                    + "return function pointer is null");
+                                                + "return function pointer is null");
         }
 
         final int p1 = func.getParameterCount();
         final int p2 = returnFunction.getParameterCount();
         if (p1 >= p2) {
             throw new InvalidParameterException("LinearRegressionFitter::fit(Function, Function, double[], double[]) - "
-                    + "return parameter function has insufficient parameter count (" + p2 + " vs. required " + p1);
+                                                + "return parameter function has insufficient parameter count (" + p2 + " vs. required " + p1);
         }
 
         for (int i = 0; i < func.getParameterCount(); i++) {
@@ -129,7 +129,7 @@ public class LinearRegressionFitter {
      * singular eigenvalues of the gradient matrix to zero or using a Tikhonov based approach (aka. Wiener filter) of
      * reducing the weight of near-singular values.
      *
-     * @param func function to be fittet
+     * @param func function to be fitted
      * @param xValues horizontal coordinates
      * @param yValues vertical coordinates
      */
@@ -141,11 +141,13 @@ public class LinearRegressionFitter {
         }
         if (xValues == null || yValues == null) {
             throw new InvalidParameterException(funcName + (xValues != null ? "double[]" : "null") + ", "
-                    + (yValues != null ? "double[]" : "null") + ") - " + "array pointer are null");
+                                                + (yValues != null ? "double[]" : "null") + ") - "
+                                                + "array pointer are null");
         }
         if (xValues.length != yValues.length) {
             throw new InvalidParameterException(funcName + "double[" + xValues.length + "], double[" + yValues.length
-                    + "]) - " + "array pointer size mis-match");
+                                                + "]) - "
+                                                + "array pointer size mis-match");
         }
         if (func.getInputDimension() != 1) {
             throw new InvalidParameterException(
@@ -153,23 +155,19 @@ public class LinearRegressionFitter {
         }
         if (func.getFreeParameterCount() > yValues.length) {
             throw new InvalidParameterException(
-                    funcNameEmpty + " cannot fit function with more free parameters than data points " + "("
-                            + func.getParameterCount() + " vs. " + yValues.length + ")");
+                    funcNameEmpty + " cannot fit function with more free parameters than data points "
+                    + "("
+                    + func.getParameterCount() + " vs. " + yValues.length + ")");
         }
 
         final long start = System.currentTimeMillis();
-        boolean recomputeMatrices;
+        boolean recomputeMatrices = true;
         reinitialise();
-        recomputeMatrices = true;
 
         function = (Function1D) func;
         xValuesRef = java.util.Arrays.copyOf(xValues, xValues.length);
         yValuesRef = java.util.Arrays.copyOf(yValues, yValues.length);
 
-        final double[] localPar = new double[function.getParameterCount()];
-        for (int i = 0; i < localPar.length; i++) {
-            localPar[i] = function.getParameterValue(i);
-        }
         function.setFitterMode(true);
 
         if (recomputeMatrices) {
@@ -216,13 +214,13 @@ public class LinearRegressionFitter {
                             } else {
                                 newS.set(i, i, 0.0);
                                 if (!fisSilent) {
-                                    System.out.println("drop singluar eigenvalue " + i);
+                                    System.out.println("drop singular eigenvalue " + i);
                                 }
                             }
                         } else {
                             newS.set(i, i, 0.0);
                             if (!fisSilent) {
-                                System.out.println("drop singluar eigenvalue " + i);
+                                System.out.println("drop singular eigenvalue " + i);
                             }
                         }
                     }
@@ -236,7 +234,7 @@ public class LinearRegressionFitter {
                         if (sig[i] / first < fsvdCutOff || sig[i] < 1e-16) {
                             // discard eigenvalue
                             if (!fisSilent) {
-                                System.out.println("drop singluar eigenvalue " + i);
+                                System.out.println("drop singular eigenvalue " + i);
                             }
                             newS.set(i, i, 0.0);
                         } else {
@@ -244,7 +242,6 @@ public class LinearRegressionFitter {
                         }
                     }
                     decomp.rank();
-
                 }
 
                 inverseMatrix = decomp.getV().times(newS).times(decomp.getU().transpose());
@@ -298,7 +295,7 @@ public class LinearRegressionFitter {
      *
      * @return best estimate value
      */
-    public double[] getBestEstimates() {
+    public synchronized double[] getBestEstimates() {
         if (flastFitResult == null) {
             throw new InvalidParameterException("LinearRegressionFitter::getBestEstimates() - " + NULL_FUNCTION_WARN);
         }
@@ -314,7 +311,7 @@ public class LinearRegressionFitter {
      *
      * @return parameter best estimates error
      */
-    public double[] getBestEstimatesErrors() {
+    public synchronized double[] getBestEstimatesErrors() {
         if (flastFitError == null) {
             throw new InvalidParameterException(
                     "LinearRegressionFitter::getBestEstimatesErrors() - " + NULL_FUNCTION_WARN);
@@ -329,21 +326,21 @@ public class LinearRegressionFitter {
     /**
      * @return the \chi^2 value of the last fit
      */
-    public double getChiSquared() {
+    public synchronized double getChiSquared() {
         return chiSquared;
     }
 
     /**
      * @return last fitting execution time [ms]
      */
-    public long getLastFitDuration() {
+    public synchronized long getLastFitDuration() {
         return lastFitDuration;
     }
 
     /**
      * @return last fitting execution time including preparation [ms]
      */
-    public long getLastPrepareDuration() {
+    public synchronized long getLastPrepareDuration() {
         return lastPrepareDuration;
     }
 
@@ -353,13 +350,13 @@ public class LinearRegressionFitter {
      * @param index of parameter
      * @return parameter value
      */
-    public double getParameter(final int index) {
+    public synchronized double getParameter(final int index) {
         if (flastFitResult == null) {
             throw new InvalidParameterException("LinearRegressionFitter::getParameter(int) - " + NULL_FUNCTION_WARN);
         }
         if (index < 0 || index >= flastFitResult.getRowDimension()) {
             throw new InvalidParameterException("LinearRegressionFitter::getParameter(" + index + ") - "
-                    + "requested invalid parameter index [0," + flastFitResult.getRowDimension() + "]");
+                                                + "requested invalid parameter index [0," + flastFitResult.getRowDimension() + "]");
         }
         return flastFitResult.get(index, 0);
     }
@@ -370,13 +367,13 @@ public class LinearRegressionFitter {
      * @param index of parameter
      * @return parameter error estimation value
      */
-    public double getParError(final int index) {
+    public synchronized double getParError(final int index) {
         if (flastFitError == null) {
             throw new InvalidParameterException("LinearRegressionFitter::getParameter(int) - " + NULL_FUNCTION_WARN);
         }
         if (index < 0 || index >= flastFitError.getRowDimension()) {
             throw new InvalidParameterException("LinearRegressionFitter::getParameter(" + index + ") - "
-                    + "requested invalid parameter index [0," + flastFitError.getRowDimension() + "]");
+                                                + "requested invalid parameter index [0," + flastFitError.getRowDimension() + "]");
         }
         return flastFitError.get(index, 0);
     }
@@ -389,17 +386,17 @@ public class LinearRegressionFitter {
      *         otherwise (numerical stability) Tikhonov type regularisation:<br>
      *         1/lambda_i -&gt; lambda_i/(lambda_i^2+mu^2) for |1/lambda_i| &gt; 1e-16 1/lambda_i<br>
      * 
-     *         the paramater mu can be read set via function getTikhonovRegularisationParameter, or function
+     *         the parameter mu can be read set via function getTikhonovRegularisationParameter, or function
      *         setTikhonovRegularisationParameter
      */
-    public REG_METHOD getRegularisationMethod() {
+    public synchronized REG_METHOD getRegularisationMethod() {
         return fregularisationMethod;
     }
 
     /**
      * @return SVD cut off threshold for ill-conditioned systems, default: 1e-16
      */
-    public double getSVDCutOff() {
+    public synchronized double getSVDCutOff() {
         return fsvdCutOff;
     }
 
@@ -409,19 +406,19 @@ public class LinearRegressionFitter {
      *
      * @return Tikhonov regularisation parameter mu, default: 1.0
      */
-    public double getTikhonovRegularisation() {
+    public synchronized double getTikhonovRegularisation() {
         return ftikhonov;
     }
 
     /**
      * @return last fit converged successfully
      */
-    public boolean isConverged() {
+    public synchronized boolean isConverged() {
         return isConverged;
     }
 
     /** @return true: errors are used as fitting weights */
-    public boolean isErrorWeighting() {
+    public synchronized boolean isErrorWeighting() {
         return useErrors;
     }
 
@@ -430,11 +427,11 @@ public class LinearRegressionFitter {
      *
      * @return whether fitter is silent (ie. not outputting debugging/info messages
      */
-    public boolean isSilent() {
+    public synchronized boolean isSilent() {
         return fisSilent;
     }
 
-    private void reinitialise() {
+    private synchronized void reinitialise() {
         forwardMatrix = null;
         errorMatrix = null;
         inverseMatrix = null;
@@ -453,7 +450,7 @@ public class LinearRegressionFitter {
     /**
      * @param state true: use errors as fitting weights
      */
-    public void setErrorWeighting(final boolean state) {
+    public synchronized void setErrorWeighting(final boolean state) {
         useErrors = state;
     }
 
@@ -467,10 +464,10 @@ public class LinearRegressionFitter {
      * 
      * @param method regularisation method to be used
      *
-     *        the paramater mu can be read set via function getTikhonovRegularisationParameter, or function
+     *        the parameter mu can be read set via function getTikhonovRegularisationParameter, or function
      *        setTikhonovRegularisationParameter
      */
-    public void setRegularisationMethod(final REG_METHOD method) {
+    public synchronized void setRegularisationMethod(final REG_METHOD method) {
         fregularisationMethod = method;
     }
 
@@ -479,7 +476,7 @@ public class LinearRegressionFitter {
      *
      * @param cutOff minimum eigenvalue cut-off
      */
-    public void setSVDCutOff(final double cutOff) {
+    public synchronized void setSVDCutOff(final double cutOff) {
         fsvdCutOff = cutOff;
     }
 
@@ -489,9 +486,9 @@ public class LinearRegressionFitter {
      * 1.0 1/lambda_i -&gt; lambda_i/(lambda_i^2+mu^2) for |1/lambda_i| &gt; 1e-16 1/lambda_i -&gt; 0 (for numerical
      * stability)
      *
-     * @param cutOff minimum eigenvalue cutt-off
+     * @param cutOff minimum eigenvalue cut-off
      */
-    public void setTikhonovRegularisation(final double cutOff) {
+    public synchronized void setTikhonovRegularisation(final double cutOff) {
         ftikhonov = cutOff;
     }
 
@@ -500,7 +497,7 @@ public class LinearRegressionFitter {
      *
      * @param state true &lt;-&gt; 'on', false &lt;-&gt; 'off'
      */
-    public void setVerbosity(final boolean state) {
+    public synchronized void setVerbosity(final boolean state) {
         fisSilent = !state;
     }
 
@@ -514,11 +511,10 @@ public class LinearRegressionFitter {
 
         final Random rnd = new Random();
         for (int i = 0; i < xValues.length; i++) {
-            final double error = 1.0 * rnd.nextGaussian();
+            final double error = rnd.nextGaussian();
             xValues[i] = i - xValues.length / 2.0;
             yValues[i] = func.getValue(xValues[i]) + 0.1 * error;
             // System.out.printf("%+2d: poly(%+4.2f) = %f\n", i, xValues[i],
-            // yValues[i]);
         }
 
         func.fixParameter(0, true);
@@ -527,10 +523,11 @@ public class LinearRegressionFitter {
         // final double[][] result = fitter.fit(func, xValues, yValues);
         fitter.fit(func, xValues, yValues);
 
-        System.out.println("ellapsed time " + fitter.getLastFitDuration() + " ms,  ch2 = " + fitter.getChiSquared());
+        System.out.println("elapsed time " + fitter.getLastFitDuration() + " ms,  ch2 = " + fitter.getChiSquared());
     }
 
     public enum REG_METHOD {
-        STANDARD, TIKHONOV
+        STANDARD,
+        TIKHONOV
     }
 }

@@ -191,7 +191,7 @@ public class LegendTests {
         assertEquals(2, legend.getItems().size());
     }
 
-    private class TestRenderer implements Renderer {
+    private static class TestRenderer implements Renderer {
         private final BooleanProperty showInLegend = new SimpleBooleanProperty(this, "showInLegend", true);
         private final ObservableList<Axis> axisList = FXCollections.observableArrayList();
         private final ObservableList<DataSet> dataSetList = FXCollections.observableArrayList();

@@ -179,20 +179,20 @@ public class NonLinearRegressionFitter2 {
 
         // First element reserved for method number if other methods than 'cliff' are added later
         if (penalties.isEmpty()) {
-            penalties.add(Integer.valueOf(constraintMethod));
+            penalties.add(constraintMethod);
         }
 
         // add constraint
         if (penalties.size() == 1) {
-            penalties.add(Integer.valueOf(1));
+            penalties.add(1);
         } else {
-            int nPC = ((Integer) penalties.get(1)).intValue();
+            int nPC = (Integer) penalties.get(1);
             nPC++;
-            penalties.set(1, Integer.valueOf(nPC));
+            penalties.set(1, nPC);
         }
-        penalties.add(Integer.valueOf(paramIndex));
-        penalties.add(Integer.valueOf(conDir));
-        penalties.add(Double.valueOf(constraint));
+        penalties.add(paramIndex);
+        penalties.add(conDir);
+        penalties.add(constraint);
         if (paramIndex > maxConstraintIndex) {
             maxConstraintIndex = paramIndex;
         }
@@ -211,22 +211,22 @@ public class NonLinearRegressionFitter2 {
 
         // First element reserved for method number if other methods than 'cliff' are added later
         if (sumPenalties.isEmpty()) {
-            sumPenalties.add(Integer.valueOf(constraintMethod));
+            sumPenalties.add(constraintMethod);
         }
 
         // add constraint
         if (sumPenalties.size() == 1) {
-            sumPenalties.add(Integer.valueOf(1));
+            sumPenalties.add(1);
         } else {
-            int nPC = ((Integer) sumPenalties.get(1)).intValue();
+            int nPC = (Integer) sumPenalties.get(1);
             nPC++;
-            sumPenalties.set(1, Integer.valueOf(nPC));
+            sumPenalties.set(1, nPC);
         }
-        sumPenalties.add(Integer.valueOf(nCon));
+        sumPenalties.add(nCon);
         sumPenalties.add(paramIndices);
         sumPenalties.add(plusOrMinus);
-        sumPenalties.add(Integer.valueOf(conDir));
-        sumPenalties.add(Double.valueOf(constraint));
+        sumPenalties.add(conDir);
+        sumPenalties.add(constraint);
         final int maxI = Math.maximum(paramIndices);
         if (maxI > maxConstraintIndex) {
             maxConstraintIndex = maxI;
@@ -662,7 +662,6 @@ public class NonLinearRegressionFitter2 {
 
             covar = new double[nTerms][nTerms];
             corrCoeff = new double[nTerms][nTerms];
-            ;
             for (int i = 0; i < nTerms; i++) {
                 bestSd[i] = Double.NaN;
                 pseudoSd[i] = Double.NaN;
@@ -703,7 +702,7 @@ public class NonLinearRegressionFitter2 {
         // Set any single parameter constraint parameters
         if (penalty) {
             Integer itemp = (Integer) penalties.get(1);
-            nConstraints = itemp.intValue();
+            nConstraints = itemp;
             penaltyParam = new int[nConstraints];
             penaltyCheck = new int[nConstraints];
             constraints = new double[nConstraints];
@@ -711,13 +710,13 @@ public class NonLinearRegressionFitter2 {
             int j = 2;
             for (int i = 0; i < nConstraints; i++) {
                 itemp = (Integer) penalties.get(j);
-                penaltyParam[i] = itemp.intValue();
+                penaltyParam[i] = itemp;
                 j++;
                 itemp = (Integer) penalties.get(j);
-                penaltyCheck[i] = itemp.intValue();
+                penaltyCheck[i] = itemp;
                 j++;
                 dtemp = (Double) penalties.get(j);
-                constraints[i] = dtemp.doubleValue();
+                constraints[i] = dtemp;
                 j++;
             }
         }
@@ -725,7 +724,7 @@ public class NonLinearRegressionFitter2 {
         // Set any multiple parameter constraint parameters
         if (sumPenalty) {
             Integer itemp = (Integer) sumPenalties.get(1);
-            nSumConstraints = itemp.intValue();
+            nSumConstraints = itemp;
             sumPenaltyParam = new int[nSumConstraints][];
             sumPlusOrMinus = new double[nSumConstraints][];
             sumPenaltyCheck = new int[nSumConstraints];
@@ -737,7 +736,7 @@ public class NonLinearRegressionFitter2 {
             int j = 2;
             for (int i = 0; i < nSumConstraints; i++) {
                 itemp = (Integer) sumPenalties.get(j);
-                sumPenaltyNumber[i] = itemp.intValue();
+                sumPenaltyNumber[i] = itemp;
                 j++;
                 itempArray = (int[]) sumPenalties.get(j);
                 sumPenaltyParam[i] = itempArray;
@@ -746,18 +745,16 @@ public class NonLinearRegressionFitter2 {
                 sumPlusOrMinus[i] = dtempArray;
                 j++;
                 itemp = (Integer) sumPenalties.get(j);
-                sumPenaltyCheck[i] = itemp.intValue();
+                sumPenaltyCheck[i] = itemp;
                 j++;
                 dtemp = (Double) sumPenalties.get(j);
-                sumConstraints[i] = dtemp.doubleValue();
+                sumConstraints[i] = dtemp;
                 j++;
             }
         }
 
         // Store un-scaled start values
-        for (int i = 0; i < np; i++) {
-            startH[i] = start[i];
-        }
+        System.arraycopy(start, 0, startH, 0, np);
 
         // scale initial estimates and step sizes
         if (scaleOpt > 0) {
@@ -765,6 +762,7 @@ public class NonLinearRegressionFitter2 {
             for (int i = 0; i < np; i++) {
                 if (start[i] == 0.0D) {
                     testzero = true;
+                    break;
                 }
             }
             if (testzero) {
@@ -1079,9 +1077,7 @@ public class NonLinearRegressionFitter2 {
         double hold0 = 1.0D;
         double hold1 = 1.0D;
         for (int i = 0; i < np; ++i) {
-            for (int k = 0; k < np; ++k) {
-                f[k] = pmin[k];
-            }
+            System.arraycopy(pmin, 0, f, 0, np);
             hold0 = pmin[i];
             if (hold0 == 0.0D) {
                 hold0 = step[i];
@@ -1107,9 +1103,7 @@ public class NonLinearRegressionFitter2 {
         lastSSnoConstraint = sumOfSquares;
         for (int i = 0; i < np; ++i) {
             for (int j = 0; j < np; ++j) {
-                for (int k = 0; k < np; ++k) {
-                    f[k] = pmin[k];
-                }
+                System.arraycopy(pmin, 0, f, 0, np);
                 hold0 = f[i];
                 if (hold0 == 0.0D) {
                     hold0 = step[i];
@@ -1277,7 +1271,7 @@ public class NonLinearRegressionFitter2 {
             // TODO: check purpose of matrixCheck
             // this.invertFlag = cov.getMatrixCheck();
 
-            if (invertFlag == false) {
+            if (!invertFlag) {
                 flag--;
             }
             stat = cov.getArrayCopy();
@@ -1325,7 +1319,7 @@ public class NonLinearRegressionFitter2 {
                 }
             }
         }
-        if (posVarFlag == false) {
+        if (!posVarFlag) {
             flag--;
         }
 
@@ -1346,9 +1340,7 @@ public class NonLinearRegressionFitter2 {
             final int m = penalties.size();
 
             // remove single parameter constraints
-            for (int i = m - 1; i >= 0; i--) {
-                penalties.remove(i);
-            }
+            penalties.subList(0, m).clear();
         }
         penalty = false;
         nConstraints = 0;
@@ -1358,9 +1350,7 @@ public class NonLinearRegressionFitter2 {
             final int m = sumPenalties.size();
 
             // remove multiple parameter constraints
-            for (int i = m - 1; i >= 0; i--) {
-                sumPenalties.remove(i);
-            }
+            sumPenalties.subList(0, m).clear();
         }
         sumPenalty = false;
         nSumConstraints = 0;
@@ -1376,9 +1366,6 @@ public class NonLinearRegressionFitter2 {
         final DoubleStorage1D xDataLocal = new DoubleStorage1D(xData);
         final DoubleStorage1D yDataLocal = new DoubleStorage1D(xData);
         final DoubleStorage1D weightLocal = new DoubleStorage1D(weights);
-        if (weights == null) {
-            System.err.println("weights are null");
-        }
         setData(xDataLocal, yDataLocal, weightLocal);
     }
 
@@ -1984,6 +1971,9 @@ public class NonLinearRegressionFitter2 {
         if (ihh != -1) {
             halfw += halfhigh;
             nd++;
+        }
+        if (nd == 0) {
+            return Double.NaN;
         }
         halfw /= nd;
 

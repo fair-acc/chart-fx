@@ -42,7 +42,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  */
 public class ScatterAndBubbleRendererSample extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScatterAndBubbleRendererSample.class);
-    private static String demoDataFile = "testdata/2017_OECD_data.csv";
+    private static final String DEMO_DATA_FILE = "testdata/2017_OECD_data.csv";
     private final Map<String, Double> lifeExpectancyWomen = new ConcurrentHashMap<>();
     private final Map<String, Double> lifeExpectancyMen = new ConcurrentHashMap<>();
     private final Map<String, Double> gdpPerCapita = new ConcurrentHashMap<>();
@@ -75,7 +75,7 @@ public class ScatterAndBubbleRendererSample extends Application {
     @Override
     public void start(final Stage primaryStage) {
         // initialises Map based on https://data.oecd.org/ data
-        loadDemoData(demoDataFile);
+        loadDemoData(DEMO_DATA_FILE);
 
         ProcessingProfiler.setVerboseOutputState(true);
         ProcessingProfiler.setLoggerOutputState(true);

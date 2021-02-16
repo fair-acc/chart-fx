@@ -17,7 +17,6 @@ import javafx.util.StringConverter;
  * @author braeun
  */
 public class DecimalStringConverter extends StringConverter<Number> implements NumberFormatter {
-
     private int precision = 6;
     private final DecimalFormat format = new DecimalFormat();
 
@@ -36,9 +35,7 @@ public class DecimalStringConverter extends StringConverter<Number> implements N
         } else {
             final StringBuilder sb = new StringBuilder(32);
             sb.append("0.");
-            for (int i = 0; i < precision; i++) {
-                sb.append('0');
-            }
+            sb.append("0".repeat(Math.max(0, precision)));
             format.applyPattern(sb.toString());
         }
     }
@@ -89,5 +86,4 @@ public class DecimalStringConverter extends StringConverter<Number> implements N
     public String toString(Number object) {
         return format.format(object);
     }
-
 }

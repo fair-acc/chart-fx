@@ -182,7 +182,7 @@ public class Butterworth extends Cascade {
         setLayout(digitalProto, directFormType);
     }
 
-    private class AnalogLowPass extends LayoutBase {
+    private static class AnalogLowPass extends LayoutBase {
         private final int nPoles;
 
         public AnalogLowPass(final int nPoles) {

@@ -85,10 +85,8 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final int ySize = lCache.ySize;
         final double[][] data = new double[ySize][xSize];
         for (int yIndex = 0; yIndex < ySize; yIndex++) {
-            for (int xIndex = 0; xIndex < xSize; xIndex++) {
-                final double offset = lCache.reduced[yIndex * xSize + xIndex];
-                data[ySize - 1 - yIndex][xIndex] = offset;
-            }
+            if (xSize >= 0)
+                System.arraycopy(lCache.reduced, yIndex * xSize + 0, data[ySize - 1 - yIndex], 0, xSize);
         }
 
         // abort if min/max == 0 -> cannot compute contours

@@ -214,25 +214,25 @@ public class MetaDataRendererSample extends Application {
         @Override
         public List<String> getErrorList() {
             if (counter2 % 2 == 0) {
-                return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT);
+                return Collections.singletonList(DataSetMetaData.TAG_OVERSHOOT);
             }
-            return Collections.<String>emptyList();
+            return Collections.emptyList();
         }
 
         @Override
         public List<String> getInfoList() {
             if (counter1 % 4 == 0) {
-                return Arrays.asList("info1");
+                return Collections.singletonList("info1");
             }
-            return Collections.<String>emptyList();
+            return Collections.emptyList();
         }
 
         @Override
         public List<String> getWarningList() {
             if (counter1 % 2 == 0) {
-                return Arrays.asList(DataSetMetaData.TAG_GAIN_RANGE);
+                return Collections.singletonList(DataSetMetaData.TAG_GAIN_RANGE);
             }
-            return Collections.<String>emptyList();
+            return Collections.emptyList();
         }
     }
 
@@ -249,7 +249,7 @@ public class MetaDataRendererSample extends Application {
             if (counter1 % 3 == 0) {
                 return Arrays.asList(DataSetMetaData.TAG_OVERSHOOT, DataSetMetaData.TAG_UNDERSHOOT);
             }
-            return Collections.<String>emptyList();
+            return Collections.emptyList();
         }
 
         @Override
@@ -257,15 +257,15 @@ public class MetaDataRendererSample extends Application {
             if (counter1 % 2 == 0) {
                 return Arrays.asList("info1", "info2");
             }
-            return Collections.<String>emptyList();
+            return Collections.emptyList();
         }
 
         @Override
         public List<String> getWarningList() {
             if (counter1 % 2 == 0) {
-                return Arrays.asList(DataSetMetaData.TAG_GAIN_RANGE);
+                return Collections.singletonList(DataSetMetaData.TAG_GAIN_RANGE);
             }
-            return Collections.<String>emptyList();
+            return Collections.emptyList();
         }
     }
 }

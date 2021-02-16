@@ -404,7 +404,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         if (isTrending) {
             final ObservableList<AbstractChartMeasurement> measurements = measurementSelector.getSelectedChartMeasurements();
             final String measurementName = "measurement";
-            trendingDataSet.setName(new StringBuilder().append(measType.getName()).append(measurementName).toString());
+            trendingDataSet.setName(measType.getName() + measurementName);
             measurements.removeListener(trendingListener);
             measurements.addListener(trendingListener);
             if (!measurements.isEmpty()) {
@@ -416,7 +416,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
             final ObservableList<DataSet> dataSets = dataSetSelector.getSelectedDataSets();
             final String dataSetsNames = dataSets.isEmpty() ? "(null)" : getDataSetsAsStringList(dataSets);
 
-            mathDataSet.setName(new StringBuilder().append(measType.getName()).append(dataSetsNames).toString());
+            mathDataSet.setName(measType.getName() + dataSetsNames);
 
             mathDataSet.deregisterListener();
             mathDataSet.getSourceDataSets().clear();

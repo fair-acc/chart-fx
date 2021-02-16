@@ -47,7 +47,7 @@ import de.gsi.microservice.utils.SystemProperties;
  *  N.B. heartbeat expires when last heartbeat message is more than HEARTBEAT_INTERVAL * HEARTBEAT_LIVENESS ms ago.
  *  this implies also, that worker must either return their message within 'HEARTBEAT_INTERVAL * HEARTBEAT_LIVENESS ms' or decouple their secondary handler interface into another thread.
  *
- *  default client time-out [s] is set by system property: 'OpenCMW.clientTimeOut' // default: 3600 [s] -- after which unanswered client messages and infos are being deleted
+ *  default client time-out [s] is set by system property: 'OpenCMW.clientTimeOut' // default: 3600 [s] -- after which unanswered client messages and info are being deleted
  *
 */
 public class MajordomoBroker extends Thread {
@@ -373,7 +373,7 @@ public class MajordomoBroker extends Thread {
         if (CLIENT_TIMEOUT <= 0) {
             return;
         }
-        for (String clientName : clients.keySet()) { // copy because we are going to remove keys
+        for (String clientName : clients.keySet().toArray(String[] ::new)) { // copy because we are going to remove keys
             Client client = clients.get(clientName);
             if (client == null || client.expiry < System.currentTimeMillis()) {
                 clients.remove(clientName);
@@ -497,7 +497,7 @@ public class MajordomoBroker extends Thread {
         protected final byte[] nameBytes; // Service name as byte array
         protected final String nameHex; // Service name as hex String
         private final Deque<MdpClientMessage> requests = new ArrayDeque<>(); // List of client requests
-        protected long expiry = System.currentTimeMillis() + CLIENT_TIMEOUT * 1000; // Expires at unless heartbeat
+        protected long expiry = System.currentTimeMillis() + CLIENT_TIMEOUT * 1000L; // Expires at unless heartbeat
 
         public Client(final Socket socket, final MdpSubProtocol protocol, final String name, final byte[] nameBytes) {
             this.socket = socket;
@@ -508,7 +508,7 @@ public class MajordomoBroker extends Thread {
         }
 
         public void offerToQueue(final MdpClientMessage msg) {
-            expiry = System.currentTimeMillis() + CLIENT_TIMEOUT * 1000;
+            expiry = System.currentTimeMillis() + CLIENT_TIMEOUT * 1000L;
             requests.offer(msg);
         }
 
@@ -591,7 +591,7 @@ public class MajordomoBroker extends Thread {
 
         protected final boolean external;
         protected Service service; // Owning service, if known
-        protected long expiry = System.currentTimeMillis() + HEARTBEAT_INTERVAL * HEARTBEAT_LIVENESS; // Expires at unless heartbeat
+        protected long expiry = System.currentTimeMillis() + (long) HEARTBEAT_INTERVAL * (long) HEARTBEAT_LIVENESS; // Expires at unless heartbeat
 
         public Worker(final Socket socket, final byte[] address, final String addressHex) {
             this.socket = socket;

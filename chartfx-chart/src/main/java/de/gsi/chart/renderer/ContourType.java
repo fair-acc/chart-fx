@@ -5,5 +5,5 @@ public enum ContourType {
     CONTOUR_FAST, // experimental contour plotting algorithm
     CONTOUR_HEXAGON, // hexagon-map based contour plotting algorithm
     HEATMAP, // 2D orthogonal projection based plotting algorithm
-    HEATMAP_HEXAGON; // hexagon-based plotting algorithm
+    HEATMAP_HEXAGON // hexagon-based plotting algorithm
 }

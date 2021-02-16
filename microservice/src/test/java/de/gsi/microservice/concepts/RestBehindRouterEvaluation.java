@@ -89,7 +89,7 @@ public class RestBehindRouterEvaluation {
 
         // receive empty payload.
         final ZFrame emptyFrame = ZFrame.recvFrame(socket);
-        if (!emptyFrame.hasMore() || emptyFrame.size() == 0) {
+        if (emptyFrame == null || !emptyFrame.hasMore() || emptyFrame.size() == 0) {
             // received null frame
             //System.err.println("nothing received");
             return handle;
@@ -155,6 +155,7 @@ public class RestBehindRouterEvaluation {
         while (request.hasMore()) {
             // receive message
             final byte[] message = router.recv(0);
+            assert message != null;
             final boolean more = router.hasReceiveMore();
             System.err.println("router msg (" + (more ? "more" : "all ") + "): " + Arrays.toString(message) + "\n      - string: '" + new String(message) + "'");
 
@@ -193,6 +194,7 @@ public class RestBehindRouterEvaluation {
 
         // receive playload message.
         ZFrame request = ZFrame.recvFrame(httpSocket);
+        assert request != null;
         String header = new String(request.getData(), 0, request.size(),
                 StandardCharsets.UTF_8);
         System.err.println("received client request header : '" + header); //  Professional Logging(TM)

@@ -48,10 +48,10 @@ public class GridRendererSample extends Application {
         final XYChart xyChart4 = new XYChart(new DefaultNumericAxis("x-Axis 4", 0, 100, 10),
                 new DefaultNumericAxis("y-Axis 4", 0, 100, 20));
         xyChart4.setPrefSize(600, 300);
-        xyChart4.getGridRenderer().getHorizontalMajorGrid().getStrokeDashArray().setAll(Double.valueOf(15),
-                Double.valueOf(15));
-        xyChart4.getGridRenderer().getVerticalMajorGrid().getStrokeDashArray().setAll(Double.valueOf(5),
-                Double.valueOf(5));
+        xyChart4.getGridRenderer().getHorizontalMajorGrid().getStrokeDashArray().setAll(15.0,
+                15.0);
+        xyChart4.getGridRenderer().getVerticalMajorGrid().getStrokeDashArray().setAll(5.0,
+                5.0);
         xyChart4.getGridRenderer().getHorizontalMajorGrid().setStrokeWidth(2);
         xyChart4.getGridRenderer().getVerticalMajorGrid().setStrokeWidth(2);
 

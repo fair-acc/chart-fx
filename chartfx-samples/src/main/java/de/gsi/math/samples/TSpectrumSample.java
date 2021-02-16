@@ -196,7 +196,7 @@ public class TSpectrumSample extends Application {
 
         MathDataSet dsBackground = new MathDataSet("background", (final double[] input, final double[] output, final int length) -> {
             LOGGER.atInfo().log("trigger background update");
-            final int nIter = nIterations.getValue().intValue();
+            final int nIter = nIterations.getValue();
             final Direction direction = cbxDirection.getSelectionModel().getSelectedItem();
             final FilterOrder filterOrder = cbxFilterOrder.getSelectionModel().getSelectedItem();
             final SmoothWindow smoothing = cbxSmoothWindow.getSelectionModel().getSelectedItem();
@@ -206,7 +206,7 @@ public class TSpectrumSample extends Application {
         backgroundRenderer.getDatasets().addAll(dsBackground);
 
         MathDataSet dsMarkov = new MathDataSet("bgMarkov", (final double[] input, final double[] output, final int length) -> {
-            final int nAverage = spAverageMarkov.getValue().intValue();
+            final int nAverage = spAverageMarkov.getValue();
             ArrayMath.decibelInPlace(TSpectrum.smoothMarkov(ArrayMath.inverseDecibel(input), output, length, nAverage));
         }, demoDataSet);
         backgroundRenderer.getDatasets().addAll(dsMarkov);
@@ -220,10 +220,10 @@ public class TSpectrumSample extends Application {
             final double[] rawData = ((DataSet2D) dataSet).getYValues();
             final double[] destVector = new double[dataSet.getDataCount()];
 
-            final double sigma = spSigma.getValue().doubleValue();
-            final double threshold = spThreshold.getValue().doubleValue();
-            final int nIter = nIterations.getValue().intValue();
-            final int nAverage = spAverageSearch.getValue().intValue();
+            final double sigma = spSigma.getValue();
+            final double threshold = spThreshold.getValue();
+            final int nIter = nIterations.getValue();
+            final int nAverage = spAverageSearch.getValue();
             final boolean markov = cbMarkov.isSelected();
             final boolean backgroundRemove = cbBackground.isSelected();
 

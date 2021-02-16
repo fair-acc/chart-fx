@@ -42,8 +42,8 @@ import javafx.scene.chart.Axis;
  * animations is running.
  */
 public final class ChartLayoutAnimator extends AnimationTimer implements EventHandler<ActionEvent> {
-    private Parent nodeToLayout;
-    private final Map<Object, Animation> activeTimeLines = new HashMap<Object, Animation>();
+    private final Parent nodeToLayout;
+    private final Map<Object, Animation> activeTimeLines = new HashMap<>();
     private final boolean isAxis;
 
     public ChartLayoutAnimator(Parent nodeToLayout) {
@@ -69,7 +69,6 @@ public final class ChartLayoutAnimator extends AnimationTimer implements EventHa
         // play animation
         t.play();
         return t;
-
     }
 
     /**
@@ -100,7 +99,7 @@ public final class ChartLayoutAnimator extends AnimationTimer implements EventHa
         if (activeTimeLines.isEmpty())
             stop();
         // cause one last re-layout to make sure final values were used
-        handle(0l);
+        handle(0L);
     }
 
     @Override

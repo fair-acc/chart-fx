@@ -18,10 +18,10 @@ import org.junit.jupiter.api.Test;
  * @author Alexander Krimm
  */
 class CircluarBufferTest {
+    private static final int FILL_BUFFER_LENGTH = 35;
     private CircularBuffer<Double> buffer1;
     private final int bufferLength = 10;
     private CircularBuffer<Double> buffer2;
-    private final int fillBufferLength = 35;
 
     @Test
     public void contstructorTests() {
@@ -38,8 +38,8 @@ class CircluarBufferTest {
             assertEquals(value, buffer.get(count++), count + ": equals get");
         }
 
-        final Double newValue1 = Double.valueOf(-42.0);
-        final Double newValue2 = Double.valueOf(-43.0);
+        final Double newValue1 = -42.0;
+        final Double newValue2 = -43.0;
         Double oldValue = buffer.replace(newValue1);
         assertEquals(initBuffer[0], oldValue, "replace old value");
         assertEquals(newValue1, buffer.get(), "new value after replace via get()");
@@ -54,7 +54,7 @@ class CircluarBufferTest {
         assertEquals(5, buffer.writePosition(), "writePosition");
         assertFalse(buffer.isBufferFlipped(), "buffer not flipped");
 
-        buffer.put(Double.valueOf(6.0));
+        buffer.put(6.0);
         assertEquals(initBuffer.length + 1, buffer.available(), "available()");
         assertEquals(6, buffer.capacity(), "capacity()");
         assertEquals(0, buffer.writePosition(), "writePosition");
@@ -97,8 +97,8 @@ class CircluarBufferTest {
     public void testCircularBuffer() {
         assertEquals(bufferLength, buffer1.remainingCapacity());
         assertEquals(0, buffer1.available());
-        final Double[] input = new Double[fillBufferLength];
-        final Double[] input2 = new Double[fillBufferLength + 5];
+        final Double[] input = new Double[FILL_BUFFER_LENGTH];
+        final Double[] input2 = new Double[FILL_BUFFER_LENGTH + 5];
 
         buffer1.put(-2.0);
         buffer1.put(-1.0);
@@ -111,15 +111,15 @@ class CircluarBufferTest {
         assertEquals(bufferLength - 2, buffer1.remainingCapacity());
         assertEquals(2, buffer1.available());
 
-        for (int i = 0; i < fillBufferLength; i++) {
-            buffer1.put(Double.valueOf(i));
+        for (int i = 0; i < FILL_BUFFER_LENGTH; i++) {
+            buffer1.put((double) i);
             input[i] = (double) i;
         }
 
         assertEquals(0, buffer1.remainingCapacity());
         assertEquals(bufferLength, buffer1.available());
 
-        buffer2.put(input, fillBufferLength);
+        buffer2.put(input, FILL_BUFFER_LENGTH);
 
         assertEquals(0, buffer2.remainingCapacity());
         assertEquals(bufferLength, buffer2.available());
@@ -132,7 +132,7 @@ class CircluarBufferTest {
         assertEquals(0, buffer2.available());
         assertEquals(0, buffer2.writePosition());
 
-        buffer2.put(input2, fillBufferLength);
+        buffer2.put(input2, FILL_BUFFER_LENGTH);
         assertEquals(5, buffer2.writePosition());
         assertEquals(bufferLength, buffer2.available());
     }

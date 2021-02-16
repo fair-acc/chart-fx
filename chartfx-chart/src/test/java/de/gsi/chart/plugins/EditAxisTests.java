@@ -2,8 +2,6 @@ package de.gsi.chart.plugins;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.concurrent.ExecutionException;
-
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;

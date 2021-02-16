@@ -255,7 +255,7 @@ public class ColorGradient {
                 ColorGradient.VIRIDIS, ColorGradient.BLUERED, ColorGradient.PINK, ColorGradient.RAINBOW_EQ);
     }
 
-    private static final ColorGradient viridis() {
+    private static ColorGradient viridis() {
         // From MatPlotLib
         final float[][] vals = new float[][] { { 0.267004f, 0.004874f, 0.329415f }, { 0.268510f, 0.009605f, 0.335427f },
             { 0.269944f, 0.014625f, 0.341379f }, { 0.271305f, 0.019942f, 0.347269f },
@@ -394,7 +394,7 @@ public class ColorGradient {
         return new ColorGradient("VIRIDIS", stops);
     }
 
-    private static final ColorGradient cetR2() {
+    private static ColorGradient cetR2() {
         // Peter Kovesi. Good Colour Maps: How to Design Them. arXiv:1509.03700 [cs.GR] 2015
         // https://peterkovesi.com/projects/colourmaps/index.html
         // CET-R2:   rainbow_bgyr_35-85_c72_n256

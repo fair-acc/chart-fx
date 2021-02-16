@@ -11,7 +11,7 @@ public interface GridDataSet extends DataSet {
      * @param indices indices to retrieve, missing indices are treated as zero
      * @return the value for the given indices
      */
-    public double get(final int dimIndex, int... indices);
+    double get(final int dimIndex, int... indices);
 
     /**
      * Returns the Grid Value along the specified Grid dimension

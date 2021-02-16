@@ -14,9 +14,9 @@ import de.gsi.dataset.locks.DataSetLock;
  * @author rstein
  */
 public interface DataSet extends EventSource, Serializable {
-    final int DIM_X = 0;
-    final int DIM_Y = 1;
-    final int DIM_Z = 2;
+    int DIM_X = 0;
+    int DIM_Y = 1;
+    int DIM_Z = 2;
 
     /**
      * Gets the x value of the data point with the index i

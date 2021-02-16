@@ -72,7 +72,6 @@ package de.gsi.math.spectra.wavelet;
  * @author Ian Kaplan
  */
 public abstract class Lift {
-
     /**
      * <p>
      * Simple wavelet Lifting Scheme forward transform
@@ -162,7 +161,6 @@ public abstract class Lift {
      * 
      */
     protected void split(final double[] vec, final int N) {
-
         int start = 1;
         int end = N - 1;
 
@@ -187,7 +185,8 @@ public abstract class Lift {
     protected abstract void update(double[] vec, int N, Direction direction);
 
     protected enum Direction {
-        forward, inverse;
+        forward,
+        inverse
     }
 
 } // liftbase

@@ -131,7 +131,7 @@ public class EventRateLimiter implements EventListener {
      */
     public enum UpdateStrategy {
         INSTANTANEOUS_RATE, // update if diff time w.r.t. the last {@link UpdateEvent} is larger than time threshold
-        AVERAGE_RATE; // update if the average {@link UpdateEvent} rate is smaller than frequency threshold
+        AVERAGE_RATE // update if the average {@link UpdateEvent} rate is smaller than frequency threshold
     }
 
     protected class DelayedUpdateTask extends TimerTask {

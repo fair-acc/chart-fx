@@ -26,7 +26,7 @@ import javafx.scene.shape.Line;
  */
 public final class DashPatternStyle { // NOPMD nomen est omen
 
-    private static WeakHashMap<Integer, ImagePattern> dashHashMap = new WeakHashMap<>();
+    private static final WeakHashMap<Integer, ImagePattern> dashHashMap = new WeakHashMap<>();
 
     private DashPatternStyle() {
         // empty definition for utility class
@@ -62,7 +62,7 @@ public final class DashPatternStyle { // NOPMD nomen est omen
             final Pane pane = new Pane();
             pane.setPrefSize(width, height);
             final Line fw = isHorizontal ? new Line(0, middle, dashPatternLength, middle)
-                    : new Line(middle, 0, middle, dashPatternLength);
+                                         : new Line(middle, 0, middle, dashPatternLength);
 
             fw.setSmooth(false);
             fw.setStroke(color);
@@ -81,7 +81,6 @@ public final class DashPatternStyle { // NOPMD nomen est omen
             final Image hatch = pane.snapshot(null, null);
 
             return new ImagePattern(hatch, width, 0, width, height, false);
-
         });
     }
 
@@ -112,6 +111,5 @@ public final class DashPatternStyle { // NOPMD nomen est omen
         } else {
             gc.fillRect(x0 - strokeWidthHalf, y0, strokeWidth, height);
         }
-
     }
 }

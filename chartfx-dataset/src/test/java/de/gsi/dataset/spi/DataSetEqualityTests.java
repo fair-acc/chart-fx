@@ -207,7 +207,7 @@ public class DataSetEqualityTests {
      *
      * @author rstein
      */
-    private class NullEditConstraints implements EditConstraints {
+    private static class NullEditConstraints implements EditConstraints {
         @Override
         public boolean canAdd(int index) {
             return false;
@@ -224,7 +224,7 @@ public class DataSetEqualityTests {
         }
     }
 
-    private class OneDimDataSet extends AbstractDataSet<OneDimDataSet> implements DataSet {
+    private static class OneDimDataSet extends AbstractDataSet<OneDimDataSet> implements DataSet {
         private static final long serialVersionUID = 1L;
         final private double[] data = new double[] { 2.4, 5.2, 8.5, 9.2 };
 

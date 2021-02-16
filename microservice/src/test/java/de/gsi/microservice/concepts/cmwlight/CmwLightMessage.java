@@ -255,11 +255,9 @@ public class CmwLightMessage {
             sb.append("server heartbeat");
             break;
         case SERVER_REP:
-            sb.append("server reply: ").append(requestType.name());
         case CLIENT_REQ:
-            if (messageType == CmwLightProtocol.MessageType.CLIENT_REQ)
-                sb.append("client request: ").append(requestType.name());
-            sb.append(" id: ").append(id).append(" deviceName=").append(deviceName).append(", updateType=").append(updateType).append(", sessionId='").append(sessionId).append('\'').append(", propertyName='").append(propertyName).append('\'').append(", options=").append(options).append(", data=").append(data).append(", sourceId=").append(sourceId);
+            sb.append(messageType.name()).append(": ").append(requestType.name());
+            sb.append(": id: ").append(id).append(" deviceName=").append(deviceName).append(", updateType=").append(updateType).append(", sessionId='").append(sessionId).append('\'').append(", propertyName='").append(propertyName).append('\'').append(", options=").append(options).append(", data=").append(data).append(", sourceId=").append(sourceId);
             switch (requestType) {
             case GET:
             case SET:
@@ -268,6 +266,7 @@ public class CmwLightMessage {
                 sb.append("\n  requestContext=").append(requestContext);
                 break;
             case CONNECT:
+            case EVENT:
                 break;
             case REPLY:
             case NOTIFICATION_DATA:
@@ -278,14 +277,13 @@ public class CmwLightMessage {
             case SUBSCRIBE_EXCEPTION:
                 sb.append("\n  exceptionMessage=").append(exceptionMessage);
                 break;
-            case EVENT:
-                break;
             case SESSION_CONFIRM:
                 sb.append(", sessionBody='").append(sessionBody).append('\'');
                 break;
             default:
                 throw new IllegalStateException("unknown client request message type: " + messageType);
             }
+            break;
         default:
             throw new IllegalStateException("unknown message type: " + messageType);
         }

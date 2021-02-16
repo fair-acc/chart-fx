@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
 import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
 
-import java.io.IOException;
 import java.util.Collections;
 
 import javafx.scene.Scene;

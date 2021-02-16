@@ -99,7 +99,7 @@ public class RollingDataSet extends FragmentedDataSet {
         depth = d;
     }
 
-    private class InternalDataSet extends DoubleDataSet {
+    private static class InternalDataSet extends DoubleDataSet {
         private static final long serialVersionUID = 1L;
 
         public InternalDataSet(DataSet ds) {

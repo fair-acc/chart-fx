@@ -82,7 +82,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             throw new IllegalStateException("cannot downconvert lock - holding n writelocks = " + getWriterCount());
         }
         final long result = stampedLock.tryConvertToReadLock(lastWriteStamp);
-        if (result == 0l) { // NOPMD to be expected return value from 'tryConvertToReadLock'
+        if (result == 0L) { // NOPMD to be expected return value from 'tryConvertToReadLock'
             throw new IllegalStateException("cannot downconvert lock - tryConvertToReadLock return '0'");
         }
         this.readerCount.getAndIncrement();
@@ -175,28 +175,32 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     public D readLockGuardOptimistic(final Runnable reading) { // NOPMD -- runnable not used in a thread context
         final long stamp = stampedLock.tryOptimisticRead();
         reading.run();
-        if (!stampedLock.validate(stamp)) {
-            readLock();
-            try {
-                reading.run();
-            } finally {
-                readUnLock();
-            }
+        if (stampedLock.validate(stamp)) {
+            return dataSet;
+        }
+        readLock();
+        try {
+            reading.run();
+        } finally {
+            readUnLock();
         }
         return dataSet;
     }
 
     @Override
     public <R> R readLockGuardOptimistic(final Supplier<R> reading) {
+        // try optimistic read
         final long stamp = stampedLock.tryOptimisticRead();
         R result = reading.get();
-        if (!stampedLock.validate(stamp)) {
-            readLock();
-            try {
-                result = reading.get();
-            } finally {
-                readUnLock();
-            }
+        if (stampedLock.validate(stamp)) {
+            return result;
+        }
+        // fallback to blocking read
+        readLock();
+        try {
+            result = reading.get();
+        } finally {
+            readUnLock();
         }
         return result;
     }
@@ -205,7 +209,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     public D readUnLock() {
         if (readerCount.decrementAndGet() == 0) {
             stampedLock.unlockRead(lastReadStamp);
-            lastReadStamp = 0l;
+            lastReadStamp = 0L;
         } else if (readerCount.get() < 0) {
             throw new IllegalStateException("read lock alread unlocked");
         }
@@ -216,7 +220,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     @Override
     public D writeLock() {
         final Thread callingThread = Thread.currentThread();
-        while (threadsAreUnequal(callingThread, writeLockedByThread)) {
+        while (unequalToLockHoldingThread(callingThread)) {
             lastWriteStamp = stampedLock.writeLock();
             synchronized (stampedLock) {
                 // copy threadID
@@ -275,9 +279,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         return dataSet;
     }
 
-    protected boolean threadsAreUnequal(final Thread thread1, final Thread thread2) {
+    protected boolean unequalToLockHoldingThread(final Thread thread1) {
         synchronized (stampedLock) {
-            return thread1 != thread2;
+            return thread1 != writeLockedByThread; // NOPMD - deliberate use of object identity
         }
     }
 }

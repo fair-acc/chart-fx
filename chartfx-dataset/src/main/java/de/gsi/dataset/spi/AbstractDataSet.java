@@ -1,10 +1,6 @@
 package de.gsi.dataset.spi;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.IntToDoubleFunction;
@@ -46,15 +42,15 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     private static final String[] DEFAULT_AXES_NAME = { "x-Axis", "y-Axis", "z-Axis" };
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private String name;
-    protected int dimension;
+    protected final int dimension;
     private final List<AxisDescription> axesDescriptions = new ArrayList<>();
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
-    private StringHashMapList dataLabels = new StringHashMapList();
-    private StringHashMapList dataStyles = new StringHashMapList();
-    private List<String> infoList = new ArrayList<>();
-    private List<String> warningList = new ArrayList<>();
-    private List<String> errorList = new ArrayList<>();
+    private final StringHashMapList dataLabels = new StringHashMapList();
+    private final StringHashMapList dataStyles = new StringHashMapList();
+    private final List<String> infoList = new ArrayList<>();
+    private final List<String> warningList = new ArrayList<>();
+    private final List<String> errorList = new ArrayList<>();
     private transient EditConstraints editConstraints;
     private final Map<String, String> metaInfoMap = new ConcurrentHashMap<>();
     private final transient AtomicBoolean axisUpdating = new AtomicBoolean(false);
@@ -176,7 +172,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         for (int index = 0; index < getDataCount(); index++) {
             final String label1 = this.getDataLabel(index);
             final String label2 = other.getDataLabel(index);
-            if (label1 != label2 && (label1 == null || !label1.equals(label2))) { // NOPMD -- early return if reference is identical
+            if (!Objects.equals(label1, label2)) {
                 return false;
             }
         }
@@ -319,7 +315,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         final String name1 = this.getName();
         final String name2 = other.getName();
 
-        if (!(name1 == null ? name2 == null : name1.equals(name2))) {
+        if (!(Objects.equals(name1, name2))) {
             return false;
         }
 
@@ -356,7 +352,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * checks for equal 'get' values with tolerance band, may be overwritten by derived classes
-     * 
+     *
      * @param other class
      * @param epsilon tolerance threshold
      * @return {@code true} if equal
@@ -468,6 +464,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return dataStyles.get(index);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected D getThis() {
         return (D) this;
@@ -483,17 +480,18 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         final int prime = 31;
         int result = 1;
         result = prime * result + axesDescriptions.hashCode();
-        result = prime * result + ((dataLabels == null) ? 0 : dataLabels.hashCode());
+        result = prime * result + dataLabels.hashCode();
         result = prime * result + dimension;
-        result = prime * result + ((editConstraints == null) ? 0 : editConstraints.hashCode());
-        result = prime * result + ((errorList == null) ? 0 : errorList.hashCode());
-        result = prime * result + ((infoList == null) ? 0 : infoList.hashCode());
+        result = prime * result + Objects.hashCode(editConstraints);
+        result = prime * result + errorList.hashCode();
+        result = prime * result + infoList.hashCode();
         result = prime * result + metaInfoMap.hashCode();
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        result = prime * result + ((warningList == null) ? 0 : warningList.hashCode());
+        result = prime * result + Objects.hashCode(name);
+        result = prime * result + warningList.hashCode();
         return result;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataSetLock<? extends DataSet> lock() {
         return lock;
@@ -709,7 +707,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             return;
         }
 
-        var otherAbstract = (AbstractDataSet) other;
+        var otherAbstract = (AbstractDataSet<?>) other;
         getDataLabelMap().clear();
         getDataLabelMap().putAll(otherAbstract.getDataLabelMap());
         getDataStyleMap().clear();

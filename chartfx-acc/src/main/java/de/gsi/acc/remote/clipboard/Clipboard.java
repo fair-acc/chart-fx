@@ -289,9 +289,9 @@ public class Clipboard implements EventSource, EventListener {
             tags = { "Clipboard" },
             path = ENDPOINT_UPLOAD,
             method = HttpMethod.POST,
-            formParams = { @OpenApiFormParam(name = "clipboarExportName")
+            formParams = { @OpenApiFormParam(name = "clipboardExportName")
                            ,
-                                   @OpenApiFormParam(name = "clipboarCategoryName") },
+                                   @OpenApiFormParam(name = "clipboardCategoryName") },
             fileUploads = { @OpenApiFileUpload(name = "clipboardData", isArray = true) },
             requestBody = @OpenApiRequestBody(content = { @OpenApiContent(type = "text/html")
                                                           ,
@@ -304,13 +304,13 @@ public class Clipboard implements EventSource, EventListener {
                                   @OpenApiResponse(status = "200", content = { @OpenApiContent(from = DataContainer.class) }) })
     private final Handler uploadHandlerPost
             = new CombinedHandler(ctx -> {
-                  final String exportName = ctx.formParam("clipboarExportName");
-                  final String rawCategory = ctx.formParam("clipboarCategoryName");
+                  final String exportName = ctx.formParam("clipboardExportName");
+                  final String rawCategory = ctx.formParam("clipboardCategoryName");
                   final String category = fixPreAndPost(rawCategory == null || rawCategory.isBlank() ? CLIPBOARD_DEFAULT : rawCategory);
                   LOGGER.atDebug().addArgument(exportName).log("received export name = '{}'");
 
                   LOGGER.atInfo().addArgument(exportName).log("received export name = '{}'");
-                  LOGGER.atInfo().addArgument(ctx.formParam("clipboarCategoryName")).log("received category name = '{}'");
+                  LOGGER.atInfo().addArgument(ctx.formParam("clipboardCategoryName")).log("received category name = '{}'");
 
                   ctx.uploadedFiles("clipboardData").forEach(file -> {
                       final String fileName = file.getFilename();

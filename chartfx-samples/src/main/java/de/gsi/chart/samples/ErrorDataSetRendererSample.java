@@ -171,13 +171,12 @@ public class ErrorDataSetRendererSample extends Application {
             double oldY = 0;
 
             for (int n = 0; n < ErrorDataSetRendererSample.N_SAMPLES; n++) {
-                final double x = n;
                 oldY += RandomDataGenerator.random() - 0.5;
                 final double y = oldY + (n == 500_000 ? 500.0 : 0) /* + ((x>1e4 && x <2e4) ? Double.NaN: 0.0) */;
                 final double ex = 0.1;
                 final double ey = 10;
-                dataSet.add(x, y, ex, ey);
-                dataSetNoErrors.add(x, y + 20);
+                dataSet.add(n, y, ex, ey);
+                dataSetNoErrors.add(n, y + 20);
                 // N.B. update events suppressed by 'setAutoNotification(false)' above
 
                 if (n == 500000) { // NOPMD this point is really special ;-)

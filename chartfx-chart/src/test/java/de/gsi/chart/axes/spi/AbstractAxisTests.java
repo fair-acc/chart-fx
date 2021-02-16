@@ -40,7 +40,6 @@ class AbstractAxisTests {
     private static final int DEFAULT_AXIS_LENGTH = 1000;
     private static final int WIDTH = 300;
     private static final int HEIGHT = 200;
-    private Pane pane;
 
     @Test
     void testAutoRange() {
@@ -217,7 +216,7 @@ class AbstractAxisTests {
     public void start(Stage stage) {
         assertDoesNotThrow(DefaultLegend::new);
 
-        pane = new Pane();
+        final Pane pane = new Pane();
 
         stage.setScene(new Scene(pane, WIDTH, HEIGHT));
         stage.show();

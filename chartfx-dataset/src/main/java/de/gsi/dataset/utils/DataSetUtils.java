@@ -239,7 +239,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @return The filename with the placeholders replaced
      */
     public static String getFileName(final DataSet dataSet, final String fileName) {
-        final Pattern placeholder = Pattern.compile("\\{([^\\{\\}]*)\\}");
+        final Pattern placeholder = Pattern.compile("\\{([^{}]*)}");
         final Matcher matcher = placeholder.matcher(fileName);
         final StringBuffer result = new StringBuffer();
         while (matcher.find()) {
@@ -354,7 +354,6 @@ public class DataSetUtils extends DataSetUtilsHelper {
      * @return SplitCharByteInputStream
      * @throws IOException in case of IO problems
      */
-    @SuppressWarnings("resource")
     private static SplitCharByteInputStream openDatasetFileInput(final File file, final Compression compression)
             throws IOException {
         InputStream istream;

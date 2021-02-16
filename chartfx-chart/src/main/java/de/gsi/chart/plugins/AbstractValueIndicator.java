@@ -53,7 +53,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
         }
     };
 
-    private final ObjectProperty<HPos> labelHorizontalAnchor = new SimpleObjectProperty<HPos>(this,
+    private final ObjectProperty<HPos> labelHorizontalAnchor = new SimpleObjectProperty<>(this,
             "labelHorizontalAnchor", HPos.CENTER) {
         @Override
         protected void invalidated() {
@@ -61,7 +61,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
         }
     };
 
-    private final ObjectProperty<VPos> labelVerticalAnchor = new SimpleObjectProperty<VPos>(this, "labelVerticalAnchor",
+    private final ObjectProperty<VPos> labelVerticalAnchor = new SimpleObjectProperty<>(this, "labelVerticalAnchor",
             VPos.CENTER) {
         @Override
         protected void invalidated() {

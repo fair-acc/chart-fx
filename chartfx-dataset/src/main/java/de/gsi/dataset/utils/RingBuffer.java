@@ -6,7 +6,7 @@ package de.gsi.dataset.utils;
  * @author rstein
  * @param <E> the generic Object to be stored
  */
-public class RingBuffer<E extends Object> {
+public class RingBuffer<E> {
     private final E[] elements;
     private final int capacity;
     private int writePos;
@@ -62,7 +62,6 @@ public class RingBuffer<E extends Object> {
         }
         elements[writePos++] = element;
         return true;
-
     }
 
     /**
@@ -208,5 +207,4 @@ public class RingBuffer<E extends Object> {
 
         return intoWritePos;
     }
-
 }

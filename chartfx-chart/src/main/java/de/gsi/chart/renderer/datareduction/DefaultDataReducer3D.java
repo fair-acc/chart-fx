@@ -12,8 +12,8 @@ public final class DefaultDataReducer3D { // NOPMD nomen est omen
     public static void resample(double[] src, final int srcWidth, final int srcHeight, double[] target,
             final int targetWidth, final int targetHeight, //
             ReductionType reductionType) {
-        final int xRatio = (int) ((srcWidth << 16) / targetWidth) + 1;
-        final int yRatio = (int) ((srcHeight << 16) / targetHeight) + 1;
+        final int xRatio = ((srcWidth << 16) / targetWidth) + 1;
+        final int yRatio = ((srcHeight << 16) / targetHeight) + 1;
         final int xLimit = xRatio >> 16;
         final int yLimit = yRatio >> 16;
 
@@ -122,10 +122,8 @@ public final class DefaultDataReducer3D { // NOPMD nomen est omen
             final int yMaxIndex) {
         for (int y = yMinIndex; y <= yMaxIndex; y++) {
             final int rowStart = y * targetWidth;
-            for (int x = 0; x < targetWidth; x++) {
-                final double r = source[rowStart + x];
-                target[rowStart + x] = r;
-            }
+            if (targetWidth >= 0)
+                System.arraycopy(source, rowStart + 0, target, rowStart + 0, targetWidth);
         }
     }
 
@@ -173,7 +171,6 @@ public final class DefaultDataReducer3D { // NOPMD nomen est omen
         case NONE:
         default:
             copyIdentity(target, targetWidth, yMinIndex, source, yMaxIndex);
-            return;
         }
     }
 
@@ -222,7 +219,6 @@ public final class DefaultDataReducer3D { // NOPMD nomen est omen
         case NONE:
         default:
             copyIdentity(target, targetWidth, yMinIndex, source, yMaxIndex);
-            return;
         }
     }
 
@@ -271,7 +267,6 @@ public final class DefaultDataReducer3D { // NOPMD nomen est omen
         case NONE:
         default:
             copyIdentity(target, targetWidth, yMinIndex, source, yMaxIndex);
-            return;
         }
     }
 

@@ -26,14 +26,14 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  */
 public final class ArrayCache { // NOPMD nomen est omen
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, boolean[]>> booleanArrayCache = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, byte[]>> byteArrayCache = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, double[]>> doubleArrayCache = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, float[]>> floatArrayCache = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, int[]>> intArrayCache = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, long[]>> longArrayCache = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, short[]>> shortArrayCache = new ConcurrentHashMap<>(); // NOPMD
-    private static ConcurrentHashMap<String, WeakHashMap<Integer, String[]>> stringArrayCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, boolean[]>> booleanArrayCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, byte[]>> byteArrayCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, double[]>> doubleArrayCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, float[]>> floatArrayCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, int[]>> intArrayCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, long[]>> longArrayCache = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, short[]>> shortArrayCache = new ConcurrentHashMap<>(); // NOPMD
+    private static final ConcurrentHashMap<String, WeakHashMap<Integer, String[]>> stringArrayCache = new ConcurrentHashMap<>();
 
     private ArrayCache() {
         // static helper class

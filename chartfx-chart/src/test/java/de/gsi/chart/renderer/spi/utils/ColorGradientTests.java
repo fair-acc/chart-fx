@@ -16,14 +16,14 @@ import org.junit.jupiter.api.Test;
 public class ColorGradientTests {
     @Test
     public void testColorGradientApi() {
-        assertDoesNotThrow(() -> new ColorGradient(new ArrayList<Stop>()));
-        assertDoesNotThrow(() -> new ColorGradient((Stop) null, (Stop) null));
-        assertDoesNotThrow(() -> new ColorGradient("myGradient", new ArrayList<Stop>()));
-        assertDoesNotThrow(() -> new ColorGradient("myGradient", (Stop) null, (Stop) null));
+        assertDoesNotThrow(() -> new ColorGradient(new ArrayList<>()));
+        assertDoesNotThrow(() -> new ColorGradient((Stop) null, null));
+        assertDoesNotThrow(() -> new ColorGradient("myGradient", new ArrayList<>()));
+        assertDoesNotThrow(() -> new ColorGradient("myGradient", null, null));
 
         final List<ColorGradient> gradients = new ArrayList<>(ColorGradient.colorGradients());
-        gradients.add(new ColorGradient("myGradient1", new ArrayList<Stop>()));
-        gradients.add(new ColorGradient("myGradient2", new ArrayList<Stop>()));
+        gradients.add(new ColorGradient("myGradient1", new ArrayList<>()));
+        gradients.add(new ColorGradient("myGradient2", new ArrayList<>()));
         for (ColorGradient gradient : gradients) {
             assertNotNull(gradient, "gradient not null");
 

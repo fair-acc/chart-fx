@@ -157,7 +157,7 @@ public final class DefaultRenderColorScheme {
         return fillColorProperty().get(index % size);
     }
 
-    public static final ObservableList<Paint> getStandardFillStyle() {
+    public static ObservableList<Paint> getStandardFillStyle() {
         final ObservableList<Paint> values = FXCollections.observableArrayList();
         for (Color colour : fillColorProperty().get()) {
             values.add(FillPatternStyleHelper.getDefaultHatch(colour.brighter(), hatchShiftByIndexProperty().get()));
@@ -185,9 +185,7 @@ public final class DefaultRenderColorScheme {
 
         final Color fillColor = StyleParser.getColorPropertyValue(defaultStyle, XYChartCss.FILL_COLOR);
         if (fillColor != null) {
-            final Color rawColor = fillColor;
-
-            final Color color = getColorModifier(map, rawColor);
+            final Color color = getColorModifier(map, fillColor);
             if (color == null) {
                 return;
             }

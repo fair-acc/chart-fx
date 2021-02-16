@@ -23,7 +23,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
         MEAN,
         MAX,
         INTEGRAL,
-        SLICE;
+        SLICE
     }
 
     private static final long serialVersionUID = 1L;

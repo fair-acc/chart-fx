@@ -29,8 +29,8 @@ import de.gsi.serializer.IoSerialiser;
  */
 @SuppressWarnings("PMD.ExcessiveClassLength")
 public class CmwLightSerialiser implements IoSerialiser {
-    public static final String NOT_IMPLEMENTED = "not implemented";
     private static final Logger LOGGER = LoggerFactory.getLogger(CmwLightSerialiser.class);
+    public static final String NOT_IMPLEMENTED = "not implemented";
     private static final int ADDITIONAL_HEADER_INFO_SIZE = 1000;
     private static final DataType[] byteToDataType = new DataType[256];
     private static final Byte[] dataTypeToByte = new Byte[256];
@@ -96,7 +96,6 @@ public class CmwLightSerialiser implements IoSerialiser {
         }
     }
 
-    private int bufferIncrements = ADDITIONAL_HEADER_INFO_SIZE;
     private IoBuffer buffer;
     private WireDataFieldDescription parent;
     private WireDataFieldDescription lastFieldHeader;
@@ -150,7 +149,7 @@ public class CmwLightSerialiser implements IoSerialiser {
     }
 
     public int getBufferIncrements() {
-        return bufferIncrements;
+        return ADDITIONAL_HEADER_INFO_SIZE;
     }
 
     @Override

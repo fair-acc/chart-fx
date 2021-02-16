@@ -68,7 +68,7 @@ public class AxisRange extends DataRange {
             return false;
         }
 
-        return ((AxisRange) obj).hashCode() == this.hashCode();
+        return obj.hashCode() == this.hashCode();
     }
 
     /**

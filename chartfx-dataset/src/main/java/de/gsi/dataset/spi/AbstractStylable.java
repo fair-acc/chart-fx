@@ -12,7 +12,6 @@ import de.gsi.dataset.DataSet;
 public abstract class AbstractStylable<D extends DataSet> implements DataSet {
     private static final long serialVersionUID = 1L;
     private String style = "";
-    private String styleClass = ""; // TODO: check whether this is needed
 
     AbstractStylable() {
         super();

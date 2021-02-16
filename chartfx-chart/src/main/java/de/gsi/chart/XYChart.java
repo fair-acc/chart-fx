@@ -328,7 +328,7 @@ public class XYChart extends Chart {
                 if (side == null) {
                     throw new InvalidParameterException("axis '" + axis.getName() + "' has 'null' as side being set");
                 }
-                if (!getAxesPane(axis.getSide()).getChildren().contains(axis)) {
+                if (axis instanceof Node && !getAxesPane(axis.getSide()).getChildren().contains(axis)) {
                     getAxesPane(axis.getSide()).getChildren().add((Node) axis);
                 }
 
@@ -351,7 +351,7 @@ public class XYChart extends Chart {
             }
 
             // check if axis is in correct pane
-            if (getAxesPane(axis.getSide()).getChildren().contains(axis)) {
+            if (axis instanceof Node && getAxesPane(axis.getSide()).getChildren().contains(axis)) {
                 // yes, it is continue with next axis
                 continue;
             }
@@ -443,7 +443,7 @@ public class XYChart extends Chart {
             checkRendererForRequiredAxes(renderer);
 
             final List<DataSet> drawnDataSets = renderer.render(gc, this, dataSetOffset, getDatasets());
-            dataSetOffset += drawnDataSets.size();
+            dataSetOffset += drawnDataSets == null ? 0 : drawnDataSets.size();
         }
 
         if (gridRenderer.isDrawOnTop()) {
@@ -457,15 +457,7 @@ public class XYChart extends Chart {
 
     @Override
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
-        while (change.next()) {
-            // handle added renderer
-            //TODO: check if this function is still necessary (presently commented)
-            // for (final Renderer renderer : change.getAddedSubList()) {
-            // checkRendererForRequiredAxes(renderer);
-            //}
-        }
         // reset change to allow derived classes to add additional listeners to renderer changes
-        change.reset();
         super.rendererChanged(change);
     }
 

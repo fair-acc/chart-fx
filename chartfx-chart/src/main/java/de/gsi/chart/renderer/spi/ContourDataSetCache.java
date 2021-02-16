@@ -2,7 +2,6 @@ package de.gsi.chart.renderer.spi;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
-import static de.gsi.dataset.DataSet.DIM_Z;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -364,10 +363,9 @@ class ContourDataSetCache extends WritableImageCache {
             final int rowIndex = dataWidth * yIndex;
             final int rowPixelIndex = rowSizeInBytes * (hMinus1 - yIndex);
             for (int xIndex = 0; xIndex < dataWidth; xIndex++) {
-                final int x = xIndex;
                 final int[] color = colorGradient.getColorBytes(inputData[rowIndex + xIndex]);
 
-                final int pixelIndex = rowPixelIndex + x * BGRA_BYTE_SIZE;
+                final int pixelIndex = rowPixelIndex + xIndex * BGRA_BYTE_SIZE;
                 byteBuffer[pixelIndex] = (byte) (color[3]);
                 byteBuffer[pixelIndex + 1] = (byte) (color[2]);
                 byteBuffer[pixelIndex + 2] = (byte) (color[1]);

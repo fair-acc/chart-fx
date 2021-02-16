@@ -16,7 +16,6 @@ import javafx.util.StringConverter;
  * @author braeun
  */
 public class ScientificNotationStringConverter extends StringConverter<Number> implements NumberFormatter {
-
     private int precision = 2;
     private final DecimalFormat format = new DecimalFormat();
 
@@ -32,9 +31,7 @@ public class ScientificNotationStringConverter extends StringConverter<Number> i
     private void buildFormat(final int precision) {
         final StringBuilder sb = new StringBuilder(32);
         sb.append("0.");
-        for (int i = 0; i < precision; i++) {
-            sb.append('0');
-        }
+        sb.append("0".repeat(Math.max(0, precision)));
         sb.append("E0");
         format.applyPattern(sb.toString());
     }
@@ -75,5 +72,4 @@ public class ScientificNotationStringConverter extends StringConverter<Number> i
     public String toString(final Number object) {
         return format.format(object);
     }
-
 }

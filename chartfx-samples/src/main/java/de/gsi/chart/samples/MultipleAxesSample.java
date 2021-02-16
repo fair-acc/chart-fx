@@ -154,7 +154,7 @@ public class MultipleAxesSample extends Application {
         Application.launch(args);
     }
 
-    private class MyZoomCheckBox extends CheckBox {
+    private static class MyZoomCheckBox extends CheckBox {
         /**
          * @param zoom the zoom interactor
          * @param axis to be synchronised
@@ -166,7 +166,7 @@ public class MultipleAxesSample extends Application {
                 if (n.equals(o)) {
                     return;
                 }
-                if (n.booleanValue()) {
+                if (n) {
                     zoom.omitAxisZoomList().remove(axis);
                     Zoomer.setOmitZoom(axis, false); // alternative implementation
                 } else {

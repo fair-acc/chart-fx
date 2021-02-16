@@ -14,5 +14,5 @@ public enum AxisLabelOverlapPolicy {
     /**
      * shift every second label by one label height/width (N.B. especially useful for category axes
      */
-    FORCED_SHIFT_ALT;
+    FORCED_SHIFT_ALT
 }

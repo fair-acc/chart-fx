@@ -14,6 +14,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 
 import de.gsi.chart.utils.DragResizerUtil.DragDirection;
 
@@ -25,7 +26,7 @@ import de.gsi.chart.utils.DragResizerUtil.DragDirection;
 public class DragResizerUtilTests {
     @Test
     public void testConstructor() {
-        assertDoesNotThrow(() -> new DragResizerUtil());
+        assertDoesNotThrow((ThrowingSupplier<DragResizerUtil>) DragResizerUtil::new);
         assertNotNull(DragResizerUtil.DEFAULT_LISTENER);
 
         final Rectangle rect = new Rectangle(/* minX */ 0.0, /* minY */ 0.0, /* width */ 100.0, /* height */ 50.0);
@@ -203,7 +204,7 @@ public class DragResizerUtilTests {
         assertFalse(util.isInResizeZone(new MyMouseEvent(110, 60)));
     }
 
-    private class MyMouseEvent extends MouseEvent {
+    private static class MyMouseEvent extends MouseEvent {
         private static final long serialVersionUID = 0L;
 
         MyMouseEvent(final double x, final double y) {

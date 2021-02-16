@@ -264,13 +264,9 @@ public class ArrayConversionTests {
         double[][] convertedDoubleArray = ArrayConversion.getDouble2DArray(refFloat2DArray);
         assertArrayEquals(refDouble2DArray, convertedDoubleArray, "double[][] -> float[][] array conversion");
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            ArrayConversion.getFloat2DArray(new double[0][2]);
-        });
+        assertThrows(IllegalArgumentException.class, () -> ArrayConversion.getFloat2DArray(new double[0][2]));
 
-        assertThrows(IllegalArgumentException.class, () -> {
-            ArrayConversion.getDouble2DArray(new float[0][2]);
-        });
+        assertThrows(IllegalArgumentException.class, () -> ArrayConversion.getDouble2DArray(new float[0][2]));
 
         if (LOGGER.isDebugEnabled())
 

@@ -53,8 +53,8 @@ public class TickMarkTests {
             tickMark.setValue(50.0);
             assertEquals(50.0, tickMark.getValue());
 
-            assertDoesNotThrow(() -> tickMark.getHeight());
-            assertDoesNotThrow(() -> tickMark.getWidth());
+            assertDoesNotThrow(tickMark::getHeight);
+            assertDoesNotThrow(tickMark::getWidth);
         }
     }
 

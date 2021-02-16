@@ -74,24 +74,21 @@ public class DiscreteTimeFourierTransform {
             for (int thread = 0; thread < nthreads; thread++) {
                 final int firstIdx = thread * k;
                 final int lastIdx = thread == nthreads - 1 ? n : firstIdx + k;
-                futures[thread] = ConcurrencyUtils.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = firstIdx; i < lastIdx; i++) {
-                            final double omega = MathBase.TWO_PI * testFrequencies[i];
-                            double sum1 = 0.0;
-                            double sum2 = 0.0;
+                futures[thread] = ConcurrencyUtils.submit(() -> {
+                    for (int i = firstIdx; i < lastIdx; i++) {
+                        final double omega = MathBase.TWO_PI * testFrequencies[i];
+                        double sum1 = 0.0;
+                        double sum2 = 0.0;
 
-                            for (int j = 0; j < tn; j++) {
-                                sum1 += val[j] * MathBase.cos(omega * t[j]);
-                                sum2 += val[j] * MathBase.sin(omega * t[j]);
-                            }
-
-                            sum1 /= tn;
-                            sum2 /= tn;
-
-                            ret[i] = 2 * MathBase.sqrt(MathBase.sqr(sum1) + MathBase.sqr(sum2));
+                        for (int j = 0; j < tn; j++) {
+                            sum1 += val[j] * MathBase.cos(omega * t[j]);
+                            sum2 += val[j] * MathBase.sin(omega * t[j]);
                         }
+
+                        sum1 /= tn;
+                        sum2 /= tn;
+
+                        ret[i] = 2 * MathBase.sqrt(MathBase.sqr(sum1) + MathBase.sqr(sum2));
                     }
                 });
             }

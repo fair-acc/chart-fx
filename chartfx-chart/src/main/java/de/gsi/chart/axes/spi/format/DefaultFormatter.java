@@ -4,24 +4,24 @@ import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.util.WeakHashMap;
 
+import javafx.util.StringConverter;
+
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.TickUnitSupplier;
 import de.gsi.chart.utils.DigitNumberArithmetic;
 import de.gsi.chart.utils.NumberFormatterImpl;
 import de.gsi.dataset.spi.utils.Tuple;
-import javafx.util.StringConverter;
 
 /**
  * Default number formatter for NumberAxis, this stays in sync with auto-ranging and formats values appropriately. You
  * can wrap this formatter to add prefixes or suffixes;
  */
 public class DefaultFormatter extends AbstractFormatter {
-
     private static final TickUnitSupplier DEFAULT_TICK_UNIT_SUPPLIER = new DefaultTickUnitSupplier();
     private static final String FORMAT_SMALL_SCALE = "0.00";
     private static final String FORMAT_LARGE_SCALE = "#.##E0";
     public static final int DEFAULT_SMALL_AXIS = 6; // [orders of magnitude],
-                                                    // e.g. '4' <-> [1,10000]
+            // e.g. '4' <-> [1,10000]
     private final DecimalFormat formatterSmall = new DecimalFormat(DefaultFormatter.FORMAT_SMALL_SCALE);
     private final DecimalFormat formatterLarge = new DecimalFormat(DefaultFormatter.FORMAT_LARGE_SCALE);
 
@@ -64,7 +64,6 @@ public class DefaultFormatter extends AbstractFormatter {
         this(axis);
         this.prefix = prefix;
         this.suffix = suffix;
-
     }
 
     /**
@@ -92,7 +91,6 @@ public class DefaultFormatter extends AbstractFormatter {
 
     @Override
     protected void rangeUpdated() {
-
         final double range = getRange();
         isExponentialForm = range < 1e-3 || range > 1e4;
         myFormatter.setExponentialForm(isExponentialForm);
@@ -101,7 +99,7 @@ public class DefaultFormatter extends AbstractFormatter {
         int maxDigits = 0; /** number of digits before separator */
         if (majorTickMarksCopy != null) {
             for (int i = 0; i < majorTickMarksCopy.size(); i++) {
-                final double val = majorTickMarksCopy.get(i).doubleValue() / unitScaling;
+                final double val = majorTickMarksCopy.get(i) / unitScaling;
                 final int nDigits = (int) Math.log10(Math.abs(val)) + 1;
                 maxDigits = Math.max(nDigits, maxDigits);
             }
@@ -109,10 +107,10 @@ public class DefaultFormatter extends AbstractFormatter {
             int maxExp = 0;
             int maxFrac = 0;
             for (int i = 0; i < majorTickMarksCopy.size() - 1; i++) {
-                final double lower = majorTickMarksCopy.get(i).doubleValue() / unitScaling;
-                final double upper = majorTickMarksCopy.get(i + 1).doubleValue() / unitScaling;
+                final double lower = majorTickMarksCopy.get(i) / unitScaling;
+                final double upper = majorTickMarksCopy.get(i + 1) / unitScaling;
                 final int significantDifferentDigits = DigitNumberArithmetic
-                        .numberDigitsUntilFirstSignificantDigit(lower, upper);
+                                                               .numberDigitsUntilFirstSignificantDigit(lower, upper);
                 maxSigDigits = Math.max(maxSigDigits, significantDifferentDigits);
 
                 // first tuple index is exp, second is number of fraction digits
@@ -187,7 +185,7 @@ public class DefaultFormatter extends AbstractFormatter {
         if (hash == null) {
             final WeakHashMap<Number, String> temp = new WeakHashMap<>();
             temp.put(object, retVal);
-            numberFormatCache.put(Integer.valueOf(formatterPattern.hashCode()), temp);
+            numberFormatCache.put(formatterPattern.hashCode(), temp);
             // checkCache = new WeakHashMap<>();
         } else {
             hash.put(object, retVal);

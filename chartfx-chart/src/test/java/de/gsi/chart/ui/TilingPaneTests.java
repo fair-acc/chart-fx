@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
@@ -39,7 +40,7 @@ public class TilingPaneTests {
 
     @Start
     public void start(Stage stage) {
-        assertDoesNotThrow(() -> new TilingPane());
+        assertDoesNotThrow((ThrowingSupplier<TilingPane>) TilingPane::new);
         assertThrows(IllegalArgumentException.class, () -> new TilingPane(null));
 
         for (int i = 0; i < 4; i++) {

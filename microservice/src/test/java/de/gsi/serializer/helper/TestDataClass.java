@@ -202,13 +202,13 @@ public class TestDataClass {
                     .log("field '{}' does not match '{}' vs '{}'");
             returnState = false;
         }
-        if (string1 != other.string1 && (string1 == null || !string1.equals(other.string1))) { //NOSONAR //NOPMD null-compatible String check
+        if (!Objects.equals(string1, other.string1)) {
             LOGGER.atError().addArgument("string1").addArgument(this.string1).addArgument(other.string1) //
                     .log("field '{}' does not match '{}' vs '{}'");
             returnState = false;
         }
         if (!isCmwCompatibilityMode()) {
-            if (string2 != other.string2 && (string2 == null || !string2.equals(other.string2))) { //NOSONAR //NOPMD null-compatible String check
+            if (!Objects.equals(string2, other.string2)) {
                 LOGGER.atError().addArgument("string2").addArgument(this.string2).addArgument(other.string2) //
                         .log("field '{}' does not match '{}' vs '{}'");
                 returnState = false;

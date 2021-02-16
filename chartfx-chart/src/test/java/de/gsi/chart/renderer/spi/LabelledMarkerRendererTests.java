@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.compareAndWriteReference;
 import static de.gsi.chart.ui.utils.FuzzyTestImageUtils.writeTestImage;
 
-import java.io.IOException;
-
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -56,7 +54,7 @@ public class LabelledMarkerRendererTests {
 
     @Start
     public void start(Stage stage) {
-        assertDoesNotThrow(() -> new LabelledMarkerRenderer());
+        assertDoesNotThrow(LabelledMarkerRenderer::new);
         renderer = new LabelledMarkerRenderer();
         chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
         chart.getRenderers().set(0, renderer);
@@ -86,7 +84,7 @@ public class LabelledMarkerRendererTests {
     }
 
     @Test
-    public void defaultTests() throws IOException, Exception {
+    public void defaultTests() throws Exception {
         FXUtils.runAndWait(() -> chart.getDatasets().add(getTestDataSet()));
         FXUtils.runAndWait(() -> chart.requestLayout());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));

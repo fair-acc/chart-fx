@@ -24,5 +24,5 @@ public enum Corner {
     /**
      * Represents top-right edge of a rectangle.
      */
-    BOTTOM_RIGHT;
+    BOTTOM_RIGHT
 }

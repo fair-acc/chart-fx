@@ -230,7 +230,7 @@ public class CheckedValueField extends VBox {
         }
     }
 
-    private class MyHBox extends HBox {
+    private static class MyHBox extends HBox {
         public MyHBox(final Node child, final Pos position) {
             super(child);
             setAlignment(position);

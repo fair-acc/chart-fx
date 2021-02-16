@@ -182,7 +182,7 @@ public class Bessel extends Cascade {
         setLayout(digitalProto, directFormType);
     }
 
-    private class AnalogLowPass extends LayoutBase {
+    private static class AnalogLowPass extends LayoutBase {
         private final int degree;
         private final double[] mA;
         private Complex[] mRoot;

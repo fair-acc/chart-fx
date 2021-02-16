@@ -26,7 +26,7 @@ public class CmwLightPublisher implements Runnable {
     public CmwLightPublisher() {
         context = ZMQ.context(1);
         poller = context.poller();
-        disruptor = new Disruptor<CmwRbEntry>(CmwRbEntry::new, 1024, new WorkerThreadFactory("cmw-disruptor"));
+        disruptor = new Disruptor<>(CmwRbEntry::new, 1024, new WorkerThreadFactory("cmw-disruptor"));
         rb = disruptor.getRingBuffer();
     }
 
@@ -121,7 +121,7 @@ public class CmwLightPublisher implements Runnable {
         poller.run();
     }
 
-    private class CmwRbEntry {
+    private static class CmwRbEntry {
         public CmwLightMessage message;
         public String device;
         public String type;

@@ -5,7 +5,6 @@ import javafx.application.Application;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.chart.samples.ErrorDataSetRendererSample;
 import de.gsi.chart.samples.RunChartSamples;
 
 /**

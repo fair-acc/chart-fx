@@ -41,7 +41,7 @@ public class WriteFxImageBenchmark {
 
     private static final int w = 333;
     private static final int h = 777;
-    private static ByteBuffer noisePixels;
+    private static ByteBuffer noisePixels = ByteBuffer.allocate(w * h * 4);
     private static PixelBuffer<ByteBuffer> noiseBuffer;
     private static WritableImage testimage; // test image with noise (N.B. hard to compress)
     private static final int w2 = 777;
@@ -50,7 +50,6 @@ public class WriteFxImageBenchmark {
     private static final AtomicBoolean initialized = new AtomicBoolean(false);
 
     public static void initalizeImage() {
-        noisePixels = ByteBuffer.allocate(w * h * 4);
         noiseBuffer = new PixelBuffer<>(w, h, noisePixels, PixelFormat.getByteBgraPreInstance());
         testimage = new WritableImage(noiseBuffer);
         final Canvas noiseCanvas = new Canvas(w, h);
@@ -78,7 +77,7 @@ public class WriteFxImageBenchmark {
     public static void main(String[] args) throws IOException {
         // get the image on the javafx application thread for snapshot to work
         Platform.startup(WriteFxImageBenchmark::initalizeImage);
-        while (!initialized.get()) {
+        while (!initialized.get()) { // NOPMD busy loop
             //
         }
         Platform.exit();

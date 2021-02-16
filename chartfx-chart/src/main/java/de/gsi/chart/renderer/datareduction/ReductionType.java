@@ -4,5 +4,5 @@ public enum ReductionType {
     MIN,
     MAX,
     AVERAGE,
-    DOWN_SAMPLE;
+    DOWN_SAMPLE
 }

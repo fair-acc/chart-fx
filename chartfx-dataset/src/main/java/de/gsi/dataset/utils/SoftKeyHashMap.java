@@ -846,12 +846,10 @@ public class SoftKeyHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>
             final Map.Entry<?, ?> e = (Map.Entry<?, ?>) o;
             final K k1 = getKey();
             final Object k2 = e.getKey();
-            if (k1 == k2 || k1 != null && k1.equals(k2)) {
+            if (Objects.equals(k1, k2)) {
                 final V v1 = getValue();
                 final Object v2 = e.getValue();
-                if (v1 == v2 || v1 != null && v1.equals(v2)) {
-                    return true;
-                }
+                return Objects.equals(v1, v2);
             }
             return false;
         }

@@ -24,8 +24,6 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
@@ -135,12 +133,7 @@ public class PeriodicScreenCapture implements Observable {
         if (periodicTask != null) {
             periodicTask.stop();
         }
-        periodicTask = new Timeline(new KeyFrame(Duration.seconds(period), new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(final ActionEvent event) {
-                performScreenCapture();
-            }
-        }));
+        periodicTask = new Timeline(new KeyFrame(Duration.seconds(period), event -> performScreenCapture()));
         periodicTask.setDelay(Duration.seconds(delay));
         periodicTask.setCycleCount(Animation.INDEFINITE);
         periodicTask.play();

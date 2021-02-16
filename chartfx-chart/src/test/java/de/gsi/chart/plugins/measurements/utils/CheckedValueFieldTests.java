@@ -1,12 +1,11 @@
 package de.gsi.chart.plugins.measurements.utils;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ExecutionException;
 
 import javafx.scene.Scene;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
@@ -32,7 +31,7 @@ public class CheckedValueFieldTests {
 
     @Start
     public void start(Stage stage) {
-        assertDoesNotThrow(() -> new CheckedValueField());
+        assertDoesNotThrow(CheckedValueField::new);
 
         field = new CheckedValueField();
 
@@ -69,7 +68,7 @@ public class CheckedValueFieldTests {
         assertEquals("test unit", field.getUnitLabel().getText());
 
         field.setUnit(null);
-        assertEquals(null, field.getUnitLabel().getText());
+        assertNull(field.getUnitLabel().getText());
         field.setUnit("test unit");
 
         field.setValue(2.0, "2.0");
@@ -103,7 +102,9 @@ public class CheckedValueFieldTests {
         assertEquals(toHexString(Color.RED), field.getUnitLabel().getTextFill().toString());
 
         field.setValueToolTip("important tooltip");
-        assertEquals("important tooltip", field.getValueLabel().getTooltip().getText());
+        final Tooltip fieldToolTip = field.getValueLabel().getTooltip();
+        assertNotNull(fieldToolTip);
+        assertEquals("important tooltip", fieldToolTip.getText());
 
         field.resetRanges();
         assertEquals(Double.POSITIVE_INFINITY, field.getMaxRange());
@@ -115,7 +116,7 @@ public class CheckedValueFieldTests {
     }
 
     @TestFx
-    public void testFieldFormatter() throws InterruptedException, ExecutionException {
+    public void testFieldFormatter() {
         assertNotNull(field.getMinRangeTextField());
         assertNotNull(field.getMinRangeTextField().getValue());
         assertNotNull(field.getMaxRangeTextField());
@@ -179,16 +180,16 @@ public class CheckedValueFieldTests {
         assertEquals(43.0, field.getMaxRange());
     }
 
-    private String format(double val) {
+    private static String format(double val) {
         String in = Integer.toHexString((int) Math.round(val * 255));
         return in.length() == 1 ? "0" + in : in;
     }
 
-    private String toHexString(Color value) {
+    private static String toHexString(Color value) {
         return "0x" + (format(value.getRed()) + format(value.getGreen()) + format(value.getBlue()) + format(value.getAlpha())).toLowerCase();
     }
 
-    private KeyEvent getKeyEvent(final KeyCode keyCode) {
+    private static KeyEvent getKeyEvent(final KeyCode keyCode) {
         return new KeyEvent(null, //source
                 null, // target,
                 KeyEvent.KEY_PRESSED, // EventType

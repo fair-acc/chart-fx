@@ -3,14 +3,15 @@ package de.gsi.chart.samples.legacy.utils;
 import java.util.ArrayList;
 import java.util.List;
 
-import de.gsi.chart.samples.legacy.RollingBufferLegacySample;
-import de.gsi.dataset.testdata.spi.SineFunction;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+
+import de.gsi.chart.samples.legacy.RollingBufferLegacySample;
+import de.gsi.dataset.testdata.spi.SineFunction;
 
 public class JavaFXTestChart extends AbstractTestApplication implements ChartTestCase {
     protected int nSamples = MAX_DATA_POINTS_100K;
@@ -21,7 +22,6 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
     protected XYChart.Series<Number, Number> series1 = new XYChart.Series<>();
 
     public JavaFXTestChart() {
-
         xAxis.setLabel("x-axis (JavaFX Chart)");
         xAxis.setAutoRanging(false);
         yAxis.setAutoRanging(false);
@@ -29,7 +29,7 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
         yAxis.setUpperBound(+1.1);
 
         // Create a LineChart
-        lineChart = new LineChart<Number, Number>(xAxis, yAxis) {
+        lineChart = new LineChart<>(xAxis, yAxis) {
             // Override to remove symbols on each data point
             @Override
             protected void dataItemAdded(final Series<Number, Number> series, final int itemIndex,
@@ -55,7 +55,6 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
 
     @Override
     public Node getChart(final int nSamples) {
-
         return lineChart;
     }
 

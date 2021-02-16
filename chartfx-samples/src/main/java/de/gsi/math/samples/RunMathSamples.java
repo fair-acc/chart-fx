@@ -83,26 +83,23 @@ public class RunMathSamples extends Application {
                     stage.show();
 
                     if (makeScreenShot.isSelected()) {
-                        new Thread() {
-                            @Override
-                            public void run() {
-                                try {
-                                    Thread.sleep(2000);
-                                    Platform.runLater(() -> {
-                                        LOGGER.atInfo()
-                                                .log("make screen shot to file of " + run.getClass().getSimpleName());
-                                        final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
-                                                run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
-                                                DEFAULT_PERIOD, false);
-                                        screenCapture.performScreenCapture();
-                                    });
-                                } catch (final InterruptedException ex) {
-                                    if (LOGGER.isErrorEnabled()) {
-                                        LOGGER.atError().setCause(ex).log("InterruptedException");
-                                    }
+                        new Thread(() -> {
+                            try {
+                                Thread.sleep(2000);
+                                Platform.runLater(() -> {
+                                    LOGGER.atInfo()
+                                            .log("make screen shot to file of " + run.getClass().getSimpleName());
+                                    final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
+                                            run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
+                                            DEFAULT_PERIOD, false);
+                                    screenCapture.performScreenCapture();
+                                });
+                            } catch (final InterruptedException ex) {
+                                if (LOGGER.isErrorEnabled()) {
+                                    LOGGER.atError().setCause(ex).log("InterruptedException");
                                 }
                             }
-                        }.start();
+                        }).start();
                     }
                 } catch (final Exception e1) {
                     if (LOGGER.isErrorEnabled()) {

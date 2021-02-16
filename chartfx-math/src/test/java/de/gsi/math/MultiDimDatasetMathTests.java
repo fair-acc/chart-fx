@@ -1,7 +1,6 @@
 package de.gsi.math;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -9,13 +8,10 @@ import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
 
-import java.util.Arrays;
-
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.gsi.dataset.DataSet;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DataSetBuilder;
 import de.gsi.dataset.spi.DoubleErrorDataSet;

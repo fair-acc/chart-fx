@@ -288,7 +288,7 @@ public class MidiWaveformSynthesizer {
         }
     }
 
-    public static final void addNotesToTrack(final Track track, final Track trk) throws InvalidMidiDataException {
+    public static void addNotesToTrack(final Track track, final Track trk) throws InvalidMidiDataException {
         for (int ii = 0; ii < track.size(); ii++) {
             final MidiEvent me = track.get(ii);
             final MidiMessage mm = me.getMessage();

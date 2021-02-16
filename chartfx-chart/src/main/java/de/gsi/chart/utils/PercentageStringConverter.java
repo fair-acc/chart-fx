@@ -16,7 +16,6 @@ import javafx.util.StringConverter;
  * @author braeun
  */
 public class PercentageStringConverter extends StringConverter<Number> {
-
     private int precision = 1;
     private boolean appendPercentSign = true;
     private final DecimalFormat format = new DecimalFormat();
@@ -41,9 +40,7 @@ public class PercentageStringConverter extends StringConverter<Number> {
         sb.append('0');
         if (precision > 0) {
             sb.append('.');
-            for (int i = 0; i < precision; i++) {
-                sb.append('0');
-            }
+            sb.append("0".repeat(precision));
         }
         format.applyPattern(sb.toString());
     }
@@ -79,5 +76,4 @@ public class PercentageStringConverter extends StringConverter<Number> {
     public String toString(final Number object) {
         return format.format(object.doubleValue() * 100.0) + (appendPercentSign ? "%" : "");
     }
-
 }

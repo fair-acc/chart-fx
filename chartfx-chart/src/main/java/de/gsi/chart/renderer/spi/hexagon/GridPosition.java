@@ -12,7 +12,6 @@ import java.util.logging.Logger;
  * not depend on how you have placed the Hexagons on the HexagonMap. The axial coordinate system is used.
  */
 public class GridPosition implements Cloneable, Serializable {
-
     private static final long serialVersionUID = -6932865381701419097L;
 
     /**
@@ -58,9 +57,7 @@ public class GridPosition implements Cloneable, Serializable {
 
         if (obj.getClass().equals(this.getClass())) {
             final GridPosition gridPositionObj = (GridPosition) obj;
-            if (gridPositionObj.q == q && gridPositionObj.r == r) {
-                return true;
-            }
+            return gridPositionObj.q == q && gridPositionObj.r == r;
         }
         return false;
     }
@@ -195,7 +192,6 @@ public class GridPosition implements Cloneable, Serializable {
             rCalculated = r * (1.0 - j / n) + destination.r * j / n;
             p = GridPosition.hexRound(qCalculated, rCalculated);
             result.add(p);
-
         }
         result.add(destination);
         return result;

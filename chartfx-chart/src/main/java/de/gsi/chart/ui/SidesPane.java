@@ -1,6 +1,5 @@
 package de.gsi.chart.ui;
 
-import de.gsi.chart.ui.geometry.Side;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -13,6 +12,8 @@ import javafx.scene.control.Control;
 import javafx.scene.control.Skin;
 import javafx.scene.layout.Region;
 import javafx.util.Duration;
+
+import de.gsi.chart.ui.geometry.Side;
 
 /**
  * SidesPane inspired by the HiddenSidesPane of the controlsFX package
@@ -33,14 +34,13 @@ import javafx.util.Duration;
  * </pre>
  */
 public class SidesPane extends Control {
-
     private final DoubleProperty prefHeightTop = new SimpleDoubleProperty(this, "prefHeightTop", -1);
     private final DoubleProperty prefHeightBottom = new SimpleDoubleProperty(this, "prefHeightBottom", -1);
     private final DoubleProperty prefWidthLeft = new SimpleDoubleProperty(this, "prefWidthLeft", -1);
     private final DoubleProperty prefWidthRight = new SimpleDoubleProperty(this, "prefWidthRight", -1);
     private final DoubleProperty triggerDistance = new SimpleDoubleProperty(this, "triggerDistance", 16);
     private final ObjectProperty<Node> content = new SimpleObjectProperty<>(this, "content"); //$NON-NLS-1$
-    private final ObjectProperty<Node> top = new SimpleObjectProperty<Node>(this, "top") {
+    private final ObjectProperty<Node> top = new SimpleObjectProperty<>(this, "top") {
         @Override
         public void set(Node node) {
             if (node instanceof Region) {
@@ -57,7 +57,7 @@ public class SidesPane extends Control {
     /**
      * The property used to store a reference to the node shown at the right side of the pane.
      */
-    private final ObjectProperty<Node> right = new SimpleObjectProperty<Node>(this, "right") {
+    private final ObjectProperty<Node> right = new SimpleObjectProperty<>(this, "right") {
         @Override
         public void set(Node node) {
             if (node instanceof Region) {
@@ -74,7 +74,7 @@ public class SidesPane extends Control {
     /**
      * The property used to store a reference to the node shown at the bottom side of the pane.
      */
-    private final ObjectProperty<Node> bottom = new SimpleObjectProperty<Node>(this, "bottom") {
+    private final ObjectProperty<Node> bottom = new SimpleObjectProperty<>(this, "bottom") {
         @Override
         public void set(Node node) {
             if (node instanceof Region) {
@@ -91,7 +91,7 @@ public class SidesPane extends Control {
     /**
      * The property used to store a reference to the node shown at the left side of the pane.
      */
-    private final ObjectProperty<Node> left = new SimpleObjectProperty<Node>(this, "left") {
+    private final ObjectProperty<Node> left = new SimpleObjectProperty<>(this, "left") {
         @Override
         public void set(Node node) {
             if (node instanceof Region) {
@@ -301,7 +301,7 @@ public class SidesPane extends Control {
         if (ret == null) {
             return false;
         }
-        return ret.booleanValue();
+        return ret;
     }
 
     /**

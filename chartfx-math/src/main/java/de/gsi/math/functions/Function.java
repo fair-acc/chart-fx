@@ -6,11 +6,10 @@ package de.gsi.math.functions;
  * @author rstein
  */
 public interface Function {
-
     /**
      * resets all parameter values to zero
      */
-    public void clearParameterValues();
+    void clearParameterValues();
 
     /**
      * sets
@@ -23,65 +22,65 @@ public interface Function {
     /**
      * @return the number of free parameter
      */
-    public int getFreeParameterCount();
+    int getFreeParameterCount();
 
     /**
      * @return unique function ID
      */
-    public String getID();
+    String getID();
 
     /**
      * @return the input dimension of the function
      */
-    public int getInputDimension();
+    int getInputDimension();
 
     /**
      * @return function name (e.g. brief description/Latex notation)
      */
-    public String getName();
+    String getName();
 
     /**
      * @return the output dimension of the function
      */
-    public int getOutputDimension();
+    int getOutputDimension();
 
     /**
      * @return the number of parameter
      */
-    public int getParameterCount();
+    int getParameterCount();
 
     /**
      * @param id the parameter id
      * @return the name of a by 'id' given parameter
      */
-    public String getParameterName(int id);
+    String getParameterName(int id);
 
     /**
      * @param id the parameter id
      * @return the maximum value of a by 'id' given parameter range N.B. depending on the fitter, the range may be used
      *         only as a hint
      */
-    public double getParameterRangeMaximum(int id);
+    double getParameterRangeMaximum(int id);
 
     /**
      * @param id the parameter id
      * @return the minimum value of a by 'id' given parameter range N.B. depending on the fitter, the range may be used
      *         only as a hint
      */
-    public double getParameterRangeMinimum(int id);
+    double getParameterRangeMinimum(int id);
 
     /**
      * @param id parameter id
      * @return the value of a by 'id' given parameter
      */
-    public double getParameterValue(int id);
+    double getParameterValue(int id);
 
     /**
      * returns whether function is in use by fitting routine &lt;expert function&gt;
      * 
      * @return true: function is used within a fitting routine
      */
-    public boolean isFitterMode();
+    boolean isFitterMode();
 
     /**
      * returns whether given parameter is fixed (static) or not
@@ -96,12 +95,12 @@ public interface Function {
      * 
      * @param state true: function is used within a fitting routine
      */
-    public void setFitterMode(boolean state);
+    void setFitterMode(boolean state);
 
     /**
      * @param count number of free parameter
      */
-    public void setParameterCount(int count);
+    void setParameterCount(int count);
 
     /**
      * sets the name of a by 'id' given parameter
@@ -109,7 +108,7 @@ public interface Function {
      * @param id the parameter id
      * @param paramName name for the given pararameter 'id'
      */
-    public void setParameterName(int id, String paramName);
+    void setParameterName(int id, String paramName);
 
     /**
      * sets the range of a by 'id' given parameter N.B. depending on the fitter, the range may be used only as a hint
@@ -118,7 +117,7 @@ public interface Function {
      * @param minRange minimum parameter range
      * @param maxRange maximum parameter range
      */
-    public void setParameterRange(int id, double minRange, double maxRange);
+    void setParameterRange(int id, double minRange, double maxRange);
 
     /**
      * sets the value of a by 'id' given parameter
@@ -126,7 +125,7 @@ public interface Function {
      * @param id the parameter id
      * @param value new value of parameter
      */
-    public void setParameterValue(int id, double value);
+    void setParameterValue(int id, double value);
 
     /**
      * sets the parameter values using an array the array is required to have at most getParameterCount() indices
@@ -134,5 +133,4 @@ public interface Function {
      * @param value new parameter values
      */
     void setParameterValues(double[] value);
-
 }

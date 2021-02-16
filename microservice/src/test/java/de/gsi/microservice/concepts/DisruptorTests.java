@@ -12,7 +12,7 @@ import com.lmax.disruptor.util.Util;
 public class DisruptorTests { // NOPMD NOSONAR -- nomen est omen
     // https://github.com/LMAX-Exchange/disruptor/wiki/Getting-Started
     private static final int N_ITERATIONS = 100_000;
-    private final int bufferSize = Util.ceilingNextPowerOfTwo(N_ITERATIONS); // specify the size of the ring buffer, must be power of 2.
+    private static final int BUFFER_SIZE = Util.ceilingNextPowerOfTwo(N_ITERATIONS); // specify the size of the ring buffer, must be power of 2.
     private final Disruptor<ByteArrayEvent> disruptorOut;
     private final RingBuffer<ByteArrayEvent> outputBuffer;
     private final Disruptor<ByteArrayEvent> disruptorIn;
@@ -20,9 +20,9 @@ public class DisruptorTests { // NOPMD NOSONAR -- nomen est omen
     private long readPosition = 0;
 
     public DisruptorTests(int nWorkers) {
-        disruptorOut = new Disruptor<>(ByteArrayEvent::new, bufferSize, DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
+        disruptorOut = new Disruptor<>(ByteArrayEvent::new, BUFFER_SIZE, DaemonThreadFactory.INSTANCE, ProducerType.SINGLE, new BlockingWaitStrategy());
         outputBuffer = disruptorOut.getRingBuffer();
-        disruptorIn = new Disruptor<>(ByteArrayEvent::new, bufferSize, DaemonThreadFactory.INSTANCE, nWorkers <= 1 ? ProducerType.SINGLE : ProducerType.MULTI, new BlockingWaitStrategy());
+        disruptorIn = new Disruptor<>(ByteArrayEvent::new, BUFFER_SIZE, DaemonThreadFactory.INSTANCE, nWorkers <= 1 ? ProducerType.SINGLE : ProducerType.MULTI, new BlockingWaitStrategy());
         inputBuffer = disruptorIn.getRingBuffer();
 
         // Connect the parallel handler
@@ -108,7 +108,7 @@ public class DisruptorTests { // NOPMD NOSONAR -- nomen est omen
         System.out.printf("%-40s:  %10d calls/second\n", topic, diff > 0 ? (int) (nExec / diff) : -1);
     }
 
-    private class ByteArrayEvent {
+    private static class ByteArrayEvent {
         public byte[] array;
     }
 }

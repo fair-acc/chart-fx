@@ -194,7 +194,7 @@ public class HistogramRendererBarSample extends Application {
         return chart;
     }
 
-    public class MyHistogram extends de.gsi.dataset.spi.Histogram {
+    public static class MyHistogram extends de.gsi.dataset.spi.Histogram {
         public MyHistogram(final String name) {
             super(name, NBINS, 0, NBINS - 1.0, false, HistogramOuterBounds.BINS_CENTERED_ON_BOUNDARY);
             this.addDataLabel(18, "-");
@@ -230,7 +230,7 @@ public class HistogramRendererBarSample extends Application {
         }
     }
 
-    private class HistogramRendererParameterTooBar extends ToolBar { // NOPMD NOSONAR -- number of parents
+    private static class HistogramRendererParameterTooBar extends ToolBar { // NOPMD NOSONAR -- number of parents
         private final HistogramRenderer histogramRenderer;
 
         public HistogramRendererParameterTooBar(final HistogramRenderer histogramRenderer) {

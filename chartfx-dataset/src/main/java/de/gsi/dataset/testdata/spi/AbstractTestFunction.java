@@ -58,13 +58,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 
     @Override
     public ErrorType getErrorType(final int dimIndex) {
-        switch (dimIndex) {
-        case DIM_X:
-        case DIM_Y:
-            return ErrorType.SYMMETRIC;
-        default:
-            throw new IndexOutOfBoundsException("DataSet only has 2 dimensions");
-        }
+        return super.getErrorType(dimIndex);
     }
 
     @Override

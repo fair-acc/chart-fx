@@ -140,59 +140,56 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         startTimer.setMaxWidth(Double.MAX_VALUE);
         startTimer.setOnAction(evt -> {
             if (timer == null) {
-                timer = new Thread() {
-                    @Override
-                    public void run() {
-                        try {
-                            for (int i = 0; i < nSamplesTest.length; i++) {
-                                final int samples = nSamplesTest[i];
-                                final int wait = i == 0 ? 2 * WAIT_PERIOD : WAIT_PERIOD;
-                                LOGGER.atInfo().log("start test iteration for: " + samples + " samples");
-                                if (samples > 10000) {
-                                    // pre-emptively abort test JavaFX Chart
-                                    // test case (too high memory/cpu
-                                    // consumptions crashes gc)
-                                    compute[0] = false;
-                                }
-                                final TestThread t1 = new TestThread(1, compute[0] ? samples : 1000, chart1,
-                                        chartTestCase1, results1, updatePeriod, wait);
-                                final TestThread t2 = new TestThread(2, compute[1] ? samples : 1000, chart2,
-                                        chartTestCase2, results2, updatePeriod, wait);
-                                final TestThread t3 = new TestThread(3, compute[2] ? samples : 1000, chart3,
-                                        chartTestCase3, results3, updatePeriod, wait);
-
-                                meter.resetAverages();
-                                if (compute[0]) {
-                                    t1.start();
-                                    t1.join();
-                                }
-                                if (compute[1]) {
-                                    t2.start();
-                                    t2.join();
-                                }
-                                if (compute[2]) {
-                                    t3.start();
-                                    t3.join();
-                                }
-
-                                if (i <= 2) {
-                                    // ignore compute for first iteration
-                                    // (needed to optimise JIT compiler)
-                                    compute[0] = true;
-                                    compute[1] = true;
-                                    compute[2] = true;
-                                    results1.clearData();
-                                    results2.clearData();
-                                    results3.clearData();
-                                }
+                timer = new Thread(() -> {
+                    try {
+                        for (int i = 0; i < nSamplesTest.length; i++) {
+                            final int samples = nSamplesTest[i];
+                            final int wait = i == 0 ? 2 * WAIT_PERIOD : WAIT_PERIOD;
+                            LOGGER.atInfo().log("start test iteration for: " + samples + " samples");
+                            if (samples > 10000) {
+                                // pre-emptively abort test JavaFX Chart
+                                // test case (too high memory/cpu
+                                // consumptions crashes gc)
+                                compute[0] = false;
                             }
-                        } catch (final InterruptedException e) {
-                            if (LOGGER.isErrorEnabled()) {
-                                LOGGER.atError().setCause(e).log("InterruptedException");
+                            final TestThread t1 = new TestThread(1, compute[0] ? samples : 1000, chart1,
+                                    chartTestCase1, results1, updatePeriod, wait);
+                            final TestThread t2 = new TestThread(2, compute[1] ? samples : 1000, chart2,
+                                    chartTestCase2, results2, updatePeriod, wait);
+                            final TestThread t3 = new TestThread(3, compute[2] ? samples : 1000, chart3,
+                                    chartTestCase3, results3, updatePeriod, wait);
+
+                            meter.resetAverages();
+                            if (compute[0]) {
+                                t1.start();
+                                t1.join();
+                            }
+                            if (compute[1]) {
+                                t2.start();
+                                t2.join();
+                            }
+                            if (compute[2]) {
+                                t3.start();
+                                t3.join();
+                            }
+
+                            if (i <= 2) {
+                                // ignore compute for first iteration
+                                // (needed to optimise JIT compiler)
+                                compute[0] = true;
+                                compute[1] = true;
+                                compute[2] = true;
+                                results1.clearData();
+                                results2.clearData();
+                                results3.clearData();
                             }
                         }
+                    } catch (final InterruptedException e) {
+                        if (LOGGER.isErrorEnabled()) {
+                            LOGGER.atError().setCause(e).log("InterruptedException");
+                        }
                     }
-                };
+                });
                 timer.start();
                 LOGGER.atInfo().log("reset FPS averages");
                 meter.resetAverages();

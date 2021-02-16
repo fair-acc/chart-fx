@@ -78,7 +78,7 @@ public class EventBenchmark {
         es3.addListener(event ->
 
                 {
-                    int val = ((Integer) event.getPayLoad()).intValue() + 1;
+                    int val = (Integer) event.getPayLoad() + 1;
                     if (val < 10) {
                         Blackhole.consumeCPU(100);
                         es3.invokeListener(new UpdateEvent(es3, "test", val), parallel);

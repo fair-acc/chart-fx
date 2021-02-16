@@ -60,7 +60,7 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
         output.setName("slice(" + source.getName() + ")@" + xMin + " " + source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_X).set(source.getAxisDescription(dimIndex).getName(), source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_Y).set(source.getAxisDescription(DIM_Z).getName(), source.getAxisDescription(DIM_Z).getUnit());
-        output.getAxisDescriptions().stream().forEach(AxisDescription::clear);
+        output.getAxisDescriptions().forEach(AxisDescription::clear);
     }
 
     public static double[] getMeanIntegralArray(final GridDataSet source, final int dimIndex, final double xMin, final double xMax, final double[] buffer, final boolean isMean) {
@@ -186,7 +186,7 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
         output.setName((isMean ? "mean(" : "int(") + source.getName() + ")@" + xMin + " -> " + xMax + " " + source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_X).set(source.getAxisDescription(dimIndex).getName(), source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_Y).set(source.getAxisDescription(DIM_Z).getName(), source.getAxisDescription(DIM_Z).getUnit());
-        output.getAxisDescriptions().stream().forEach(AxisDescription::clear);
+        output.getAxisDescriptions().forEach(AxisDescription::clear);
     }
 
     private static void computeMinMax(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, final boolean isMin) {
@@ -210,7 +210,7 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
         output.setName((isMin ? "min(" : "max(") + source.getName() + ")@" + xMin + " -> " + xMax + " " + source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_X).set(source.getAxisDescription(dimIndex).getName(), source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_Y).set(source.getAxisDescription(DIM_Z).getName(), source.getAxisDescription(DIM_Z).getUnit());
-        output.getAxisDescriptions().stream().forEach(AxisDescription::clear);
+        output.getAxisDescriptions().forEach(AxisDescription::clear);
     }
 
     private static double[] getSanitizedBuffer(final GridDataSet source, final int dimIndex, final double[] buffer) {

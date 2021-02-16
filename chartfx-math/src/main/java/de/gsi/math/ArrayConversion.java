@@ -123,7 +123,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
 
         for (int i = 0; i < in.length; i++) {
             for (int j = 0; j < in.length; j++) {
-                ret[i][j] = (double) in[i][j];
+                ret[i][j] = in[i][j];
             }
         }
 
@@ -140,7 +140,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         double[] ret = new double[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (double) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -169,7 +169,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         double[] ret = new double[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (double) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -185,7 +185,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         double[] ret = new double[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (double) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -217,7 +217,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         double[] ret = new double[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (double) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -254,7 +254,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         float[] ret = new float[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (float) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -331,7 +331,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         float[] ret = new float[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (float) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -347,7 +347,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         int[] ret = new int[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (int) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -424,7 +424,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         int[] ret = new int[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (int) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -440,7 +440,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         long[] ret = new long[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (long) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -488,7 +488,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         long[] ret = new long[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (long) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -517,7 +517,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         long[] ret = new long[in.length];
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (long) in[i];
+            ret[i] = in[i];
         }
 
         return ret;
@@ -533,7 +533,7 @@ public final class ArrayConversion { // NOPMD nomen est omen
         short[] ret = new short[in.length]; // NOPMD
 
         for (int i = 0; i < in.length; i++) {
-            ret[i] = (short) in[i]; // NOPMD
+            ret[i] = in[i]; // NOPMD
         }
         return ret;
     }

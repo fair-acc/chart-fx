@@ -70,7 +70,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
         final String methodName = stackTraceElement.getMethodName();
         final int lineNumer = stackTraceElement.getLineNumber();
 
-        return new StringBuilder().append(simpleClassName).append("::").append(methodName).append("(line:").append(lineNumer).append(")").toString();
+        return simpleClassName + "::" + methodName + "(line:" + lineNumer + ")";
     }
 
     /**

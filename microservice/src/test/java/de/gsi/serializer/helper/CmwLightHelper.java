@@ -454,6 +454,9 @@ public class CmwLightHelper {
             throw new IllegalStateException("nEntries = " + nEntries + " <= 0!");
         }
         WireDataFieldDescription field = ioSerialiser.getFieldHeader();
+        if (field == null) {
+            throw new UnsupportedOperationException("IoSerializer does not support access to individual fields");
+        }
         ioSerialiser.getBuffer().position(field.getDataStartPosition());
         nEntries--;
         return field;

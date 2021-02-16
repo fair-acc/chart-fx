@@ -439,7 +439,7 @@ public class DataSetToByteArraySample {
         ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
     }
 
-    private class DataSetWrapper {
+    private static class DataSetWrapper {
         private DataSet source;
     }
 }

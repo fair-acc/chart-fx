@@ -30,10 +30,7 @@ public class Panner extends ChartPlugin {
     /**
      * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
      */
-    public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = event ->
-            // MouseEvents.isOnlyPrimaryButtonDown(event) &&
-            // MouseEvents.isOnlyCtrlModifierDown(event) ||
-            MouseEventsHelper.isOnlyMiddleButtonDown(event);
+    public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = MouseEventsHelper::isOnlyMiddleButtonDown;
 
     private Predicate<MouseEvent> mouseFilter = Panner.DEFAULT_MOUSE_FILTER;
     private Point2D previousMouseLocation = null;

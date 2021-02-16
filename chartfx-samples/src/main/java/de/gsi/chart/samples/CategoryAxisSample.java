@@ -73,11 +73,10 @@ public class CategoryAxisSample extends Application {
 
         double y = 0;
         for (int n = 0; n < CategoryAxisSample.N_SAMPLES; n++) {
-            final double x = n;
             y += RandomDataGenerator.random() - 0.5;
             final double ex = 0.0;
             final double ey = 0.1;
-            dataSet.add(x, y, ex, ey);
+            dataSet.add(n, y, ex, ey);
             dataSet.addDataLabel(n, "SpecialCategory#" + n);
         }
 

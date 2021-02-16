@@ -68,7 +68,7 @@ public class ClipboardSample extends Application {
     private final LimitedIndexedTreeDataSet currentDataSet = new LimitedIndexedTreeDataSet("dipole current [A]", N_SAMPLES);
     private final LimitedIndexedTreeDataSet intensityDataSet = new LimitedIndexedTreeDataSet("beam intensity [ppp]", N_SAMPLES);
     private Timer timer;
-    private Runnable startStopTimerAction = () -> {
+    private final Runnable startStopTimerAction = () -> {
         if (timer == null) {
             timer = new Timer("sample-update-timer", true);
             intensityDataSet.reset();

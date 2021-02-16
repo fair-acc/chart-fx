@@ -1,6 +1,6 @@
 package de.gsi.chart.samples;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -65,7 +65,7 @@ public class CustomColourSchemeSample extends Application {
         strokeStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
             DefaultRenderColorScheme.strokeColorProperty().set(n.getPalette());
             chart.requestLayout();
-            chart.getLegend().updateLegend(chart.getDatasets(), Arrays.asList(renderer), true);
+            chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated stroke colour scheme to " + n.name());
         });
 
@@ -78,7 +78,7 @@ public class CustomColourSchemeSample extends Application {
             DefaultRenderColorScheme.fillStylesProperty().clear();
             DefaultRenderColorScheme.fillStylesProperty().set(DefaultRenderColorScheme.getStandardFillStyle());
             chart.requestLayout();
-            chart.getLegend().updateLegend(chart.getDatasets(), Arrays.asList(renderer), true);
+            chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated fill colour scheme to " + n.name());
         });
 
@@ -103,7 +103,7 @@ public class CustomColourSchemeSample extends Application {
             DefaultRenderColorScheme.fillStylesProperty().clear();
             DefaultRenderColorScheme.fillStylesProperty().set(values);
             chart.requestLayout();
-            chart.getLegend().updateLegend(chart.getDatasets(), Arrays.asList(renderer), true);
+            chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated to custom filling scheme");
         });
 
