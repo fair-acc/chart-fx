@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
  * 
  * @author Alexander Krimm
  */
-class CircluarBufferTest {
+class CircularBufferTest {
     private static final int FILL_BUFFER_LENGTH = 35;
     private CircularBuffer<Double> buffer1;
     private final int bufferLength = 10;
@@ -81,7 +81,7 @@ class CircluarBufferTest {
         assertEquals(0, buffer.available());
         assertEquals(0, buffer.writePosition());
 
-        assertThrows(IllegalArgumentException.class, () -> buffer.getIndex(-1));
+        assertThrows(IllegalArgumentException.class, () -> assertNotEquals(0, buffer.getIndex(-1)));
     }
 
     @BeforeEach

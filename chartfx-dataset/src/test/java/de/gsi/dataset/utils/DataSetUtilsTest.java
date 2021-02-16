@@ -1,6 +1,7 @@
 package de.gsi.dataset.utils;
 
 import static java.util.Objects.requireNonNull;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
@@ -87,7 +88,7 @@ class DataSetUtilsTest {
         DataSet dataSetRead = DataSetUtils.readDataSetFromByteArray(byteBuffer.toByteArray());
         // assert that DataSet was written and read correctly
         assertNotNull(dataSetRead);
-        requireNonNull(dataSet);
+        requireNonNull(dataSetRead); // convince coverity that the the variable is not null
         assertEquals(dataSet, dataSetRead);
         assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
@@ -150,6 +151,7 @@ class DataSetUtilsTest {
         DataSet dataSetRead = DataSetUtils.readDataSetFromFile(tmpdir.toAbsolutePath().toString() + '/' + filename);
         // assert that DataSet was written and read correctly
         assertNotNull(dataSetRead);
+        requireNonNull(dataSetRead); // convince coverity that the the variable is not null
         assertTrue(dataSetRead instanceof DoubleErrorDataSet);
         assertEquals(dataSet.getDataCount(), dataSetRead.getDataCount());
         for (int dim = 0; dim < dataSet.getDimension(); dim++) {

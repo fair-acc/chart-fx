@@ -1,5 +1,7 @@
 package de.gsi.microservice.concepts.majordomo.legacy;
 
+import static java.util.Objects.requireNonNull;
+
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Arrays;
@@ -28,9 +30,6 @@ import de.gsi.serializer.spi.WireDataFieldDescription;
  */
 @Deprecated(since = "2020")
 public class CmwLightClient {
-    private final ZMQ.Socket controlChannel;
-    private final AtomicInteger connectionState = new AtomicInteger(0);
-
     // Message Types in the descriptor (Last part of a message containing the type of each sub message)
     public static final byte MT_HEADER = 0;
     public static final byte MT_BODY = 1; //
@@ -85,9 +84,14 @@ public class CmwLightClient {
     public static final byte UT_FIRST_UPDATE = (byte) 1; // Initial update sent when the subscription is created.
     public static final byte UT_IMMEDIATE_UPDATE = (byte) 2; //Update sent after the value has been modified by a set call.
 
+    // client state
+    private final ZMQ.Socket controlChannel;
+    private final AtomicInteger connectionState = new AtomicInteger(0);
+    private final ZContext context;
+
     public CmwLightClient() {
         System.out.println("create new context");
-        final ZContext context = new ZContext();
+        context = new ZContext();
         controlChannel = context.createSocket(SocketType.DEALER);
         System.out.println("setup socket");
         controlChannel.setSndHWM(0);
@@ -125,13 +129,13 @@ public class CmwLightClient {
         if (!Arrays.equals(firstFrame.getData(), new byte[] { SERVER_REP })) {
             System.out.println("expected reply message, but got: " + data);
         }
-        final byte[] descriptor = data.pollLast().getData();
-        if (Arrays.equals(data.getLast().getData(), new byte[] { MT_HEADER })) {
+        final byte[] descriptor = requireNonNull(data.pollLast()).getData();
+        if (Arrays.equals(requireNonNull(data.getLast()).getData(), new byte[] { MT_HEADER })) {
             System.out.println("received header: " + data);
-        } else if (Arrays.equals(data.getLast().getData(), new byte[] { MT_HEADER, MT_BODY_EXCEPTION })) {
+        } else if (Arrays.equals(requireNonNull(data.getLast()).getData(), new byte[] { MT_HEADER, MT_BODY_EXCEPTION })) {
             System.out.println("received exception: " + data);
-        } else if (!Arrays.equals(data.getLast().getData(), new byte[] { MT_HEADER, MT_BODY, MT_BODY_DATA_CONTEXT })) {
-            System.out.println("expected reply message, but got: " + Arrays.toString(data.getLast().getData()));
+        } else if (!Arrays.equals(requireNonNull(data.getLast()).getData(), new byte[] { MT_HEADER, MT_BODY, MT_BODY_DATA_CONTEXT })) {
+            System.out.println("expected reply message, but got: " + Arrays.toString(requireNonNull(data.getLast()).getData()));
             return;
         } else {
             System.out.println("received reply: " + data);
