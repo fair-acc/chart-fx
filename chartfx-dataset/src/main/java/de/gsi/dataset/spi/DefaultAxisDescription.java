@@ -324,6 +324,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
     }
 
     private static boolean strEqual(final String str1, final String str2) {
-        return (Objects.equals(str1, str2)); // NOPMD pointer address check is intended
+        return Objects.equals(str1, str2);
     }
 }

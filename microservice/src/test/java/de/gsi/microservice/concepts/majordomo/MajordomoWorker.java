@@ -154,8 +154,10 @@ public class MajordomoWorker extends Thread {
                 final PrintWriter pw = new PrintWriter(sw);
                 e.printStackTrace(pw);
 
-                final String exceptionMsg = // NOPMD NOSONAR -- easier to read !?!?
-                        MajordomoWorker.this.getClass().getName() + " caught exception in user-provided call-back function for service '" + getServiceName() + "'\nrequest msg: " + request + "\nexception: " + sw.toString();
+                final String exceptionMsg = MajordomoWorker.this.getClass().getName() //
+                                            + " caught exception in user-provided call-back function for service '" + getServiceName() //
+                                            + "'\nrequest msg: " + request //
+                                            + "\nexception: " + sw.toString();
                 return new MdpWorkerMessage(request.senderID, MdpWorkerCommand.W_REPLY, serviceBytes, clientSourceID, exceptionMsg.getBytes(StandardCharsets.UTF_8));
             }
         }
