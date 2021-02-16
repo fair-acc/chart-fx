@@ -1,5 +1,6 @@
 package de.gsi.chart.plugins;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
@@ -99,6 +100,7 @@ class ScreenshotTest {
 
         File[] filelist = tmpdir.toAbsolutePath().toFile().listFiles();
         assertNotNull(filelist);
+        requireNonNull(filelist); // coverity needs to be assured that the variable cannot be null
         assertEquals(1, filelist.length);
         assertEquals(new File(tmpdir.toAbsolutePath().toString(), "Cosine_0.0.png"), filelist[0]);
         try (InputStream file = new FileInputStream(filelist[0])) {

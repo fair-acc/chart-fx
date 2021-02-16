@@ -1,5 +1,6 @@
 package de.gsi.serializer.annotations;
 
+import static java.util.Objects.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -71,6 +72,7 @@ class SerialiserAnnotationTests {
 
         final FieldDescription energyField = serialiserFieldDescriptions.findChildField("energy".hashCode(), "energy");
         assertNotNull(energyField);
+        requireNonNull(energyField); // coverity needs to be assured that the variable cannot be null
         assertEquals("GeV/u", energyField.getFieldUnit());
         assertEquals("energy description", energyField.getFieldDescription());
         assertEquals("OUT", energyField.getFieldDirection());
@@ -79,6 +81,7 @@ class SerialiserAnnotationTests {
 
         final FieldDescription temperatureField = serialiserFieldDescriptions.findChildField("temperature".hashCode(), "temperature");
         assertNotNull(temperatureField);
+        requireNonNull(temperatureField); // coverity needs to be assured that the variable cannot be null
         assertEquals("°C", temperatureField.getFieldUnit());
         assertEquals("important temperature reading", temperatureField.getFieldDescription());
         assertEquals("OUT", temperatureField.getFieldDirection());
