@@ -2,7 +2,9 @@
 name: Java CI
 
 on: [push, pull_request]
-
+env:
+  java_reference_version: 11
+  
 jobs:
   test:
     runs-on: ${{ matrix.os }}
@@ -10,7 +12,6 @@ jobs:
       matrix:
         os: [ubuntu-18.04]
         java: [11, 15]
-        java_reference: [11]
       fail-fast: false
       max-parallel: 4
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
@@ -23,7 +24,7 @@ jobs:
         run: |
           export REV=${GITHUB_REF#refs/*/}
           echo "REVISION=${REV/\//-}" >> $GITHUB_ENV
-          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${{matrix.java_reference}}\.[0-9]*\.[0-9]*$ ]]; then
+          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${{java_reference_version}}\.[0-9]*\.[0-9]*$ ]]; then
             echo "CHANGELIST=" >> $GITHUB_ENV
           else
             echo "CHANGELIST=-SNAPSHOT" >> $GITHUB_ENV
@@ -45,14 +46,14 @@ jobs:
         run: mvn -Dgpg.skip=true --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} package
       - name: CodeCov coverage Reporter
         uses: codecov/codecov-action@v1
-        if: matrix.java == matrix.java_reference
+        if: matrix.java == java_reference_version
       - name: Codacy coverage Reporter
-        if: matrix.java == matrix.java_reference
+        if: matrix.java == java_reference_version
         uses: codacy/codacy-coverage-reporter-action@0.2.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
       - name: Run Codacy Analysis CLI
-        if: matrix.java == matrix.java_reference
+        if: matrix.java == java_reference_version
         uses: codacy/codacy-analysis-cli-action@master
         with:
           output: results.sarif
@@ -63,7 +64,7 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
       - name: Upload SARIF results file
-        if: matrix.java == matrix.java_reference
+        if: matrix.java == java_reference_version
         uses: github/codeql-action/upload-sarif@main
         with:
           sarif_file: results.sarif
@@ -79,7 +80,7 @@ jobs:
         run: |
           export REV=${GITHUB_REF#refs/*/}
           echo "REVISION=${REV/\//-}" >> $GITHUB_ENV
-          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${{matrix.java_reference}}\.[0-9]*\.[0-9]*$ ]]; then
+          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${{java_reference_version}}\.[0-9]*\.[0-9]*$ ]]; then
             echo "CHANGELIST=" >> $GITHUB_ENV
           else
             echo "CHANGELIST=-SNAPSHOT" >> $GITHUB_ENV
@@ -96,7 +97,7 @@ jobs:
       - name: Set up the JDK
         uses: actions/setup-java@v1.4.3
         with:
-          java-version: ${{ matrix.java_reference }}
+          java-version: ${{ test.java_reference_version }}
           gpg-private-key: ${{ secrets.GPG_KEY }}
           gpg-passphrase: GPG_PASS
       - name: Deploy to Github Packages
@@ -107,7 +108,7 @@ jobs:
       - name: Set up JDK to publish to OSSRH
         uses: actions/setup-java@v1.4.3
         with:
-          java-version: ${{ matrix.java_reference }}
+          java-version: ${{ test.java_reference_version }}
           server-id: ossrh
           server-username: SONATYPE_USER
           server-password: SONATYPE_PASS
