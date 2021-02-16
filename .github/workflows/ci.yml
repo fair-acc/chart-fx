@@ -3,7 +3,7 @@ name: Java CI
 
 on: [push, pull_request]
 env:
-  java_reference_version: 11
+  JAVA_REFERENCE_VERSION: 11
   
 jobs:
   test:
@@ -24,7 +24,7 @@ jobs:
         run: |
           export REV=${GITHUB_REF#refs/*/}
           echo "REVISION=${REV/\//-}" >> $GITHUB_ENV
-          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${java_reference_version}\.[0-9]*\.[0-9]*$ ]]; then
+          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${JAVA_REFERENCE_VERSION}\.[0-9]*\.[0-9]*$ ]]; then
             echo "CHANGELIST=" >> $GITHUB_ENV
           else
             echo "CHANGELIST=-SNAPSHOT" >> $GITHUB_ENV
@@ -46,25 +46,25 @@ jobs:
         run: mvn -Dgpg.skip=true --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} package
       - name: CodeCov coverage Reporter
         uses: codecov/codecov-action@v1
-        if: matrix.java == java_reference_version
+        if: matrix.java == ${JAVA_REFERENCE_VERSION}
       - name: Codacy coverage Reporter
-        if: matrix.java == java_reference_version
+        if: matrix.java == ${JAVA_REFERENCE_VERSION}
         uses: codacy/codacy-coverage-reporter-action@0.2.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
       - name: Run Codacy Analysis CLI
-        if: matrix.java == java_reference_version
+        if: matrix.java == ${JAVA_REFERENCE_VERSION}
         uses: codacy/codacy-analysis-cli-action@master
         with:
           output: results.sarif
           format: sarif
-          # Adjust severity of non-security issues
+# Adjust severity of non-security issues
           gh-code-scanning-compat: true
           # Force 0 exit code to allow SARIF file generation
-          # This will handover control about PR rejection to the GitHub side
+#This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
       - name: Upload SARIF results file
-        if: matrix.java == java_reference_version
+        if: matrix.java == ${JAVA_REFERENCE_VERSION}
         uses: github/codeql-action/upload-sarif@main
         with:
           sarif_file: results.sarif
@@ -78,9 +78,10 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set version environment for version string
         run: |
-          export REV=${GITHUB_REF#refs/*/}
+          export REV=${
+            GITHUB_REF #refs /*/}
           echo "REVISION=${REV/\//-}" >> $GITHUB_ENV
-          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${{java_reference_version}}\.[0-9]*\.[0-9]*$ ]]; then
+          if [[ "${GITHUB_REF#refs/tags/}" =~ ^${JAVA_REFERENCE_VERSION}\.[0-9]*\.[0-9]*$ ]]; then
             echo "CHANGELIST=" >> $GITHUB_ENV
           else
             echo "CHANGELIST=-SNAPSHOT" >> $GITHUB_ENV
@@ -92,33 +93,51 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-      - name: Set up the JDK
-        uses: actions/setup-java@v1.4.3
-        with:
-          java-version: ${{ test.java_reference_version }}
-          gpg-private-key: ${{ secrets.GPG_KEY }}
-          gpg-passphrase: GPG_PASS
-      - name: Deploy to Github Packages
-        run: if [ -z "$CHANGELIST" ]; then mvn -DskipTests --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} -Drelease=github deploy; fi
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GPG_PASS: ${{ secrets.GPG_PASSPHRASE }}
-      - name: Set up JDK to publish to OSSRH
-        uses: actions/setup-java@v1.4.3
-        with:
-          java-version: ${{ test.java_reference_version }}
-          server-id: ossrh
-          server-username: SONATYPE_USER
-          server-password: SONATYPE_PASS
-          # gpg-private-key: ${{ secrets.GPG_KEY }} # gpg key was already added in the first java-setup phase, will fail the cleanup if added again
-          gpg-passphrase: GPG_PASS
-      - name: Deploy to Maven Central
-        run: mvn -DskipTests --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} -Drelease=ossrh deploy
-        env:
-          GPG_PASS: ${{ secrets.GPG_PASSPHRASE }}
-          SONATYPE_USER: ${{ secrets.SONATYPE_USER }}
-          SONATYPE_PASS: ${{ secrets.SONATYPE_PASS }}
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/
+                    pom.xml') }} restore
+                    - keys : ${ { runner.os } } - m2
+                             - name : Set up the JDK
+                                              uses : actions
+                                                     / setup
+                             - java @v1 .4.3 with : java
+                                                    - version : ${ JAVA_REFERENCE_VERSION } gpg
+                                                                - private
+                                                                - key : $ {
+                { secrets.GPG_KEY }
+            }
+            gpg - passphrase : GPG_PASS
+                               - name : Deploy to Github Packages
+                                                run : if[-z "$CHANGELIST"];
+            then mvn - DskipTests-- no - transfer - progress-- batch - mode - Drevision = ${ REVISION } - Dchangelist = ${ CHANGELIST } - Drelease = github deploy;
+            fi
+                    env : GITHUB_TOKEN : $ {
+                { secrets.GITHUB_TOKEN }
+            }
+        GPG_PASS:
+            ${ { secrets.GPG_PASSPHRASE } }
+                    - name : Set up JDK to publish to OSSRH
+                                     uses : actions
+                                            / setup
+                    - java @v1 .4.3 with : java - version : ${ JAVA_REFERENCE_VERSION } server - id : ossrh server - username : SONATYPE_USER server - password : SONATYPE_PASS
+#gpg - private - key : $ { { secrets.GPG_KEY } } #gpg key was already added in the first java - setup phase, will fail the cleanup if added again
+                                                                                                                                                                          gpg
+                                                                                                                                                                  - passphrase : GPG_PASS
+                                                                                                                                                                                 - name : Deploy to Maven Central
+                                                                                                                                                                                                  run : mvn
+                                                                                                                                                                                                        - DskipTests-- no
+                                                                                                                                                                                                        - transfer
+                                                                                                                                                                                                        - progress-- batch
+                                                                                                                                                                                                        - mode
+                                                                                                                                                                                                        - Drevision
+                    = ${ REVISION } - Dchangelist = ${ CHANGELIST } - Drelease = ossrh deploy
+                            env : GPG_PASS : $ {
+                { secrets.GPG_PASSPHRASE }
+            }
+        SONATYPE_USER:
+            $ {
+                { secrets.SONATYPE_USER }
+            }
+        SONATYPE_PASS:
+            ${ { secrets.SONATYPE_PASS } }
 
-...
+            ...
