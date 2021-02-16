@@ -1,11 +1,8 @@
 package de.gsi.dataset.spi.utils;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author akrimm
@@ -14,9 +11,9 @@ class MultiArrayTest {
     //// Double
     @Test
     void testMultiArrayDoubleExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new double[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 }) != null)); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0))); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap(new double[] { 3, 2 }, 0, new int[] { 1, 2, 3 }))); // elements smaller than dimensions
     }
 
     @Test
@@ -36,10 +33,10 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 1, 2, 0 }, array.getIndices(array.getIndex(new int[] { 1, 2, 0 })));
         assertArrayEquals(new int[] { 0, 0, 0 }, array.getIndices(3));
         assertEquals(8 + 3, array.getIndex(array.getIndices(8 + 3)));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(15));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, 2, 2 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, -1, 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(15)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(2)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, 2, 2 })));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, -1, 0 })));
     }
 
     @Test
@@ -101,10 +98,10 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 1, 2, 0 }, array.getIndices(array.getIndex(new int[] { 1, 2, 0 })));
         assertArrayEquals(new int[] { 0, 0, 0 }, array.getIndices(3));
         assertEquals(8 + 3, array.getIndex(array.getIndices(8 + 3)));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(15));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, 2, 2 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, -1, 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(15)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(2)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, 2, 2 })));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, -1, 0 }));
     }
 
     @Test
@@ -144,9 +141,9 @@ class MultiArrayTest {
     //// Float
     @Test
     void testMultiArrayFloatExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new float[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 }))); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0))); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap(new float[] { 3, 2 }, 0, new int[] { 1, 2, 3 }))); // elements smaller than dimensions
     }
 
     @Test
@@ -166,10 +163,10 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 1, 2, 0 }, array.getIndices(array.getIndex(new int[] { 1, 2, 0 })));
         assertArrayEquals(new int[] { 0, 0, 0 }, array.getIndices(3));
         assertEquals(8 + 3, array.getIndex(array.getIndices(8 + 3)));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(15));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, 2, 2 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, -1, 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(15)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(2)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, 2, 2 })));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, -1, 0 })));
     }
 
     @Test
@@ -203,9 +200,9 @@ class MultiArrayTest {
     //// Long
     @Test
     void testMultiArrayLongExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new long[] { 3, 2 }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 }))); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0))); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap(new long[] { 3, 2 }, 0, new int[] { 1, 2, 3 }))); // elements smaller than dimensions
     }
 
     @Test
@@ -225,10 +222,10 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 1, 2, 0 }, array.getIndices(array.getIndex(new int[] { 1, 2, 0 })));
         assertArrayEquals(new int[] { 0, 0, 0 }, array.getIndices(3));
         assertEquals(8 + 3, array.getIndex(array.getIndices(8 + 3)));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(15));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, 2, 2 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, -1, 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(15)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(2)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, 2, 2 })));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, -1, 0 })));
     }
 
     @Test
@@ -262,9 +259,9 @@ class MultiArrayTest {
     //// Object
     @Test
     void testMultiArrayObjectExceptions() {
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 })); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap("Foo", 0)); // elements no array
-        assertThrows(IllegalArgumentException.class, () -> MultiArray.wrap(new String[] { "a", "b" }, 0, new int[] { 1, 2, 3 })); // elements smaller than dimensions
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0, new int[] { 1, 2, 3 }))); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap("Foo", 0))); // elements no array
+        assertThrows(IllegalArgumentException.class, () -> assertNotNull(MultiArray.wrap(new String[] { "a", "b" }, 0, new int[] { 1, 2, 3 }))); // elements smaller than dimensions
     }
 
     @Test
@@ -284,10 +281,10 @@ class MultiArrayTest {
         assertArrayEquals(new int[] { 1, 2, 0 }, array.getIndices(array.getIndex(new int[] { 1, 2, 0 })));
         assertArrayEquals(new int[] { 0, 0, 0 }, array.getIndices(3));
         assertEquals(8 + 3, array.getIndex(array.getIndices(8 + 3)));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(15));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndices(2));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, 2, 2 }));
-        assertThrows(IndexOutOfBoundsException.class, () -> array.getIndex(new int[] { 0, -1, 0 }));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(15)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotNull(array.getIndices(2)));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, 2, 2 })));
+        assertThrows(IndexOutOfBoundsException.class, () -> assertNotEquals(0, array.getIndex(new int[] { 0, -1, 0 })));
     }
 
     @Test

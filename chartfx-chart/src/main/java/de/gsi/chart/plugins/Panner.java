@@ -27,8 +27,6 @@ import de.gsi.chart.ui.geometry.Side;
  * @author Grzegorz Kruk
  */
 public class Panner extends ChartPlugin {
-    // MouseEvents.isOnlyPrimaryButtonDown(event) &&
-    // MouseEvents.isOnlyCtrlModifierDown(event) ||
     /**
      * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
      */
