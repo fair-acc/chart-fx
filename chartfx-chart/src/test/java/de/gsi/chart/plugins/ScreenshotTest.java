@@ -1,6 +1,7 @@
 package de.gsi.chart.plugins;
 
 import static java.util.Objects.requireNonNull;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
