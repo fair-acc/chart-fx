@@ -1,5 +1,7 @@
 package de.gsi.microservice.concepts.cmwlight;
 
+import static java.util.Objects.requireNonNull;
+
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,8 +12,6 @@ import org.zeromq.*;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.serializer.*;
 import de.gsi.serializer.spi.*;
-
-import static java.util.Objects.requireNonNull;
 
 /**
  * A lightweight implementation of the CMW RDA client protocol part.

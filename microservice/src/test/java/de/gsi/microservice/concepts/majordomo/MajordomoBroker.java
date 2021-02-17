@@ -1,6 +1,7 @@
 package de.gsi.microservice.concepts.majordomo;
 
 import static java.util.Objects.requireNonNull;
+
 import static org.zeromq.ZMQ.Socket;
 
 import static de.gsi.microservice.concepts.majordomo.MajordomoProtocol.MdpClientCommand;
