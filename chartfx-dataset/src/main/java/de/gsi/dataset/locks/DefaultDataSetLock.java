@@ -1,7 +1,6 @@
 package de.gsi.dataset.locks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
@@ -18,7 +17,7 @@ import de.gsi.dataset.DataSet;
  *     [..] some other code [..]
  *  lock.writeUnLock(); // restores isAutoNotification state
  * </pre>
- *
+ * <p>
  * However, the recommended usage is using the lock guard primitives, e.g.
  *
  * <pre>
@@ -27,7 +26,7 @@ import de.gsi.dataset.DataSet;
  *    return retVal; // N.B. optional return - here: assumes Objects or boxed primitives
  * });
  * </pre>
- *
+ * <p>
  * Alternatively the best performing option for frequent simple reads without major data processing
  *
  * <pre>
@@ -36,16 +35,17 @@ import de.gsi.dataset.DataSet;
  * 	  return retVal; // N.B. optional return - here: assumes Objects or boxed primitives
  * });
  * </pre>
- *
+ * <p>
  * The latter assumes infrequent writes (e.g. a single writer thread) and frequent unobstructed reads (ie. many reader
  * threads). The lock internally acquires the data w/o explicitly locking, checks afterwards if the data has potentially
  * changed a write-lock acquiring thread, and as a automatic fall-back uses the guaranteed (but more expensive) read
  * lock to assure that the read data structure is consistent.
  *
- * @author rstein
  * @param <D> generics reference, usually to <code>&lt;? extends DataSet&gt;</code>
+ * @author rstein
  */
-@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize", "PMD.TooManyMethods" }) // Runnable used as functional interface
+@SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize", "PMD.TooManyMethods" })
+// Runnable used as functional interface
 public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private static final long serialVersionUID = 1L;
     private final transient StampedLock stampedLock = new StampedLock();
@@ -54,7 +54,8 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private transient Thread writeLockedByThread; // NOPMD
     private final transient Object readerCountLock = new Object();
     private int readerCount;
-    private final transient AtomicInteger writerCount = new AtomicInteger(0);
+    private final transient Object writerCountLock = new Object();
+    private int writerCount;
     private final transient AtomicBoolean autoNotifyState = new AtomicBoolean(true);
     private final transient D dataSet;
 
@@ -87,9 +88,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             throw new IllegalStateException("cannot downconvert lock - tryConvertToReadLock return '0'");
         }
         synchronized (readerCountLock) {
-            synchronized (stampedLock) {
+            synchronized (writerCountLock) {
                 readerCount++;
-                this.writerCount.getAndDecrement();
+                writerCount--;
                 if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
                     stampedLock.unlockRead(lastReadStamp);
                 }
@@ -98,20 +99,6 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         }
 
         return dataSet;
-    }
-
-    /**
-     * @return the last stored auto-notification state
-     */
-    public boolean getLastStoredAutoNotificationState() { // NOPMD
-        return autoNotifyState.get();
-    }
-
-    /**
-     * @return the internal StampedLock object
-     */
-    public StampedLock getLockObject() {
-        return stampedLock;
     }
 
     /**
@@ -127,7 +114,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
      * @return number of writers presently locked on this data set (N.B. all from the same thread)
      */
     public int getWriterCount() {
-        return writerCount.get();
+        synchronized (writerCountLock) {
+            return writerCount;
+        }
     }
 
     @Override
@@ -226,7 +215,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
                 autoNotifyState.set(dataSet.autoNotification().getAndSet(false));
             }
         }
-        writerCount.incrementAndGet();
+        synchronized (writerCountLock) {
+            writerCount++;
+        }
         return dataSet;
     }
 
@@ -261,17 +252,18 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D writeUnLock() {
-        if (writerCount.decrementAndGet() == 0) {
-            synchronized (stampedLock) {
+        synchronized (writerCountLock) {
+            writerCount--;
+            if (writerCount == 0) {
                 final long temp = lastWriteStamp;
                 lastWriteStamp = 0;
                 // restore present auto-notify state
                 dataSet.autoNotification().set(autoNotifyState.get());
                 writeLockedByThread = null; // NOPMD
                 stampedLock.unlockWrite(temp);
+            } else if (writerCount < 0) {
+                throw new IllegalStateException("write lock already unlocked");
             }
-        } else if (writerCount.get() < 0) {
-            throw new IllegalStateException("write lock alread unlocked");
         }
         return dataSet;
     }
