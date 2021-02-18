@@ -52,7 +52,8 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private transient long lastReadStamp;
     private transient long lastWriteStamp;
     private transient Thread writeLockedByThread; // NOPMD
-    private final transient AtomicInteger readerCount = new AtomicInteger(0);
+    private final transient Object readerCountLock = new Object();
+    private int readerCount;
     private final transient AtomicInteger writerCount = new AtomicInteger(0);
     private final transient AtomicBoolean autoNotifyState = new AtomicBoolean(true);
     private final transient D dataSet;
@@ -73,7 +74,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
      * @return corresponding data set
      * @deprecated do not use (yet)
      */
-    @Deprecated
+    @Deprecated(since = "still under test")
     public D downGradeWriteLock() {
         if (!stampedLock.isWriteLocked()) {
             throw new IllegalStateException("cannot downconvert lock - lock is not write locked");
@@ -85,22 +86,18 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         if (result == 0L) { // NOPMD to be expected return value from 'tryConvertToReadLock'
             throw new IllegalStateException("cannot downconvert lock - tryConvertToReadLock return '0'");
         }
-        this.readerCount.getAndIncrement();
-        this.writerCount.getAndDecrement();
-        if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
-            stampedLock.unlockRead(lastReadStamp);
+        synchronized (readerCountLock) {
+            synchronized (stampedLock) {
+                readerCount++;
+                this.writerCount.getAndDecrement();
+                if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
+                    stampedLock.unlockRead(lastReadStamp);
+                }
+                lastReadStamp = result;
+            }
         }
-        lastReadStamp = result;
 
         return dataSet;
-    }
-
-    /**
-     * @return last reader stamp
-     * @see java.util.concurrent.locks.StampedLock
-     */
-    public long getLastReadStamp() {
-        return lastReadStamp;
     }
 
     /**
@@ -108,14 +105,6 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
      */
     public boolean getLastStoredAutoNotificationState() { // NOPMD
         return autoNotifyState.get();
-    }
-
-    /**
-     * @return last writer stamp
-     * @see java.util.concurrent.locks.StampedLock
-     */
-    public long getLastWriteStamp() {
-        return lastWriteStamp;
     }
 
     /**
@@ -129,7 +118,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
      * @return number of readers presently locked on this data set
      */
     public int getReaderCount() {
-        return readerCount.get();
+        synchronized (readerCountLock) {
+            return readerCount;
+        }
     }
 
     /**
@@ -141,8 +132,11 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D readLock() {
-        if (readerCount.getAndIncrement() == 0) {
-            lastReadStamp = stampedLock.readLock();
+        synchronized (readerCountLock) {
+            if (readerCount == 0) {
+                lastReadStamp = stampedLock.readLock();
+            }
+            readerCount++;
         }
 
         return dataSet;
@@ -207,11 +201,14 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D readUnLock() {
-        if (readerCount.decrementAndGet() == 0) {
-            stampedLock.unlockRead(lastReadStamp);
-            lastReadStamp = 0L;
-        } else if (readerCount.get() < 0) {
-            throw new IllegalStateException("read lock alread unlocked");
+        synchronized (readerCountLock) {
+            readerCount--;
+            if (readerCount == 0) {
+                stampedLock.unlockRead(lastReadStamp);
+                lastReadStamp = 0L;
+            } else if (readerCount < 0) {
+                throw new IllegalStateException("read lock alread unlocked");
+            }
         }
 
         return dataSet;
