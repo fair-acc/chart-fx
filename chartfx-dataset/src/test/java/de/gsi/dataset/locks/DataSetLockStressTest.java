@@ -108,7 +108,8 @@ class DataSetLockStressTest {
                 nWrites++;
             }
         } catch (Exception e) {
-            exception = e; exception = e; // forward exception to static class context
+            exception = e;
+            exception = e; // forward exception to static class context
             testThread.interrupt();
             return -1;
         }

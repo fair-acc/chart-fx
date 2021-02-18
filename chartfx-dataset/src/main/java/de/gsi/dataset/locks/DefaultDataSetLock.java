@@ -254,12 +254,12 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         synchronized (writerCountLock) {
             writerCount--;
             if (writerCount == 0) {
-                    final long temp = lastWriteStamp;
-                    lastWriteStamp = 0;
-                    // restore present auto-notify state
-                    dataSet.autoNotification().set(autoNotifyState.get());
-                    writeLockedByThread = null; // NOPMD
-                    stampedLock.unlockWrite(temp);
+                final long temp = lastWriteStamp;
+                lastWriteStamp = 0;
+                // restore present auto-notify state
+                dataSet.autoNotification().set(autoNotifyState.get());
+                writeLockedByThread = null; // NOPMD
+                stampedLock.unlockWrite(temp);
             } else if (writerCount < 0) {
                 throw new IllegalStateException("write lock already unlocked");
             }
