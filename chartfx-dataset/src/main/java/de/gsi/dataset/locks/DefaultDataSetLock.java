@@ -1,7 +1,6 @@
 package de.gsi.dataset.locks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
@@ -54,7 +53,8 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private transient Thread writeLockedByThread; // NOPMD
     private final transient Object readerCountLock = new Object();
     private int readerCount;
-    private final transient AtomicInteger writerCount = new AtomicInteger(0);
+    private final transient Object writerCountLock = new Object();
+    private int writerCount;
     private final transient AtomicBoolean autoNotifyState = new AtomicBoolean(true);
     private final transient D dataSet;
 
@@ -87,9 +87,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             throw new IllegalStateException("cannot downconvert lock - tryConvertToReadLock return '0'");
         }
         synchronized (readerCountLock) {
-            synchronized (stampedLock) {
+            synchronized (writerCountLock) {
                 readerCount++;
-                this.writerCount.getAndDecrement();
+                writerCount--;
                 if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
                     stampedLock.unlockRead(lastReadStamp);
                 }
@@ -98,20 +98,6 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         }
 
         return dataSet;
-    }
-
-    /**
-     * @return the last stored auto-notification state
-     */
-    public boolean getLastStoredAutoNotificationState() { // NOPMD
-        return autoNotifyState.get();
-    }
-
-    /**
-     * @return the internal StampedLock object
-     */
-    public StampedLock getLockObject() {
-        return stampedLock;
     }
 
     /**
@@ -127,7 +113,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
      * @return number of writers presently locked on this data set (N.B. all from the same thread)
      */
     public int getWriterCount() {
-        return writerCount.get();
+        synchronized (writerCountLock) {
+            return writerCount;
+        }
     }
 
     @Override
@@ -226,7 +214,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
                 autoNotifyState.set(dataSet.autoNotification().getAndSet(false));
             }
         }
-        writerCount.incrementAndGet();
+        synchronized (writerCountLock) {
+            writerCount++;
+        }
         return dataSet;
     }
 
@@ -261,17 +251,18 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D writeUnLock() {
-        if (writerCount.decrementAndGet() == 0) {
-            synchronized (stampedLock) {
-                final long temp = lastWriteStamp;
-                lastWriteStamp = 0;
-                // restore present auto-notify state
-                dataSet.autoNotification().set(autoNotifyState.get());
-                writeLockedByThread = null; // NOPMD
-                stampedLock.unlockWrite(temp);
+        synchronized (writerCountLock) {
+            writerCount--;
+            if (writerCount == 0) {
+                    final long temp = lastWriteStamp;
+                    lastWriteStamp = 0;
+                    // restore present auto-notify state
+                    dataSet.autoNotification().set(autoNotifyState.get());
+                    writeLockedByThread = null; // NOPMD
+                    stampedLock.unlockWrite(temp);
+            } else if (writerCount < 0) {
+                throw new IllegalStateException("write lock already unlocked");
             }
-        } else if (writerCount.get() < 0) {
-            throw new IllegalStateException("write lock alread unlocked");
         }
         return dataSet;
     }
