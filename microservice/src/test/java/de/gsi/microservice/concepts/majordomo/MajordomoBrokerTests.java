@@ -1,5 +1,7 @@
 package de.gsi.microservice.concepts.majordomo;
 
+import static java.util.Objects.requireNonNull;
+
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -70,8 +72,9 @@ public class MajordomoBrokerTests {
         sendClientMessage(clientSocket, MdpClientCommand.C_UNKNOWN, null, DEFAULT_ECHO_SERVICE, DEFAULT_REQUEST_MESSAGE_BYTES);
 
         final MdpMessage reply = receiveMdpMessage(clientSocket);
-        assertNotNull(reply.toString());
         assertNotNull(reply, "reply message w/o RBAC token not being null");
+        requireNonNull(reply); // coverity needs to be assured that the variable cannot be null
+        assertNotNull(reply.toString());
         assertTrue(reply instanceof MdpClientMessage);
         MdpClientMessage clientMessage = (MdpClientMessage) reply;
         assertNull(clientMessage.senderID); // default dealer socket does not export sender ID (only ROUTER and/or enabled sockets)
@@ -249,6 +252,7 @@ public class MajordomoBrokerTests {
             for (int i = 0; i < 10; i++) {
                 final ZMsg reply = clientSession.recv();
                 assertNotNull(reply, "reply message w/o RBAC token not being null");
+                requireNonNull(reply); // convince coverity that variable is not null
                 assertNotNull(reply.peekLast(), "user-data not being null");
                 assertArrayEquals(DEFAULT_REQUEST_MESSAGE_BYTES, reply.getLast().getData());
                 counter.getAndIncrement();

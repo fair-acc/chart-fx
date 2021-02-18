@@ -1,5 +1,7 @@
 package de.gsi.microservice.concepts.cmwlight;
 
+import static java.util.Objects.requireNonNull;
+
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -170,17 +172,17 @@ public class CmwLightProtocol {
 
     public static CmwLightMessage parseMsg(final ZMsg data) throws RdaLightException { // NOPMD - NPath complexity acceptable (complex protocol)
         AssertUtils.notNull("data", data);
-        final ZFrame firstFrame = data.pollFirst();
+        final ZFrame firstFrame = requireNonNull(data.pollFirst());
         if (firstFrame != null && Arrays.equals(firstFrame.getData(), new byte[] { MessageType.SERVER_CONNECT_ACK.value() })) {
             final CmwLightMessage reply = new CmwLightMessage(MessageType.SERVER_CONNECT_ACK);
-            final ZFrame versionData = data.pollFirst();
+            final ZFrame versionData = requireNonNull(data.pollFirst());
             AssertUtils.notNull("version data in connection acknowledgement frame", versionData);
             reply.version = versionData.getString(Charset.defaultCharset());
             return reply;
         }
         if (firstFrame != null && Arrays.equals(firstFrame.getData(), new byte[] { MessageType.CLIENT_CONNECT.value() })) {
             final CmwLightMessage reply = new CmwLightMessage(MessageType.CLIENT_CONNECT);
-            final ZFrame versionData = data.pollFirst();
+            final ZFrame versionData = requireNonNull(data.pollFirst());
             AssertUtils.notNull("version data in connection acknowledgement frame", versionData);
             reply.version = versionData.getString(Charset.defaultCharset());
             return reply;
@@ -198,24 +200,24 @@ public class CmwLightProtocol {
         switch (reply.requestType) {
         case REPLY:
             assertDescriptor(descriptor, FrameType.HEADER, FrameType.BODY, FrameType.BODY_DATA_CONTEXT);
-            reply.bodyData = data.pollFirst();
-            reply.dataContext = parseContextData(data.pollFirst());
+            reply.bodyData = requireNonNull(data.pollFirst());
+            reply.dataContext = parseContextData(requireNonNull(data.pollFirst()));
             return reply;
         case NOTIFICATION_DATA: // notification update
             assertDescriptor(descriptor, FrameType.HEADER, FrameType.BODY, FrameType.BODY_DATA_CONTEXT);
             reply.notificationId = (long) reply.options.get(FieldName.NOTIFICATION_ID_TAG.value());
-            reply.bodyData = data.pollFirst();
-            reply.dataContext = parseContextData(data.pollFirst());
+            reply.bodyData = requireNonNull(data.pollFirst());
+            reply.dataContext = parseContextData(requireNonNull(data.pollFirst()));
             return reply;
         case EXCEPTION: // exception on get/set request
         case NOTIFICATION_EXC: // exception on notification, e.g null pointer in server notify code
         case SUBSCRIBE_EXCEPTION: // exception on subscribe e.g. nonexistent property, wrong filters
             assertDescriptor(descriptor, FrameType.HEADER, FrameType.BODY_EXCEPTION);
-            reply.exceptionMessage = parseExceptionMessage(data.pollFirst());
+            reply.exceptionMessage = parseExceptionMessage(requireNonNull(data.pollFirst()));
             return reply;
         case GET:
             assertDescriptor(descriptor, FrameType.HEADER, FrameType.BODY_REQUEST_CONTEXT);
-            reply.requestContext = parseRequestContext(data.pollFirst());
+            reply.requestContext = parseRequestContext(requireNonNull(data.pollFirst()));
             return reply;
         case SUBSCRIBE: // descriptor: [0] options: SOURCE_ID_TAG // seems to be sent after subscription is accepted
             if (reply.messageType == MessageType.SERVER_REP) {
@@ -223,7 +225,7 @@ public class CmwLightProtocol {
                 reply.sourceId = (long) reply.options.get(FieldName.SOURCE_ID_TAG.value());
             } else {
                 assertDescriptor(descriptor, FrameType.HEADER, FrameType.BODY_REQUEST_CONTEXT);
-                reply.requestContext = parseRequestContext(data.pollFirst());
+                reply.requestContext = parseRequestContext(requireNonNull(data.pollFirst()));
             }
             return reply;
         case SESSION_CONFIRM: // descriptor: [0] options: SESSION_BODY_TAG
@@ -237,8 +239,8 @@ public class CmwLightProtocol {
             return reply;
         case SET:
             assertDescriptor(descriptor, FrameType.HEADER, FrameType.BODY, FrameType.BODY_REQUEST_CONTEXT);
-            reply.bodyData = data.pollFirst();
-            reply.requestContext = parseRequestContext(data.pollFirst());
+            reply.bodyData = requireNonNull(data.pollFirst());
+            reply.requestContext = parseRequestContext(requireNonNull(data.pollFirst()));
             return reply;
         default:
             throw new RdaLightException("received unknown or non-client request type: " + reply.requestType);

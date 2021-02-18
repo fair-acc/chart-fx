@@ -1,5 +1,7 @@
 package de.gsi.microservice.concepts.majordomo;
 
+import static java.util.Objects.requireNonNull;
+
 import static org.zeromq.ZMQ.Socket;
 
 import static de.gsi.microservice.concepts.majordomo.MajordomoProtocol.MdpClientCommand;
@@ -570,7 +572,7 @@ public class MajordomoBroker extends Thread {
         protected void putPrioritisedMessage(final MdpClientMessage queuedMessage) {
             if (queuedMessage.hasRbackToken()) {
                 // find proper RBAC queue
-                final RbacToken rbacToken = RbacToken.from(queuedMessage.getRbacFrame());
+                final RbacToken rbacToken = RbacToken.from(requireNonNull(queuedMessage.getRbacFrame()));
                 final Queue<MdpClientMessage> roleBasedQueue = requests.get(rbacToken.getRole());
                 if (roleBasedQueue != null) {
                     roleBasedQueue.offer(queuedMessage);

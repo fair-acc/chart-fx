@@ -125,11 +125,14 @@ public class CmwLightClient {
         if (connectionState.get().equals(ConnectionState.CONNECTING) && reply.messageType == CmwLightProtocol.MessageType.SERVER_CONNECT_ACK) {
             connectionState.set(ConnectionState.CONNECTED);
             backOff = 20; // reset back-off time
+            lastHbReceived = currentTime;
             return reply;
         }
         if (connectionState.get() != ConnectionState.CONNECTED) {
             LOGGER.atWarn().addArgument(reply).log("received data before connection established: {}");
+            return null;
         }
+        lastHbReceived = currentTime;
         if (reply.requestType == CmwLightProtocol.RequestType.SUBSCRIBE_EXCEPTION) {
             final long id = reply.id;
             final Subscription sub = subscriptions.get(id);
@@ -143,9 +146,6 @@ public class CmwLightClient {
             sub.updateId = (long) reply.options.get(CmwLightProtocol.FieldName.SOURCE_ID_TAG.value());
             sub.subscriptionState = SubscriptionState.SUBSCRIBED;
             sub.backOff = 20;
-        }
-        if (reply != null) {
-            lastHbReceived = currentTime;
         }
         return reply;
     }

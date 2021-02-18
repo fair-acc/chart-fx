@@ -156,7 +156,8 @@ public class DataSetLockTest {
         }
 
         // recursive read locks
-        myLock.readLock().getDataCount();
+        myLock.readLock();
+        assertEquals(0, dataSet.getDataCount());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().log("READER: after first read lock");
         }
@@ -261,7 +262,8 @@ public class DataSetLockTest {
         assertEquals(0, myLockImpl.getWriterCount());
         assertTrue(dataSet.isAutoNotification());
 
-        myLock.readLock().getDataCount();
+        myLock.readLock();
+        assertEquals(0, dataSet.getDataCount());
         assertEquals(1, myLockImpl.getReaderCount());
         assertEquals(0, myLockImpl.getWriterCount());
 
@@ -288,7 +290,8 @@ public class DataSetLockTest {
         assertEquals(0, myLockImpl.getWriterCount());
 
         Thread reader = new Thread(() -> {
-            myLock.readLock().getDataCount();
+            myLock.readLock();
+            assertEquals(0, dataSet.getDataCount());
             assertEquals(2, myLockImpl.getReaderCount());
             assertEquals(0, myLockImpl.getWriterCount());
             myLock.readUnLock();
