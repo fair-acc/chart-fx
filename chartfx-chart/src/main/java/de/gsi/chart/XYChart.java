@@ -1,7 +1,9 @@
 package de.gsi.chart;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -52,7 +54,7 @@ import de.gsi.dataset.utils.AssertUtils;
 public class XYChart extends Chart {
     private static final Logger LOGGER = LoggerFactory.getLogger(XYChart.class);
     protected static final int BURST_LIMIT_MS = 15;
-    protected BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
+    protected final BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
     private final GridRenderer gridRenderer = new GridRenderer();
     protected final ChangeListener<? super Boolean> gridLineVisibilitychange = (ob, o, n) -> requestLayout();
@@ -65,7 +67,7 @@ public class XYChart extends Chart {
      *
      */
     public XYChart() {
-        this(new Axis[] {});
+        this(new Axis[] {}); // NOPMD NOSONAR
         // N.B. this constructor is needed since JavaFX seems to instantiate fxml using reflection to find the corresponding constructor
     }
 
@@ -129,7 +131,6 @@ public class XYChart extends Chart {
      *         that add/remove datasets from a global observable list
      */
     public ObservableList<DataSet> getAllShownDatasets() {
-        // return allVisibleDataSets;
         final ObservableList<DataSet> ret = FXCollections.observableArrayList();
         ret.addAll(getDatasets());
         getRenderers().stream().filter(Renderer::showInLegend).forEach(renderer -> ret.addAll(renderer.getDatasets()));
@@ -259,33 +260,20 @@ public class XYChart extends Chart {
         dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()) //
                                                              .forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
 
-        // N.B. possible race condition on this line -> for the future to solve
-        // recomputeLimits holds a writeLock the following sections need a read lock (for allowing parallel axis)
-        // there isn't an easy way to down-grade the established write locks into read locks (yet)
-        // Experimental version:
-        // dataSets.forEach(dataset -> {
-        // dataset.lock().writeLock();
-        // dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined())
-        // .forEach(axisDescription -> {
-        // dataset.setAutoNotification(false);
-        // dataset.recomputeLimits(dataset.getAxisDescriptions().indexOf(axisDescription));
-        // });
-        // DefaultDataSetLock<DataSet> myLock = (DefaultDataSetLock<DataSet>) dataset.lock();
-        // myLock.downGradeWriteLock();
-        // });
+        final ArrayDeque<DataSet> lockQueue = new ArrayDeque<>(dataSets);
+        recursiveLockGuard(lockQueue, () -> getAxes().forEach(chartAxis -> {
+            final List<DataSet> dataSetForAxis = getDataSetForAxis(chartAxis);
+            updateNumericAxis(chartAxis, dataSetForAxis);
+            // chartAxis.requestAxisLayout()
+        }));
+    }
 
-        dataSets.forEach(ds -> ds.lock().readLock());
-        try {
-            getAxes().forEach(chartAxis -> {
-                final List<DataSet> dataSetForAxis = getDataSetForAxis(chartAxis);
-                updateNumericAxis(chartAxis, dataSetForAxis);
-                // chartAxis.requestAxisLayout();
-            });
-        } finally {
-            dataSets.forEach(ds -> ds.lock().readUnLock());
+    protected void recursiveLockGuard(final Deque<DataSet> queue, final Runnable runnable) { // NOPMD
+        if (queue.isEmpty()) {
+            runnable.run();
+        } else {
+            queue.pop().lock().readLockGuard(() -> recursiveLockGuard(queue, runnable));
         }
-
-        // unlock datasets again
     }
 
     /**
@@ -453,12 +441,6 @@ public class XYChart extends Chart {
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - done");
         }
-    }
-
-    @Override
-    protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
-        // reset change to allow derived classes to add additional listeners to renderer changes
-        super.rendererChanged(change);
     }
 
     protected static void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {

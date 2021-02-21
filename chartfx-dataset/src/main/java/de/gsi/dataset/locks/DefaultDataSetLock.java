@@ -1,6 +1,7 @@
 package de.gsi.dataset.locks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
@@ -55,7 +56,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private final transient Object readerCountLock = new Object();
     private int readerCount;
     private final transient Object writerCountLock = new Object();
-    private int writerCount;
+    private final AtomicInteger writerCount = new AtomicInteger(0);
     private final transient AtomicBoolean autoNotifyState = new AtomicBoolean(true);
     private final transient D dataSet;
 
@@ -78,31 +79,29 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     @Deprecated(since = "still under test")
     public D downGradeWriteLock() {
         if (!stampedLock.isWriteLocked()) {
-            throw new IllegalStateException("cannot downconvert lock - lock is not write locked");
+            throw new IllegalStateException("cannot down-convert lock - lock is not write locked");
         }
         if (getWriterCount() > 1) {
-            throw new IllegalStateException("cannot downconvert lock - holding n writelocks = " + getWriterCount());
+            throw new IllegalStateException("cannot down-convert lock - holding n write locks = " + getWriterCount());
         }
         final long result = stampedLock.tryConvertToReadLock(lastWriteStamp);
         if (result == 0L) { // NOPMD to be expected return value from 'tryConvertToReadLock'
-            throw new IllegalStateException("cannot downconvert lock - tryConvertToReadLock return '0'");
+            throw new IllegalStateException("cannot down-convert lock - tryConvertToReadLock return '0'");
         }
-        synchronized (readerCountLock) {
-            synchronized (writerCountLock) {
-                readerCount++;
-                writerCount--;
-                if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
-                    stampedLock.unlockRead(lastReadStamp);
-                }
-                lastReadStamp = result;
+        synchronized (writerCountLock) {
+            readerCount++;
+            writerCount.decrementAndGet();
+            if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
+                stampedLock.unlockRead(lastReadStamp);
             }
+            lastReadStamp = result;
         }
 
         return dataSet;
     }
 
     /**
-     * @return number of readers presently locked on this data set
+     * @return number of readers presently locked on this data set - this counts only (deprecated) readers using read(Un)Lock()
      */
     public int getReaderCount() {
         synchronized (readerCountLock) {
@@ -114,9 +113,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
      * @return number of writers presently locked on this data set (N.B. all from the same thread)
      */
     public int getWriterCount() {
-        synchronized (writerCountLock) {
-            return writerCount;
-        }
+        return writerCount.get();
     }
 
     @Override
@@ -133,23 +130,23 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D readLockGuard(final Runnable reading) {
-        readLock();
+        final long stamp = stampedLock.readLock();
         try {
             reading.run();
         } finally {
-            readUnLock();
+            stampedLock.unlockRead(stamp);
         }
         return dataSet;
     }
 
     @Override
     public <R> R readLockGuard(final Supplier<R> reading) {
-        readLock();
         R result;
+        final long stamp = stampedLock.readLock();
         try {
             result = reading.get();
         } finally {
-            readUnLock();
+            stampedLock.unlockRead(stamp);
         }
         return result;
     }
@@ -161,29 +158,29 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         if (stampedLock.validate(stamp)) {
             return dataSet;
         }
-        readLock();
+        final long stampHard = stampedLock.readLock();
         try {
             reading.run();
         } finally {
-            readUnLock();
+            stampedLock.unlockRead(stampHard);
         }
         return dataSet;
     }
 
     @Override
     public <R> R readLockGuardOptimistic(final Supplier<R> reading) {
+        R result = reading.get();
         // try optimistic read
         final long stamp = stampedLock.tryOptimisticRead();
-        R result = reading.get();
         if (stampedLock.validate(stamp)) {
             return result;
         }
         // fallback to blocking read
-        readLock();
+        final long stampHard = stampedLock.readLock();
         try {
             result = reading.get();
         } finally {
-            readUnLock();
+            stampedLock.unlockRead(stampHard);
         }
         return result;
     }
@@ -196,7 +193,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
                 stampedLock.unlockRead(lastReadStamp);
                 lastReadStamp = 0L;
             } else if (readerCount < 0) {
-                throw new IllegalStateException("read lock alread unlocked");
+                throw new IllegalStateException("read lock already unlocked");
             }
         }
 
@@ -206,18 +203,18 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     @Override
     public D writeLock() {
         final Thread callingThread = Thread.currentThread();
-        while (unequalToLockHoldingThread(callingThread)) {
+        if (unequalToLockHoldingThread(callingThread)) {
             lastWriteStamp = stampedLock.writeLock();
-            synchronized (stampedLock) {
+            synchronized (writerCountLock) {
                 // copy threadID
                 writeLockedByThread = callingThread;
                 // store present auto-notify state
                 autoNotifyState.set(dataSet.autoNotification().getAndSet(false));
+                writerCount.incrementAndGet();
             }
+            return dataSet;
         }
-        synchronized (writerCountLock) {
-            writerCount++;
-        }
+        writerCount.incrementAndGet();
         return dataSet;
     }
 
@@ -252,24 +249,27 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D writeUnLock() {
-        synchronized (writerCountLock) {
-            writerCount--;
-            if (writerCount == 0) {
-                final long temp = lastWriteStamp;
-                lastWriteStamp = 0;
-                // restore present auto-notify state
-                dataSet.autoNotification().set(autoNotifyState.get());
-                writeLockedByThread = null; // NOPMD
-                stampedLock.unlockWrite(temp);
-            } else if (writerCount < 0) {
-                throw new IllegalStateException("write lock already unlocked");
+        if (writerCount.get() == 1) {
+            synchronized (writerCountLock) {
+                if (writerCount.decrementAndGet() == 0) {
+                    final long temp = lastWriteStamp;
+                    lastWriteStamp = 0;
+                    // restore present auto-notify state
+                    dataSet.autoNotification().set(autoNotifyState.get());
+                    writeLockedByThread = null; // NOPMD
+                    stampedLock.unlockWrite(temp);
+                } else if (writerCount.get() < 0) {
+                    throw new IllegalStateException("write lock already unlocked");
+                }
             }
+            return dataSet;
         }
+        writerCount.decrementAndGet();
         return dataSet;
     }
 
     protected boolean unequalToLockHoldingThread(final Thread thread1) {
-        synchronized (stampedLock) {
+        synchronized (writerCountLock) {
             return thread1 != writeLockedByThread; // NOPMD - deliberate use of object identity
         }
     }

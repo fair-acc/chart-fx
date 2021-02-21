@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.gsi.dataset.spi.CircularDoubleErrorDataSet;
 
@@ -25,13 +27,14 @@ import de.gsi.dataset.spi.CircularDoubleErrorDataSet;
  */
 @Execution(ExecutionMode.SAME_THREAD)
 class DataSetLockStressTest {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSetLockStressTest.class);
     // N_READER + N_WRITER should be number of processors, with N_READERS > 1 and N_WRITERS the rest
     private static final int N_READERS = 8;
-    private static final int N_WRITERS = 2;
+    private static final int N_WRITERS = 4;
     private static final int MIN_N_READS = 0; // tuned/dependent on TIME_OUT_MILLIS
     private static final int MIN_N_WRITES = 0; // tuned/dependent on TIME_OUT_MILLIS
-    private static final int MAX_TEST_TIME_SECONDS = 1;
-    private static final int TIME_OUT_MILLIS = 1000;
+    private static final int MAX_TEST_TIME_SECONDS = 10;
+    private static final int TIME_OUT_MILLIS = 10000;
     private static volatile Exception exception;
     private long start = System.currentTimeMillis();
 
@@ -56,15 +59,19 @@ class DataSetLockStressTest {
             readerJobs.add(threadPool.submit(() -> readLoop(testThread, dataSet)));
         }
 
+        long nReadsTotal = 0;
+        long nWritesTotal = 0;
         try {
             for (Future<Integer> task : writerJobs) {
                 final Integer nWrites = task.get(MAX_TEST_TIME_SECONDS, TimeUnit.SECONDS);
                 assertTrue(nWrites >= MIN_N_WRITES, "starved writer - nWrites = " + nWrites);
+                nWritesTotal += nWrites;
             }
 
             for (Future<Integer> task : readerJobs) {
                 final Integer nReads = task.get(2 * MAX_TEST_TIME_SECONDS, TimeUnit.SECONDS);
                 assertTrue(nReads >= MIN_N_READS, "starved reader - nReads = " + nReads);
+                nReadsTotal += nReads;
             }
         } catch (Exception e) {
             if (exception != null) {
@@ -80,6 +87,7 @@ class DataSetLockStressTest {
             throw new IllegalStateException("terminated after " + diff + " ms", exception);
         }
         assertNull(exception, "did not finish test without errors");
+        LOGGER.atInfo().addArgument(MAX_TEST_TIME_SECONDS).addArgument(nWritesTotal).addArgument(nReadsTotal).log("qualitative performance over {} s: nWrites = {} nReads = {}");
     }
 
     private int readLoop(Thread testThread, CircularDoubleErrorDataSet dataSet) {
