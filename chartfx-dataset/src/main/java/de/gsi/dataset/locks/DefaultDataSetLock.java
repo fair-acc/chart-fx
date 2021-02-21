@@ -2,6 +2,7 @@ package de.gsi.dataset.locks;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
@@ -51,11 +52,10 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private static final long serialVersionUID = 1L;
     private final transient StampedLock stampedLock = new StampedLock();
     private transient long lastReadStamp;
-    private transient long lastWriteStamp;
-    private transient Thread writeLockedByThread; // NOPMD
+    private final AtomicLong lastWriteStamp = new AtomicLong(-1L);
+    private final AtomicLong writerLockedByThreadId = new AtomicLong(-1L);
     private final transient Object readerCountLock = new Object();
     private int readerCount;
-    private final transient Object writerCountLock = new Object();
     private final AtomicInteger writerCount = new AtomicInteger(0);
     private final transient AtomicBoolean autoNotifyState = new AtomicBoolean(true);
     private final transient D dataSet;
@@ -84,18 +84,16 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         if (getWriterCount() > 1) {
             throw new IllegalStateException("cannot down-convert lock - holding n write locks = " + getWriterCount());
         }
-        final long result = stampedLock.tryConvertToReadLock(lastWriteStamp);
+        final long result = stampedLock.tryConvertToReadLock(lastWriteStamp.get());
         if (result == 0L) { // NOPMD to be expected return value from 'tryConvertToReadLock'
             throw new IllegalStateException("cannot down-convert lock - tryConvertToReadLock return '0'");
         }
-        synchronized (writerCountLock) {
-            readerCount++;
-            writerCount.decrementAndGet();
-            if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
-                stampedLock.unlockRead(lastReadStamp);
-            }
-            lastReadStamp = result;
+        readerCount++;
+        writerCount.decrementAndGet();
+        if ((lastReadStamp == 0) && stampedLock.isReadLocked() && (getReaderCount() > 1)) {
+            stampedLock.unlockRead(lastReadStamp);
         }
+        lastReadStamp = result;
 
         return dataSet;
     }
@@ -202,18 +200,20 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D writeLock() {
-        final Thread callingThread = Thread.currentThread();
-        if (unequalToLockHoldingThread(callingThread)) {
-            lastWriteStamp = stampedLock.writeLock();
-            synchronized (writerCountLock) {
-                // copy threadID
-                writeLockedByThread = callingThread;
-                // store present auto-notify state
-                autoNotifyState.set(dataSet.autoNotification().getAndSet(false));
-                writerCount.incrementAndGet();
-            }
-            return dataSet;
+        final long callingThreadId = Thread.currentThread().getId();
+        if (writerLockedByThreadId.get() != callingThreadId) {
+            // wrong not matching thread - need to acquire lock
+            long stamp;
+            do {
+                stamp = stampedLock.tryWriteLock();
+                // stamp = stampedLock.writeLock() - would be the natural choice (performance) but blocks in write-lock racing conditions
+            } while (stamp == 0);
+            // acquired lock
+            writerLockedByThreadId.set(callingThreadId);
+            lastWriteStamp.set(stamp);
+            autoNotifyState.set(dataSet.autoNotification().getAndSet(false));
         }
+        // we acquired a new lock or are already owner of a previously acquired lock
         writerCount.incrementAndGet();
         return dataSet;
     }
@@ -249,28 +249,17 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D writeUnLock() {
-        if (writerCount.get() == 1) {
-            synchronized (writerCountLock) {
-                if (writerCount.decrementAndGet() == 0) {
-                    final long temp = lastWriteStamp;
-                    lastWriteStamp = 0;
-                    // restore present auto-notify state
-                    dataSet.autoNotification().set(autoNotifyState.get());
-                    writeLockedByThread = null; // NOPMD
-                    stampedLock.unlockWrite(temp);
-                } else if (writerCount.get() < 0) {
-                    throw new IllegalStateException("write lock already unlocked");
-                }
+        if (writerCount.decrementAndGet() == 0) {
+            final long callingThreadId = Thread.currentThread().getId();
+            if (writerLockedByThreadId.get() != callingThreadId) {
+                throw new IllegalStateException("unlock attempt by tid = " + callingThreadId + " (" + Thread.currentThread() + ") - but locked by " + writerLockedByThreadId.get());
             }
-            return dataSet;
-        }
-        writerCount.decrementAndGet();
-        return dataSet;
-    }
 
-    protected boolean unequalToLockHoldingThread(final Thread thread1) {
-        synchronized (writerCountLock) {
-            return thread1 != writeLockedByThread; // NOPMD - deliberate use of object identity
+            // restore present auto-notify state
+            dataSet.autoNotification().set(autoNotifyState.get());
+            writerLockedByThreadId.set(-1L);
+            stampedLock.unlockWrite(lastWriteStamp.getAndSet(-1L));
         }
+        return dataSet;
     }
 }
