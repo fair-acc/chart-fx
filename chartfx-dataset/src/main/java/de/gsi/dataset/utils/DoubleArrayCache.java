@@ -82,4 +82,37 @@ public class DoubleArrayCache extends CacheCollection<double[]> {
     public static DoubleArrayCache getInstance() {
         return SELF;
     }
+
+    private static final ArrayPool.DoubleArrayPool EXACT_POOL = new ArrayPool.DoubleArrayPool() {
+        @Override
+        public double[] allocate(int requiredSize) {
+            return SELF.getArray(requiredSize, true);
+        }
+
+        @Override
+        public void release(double[] array) {
+            SELF.add(array);
+        }
+    };
+
+    private static final ArrayPool.DoubleArrayPool MINSIZE_POOL = new ArrayPool.DoubleArrayPool() {
+        @Override
+        public double[] allocate(int requiredSize) {
+            return SELF.getArray(requiredSize, false);
+        }
+
+        @Override
+        public void release(double[] array) {
+            SELF.add(array);
+        }
+    };
+
+    public static ArrayPool.DoubleArrayPool getExactInstance() {
+        return EXACT_POOL;
+    }
+
+    public static ArrayPool.DoubleArrayPool getMinSizeInstance() {
+        return MINSIZE_POOL;
+    }
+
 }

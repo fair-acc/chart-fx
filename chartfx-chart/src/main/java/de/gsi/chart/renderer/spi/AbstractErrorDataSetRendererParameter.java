@@ -2,6 +2,9 @@ package de.gsi.chart.renderer.spi;
 
 import java.util.Objects;
 
+import de.gsi.dataset.utils.ArrayPool;
+import de.gsi.dataset.utils.ArrayPool.DoubleArrayPool;
+import de.gsi.dataset.utils.DoubleArrayCache;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -56,6 +59,20 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
             AbstractErrorDataSetRendererParameter.DEFAULT_HISTORY_INTENSITY_FADING);
     private final BooleanProperty drawBubbles = new SimpleBooleanProperty(this, "drawBubbles", false);
     private final BooleanProperty allowNaNs = new SimpleBooleanProperty(this, "allowNaNs", false);
+
+    public DoubleArrayPool getArrayPool() {
+        return arrayPool.get();
+    }
+
+    public ObjectProperty<DoubleArrayPool> arrayPoolProperty() {
+        return arrayPool;
+    }
+
+    public void setArrayPool(DoubleArrayPool arrayPool) {
+        this.arrayPool.set(arrayPool);
+    }
+
+    private final ObjectProperty<DoubleArrayPool> arrayPool = new SimpleObjectProperty<>(DoubleArrayCache.getExactInstance());
 
     /**
      * 

@@ -209,7 +209,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 }
 
                 final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax,
-                        dataSet.getDataCount(), true);
+                        dataSet.getDataCount(), true, getArrayPool());
                 if (ProcessingProfiler.getDebugState()) {
                     stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
                 }

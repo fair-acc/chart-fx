@@ -17,9 +17,9 @@ import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
+import de.gsi.dataset.utils.ArrayPool.DoubleArrayPool;
 import de.gsi.dataset.utils.ArrayCache;
 import de.gsi.dataset.utils.CachedDaemonThreadFactory;
-import de.gsi.dataset.utils.DoubleArrayCache;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.math.ArrayUtils;
 
@@ -35,6 +35,7 @@ class CachedDataPoints {
     private static final String SELECTED2 = "selected";
     private static final double DEG_TO_RAD = Math.PI / 180.0;
 
+    protected final DoubleArrayPool arrayPool;
     protected double[] xValues;
     protected double[] yValues;
     protected double[] errorXNeg;
@@ -67,18 +68,19 @@ class CachedDataPoints {
     protected int maxDataCount;
     protected int actualDataCount; // number of data points that remain after data reduction
 
-    public CachedDataPoints(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
+    public CachedDataPoints(final int indexMin, final int indexMax, final int dataLength, final boolean full, DoubleArrayPool arrayPool) {
         maxDataCount = dataLength;
-        xValues = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-        yValues = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+        this.arrayPool = arrayPool;
+        xValues = arrayPool.allocate(maxDataCount);
+        yValues = arrayPool.allocate(maxDataCount);
         styles = ArrayCache.getCachedStringArray(STYLES2, dataLength);
         this.indexMin = indexMin;
         this.indexMax = indexMax;
-        errorYNeg = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-        errorYPos = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+        errorYNeg = arrayPool.allocate(maxDataCount);
+        errorYPos = arrayPool.allocate(maxDataCount);
         if (full) {
-            errorXNeg = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-            errorXPos = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+            errorXNeg = arrayPool.allocate(maxDataCount);
+            errorXPos = arrayPool.allocate(maxDataCount);
         }
         selected = ArrayCache.getCachedBooleanArray(SELECTED2, dataLength);
         ArrayUtils.fillArray(styles, null);
@@ -514,12 +516,12 @@ class CachedDataPoints {
     }
 
     public void release() {
-        DoubleArrayCache.getInstance().add(xValues);
-        DoubleArrayCache.getInstance().add(yValues);
-        DoubleArrayCache.getInstance().add(errorYNeg);
-        DoubleArrayCache.getInstance().add(errorYPos);
-        DoubleArrayCache.getInstance().add(errorXNeg);
-        DoubleArrayCache.getInstance().add(errorXPos);
+         arrayPool.release(xValues);
+         arrayPool.release(yValues);
+         arrayPool.release(errorYNeg);
+         arrayPool.release(errorYPos);
+         arrayPool.release(errorXNeg);
+         arrayPool.release(errorXPos);
         ArrayCache.release(SELECTED2, selected);
         ArrayCache.release(STYLES2, styles);
     }
