@@ -114,5 +114,4 @@ public class DoubleArrayCache extends CacheCollection<double[]> {
     public static ArrayPool.DoubleArrayPool getMinSizeInstance() {
         return MINSIZE_POOL;
     }
-
 }

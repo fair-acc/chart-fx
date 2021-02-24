@@ -2,9 +2,6 @@ package de.gsi.chart.renderer.spi;
 
 import java.util.Objects;
 
-import de.gsi.dataset.utils.ArrayPool;
-import de.gsi.dataset.utils.ArrayPool.DoubleArrayPool;
-import de.gsi.dataset.utils.DoubleArrayCache;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -23,7 +20,10 @@ import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
 import de.gsi.chart.renderer.datareduction.MaxDataReducer;
 import de.gsi.chart.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import de.gsi.chart.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
+import de.gsi.dataset.utils.ArrayPool;
+import de.gsi.dataset.utils.ArrayPool.DoubleArrayPool;
 import de.gsi.dataset.utils.AssertUtils;
+import de.gsi.dataset.utils.DoubleArrayCache;
 
 /**
  * simple class to move the various parameters out of the class containing the algorithms uses the shadow field pattern

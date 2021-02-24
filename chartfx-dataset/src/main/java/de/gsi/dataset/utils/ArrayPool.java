@@ -6,12 +6,10 @@ package de.gsi.dataset.utils;
  * @author ennerf
  */
 public interface ArrayPool<T> {
-
     public interface DoubleArrayPool extends ArrayPool<double[]> {
     }
 
     public T allocate(int requiredSize);
 
     public void release(T array);
-
 }

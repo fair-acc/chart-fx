@@ -17,8 +17,8 @@ import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.DataSetError.ErrorType;
-import de.gsi.dataset.utils.ArrayPool.DoubleArrayPool;
 import de.gsi.dataset.utils.ArrayCache;
+import de.gsi.dataset.utils.ArrayPool.DoubleArrayPool;
 import de.gsi.dataset.utils.CachedDaemonThreadFactory;
 import de.gsi.dataset.utils.ProcessingProfiler;
 import de.gsi.math.ArrayUtils;
@@ -516,12 +516,12 @@ class CachedDataPoints {
     }
 
     public void release() {
-         arrayPool.release(xValues);
-         arrayPool.release(yValues);
-         arrayPool.release(errorYNeg);
-         arrayPool.release(errorYPos);
-         arrayPool.release(errorXNeg);
-         arrayPool.release(errorXPos);
+        arrayPool.release(xValues);
+        arrayPool.release(yValues);
+        arrayPool.release(errorYNeg);
+        arrayPool.release(errorYPos);
+        arrayPool.release(errorXNeg);
+        arrayPool.release(errorXPos);
         ArrayCache.release(SELECTED2, selected);
         ArrayCache.release(STYLES2, styles);
     }
