@@ -52,22 +52,6 @@ jobs:
         uses: codacy/codacy-coverage-reporter-action@0.2.0
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-      - name: Run Codacy Analysis CLI
-        if: matrix.java == env.JAVA_REFERENCE_VERSION
-        uses: codacy/codacy-analysis-cli-action@master
-        with:
-          output: results.sarif
-          format: sarif
-          # Adjust severity of non-security issues
-          gh-code-scanning-compat: true
-          # Force 0 exit code to allow SARIF file generation
-          # This will handover control about PR rejection to the GitHub side
-          max-allowed-issues: 2147483647
-      - name: Upload SARIF results file
-        if: matrix.java == env.JAVA_REFERENCE_VERSION
-        uses: github/codeql-action/upload-sarif@main
-        with:
-          sarif_file: results.sarif
 
   publish:
     name: Deploy to github packages and Sonatype OSSRH
