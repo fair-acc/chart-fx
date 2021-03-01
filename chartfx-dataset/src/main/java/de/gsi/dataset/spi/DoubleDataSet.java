@@ -335,7 +335,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             copyDataLabelsAndStyles(other, copy);
             copyAxisDescription(other);
         }));
-        return fireInvalidated(new UpdatedDataEvent(this));
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 
     /**

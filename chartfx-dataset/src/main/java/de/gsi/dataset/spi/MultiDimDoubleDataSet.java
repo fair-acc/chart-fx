@@ -26,6 +26,16 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     protected DoubleArrayList[] values; // way faster than java default lists
 
     /**
+     * Creates a new instance of <code>DefaultDataSet</code>.
+     *
+     * @param name name of this DataSet. max queue size default to 1000
+     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
+     */
+    public MultiDimDoubleDataSet(final String name) {
+        this(name, 2);
+    }
+
+    /**
      * Creates a new instance of <code>MultiDimDoubleDataSet</code> as copy of another (deep-copy).
      *
      * @param another another Dataset to copy the content from
@@ -216,8 +226,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      */
     public MultiDimDoubleDataSet clearData() {
         lock().writeLockGuard(() -> {
-            for (int i = 0; i < this.values.length; i++) {
-                this.values[i].clear();
+            for (final DoubleArrayList value : this.values) {
+                value.clear();
             }
             getDataLabelMap().clear();
             getDataStyleMap().clear();
@@ -238,8 +248,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      */
     public int getCapacity() {
         int cap = Integer.MAX_VALUE;
-        for (int i = 0; i < this.values.length; i++) {
-            cap = Math.min(cap, values[i].elements().length);
+        for (final DoubleArrayList value : this.values) {
+            cap = Math.min(cap, value.elements().length);
         }
         return cap;
     }
@@ -286,8 +296,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             AssertUtils.indexInBounds(toIndex, getDataCount(), "toIndex");
             AssertUtils.indexOrder(fromIndex, "fromIndex", toIndex, "toIndex");
 
-            for (int i = 0; i < this.values.length; i++) {
-                values[i].removeElements(fromIndex, toIndex);
+            for (final DoubleArrayList value : this.values) {
+                value.removeElements(fromIndex, toIndex);
             }
 
             // remove old label and style keys
@@ -309,8 +319,8 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      */
     public MultiDimDoubleDataSet resize(final int size) {
         lock().writeLockGuard(() -> {
-            for (int i = 0; i < this.values.length; i++) {
-                values[i].size(size);
+            for (final DoubleArrayList value : this.values) {
+                value.size(size);
             }
         });
         return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
@@ -347,7 +357,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             }
             setStyle(other.getStyle());
         }));
-        return fireInvalidated(new UpdatedDataEvent(this));
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 
     /**

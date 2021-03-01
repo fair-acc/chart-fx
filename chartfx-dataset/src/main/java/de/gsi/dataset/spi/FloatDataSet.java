@@ -136,11 +136,11 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
             xValues.addElements(xValues.size(), xValuesNew);
             yValues.addElements(yValues.size(), yValuesNew);
 
-            for (int i = 0; i < xValuesNew.length; i++) {
-                getAxisDescription(DIM_X).add(xValuesNew[i]);
+            for (final float v : xValuesNew) {
+                getAxisDescription(DIM_X).add(v);
             }
-            for (int i = 0; i < yValuesNew.length; i++) {
-                getAxisDescription(DIM_Y).add(yValuesNew[i]);
+            for (final float v : yValuesNew) {
+                getAxisDescription(DIM_Y).add(v);
             }
         });
         return fireInvalidated(new AddedDataEvent(this));
@@ -345,7 +345,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
             copyDataLabelsAndStyles(other, copy);
             copyAxisDescription(other);
         }));
-        return fireInvalidated(new UpdatedDataEvent(this));
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 
     /**
