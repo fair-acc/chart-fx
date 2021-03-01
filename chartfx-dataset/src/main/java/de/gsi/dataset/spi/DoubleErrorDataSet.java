@@ -425,7 +425,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             copyDataLabelsAndStyles(other, copy);
             copyAxisDescription(other);
         }));
-        return getThis();
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 
     /**

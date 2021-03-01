@@ -35,6 +35,17 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
     /**
      * Creates a new instance of <code>DefaultDataSet</code>.
      *
+     * @param name name of this DataSet. max queue size default to 1000
+     * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
+     */
+    public LimitedIndexedTreeDataSet(final String name) {
+        super(name, 2, ErrorType.SYMMETRIC, ErrorType.SYMMETRIC);
+        this.maxQueueSize = 1000;
+    }
+
+    /**
+     * Creates a new instance of <code>DefaultDataSet</code>.
+     *
      * @param name name of this DataSet.
      * @param maxQueueSize maximum number of samples that is being stored
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
@@ -537,7 +548,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             super.copyMetaData(other);
             super.copyAxisDescription(other);
         }));
-        return this;
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 
     /**
