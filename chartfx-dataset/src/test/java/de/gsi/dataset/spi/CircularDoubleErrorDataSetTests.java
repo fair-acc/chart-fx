@@ -9,6 +9,8 @@ import static de.gsi.dataset.DataSet.DIM_Y;
 
 import org.junit.jupiter.api.Test;
 
+import de.gsi.dataset.AxisDescription;
+
 /**
  * Checks for CircularDoubleDataSet interfaces and constructors.
  * TODO: add tests for Listeners
@@ -75,5 +77,70 @@ public class CircularDoubleErrorDataSetTests {
         assertThrows(UnsupportedOperationException.class, () -> dataSet.removeDataLabel(2));
         assertThrows(UnsupportedOperationException.class, () -> dataSet.addDataLabel(0, "addedLabel"));
         assertThrows(UnsupportedOperationException.class, () -> dataSet.addDataStyle(0, "color:green"));
+    }
+
+    @Test
+    public void testThatAddingSingleValuesWillUpdateAxisDescriptionAccoringToNewValue() {
+        CircularDoubleErrorDataSet dataSet = new CircularDoubleErrorDataSet("test", 5);
+        AxisDescription xAxisDescription = dataSet.getAxisDescription(DIM_X);
+        AxisDescription yAxisDescription = dataSet.getAxisDescription(DIM_Y);
+
+        assertAxisDescriptionRange(xAxisDescription, Double.NaN, Double.NaN);
+        assertAxisDescriptionRange(yAxisDescription, Double.NaN, Double.NaN);
+
+        dataSet.add(1., 2., 0, 0);
+
+        assertAxisDescriptionRange(xAxisDescription, 1., 1.);
+        assertAxisDescriptionRange(yAxisDescription, 2., 2.);
+
+        dataSet.add(2., 3., 0, 0);
+
+        assertAxisDescriptionRange(xAxisDescription, 1., 2.);
+        assertAxisDescriptionRange(yAxisDescription, 2., 3.);
+
+        dataSet.add(3., -1., 0, 0);
+
+        assertAxisDescriptionRange(xAxisDescription, 1., 3.);
+        assertAxisDescriptionRange(yAxisDescription, -1., 3.);
+    }
+
+    @Test
+    public void testThatAddingMultipleValuesWillUpdateAxisDescriptionAccoringToNewValues() {
+        CircularDoubleErrorDataSet dataSet = new CircularDoubleErrorDataSet("test", 5);
+        AxisDescription xAxisDescription = dataSet.getAxisDescription(DIM_X);
+        AxisDescription yAxisDescription = dataSet.getAxisDescription(DIM_Y);
+
+        dataSet.add( //
+                new double[] { 1., 2. }, //
+                new double[] { 10., 20. }, //
+                new double[] { 1., 2. }, //
+                new double[] { 3., 4. });
+
+        assertAxisDescriptionRange(xAxisDescription, 1., 2.);
+        assertAxisDescriptionRange(yAxisDescription, 9., 24.);
+
+        dataSet.add( //
+                new double[] { 3., 4. }, //
+                new double[] { 30., 40. }, //
+                new double[] { 1., 2. }, //
+                new double[] { 3., 4. });
+
+        assertAxisDescriptionRange(xAxisDescription, 1., 4.);
+        assertAxisDescriptionRange(yAxisDescription, 9., 44.);
+
+        dataSet.add( //
+                new double[] { 5., 6. }, //
+                new double[] { -50., -60. }, //
+                new double[] { 1., 2. }, //
+                new double[] { 3., 4. });
+
+        // size of five, the first values gets evicted!
+        assertAxisDescriptionRange(xAxisDescription, 2., 6.);
+        assertAxisDescriptionRange(yAxisDescription, -62., 44.);
+    }
+
+    private void assertAxisDescriptionRange(AxisDescription axisDescription, double min, double max) {
+        assertEquals(min, axisDescription.getMin());
+        assertEquals(max, axisDescription.getMax());
     }
 }
