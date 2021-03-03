@@ -78,8 +78,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * @param style the data style string
      * @return itself
      */
-    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos, final String label,
-            final String style) {
+    public CircularDoubleErrorDataSet add(final double x, final double y, final double yErrorNeg, final double yErrorPos, final String label, final String style) {
         lock().writeLockGuard(() -> {
             xValues.put(x);
             yValues.put(y);
@@ -88,8 +87,9 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataLabels.put(label);
             dataStyles.put(style);
 
-            // invalidate ranges
-            getAxisDescriptions().forEach(AxisDescription::clear);
+            getAxisDescription(DIM_X).setMin(xValues.get(0));
+            getAxisDescription(DIM_X).setMax(xValues.get(xValues.available() - 1));
+            getAxisDescription(DIM_Y).add(y);
         });
 
         return fireInvalidated(new AddedDataEvent(this));
@@ -124,7 +124,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataLabels.put(new String[yErrPos.length], yErrPos.length);
             dataStyles.put(new String[yErrPos.length], yErrPos.length);
 
-            getAxisDescription(DIM_X).add(xVals);
+            getAxisDescription(DIM_X).setMin(xValues.get(0));
+            getAxisDescription(DIM_X).setMax(xValues.get(xValues.available() - 1));
             for (int i = 0; i < yVals.length; i++) {
                 getAxisDescription(DIM_Y).add(yVals[i] + yErrPos[i]);
                 getAxisDescription(DIM_Y).add(yVals[i] - yErrNeg[i]);
