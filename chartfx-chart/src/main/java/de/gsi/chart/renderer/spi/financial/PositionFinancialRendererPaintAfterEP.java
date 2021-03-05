@@ -18,7 +18,7 @@ import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
 
 /**
- * <h1>Position renderer PaintAfter Extension Point</h1>
+ * <h2>Position renderer PaintAfter Extension Point</h2>
  *<p>
  * A position is the amount of a security, asset, or property that is owned (or sold short) by some individual or other entity.
  * A trader or investor takes a position when they make a purchase through a buy order, signaling bullish intent; or if they sell short securities with bearish intent.
