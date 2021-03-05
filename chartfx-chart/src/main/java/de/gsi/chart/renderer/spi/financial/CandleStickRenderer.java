@@ -30,7 +30,7 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
- * <h1>Candlestick renderer</h1>
+ * <h2>Candlestick renderer</h2>
  *<p>
  * A candlestick chart (also called Japanese candlestick chart) is a style of financial chart used to describe price movements of a security,
  * derivative, or currency.

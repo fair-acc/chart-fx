@@ -30,7 +30,7 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
- * <h1>High-Low renderer (OHLC-V/OI Chart)</h1>
+ * <h2>High-Low renderer (OHLC-V/OI Chart)</h2>
  *<p>
  * An open-high-low-close chart (also OHLC) is a type of chart typically used to illustrate movements in the price of a financial instrument over time.
  * Each vertical line on the chart shows the price range (the highest and lowest prices) over one unit of time, e.g., one day or one hour.

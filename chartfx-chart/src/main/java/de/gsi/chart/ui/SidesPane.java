@@ -23,9 +23,9 @@ import de.gsi.chart.ui.geometry.Side;
  * The hidden node will appear (at its preferred width or height) with a short slide-in animation. The node will
  * disappear again as soon as the mouse cursor exits it. A hidden node / side can also be pinned by calling
  * {@link #setPinned(Side,Boolean)}. It will remain visible as long as it stays pinned.
- * <h3>Screenshot</h3> The following screenshots shows the right side node hovering over a table after it was made
+ * <h2>Screenshot</h2> The following screenshots shows the right side node hovering over a table after it was made
  * visible: <img src="hiddenSidesPane.png" alt="Screenshot of HiddenSidesPane">
- * <h3>Code Sample</h3>
+ * <h2>Code Sample</h2>
  *
  * <pre>
  * SidesPane pane = new SidesPane();
