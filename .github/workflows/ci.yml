@@ -86,6 +86,7 @@ jobs:
           gpg-passphrase: GPG_PASS
       - name: Deploy to Github Packages
         run: if [ -z "$CHANGELIST" ]; then mvn -DskipTests --no-transfer-progress --batch-mode -Drevision=${REVISION} -Dchangelist=${CHANGELIST} -Drelease=github deploy; fi
+        continue-on-error: true # allows to restart the deployment step and not have the existing deployed github package prevent publishing to maven central
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GPG_PASS: ${{ secrets.GPG_PASSPHRASE }}
