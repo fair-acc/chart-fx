@@ -375,5 +375,4 @@ public class HiddenSidesPane extends Control {
     public final DoubleProperty triggerDistanceProperty() {
         return triggerDistance;
     }
-
 }
