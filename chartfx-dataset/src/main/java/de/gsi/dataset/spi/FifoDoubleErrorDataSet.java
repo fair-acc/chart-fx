@@ -9,7 +9,9 @@ import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
+import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.spi.utils.DoublePointError;
+import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.LimitedQueue;
 
 /**
@@ -21,37 +23,37 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
     private static final int SAFE_BET = 1;
     private static final long serialVersionUID = -7153702141838930486L;
     protected final transient LimitedQueue<DataBlob> data;
-    protected double maxDistance = Double.MAX_VALUE;
+    protected double maxDistance;
 
     /**
      * Creates a new instance of <code>FifoDoubleErrorDataSet</code>.
      *
      * @param name name of this DataSet.
-     * @param initalSize maximum circular buffer capacity
+     * @param initialSize maximum circular buffer capacity
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
-    public FifoDoubleErrorDataSet(final String name, final int initalSize) {
-        this(name, initalSize, Double.MAX_VALUE);
+    public FifoDoubleErrorDataSet(final String name, final int initialSize) {
+        this(name, initialSize, Double.MAX_VALUE);
     }
 
     /**
      * Creates a new instance of <code>FifoDoubleErrorDataSet</code>.
      *
      * @param name name of this DataSet.
-     * @param initalSize maximum circular buffer capacity
+     * @param initialSize maximum circular buffer capacity
      * @param maxDistance maximum range before data points are being dropped
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
-    public FifoDoubleErrorDataSet(final String name, final int initalSize, final double maxDistance) {
+    public FifoDoubleErrorDataSet(final String name, final int initialSize, final double maxDistance) {
         super(name, 2, ErrorType.NO_ERROR, ErrorType.SYMMETRIC);
-        if (initalSize <= 0) {
-            throw new IllegalArgumentException("negative or zero initalSize = " + initalSize);
+        if (initialSize <= 0) {
+            throw new IllegalArgumentException("negative or zero initialSize = " + initialSize);
         }
         if (maxDistance <= 0) {
             throw new IllegalArgumentException("negative or zero maxDistance = " + maxDistance);
         }
         this.maxDistance = maxDistance;
-        data = new LimitedQueue<>(initalSize);
+        data = new LimitedQueue<>(initialSize);
     }
 
     /**
@@ -115,16 +117,37 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      * </p>
      * Note: The method copies values from specified double arrays.
      *
+     * @param xVals the new x coordinates
+     * @param yVals the new y coordinates
+     * @param yErrNeg the +dy errors
+     * @param yErrPos the -dy errors
+     * @return itself
+     */
+    public FifoDoubleErrorDataSet add(final double[] xVals, final double[] yVals, final double[] yErrNeg, final double[] yErrPos) {
+        AssertUtils.notNull("X coordinates", xVals);
+        AssertUtils.notNull("Y coordinates", yVals);
+        AssertUtils.notNull("Y error neg", yErrNeg);
+        AssertUtils.notNull("Y error pos", yErrPos);
+        final int dataCount = Math.min(Math.min(xVals.length, yVals.length), Math.min(yErrNeg.length, yErrPos.length));
+        return add(xVals, yVals, yErrNeg, yErrPos, dataCount);
+    }
+
+    /**
+     * <p>
+     * Initialises the data set with specified data.
+     * </p>
+     * Note: The method copies values from specified double arrays.
+     *
      * @param xValues the new x coordinates
      * @param yValues the new y coordinates
      * @param yErrorsNeg the -dy errors
      * @param yErrorsPos the +dy errors
+     * @param dataCount maximum number of data points to copy (e.g. in case array store more than needs to be copied)
      * @return itself
      */
-    public FifoDoubleErrorDataSet add(final double[] xValues, final double[] yValues, final double[] yErrorsNeg,
-            final double[] yErrorsPos) {
+    public FifoDoubleErrorDataSet add(final double[] xValues, final double[] yValues, final double[] yErrorsNeg, final double[] yErrorsPos, final int dataCount) {
         lock().writeLockGuard(() -> {
-            for (int i = 0; i < xValues.length; i++) {
+            for (int i = 0; i < dataCount; i++) {
                 this.add(xValues[i], yValues[i], yErrorsNeg[i], yErrorsPos[i]);
             }
         });
@@ -226,9 +249,9 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         protected String style;
         protected String tag;
 
-        protected DataBlob(final double x, final double y, final double errorYNeg, final double errorYPos, final String tag,
-                final String style) {
-            super(x, y, errorYNeg, errorYPos);
+        protected DataBlob(final double x, final double y, final double errorYNeg, final double errorYPos, final String tag, final String style) {
+            //noinspection SuspiciousNameCombination
+            super(x, y, errorYNeg, errorYPos); // NOPMD NOSONAR - super's x/y error is reinterpreted as +ey -ey in this class
             this.tag = tag;
             this.style = style;
         }
@@ -244,6 +267,20 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
-        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+        lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+            this.reset();
+            // copy data
+            final int count = other.getDataCount();
+            if (other instanceof DataSetError) {
+                this.add(other.getValues(DIM_X), other.getValues(DIM_Y), ((DataSetError) other).getErrorsNegative(DIM_Y), ((DataSetError) other).getErrorsPositive(DIM_Y), other.getDataCount());
+            } else {
+                this.add(other.getValues(DIM_X), other.getValues(DIM_Y), new double[count], new double[count], other.getDataCount());
+            }
+
+            copyMetaData(other);
+            copyDataLabelsAndStyles(other, copy);
+            copyAxisDescription(other);
+        }));
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 }

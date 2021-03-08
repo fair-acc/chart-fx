@@ -23,49 +23,33 @@ import de.gsi.dataset.utils.AssertUtils;
  *
  * @author rstein
  */
-public class DataSetEqualityTests {
+class DataSetEqualityTests {
     @Test
-    public void testDataSetEquality() {
+    void testDataSetEquality() {
         // check for helper classes
         assertEquals(new DataRange(), new DataRange());
         assertEquals(new DefaultAxisDescription(DIM_X, "default"), new DefaultAxisDescription(DIM_X, "default"));
 
-        // common DataSet implementations
-        assertEquals(new DoubleDataSet("default"), new DoubleDataSet("default"));
-        assertEquals(new DoubleErrorDataSet("default"), new DoubleErrorDataSet("default"));
-        assertEquals(new FloatDataSet("default"), new FloatDataSet("default"));
-
-        assertEquals(new CircularDoubleErrorDataSet("default", 10), new CircularDoubleErrorDataSet("default", 11));
-
-        assertEquals(new DefaultDataSet("default"), new DefaultDataSet("default"));
-        assertEquals(new DefaultErrorDataSet("default"), new DefaultErrorDataSet("default"));
-        assertEquals(new DoubleDataSet("default"), new DoubleDataSet("default"));
-        assertEquals(new DoubleErrorDataSet("default"), new DoubleErrorDataSet("default"));
-        assertEquals(new FifoDoubleErrorDataSet("default", 10), new FifoDoubleErrorDataSet("default", 11));
-        assertEquals(new FragmentedDataSet("default"), new FragmentedDataSet("default"));
+        // common DataSet implementations not covered by GenericDataSetTests
         assertEquals(new Histogram("default", 10, 0.0, 1.0, BINS_ALIGNED_WITH_BOUNDARY), new Histogram("default", 10, 0.0, 1.0, BINS_ALIGNED_WITH_BOUNDARY));
-        // assertEquals(new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0),
-        // new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0));
+        // assertEquals(new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0), new Histogram2("default", 10, 0.0, 1.0, 10, 0.0, 1.0))
         assertEquals(new LabelledMarkerDataSet("default"), new LabelledMarkerDataSet("default"));
-        assertEquals(new LimitedIndexedTreeDataSet("default", 10), new LimitedIndexedTreeDataSet("default", 11));
-        assertEquals(new RollingDataSet("default"), new RollingDataSet("default"));
-        assertEquals(new WrappedDataSet("default"), new WrappedDataSet("default"));
-
-        assertEquals(new LimitedIndexedTreeDataSet("default", 100), new LimitedIndexedTreeDataSet("default", 100));
     }
 
     /**
      * more specific test here DoubleErrorDataSet as stand-in for all AbstractDataSet derived classes
      */
     @Test
-    public void testDoubleDataSetEquality() {
+    void testDoubleDataSetEquality() { // NOPMD NOSONAR number of asserts in method
         final DoubleErrorDataSet ds1 = new DoubleErrorDataSet("default");
         final DoubleErrorDataSet ds2 = new DoubleErrorDataSet("default");
 
         assertEquals(ds1, ds1);
         assertNotEquals(null, ds1);
-        assertNotEquals(ds1, new OneDimDataSet());
-        assertNotEquals("", ds1);
+        //noinspection AssertBetweenInconvertibleTypes
+        assertNotEquals(ds1, new OneDimDataSet(), "incompatible class type"); // NOPMD NOSONAR
+        //noinspection AssertBetweenInconvertibleTypes
+        assertNotEquals("", ds1, "incompatible class type"); // NOPMD NOSONAR
         assertEquals(ds1, ds2);
 
         ds1.setName(null);

@@ -2,6 +2,7 @@ package de.gsi.dataset.spi;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import static de.gsi.dataset.DataSet.DIM_X;
@@ -17,9 +18,9 @@ import de.gsi.dataset.AxisDescription;
  * 
  * @author Alexander Krimm
  */
-public class CircularDoubleErrorDataSetTests {
+class CircularDoubleErrorDataSetTests {
     @Test
-    public void defaultTests() {
+    void defaultTests() {
         CircularDoubleErrorDataSet dataSet = new CircularDoubleErrorDataSet("test", 5);
         assertEquals("test", dataSet.getName());
         assertEquals(2, dataSet.getDimension());
@@ -32,8 +33,8 @@ public class CircularDoubleErrorDataSetTests {
         // add point
         dataSet.add(1.0, 2.0, 3.0, 2.2);
         assertEquals(1, dataSet.getDataCount());
-        assertEquals(null, dataSet.getStyle(0));
-        assertEquals(null, dataSet.getDataLabel(0));
+        assertNull(dataSet.getStyle(0));
+        assertNull(dataSet.getDataLabel(0));
         assertEquals(1.0, dataSet.get(DIM_X, 0));
         assertEquals(2.0, dataSet.get(DIM_Y, 0));
         assertEquals(3.0, dataSet.getErrorNegative(DIM_Y, 0));
@@ -42,10 +43,10 @@ public class CircularDoubleErrorDataSetTests {
         assertEquals(0.0, dataSet.getErrorPositive(DIM_X, 0));
 
         // add point with label
-        dataSet.add(1.1, 2.1, 3.1, 2.3, "testlabel");
+        dataSet.add(1.1, 2.1, 3.1, 2.3, "testLabel");
         assertEquals(2, dataSet.getDataCount());
-        assertEquals("testlabel", dataSet.getDataLabel(1));
-        assertEquals(null, dataSet.getStyle(1));
+        assertEquals("testLabel", dataSet.getDataLabel(1));
+        assertNull(dataSet.getStyle(1));
         assertArrayEquals(new double[] { 1.0, 1.1 }, dataSet.getValues(DIM_X));
         assertArrayEquals(new double[] { 2.0, 2.1 }, dataSet.getValues(DIM_Y));
         assertArrayEquals(new double[] { 3.0, 3.1 }, dataSet.getErrorsNegative(DIM_Y));
@@ -54,9 +55,9 @@ public class CircularDoubleErrorDataSetTests {
         assertArrayEquals(new double[] { 0, 0 }, dataSet.getErrorsPositive(DIM_X));
 
         // add point with label and style
-        dataSet.add(1.2, 2.2, 3.2, 2.4, "testlabel2", "color:red");
+        dataSet.add(1.2, 2.2, 3.2, 2.4, "testLabel2", "color:red");
         assertEquals(3, dataSet.getDataCount());
-        assertEquals("testlabel2", dataSet.getDataLabel(2));
+        assertEquals("testLabel2", dataSet.getDataLabel(2));
         assertEquals("color:red", dataSet.getStyle(2));
 
         // add points
@@ -80,7 +81,7 @@ public class CircularDoubleErrorDataSetTests {
     }
 
     @Test
-    public void testThatAddingSingleValuesWillUpdateAxisDescriptionAccoringToNewValue() {
+    void testThatAddingSingleValuesWillUpdateAxisDescriptionAccordingToNewValue() {
         CircularDoubleErrorDataSet dataSet = new CircularDoubleErrorDataSet("test", 5);
         AxisDescription xAxisDescription = dataSet.getAxisDescription(DIM_X);
         AxisDescription yAxisDescription = dataSet.getAxisDescription(DIM_Y);
@@ -105,7 +106,7 @@ public class CircularDoubleErrorDataSetTests {
     }
 
     @Test
-    public void testThatAddingMultipleValuesWillUpdateAxisDescriptionAccoringToNewValues() {
+    void testThatAddingMultipleValuesWillUpdateAxisDescriptionAccordingToNewValues() {
         CircularDoubleErrorDataSet dataSet = new CircularDoubleErrorDataSet("test", 5);
         AxisDescription xAxisDescription = dataSet.getAxisDescription(DIM_X);
         AxisDescription yAxisDescription = dataSet.getAxisDescription(DIM_Y);
@@ -137,6 +138,36 @@ public class CircularDoubleErrorDataSetTests {
         // size of five, the first values gets evicted!
         assertAxisDescriptionRange(xAxisDescription, 2., 6.);
         assertAxisDescriptionRange(yAxisDescription, -62., 44.);
+    }
+
+    @Test
+    void testUpdateAxisRange() {
+        CircularDoubleErrorDataSet dataSet = new CircularDoubleErrorDataSet("test", 5);
+        AxisDescription xAxisDescription = dataSet.getAxisDescription(DIM_X);
+        AxisDescription yAxisDescription = dataSet.getAxisDescription(DIM_Y);
+
+        assertEquals(Double.NaN, xAxisDescription.getMin());
+        assertEquals(Double.NaN, xAxisDescription.getMax());
+        assertEquals(Double.NaN, yAxisDescription.getMin());
+        assertEquals(Double.NaN, yAxisDescription.getMax());
+
+        dataSet.add(1, 1, 0.1, 0.1);
+        assertEquals(1, xAxisDescription.getMin());
+        assertEquals(1, xAxisDescription.getMax());
+        assertEquals(0.9, yAxisDescription.getMin());
+        assertEquals(1.1, yAxisDescription.getMax());
+
+        dataSet.add(2, 1, 0.1, 0.1);
+        assertEquals(1, xAxisDescription.getMin());
+        assertEquals(2, xAxisDescription.getMax());
+        assertEquals(0.9, yAxisDescription.getMin());
+        assertEquals(1.1, yAxisDescription.getMax());
+
+        dataSet.add(2, 2, 0.1, 0.1);
+        assertEquals(1, xAxisDescription.getMin());
+        assertEquals(2, xAxisDescription.getMax());
+        assertEquals(0.9, yAxisDescription.getMin());
+        assertEquals(2.1, yAxisDescription.getMax());
     }
 
     private void assertAxisDescriptionRange(AxisDescription axisDescription, double min, double max) {
