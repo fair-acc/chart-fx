@@ -1,7 +1,3 @@
-/*****************************************************************************
- * * Chart Common - dataset consisting of other dataset fragments * * modified: 2019-01-23 Harald Braeuning * *
- ****************************************************************************/
-
 package de.gsi.dataset.spi;
 
 import java.util.ArrayList;
@@ -19,10 +15,6 @@ import de.gsi.dataset.event.UpdatedDataEvent;
 public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implements DataSet2D {
     private static final long serialVersionUID = 2540953806461866839L;
     protected int dataCount;
-    // protected double xmin;
-    // protected double xmax;
-    // protected double ymin;
-    // protected double ymax;
     protected final ArrayList<DataSet> list = new ArrayList<>();
 
     /**
@@ -59,7 +51,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
         // TODO: harald -> please check whether this is supposed to be deep copy
         // (true) or by reference (false) hand over (assumption here is 'by reference/pointer' -> remove this comment
         // once checked
-        final DoubleDataSet set = new DoubleDataSet(String.format("Fragement #%d", list.size() + 1), xValues, yValues,
+        final DoubleDataSet set = new DoubleDataSet(String.format("Fragment #%d", list.size() + 1), xValues, yValues,
                 xValues.length, false);
         add(set);
     }
@@ -133,6 +125,14 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
-        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+        lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+            clear();
+            add(other);
+
+            copyMetaData(other);
+            copyDataLabelsAndStyles(other, copy);
+            copyAxisDescription(other);
+        }));
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 }

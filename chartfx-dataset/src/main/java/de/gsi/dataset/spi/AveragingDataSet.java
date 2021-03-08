@@ -2,8 +2,10 @@ package de.gsi.dataset.spi;
 
 import java.util.ArrayDeque;
 
+import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.event.AddedDataEvent;
+import de.gsi.dataset.event.UpdatedDataEvent;
 
 /**
  * TODO: Change to ErrorDataSet and calculate standard deviation.
@@ -13,9 +15,16 @@ import de.gsi.dataset.event.AddedDataEvent;
 public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implements DataSet {
     private static final long serialVersionUID = 1L;
     private int averageSize = 1;
-    private int fuzzyCount = 0;
+    private int fuzzyCount;
     private InternalDataSet dataset;
     private final ArrayDeque<DataSet> deque = new ArrayDeque<>();
+
+    /**
+     * @param name data set name (assumes 2-dim DataSet
+     */
+    public AveragingDataSet(final String name) {
+        this(name, 2, 0);
+    }
 
     /**
      * @param name data set name
@@ -150,12 +159,12 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
                     ds.getDataCount(), true);
         }
 
-        public boolean isCompatible(DataSet d) {
-            return Math.abs(super.getDataCount() - d.getDataCount()) <= fuzzyCount;
+        public boolean isIncompatible(DataSet d) {
+            return Math.abs(super.getDataCount() - d.getDataCount()) > fuzzyCount;
         }
 
         public void opAdd(DataSet d) {
-            if (!isCompatible(d)) {
+            if (isIncompatible(d)) {
                 throw new IllegalArgumentException("Datasets do not match");
             }
 
@@ -172,7 +181,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
         }
 
         public void opSub(DataSet d) {
-            if (!isCompatible(d)) {
+            if (isIncompatible(d)) {
                 throw new IllegalArgumentException("Datasets do not match");
             }
             yValues.size(d.getDataCount());
@@ -189,26 +198,36 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
-        if (other instanceof AveragingDataSet) {
-            this.fuzzyCount = ((AveragingDataSet) other).getFuzzyCount();
-            this.averageSize = ((AveragingDataSet) other).getAverageSize();
-            if (copy) {
-                this.clear();
-                ((AveragingDataSet) other).deque.forEach(ds -> this.add(new DefaultDataSet(ds)));
-            } else {
-                this.dataset = ((AveragingDataSet) other).dataset;
-                this.deque.clear();
-                this.deque.addAll(((AveragingDataSet) other).deque);
+        lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+            if (other instanceof AveragingDataSet) {
+                this.fuzzyCount = ((AveragingDataSet) other).getFuzzyCount();
+                this.averageSize = ((AveragingDataSet) other).getAverageSize();
+                if (copy) {
+                    this.clear();
+                    ((AveragingDataSet) other).deque.forEach(ds -> this.add(new DefaultDataSet(ds)));
+                } else {
+                    this.dataset = ((AveragingDataSet) other).dataset;
+                    this.deque.clear();
+                    this.deque.addAll(((AveragingDataSet) other).deque);
+                }
+                getAxisDescriptions().forEach(AxisDescription::clear);
+                for (int dim = 0; dim < getDimension(); dim++) {
+                    recomputeLimits(dim);
+                }
+                return;
             }
-            return this;
-        }
-        // non AveragingDataSet: add the other data set as a single data set
-        this.clear();
-        if (copy) {
-            this.add(new DefaultDataSet(other));
-        } else {
-            this.add(other);
-        }
-        return this;
+            // non AveragingDataSet: add the other data set as a single data set
+            this.clear();
+            if (copy) {
+                this.add(new DefaultDataSet(other));
+            } else {
+                this.add(other);
+            }
+            getAxisDescriptions().forEach(AxisDescription::clear);
+            for (int dim = 0; dim < getDimension(); dim++) {
+                recomputeLimits(dim);
+            }
+        }));
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 }

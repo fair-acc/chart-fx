@@ -6,6 +6,7 @@ import de.gsi.dataset.DataSet2D;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.event.AddedDataEvent;
 import de.gsi.dataset.event.RemovedDataEvent;
+import de.gsi.dataset.event.UpdatedDataEvent;
 import de.gsi.dataset.utils.AssertUtils;
 import de.gsi.dataset.utils.CircularBuffer;
 import de.gsi.dataset.utils.DoubleCircularBuffer;
@@ -26,18 +27,18 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
      * Creates a new instance of <code>CircularDoubleErrorDataSet</code>.
      *
      * @param name name of this DataSet.
-     * @param initalSize maximum circular buffer capacity
+     * @param initialSize maximum circular buffer capacity
      * @throws IllegalArgumentException if <code>name</code> is <code>null</code>
      */
-    public CircularDoubleErrorDataSet(final String name, final int initalSize) {
+    public CircularDoubleErrorDataSet(final String name, final int initialSize) {
         super(name, 2, ErrorType.NO_ERROR, ErrorType.ASYMMETRIC);
-        AssertUtils.gtEqThanZero("initalSize", initalSize);
-        xValues = new DoubleCircularBuffer(initalSize);
-        yValues = new DoubleCircularBuffer(initalSize);
-        yErrorsPos = new DoubleCircularBuffer(initalSize);
-        yErrorsNeg = new DoubleCircularBuffer(initalSize);
-        dataLabels = new CircularBuffer<>(initalSize);
-        dataStyles = new CircularBuffer<>(initalSize);
+        AssertUtils.gtEqThanZero("initialSize", initialSize);
+        xValues = new DoubleCircularBuffer(initialSize);
+        yValues = new DoubleCircularBuffer(initialSize);
+        yErrorsPos = new DoubleCircularBuffer(initialSize);
+        yErrorsNeg = new DoubleCircularBuffer(initialSize);
+        dataLabels = new CircularBuffer<>(initialSize);
+        dataStyles = new CircularBuffer<>(initialSize);
     }
 
     /**
@@ -87,9 +88,10 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             dataLabels.put(label);
             dataStyles.put(style);
 
+            // assumes in X sorted data range
             getAxisDescription(DIM_X).setMin(xValues.get(0));
             getAxisDescription(DIM_X).setMax(xValues.get(xValues.available() - 1));
-            getAxisDescription(DIM_Y).add(y);
+            getAxisDescription(DIM_Y).clear();
         });
 
         return fireInvalidated(new AddedDataEvent(this));
@@ -112,24 +114,45 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
         AssertUtils.notNull("Y coordinates", yVals);
         AssertUtils.notNull("Y error neg", yErrNeg);
         AssertUtils.notNull("Y error pos", yErrPos);
-        AssertUtils.equalDoubleArrays(xVals, yVals);
-        AssertUtils.equalDoubleArrays(xVals, yErrNeg);
-        AssertUtils.equalDoubleArrays(xVals, yErrPos);
+        final int dataCount = Math.min(Math.min(xVals.length, yVals.length), Math.min(yErrNeg.length, yErrPos.length));
+        return add(xVals, yVals, yErrNeg, yErrPos, dataCount);
+    }
+
+    /**
+     * <p>
+     * Initialises the data set with specified data.
+     * </p>
+     * Note: The method copies values from specified double arrays.
+     *
+     * @param xVals the new x coordinates
+     * @param yVals the new y coordinates
+     * @param yErrNeg the +dy errors
+     * @param yErrPos the -dy errors
+     * @param dataCount maximum number of data points to copy (e.g. in case array store more than needs to be copied)
+     * @return itself
+     */
+    public CircularDoubleErrorDataSet add(final double[] xVals, final double[] yVals, final double[] yErrNeg, final double[] yErrPos, final int dataCount) {
+        AssertUtils.notNull("X coordinates", xVals);
+        AssertUtils.notNull("Y coordinates", yVals);
+        AssertUtils.notNull("Y error neg", yErrNeg);
+        AssertUtils.notNull("Y error pos", yErrPos);
+        AssertUtils.gtOrEqual("X coordinates", dataCount, xVals.length);
+        AssertUtils.gtOrEqual("Y coordinates", dataCount, yVals.length);
+        AssertUtils.gtOrEqual("Y error neg", dataCount, yErrNeg.length);
+        AssertUtils.gtOrEqual("Y error pos", dataCount, yErrPos.length);
 
         lock().writeLockGuard(() -> {
-            this.xValues.put(xVals, xVals.length);
-            this.yValues.put(yVals, yVals.length);
-            this.yErrorsNeg.put(yErrNeg, yErrNeg.length);
-            this.yErrorsPos.put(yErrPos, yErrPos.length);
-            dataLabels.put(new String[yErrPos.length], yErrPos.length);
-            dataStyles.put(new String[yErrPos.length], yErrPos.length);
+            this.xValues.put(xVals, dataCount);
+            this.yValues.put(yVals, dataCount);
+            this.yErrorsNeg.put(yErrNeg, dataCount);
+            this.yErrorsPos.put(yErrPos, dataCount);
+            dataLabels.put(new String[yVals.length], dataCount);
+            dataStyles.put(new String[yVals.length], dataCount);
 
+            // assumes in X sorted data range
             getAxisDescription(DIM_X).setMin(xValues.get(0));
             getAxisDescription(DIM_X).setMax(xValues.get(xValues.available() - 1));
-            for (int i = 0; i < yVals.length; i++) {
-                getAxisDescription(DIM_Y).add(yVals[i] + yErrPos[i]);
-                getAxisDescription(DIM_Y).add(yVals[i] - yErrNeg[i]);
-            }
+            getAxisDescription(DIM_Y).clear();
         });
 
         return fireInvalidated(new AddedDataEvent(this));
@@ -206,6 +229,23 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
-        throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+        lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+            this.reset();
+            if (other.getDataCount() == 0) {
+                return;
+            }
+            // copy data
+            final int count = other.getDataCount();
+            if (other instanceof DataSetError) {
+                this.add(other.getValues(DIM_X), other.getValues(DIM_Y), ((DataSetError) other).getErrorsNegative(DIM_Y), ((DataSetError) other).getErrorsPositive(DIM_Y), other.getDataCount());
+            } else {
+                this.add(other.getValues(DIM_X), other.getValues(DIM_Y), new double[count], new double[count], other.getDataCount());
+            }
+
+            copyMetaData(other);
+            copyDataLabelsAndStyles(other, copy);
+            copyAxisDescription(other);
+        }));
+        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
     }
 }

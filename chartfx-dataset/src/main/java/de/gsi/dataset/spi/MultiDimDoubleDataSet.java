@@ -336,12 +336,23 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     @Override
     public MultiDimDoubleDataSet set(final DataSet other, final boolean copy) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> {
+            this.resize(0);
+
             // copy data
             double[][] data = new double[other.getDimension()][];
-            for (int i = 0; i < other.getDimension(); i++) {
-                data[i] = other.getValues(i);
+            for (int dim = 0; dim < other.getDimension(); dim++) {
+                data[dim] = other.getValues(dim);
             }
-            this.set(data, copy);
+            if (other.getDimension() == 2) {
+                this.set(data, other.getDataCount(), copy);
+            } else {
+                this.set(data, copy);
+            }
+
+            for (int dim = 0; dim < other.getDimension(); dim++) {
+                recomputeLimits(dim);
+            }
+
             // deep copy data point labels and styles
             for (int index = 0; index < other.getDataCount(); index++) {
                 final String label = other.getDataLabel(index);
@@ -384,10 +395,28 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
      * @return itself
      */
     public MultiDimDoubleDataSet set(final double[][] values, final boolean copy) {
-        int dataMaxIndex = Integer.MAX_VALUE;
+        int dataCount = Integer.MAX_VALUE;
         for (int i = 0; i < this.values.length; i++) {
-            AssertUtils.notNull("X coordinates", values[i]);
-            dataMaxIndex = Math.min(dataMaxIndex, values[i].length);
+            AssertUtils.notNull(i + "-th coordinates", values[i]);
+            dataCount = Math.min(dataCount, values[i].length);
+        }
+        return this.set(values, dataCount, copy);
+    }
+
+    /**
+     * <p>
+     * Initialises the data set with specified data.
+     * </p>
+     * Note: The method copies values from specified double arrays.
+     *
+     * @param values coordinates
+     * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation
+     * @param dataCount maximum number of data points to copy (e.g. in case array store more than needs to be copied)
+     * @return itself
+     */
+    public MultiDimDoubleDataSet set(final double[][] values, final int dataCount, final boolean copy) {
+        for (int i = 0; i < this.values.length; i++) {
+            AssertUtils.notNull(i + "-th coordinates", values[i]);
         }
 
         lock().writeLockGuard(() -> {
@@ -396,7 +425,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             if (copy) {
                 resize(0);
                 for (int i = 0; i < this.values.length; i++) {
-                    this.values[i].addElements(0, values[i]);
+                    this.values[i].addElements(0, values[i], 0, dataCount);
                 }
             } else {
                 for (int i = 0; i < this.values.length; i++) {
