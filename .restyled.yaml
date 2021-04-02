@@ -177,9 +177,12 @@ restylers_version: "20191031"
 #
 #   The command (and any required argument(s)) to perform the Restyling.
 #
+# for info see: https://github.com/restyled-io/restyler/issues/134
+# N.B. the docker image version can be controlled via PRs:
+# https://github.com/restyled-io/restylers/tree/main/clang-format
 restylers:
   - name: clang-format
-    image: restyled/restyler-clang-format:v9.0.0
+    image: 'restyled/restyler-clang-format:12.0.0'
     command:
       - clang-format
       - "-i"
