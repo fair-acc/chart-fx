@@ -1,7 +1,5 @@
 package de.gsi.chart.renderer.datareduction;
 
-import java.security.InvalidParameterException;
-
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 
@@ -22,7 +20,7 @@ public class DefaultDataReducer implements RendererDataReducer {
         @Override
         public void set(final int value) {
             if (value < 0) {
-                throw new InvalidParameterException("minPointPixelDistance " + value + " must be greater than zero");
+                throw new IllegalArgumentException("minPointPixelDistance " + value + " must be greater than zero");
             }
             super.set(value);
         }
@@ -125,24 +123,11 @@ public class DefaultDataReducer implements RendererDataReducer {
             final double newXValue = xValues[i];
             final double newYValue = yValues[i];
             final boolean isNaN = Double.isNaN(newYValue);
-            if (isNaN) {
-                xValues[count] = newXValue;
-                yValues[count] = Double.NaN;
-                xPointErrorsNeg[count] = 0.0;
-                xPointErrorsPos[count] = 0.0;
-                yPointErrorsNeg[count] = Double.NaN;
-                yPointErrorsPos[count] = Double.NaN;
-                pointSelected[count] = sel;
-                styles[count] = style;
-                count++;
-                ncount = 0;
-                continue;
-            }
             final int differenceInX = (int) Math.abs(xold - newXValue);
             final int differenceInY = (int) Math.abs(yold - newYValue);
 
             // check hor. and ver. pixel distance of new to last drawn point
-            if (differenceInX > minPixelDistance || differenceInY > minPixelDistance) {
+            if (differenceInX > minPixelDistance || differenceInY > minPixelDistance || isNaN) {
                 // pixel distance larger than required min-distance -> have to draw new point
 
                 if (ncount > 0) {
@@ -166,18 +151,40 @@ public class DefaultDataReducer implements RendererDataReducer {
                 }
 
                 // add new point outside the accumulated region
-                // start new accumulation phase
-                meanX = newXValue;
-                meanY = newYValue;
+                if (isNaN) {
+                    // immediately publish NaN value
+                    xValues[count] = newXValue;
+                    yValues[count] = Double.NaN;
+                    xPointErrorsNeg[count] = 0.0;
+                    xPointErrorsPos[count] = 0.0;
+                    yPointErrorsNeg[count] = Double.NaN;
+                    yPointErrorsPos[count] = Double.NaN;
+                    pointSelected[count] = pointSelected[i];
+                    styles[count] = styles[i];
+                    count++;
+                    // reset accumulation
+                    meanX = 0;
+                    meanY = 0;
+                    minX = Integer.MAX_VALUE;
+                    maxX = Integer.MIN_VALUE;
+                    minY = Integer.MAX_VALUE;
+                    maxY = Integer.MIN_VALUE;
+                    sel = false;
+                    style = null;
+                    ncount = 0;
+                } else { // start new accumulation phase
+                    meanX = newXValue;
+                    meanY = newYValue;
+                    minX = (int) xPointErrorsPos[i];
+                    maxX = (int) xPointErrorsNeg[i];
+                    minY = (int) yPointErrorsPos[i];
+                    maxY = (int) yPointErrorsNeg[i];
+                    sel = pointSelected[i];
+                    style = styles[i];
+                    ncount = 1;
+                }
                 xold = newXValue;
                 yold = newYValue;
-                minX = (int) xPointErrorsPos[i];
-                maxX = (int) xPointErrorsNeg[i];
-                minY = (int) yPointErrorsPos[i];
-                maxY = (int) yPointErrorsNeg[i];
-                sel |= pointSelected[i];
-                style = styles[i];
-                ncount = 1;
             } else {
                 // points are closer than the dash size, drop new point
                 // compute mean -- first part: accumulation, min, max
@@ -265,22 +272,11 @@ public class DefaultDataReducer implements RendererDataReducer {
             final double newXValue = xValues[i];
             final double newYValue = yValues[i];
             final boolean isNaN = Double.isNaN(newYValue);
-            if (isNaN) {
-                xValues[count] = newXValue;
-                yValues[count] = Double.NaN;
-                yPointErrorsNeg[count] = Double.NaN;
-                yPointErrorsPos[count] = Double.NaN;
-                pointSelected[count] = sel;
-                styles[count] = style;
-                count++;
-                ncount = 0;
-                continue;
-            }
             final int differenceInX = (int) Math.abs(xold - newXValue);
             final int differenceInY = (int) Math.abs(yold - newYValue);
 
             // check hor. and ver. pixel distance of new to last drawn point
-            if (differenceInX > minPixelDistance || differenceInY > minPixelDistance) {
+            if (differenceInX > minPixelDistance || differenceInY > minPixelDistance || isNaN) {
                 // pixel distance larger than required min-distance -> have to draw new point
 
                 if (ncount > 0) {
@@ -301,17 +297,36 @@ public class DefaultDataReducer implements RendererDataReducer {
                     // aggregated/merged previous points - accumulation phase is finished
                 }
 
-                // add new point outside the accumulated region
-                // start new accumulation phase
-                meanX = newXValue;
-                meanY = newYValue;
+                if (isNaN) {
+                    // immediately push NaN values to result
+                    xValues[count] = newXValue;
+                    yValues[count] = Double.NaN;
+                    yPointErrorsNeg[count] = Double.NaN;
+                    yPointErrorsPos[count] = Double.NaN;
+                    pointSelected[count] = pointSelected[i];
+                    styles[count] = styles[i];
+                    count++;
+                    // reset accumulation values
+                    meanX = 0;
+                    meanY = 0;
+                    minY = Integer.MAX_VALUE;
+                    maxY = Integer.MIN_VALUE;
+                    sel = pointSelected[i];
+                    style = styles[i];
+                    ncount = 0;
+                } else {
+                    // add new point outside the accumulated region
+                    // start new accumulation phase
+                    meanX = newXValue;
+                    meanY = newYValue;
+                    minY = (int) yPointErrorsPos[i];
+                    maxY = (int) yPointErrorsNeg[i];
+                    sel = pointSelected[i];
+                    style = styles[i];
+                    ncount = 1;
+                }
                 xold = newXValue;
                 yold = newYValue;
-                minY = (int) yPointErrorsPos[i];
-                maxY = (int) yPointErrorsNeg[i];
-                sel |= pointSelected[i];
-                style = styles[i];
-                ncount = 1;
             } else {
                 // points are closer than the dash size, drop new point
                 // compute mean -- first part: accumulation, min, max
@@ -388,23 +403,14 @@ public class DefaultDataReducer implements RendererDataReducer {
             final double newXValue = xValues[i];
             final double newYValue = yValues[i];
             final boolean isNaN = Double.isNaN(newYValue);
-            if (isNaN) {
-                xValues[count] = newXValue;
-                yValues[count] = Double.NaN;
-                pointSelected[count] = sel;
-                styles[count] = style;
-                count++;
-                ncount = 0;
-                continue;
-            }
             final int differenceInX = (int) Math.abs(xold - newXValue);
             final int differenceInY = (int) Math.abs(yold - newYValue);
 
-            // check hor. and ver. pixel distance of new to last drawn point
-            if (differenceInX > minPixelDistance || differenceInY > minPixelDistance) {
+            // check hor. and ver. pixel distance of new to last drawn point. Always stop accumulation for NaNs
+            if (differenceInX > minPixelDistance || differenceInY > minPixelDistance || isNaN) {
                 // pixel distance larger than required min-distance -> have to draw new point
 
-                if (ncount > 0 || isNaN) {
+                if (ncount > 0) {
                     // absorbed at least one point before
                     // compute mean -- first part: accumulation, min, max
                     if (ncount == 1) {
@@ -422,14 +428,26 @@ public class DefaultDataReducer implements RendererDataReducer {
                 }
 
                 // add new point outside the accumulated region
-                // start new accumulation phase
-                meanX = newXValue;
-                meanY = newYValue;
+                if (isNaN) { // directly add any NaNs and reset accumulation variables
+                    xValues[count] = (int) newXValue;
+                    yValues[count] = Double.NaN;
+                    pointSelected[count] = pointSelected[i];
+                    styles[count] = styles[i];
+                    count++;
+                    meanX = 0;
+                    meanY = 0;
+                    sel = false;
+                    style = null;
+                    ncount = 0;
+                } else { // start new accumulation phase
+                    meanX = newXValue;
+                    meanY = newYValue;
+                    sel = pointSelected[i];
+                    style = styles[i];
+                    ncount = 1;
+                }
                 xold = newXValue;
                 yold = newYValue;
-                sel |= pointSelected[i];
-                style = styles[i];
-                ncount = 1;
             } else {
                 // points are closer than the dash size, drop new point
                 // compute mean -- first part: accumulation, min, max
