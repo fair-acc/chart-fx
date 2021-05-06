@@ -362,7 +362,7 @@ as jvm flags. Adding the following to the java command line call or your IDEs ru
 modules available and accessible to chartfx:
 
 ```
---add-modules=javafx.swing,javafx.graphics,javafx.fxml,javafx.media,javafx.web
+--add-modules=javafx.graphics,javafx.fxml,javafx.media
 --add-reads javafx.graphics=ALL-UNNAMED
 --add-opens javafx.controls/com.sun.javafx.charts=ALL-UNNAMED
 --add-opens javafx.controls/com.sun.javafx.scene.control.inputmap=ALL-UNNAMED
@@ -370,7 +370,13 @@ modules available and accessible to chartfx:
 --add-opens javafx.graphics/com.sun.javafx.iio.common=ALL-UNNAMED
 --add-opens javafx.graphics/com.sun.javafx.css=ALL-UNNAMED
 --add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED`
+--add-exports javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED
 ```
+
+As these parameters might change as dependencies get updated and depending on the way your project is set up,
+please check the following resources if you encounter problems with module accessibility:
+- [ControlsFX wiki about module visibility problems](https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above#understanding-exceptions)
+- [Blogpost with a brief explanation about the different parameters and how to use them](https://nipafx.dev/five-command-line-options-hack-java-module-system/)
 
 ### Extending chartfx
 If you find yourself missing some feature or not being able to access specific chart internals, the way to go is often to
