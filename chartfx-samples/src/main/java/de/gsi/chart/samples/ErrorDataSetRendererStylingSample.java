@@ -1,9 +1,9 @@
 package de.gsi.chart.samples;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import static de.gsi.dataset.DataSet.DIM_X;
+
+import java.util.*;
+import java.util.stream.Collectors;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -42,6 +42,7 @@ import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.spi.DefaultErrorDataSet;
 import de.gsi.dataset.testdata.spi.CosineFunction;
 import de.gsi.dataset.testdata.spi.GaussFunction;
 import de.gsi.dataset.testdata.spi.RandomStepFunction;
@@ -61,7 +62,9 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 100; // [ms]
     private static final double N_MAX_SAMPLES = 10_000;
+    private final Random rnd = new Random();
     private DataSetType dataSetType = DataSetType.RANDOM_WALK;
+    private boolean dataSetIncludeNaNs = false;
     private int nSamples = 400;
     private Timer timer;
 
@@ -97,8 +100,26 @@ public class ErrorDataSetRendererStylingSample extends Application {
             break;
         }
 
+        final List<DataSetError> dataSetsWithNaN;
+        if (dataSetIncludeNaNs) {
+            dataSetsWithNaN = dataSet.stream() //
+                                      .map(ds -> {
+                                          final DefaultErrorDataSet newDs = new DefaultErrorDataSet(ds);
+                                          for (int i = Math.min(Math.max(nSamples / 10, 500), 2); i >= 0; i--) { // how many gaps to produce
+                                              final int index = rnd.nextInt(nSamples - i);
+                                              for (int j = i; j >= 0; j--) { // produce gaps with 1 to n consecutive NaNs
+                                                  newDs.set(index, ds.get(DIM_X, index + j), Double.NaN);
+                                              }
+                                          }
+                                          return newDs;
+                                      })
+                                      .collect(Collectors.toList());
+        } else {
+            dataSetsWithNaN = dataSet;
+        }
+
         Platform.runLater(() -> {
-            chart.getRenderers().get(0).getDatasets().setAll(dataSet);
+            chart.getRenderers().get(0).getDatasets().setAll(dataSetsWithNaN);
             chart.requestLayout();
         });
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
@@ -230,6 +251,12 @@ public class ErrorDataSetRendererStylingSample extends Application {
             generateData(chart);
         });
 
+        final CheckBox dataSetIncludeNaNsBox = new CheckBox("Include NaNs");
+        dataSetIncludeNaNsBox.selectedProperty().addListener((ch, oldVal, newVal) -> {
+            dataSetIncludeNaNs = newVal;
+            generateData(chart);
+        });
+
         // H-Spacer
         final Region spacer = new Region();
         spacer.setMinWidth(Region.USE_PREF_SIZE);
@@ -237,7 +264,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox(DEBUG_UPDATE_RATE);
         profilerInfoBox.setDebugLevel(DebugLevel.VERSION);
 
-        return new HBox(new Label("Function Type: "), dataSetTypeSelector, newDataSet, startTimer, spacer, profilerInfoBox);
+        return new HBox(new Label("Function Type: "), dataSetTypeSelector, dataSetIncludeNaNsBox, newDataSet, startTimer, spacer, profilerInfoBox);
     }
 
     private ParameterTab getRendererTab(final XYChart chart, final ErrorDataSetRenderer errorRenderer) {
@@ -364,6 +391,14 @@ public class ErrorDataSetRendererStylingSample extends Application {
         cacheParallel.selectedProperty().bindBidirectional(errorRenderer.parallelImplementationProperty());
         cacheParallel.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
         pane.addToParameterPane("   Point cache parallel: ", cacheParallel);
+
+        final CheckBox allowNaNs = new CheckBox();
+        allowNaNs.setSelected(errorRenderer.isallowNaNs());
+        allowNaNs.selectedProperty().addListener((ch, old, selected) -> {
+            errorRenderer.setAllowNaNs(selected);
+            chart.requestLayout();
+        });
+        pane.addToParameterPane("Allow NaN: ", allowNaNs);
 
         return pane;
     }
