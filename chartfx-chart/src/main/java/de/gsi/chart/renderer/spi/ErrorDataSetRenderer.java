@@ -84,13 +84,13 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int dsLayoutIndexOffset = layoutOffset == null ? 0 : layoutOffset; // TODO: rationalise
 
-        final int plotingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dsIndex : dsIndexLocal);
+        final int plottingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dsIndex : dsIndexLocal);
 
         gc.save();
 
-        DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(), plotingIndex);
+        DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(), plottingIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, dataSet.getStyle());
-        DefaultRenderColorScheme.setFillScheme(gc, dataSet.getStyle(), plotingIndex);
+        DefaultRenderColorScheme.setFillScheme(gc, dataSet.getStyle(), plottingIndex);
         if (getErrorType() == ErrorStyle.ERRORBARS) {
             final double x = width / 2.0;
             final double y = height / 2.0;
