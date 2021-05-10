@@ -60,6 +60,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("FinancialAdvancedCandlestickSample", new FinancialAdvancedCandlestickSample()));
         buttons.getChildren().add(new MyButton("FinancialPositionSample", new FinancialPositionSample()));
         buttons.getChildren().add(new MyButton("FinancialRealtimeCandlestickSample", new FinancialRealtimeCandlestickSample()));
+        buttons.getChildren().add(new MyButton("FinancialRealtimeFootprintSample", new FinancialRealtimeFootprintSample()));
         buttons.getChildren().add(new MyButton("FxmlSample", new FxmlSample()));
         buttons.getChildren().add(new MyButton("GridRendererSample", new GridRendererSample()));
         buttons.getChildren().add(new MyButton("HexagonSamples", new HexagonSamples()));

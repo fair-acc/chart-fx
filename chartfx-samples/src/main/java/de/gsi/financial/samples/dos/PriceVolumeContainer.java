@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.TreeMap;
 
 public class PriceVolumeContainer {
-    private final TreeMap<Double, PriceVolume> priceVolumeMap = new TreeMap<>();
+    private final TreeMap<Double, Double[]> priceVolumeMap = new TreeMap<>();
     private double pocPrice;
     private double pocVolume = -Double.MAX_VALUE;
 
@@ -15,16 +15,16 @@ public class PriceVolumeContainer {
      * @param volumeUp tick up volume
      */
     public void addPriceVolume(double price, double volumeDown, double volumeUp) {
-        PriceVolume priceVolume = priceVolumeMap.get(price);
+        Double[] priceVolume = priceVolumeMap.get(price);
         if (priceVolume == null) {
-            priceVolume = new PriceVolume(price, volumeDown, volumeUp);
+            priceVolume = new Double[] { price, volumeDown, volumeUp };
             priceVolumeMap.put(price, priceVolume);
 
         } else {
-            priceVolume.volumeUp += volumeUp;
-            priceVolume.volumeDown += volumeDown;
+            priceVolume[1] += volumeDown;
+            priceVolume[2] += volumeUp;
         }
-        double totalVolume = priceVolume.volumeUp + priceVolume.volumeDown;
+        double totalVolume = priceVolume[1] + priceVolume[2];
         if (totalVolume > pocVolume) {
             pocVolume = totalVolume;
             pocPrice = price;
@@ -35,21 +35,21 @@ public class PriceVolumeContainer {
    * @param price return DO price volume by required price level
    * @return provides volume information for specific price
    */
-    public PriceVolume getPriceVolumeBy(double price) {
+    public Double[] getPriceVolumeBy(double price) {
         return priceVolumeMap.get(price);
     }
 
     /**
    * @return provides price volume tree map
    */
-    public TreeMap<Double, PriceVolume> getCompletedPriceVolumeTreeMap() {
+    public TreeMap<Double, Double[]> getCompletedPriceVolumeTreeMap() {
         return priceVolumeMap;
     }
 
     /**
    * @return provides price volume collection for actual bar
    */
-    public Collection<PriceVolume> getCompletedPriceVolume() {
+    public Collection<Double[]> getCompletedPriceVolume() {
         return priceVolumeMap.values();
     }
 

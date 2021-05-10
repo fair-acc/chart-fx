@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.nio.channels.ClosedChannelException;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 
 import javafx.beans.property.DoubleProperty;
@@ -23,6 +24,7 @@ import de.gsi.financial.samples.dos.DefaultOHLCV;
 import de.gsi.financial.samples.dos.Interval;
 import de.gsi.financial.samples.dos.OHLCVItem;
 import de.gsi.financial.samples.service.consolidate.IncrementalOhlcvConsolidation;
+import de.gsi.financial.samples.service.consolidate.OhlcvConsolidationAddon;
 import de.gsi.financial.samples.service.consolidate.OhlcvTimeframeConsolidation;
 import de.gsi.financial.samples.service.period.IntradayPeriod;
 
@@ -61,10 +63,11 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
         OHLC_TICK
     }
 
-    public SimpleOhlcvReplayDataSet(DataInput dataInput, IntradayPeriod period, Interval<Calendar> timeRange, Interval<Calendar> tt, Calendar replayFrom) {
+    public SimpleOhlcvReplayDataSet(DataInput dataInput, IntradayPeriod period, Interval<Calendar> timeRange,
+            Interval<Calendar> tt, Calendar replayFrom, Map<String, OhlcvConsolidationAddon[]> addons) {
         super(dataInput.name());
         setInputSource(dataInput);
-        fillTestData(period, timeRange, tt, replayFrom); // NOPMD
+        fillTestData(period, timeRange, tt, replayFrom, addons); // NOPMD
         if (LOGGER.isDebugEnabled()) {
             LOGGER.atDebug().addArgument(SimpleOhlcvReplayDataSet.class.getSimpleName()).log("started '{}'");
         }
@@ -74,7 +77,7 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
         ohlcvChangeListeners.add(ohlcvChangeListener);
     }
 
-    public void fillTestData(IntradayPeriod period, Interval<Calendar> timeRange, Interval<Calendar> tt, Calendar replayFrom) {
+    public void fillTestData(IntradayPeriod period, Interval<Calendar> timeRange, Interval<Calendar> tt, Calendar replayFrom, Map<String, OhlcvConsolidationAddon[]> addons) {
         lock().writeLockGuard(
                 () -> {
                     try {
@@ -89,7 +92,7 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
                         ohlcv = new DefaultOHLCV();
                         ohlcv.setTitle(resource);
 
-                        consolidation = OhlcvTimeframeConsolidation.createConsolidation(period, tt, null);
+                        consolidation = OhlcvTimeframeConsolidation.createConsolidation(period, tt, addons);
 
                         autoNotification().set(false);
                         setData(ohlcv);

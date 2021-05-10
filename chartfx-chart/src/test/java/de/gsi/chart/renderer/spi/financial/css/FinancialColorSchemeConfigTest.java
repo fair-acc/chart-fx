@@ -24,13 +24,11 @@ import org.testfx.framework.junit5.Start;
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.Renderer;
-import de.gsi.chart.renderer.spi.financial.AbstractFinancialRenderer;
-import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
-import de.gsi.chart.renderer.spi.financial.HighLowRenderer;
-import de.gsi.chart.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
+import de.gsi.chart.renderer.spi.financial.*;
 import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEP;
 import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEPAware;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
+import de.gsi.chart.renderer.spi.financial.utils.FootprintRenderedAPIDummyAdapter;
 import de.gsi.chart.renderer.spi.financial.utils.PositionFinancialDataSetDummy;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
@@ -80,6 +78,12 @@ class FinancialColorSchemeConfigTest {
             financialColorSchemeConfig.applySchemeToDataset(colorScheme, null, ohlcvDataSet, renderer);
         }
         assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", null, ohlcvDataSet, renderer));
+
+        renderer = new FootprintRenderer(new FootprintRenderedAPIDummyAdapter(null));
+        for (String colorScheme : getDefaultColorSchemes()) {
+            financialColorSchemeConfig.applySchemeToDataset(colorScheme, null, ohlcvDataSet, renderer);
+        }
+        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", null, ohlcvDataSet, renderer));
     }
 
     @Test
@@ -90,6 +94,12 @@ class FinancialColorSchemeConfigTest {
         assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", ohlcvDataSet, renderer));
 
         renderer = new HighLowRenderer();
+        for (String colorScheme : getDefaultColorSchemes()) {
+            financialColorSchemeConfig.applySchemeToDataset(colorScheme, ohlcvDataSet, renderer);
+        }
+        assertThrows(IllegalArgumentException.class, () -> financialColorSchemeConfig.applySchemeToDataset("NOT_EXIST", ohlcvDataSet, renderer));
+
+        renderer = new FootprintRenderer(new FootprintRenderedAPIDummyAdapter(null));
         for (String colorScheme : getDefaultColorSchemes()) {
             financialColorSchemeConfig.applySchemeToDataset(colorScheme, ohlcvDataSet, renderer);
         }

@@ -14,6 +14,7 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.AbstractAxisParameter;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
+import de.gsi.chart.renderer.spi.financial.FootprintRenderer;
 import de.gsi.chart.renderer.spi.financial.HighLowRenderer;
 import de.gsi.chart.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
 import de.gsi.chart.renderer.spi.financial.service.DataSetAware;
@@ -84,6 +85,33 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
                 break;
             default:
                 throw new IllegalArgumentException("HighLowRenderer: Not implemented yet. ColorScheme=" + theme);
+            }
+        }
+        // driven-by FootprintRenderer
+        else if (renderer instanceof FootprintRenderer) {
+            switch (theme) {
+            case CLASSIC:
+                dataSet.setStyle("footprintLongColor=green; footprintShortColor=red; footprintCrossLineColor=grey; footprintDefaultFontColor=rgba(255,255,255,0.58); footprintPocColor=#d1d100; "
+                                 + "footprintVolumeLongColor=rgba(139,199,194,0.4); footprintVolumeShortColor=rgba(235,160,159,0.4)");
+                break;
+            case CLEARLOOK:
+                dataSet.setStyle("footprintLongColor=#4c4c4c; footprintShortColor=red; footprintCrossLineColor=grey; footprintDefaultFontColor=rgba(255,255,255,0.58); footprintPocColor=#d1d100; "
+                                 + "footprintVolumeLongColor=rgba(139,199,194,0.4); footprintVolumeShortColor=rgba(235,160,159,0.4)");
+                break;
+            case SAND:
+                dataSet.setStyle("footprintLongColor=#00aa00; footprintShortColor=red; footprintCrossLineColor=black; footprintDefaultFontColor=rgba(255,255,255,0.58); footprintPocColor=#d1d100; "
+                                 + "candleShadowColor=rgba(72,72,72,0.2); footprintVolumeLongColor=rgba(139,199,194,0.4); footprintVolumeShortColor=rgba(235,160,159,0.4)");
+                break;
+            case BLACKBERRY:
+                dataSet.setStyle("footprintLongColor=#00022e; footprintShortColor=#780000; footprintCrossLineColor=grey; footprintDefaultFontColor=rgba(255,255,255,0.58); footprintPocColor=yellow; "
+                                 + "candleLongWickColor=white; candleShortWickColor=red; footprintVolumeLongColor=rgba(139,199,194,0.4); footprintVolumeShortColor=rgba(235,160,159,0.4)");
+                break;
+            case DARK:
+                dataSet.setStyle("footprintLongColor=#298988; footprintShortColor=#963838; footprintCrossLineColor=grey; footprintDefaultFontColor=rgba(255,255,255,0.58); footprintPocColor=yellow; "
+                                 + "footprintVolumeLongColor=rgba(139,199,194,0.4); footprintVolumeShortColor=rgba(235,160,159,0.4)");
+                break;
+            default:
+                throw new IllegalArgumentException("FootprintRenderer: Not implemented yet. ColorScheme=" + theme);
             }
         }
 
@@ -203,8 +231,6 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
                 ((AbstractAxisParameter) chart.getYAxis()).setTickLabelFill(Color.rgb(194, 194, 194));
             }
             break;
-        default:
-            throw new IllegalArgumentException("Theme is not implemented yet. Theme=" + theme);
         }
     }
 
