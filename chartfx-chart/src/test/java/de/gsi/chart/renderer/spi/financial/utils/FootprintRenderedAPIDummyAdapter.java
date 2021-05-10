@@ -1,20 +1,21 @@
 package de.gsi.chart.renderer.spi.financial.utils;
 
-import de.gsi.chart.renderer.spi.financial.FootprintRenderer;
-import de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
-import de.gsi.chart.renderer.spi.financial.service.footprint.NbColumnColorGroup;
-import de.gsi.chart.renderer.spi.financial.service.footprint.NbColumnColorGroup.FontColor;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
+import static de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes.BID_ASK_VOLUME_FONTS;
+import static de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes.COLUMN_COLOR_GROUP_SETTINGS;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import static de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes.BID_ASK_VOLUME_FONTS;
-import static de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes.COLUMN_COLOR_GROUP_SETTINGS;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+
+import de.gsi.chart.renderer.spi.financial.FootprintRenderer;
+import de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
+import de.gsi.chart.renderer.spi.financial.service.footprint.NbColumnColorGroup;
+import de.gsi.chart.renderer.spi.financial.service.footprint.NbColumnColorGroup.FontColor;
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
 public class FootprintRenderedAPIDummyAdapter implements FootprintRenderer.IFootprintRenderedAPI {
     private final FootprintRendererAttributes footprintAttrs;
