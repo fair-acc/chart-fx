@@ -2,7 +2,11 @@
 name: Static analysis with Coverity
 
 on:
-  workflow_dispatch: # allow to request runs manually from the actions tab
+  workflow_run: # to allow coverity to be run for forked branches, run this on the head branch but checkout the original head
+    workflows:
+      - dispatch_coverity
+    types:
+      - completed
   push:
     tags: 11\.[0-9]+\.[0-9]+ # run on each version release
   schedule:
@@ -14,7 +18,16 @@ jobs:
     runs-on: ubuntu-18.04
     environment: coverity # environment needs to be manually triggered only use on demand
     steps:
+      - name: Checkout branch on that the Coverity scan was dispatched
+        uses: actions/checkout@v2
+        if: ${{ github.event_name == 'workflow_run' }}
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 25
       - uses: actions/checkout@v2
+        if: ${{ github.event_name != 'workflow_run' }}
+        with:
+          fetch-depth: 25
       - name: Set version environment for version string
         run: |
           export REV=${GITHUB_REF#refs/*/}
