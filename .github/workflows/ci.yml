@@ -1,7 +1,7 @@
 ---
 name: Java CI
 
-on: [push, pull_request]
+on: [push, pull_request_target]
 env:
   JAVA_REFERENCE_VERSION: 11
 
