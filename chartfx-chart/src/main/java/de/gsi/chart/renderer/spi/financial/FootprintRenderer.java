@@ -250,7 +250,7 @@ public class FootprintRenderer extends AbstractFinancialRenderer<FootprintRender
                         // get all additional information for footprints
                         IOhlcvItem ohlcvItem = itemAware.getItem(i);
                         IOhlcvItem lastOhlcvItem = itemAware.getLastItem();
-                        boolean isLastBar = lastOhlcvItem.getTimeStamp().equals(ohlcvItem.getTimeStamp());
+                        boolean isLastBar = lastOhlcvItem == null || lastOhlcvItem.getTimeStamp().equals(ohlcvItem.getTimeStamp());
                         if (!footprintRenderedApi.isFootprintAvailable(ohlcvItem)) {
                             continue;
                         }

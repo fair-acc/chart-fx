@@ -95,7 +95,7 @@ public abstract class AbstractFinancialRenderer<R extends Renderer> extends Abst
      * @return the specific paint bar Paint
      */
     protected Paint getPaintBarColor(OhlcvRendererEpData data) {
-        if (paintBarMarker != null) {
+        if (paintBarMarker != null && data != null) {
             return paintBarMarker.getPaintBy(data);
         }
         return null;

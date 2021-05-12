@@ -141,7 +141,7 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         chart.getPlugins().add(createRsLevel(yAxis, 4731, 4733, "Daily Resistance"));
 
         // apply all changes by addons and extensions
-        applyColorScheme((XYChart) chart);
+        applyColorScheme(theme, (XYChart) chart);
 
         VBox root = new VBox();
         VBox.setVgrow(chart, Priority.SOMETIMES);

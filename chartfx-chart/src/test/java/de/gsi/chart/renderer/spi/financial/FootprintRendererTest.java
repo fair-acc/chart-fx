@@ -8,6 +8,7 @@ import java.security.InvalidParameterException;
 import java.util.Calendar;
 
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
@@ -22,6 +23,7 @@ import de.gsi.chart.axes.AxisLabelOverlapPolicy;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
+import de.gsi.chart.renderer.spi.financial.service.OhlcvRendererEpData;
 import de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
 import de.gsi.chart.renderer.spi.financial.utils.CalendarUtils;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
@@ -63,7 +65,7 @@ public class FootprintRendererTest {
         rendererTested.setComputeLocalRange(false);
         rendererTested.setComputeLocalRange(true);
 
-        assertNull(rendererTested.getPaintBarColor(null));
+        assertNull(rendererTested.getPaintBarColor(new OhlcvRendererEpData()));
 
         final DefaultNumericAxis xAxis = new DefaultNumericAxis("time", "iso");
         xAxis.setTimeAxis(true);
@@ -170,7 +172,7 @@ public class FootprintRendererTest {
 
     @Test
     public void noXyChartInstance() {
-        assertThrows(InvalidParameterException.class, () -> rendererTested.render(null, new TestChart(), 0, null));
+        assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null));
     }
 
     @Test

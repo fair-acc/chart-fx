@@ -260,7 +260,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         prepareRenderers(chart, ohlcvDataSet, indiSet);
 
         // apply color scheme
-        applyColorScheme(chart);
+        applyColorScheme(theme, chart);
 
         // zoom to specific time range
         if (timeRange != null) {
@@ -270,7 +270,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         return chart;
     }
 
-    protected void applyColorScheme(XYChart chart) {
+    protected void applyColorScheme(String theme, XYChart chart) {
         try {
             financialColorScheme.applyTo(theme, chart);
         } catch (Exception e) {
