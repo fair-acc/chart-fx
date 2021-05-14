@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 #enforces .clang-format style guide prior to committing to the git repository
 
