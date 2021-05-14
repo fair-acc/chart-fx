@@ -1,9 +1,6 @@
 package de.gsi.dataset.spi.financial.api.attrs;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AttributeModel implements Cloneable {
     private Map<AttributeKey<?>, Object> attributes;
@@ -194,7 +191,7 @@ public class AttributeModel implements Cloneable {
         //HashMap<AttributeKey<?>, Object> _attributes = (HashMap)cloner.deepClone(attributes);
         AttributeModel copiedModel = (AttributeModel) clone();
         // clone the included attribute models
-        for (AttributeKey attributeKey : copiedModel.getAttributes()) {
+        for (AttributeKey attributeKey : new HashSet<>(copiedModel.getAttributes())) {
             if (AttributeModel.class.isAssignableFrom(attributeKey.getType())) {
                 AttributeModel attributeModel = (AttributeModel) copiedModel.getAttribute(attributeKey);
                 attributeModel = attributeModel.deepCopyAttributes();

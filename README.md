@@ -253,14 +253,18 @@ mvn exec:java
 
 <table>
 <tr>
-<td><figure><img src="docs/pics/FinancialCandlestickSample.png" alt="FinancialCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/financial/FinancialCandlestickSample.java">FinancialCandlestickSample.java (Several Themes Supported)</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/FinancialHiLowSample.png" alt="FinancialHiLowSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/financial/FinancialHiLowSample.java">FinancialHiLowSample.java (OHLC Renderer)</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/FinancialCandlestickSample.png" alt="FinancialCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/financial/samples/FinancialCandlestickSample.java">FinancialCandlestickSample.java (Several Themes Supported)</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/FinancialHiLowSample.png" alt="FinancialHiLowSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/financial/samples/FinancialHiLowSample.java">FinancialHiLowSample.java (OHLC Renderer)</a></figcaption></figure></td>
 </tr>
 <tr>
-<td><figure><img src="docs/pics/FinancialAdvancedCandlestickSample.png" alt="FinancialAdvancedCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/financial/FinancialAdvancedCandlestickSample.java">FinancialAdvancedCandlestickSample.java (Advanced PaintBars and Extension Points)</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/FinancialRealtimeCandlestickSample.png" alt="FinancialAdvancedCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/chart/samples/financial/FinancialRealtimeCandlestickSample.png">FinancialRealtimeCandlestickSample.java (OHLC Tick Replay Real-time processing)</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/FinancialAdvancedCandlestickSample.png" alt="FinancialAdvancedCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/financial/samples/FinancialAdvancedCandlestickSample.java">FinancialAdvancedCandlestickSample.java (Advanced PaintBars and Extension Points)</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/FinancialRealtimeCandlestickSample.png" alt="FinancialAdvancedCandlestickSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/financial/samples/FinancialRealtimeCandlestickSample.java">FinancialRealtimeCandlestickSample.java (OHLC Tick Replay Real-time processing)</a></figcaption></figure></td>
 </tr>
 </table>
+
+#### Financial Footprint Chart
+
+<figure><img src="docs/pics/FinancialRealtimeFootprintSample.png" alt="FinancialAdvancedCandlestickSample" width=1600/><figcaption><a href="chartfx-samples/src/main/java/de/gsi/financial/samples/FinancialRealtimeFootprintSample.java">FinancialRealtimeFootprintSample.java (FOOTPRINT Tick Replay Real-time processing)</a></figcaption></figure>
 
 ### Math- & Signal-Processing related examples
 The math samples can be started by running:

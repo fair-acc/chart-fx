@@ -8,6 +8,7 @@ import java.text.ParseException;
 import java.time.ZoneOffset;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Map;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -38,12 +39,7 @@ import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.spi.financial.AbstractFinancialRenderer;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeAware;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
-import de.gsi.financial.samples.dos.Interval;
-import de.gsi.financial.samples.service.CalendarUtils;
-import de.gsi.financial.samples.service.SimpleOhlcvDailyParser;
-import de.gsi.financial.samples.service.SimpleOhlcvReplayDataSet;
-import de.gsi.financial.samples.service.SimpleOhlcvReplayDataSet.DataInput;
-import de.gsi.financial.samples.service.period.IntradayPeriod;
+import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.geometry.Side;
 import de.gsi.dataset.spi.DefaultDataSet;
@@ -51,6 +47,13 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcv;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.dataset.utils.ProcessingProfiler;
+import de.gsi.financial.samples.dos.Interval;
+import de.gsi.financial.samples.service.CalendarUtils;
+import de.gsi.financial.samples.service.SimpleOhlcvDailyParser;
+import de.gsi.financial.samples.service.SimpleOhlcvReplayDataSet;
+import de.gsi.financial.samples.service.SimpleOhlcvReplayDataSet.DataInput;
+import de.gsi.financial.samples.service.consolidate.OhlcvConsolidationAddon;
+import de.gsi.financial.samples.service.period.IntradayPeriod;
 
 /**
  * Base class for demonstration of financial charts.
@@ -70,15 +73,18 @@ public abstract class AbstractBasicFinancialApplication extends Application {
     private final double UPDATE_PERIOD = 10.0; // replay multiple
     protected int DEBUG_UPDATE_RATE = 500;
 
+    protected String title; // application title
+    protected String theme = FinancialColorSchemeConstants.SAND;
     protected String resource = "@ES-[TF1D]";
     protected String timeRange = "2020/08/24 0:00-2020/11/12 0:00";
     protected String tt;
     protected String replayFrom;
     protected IntradayPeriod period;
     protected OhlcvDataSet ohlcvDataSet;
+    protected Map<String, OhlcvConsolidationAddon[]> consolidationAddons;
 
     // injection
-    private final FinancialColorSchemeAware financialColorScheme = new FinancialColorSchemeConfig();
+    protected final FinancialColorSchemeAware financialColorScheme = new FinancialColorSchemeConfig();
 
     private final Spinner<Double> updatePeriod = new Spinner<>(1.0, 500.0, UPDATE_PERIOD, 1.0);
     private final CheckBox localRange = new CheckBox("auto-y");
@@ -95,6 +101,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
         startTime = ProcessingProfiler.getTimeStamp();
 
+        configureApp();
         Scene scene = prepareScene();
         ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
 
@@ -107,6 +114,10 @@ public abstract class AbstractBasicFinancialApplication extends Application {
 
         // ensure correct state after restart demo
         stopTimer();
+    }
+
+    protected void configureApp() {
+        // configure shared variables for application sample tests
     }
 
     protected void closeDemo(final WindowEvent evt) {
@@ -136,7 +147,9 @@ public abstract class AbstractBasicFinancialApplication extends Application {
             // repetitively generate new data
             periodicTimer = new Button("replay");
             periodicTimer.setTooltip(new Tooltip("replay instrument data in realtime"));
-            periodicTimer.setOnAction(evt -> pauseResumeTimer());
+            periodicTimer.setOnAction(evt -> {
+                pauseResumeTimer();
+            });
 
             updatePeriod.valueProperty().addListener((ch, o, n) -> updateTimer());
             updatePeriod.setEditable(true);
@@ -191,7 +204,8 @@ public abstract class AbstractBasicFinancialApplication extends Application {
                         period,
                         timeRangeInt,
                         ttInt,
-                        replayFromCal);
+                        replayFromCal,
+                        consolidationAddons);
             } catch (ParseException e) {
                 throw new IllegalArgumentException(e.getMessage(), e);
             }
@@ -246,11 +260,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         prepareRenderers(chart, ohlcvDataSet, indiSet);
 
         // apply color scheme
-        try {
-            financialColorScheme.applyTo(theme, chart);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
+        applyColorScheme(theme, chart);
 
         // zoom to specific time range
         if (timeRange != null) {
@@ -258,6 +268,14 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         }
 
         return chart;
+    }
+
+    protected void applyColorScheme(String theme, XYChart chart) {
+        try {
+            financialColorScheme.applyTo(theme, chart);
+        } catch (Exception e) {
+            throw new IllegalArgumentException(e.getMessage(), e);
+        }
     }
 
     /**

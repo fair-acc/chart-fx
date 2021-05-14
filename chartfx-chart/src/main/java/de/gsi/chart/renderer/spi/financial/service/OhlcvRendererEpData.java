@@ -28,4 +28,5 @@ public class OhlcvRendererEpData {
     public double yClose; // close in display coords
     public double yDiff; // diff = open - close
     public double yMin; // minimal y coord of bar
+    public Object addon; // addon defined by specific renderer
 }

@@ -129,6 +129,7 @@ public class OhlcvDataSet extends AbstractDataSet<OhlcvDataSet> implements Itera
         return ohlcv.getOhlcvItem(index);
     }
 
+    @Override
     public IOhlcvItem getLastItem() {
         int size = ohlcv.size();
         if (size == 0) {

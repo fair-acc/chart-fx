@@ -19,10 +19,16 @@ import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
 import de.gsi.chart.plugins.YRangeIndicator;
 import de.gsi.chart.plugins.YWatchValueIndicator;
+import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.financial.AbstractFinancialRenderer;
 import de.gsi.chart.renderer.spi.financial.CandleStickRenderer;
 import de.gsi.chart.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants;
+import de.gsi.chart.renderer.spi.financial.service.RendererPaintAfterEPAware;
+import de.gsi.chart.utils.FXUtils;
+import de.gsi.dataset.spi.DefaultDataSet;
+import de.gsi.dataset.spi.financial.OhlcvDataSet;
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.financial.samples.dos.OrderContainer;
 import de.gsi.financial.samples.dos.PositionContainer;
 import de.gsi.financial.samples.service.SimpleOhlcvReplayDataSet;
@@ -32,10 +38,6 @@ import de.gsi.financial.samples.service.order.PositionFinancialDataSet;
 import de.gsi.financial.samples.service.period.IntradayPeriod;
 import de.gsi.financial.samples.service.plan.MktOrderListTradePlan;
 import de.gsi.financial.samples.service.plan.MktOrderListTradePlan.SimMktOrder;
-import de.gsi.chart.utils.FXUtils;
-import de.gsi.dataset.spi.DefaultDataSet;
-import de.gsi.dataset.spi.financial.OhlcvDataSet;
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 
 /**
  * Tick OHLC/V realtime processing. Demonstration of re-sample data to 2M timeframe.
@@ -45,20 +47,25 @@ import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
  * @author afischer
  */
 public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialApplication {
-    private CandleStickRenderer candleStickRenderer;
-
     /**
-     * Prepare charts to the root.
+     * Sample App Test Configuration
      */
-    protected Scene prepareScene() {
-        String title = "Replay OHLC/V Tick Data in real-time (press 'replay' button)";
-        String priceFormat = "%1.1f";
+    @Override
+    protected void configureApp() {
+        title = "Replay OHLC/V Tick Data in real-time (press 'replay' button, zoom by mousewheel)";
+        theme = FinancialColorSchemeConstants.SAND;
         resource = "REALTIME_OHLC_TICK";
         timeRange = "2016/07/29 00:00-2016/07/29 20:15";
         tt = "00:00-23:59"; // time template whole day session
         replayFrom = "2016/07/29 13:58";
         period = new IntradayPeriod(M, 2.0);
+    }
 
+    /**
+     * Prepare charts to the root.
+     */
+    protected Scene prepareScene() {
+        String priceFormat = "%1.1f";
         // simulate market orders list
         List<SimMktOrder> orders = new ArrayList<>();
         orders.add(new SimMktOrder("2016/07/29 14:06", 3));
@@ -74,7 +81,7 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         orders.add(new SimMktOrder("2016/07/29 16:56", 1));
         orders.add(new SimMktOrder("2016/07/29 18:40", 1));
 
-        final Chart chart = getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND);
+        final Chart chart = getDefaultFinancialTestChart(theme);
         final AbstractFinancialRenderer<?> renderer = (AbstractFinancialRenderer<?>) chart.getRenderers().get(0);
 
         chart.setTitle(title);
@@ -105,8 +112,9 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
                     asset, ohlcvDataSet, context);
 
             // example of addition complex extension-point to renderer
-            candleStickRenderer.addPaintAfterEp(new PositionFinancialRendererPaintAfterEP(
-                    positionFinancialDataSet, (XYChart) chart));
+            if (renderer instanceof RendererPaintAfterEPAware) {
+                ((RendererPaintAfterEPAware) renderer).addPaintAfterEp(new PositionFinancialRendererPaintAfterEP(positionFinancialDataSet, (XYChart) chart));
+            }
 
             // execution platform (has to be last added to dataset)
             BacktestExecutionPlatform executionPlatform = new BacktestExecutionPlatform();
@@ -132,6 +140,9 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         chart.getPlugins().add(createRsLevel(yAxis, 4710, 4711, "Daily Support"));
         chart.getPlugins().add(createRsLevel(yAxis, 4731, 4733, "Daily Resistance"));
 
+        // apply all changes by addons and extensions
+        applyColorScheme(theme, (XYChart) chart);
+
         VBox root = new VBox();
         VBox.setVgrow(chart, Priority.SOMETIMES);
         root.getChildren().addAll(testVariableToolBar, chart);
@@ -149,11 +160,11 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
 
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {
         // create and apply renderers
-        candleStickRenderer = new CandleStickRenderer(true);
-        candleStickRenderer.getDatasets().addAll(ohlcvDataSet);
+        Renderer renderer = new CandleStickRenderer(true);
+        renderer.getDatasets().addAll(ohlcvDataSet);
 
         chart.getRenderers().clear();
-        chart.getRenderers().add(candleStickRenderer);
+        chart.getRenderers().add(renderer);
     }
 
     /**

@@ -2,7 +2,7 @@ package de.gsi.chart.renderer.spi.financial;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.SAND;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConstants.*;
 
 import java.security.InvalidParameterException;
 import java.util.Calendar;
@@ -24,9 +24,11 @@ import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.renderer.spi.financial.css.FinancialColorSchemeConfig;
 import de.gsi.chart.renderer.spi.financial.service.OhlcvRendererEpData;
+import de.gsi.chart.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
 import de.gsi.chart.renderer.spi.financial.utils.CalendarUtils;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils;
 import de.gsi.chart.renderer.spi.financial.utils.FinancialTestUtils.TestChart;
+import de.gsi.chart.renderer.spi.financial.utils.FootprintRenderedAPIDummyAdapter;
 import de.gsi.chart.renderer.spi.financial.utils.Interval;
 import de.gsi.chart.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import de.gsi.chart.ui.utils.TestFx;
@@ -37,17 +39,29 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
-public class HighLowRendererTest {
-    private HighLowRenderer rendererTested;
+public class FootprintRendererTest {
+    private FootprintRenderer rendererTested;
     private XYChart chart;
     private OhlcvDataSet ohlcvDataSet;
+    private final String[] schemes = getDefaultColorSchemes();
 
     @Start
     public void start(Stage stage) throws Exception {
+        for (String scheme : schemes) {
+            financialComponentTest(stage, scheme);
+        }
+    }
+
+    private void financialComponentTest(Stage stage, String scheme) throws Exception {
         ProcessingProfiler.setDebugState(false); // enable for detailed renderer tracing
         ohlcvDataSet = new OhlcvDataSet("ohlc1");
         ohlcvDataSet.setData(FinancialTestUtils.createTestOhlcv());
-        rendererTested = new HighLowRenderer(true);
+        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(scheme);
+        rendererTested = new FootprintRenderer(
+                new FootprintRenderedAPIDummyAdapter(footprintAttrs),
+                true,
+                true,
+                true);
         rendererTested.setComputeLocalRange(false);
         rendererTested.setComputeLocalRange(true);
 
@@ -72,13 +86,13 @@ public class HighLowRendererTest {
         chart.getRenderers().add(rendererTested);
 
         // PaintBar extension usage
-        rendererTested.setPaintBarMarker(d -> d.ds.get(OhlcvDataSet.DIM_Y_OPEN, d.index) - d.ds.get(OhlcvDataSet.DIM_Y_CLOSE, d.index) > 100.0 ? Color.MAGENTA : null);
+        rendererTested.setPaintBarMarker(d -> d.ohlcvItem != null ? Math.abs(d.ohlcvItem.getOpen() - d.ohlcvItem.getClose()) > 2.0 ? Color.MAGENTA : null : null);
 
         // Extension point usage
         rendererTested.addPaintAfterEp(data -> assertNotNull(data.gc));
         assertEquals(1, rendererTested.getPaintAfterEps().size());
 
-        new FinancialColorSchemeConfig().applyTo(SAND, chart);
+        new FinancialColorSchemeConfig().applyTo(scheme, chart);
 
         stage.setScene(new Scene(chart, 800, 600));
         stage.show();
@@ -125,13 +139,35 @@ public class HighLowRendererTest {
     }
 
     @Test
-    public void testVolumeContructor() {
-        HighLowRenderer highLowRenderer = new HighLowRenderer(true);
-        assertTrue(highLowRenderer.isPaintVolume());
-        highLowRenderer = new HighLowRenderer(false);
-        assertFalse(highLowRenderer.isPaintVolume());
-        highLowRenderer = new HighLowRenderer();
-        assertFalse(highLowRenderer.isPaintVolume());
+    public void testShortConstructor() {
+        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(schemes[0]);
+        FootprintRenderer renderer = new FootprintRenderer(
+                new FootprintRenderedAPIDummyAdapter(footprintAttrs));
+        assertFalse(renderer.isPaintVolume());
+        assertTrue(renderer.isPaintPoc());
+        assertTrue(renderer.isPaintPullbackColumn());
+    }
+
+    @Test
+    public void testLongConstructor() {
+        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(schemes[0]);
+        FootprintRenderer renderer = new FootprintRenderer(
+                new FootprintRenderedAPIDummyAdapter(footprintAttrs),
+                true,
+                true,
+                true);
+        assertTrue(renderer.isPaintVolume());
+        assertTrue(renderer.isPaintPoc());
+        assertTrue(renderer.isPaintPullbackColumn());
+
+        renderer = new FootprintRenderer(
+                new FootprintRenderedAPIDummyAdapter(footprintAttrs),
+                false,
+                false,
+                false);
+        assertFalse(renderer.isPaintVolume());
+        assertFalse(renderer.isPaintPoc());
+        assertFalse(renderer.isPaintPullbackColumn());
     }
 
     @Test
@@ -141,6 +177,6 @@ public class HighLowRendererTest {
 
     @Test
     void getThis() {
-        assertEquals(HighLowRenderer.class, rendererTested.getThis().getClass());
+        assertEquals(FootprintRenderer.class, rendererTested.getThis().getClass());
     }
 }

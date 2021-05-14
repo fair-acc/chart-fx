@@ -180,6 +180,53 @@ public class FinancialCss { // NOPMD decide not to rename it for the time being
      */
     public static final String DATASET_POSITION_ORDER_LINKAGE_LINE_WIDTH = "positionOrderLinkageLineWidth";
 
+    // FOOTPRINT ----------------------------------------------------------
+
+    /**
+     * Footprint bar relative width against actual scaled view. Defined in percentage range: {@literal <}0.0, 1.0{@literal >}
+     */
+    public static final String DATASET_FOOTPRINT_BAR_WIDTH_PERCENTAGE = "footprintBarWidthPercent";
+
+    /**
+     * Footprint renderer the main ratio for resizing of the final footprint bar paint
+     */
+    public static final String DATASET_FOOTPRINT_PAINT_MAIN_RATIO = "footprintPaintMainRatio";
+
+    /**
+     * The footprint candle boxes color for candle's upstick
+     */
+    public static final String DATASET_FOOTPRINT_LONG_COLOR = "footprintLongColor";
+
+    /**
+     * The footprint candle boxed color for candle's downstick
+     */
+    public static final String DATASET_FOOTPRINT_SHORT_COLOR = "footprintShortColor";
+
+    /**
+     * Volume Long bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
+     */
+    public static final String DATASET_FOOTPRINT_VOLUME_LONG_COLOR = "footprintVolumeLongColor";
+
+    /**
+     * Volume Short bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
+     */
+    public static final String DATASET_FOOTPRINT_VOLUME_SHORT_COLOR = "footprintVolumeShortColor";
+
+    /**
+     * Footprint division line between bid and ask numbers (cross-line vertical)
+     */
+    public static final String DATASET_FOOTPRINT_CROSS_LINE_COLOR = "footprintCrossLineColor";
+
+    /**
+     * Footprint default font color. If the column color grouping is disabled, this color is taken.
+     */
+    public static final String DATASET_FOOTPRINT_DEFAULT_FONT_COLOR = "footprintDefaultFontColor";
+
+    /**
+     * Footprint POC color. POC = Point of control.
+     */
+    public static final String DATASET_FOOTPRINT_POC_COLOR = "footprintPocColor";
+
     private FinancialCss() {
     }
 }
