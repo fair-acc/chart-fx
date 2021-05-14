@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import de.gsi.chart.utils.PeriodicScreenCapture;
 import de.gsi.financial.samples.*;
+import de.gsi.misc.samples.LimitsSample;
 
 /**
  * @author rstein
@@ -34,9 +35,9 @@ public class RunChartSamples extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        final BorderPane root = new BorderPane();
+        final var root = new BorderPane();
 
-        final FlowPane buttons = new FlowPane();
+        final var buttons = new FlowPane();
         buttons.setAlignment(Pos.CENTER_LEFT);
         root.setCenter(buttons);
         root.setBottom(makeScreenShot);
@@ -69,6 +70,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("HistogramSample", new HistogramSample()));
         buttons.getChildren().add(new MyButton("HistoryDataSetRendererSample", new HistoryDataSetRendererSample()));
         buttons.getChildren().add(new MyButton("LabelledMarkerSample", new LabelledMarkerSample()));
+        buttons.getChildren().add(new MyButton("LimitsSample", new LimitsSample()));
         buttons.getChildren().add(new MyButton("LogAxisSample", new LogAxisSample()));
         buttons.getChildren().add(new MyButton("MetaDataRendererSample", new MetaDataRendererSample()));
         buttons.getChildren().add(new MyButton("MountainRangeRendererSample", new MountainRangeRendererSample()));
@@ -80,6 +82,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("RollingBufferSortedTreeSample", new RollingBufferSortedTreeSample()));
         buttons.getChildren().add(new MyButton("ScatterAndBubbleRendererSample", new ScatterAndBubbleRendererSample()));
         buttons.getChildren().add(new MyButton("SimpleChartSample", new SimpleChartSample()));
+        buttons.getChildren().add(new MyButton("SimpleInvertedChartSample", new SimpleInvertedChartSample()));
         buttons.getChildren().add(new MyButton("TimeAxisRangeSample", new TimeAxisRangeSample()));
         buttons.getChildren().add(new MyButton("TimeAxisSample", new TimeAxisSample()));
         buttons.getChildren().add(new MyButton("TransposedDataSetSample", new TransposedDataSetSample()));
@@ -88,9 +91,9 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("WriteDataSetToFileSample", new WriteDataSetToFileSample()));
         buttons.getChildren().add(new MyButton("ZoomerSample", new ZoomerSample()));
 
-        final Scene scene = new Scene(root);
+        final var scene = new Scene(root);
 
-        primaryStage.setTitle(this.getClass().getSimpleName());
+        primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
         primaryStage.show();
@@ -103,7 +106,7 @@ public class RunChartSamples extends Application {
         Application.launch(args);
     }
 
-    protected class MyButton extends Button {
+    protected class MyButton extends Button { // NOPMD NOSONAR -- 8 parents
         public MyButton(final String buttonText, final Application run) {
             super(buttonText);
             setOnAction(e -> {
@@ -117,17 +120,13 @@ public class RunChartSamples extends Application {
                             try {
                                 Thread.sleep(2000);
                                 Platform.runLater(() -> {
-                                    LOGGER.atInfo()
-                                            .log("make screen shot to file of " + run.getClass().getSimpleName());
-                                    final PeriodicScreenCapture screenCapture = new PeriodicScreenCapture(path,
-                                            run.getClass().getSimpleName(), stage.getScene(), DEFAULT_DELAY,
-                                            DEFAULT_PERIOD, false);
-                                    screenCapture.performScreenCapture();
+                                    LOGGER.atInfo().log("make screen shot to file of " + run.getClass().getSimpleName());
+                                    new PeriodicScreenCapture(path, run.getClass().getSimpleName(), stage.getScene(),
+                                            DEFAULT_DELAY, DEFAULT_PERIOD, false)
+                                            .performScreenCapture();
                                 });
-                            } catch (final InterruptedException e12) {
-                                if (LOGGER.isErrorEnabled()) {
-                                    LOGGER.atError().setCause(e12).log("InterruptedException");
-                                }
+                            } catch (final InterruptedException e12) { // NOPMD NOSONAR - intercepting exception is OK in this logged context
+                                LOGGER.atError().setCause(e12).log("InterruptedException");
                             }
                         }).start();
                     }
