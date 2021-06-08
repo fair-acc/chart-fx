@@ -1,12 +1,12 @@
 package de.gsi.math;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.Histogram.Boundary.LOWER;
 import static de.gsi.dataset.Histogram.Boundary.UPPER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +18,7 @@ import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.AbstractHistogram;
 import de.gsi.dataset.spi.Histogram;
 import de.gsi.dataset.testdata.spi.AbstractTestFunction;
+import de.gsi.dataset.testdata.spi.GaussFunction;
 import de.gsi.dataset.testdata.spi.TriangleFunction;
 
 /**
@@ -235,5 +236,27 @@ class DataSetMathTests {
             }
             count++;
         }
+    }
+
+    @Test
+    void testIntegralWidthEstimator() {
+        final int count = 1000;
+        final double maxHalfWidth = count / 2.0;
+        GaussFunction gaussFunction = new GaussFunction("testGauss", count, 500, 100.0);
+        assertEquals(500, SimpleDataSetEstimators.computeCentreOfMass(gaussFunction), 0.001, "centre-of-mass check");
+        assertEquals(100.0, DataSetMath.integrateFromCentre(gaussFunction, Double.NaN, maxHalfWidth, false).getAxisDescription(DIM_Y).getMax(), 0.01, "integral max");
+        assertEquals(1.0, DataSetMath.integrateFromCentre(gaussFunction, Double.NaN, maxHalfWidth, true).getAxisDescription(DIM_Y).getMax(), 0.01, "integral max");
+
+        assertEquals(100, DataSetMath.integralWidth(gaussFunction, Double.NaN, maxHalfWidth, 0.6827), 1, "1 sigma equivalency");
+        assertEquals(200, DataSetMath.integralWidth(gaussFunction, Double.NaN, maxHalfWidth, 0.9545), 1, "2 sigma equivalency");
+        assertEquals(300, DataSetMath.integralWidth(gaussFunction, Double.NaN, maxHalfWidth, 0.9973), 1, "3 sigma equivalency");
+
+        // test error cases
+        assertEquals(0, DataSetMath.integrateFromCentre(new GaussFunction("zeroGauss", 0), Double.NaN, 100, true).getDataCount());
+        assertEquals(0, DataSetMath.integrateFromCentre(new GaussFunction("zeroGauss", 2), Double.NaN, -1, true).getDataCount());
+        assertThrows(IllegalArgumentException.class, () -> DataSetMath.integrateFromCentre(new GaussFunction("zeroGauss", 2), -1, 2, true));
+        assertThrows(IllegalArgumentException.class, () -> DataSetMath.integrateFromCentre(new GaussFunction("zeroGauss", 2), 0, 2, true));
+        assertThrows(IllegalArgumentException.class, () -> DataSetMath.integrateFromCentre(new GaussFunction("zeroGauss", 2), 2, 2, true));
+        assertThrows(IllegalArgumentException.class, () -> DataSetMath.integrateFromCentre(new GaussFunction("zeroGauss", 2), 3, 2, true));
     }
 }
