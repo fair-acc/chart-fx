@@ -8,6 +8,8 @@ import static de.gsi.dataset.Histogram.Boundary.UPPER;
 import static de.gsi.math.DataSetMath.ErrType.EXP;
 import static de.gsi.math.DataSetMath.ErrType.EYN;
 import static de.gsi.math.DataSetMath.ErrType.EYP;
+import static de.gsi.math.MathBase.max;
+import static de.gsi.math.MathBase.min;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -157,7 +159,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
                     new double[ncount], new double[ncount], ncount, true);
         }
 
-        final int nAvg = MathBase.min(nUpdates, dataSets.size());
+        final int nAvg = min(nUpdates, dataSets.size());
         final var newFunction = dataSets.get(dataSets.size() - 1);
         final var retFunction = new DoubleErrorDataSet(functionName, newFunction.getDataCount() + 2);
 
@@ -169,7 +171,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             var eyp = 0.0;
 
             var count = 0;
-            for (int j = MathBase.max(0, dataSets.size() - nAvg); j < dataSets.size(); j++) {
+            for (int j = max(0, dataSets.size() - nAvg); j < dataSets.size(); j++) {
                 final var oldFunction = dataSets.get(j);
                 final double oldX = oldFunction.get(DIM_X, i);
                 final double oldY = oldX == newX ? oldFunction.get(DIM_Y, i) : oldFunction.getValue(DIM_X, newX);
@@ -239,22 +241,22 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final boolean inter = oldX != newX;
 
             final double y = inter ? newDataSet.getValue(DIM_Y, oldX) : newDataSet.get(DIM_Y, i);
-            final double newY = (1 - alpha) * oldY + alpha * y;
-            final double newY2 = (1 - alpha) * oldY2 + alpha * (y * y);
+            final double newVal = (1 - alpha) * oldY + alpha * y;
+            final double newVal2 = (1 - alpha) * oldY2 + alpha * (y * y);
 
             final double eyn = error(newDataSet, EYN, i, newX, inter);
             final double eyp = error(newDataSet, EYP, i, newX, inter);
 
             if (prevAverage2 instanceof DoubleErrorDataSet) {
                 if (avg2Empty) {
-                    ((DoubleErrorDataSet) prevAverage2).add(newX, newY2, eyn, eyp);
+                    ((DoubleErrorDataSet) prevAverage2).add(newX, newVal2, eyn, eyp);
                 } else {
-                    ((DoubleErrorDataSet) prevAverage2).set(i, newX, newY2, eyn, eyp);
+                    ((DoubleErrorDataSet) prevAverage2).set(i, newX, newVal2, eyn, eyp);
                 }
             }
-            final double newEYN = MathBase.sqrt(MathBase.abs(newY2 - MathBase.pow(newY, 2)) + eyn * eyn);
-            final double newEYP = MathBase.sqrt(MathBase.abs(newY2 - MathBase.pow(newY, 2)) + eyp * eyp);
-            retFunction.set(i, oldX, newY, newEYN, newEYP);
+            final double newEYN = MathBase.sqrt(MathBase.abs(newVal2 - MathBase.pow(newVal, 2)) + eyn * eyn);
+            final double newEYP = MathBase.sqrt(MathBase.abs(newVal2 - MathBase.pow(newVal, 2)) + eyp * eyp);
+            retFunction.set(i, oldX, newVal, newEYN, newEYP);
         }
 
         return retFunction;
@@ -616,8 +618,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final double yep = error(integratedFunction, EYP, lastPoint);
         final double ye = 0.5 * (yen + yep);
 
-        return new DoublePointError(integratedFunction.get(DIM_X, lastPoint), integratedFunction.get(DIM_Y, lastPoint),
-                0.0, ye);
+        return new DoublePointError(integratedFunction.get(DIM_X, lastPoint), integratedFunction.get(DIM_Y, lastPoint), 0.0, ye);
     }
 
     public static double integralSimple(final DataSet function) {
@@ -665,8 +666,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         double xMaxLocal = function.getAxisDescription(DIM_X).getMax();
         var sign = 1.0;
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {
-            xMinLocal = MathBase.min(xMin, xMax);
-            xMaxLocal = MathBase.max(xMin, xMax);
+            xMinLocal = min(xMin, xMax);
+            xMaxLocal = max(xMin, xMax);
             if (xMin > xMax) {
                 sign = -1;
             }
@@ -687,11 +688,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
         if (Double.isFinite(xMin) && xMin <= function.get(DIM_X, 0)) {
             // interpolate before range where discrete function is defined
-            final double x0 = xMin;
             final double val1 = function.getValue(DIM_Y, xMin);
             final double x1 = function.get(DIM_X, 0);
             final double val2 = function.get(DIM_Y, 0);
-            final double step = x1 - x0;
+            final double step = x1 - xMin;
             integral += sign * 0.5 * step * (val1 + val2);
             final double en1 = error(function, EYN, 0);
             final double ep1 = error(function, EYP, 0);
@@ -700,7 +700,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             integralEN = MathBase.hypot(integralEN, step * en1);
             integralEP = MathBase.hypot(integralEP, step * ep1);
 
-            retFunction.add(x0, integral, 0, 0);
+            retFunction.add(xMin, integral, 0, 0);
         }
 
         retFunction.add(function.get(DIM_X, 0), integral, integralEN, integralEP);
@@ -752,9 +752,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
             // interpolate after range where discrete function is defined
             final double x0 = function.get(DIM_X, nLength - 1);
             final double val1 = function.get(DIM_Y, nLength - 1);
-            final double x1 = xMax;
             final double val2 = function.getValue(DIM_Y, xMax);
-            final double step = x1 - x0;
+            final double step = xMax - x0;
             final double en1 = error(function, EYN, nLength - 1);
             final double ep1 = error(function, EYP, nLength - 1);
             // assuming uncorrelated errors between bins
@@ -766,6 +765,65 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
 
         return retFunction;
+    }
+
+    @SafeVarargs
+    public static DataSet integrateFromCentre(@NotNull DataSet function, final double centre, final double width, final boolean normalise, @NotNull final Formatter<Number>... format) {
+        final double xMinLocal = function.getAxisDescription(DIM_X).getMin();
+        final double xMaxLocal = function.getAxisDescription(DIM_X).getMax();
+        final double centreLocal = Double.isFinite(centre) ? centre : SimpleDataSetEstimators.computeCentreOfMass(function, 0, function.getDataCount());
+
+        final var pattern = "{0}({1},c={2})dyn|_'{'c-{3}'}'^'{'c+{3}'}'";
+        final int nLength = function.getDataCount();
+        final String dataSetName = getFormatter(format).format(pattern, INTEGRAL_SYMBOL, function.getName(), centreLocal, width);
+        if (nLength < 2) { // need at least two
+            if (!(function instanceof GridDataSet) || function.getDimension() > 2) {
+                final int ncount = function.getDataCount();
+                final var emptyVector = new double[ncount];
+                return new DoubleErrorDataSet(dataSetName, function.getValues(DIM_X), emptyVector, emptyVector, emptyVector, ncount, true);
+            }
+            throw new IllegalStateException("not yet implemented for non 2D dataSets");
+        }
+        final var retFunction = new DoubleErrorDataSet(dataSetName, nLength / 2);
+        if (width <= 0.0) {
+            return retFunction;
+        }
+        if (centreLocal <= xMinLocal || centreLocal >= xMaxLocal) {
+            throw new IllegalArgumentException(String.format("centre %f is outside DataSetRange [%f,%f]", centreLocal, xMinLocal, xMaxLocal));
+        }
+
+        final double scaleLocal = normalise ? 1.0 / integral(function, max(centreLocal - width, xMinLocal), min(centreLocal + width, xMaxLocal)).getY() : 1.0;
+        final var centreLocalIndex = function.getIndex(DIM_X, centreLocal);
+        final var maxIntIndex = min(centreLocalIndex, function.getDataCount() - 1 - centreLocalIndex);
+        var integral = 0.0;
+        for (var i = 0; i < maxIntIndex; i++) {
+            // x-values
+            final double xL0 = function.get(DIM_X, centreLocalIndex - i - 1);
+            final double xL1 = function.get(DIM_X, centreLocalIndex - i);
+            final double stepL = xL1 - xL0;
+
+            final double xR0 = function.get(DIM_X, centreLocalIndex + i);
+            final double xR1 = function.get(DIM_X, centreLocalIndex + i + 1);
+            final double stepR = xR1 - xR0;
+
+            // y-values
+            final double yL0 = function.get(DIM_Y, centreLocalIndex - i - 1);
+            final double yL1 = function.get(DIM_Y, centreLocalIndex - i);
+            final double yR0 = function.get(DIM_Y, centreLocalIndex + i);
+            final double yR1 = function.get(DIM_Y, centreLocalIndex + i + 1);
+
+            // simple triangulation integration
+            integral += scaleLocal * 0.5 * (stepL * (yL0 + yL1) + stepR * (yR0 + yR1));
+
+            final double distanceFromCentre = 0.5 * (xR1 - xL0);
+            retFunction.add(distanceFromCentre, integral, 0, 0);
+        }
+
+        return retFunction;
+    }
+
+    public static double integralWidth(@NotNull DataSet function, final double centre, final double maxWidth, final double threshold) {
+        return SimpleDataSetEstimators.getZeroCrossing(integrateFromCentre(function, centre, maxWidth, true), threshold);
     }
 
     @SafeVarargs
@@ -1069,8 +1127,8 @@ public final class DataSetMath { // NOPMD - nomen est omen
         double xMaxLocal = function.get(DIM_X, nLength - 1);
 
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {
-            xMinLocal = MathBase.min(xMin, xMax);
-            xMaxLocal = MathBase.max(xMin, xMax);
+            xMinLocal = min(xMin, xMax);
+            xMaxLocal = max(xMin, xMax);
         } else if (Double.isFinite(xMin)) {
             xMinLocal = xMin;
         } else if (Double.isFinite(xMax)) {
