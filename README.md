@@ -317,7 +317,7 @@ Besides the extended functionality outlined above, the ChartFx optimisation goal
   	<figcaption>Performance comparison @ 25 Hz update rate.</figcaption>
 </figure></td>
 <td><figure>
-  	<img src="docs/pics/chartfx-performance1a.png" alt="JavaFX-ChartFx performance comparison for 2 Hz" width=90%/>
+  	<img src="docs/pics/chartfx-performance1b.png" alt="JavaFX-ChartFx performance comparison for 2 Hz" width=90%/>
   	<figcaption>Performance comparison @ 2 Hz update rate.</figcaption>
 </figure></td></tr>
 </table>
