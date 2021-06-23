@@ -321,7 +321,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public AbstractAxisParameter() {
         super();
-        getStylesheets().add(AbstractAxisParameter.CHART_CSS);
         getStyleClass().setAll("axis");
         majorTickStyle.getStyleClass().add("axis-tick-mark");
         minorTickStyle.getStyleClass().add("axis-minor-tick-mark");
@@ -371,6 +370,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         maxProperty().addListener(scaleChangeListener);
         widthProperty().addListener(scaleChangeListener);
         heightProperty().addListener(scaleChangeListener);
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return AbstractAxisParameter.CHART_CSS;
     }
 
     /**

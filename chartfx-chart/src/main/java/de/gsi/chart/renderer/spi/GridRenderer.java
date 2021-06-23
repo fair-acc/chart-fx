@@ -60,7 +60,6 @@ public class GridRenderer extends Pane implements Renderer {
     public GridRenderer() {
         super();
 
-        getStylesheets().add(GridRenderer.CHART_CSS);
         getStyleClass().setAll(GridRenderer.STYLE_CLASS_GRID_RENDERER);
         horMajorGridStyleNode = new Line();
         horMajorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MAJOR_GRID_LINE);
@@ -111,6 +110,11 @@ public class GridRenderer extends Pane implements Renderer {
         horizontalGridLinesVisibleProperty().addListener(change);
         verticalGridLinesVisibleProperty().addListener(change);
         drawOnTopProperty().addListener(change);
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return GridRenderer.CHART_CSS;
     }
 
     protected void drawEuclideanGrid(final GraphicsContext gc, XYChart xyChart) {
