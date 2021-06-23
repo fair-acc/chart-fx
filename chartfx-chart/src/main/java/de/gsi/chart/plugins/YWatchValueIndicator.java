@@ -1,10 +1,5 @@
-/**
- * Copyright (c) 2017 European Organisation for Nuclear Research (CERN), All Rights Reserved.
- */
-
 package de.gsi.chart.plugins;
 
-import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -75,7 +70,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
      * @param value Update marker label and its Y Axis position by this double value.
      */
     public void setMarkerValue(final double value) {
-        setText(String.format(valueFormat, value));
+        setText(getAxis().getTickMarkLabel(value));
         setValue(value);
     }
 
@@ -129,15 +124,17 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         final double minY = plotAreaBounds.getMinY();
         final double maxY = plotAreaBounds.getMaxY();
 
+        final double halfHeight = label.getHeight() / 2;
+        final double width = label.getWidth() + 10;
         final double yPos = minY + getAxis().getDisplayPosition(getValue());
         final double axisPos;
         final boolean isRightSide = getAxis().getSide().equals(Side.RIGHT);
         if (isRightSide) {
             axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(0, 0)).getX() + 2;
-            triangle.getPoints().setAll(0.0, 0.0, 10.0, 10.0, 50.0, 10.0, 50.0, -10.0, 10.0, -10.0);
+            triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeight, width, halfHeight, width, -halfHeight, 10.0, -halfHeight);
         } else {
             axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(getAxis().getWidth(), 0)).getX() - 2;
-            triangle.getPoints().setAll(0.0, 0.0, -10.0, 10.0, -50.0, 10.0, -50.0, -10.0, -10.0, -10.0);
+            triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeight, -width, halfHeight, -width, -halfHeight, -10.0, -halfHeight);
         }
         final double yPosGlobal = getChart().getPlotForeground().sceneToLocal(getChart().getCanvas().localToScene(0, yPos)).getY();
 
@@ -149,7 +146,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         } else {
             layoutLine(minX, yPos, maxX, yPos);
             layoutMarker(axisPos, yPosGlobal, minX, yPos);
-            layoutWatchLabel(new BoundingBox(minX, yPos, maxX - minX, 0), axisPos, isRightSide);
+            layoutWatchLabel(axisPos, yPosGlobal, isRightSide);
         }
     }
 
@@ -161,21 +158,15 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         super.layoutLine(startX, startY, endX, endY);
     }
 
-    protected void layoutWatchLabel(final Bounds bounds, double axisPos, boolean isRightSide) {
+    protected void layoutWatchLabel(final double x, double y, boolean isRightSide) {
         if (label.getText() == null || label.getText().isEmpty()) {
             getChartChildren().remove(label);
             return;
         }
 
-        double xPos = bounds.getMinX();
-        double yPos = bounds.getMinY();
-
         final double width = label.prefWidth(-1);
         final double height = label.prefHeight(width);
-        final double baseLine = label.getBaselineOffset();
-
-        double padding = isRightSide ? 0 : width + label.getPadding().getRight();
-        label.resizeRelocate(xPos + axisPos - padding, yPos + baseLine, width, height);
+        label.resizeRelocate(isRightSide ? x : x - width, y - 0.5 * height, width, height);
         label.toFront();
 
         if (!getChart().getPlotForeground().getChildren().contains(label)) {
