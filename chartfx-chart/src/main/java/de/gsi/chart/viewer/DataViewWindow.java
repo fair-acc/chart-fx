@@ -281,9 +281,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         GridPane.setVgrow(this, Priority.ALWAYS);
 
         getStyleClass().setAll(CSS_WINDOW);
-        final String css = DataViewWindow.class.getResource(WINDOW_CSS).toExternalForm();
-        getStylesheets().clear();
-        getStylesheets().add(css);
 
         contentProperty().addListener((ch, o, newNode) -> setLocalCenter(newNode));
         DragResizerUtil.makeResizable(this);
@@ -373,6 +370,11 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         setContent(content);
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return Objects.requireNonNull(DataViewWindow.class.getResource(WINDOW_CSS)).toExternalForm();
     }
 
     public final void addCloseWindowButton() {
