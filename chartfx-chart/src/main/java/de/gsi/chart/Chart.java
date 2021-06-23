@@ -325,8 +325,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             }
         }
 
-        getStylesheets().add(Chart.CHART_CSS);
-
         setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
         setMinSize(0, 0);
         setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
@@ -492,6 +490,11 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         axesAndCanvasPane.getStyleClass().add("chart-content");
 
         registerShowingListener(); // NOPMD - unlikely but allowed override
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return CHART_CSS;
     }
 
     @Override

@@ -1,5 +1,7 @@
 package de.gsi.chart.ui;
 
+import java.util.Objects;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -20,7 +22,6 @@ public class BorderedTitledPane extends StackPane {
     private final StackPane contentPane;
 
     public BorderedTitledPane(final String titleString, final Node content) {
-        getStylesheets().add(getClass().getResource("titled-border.css").toExternalForm());
         getStyleClass().add("bordered-titled-border");
         if (content == null) {
             throw new IllegalArgumentException("content must not be null");
@@ -35,6 +36,11 @@ public class BorderedTitledPane extends StackPane {
         contentPane.getChildren().add(content);
 
         getChildren().addAll(contentPane, title);
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return Objects.requireNonNull(getClass().getResource("titled-border.css")).toExternalForm();
     }
 
     public StackPane getContentPane() {

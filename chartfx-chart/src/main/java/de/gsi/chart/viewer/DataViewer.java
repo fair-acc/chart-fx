@@ -2,6 +2,7 @@ package de.gsi.chart.viewer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.beans.DefaultProperty;
 import javafx.beans.property.BooleanProperty;
@@ -128,7 +129,6 @@ public class DataViewer extends BorderPane {
         super();
         HBox.setHgrow(this, Priority.ALWAYS);
         VBox.setVgrow(this, Priority.ALWAYS);
-        getStylesheets().add(getClass().getResource("DataViewer.css").toExternalForm());
 
         dataViewRoot.getSubDataViews().addListener(subDataViewChangeListener);
         dataViewRoot.activeSubViewProperty().addListener(activeSubDataViewChangeListener);
@@ -144,6 +144,11 @@ public class DataViewer extends BorderPane {
         toolBar = new ToolBar(separator1, viewList, separator2, spacer);
         this.setCenter(dataViewRoot);
         requestLayout();
+    }
+
+    @Override
+    public String getUserAgentStylesheet() {
+        return Objects.requireNonNull(getClass().getResource("DataViewer.css")).toExternalForm();
     }
 
     public DataViewer(final DataView... views) {
