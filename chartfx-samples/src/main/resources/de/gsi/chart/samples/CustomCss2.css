@@ -1,0 +1,16 @@
+.chart-crosshair-path {
+  -fx-stroke-width: 3.0;
+  -fx-stroke: orange;
+}
+
+.chart-major-grid-lines {
+  -fx-stroke: derive(red, -10%);
+  -fx-stroke-dash-array: 1.5, 2.5;
+  -fx-stroke-width: 0.5;
+  -fx-grid-on-top: true;
+}
+.axis-label {
+  -fx-stroke: blue;
+  -fx-axis-label-alignment: right;
+  -fx-font-family: "Times New Roman";
+}
