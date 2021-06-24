@@ -1,0 +1,21 @@
+.chart-crosshair-path {
+  -fx-stroke-width: 3.0;
+  -fx-stroke: green;
+}
+
+.chart-zoom-rect {
+  -fx-fill: lime;
+  -fx-stroke: pink;
+  -fx-stroke-type: inside;
+  -fx-stroke-width: 5.0;
+  -fx-opacity: 0.1;
+}
+
+.chart-datapoint-tooltip-label {
+  -fx-background-color: purple;
+  -fx-border-color: black;
+  -fx-border-radius: 9.0;
+  -fx-font-size: 22.0;
+  -fx-font-weight: light;
+  -fx-text-alignment: left;
+}
