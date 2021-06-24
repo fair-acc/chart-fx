@@ -1,16 +1,8 @@
 package de.gsi.chart.samples;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.CrosshairIndicator;
-import de.gsi.chart.plugins.DataPointTooltip;
-import de.gsi.chart.plugins.EditAxis;
-import de.gsi.chart.plugins.Zoomer;
-import de.gsi.dataset.event.UpdatedDataEvent;
-import de.gsi.dataset.spi.DoubleDataSet;
-import de.gsi.dataset.testdata.spi.CosineFunction;
-import de.gsi.dataset.testdata.spi.GaussFunction;
-import de.gsi.dataset.testdata.spi.RandomWalkFunction;
+import java.util.List;
+import java.util.Objects;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -24,11 +16,21 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Objects;
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.CrosshairIndicator;
+import de.gsi.chart.plugins.DataPointTooltip;
+import de.gsi.chart.plugins.EditAxis;
+import de.gsi.chart.plugins.Zoomer;
+import de.gsi.dataset.event.UpdatedDataEvent;
+import de.gsi.dataset.spi.DoubleDataSet;
+import de.gsi.dataset.testdata.spi.CosineFunction;
+import de.gsi.dataset.testdata.spi.GaussFunction;
+import de.gsi.dataset.testdata.spi.RandomWalkFunction;
 
 /**
  * Simple example of how to use css to change the appearance of the chart.
@@ -75,7 +77,7 @@ public class CssStylingSample extends Application {
         );
         VBox.setVgrow(hBox, Priority.ALWAYS);
         hBox.getChildren().forEach(child -> HBox.setHgrow(child, Priority.ALWAYS));
-        final Scene scene = new Scene(new VBox(new HBox(new Label("Stylesheet for Scene: "), globalCssBox),hBox), 800, 600);
+        final Scene scene = new Scene(new VBox(new HBox(new Label("Stylesheet for Scene: "), globalCssBox), hBox), 800, 600);
         primaryStage.setTitle(getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.show();
