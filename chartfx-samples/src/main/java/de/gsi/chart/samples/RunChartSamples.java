@@ -48,6 +48,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("ChartIndicatorSample", new ChartIndicatorSample()));
         buttons.getChildren().add(new MyButton("ChartPerformanceGraph", new ChartPerformanceGraph()));
         buttons.getChildren().add(new MyButton("ContourChartSample", new ContourChartSample()));
+        buttons.getChildren().add(new MyButton("CssStylingSample", new CssStylingSample()));
         buttons.getChildren().add(new MyButton("CustomColourSchemeSample", new CustomColourSchemeSample()));
         buttons.getChildren().add(new MyButton("CustomFragmentedRendererSample", new CustomFragmentedRendererSample()));
         buttons.getChildren().add(new MyButton("DataViewerSample", new DataViewerSample()));
