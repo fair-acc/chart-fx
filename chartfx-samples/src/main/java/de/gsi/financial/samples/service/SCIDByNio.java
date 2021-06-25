@@ -10,12 +10,11 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-import javafx.beans.property.DoubleProperty;
-
-import org.jetbrains.annotations.NotNull;
-
 import de.gsi.financial.samples.dos.Interval;
 import de.gsi.financial.samples.dos.OHLCVItem;
+import javafx.beans.property.DoubleProperty;
+import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Create OHLCV from Sierra Chart SCID files (intraday tick format).
@@ -35,7 +34,7 @@ public class SCIDByNio implements AutoCloseable {
     public void openNewChannel(String resource) throws IOException {
         timeZone = cal.get(Calendar.ZONE_OFFSET);
 
-        fileInputStream = new FileInputStream(resource); // lgtm[java/output-resource-leak]
+        fileInputStream = new FileInputStream(FilenameUtils.getName(resource)); // lgtm[java/output-resource-leak]
         fileChannel = fileInputStream.getChannel();
 
         bufferRecordDouble = ByteBuffer.allocate(8);
