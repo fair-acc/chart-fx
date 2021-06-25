@@ -4,12 +4,10 @@ import java.util.Calendar;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
-import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
@@ -32,16 +30,17 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
     /**
      * Prepare charts to the root.
      */
+    @Override
     protected Scene prepareScene() {
         timeRange = "2020/06/24 0:00-2020/11/12 0:00";
 
-        final Chart chart = getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND);
+        final var chart = getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND);
         final AbstractFinancialRenderer<?> renderer = (AbstractFinancialRenderer<?>) chart.getRenderers().get(0);
 
         // prepare top financial toolbar
-        ToolBar testVariableToolBar = getTestToolBar(chart, renderer, false);
+        var testVariableToolBar = getTestToolBar(chart, renderer, false);
 
-        VBox root = new VBox();
+        var root = new VBox();
         VBox.setVgrow(chart, Priority.SOMETIMES);
         root.getChildren().addAll(testVariableToolBar, chart);
 
@@ -50,10 +49,10 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
 
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {
         // create and apply renderers
-        CandleStickRenderer candleStickRenderer = new CandleStickRenderer(true);
+        var candleStickRenderer = new CandleStickRenderer(true);
         candleStickRenderer.getDatasets().addAll(ohlcvDataSet);
 
-        ErrorDataSetRenderer avgRenderer = new ErrorDataSetRenderer();
+        var avgRenderer = new ErrorDataSetRenderer();
         avgRenderer.setDrawMarker(false);
         avgRenderer.setErrorType(ErrorStyle.NONE);
         avgRenderer.getDatasets().addAll(indiSet);
@@ -66,11 +65,11 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
         // Example of extension possibilities
 
         // PaintBar Service Usage
-        candleStickRenderer.setPaintBarMarker(d -> d.ohlcvItem.getOpen() - d.ohlcvItem.getClose() > 100.0 ? Color.MAGENTA : null);
+        candleStickRenderer.setPaintBarMarker(d -> d.ohlcvItem != null && (d.ohlcvItem.getOpen() - d.ohlcvItem.getClose() > 100.0) ? Color.MAGENTA : null);
 
         // PaintAfter Extension Point Usage
         // select every friday with yellow square point in the middle of candle
-        Calendar cal = Calendar.getInstance(); // set this up however you need it.
+        var cal = Calendar.getInstance(); // set this up however you need it.
         for (IOhlcvItem ohlcvItem : ohlcvDataSet) {
             cal.setTime(ohlcvItem.getTimeStamp());
             int day = cal.get(Calendar.DAY_OF_WEEK);
@@ -81,20 +80,21 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
 
         // example of extension point PaintAfter - Paint yellow square if the bar is selected by addon model attribute
         candleStickRenderer.addPaintAfterEp(d -> {
+            if (d.ohlcvItem == null || d.ohlcvItem.getAddon() == null) {
+                return;
+            }
             // addon extension with MARK BAR settings
-            if (d.ohlcvItem.getAddon() != null) {
-                if (d.ohlcvItem.getAddon().getAttribute(MARK_BAR, false)) {
-                    double yy;
-                    if (d.ohlcvItem.getClose() > d.ohlcvItem.getOpen()) {
-                        yy = d.yClose - (d.yClose - d.yOpen) / 2;
-                        d.gc.setFill(Color.CRIMSON);
-                    } else {
-                        yy = d.yOpen - (d.yOpen - d.yClose) / 2;
-                        d.gc.setFill(Color.YELLOW);
-                    }
-                    double rectCorr = d.barWidthHalf / 2.0;
-                    d.gc.fillRect(d.xCenter - rectCorr, yy - rectCorr, rectCorr * 2.0, rectCorr * 2.0);
+            if (Boolean.TRUE.equals(d.ohlcvItem.getAddon().getAttribute(MARK_BAR, false))) {
+                double yy;
+                if (d.ohlcvItem.getClose() > d.ohlcvItem.getOpen()) {
+                    yy = d.yClose - (d.yClose - d.yOpen) / 2;
+                    d.gc.setFill(Color.CRIMSON);
+                } else {
+                    yy = d.yOpen - (d.yOpen - d.yClose) / 2;
+                    d.gc.setFill(Color.YELLOW);
                 }
+                final double rectCorr = d.barWidthHalf / 2.0;
+                d.gc.fillRect(d.xCenter - rectCorr, yy - rectCorr, rectCorr * 2.0, rectCorr * 2.0);
             }
         });
     }
