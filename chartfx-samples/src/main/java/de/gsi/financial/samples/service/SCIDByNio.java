@@ -22,7 +22,8 @@ import de.gsi.financial.samples.dos.OHLCVItem;
  *
  * @author afischer
  */
-public class SCIDByNio {
+public class SCIDByNio implements AutoCloseable {
+    private FileInputStream fileInputStream;
     private FileChannel fileChannel;
     private ByteBuffer bufferRecordDouble;
     private ByteBuffer bufferRecordFloat;
@@ -34,10 +35,8 @@ public class SCIDByNio {
     public void openNewChannel(String resource) throws IOException {
         timeZone = cal.get(Calendar.ZONE_OFFSET);
 
-        var fis = new FileInputStream(resource); // lgtm[java/output-resource-leak]
-
-        //----------------------------------
-        fileChannel = fis.getChannel();
+        fileInputStream = new FileInputStream(resource); // lgtm[java/output-resource-leak]
+        fileChannel = fileInputStream.getChannel();
 
         bufferRecordDouble = ByteBuffer.allocate(8);
         bufferRecordDouble.order(ByteOrder.LITTLE_ENDIAN);
@@ -55,6 +54,12 @@ public class SCIDByNio {
         if (fileChannel.isOpen()) {
             fileChannel.close();
         }
+        fileInputStream.close();
+    }
+
+    @Override
+    public void close() throws Exception {
+        closeActualChannel();
     }
 
     /**
