@@ -6,7 +6,7 @@
         <groupId>de.gsi</groupId>
         <artifactId>chartfx</artifactId>
         <version>${revision}${sha1}${changelist}</version>
-        <relativePath>..</relativePath>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <groupId>de.gsi.dataset</groupId>
     <artifactId>chartfx-dataset</artifactId>
