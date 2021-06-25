@@ -10,11 +10,13 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.LockSupport;
 
-import de.gsi.financial.samples.dos.Interval;
-import de.gsi.financial.samples.dos.OHLCVItem;
 import javafx.beans.property.DoubleProperty;
+
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
+
+import de.gsi.financial.samples.dos.Interval;
+import de.gsi.financial.samples.dos.OHLCVItem;
 
 /**
  * Create OHLCV from Sierra Chart SCID files (intraday tick format).

@@ -211,7 +211,7 @@ public class PositionFinancialRendererPaintAfterEP implements RendererPaintAfter
         @Override
         public String toString() {
             return "PositionRendered{"
-                    + "positionId=" + positionId + ", index=" + index + ", entryExit=" + entryExit + ", quantity=" + quantity + ", posType=" + posType + ", price=" + price + ", closed=" + closed + ", joinedEntries=" + joinedEntries + '}';
+          + "positionId=" + positionId + ", index=" + index + ", entryExit=" + entryExit + ", quantity=" + quantity + ", posType=" + posType + ", price=" + price + ", closed=" + closed + ", joinedEntries=" + joinedEntries + '}';
         }
     }
 }
