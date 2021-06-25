@@ -1,6 +1,5 @@
 package de.gsi.financial.samples.service;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -8,11 +7,13 @@ import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.util.Calendar;
 import java.util.Date;
-
-import javafx.beans.property.DoubleProperty;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.LockSupport;
 
 import de.gsi.financial.samples.dos.Interval;
 import de.gsi.financial.samples.dos.OHLCVItem;
+import javafx.beans.property.DoubleProperty;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Create OHLCV from Sierra Chart SCID files (intraday tick format).
@@ -21,31 +22,20 @@ import de.gsi.financial.samples.dos.OHLCVItem;
  */
 public class SCIDByNio {
     private FileChannel fileChannel;
-    private ByteBuffer bufferHeader;
     private ByteBuffer bufferRecordDouble;
     private ByteBuffer bufferRecordFloat;
     private ByteBuffer bufferRecordULong;
     private final Calendar cal = Calendar.getInstance();
     private int timeZone;
 
-    private String title;
-    private String symbol;
-
     @SuppressWarnings({ "lgtm[java/output-resource-leak", "resource" })
     public void openNewChannel(String resource) throws IOException {
-        title = new File(resource).getName();
-        symbol = title.replaceFirst("[.][^.]+$", "");
-
         timeZone = cal.get(Calendar.ZONE_OFFSET);
 
-        File f = new File(resource);
-        FileInputStream fis = new FileInputStream(f); // lgtm[java/output-resource-leak]
+        var fis = new FileInputStream(resource); // lgtm[java/output-resource-leak]
 
         //----------------------------------
         fileChannel = fis.getChannel();
-
-        bufferHeader = ByteBuffer.allocate(4);
-        bufferHeader.order(ByteOrder.LITTLE_ENDIAN);
 
         bufferRecordDouble = ByteBuffer.allocate(8);
         bufferRecordDouble.order(ByteOrder.LITTLE_ENDIAN);
@@ -111,11 +101,7 @@ public class SCIDByNio {
         position = Math.abs(position);
 
         long positionEnd = fileChannel.size() - 40;
-        if (position > positionEnd) {
-            return positionEnd;
-        }
-
-        return position;
+        return Math.min(position, positionEnd);
     }
 
     /**
@@ -127,8 +113,8 @@ public class SCIDByNio {
      * @return tick data provider
      * @throws IOException if reading of file failed
      */
-    public TickOhlcvDataProvider createTickDataReplayStream(final Interval<Calendar> requiredTimestamps,
-            final Date replayStarTime, DoubleProperty replaySpeed) throws IOException {
+    public TickOhlcvDataProvider createTickDataReplayStream(@NotNull final Interval<Calendar> requiredTimestamps,
+            @NotNull final Date replayStarTime, DoubleProperty replaySpeed) throws IOException {
         // define boundaries of loaded data
         final long positionStart = ensureNearestTimestampPosition(requiredTimestamps.from.getTime());
         final long positionEnd = ensureNearestTimestampPosition(requiredTimestamps.to.getTime());
@@ -140,7 +126,6 @@ public class SCIDByNio {
         return new TickOhlcvDataProvider() {
             private OHLCVItem prevItem = null;
             private OHLCVItem item = null;
-            private final Object lock = new Object();
 
             @Override
             public OHLCVItem get() throws TickDataFinishedException, IOException {
@@ -149,10 +134,10 @@ public class SCIDByNio {
                     throw new TickDataFinishedException("The replay finished.");
                 }
                 if (position >= ohlcvReplayStartIndex) {
-                    long prevTime = prevItem != null ? prevItem.getTimeStamp().getTime() : 0;
-                    long time = item != null ? item.getTimeStamp().getTime() : 0;
+                    long prevTime = prevItem != null ? prevItem.getTimeStamp().getTime() : 0L;
+                    long time = item != null ? item.getTimeStamp().getTime() : 0L;
                     long waitingTime = Math.round((time - prevTime) / replaySpeed.get());
-                    waitingTime = waitingTime < 1 ? 1 : waitingTime;
+                    waitingTime = Math.max(1, waitingTime);
                     try {
                         // waiting to send next sample - simulation of replay processing
                         Thread.sleep(waitingTime);
@@ -191,10 +176,7 @@ public class SCIDByNio {
             if (bytesRead == -1) {
                 // wait for new realtime data
                 synchronized (this) {
-                    try {
-                        wait(25); // default is 25ms
-                    } catch (InterruptedException ignored) {
-                    }
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(25)); // default is 25ms
                 }
             }
         } while (bytesRead == -1);
@@ -208,8 +190,6 @@ public class SCIDByNio {
         // In Sierra Chart version 1150 and higher, in the case where the data
         // record holds 1 tick/trade of data, the Open will be equal to 0.
         fileChannel.read(bufferRecordFloat);
-        // bufferRecordFloat.flip();
-        // open = bufferRecordFloat.getFloat();
         bufferRecordFloat.clear();
 
         // high
@@ -256,7 +236,7 @@ public class SCIDByNio {
         bufferRecordULong.clear();
 
         // timestamp conversion to date structure
-        Date timestamp = new Date(convertWindowsTimeToMilliseconds(dt));
+        var timestamp = new Date(convertWindowsTimeToMilliseconds(dt));
 
         // assembly one ohlcv item domain object
         return new OHLCVItem(timestamp, open, high, low, close, totalVolume, 0, askVolume, bidVolume);
@@ -275,7 +255,7 @@ public class SCIDByNio {
         fileChannel.position(position);
         int bytesRead = fileChannel.read(bufferRecordDouble);
         if (bytesRead == -1) {
-            return null;
+            throw new IOException("could not read time-stamp for position: " + position);
         }
         bufferRecordDouble.flip();
         dt = bufferRecordDouble.getDouble();
