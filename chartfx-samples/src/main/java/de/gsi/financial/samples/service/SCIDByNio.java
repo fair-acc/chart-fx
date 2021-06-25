@@ -191,48 +191,64 @@ public class SCIDByNio {
         // open
         // In Sierra Chart version 1150 and higher, in the case where the data
         // record holds 1 tick/trade of data, the Open will be equal to 0.
-        fileChannel.read(bufferRecordFloat);
+        if (fileChannel.read(bufferRecordFloat) < 0) {
+            throw new IOException("could not read open values");
+        }
         bufferRecordFloat.clear();
 
         // high
-        fileChannel.read(bufferRecordFloat);
+        if (fileChannel.read(bufferRecordFloat) < 0) {
+            throw new IOException("could not read high values");
+        }
         bufferRecordFloat.flip();
         high = bufferRecordFloat.getFloat();
         bufferRecordFloat.clear();
 
         // low
-        fileChannel.read(bufferRecordFloat);
+        if (fileChannel.read(bufferRecordFloat) < 0) {
+            throw new IOException("could not read low values");
+        }
         bufferRecordFloat.flip();
         low = bufferRecordFloat.getFloat();
         bufferRecordFloat.clear();
 
         // close
-        fileChannel.read(bufferRecordFloat);
+        if (fileChannel.read(bufferRecordFloat) < 0) {
+            throw new IOException("could not read close values");
+        }
         bufferRecordFloat.flip();
         close = bufferRecordFloat.getFloat();
         open = close; // tick data only!
         bufferRecordFloat.clear();
 
         // number of trades
-        fileChannel.read(bufferRecordULong);
+        if (fileChannel.read(bufferRecordULong) < 0) {
+            throw new IOException("could not read number of trade values");
+        }
         bufferRecordULong.flip();
         bufferRecordULong.getInt();
         bufferRecordULong.clear();
 
         // total volume
-        fileChannel.read(bufferRecordULong);
+        if (fileChannel.read(bufferRecordULong) < 0) {
+            throw new IOException("could not read total volume values");
+        }
         bufferRecordULong.flip();
         totalVolume = bufferRecordULong.getInt();
         bufferRecordULong.clear();
 
         // bid volume
-        fileChannel.read(bufferRecordULong);
+        if (fileChannel.read(bufferRecordULong) < 0) {
+            throw new IOException("could not read bid volume values");
+        }
         bufferRecordULong.flip();
         bidVolume = bufferRecordULong.getInt();
         bufferRecordULong.clear();
 
         // ask volume
-        fileChannel.read(bufferRecordULong);
+        if (fileChannel.read(bufferRecordULong) < 0) {
+            throw new IOException("could not read ask volume values");
+        }
         bufferRecordULong.flip();
         askVolume = bufferRecordULong.getInt();
         bufferRecordULong.clear();
