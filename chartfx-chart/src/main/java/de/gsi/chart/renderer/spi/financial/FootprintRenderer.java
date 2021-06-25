@@ -45,7 +45,7 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
- * <h2>Footprint Chart Renderer</h2>
+ * Footprint Chart Renderer
  *<p>
  * Footprint chart is a type of candlestick chart that provides additional information, such as trade volume and order flow,
  * in addition to price. It is multi-dimensional in nature, and can provide an investor with more information for analysis,
