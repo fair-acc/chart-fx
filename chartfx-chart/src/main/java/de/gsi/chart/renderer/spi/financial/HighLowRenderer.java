@@ -19,6 +19,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import javafx.collections.ObservableList;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.Axis;
@@ -34,11 +40,6 @@ import de.gsi.dataset.spi.financial.OhlcvDataSet;
 import de.gsi.dataset.spi.financial.api.attrs.AttributeModelAware;
 import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 /**
  * <h1>High-Low renderer (OHLC-V/OI Chart)</h1>
