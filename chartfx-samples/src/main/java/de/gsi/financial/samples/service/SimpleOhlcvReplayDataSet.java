@@ -8,6 +8,8 @@ import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -41,21 +43,21 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
 
     private static final String DATA_SOURCE_PATH = "chartfx-samples/target/classes/de/gsi/chart/samples/financial/%s.scid";
 
-    private final DoubleProperty replayMultiply = new SimpleDoubleProperty(this, "replayMultiply", 1.0);
+    private final transient DoubleProperty replayMultiply = new SimpleDoubleProperty(this, "replayMultiply", 1.0);
 
     private DataInput inputSource = OHLC_TICK;
     private String resource;
-    protected DefaultOHLCV ohlcv;
+    protected transient DefaultOHLCV ohlcv;
 
-    protected volatile boolean running = false;
-    protected volatile boolean paused = false;
-    protected transient final Object pause = new Object();
+    protected AtomicBoolean running = new AtomicBoolean(false);
+    protected AtomicBoolean paused = new AtomicBoolean(false);
+    protected final transient Object pauseSemaphore = new Object();
 
     protected transient SCIDByNio scid;
     protected transient TickOhlcvDataProvider tickOhlcvDataProvider;
     protected transient IncrementalOhlcvConsolidation consolidation;
 
-    protected Set<OhlcvChangeListener> ohlcvChangeListeners = new LinkedHashSet<>();
+    protected transient Set<OhlcvChangeListener> ohlcvChangeListeners = new LinkedHashSet<>();
 
     protected int maxXIndex = 0;
 
@@ -112,7 +114,6 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
 
     protected void tick() throws Exception {
         OHLCVItem increment = tickOhlcvDataProvider.get();
-        //lock().writeLockGuard(() -> { // not write lock blinking
         consolidation.consolidate(ohlcv, increment);
         // recalculate limits
         if (maxXIndex < ohlcv.size()) {
@@ -122,7 +123,6 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
         }
         // notify last tick listeners
         fireOhlcvTickEvent(increment);
-        //});
     }
 
     protected void fireOhlcvTickEvent(IOhlcvItem ohlcvItem) throws Exception {
@@ -147,13 +147,13 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
      * pause/resume play back of the data source via the sound card
      */
     public void pauseResume() {
-        if (paused) {
-            paused = false;
-            synchronized (pause) {
-                pause.notify();
+        if (paused.get()) {
+            paused.set(false);
+            synchronized (pauseSemaphore) {
+                pauseSemaphore.notifyAll();
             }
         } else {
-            paused = true;
+            paused.set(true);
         }
     }
 
@@ -163,7 +163,7 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
      */
     public void setUpdatePeriod(final double updatePeriod) {
         replayMultiply.set(updatePeriod);
-        if (!running) {
+        if (!running.get()) {
             start();
         }
     }
@@ -172,8 +172,8 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
      * starts play back of the data source via the sound card
      */
     public void start() {
-        paused = false;
-        running = true;
+        paused.set(false);
+        running.set(true);
         new Thread(getDataUpdateTask()).start();
     }
 
@@ -185,9 +185,9 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
      * stops and resets play back of the data source via the sound card
      */
     public void stop() {
-        if (running) {
-            running = false;
-            if (paused) {
+        if (running.get()) {
+            running.set(false);
+            if (paused.get()) {
                 pauseResume();
             }
             try {
@@ -202,25 +202,21 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
 
     protected Runnable getDataUpdateTask() {
         return () -> {
-            while (running) {
+            while (running.get()) {
                 try {
                     tick();
                     fireInvalidated(new AddedDataEvent(SimpleOhlcvReplayDataSet.this, "tick"));
                     // pause simple support
-                    if (paused) {
-                        try {
-                            synchronized (pause) {
-                                pause.wait();
-                            }
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
+                    while (paused.get()) {
+                        synchronized (pauseSemaphore) {
+                            pauseSemaphore.wait(TimeUnit.MILLISECONDS.toMillis(25));
                         }
                     }
                 } catch (TickDataFinishedException e) {
                     stop();
                 } catch (ClosedChannelException e) {
                     LOGGER.info("The OHLCV data channel is already closed.");
-                } catch (Exception e) {
+                } catch (Exception e) { // NOSONAR NOPMD
                     throw new IllegalArgumentException(e);
                 }
             }
