@@ -72,7 +72,7 @@ class YWatchValueIndicatorTest {
     void setMarkerValue() {
         chart.getPlugins().add(valueWatchIndicatorTested);
         valueWatchIndicatorTested.setMarkerValue(35.15);
-        assertEquals("35.15", valueWatchIndicatorTested.getText());
+        assertEquals(" 35.2", valueWatchIndicatorTested.getText());
         assertEquals(35.15, valueWatchIndicatorTested.getValue(), 1e-2);
     }
 
