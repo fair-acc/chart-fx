@@ -1,11 +1,21 @@
 package de.gsi.chart.renderer.spi.financial;
 
-import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_BAR_WIDTH_PERCENTAGE;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_LONG_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_LONG_WICK_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_SHADOW_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_SHORT_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_SHORT_WICK_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_LONG_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_SHORT_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_LINE_WIDTH;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_TRANSPOSITION_PERCENT;
 import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
@@ -15,7 +25,6 @@ import javafx.scene.paint.Paint;
 
 import de.gsi.chart.Chart;
 import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.Axis;
 import de.gsi.chart.axes.spi.CategoryAxis;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.renderer.spi.financial.service.OhlcvRendererEpData;
@@ -30,7 +39,7 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
- * <h2>Candlestick renderer</h2>
+ * <h1>Candlestick renderer</h1>
  *<p>
  * A candlestick chart (also called Japanese candlestick chart) is a style of financial chart used to describe price movements of a security,
  * derivative, or currency.
@@ -56,7 +65,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
     private final boolean paintVolume;
     private final FindAreaDistances findAreaDistances;
 
-    protected List<RendererPaintAfterEP> paintAfterEPS = new ArrayList<>();
+    protected final List<RendererPaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     public CandleStickRenderer(boolean paintVolume) {
         this.paintVolume = paintVolume;
@@ -73,13 +82,13 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
 
     @Override
     public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        final Canvas canvas = new Canvas(width, height);
-        final GraphicsContext gc = canvas.getGraphicsContext2D();
+        var canvas = new Canvas(width, height);
+        final var gc = canvas.getGraphicsContext2D();
         final String style = dataSet.getStyle();
 
         gc.save();
-        Color candleLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_COLOR, Color.GREEN);
-        Color candleShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_COLOR, Color.RED);
+        var candleLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_COLOR, Color.GREEN);
+        var candleShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_COLOR, Color.RED);
 
         gc.setFill(candleLongColor);
         gc.setStroke(candleLongColor);
@@ -109,7 +118,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
-        final XYChart xyChart = (XYChart) chart;
+        final var xyChart = (XYChart) chart;
 
         // make local copy and add renderer specific data sets
         final List<DataSet> localDataSetList = new ArrayList<>(datasets);
@@ -120,13 +129,13 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
             start = ProcessingProfiler.getTimeStamp();
         }
 
-        final Axis xAxis = xyChart.getXAxis();
-        final Axis yAxis = xyChart.getYAxis();
+        final var xAxis = xyChart.getXAxis();
+        final var yAxis = xyChart.getYAxis();
 
         final double xAxisWidth = xAxis.getWidth();
         final double xmin = xAxis.getValueForDisplay(0);
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
-        int index = 0;
+        var index = 0;
 
         for (final DataSet ds : localDataSetList) {
             if (ds.getDimension() < 7)
@@ -155,13 +164,13 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
                 DefaultRenderColorScheme.setLineScheme(gc, style, lindex);
                 DefaultRenderColorScheme.setGraphicsContextAttributes(gc, style);
                 // financial styling level
-                Color candleLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_COLOR, Color.GREEN);
-                Color candleShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_COLOR, Color.RED);
-                Color candleLongWickColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_WICK_COLOR, Color.BLACK);
-                Color candleShortWickColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_WICK_COLOR, Color.BLACK);
-                Color candleShadowColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHADOW_COLOR, null);
-                Color candleVolumeLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_LONG_COLOR, Color.rgb(139, 199, 194, 0.2));
-                Color candleVolumeShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_SHORT_COLOR, Color.rgb(235, 160, 159, 0.2));
+                var candleLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_COLOR, Color.GREEN);
+                var candleShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_COLOR, Color.RED);
+                var candleLongWickColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_WICK_COLOR, Color.BLACK);
+                var candleShortWickColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_WICK_COLOR, Color.BLACK);
+                var candleShadowColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHADOW_COLOR, null);
+                var candleVolumeLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_LONG_COLOR, Color.rgb(139, 199, 194, 0.2));
+                var candleVolumeShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_SHORT_COLOR, Color.rgb(235, 160, 159, 0.2));
                 double barWidthPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_CANDLESTICK_BAR_WIDTH_PERCENTAGE, 0.5d);
                 double shadowLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_LINE_WIDTH, 2.5d);
                 double shadowTransPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_TRANSPOSITION_PERCENT, 0.5d);
@@ -173,7 +182,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
                     int iMax = Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount());
 
                     double[] distances = null;
-                    double minRequiredWidth = 0.0;
+                    var minRequiredWidth = 0.0;
                     if (lindex == 0) {
                         distances = findAreaDistances(findAreaDistances, ds, xAxis, yAxis, xmin, xmax);
                         minRequiredWidth = distances[0];
@@ -230,15 +239,15 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
                         }
 
                         // choose color of the bar
-                        Paint barPaint = getPaintBarColor(data);
+                        Paint barPaint = data == null ? null : getPaintBarColor(data);
 
                         if (yDiff > 0) {
-                            gc.setFill(barPaint != null ? barPaint : candleLongColor);
-                            gc.setStroke(barPaint != null ? barPaint : candleLongWickColor);
+                            gc.setFill(Objects.requireNonNullElse(barPaint, candleLongColor));
+                            gc.setStroke(Objects.requireNonNullElse(barPaint, candleLongWickColor));
                         } else {
                             yDiff = Math.abs(yDiff);
-                            gc.setFill(barPaint != null ? barPaint : candleShortColor);
-                            gc.setStroke(barPaint != null ? barPaint : candleShortWickColor);
+                            gc.setFill(Objects.requireNonNullElse(barPaint, candleShortColor));
+                            gc.setStroke(Objects.requireNonNullElse(barPaint, candleShortWickColor));
                         }
 
                         // paint candle

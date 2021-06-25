@@ -37,13 +37,13 @@ import de.gsi.dataset.utils.ProcessingProfiler;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
-public class HighLowRendererTest {
+class HighLowRendererTest {
     private HighLowRenderer rendererTested;
     private XYChart chart;
     private OhlcvDataSet ohlcvDataSet;
 
     @Start
-    public void start(Stage stage) throws Exception {
+    void start(Stage stage) throws Exception {
         ProcessingProfiler.setDebugState(false); // enable for detailed renderer tracing
         ohlcvDataSet = new OhlcvDataSet("ohlc1");
         ohlcvDataSet.setData(FinancialTestUtils.createTestOhlcv());
@@ -72,7 +72,7 @@ public class HighLowRendererTest {
         chart.getRenderers().add(rendererTested);
 
         // PaintBar extension usage
-        rendererTested.setPaintBarMarker(d -> d.ds.get(OhlcvDataSet.DIM_Y_OPEN, d.index) - d.ds.get(OhlcvDataSet.DIM_Y_CLOSE, d.index) > 100.0 ? Color.MAGENTA : null);
+        rendererTested.setPaintBarMarker(d -> d.ds != null && (d.ds.get(OhlcvDataSet.DIM_Y_OPEN, d.index) - d.ds.get(OhlcvDataSet.DIM_Y_CLOSE, d.index) > 100.0) ? Color.MAGENTA : null);
 
         // Extension point usage
         rendererTested.addPaintAfterEp(data -> assertNotNull(data.gc));
@@ -85,7 +85,7 @@ public class HighLowRendererTest {
     }
 
     @TestFx
-    public void categoryAxisTest() {
+    void categoryAxisTest() {
         final CategoryAxis xAxis = new CategoryAxis("time [iso]");
         xAxis.setTickLabelRotation(90);
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
@@ -96,7 +96,7 @@ public class HighLowRendererTest {
     }
 
     @TestFx
-    public void checkMinimalDimRequired() {
+    void checkMinimalDimRequired() {
         rendererTested.getDatasets().clear();
         rendererTested.getDatasets().add(new AbstractDataSet<OhlcvDataSet>("testDim", 6) {
             @Override
@@ -125,7 +125,7 @@ public class HighLowRendererTest {
     }
 
     @Test
-    public void testVolumeContructor() {
+    void testVolumeConstructor() {
         HighLowRenderer highLowRenderer = new HighLowRenderer(true);
         assertTrue(highLowRenderer.isPaintVolume());
         highLowRenderer = new HighLowRenderer(false);
@@ -135,8 +135,8 @@ public class HighLowRendererTest {
     }
 
     @Test
-    public void noXyChartInstance() {
-        assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null));
+    void noXyChartInstance() {
+        assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null)); // NOSONAR NOPMD
     }
 
     @Test
