@@ -12,14 +12,12 @@ import static de.gsi.math.DataSetMath.ErrType.EYP;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
+import org.jetbrains.annotations.NotNull;
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.EditableDataSet;
-import de.gsi.dataset.GridDataSet;
+import de.gsi.dataset.*;
 import de.gsi.dataset.spi.DoubleDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.spi.Histogram;
@@ -34,12 +32,11 @@ import de.gsi.math.spectra.SpectrumTools;
  * @author rstein
  */
 public final class DataSetMath { // NOPMD - nomen est omen
-
-    private static final char INFINITY_SYMBOL = 0x221E;
     private static final char INTEGRAL_SYMBOL = 0x222B;
     private static final char DIFFERENTIAL_SYMBOL = 0x2202;
     private static final char MULTIPLICATION_SYMBOL = 0x00B7;
     private static final String DIFFERENTIAL = DIFFERENTIAL_SYMBOL + "/" + DIFFERENTIAL_SYMBOL + "x";
+    public static Formatter<Number> DEFAULT_FORMATTER = new DefaultNumberFormatter(); // NOSONAR NOPMD -- explicitly not getter/setter
 
     /**
      *
@@ -48,7 +45,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         // private function, never called
     }
 
-    public static DoubleErrorDataSet applyMathOperation(final DoubleErrorDataSet ret, final MathOp op, final double x1, final double y1, final double y2, final double eyn1, final double eyp1, final double eyn2, final double eyp2) {
+    public static DoubleErrorDataSet applyMathOperation(final DoubleErrorDataSet ret, final MathOp op, final double x1, final double y1, final double y2, final double eyn1, final double eyp1, final double eyn2, final double eyp2) { // NOPMD NOSONAR
         // switch through math operations
         switch (op) {
         case ADD:
@@ -117,19 +114,23 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return 0;
     }
 
-    public static DataSet addFunction(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.ADD);
+    @SafeVarargs
+    public static DataSet addFunction(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.ADD, format);
     }
 
-    public static DataSet addFunction(final DataSet function, final double value) {
-        return mathFunction(function, value, MathOp.ADD);
+    @SafeVarargs
+    public static DataSet addFunction(final DataSet function, final double value, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, value, MathOp.ADD, format);
     }
 
-    public static DataSet addGaussianNoise(final DataSet function, final double sigma) {
+    @SafeVarargs
+    public static DataSet addGaussianNoise(final DataSet function, final double sigma, @NotNull final Formatter<Number>... format) {
         final int nLength = function.getDataCount();
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(function.getName() + "noise(" + sigma + ")", nLength);
+        final var dataSetName = getFormatter(format).format("{0}+noise({1})", function.getName(), sigma);
+        final var ret = new DoubleErrorDataSet(dataSetName, nLength);
 
-        for (int i = 0; i < nLength; i++) {
+        for (var i = 0; i < nLength; i++) {
             final double x = function.get(DIM_X, i);
             final double y = function.get(DIM_Y, i) + TRandom.Gaus(0, sigma);
             ret.add(x, y, sigma, sigma);
@@ -138,14 +139,14 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return ret;
     }
 
-    public static DataSet averageDataSetsFIR(final List<DataSet> dataSets, final int nUpdates) {
-        if (dataSets == null || dataSets.isEmpty()) {
-            final String name = dataSets == null ? "null" : "<empty>";
-            return new DoubleErrorDataSet("LP(" + name + ", FIR)");
+    @SafeVarargs
+    public static DataSet averageDataSetsFIR(@NotNull final List<DataSet> dataSets, final int nUpdates, @NotNull final Formatter<Number>... format) {
+        if (dataSets.isEmpty()) {
+            return new DoubleErrorDataSet(getFormatter(format).format("LP({0}, FIR)", "<empty>"));
         }
-        final String functionName = "LP(" + dataSets.get(0).getName() + ", FIR)";
+        final String functionName = getFormatter(format).format("LP({0}, FIR)", dataSets.get(0).getName());
         if (dataSets.size() <= 1) {
-            final DataSet newFunction = dataSets.get(0);
+            final var newFunction = dataSets.get(0);
             if (newFunction instanceof DataSetError) {
                 return new DoubleErrorDataSet(functionName, newFunction.getValues(DIM_X), newFunction.getValues(DIM_Y),
                         errors(newFunction, EYN), errors(newFunction, EYP), newFunction.getDataCount(), true);
@@ -157,23 +158,23 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
 
         final int nAvg = MathBase.min(nUpdates, dataSets.size());
-        final DataSet newFunction = dataSets.get(dataSets.size() - 1);
-        final DoubleErrorDataSet retFunction = new DoubleErrorDataSet(functionName, newFunction.getDataCount() + 2);
+        final var newFunction = dataSets.get(dataSets.size() - 1);
+        final var retFunction = new DoubleErrorDataSet(functionName, newFunction.getDataCount() + 2);
 
-        for (int i = 0; i < newFunction.getDataCount(); i++) {
+        for (var i = 0; i < newFunction.getDataCount(); i++) {
             final double newX = newFunction.get(DIM_X, i);
-            double mean = 0.0;
-            double var = 0.0;
-            double eyn = 0.0;
-            double eyp = 0.0;
+            var mean = 0.0;
+            var variance = 0.0;
+            var eyn = 0.0;
+            var eyp = 0.0;
 
-            int count = 0;
+            var count = 0;
             for (int j = MathBase.max(0, dataSets.size() - nAvg); j < dataSets.size(); j++) {
-                final DataSet oldFunction = dataSets.get(j);
+                final var oldFunction = dataSets.get(j);
                 final double oldX = oldFunction.get(DIM_X, i);
                 final double oldY = oldX == newX ? oldFunction.get(DIM_Y, i) : oldFunction.getValue(DIM_X, newX);
                 mean += oldY;
-                var += oldY * oldY;
+                variance += oldY * oldY;
                 // whether we need to interpolate
                 final boolean inter = oldX != newX;
                 eyn += error(oldFunction, EYN, i, newX, inter);
@@ -188,9 +189,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 mean /= count;
                 eyn /= count;
                 eyp /= count;
-                var /= count;
+                variance /= count;
                 final double mean2 = mean * mean;
-                final double diff = MathBase.abs(var - mean2);
+                final double diff = MathBase.abs(variance - mean2);
                 eyn = MathBase.sqrt(eyn * eyn + diff);
                 eyp = MathBase.sqrt(eyp * eyp + diff);
                 retFunction.add(newX, mean, eyn, eyp);
@@ -200,11 +201,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return retFunction;
     }
 
-    public static DataSet averageDataSetsIIR(final DataSet prevAverage, final DataSet prevAverage2,
-            final DataSet newDataSet, final int nUpdates) {
-        final String functionName = "LP(" + newDataSet.getName() + ", IIR)";
-        if (prevAverage == null || prevAverage2 == null || prevAverage.getDataCount() == 0
-                || prevAverage2.getDataCount() == 0) {
+    @SafeVarargs
+    public static DataSet averageDataSetsIIR(final DataSet prevAverage, final DataSet prevAverage2, final DataSet newDataSet, final int nUpdates, @NotNull final Formatter<Number>... format) {
+        final String functionName = getFormatter(format).format("LP({0}, IIR)", newDataSet.getName());
+        if (prevAverage == null || prevAverage2 == null || prevAverage.getDataCount() == 0 || prevAverage2.getDataCount() == 0) {
             final double[] yValues = newDataSet.getValues(DIM_Y);
             final double[] eyn = errors(newDataSet, EYN);
             final double[] eyp = errors(newDataSet, EYP);
@@ -229,7 +229,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final double alpha = 1.0 / (1.0 + nUpdates);
         final boolean avg2Empty = dataCount2 == 0;
 
-        for (int i = 0; i < dataCount1; i++) {
+        for (var i = 0; i < dataCount1; i++) {
             final double oldX = prevAverage.get(DIM_X, i);
             final double oldY = prevAverage.get(DIM_Y, i);
             final double oldY2 = avg2Empty ? oldY * oldY : prevAverage2.get(DIM_Y, i);
@@ -260,23 +260,27 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return retFunction;
     }
 
-    public static DataSet dbFunction(final DataSet function) {
-        return mathFunction(function, 0.0, MathOp.DB);
+    @SafeVarargs
+    public static DataSet dbFunction(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, 0.0, MathOp.DB, format);
     }
 
-    public static DataSet dbFunction(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.DB);
+    @SafeVarargs
+    public static DataSet dbFunction(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.DB, format);
     }
 
-    public static DataSet derivativeFunction(final DataSet function) {
-        return derivativeFunction(function, +1.0);
+    @SafeVarargs
+    public static DataSet derivativeFunction(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return derivativeFunction(function, +1.0, format);
     }
 
-    public static DataSet derivativeFunction(final DataSet function, final double sign) {
+    @SafeVarargs
+    public static DataSet derivativeFunction(final DataSet function, final double sign, @NotNull final Formatter<Number>... format) {
         final String signAdd = sign == 1.0 ? "" : Double.toString(sign) + MULTIPLICATION_SYMBOL;
         final int ncount = function.getDataCount();
-        final DoubleErrorDataSet retFunction = new DoubleErrorDataSet(
-                signAdd + DIFFERENTIAL + "(" + function.getName() + ")", ncount);
+        final String functionName = getFormatter(format).format("{0}{1}({2})", signAdd, DIFFERENTIAL, function.getName());
+        final var retFunction = new DoubleErrorDataSet(functionName, ncount);
 
         if (ncount <= 3) {
             return retFunction;
@@ -298,11 +302,11 @@ public final class DataSetMath { // NOPMD - nomen est omen
         // final double deltaX0 = function.get(DIM_X, 1) - function.get(DIM_X, 0);
         // retFunction.add(function.get(DIM_X, 0), sign * (deltaY0 / deltaX0),
         // deltaYEN, deltaYEP);
-        for (int i = 0; i < 2; i++) {
+        for (var i = 0; i < 2; i++) {
             final double x0 = function.get(DIM_X, i);
             retFunction.add(x0, 0, 0, 0);
         }
-        for (int i = 2; i < ncount - 2; i++) {
+        for (var i = 2; i < ncount - 2; i++) {
             final double x0 = function.get(DIM_X, i);
             final double stepL = x0 - function.get(DIM_X, i - 1);
             final double stepR = function.get(DIM_X, i + 1) - x0;
@@ -341,12 +345,14 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return retFunction;
     }
 
-    public static DataSet divideFunction(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.DIVIDE);
+    @SafeVarargs
+    public static DataSet divideFunction(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.DIVIDE, format);
     }
 
-    public static DataSet divideFunction(final DataSet function, final double value) {
-        return mathFunction(function, value, MathOp.DIVIDE);
+    @SafeVarargs
+    public static DataSet divideFunction(final DataSet function, final double value, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, value, MathOp.DIVIDE, format);
     }
 
     /**
@@ -400,27 +406,29 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
     }
 
-    public static DataSet filterFunction(final DataSet function, final double width, final Filter filterType) {
+    @SafeVarargs
+    public static DataSet filterFunction(final DataSet function, final double width, final Filter filterType, @NotNull final Formatter<Number>... format) {
         final int n = function.getDataCount();
-        final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet(filterType.getTag() + "(" + function.getName() + "," + width + ")", n);
-        for (int dim = 0; dim < filteredFunction.getDimension(); dim++) {
-            final AxisDescription refAxisDescription = function.getAxisDescription(dim);
+        final String dataSetName = getFormatter(format).format("{0}({1},{2})", filterType.getTag(), function.getName(), width);
+        final var filteredFunction = new DoubleErrorDataSet(dataSetName, n);
+        for (var dim = 0; dim < filteredFunction.getDimension(); dim++) {
+            final var refAxisDescription = function.getAxisDescription(dim);
             filteredFunction.getAxisDescription(dim).set(refAxisDescription.getName(), refAxisDescription.getUnit());
         }
-        final double[] subArrayY = new double[n];
-        final double[] subArrayYn = new double[n];
-        final double[] subArrayYp = new double[n];
+        final var subArrayY = new double[n];
+        final var subArrayYn = new double[n];
+        final var subArrayYp = new double[n];
 
         final double[] xValues = function.getValues(DIM_X);
         final double[] yValues = function.getValues(DIM_Y);
         final double[] yen = errors(function, EYN);
         final double[] yep = errors(function, EYN);
 
-        for (int i = 0; i < n; i++) {
+        for (var i = 0; i < n; i++) {
             final double time0 = xValues[i];
 
-            int count = 0;
-            for (int j = 0; j < n; j++) {
+            var count = 0;
+            for (var j = 0; j < n; j++) {
                 final double time = xValues[j];
                 if (MathBase.abs(time0 - time) <= width) {
                     subArrayY[count] = yValues[j];
@@ -468,16 +476,18 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return filteredFunction;
     }
 
-    public static DataSet geometricMeanFilteredFunction(final DataSet function, final double width) {
-        return filterFunction(function, width, Filter.GEOMMEAN);
+    @SafeVarargs
+    public static DataSet geometricMeanFilteredFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
+        return filterFunction(function, width, Filter.GEOMMEAN, format);
     }
 
-    public static DataSet getSubRange(final DataSet function, final double xMin, final double xMax) {
+    @SafeVarargs
+    public static DataSet getSubRange(final DataSet function, final double xMin, final double xMax, @NotNull final Formatter<Number>... format) {
         final int nLength = function.getDataCount();
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(
-                function.getName() + "subRange(" + xMin + ", " + xMax + ")", nLength);
+        final String dataSetName = getFormatter(format).format("subRange({0}, {1})", xMin, xMax);
+        final var ret = new DoubleErrorDataSet(dataSetName, nLength);
 
-        for (int i = 0; i < nLength; i++) {
+        for (var i = 0; i < nLength; i++) {
             final double x = function.get(DIM_X, i);
             final double y = function.get(DIM_Y, i);
             final double ex = error(function, EXP, i);
@@ -490,9 +500,11 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return ret;
     }
 
-    public static DataSet iirLowPassFilterFunction(final DataSet function, final double width) {
+    @SafeVarargs
+    public static DataSet iirLowPassFilterFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
         final int n = function.getDataCount();
-        final DoubleErrorDataSet filteredFunction = new DoubleErrorDataSet("iir" + Filter.MEAN.getTag() + "(" + function.getName() + "," + width + ")", n);
+        final String dataSetName = getFormatter(format).format("iir{0}({1},{2})", Filter.MEAN.getTag(), function.getName(), width);
+        final var filteredFunction = new DoubleErrorDataSet(dataSetName, n);
         if (n <= 1) {
             if (!(function instanceof GridDataSet)) {
                 filteredFunction.set(function);
@@ -500,13 +512,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
             }
             filteredFunction.set(function.getValues(DIM_X), function.getValues(DIM_Y), errors(function, EYN),
                     errors(function, EYP));
-            for (int index = 0; index < function.getDataCount(); index++) {
+            for (var index = 0; index < function.getDataCount(); index++) {
                 final String label = function.getDataLabel(index);
                 if (label != null && !label.isEmpty()) {
                     filteredFunction.addDataLabel(index, label);
                 }
             }
-            for (int index = 0; index < function.getDataCount(); index++) {
+            for (var index = 0; index < function.getDataCount(); index++) {
                 final String style = function.getStyle(index);
                 if (style != null && !style.isEmpty()) {
                     filteredFunction.addDataStyle(index, style);
@@ -520,10 +532,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final double[] yen = errors(function, EYN);
         final double[] yep = errors(function, EYN);
 
-        final double[] yUp = new double[n];
-        final double[] yDown = new double[n];
-        final double[] ye1 = new double[n];
-        final double[] ye2 = new double[n];
+        final var yUp = new double[n];
+        final var yDown = new double[n];
+        final var ye1 = new double[n];
+        final var ye2 = new double[n];
 
         final double smoothing = 0.5 * width;
         // IIR smoothing algorithm:
@@ -545,7 +557,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         // }
 
         // calculate forward/backward to compensate for the IIR group-delay
-        for (int i = 1; i < n; i++) {
+        for (var i = 1; i < n; i++) {
             final double x0 = xValues[i - 1];
             final double x1 = xValues[i];
             final double y = yValues[i];
@@ -556,7 +568,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
         smoothed = yValues[n - 1];
         smoothed2 = smoothed * smoothed;
-        for (int i = n - 2; i >= 0; i--) {
+        for (var i = n - 2; i >= 0; i--) {
             final double x0 = xValues[i];
             final double x1 = xValues[i + 1];
             final double y = yValues[i];
@@ -567,7 +579,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
 
         filteredFunction.add(xValues[0], yValues[0], yen[0], yep[0]);
-        for (int i = 1; i < n; i++) {
+        for (var i = 1; i < n; i++) {
             final double x1 = xValues[i];
             final double y = 0.5 * (yUp[i] + yDown[i]);
             final double mean2 = y * y;
@@ -584,7 +596,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DoublePointError integral(final DataSet function) {
         final DataSet integratedFunction = integrateFunction(function);
-        final int lastPoint = integratedFunction.getDataCount() - 1;
+        final var lastPoint = integratedFunction.getDataCount() - 1;
         if (lastPoint <= 0) {
             return new DoublePointError(0.0, 0.0, 0.0, 0.0);
         }
@@ -599,7 +611,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     public static DoublePointError integral(final DataSet function, final double xMin, final double xMax) {
         final DataSet integratedFunction = integrateFunction(function, xMin, xMax);
-        final int lastPoint = integratedFunction.getDataCount() - 1;
+        final var lastPoint = integratedFunction.getDataCount() - 1;
         final double yen = error(integratedFunction, EYN, lastPoint);
         final double yep = error(integratedFunction, EYP, lastPoint);
         final double ye = 0.5 * (yen + yep);
@@ -609,13 +621,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     public static double integralSimple(final DataSet function) {
-        double integral1 = 0.0;
-        double integral2 = 0.0;
+        var integral1 = 0.0;
+        var integral2 = 0.0;
         final int nCount = function.getDataCount();
         if (nCount <= 1) {
             return 0.0;
         }
-        for (int i = 1; i < nCount; i++) {
+        for (var i = 1; i < nCount; i++) {
             final double step = function.get(DIM_X, i) - function.get(DIM_X, i - 1);
             final double val1 = function.get(DIM_Y, i - 1);
             final double val2 = function.get(DIM_Y, i);
@@ -626,19 +638,21 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return 0.5 * (integral1 + integral2);
     }
 
-    public static DataSet integrateFunction(final DataSet function) {
-        return integrateFunction(function, Double.NaN, Double.NaN);
+    @SafeVarargs
+    public static DataSet integrateFunction(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return integrateFunction(function, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, format);
     }
 
-    public static DataSet integrateFunction(final DataSet function, final double xMin, final double xMax) {
+    @SafeVarargs
+    public static DataSet integrateFunction(final DataSet function, final double xMin, final double xMax, @NotNull final Formatter<Number>... format) {
         final int nLength = function.getDataCount();
-        final String functionName = function.getName();
-        String newName = INTEGRAL_SYMBOL + "(" + functionName + ")dyn";
+        final var pattern = "{0}({1})dyn|_'{'{2}'}'^'{'{3}'}')";
+        final String dataSetName = getFormatter(format).format(pattern, INTEGRAL_SYMBOL, function.getName(), xMin, xMax);
         if (nLength <= 0) {
             if (!(function instanceof GridDataSet) || function.getDimension() > 2) {
                 final int ncount = function.getDataCount();
-                final double[] emptyVector = new double[ncount];
-                return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), emptyVector, emptyVector,
+                final var emptyVector = new double[ncount];
+                return new DoubleErrorDataSet(dataSetName, function.getValues(DIM_X), emptyVector, emptyVector,
                         emptyVector, ncount, true);
             }
             throw new IllegalStateException("not yet implemented for non 2D dataSets");
@@ -649,32 +663,27 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
         double xMinLocal = function.getAxisDescription(DIM_X).getMin();
         double xMaxLocal = function.getAxisDescription(DIM_X).getMax();
-        double sign = 1.0;
-
+        var sign = 1.0;
         if (Double.isFinite(xMin) && Double.isFinite(xMax)) {
             xMinLocal = MathBase.min(xMin, xMax);
             xMaxLocal = MathBase.max(xMin, xMax);
             if (xMin > xMax) {
                 sign = -1;
             }
-            newName = INTEGRAL_SYMBOL + "(" + functionName + ")dyn|_{" + xMinLocal + "}^{" + xMaxLocal + "}";
         } else if (Double.isFinite(xMin)) {
             xMinLocal = xMin;
-            newName = INTEGRAL_SYMBOL + "(" + functionName + ")dyn|_{" + xMinLocal + "}^{+" + INFINITY_SYMBOL + "}";
         } else if (Double.isFinite(xMax)) {
             xMaxLocal = xMax;
-            newName = INTEGRAL_SYMBOL + "(" + functionName + ")dyn|_{-" + INFINITY_SYMBOL + "}^{" + xMaxLocal + "}";
         }
-
-        final DoubleErrorDataSet retFunction = new DoubleErrorDataSet(newName, nLength);
+        final var retFunction = new DoubleErrorDataSet(dataSetName, nLength);
         if (nLength <= 1) {
             retFunction.add(function.get(DIM_X, 0), 0, 0, 0);
             return retFunction;
         }
 
-        double integral = 0;
-        double integralEN = 0.0;
-        double integralEP = 0.0;
+        var integral = 0.0;
+        var integralEN = 0.0;
+        var integralEP = 0.0;
 
         if (Double.isFinite(xMin) && xMin <= function.get(DIM_X, 0)) {
             // interpolate before range where discrete function is defined
@@ -695,7 +704,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
 
         retFunction.add(function.get(DIM_X, 0), integral, integralEN, integralEP);
-        for (int i = 1; i < nLength; i++) {
+        for (var i = 1; i < nLength; i++) {
             final double x0 = function.get(DIM_X, i - 1);
             final double x1 = function.get(DIM_X, i);
             double step = x1 - x0;
@@ -714,7 +723,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
                 integralEN = MathBase.hypot(integralEN, 0.5 * step * (en1 + en2));
                 integralEP = MathBase.hypot(integralEP, 0.5 * step * (ep1 + ep2));
 
-            } else if (x1 < xMinLocal && x0 < xMinLocal) {
+            } else if (x1 < xMinLocal && x0 < xMinLocal) { // NOSONAR NOPMD
                 // see below
             } else if (x0 < xMinLocal && x1 > xMinLocal) {
                 retFunction.add(xMin, integral, integralEN, integralEP);
@@ -759,49 +768,52 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return retFunction;
     }
 
-    public static DataSet inversedbFunction(final DataSet function) {
-        return mathFunction(function, 1.0, MathOp.INV_DB);
+    @SafeVarargs
+    public static DataSet inversedbFunction(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, 1.0, MathOp.INV_DB, format);
     }
 
-    public static DataSet log10Function(final DataSet function) {
-        return mathFunction(function, 0.0, MathOp.LOG10);
+    @SafeVarargs
+    public static DataSet log10Function(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, 0.0, MathOp.LOG10, format);
     }
 
-    public static DataSet log10Function(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.LOG10);
+    @SafeVarargs
+    public static DataSet log10Function(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.LOG10, format);
     }
 
-    public static DataSet lowPassFilterFunction(final DataSet function, final double width) {
-        return filterFunction(function, width, Filter.MEAN);
+    @SafeVarargs
+    public static DataSet lowPassFilterFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
+        return filterFunction(function, width, Filter.MEAN, format);
     }
 
-    public static DataSet magnitudeSpectrum(final DataSet function) {
-        return magnitudeSpectrum(function, Apodization.Hann, false, false);
+    @SafeVarargs
+    public static DataSet magnitudeSpectrum(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return magnitudeSpectrum(function, Apodization.Hann, false, false, format);
     }
 
-    public static DataSet magnitudeSpectrum(final DataSet function, final Apodization apodization,
-            final boolean dbScale, final boolean normalisedFrequency) {
+    @SafeVarargs
+    public static DataSet magnitudeSpectrum(final DataSet function, final Apodization apodization, final boolean dbScale, final boolean normalisedFrequency, @NotNull final Formatter<Number>... format) {
         final int n = function.getDataCount();
 
-        final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(n);
+        final var fastFourierTrafo = new DoubleFFT_1D(n);
 
         // N.B. since realForward computes the FFT in-place -> generate a copy
-        final double[] fftSpectra = new double[n];
-        for (int i = 0; i < n; i++) {
+        final var fftSpectra = new double[n];
+        for (var i = 0; i < n; i++) {
             final double window = apodization.getIndex(i, n);
             fftSpectra[i] = function.get(DIM_Y, i) * window;
         }
 
         fastFourierTrafo.realForward(fftSpectra);
-        final double[] mag = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true)
-                                     : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
-        final double dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
-        final double fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
+        final var mag = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true) : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
+        final var dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
+        final var fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
 
-        final String functionName = "Mag" + (dbScale ? "[dB]" : "") + "(" + function.getName() + ")";
-
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(functionName, mag.length);
-        for (int i = 0; i < mag.length; i++) {
+        final String functionName = getFormatter(format).format("Mag{0}({1})", dbScale ? "[dB]" : "", function.getName());
+        final var ret = new DoubleErrorDataSet(functionName, mag.length);
+        for (var i = 0; i < mag.length; i++) {
             // TODO: consider magnitude error estimate
             ret.add(i * fsampling, mag[i], 0, 0);
         }
@@ -809,34 +821,35 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return ret;
     }
 
-    public static DataSet magnitudeSpectrumComplex(final DataSet function) {
-        return magnitudeSpectrumComplex(function, Apodization.Hann, false, false);
+    @SafeVarargs
+    public static DataSet magnitudeSpectrumComplex(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return magnitudeSpectrumComplex(function, Apodization.Hann, false, false, format);
     }
 
+    @SafeVarargs
     public static DataSet magnitudeSpectrumComplex(final DataSet function, final Apodization apodization,
-            final boolean dbScale, final boolean normalisedFrequency) {
+            final boolean dbScale, final boolean normalisedFrequency, @NotNull final Formatter<Number>... format) {
         final int n = function.getDataCount();
 
-        final DoubleFFT_1D fastFourierTrafo = new DoubleFFT_1D(n);
+        final var fastFourierTrafo = new DoubleFFT_1D(n);
 
         // N.B. since realForward computes the FFT in-place -> generate a copy
-        final double[] fftSpectra = new double[2 * n];
-        for (int i = 0; i < n; i++) {
+        final var fftSpectra = new double[2 * n];
+        for (var i = 0; i < n; i++) {
             final double window = apodization.getIndex(i, n);
             fftSpectra[2 * i] = function.get(DIM_Y, i) * window;
             fftSpectra[2 * i + 1] = function.get(DIM_Z, i) * window;
         }
 
         fastFourierTrafo.complexForward(fftSpectra);
-        final double[] mag = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true)
-                                     : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
-        final double dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
-        final double fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
+        final var mag = dbScale ? SpectrumTools.computeMagnitudeSpectrum_dB(fftSpectra, true)
+                                : SpectrumTools.computeMagnitudeSpectrum(fftSpectra, true);
+        final var dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
+        final var fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
 
-        final String functionName = "Mag" + (dbScale ? "[dB]" : "") + "(" + function.getName() + ")";
-
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(functionName, mag.length);
-        for (int i = 0; i < mag.length; i++) {
+        final var functionName = getFormatter(format).format("Mag{0}({1})", dbScale ? "[dB]" : "", function.getName());
+        final var ret = new DoubleErrorDataSet(functionName, mag.length);
+        for (var i = 0; i < mag.length; i++) {
             // TODO: consider magnitude error estimate
             if (i < mag.length / 2) {
                 ret.add((i - mag.length / 2.0) * fsampling, mag[i + mag.length / 2], 0, 0);
@@ -856,7 +869,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         if (function1.getDataCount() != function2.getDataCount()) {
             return false;
         }
-        for (int i = 0; i < function1.getDataCount(); i++) {
+        for (var i = 0; i < function1.getDataCount(); i++) {
             final double X1 = function1.get(DIM_X, i);
             final double X2 = function2.get(DIM_X, i);
             if (X1 != X2) {
@@ -867,8 +880,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return true;
     }
 
-    public static DataSet mathFunction(final DataSet function1, final DataSet function2, final MathOp op) {
-        final DoubleErrorDataSet ret = new DoubleErrorDataSet(function1.getName() + op.getTag() + function2.getName(), function1.getDataCount());
+    @SafeVarargs
+    public static DataSet mathFunction(final DataSet function1, final DataSet function2, final MathOp op, @NotNull final Formatter<Number>... format) {
+        final String newDataSetName = getFormatter(format).format("{0}{1}{2}", function1.getName(), op.getTag(), function2.getName());
+        final var ret = new DoubleErrorDataSet(newDataSetName, function1.getDataCount());
         ret.getAxisDescription(DIM_X).set(function1.getAxisDescription(DIM_X));
         ret.getAxisDescription(DIM_Y).set(function1.getAxisDescription(DIM_Y).getName(), function1.getAxisDescription(DIM_Y).getUnit());
 
@@ -887,7 +902,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
             return ret;
         }
 
-        for (int i = 0; i < function1.getDataCount(); i++) {
+        for (var i = 0; i < function1.getDataCount(); i++) {
             final double X1 = function1.get(DIM_X, i);
             // not needed : final double X2 = function1.get(DIM_X, i) ...
             final double Y1 = function1.get(DIM_Y, i);
@@ -905,7 +920,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     public static List<Double> getCommonBase(final DataSet... functions) {
         final List<Double> xValues = new NoDuplicatesList<>();
         for (DataSet function : functions) {
-            for (int i = 0; i < function.getDataCount(); i++) {
+            for (var i = 0; i < function.getDataCount(); i++) {
                 if (function instanceof Histogram) {
                     xValues.add(((Histogram) function).getBinLimits(DIM_X, LOWER, i));
                     xValues.add(((Histogram) function).getBinCenter(DIM_X, i));
@@ -919,8 +934,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return xValues;
     }
 
-    public static DataSet mathFunction(final DataSet function, final double value, final MathOp op) {
-        final String functionName = op.getTag() + "(" + function.getName() + ")";
+    @SafeVarargs
+    public static DataSet mathFunction(final DataSet function, final double value, final MathOp op, @NotNull final Formatter<Number>... format) {
+        final String functionName = getFormatter(format).format("{0}({1})", op.getTag(), function.getName());
         final double[] y = function.getValues(DIM_Y);
         final double[] eyn = Arrays.copyOf(errors(function, EYN), y.length);
         final double[] eyp = Arrays.copyOf(errors(function, EYP), y.length);
@@ -940,35 +956,35 @@ public final class DataSetMath { // NOPMD - nomen est omen
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.divide(y, value),
                     ArrayMath.divide(eyn, value), ArrayMath.divide(eyp, value), ncount, true);
         case SQR:
-            for (int i = 0; i < eyn.length; i++) {
+            for (var i = 0; i < eyn.length; i++) {
                 eyn[i] = 2 * MathBase.abs(y[i] + value) * eyn[i];
                 eyp[i] = 2 * MathBase.abs(y[i] + value) * eyp[i];
             }
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), value == 0.0 ? ArrayMath.sqr(y) : ArrayMath.sqr(ArrayMath.add(y, value)), eyn, eyp, ncount,
                     true);
         case SQRT:
-            for (int i = 0; i < eyn.length; i++) {
+            for (var i = 0; i < eyn.length; i++) {
                 eyn[i] = MathBase.sqrt(MathBase.abs(y[i] + value)) * eyn[i];
                 eyp[i] = MathBase.sqrt(MathBase.abs(y[i] + value)) * eyp[i];
             }
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), value == 0.0 ? ArrayMath.sqrt(y) : ArrayMath.sqrt(ArrayMath.add(y, value)), eyn, eyp, ncount,
                     true);
         case LOG10:
-            for (int i = 0; i < eyn.length; i++) {
+            for (var i = 0; i < eyn.length; i++) {
                 eyn[i] = 0.0; // 0.0 as a work-around
                 eyp[i] = 0.0;
             }
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.tenLog10(y), eyn, eyp,
                     ncount, true);
         case DB:
-            for (int i = 0; i < eyn.length; i++) {
+            for (var i = 0; i < eyn.length; i++) {
                 eyn[i] = 0.0; // 0.0 as a work-around
                 eyp[i] = 0.0;
             }
             return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), ArrayMath.decibel(y), eyn, eyp, ncount,
                     true);
         case INV_DB:
-            for (int i = 0; i < eyn.length; i++) {
+            for (var i = 0; i < eyn.length; i++) {
                 eyn[i] = 0.0; // 0.0 as a work-around
                 eyp[i] = 0.0;
             }
@@ -982,62 +998,72 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
     }
 
-    public static DataSet maxFilteredFunction(final DataSet function, final double width) {
-        return filterFunction(function, width, Filter.MAX);
+    @SafeVarargs
+    public static DataSet maxFilteredFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
+        return filterFunction(function, width, Filter.MAX, format);
     }
 
-    public static DataSet medianFilteredFunction(final DataSet function, final double width) {
-        return filterFunction(function, width, Filter.MEDIAN);
+    @SafeVarargs
+    public static DataSet medianFilteredFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
+        return filterFunction(function, width, Filter.MEDIAN, format);
     }
 
-    public static DataSet minFilteredFunction(final DataSet function, final double width) {
-        return filterFunction(function, width, Filter.MIN);
+    @SafeVarargs
+    public static DataSet minFilteredFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
+        return filterFunction(function, width, Filter.MIN, format);
     }
 
-    public static DataSet multiplyFunction(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.MULTIPLY);
+    @SafeVarargs
+    public static DataSet multiplyFunction(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.MULTIPLY, format);
     }
 
-    public static DataSet multiplyFunction(final DataSet function, final double value) {
-        return mathFunction(function, value, MathOp.MULTIPLY);
+    @SafeVarargs
+    public static DataSet multiplyFunction(final DataSet function, final double value, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, value, MathOp.MULTIPLY, format);
     }
 
-    public static DataSet normalisedFunction(final DataSet function) {
-        return normalisedFunction(function, 1.0);
+    @SafeVarargs
+    public static DataSet normalisedFunction(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return normalisedFunction(function, 1.0, format);
     }
 
-    public static DataSet normalisedFunction(final DataSet function, final double requiredIntegral) {
+    @SafeVarargs
+    public static DataSet normalisedFunction(final DataSet function, final double requiredIntegral, @NotNull final Formatter<Number>... format) {
         final DoublePointError complexInt = integral(function);
         final double integral = complexInt.getY() / requiredIntegral;
         final int ncount = function.getDataCount();
         // final double integralErr = complexInt.getErrorY() / requiredIntegral;
         // TODO: add error propagation to normalised function error estimate
+        final String functionName = getFormatter(format).format("{0}", function.getName());
         if (integral == 0) {
-            return new DoubleErrorDataSet(function.getName(), function.getValues(DIM_X), new double[ncount],
+            return new DoubleErrorDataSet(functionName, function.getValues(DIM_X), new double[ncount],
                     new double[ncount], new double[ncount], ncount, true);
         }
-        final double[] xValues = function.getValues(DIM_X);
-        final double[] yValues = ArrayMath.divide(function.getValues(DIM_Y), integral);
-        final double[] eyp = ArrayMath.divide(errors(function, EYN), integral);
-        final double[] eyn = ArrayMath.divide(errors(function, EYP), integral);
+        final var xValues = function.getValues(DIM_X);
+        final var yValues = ArrayMath.divide(function.getValues(DIM_Y), integral);
+        final var eyp = ArrayMath.divide(errors(function, EYN), integral);
+        final var eyn = ArrayMath.divide(errors(function, EYP), integral);
 
-        return new DoubleErrorDataSet(function.getName(), xValues, yValues, eyp, eyn, ncount, true);
+        return new DoubleErrorDataSet(functionName, xValues, yValues, eyp, eyn, ncount, true);
     }
 
-    public static DataSet normalisedMagnitudeSpectrumDecibel(final DataSet function) {
-        return magnitudeSpectrum(function, Apodization.Hann, true, true);
+    @SafeVarargs
+    public static DataSet normalisedMagnitudeSpectrumDecibel(final DataSet function, @NotNull final Formatter<Number>... format) {
+        return magnitudeSpectrum(function, Apodization.Hann, true, true, format);
     }
 
-    public static DataSet peakToPeakFilteredFunction(final DataSet function, final double width) {
-        return filterFunction(function, width, Filter.P2P);
+    @SafeVarargs
+    public static DataSet peakToPeakFilteredFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
+        return filterFunction(function, width, Filter.P2P, format);
     }
 
-    public static DataSet rmsFilteredFunction(final DataSet function, final double width) {
-        return filterFunction(function, width, Filter.RMS);
+    @SafeVarargs
+    public static DataSet rmsFilteredFunction(final DataSet function, final double width, @NotNull final Formatter<Number>... format) {
+        return filterFunction(function, width, Filter.RMS, format);
     }
 
-    public static EditableDataSet setFunction(final EditableDataSet function, final double value, final double xMin,
-            final double xMax) {
+    public static EditableDataSet setFunction(final EditableDataSet function, final double value, final double xMin, final double xMax) {
         final int nLength = function.getDataCount();
         double xMinLocal = function.get(DIM_X, 0);
         double xMaxLocal = function.get(DIM_X, nLength - 1);
@@ -1052,7 +1078,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         }
 
         final boolean oldState = function.autoNotification().getAndSet(false);
-        for (int i = 0; i < nLength; i++) {
+        for (var i = 0; i < nLength; i++) {
             final double x = function.get(DIM_X, i);
             if (x >= xMinLocal && x <= xMaxLocal) {
                 function.set(i, x, value);
@@ -1063,28 +1089,39 @@ public final class DataSetMath { // NOPMD - nomen est omen
         return function;
     }
 
-    public static DataSet sqrFunction(final DataSet function, final double value) {
-        return mathFunction(function, value, MathOp.SQR);
+    @SafeVarargs
+    public static DataSet sqrFunction(final DataSet function, final double value, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, value, MathOp.SQR, format);
     }
 
-    public static DataSet sqrFunction(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.SQR);
+    @SafeVarargs
+    public static DataSet sqrFunction(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.SQR, format);
     }
 
-    public static DataSet sqrtFunction(final DataSet function, final double value) {
-        return mathFunction(function, value, MathOp.SQRT);
+    @SafeVarargs
+    public static DataSet sqrtFunction(final DataSet function, final double value, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, value, MathOp.SQRT, format);
     }
 
-    public static DataSet sqrtFunction(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.SQRT);
+    @SafeVarargs
+    public static DataSet sqrtFunction(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.SQRT, format);
     }
 
-    public static DataSet subtractFunction(final DataSet function1, final DataSet function2) {
-        return mathFunction(function1, function2, MathOp.SUBTRACT);
+    @SafeVarargs
+    public static DataSet subtractFunction(final DataSet function1, final DataSet function2, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function1, function2, MathOp.SUBTRACT, format);
     }
 
-    public static DataSet subtractFunction(final DataSet function, final double value) {
-        return mathFunction(function, value, MathOp.SUBTRACT);
+    @SafeVarargs
+    public static DataSet subtractFunction(final DataSet function, final double value, @NotNull final Formatter<Number>... format) {
+        return mathFunction(function, value, MathOp.SUBTRACT, format);
+    }
+
+    @SafeVarargs
+    private static Formatter<Number> getFormatter(@NotNull final Formatter<Number>... format) {
+        return Objects.requireNonNull(format, "user-supplied format").length > 0 ? format[0] : DEFAULT_FORMATTER;
     }
 
     private static double[] cropToLength(final double[] in, final int length) {
