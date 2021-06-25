@@ -1,11 +1,23 @@
 package de.gsi.chart.renderer.spi.financial;
 
-import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.*;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_LONG_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_SHORT_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BAR_WIDTH_PERCENTAGE;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BODY_LINEWIDTH;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BODY_LONG_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BODY_SHORT_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_SHADOW_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_TICK_LINEWIDTH;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_TICK_LONG_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_TICK_SHORT_COLOR;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_LINE_WIDTH;
+import static de.gsi.chart.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_TRANSPOSITION_PERCENT;
 import static de.gsi.dataset.DataSet.DIM_X;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
@@ -30,7 +42,7 @@ import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 /**
- * <h2>High-Low renderer (OHLC-V/OI Chart)</h2>
+ * <h1>High-Low renderer (OHLC-V/OI Chart)</h1>
  *<p>
  * An open-high-low-close chart (also OHLC) is a type of chart typically used to illustrate movements in the price of a financial instrument over time.
  * Each vertical line on the chart shows the price range (the highest and lowest prices) over one unit of time, e.g., one day or one hour.
@@ -220,15 +232,15 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
                         }
 
                         // choose color of the bar
-                        Paint barPaint = getPaintBarColor(data);
+                        Paint barPaint = data == null ? null : getPaintBarColor(data);
 
                         // the ohlc body
-                        gc.setStroke(barPaint != null ? barPaint : yOpen > yClose ? longBodyColor : shortBodyColor);
+                        gc.setStroke(Objects.requireNonNullElse(barPaint, yOpen > yClose ? longBodyColor : shortBodyColor));
                         gc.setLineWidth(bodyLineWidth);
                         gc.strokeLine(x0, yLow, x0, yHigh);
 
                         // paint open/close tick
-                        gc.setStroke(barPaint != null ? barPaint : yOpen > yClose ? longTickColor : shortTickColor);
+                        gc.setStroke(Objects.requireNonNullElse(barPaint, yOpen > yClose ? longTickColor : shortTickColor));
                         gc.setLineWidth(tickLineWidth);
                         gc.strokeLine(x0 - barWidthHalf, yOpen, x0, yOpen);
                         gc.strokeLine(x0, yClose, x0 + barWidthHalf, yClose);
