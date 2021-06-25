@@ -11,6 +11,7 @@ import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
 import javafx.beans.DefaultProperty;
+import javafx.beans.binding.StringBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -96,52 +97,40 @@ public class DataViewerSample extends Application {
         primaryStage.setTitle(DataViewerSample.TITLE);
 
         // the new JavaFX Chart Dataviewer
+        final DataViewer viewer = setupDataViewer();
+
+        final Label focusedOwner = new Label();
+        final Scene scene = new Scene(new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 1000, 600);
+        focusedOwner.textProperty().bind(scene.focusOwnerProperty().asString());
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        primaryStage.setOnCloseRequest(evt -> System.exit(0)); //NOPMD
+    }
+
+    private DataViewer setupDataViewer() {
+        final DataViewer viewer = new DataViewer();
+
         final FontIcon chartIcon = new FontIcon("fa-line-chart:" + FONT_SIZE);
         final DataView view1 = new DataView("ChartViews", chartIcon);
 
         final FontIcon customViewIcon = new FontIcon("fa-users:" + FONT_SIZE);
         final DataView view2 = new DataView("Custom View", customViewIcon, getDemoPane());
 
-        final DataViewer viewer = new DataViewer();
         viewer.getViews().addAll(view1, view2);
         viewer.setExplorerVisible(true);
 
-        final XYChart energyChart = new TestChart();
-        energyChart.getYAxis().setName("Energy");
-        energyChart.getDatasets().addAll(createSeries());
-
-        final XYChart currentChart = new TestChart();
-        currentChart.getRenderers().clear();
-        final ErrorDataSetRenderer errorDataSetRenderer = new ErrorDataSetRenderer();
-        errorDataSetRenderer.setErrorType(ErrorStyle.NONE);
-        currentChart.getRenderers().add(errorDataSetRenderer);
-        ((Region) currentChart.getYAxis()).lookup(".axis-label").setStyle("-fx-text-fill: green;");
-        currentChart.getYAxis().setName("Current");
-        currentChart.getYAxis().setSide(Side.RIGHT);
-        currentChart.getDatasets().addAll(createSeries());
-
-        final DataViewWindow currentView = new DataViewWindow("Current", currentChart);
-        currentView.addListener(dataWindowEventListener);
-        logStatePropertyChanges(currentView.getName(), currentView);
-
-        final XYChart jDataViewerChart = createChart();
-        final DataViewWindow jDataViewerPane = new DataViewWindow("Chart", jDataViewerChart);
-        jDataViewerPane.addListener(dataWindowEventListener);
-        logStatePropertyChanges(jDataViewerPane.getName(), jDataViewerPane);
-
-        final DataViewWindow energyView = new DataViewWindow("Energy", energyChart);
-        energyView.setGraphic(new FontIcon("fa-adjust"));
-        energyView.addListener(dataWindowEventListener);
-        logStatePropertyChanges(energyView.getName(), energyView);
+        final DataViewWindow energyView = setupEnergyView();
+        final DataViewWindow currentView = setupCurrentView();
+        final DataViewWindow jDataViewerPane = setupJDataViewPane();
         view1.getVisibleChildren().addAll(energyView, currentView, jDataViewerPane);
-        // view1.getVisibleNodes().addAll(energyChart, currentChart, jDataViewerChart);
 
         final ComboBox<InitialWindowState> initialWindowState = new ComboBox<>();
         initialWindowState.getItems().setAll(InitialWindowState.values());
         initialWindowState.setValue(InitialWindowState.VISIBLE);
 
         // set default view
-        //        viewer.setSelectedView(view2);
+        // viewer.setSelectedView(view2);
         // set user default interactors
         final CheckBox listView = new CheckBox();
         listView.setGraphic(new FontIcon("fa-list-alt:" + FONT_SIZE));
@@ -163,70 +152,95 @@ public class DataViewerSample extends Application {
 
         final Button newView = new Button(null, new HBox(new FontIcon("fa-plus:" + FONT_SIZE), new FontIcon("fa-line-chart:" + FONT_SIZE)));
         newView.setTooltip(new Tooltip("add new view"));
-        newView.setOnAction(evt -> {
-            final int count = view1.getVisibleChildren().size() + view1.getMinimisedChildren().size();
-            final XYChart jChart = createChart();
-            final DataViewWindow newDataViewerPane = new DataViewWindow("Chart" + count, jChart, windowDecoration.getValue());
-            switch (initialWindowState.getValue()) {
-            case DETACHED:
-                // alternate: add immediately to undocked state
-                view1.getUndockedChildren().add(newDataViewerPane);
-                break;
-            case MINIMISED:
-                // alternate: add immediately to minimised state
-                view1.getMinimisedChildren().add(newDataViewerPane);
-                break;
-            case VISIBLE:
-            default:
-                view1.getVisibleChildren().add(newDataViewerPane);
-                break;
-            }
-
-            newDataViewerPane.addListener(dataWindowEventListener);
-            newDataViewerPane.addListener(windowEvent -> {
-                // print window state explicitly
-                LOGGER.atInfo().addArgument(newDataViewerPane.getName()).addArgument(newDataViewerPane.getWindowState()).log("explicit '{}' window state is {}");
-            });
-            newDataViewerPane.closedProperty().addListener((ch, o, n) -> {
-                LOGGER.atInfo().log("newDataViewerPane Window '" + newDataViewerPane.getName()
-                                    + "' has been closed - performing clean-up actions");
-                // perform some custom clean-up action
-            });
-
-            // add listener on specific events
-            final ChangeListener<Boolean> changeListener = (ch, o, n) -> {
-                // small debugging routine to check state-machine
-                LOGGER.atInfo().addArgument(newDataViewerPane.isMinimised()).addArgument(newDataViewerPane.isMaximised()) //
-                        .addArgument(newDataViewerPane.isRestored())
-                        .addArgument(newDataViewerPane.isDetached())
-                        .addArgument(newDataViewerPane.isClosed()) //
-                        .log("minimised: {}, maximised {}, restored {}, detached {}, closed {}");
-            };
-            newDataViewerPane.minimisedProperty().addListener(changeListener);
-            newDataViewerPane.maximisedProperty().addListener(changeListener);
-            newDataViewerPane.restoredProperty().addListener(changeListener);
-            newDataViewerPane.detachedProperty().addListener(changeListener);
-            newDataViewerPane.closedProperty().addListener(changeListener);
-
-            // view1.getVisibleNodes().add(jChart);
-        });
-
-        final Label focusedOwner = new Label();
+        newView.setOnAction(evt -> addChartToView(view1, windowDecoration, initialWindowState));
 
         viewer.getUserToolBarItems().addAll(new ProfilerInfoBox(), newView, initialWindowState, new Label("Win-Decor:"), windowDecoration, detachableBox, listView);
-        final Scene scene = new Scene(
-                new VBox(viewer.getToolBar(), viewer, new HBox(new Label("focus on: "), focusedOwner)), 1000, 600);
-        scene.focusOwnerProperty().addListener((ch, o, n) -> {
-            if (n == null) {
-                focusedOwner.setText(null);
-                return;
-            }
-            focusedOwner.setText(n.toString());
-        });
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        return viewer;
+    }
 
-        primaryStage.setOnCloseRequest(evt -> System.exit(0)); //NOPMD
+    private void addChartToView(DataView view1, final ComboBox<WindowDecoration> windowDecoration, final ComboBox<InitialWindowState> initialWindowState) {
+        final int count = view1.getVisibleChildren().size() + view1.getMinimisedChildren().size();
+        final XYChart jChart = createChart();
+        final DataViewWindow newDataViewerPane = new DataViewWindow("Chart" + count, jChart, windowDecoration.getValue());
+        switch (initialWindowState.getValue()) {
+        case DETACHED:
+            // alternate: add immediately to undocked state
+            view1.getUndockedChildren().add(newDataViewerPane);
+            break;
+        case MINIMISED:
+            // alternate: add immediately to minimised state
+            view1.getMinimisedChildren().add(newDataViewerPane);
+            break;
+        case VISIBLE:
+        default:
+            view1.getVisibleChildren().add(newDataViewerPane);
+            break;
+        }
+
+        newDataViewerPane.addListener(dataWindowEventListener);
+        newDataViewerPane.addListener(windowEvent -> {
+            // print window state explicitly
+            LOGGER.atInfo().addArgument(newDataViewerPane.getName()).addArgument(newDataViewerPane.getWindowState()).log("explicit '{}' window state is {}");
+        });
+        newDataViewerPane.closedProperty().addListener((ch, o, n) -> {
+            LOGGER.atInfo().log("newDataViewerPane Window '" + newDataViewerPane.getName()
+                                + "' has been closed - performing clean-up actions");
+            // perform some custom clean-up action
+        });
+
+        // add listener on specific events
+        final ChangeListener<Boolean> changeListener = (ch, o, n) -> {
+            // small debugging routine to check state-machine
+            LOGGER.atInfo().addArgument(newDataViewerPane.isMinimised()).addArgument(newDataViewerPane.isMaximised()) //
+                    .addArgument(newDataViewerPane.isRestored())
+                    .addArgument(newDataViewerPane.isDetached())
+                    .addArgument(newDataViewerPane.isClosed()) //
+                    .log("minimised: {}, maximised {}, restored {}, detached {}, closed {}");
+        };
+        newDataViewerPane.minimisedProperty().addListener(changeListener);
+        newDataViewerPane.maximisedProperty().addListener(changeListener);
+        newDataViewerPane.restoredProperty().addListener(changeListener);
+        newDataViewerPane.detachedProperty().addListener(changeListener);
+        newDataViewerPane.closedProperty().addListener(changeListener);
+
+        // view1.getVisibleNodes().add(jChart);
+    }
+
+    private DataViewWindow setupJDataViewPane() {
+        final XYChart jDataViewerChart = createChart();
+        final DataViewWindow jDataViewerPane = new DataViewWindow("Chart", jDataViewerChart);
+        jDataViewerPane.addListener(dataWindowEventListener);
+        logStatePropertyChanges(jDataViewerPane.getName(), jDataViewerPane);
+        return jDataViewerPane;
+    }
+
+    private DataViewWindow setupEnergyView() {
+        final XYChart energyChart = new TestChart();
+        energyChart.getYAxis().setName("Energy");
+        energyChart.getDatasets().addAll(createSeries());
+
+        final DataViewWindow energyView = new DataViewWindow("Energy", energyChart);
+        energyView.setGraphic(new FontIcon("fa-adjust"));
+        energyView.addListener(dataWindowEventListener);
+        logStatePropertyChanges(energyView.getName(), energyView);
+        return energyView;
+    }
+
+    private DataViewWindow setupCurrentView() {
+        final XYChart currentChart = new TestChart();
+        currentChart.getRenderers().clear();
+        final ErrorDataSetRenderer errorDataSetRenderer = new ErrorDataSetRenderer();
+        errorDataSetRenderer.setErrorType(ErrorStyle.NONE);
+        currentChart.getRenderers().add(errorDataSetRenderer);
+        ((Region) currentChart.getYAxis()).lookup(".axis-label").setStyle("-fx-text-fill: green;");
+        currentChart.getYAxis().setName("Current");
+        currentChart.getYAxis().setSide(Side.RIGHT);
+        currentChart.getDatasets().addAll(createSeries());
+
+        final DataViewWindow currentView = new DataViewWindow("Current", currentChart);
+        currentView.addListener(dataWindowEventListener);
+        logStatePropertyChanges(currentView.getName(), currentView);
+        return currentView;
     }
 
     /**
