@@ -3,6 +3,10 @@
   -fx-graphic: url("./icons/medium_play1.gif");
 }
 
+.my-play-button:disabled {
+  -fx-graphic: url("./icons/medium_play_d.gif");
+}
+
 .my-play-button:hover {
   -fx-graphic: url("./icons/medium_play1_r.gif");
 }
@@ -35,13 +39,13 @@
   -fx-graphic: url("./icons/medium_pause2_p.gif");
 }
 
-.my-play-button:disabled {
-  -fx-graphic: url("./icons/medium_play_d.gif");
-}
-
 /* pause button */
 .my-pause-button {
   -fx-graphic: url("./icons/medium_pause1.gif");
+}
+
+.my-pause-button:disabled {
+  -fx-graphic: url("./icons/medium_pause_d.gif");
 }
 
 .my-pause-button:hover {
@@ -64,13 +68,13 @@
   -fx-graphic: url("./icons/medium_pause2_p.gif");
 }
 
-.my-pause-button:disabled {
-  -fx-graphic: url("./icons/medium_pause_d.gif");
-}
-
 /* play-stop button */
 .my-playstop-button {
   -fx-graphic: url("./icons/medium_playstop1.gif");
+}
+
+.my-playstop-button:disabled {
+  -fx-graphic: url("./icons/medium_playstop_d.gif");
 }
 
 .my-playstop-button:hover {
@@ -93,12 +97,12 @@
   -fx-graphic: url("./icons/medium_playstop2_p.gif");
 }
 
-.my-playstop-button:disabled {
-  -fx-graphic: url("./icons/medium_playstop_d.gif");
-}
-
 /* stop button */
 .my-stop-button {
+  -fx-graphic: url("./icons/medium_stop_d.gif");
+}
+
+.my-stop-button:disabled {
   -fx-graphic: url("./icons/medium_stop_d.gif");
 }
 
@@ -120,8 +124,4 @@
 
 .my-stop-button:activated:pressed {
   -fx-graphic: url("./icons/medium_stop_p.gif");
-}
-
-.my-stop-button:disabled {
-  -fx-graphic: url("./icons/medium_stop_d.gif");
 }
