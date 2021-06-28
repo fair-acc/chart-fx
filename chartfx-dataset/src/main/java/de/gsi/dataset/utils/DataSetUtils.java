@@ -397,8 +397,8 @@ public class DataSetUtils extends DataSetUtilsHelper {
             final ZipOutputStream zipOStream = new ZipOutputStream(Files.newOutputStream(file.toPath()));
             final String filename = file.getName();
             final String zipentryname = filename.toLowerCase(Locale.UK).endsWith(".zip")
-                                                ? filename.substring(0, filename.length() - 4)
-                                                : filename;
+                                              ? filename.substring(0, filename.length() - 4)
+                                              : filename;
             zipOStream.putNextEntry(new ZipEntry(zipentryname));
             return zipOStream;
         default:
@@ -493,7 +493,7 @@ public class DataSetUtils extends DataSetUtilsHelper {
             boolean is3D = false;
 
             // skip first file format header
-            String line = inputReader.readLine();
+            String line = inputReader.readLine(); // NOPMD: consumes first line as side effect
             while ((line = inputReader.readLine()) != null) {
                 if (line.startsWith("$")) {
                     if (line.startsWith("$binary")) {

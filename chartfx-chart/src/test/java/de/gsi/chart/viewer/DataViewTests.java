@@ -1,12 +1,6 @@
 package de.gsi.chart.viewer;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ExecutionException;
 
@@ -46,7 +40,7 @@ public class DataViewTests {
         dataViewWindow = new DataViewWindow("window name", content);
         dataView = new DataView("dataView1", icon);
 
-        assertEquals(null, dataViewWindow.getParentView(), "parent view is null - not attached");
+        assertNull(dataViewWindow.getParentView(), "parent view is null - not attached");
         dataView.getVisibleChildren().add(dataViewWindow);
         assertDoesNotThrow(() -> dataView.sort());
 
@@ -84,7 +78,7 @@ public class DataViewTests {
                 dataViewWindow.maximizeButtonAction.run();
                 break;
             case WINDOW_CLOSED:
-                assertTrue(dataView.getVisibleChildren().get(0).equals(dataView.getVisibleChildren().get(1)));
+                assertEquals(dataView.getVisibleChildren().get(0), dataView.getVisibleChildren().get(1));
                 dataViewWindow.closeButtonAction.run();
                 testWindowClosedStates();
                 break;
@@ -119,7 +113,7 @@ public class DataViewTests {
                 dataViewWindow.maximizeButtonAction.run();
                 break;
             case WINDOW_CLOSED:
-                assertTrue(dataView.getVisibleChildren().get(0).equals(dataView.getVisibleChildren().get(1)));
+                assertEquals(dataView.getVisibleChildren().get(0), dataView.getVisibleChildren().get(1));
                 dataViewWindow.closeButtonAction.run();
                 //testWindowClosedStates();
                 break;
@@ -154,7 +148,7 @@ public class DataViewTests {
         assertTrue(dataView.getVisibleChildren().contains(dataViewWindow));
         assertFalse(dataView.getMinimisedChildren().contains(dataViewWindow));
         assertNotNull(dataView.getMaximizedChild());
-        assertTrue(dataViewWindow.equals(dataView.getMaximizedChild()));
+        assertEquals(dataViewWindow, dataView.getMaximizedChild());
     }
 
     private void testWindowMinimisedStates() {
@@ -162,7 +156,7 @@ public class DataViewTests {
         assertFalse(dataView.getVisibleChildren().contains(dataViewWindow));
         assertTrue(dataView.getMinimisedChildren().contains(dataViewWindow));
         assertNull(dataView.getMaximizedChild());
-        assertFalse(dataViewWindow.equals(dataView.getMaximizedChild()));
+        assertNotEquals(dataViewWindow, dataView.getMaximizedChild());
     }
 
     private void testWindowNormalStates() {
@@ -170,6 +164,6 @@ public class DataViewTests {
         assertTrue(dataView.getVisibleChildren().contains(dataViewWindow));
         assertFalse(dataView.getMinimisedChildren().contains(dataViewWindow));
         assertNull(dataView.getMaximizedChild());
-        assertFalse(dataViewWindow.equals(dataView.getMaximizedChild()));
+        assertNotEquals(dataViewWindow, dataView.getMaximizedChild());
     }
 }

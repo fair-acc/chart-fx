@@ -1530,8 +1530,8 @@ public class TSpectrum { // NOPMD - nomen est omen
         int peakIndex = 0;
         for (int i = 1; i < sizeExt - 1; i++) {
             final boolean condition2 = workingSpace[i] > workingSpace[i - 1] && workingSpace[i] > workingSpace[i + 1]
-                                       && i >= shift && i < length + shift && workingSpace[i] > lda * maximumDecon
-                                       && workingSpace[6 * sizeExt + i] > threshold * maximum / 100.0;
+                                    && i >= shift && i < length + shift && workingSpace[i] > lda * maximumDecon
+                                    && workingSpace[6 * sizeExt + i] > threshold * maximum / 100.0;
             if (condition2) {
                 double a = 0;
                 double b = 0;
@@ -1808,7 +1808,7 @@ public class TSpectrum { // NOPMD - nomen est omen
             workingSpace[lengthx * lengthy + 2 * lengthy * lengthy + i] = 1;
         }
 
-        /*** START OF ITERATIONS ***/
+        /* START OF ITERATIONS ***/
         for (int repet = 0; repet < numberRepetitions; repet++) {
             if (repet != 0) {
                 for (int i = 0; i < lengthy; i++) {
@@ -1839,8 +1839,8 @@ public class TSpectrum { // NOPMD - nomen est omen
         }
 
         final double[] returnVector = destination == null || destination.length < source.length
-                                              ? new double[source.length]
-                                              : destination;
+                                            ? new double[source.length]
+                                            : destination;
         /* write back resulting spectrum */
         for (int i = 0; i < lengthx; i++) {
             if (i < lengthy) {

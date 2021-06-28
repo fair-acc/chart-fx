@@ -53,7 +53,7 @@ public class JsonSelectionBenchmark {
     private static final GsonBuilder builder = new GsonBuilder();
     private static final Gson gson = builder.create();
     private static final ObjectMapper objectMapper = new ObjectMapper();
-    private static boolean testIdentity = true;
+    private static final boolean testIdentity = true;
     @Param({ INPUT_OBJECT_NAME_1, INPUT_OBJECT_NAME_2 })
     private String testClassId;
 

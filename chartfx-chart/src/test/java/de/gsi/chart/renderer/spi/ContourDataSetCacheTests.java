@@ -1,8 +1,6 @@
 package de.gsi.chart.renderer.spi;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -92,10 +90,10 @@ public class ContourDataSetCacheTests {
                 true);
         assertEquals(Math.minimum(TEST_DATA_Z), range.getMin());
         assertEquals(Math.maximum(TEST_DATA_Z), range.getMax());
-        assertEquals(true, range.isDefined());
+        assertTrue(range.isDefined());
 
         range = ContourDataSetCache.computeLocalRange(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, false);
-        assertEquals(false, range.isDefined());
+        assertFalse(range.isDefined());
 
         final AxisTransform identityTransform = new AxisTransform() {
             @Override

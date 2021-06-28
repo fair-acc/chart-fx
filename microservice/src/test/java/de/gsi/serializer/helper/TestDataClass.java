@@ -330,7 +330,7 @@ public class TestDataClass {
         // check for nested data content
         if (this.nestedData != null) {
             returnState = returnState & this.nestedData.equals(other.nestedData);
-        } else if (this.nestedData == null && other.nestedData != null) {
+        } else if (other.nestedData != null) {
             LOGGER.atError().addArgument("nestedData").addArgument(this.nestedData).addArgument(other.nestedData).log("field '{}' error:  this.nestedData == null ({}) && other.nestedData != null ({})");
             returnState = false;
         }

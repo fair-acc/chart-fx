@@ -1,5 +1,6 @@
 package de.gsi.chart.samples;
 
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
@@ -25,7 +26,7 @@ import de.gsi.chart.axes.spi.format.DefaultTimeTickUnitSupplier;
  * @author rstein
  */
 public class TimeAxisRangeSample extends Application {
-    private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
+    private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
 
     @Override
     public void start(final Stage primaryStage) {
@@ -71,7 +72,7 @@ public class TimeAxisRangeSample extends Application {
                     final double range = DefaultTimeTickUnitSupplier.TICK_UNIT_DEFAULTS[counter];
                     xAxisDyn.minProperty().set(now - range);
                     final String text = "actual range [s]: " + String.format("%#.3f", range) + " ("
-                                        + String.format("%#.1f", range / 3600 / 24) + " days)";
+                                      + String.format("%#.1f", range / 3600 / 24) + " days)";
                     xAxisDyn.setTickUnit(range / 12);
                     xAxisDyn.forceRedraw();
                     xAxis9Text.setText(text);

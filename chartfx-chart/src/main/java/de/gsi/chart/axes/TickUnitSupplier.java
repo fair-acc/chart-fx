@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
@@ -19,7 +19,6 @@ package de.gsi.chart.axes;
  */
 @FunctionalInterface
 public interface TickUnitSupplier {
-
     /**
      * Should return tick unit that is equal or grater to the given reference tick unit.
      *

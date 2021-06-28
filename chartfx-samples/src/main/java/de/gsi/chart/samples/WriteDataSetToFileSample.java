@@ -38,8 +38,8 @@ public class WriteDataSetToFileSample extends Application {
     private static long now = System.currentTimeMillis();
     private static DoubleDataSet dataSet1;
     private static DoubleDataSet dataSet2;
-    private static FastByteBuffer fastByteBuffer = new FastByteBuffer();
-    private static DataSetSerialiser dataSetSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(fastByteBuffer));
+    private static final FastByteBuffer fastByteBuffer = new FastByteBuffer();
+    private static final DataSetSerialiser dataSetSerialiser = DataSetSerialiser.withIoSerialiser(new BinarySerialiser(fastByteBuffer));
 
     @Override
     public void start(final Stage primaryStage) {

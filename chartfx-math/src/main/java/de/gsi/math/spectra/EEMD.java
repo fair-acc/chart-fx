@@ -13,7 +13,7 @@ import de.gsi.math.utils.ConcurrencyUtils;
  * @author rstein
  */
 public class EEMD {
-    private static TRandom rnd = new TRandom(0);
+    private static final TRandom rnd = new TRandom(0);
     private int fstatus = 100;
 
     public MatrixD eemd(final double[] data, final double rms_noise, final double NE) {

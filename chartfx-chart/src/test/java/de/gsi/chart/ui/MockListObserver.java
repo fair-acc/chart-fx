@@ -25,10 +25,7 @@
 
 package de.gsi.chart.ui;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +43,7 @@ import javafx.collections.ObservableList;
  */
 public class MockListObserver<E> implements ListChangeListener<E> {
     private boolean tooManyCalls;
-    private List<Call<E>> calls = new LinkedList<>();
+    private final List<Call<E>> calls = new LinkedList<>();
 
     static class Call<E> {
         protected ObservableList<? extends E> list;
@@ -149,7 +146,7 @@ public class MockListObserver<E> implements ListChangeListener<E> {
         assertEquals(list, call.list);
         assertEquals(Collections.EMPTY_LIST, call.removed);
         assertArrayEquals(new int[0], call.permutation);
-        assertEquals(true, call.update);
+        assertTrue(call.update);
         assertEquals(from, call.from);
         assertEquals(to, call.to);
     }

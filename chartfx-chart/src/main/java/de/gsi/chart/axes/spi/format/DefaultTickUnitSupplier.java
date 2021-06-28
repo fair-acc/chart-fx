@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016 European Organisation for Nuclear Research (CERN), All Rights Reserved.
  */
 
@@ -23,7 +23,7 @@ import de.gsi.chart.axes.TickUnitSupplier;
 public final class DefaultTickUnitSupplier implements TickUnitSupplier {
     private static final int BASE = 10;
     private static final SortedSet<Number> DEFAULT_MULTIPLIERS = Collections
-            .unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1d, 2.5, 5d)));
+                                                                         .unmodifiableSortedSet(new TreeSet<>(Arrays.asList(1d, 2.5, 5d)));
     private final double[] multipliers;
 
     /**

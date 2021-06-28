@@ -96,7 +96,7 @@ public class DefaultFormatter extends AbstractFormatter {
         myFormatter.setExponentialForm(isExponentialForm);
 
         int maxSigDigits = 0;
-        int maxDigits = 0; /** number of digits before separator */
+        int maxDigits = 0; /* number of digits before separator */
         if (majorTickMarksCopy != null) {
             for (int i = 0; i < majorTickMarksCopy.size(); i++) {
                 final double val = majorTickMarksCopy.get(i) / unitScaling;

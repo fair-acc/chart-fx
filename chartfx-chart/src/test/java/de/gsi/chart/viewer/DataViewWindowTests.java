@@ -1,11 +1,6 @@
 package de.gsi.chart.viewer;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ExecutionException;
 
@@ -53,7 +48,7 @@ public class DataViewWindowTests {
 
     @TestFx
     public void testSetterGetter() throws InterruptedException, ExecutionException {
-        assertEquals(null, field.getParentView(), "parent view is null - not attached");
+        assertNull(field.getParentView(), "parent view is null - not attached");
         assertEquals("window name", field.getName(), "getText()");
         assertNotNull(field.getTitleLabel(), "getTitleLabel()");
         assertEquals("window name", field.getTitleLabel().getText(), "getTitleLabel().getText()");

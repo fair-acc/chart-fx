@@ -790,7 +790,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         FOURIER("Spectral Transforms"),
         TRENDING("Trending");
 
-        private String name;
+        private final String name;
 
         MeasurementCategory(final String description) {
             name = description;

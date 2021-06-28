@@ -8,6 +8,7 @@ import java.nio.file.Paths;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -51,7 +52,7 @@ public class ScatterAndBubbleRendererSample extends Application {
 
     private void loadDemoData(final String fileName) {
         try (BufferedReader csvReader = Files
-                                                .newBufferedReader(Paths.get(this.getClass().getResource(fileName).toURI()))) {
+                                                .newBufferedReader(Paths.get(Objects.requireNonNull(this.getClass().getResource(fileName)).toURI()))) {
             // skip first row
             String row = csvReader.readLine();
             // LOCATION,TIME,LIFEEXP65 – WOMEN,LIFEEXP65 – MEN,TIME,USD_CAP,TIME,MLN_PER
@@ -105,7 +106,7 @@ public class ScatterAndBubbleRendererSample extends Application {
             bubbleDataSet2b.add(gdp, lifeExpectancyMen.get(country), country);
             // N.B. markerSize is in pixel regardless of the xAxis or yAxis scale
             String markerSize = "markerSize=" + 40 * Math.sqrt(population.get(country) / maxPopulation) + "; index="
-                                + count + ";";
+                              + count + ";";
             bubbleDataSet2a.addDataStyle(count, markerSize);
             bubbleDataSet2b.addDataStyle(count, markerSize);
             if ("FRA".equals(country)) {

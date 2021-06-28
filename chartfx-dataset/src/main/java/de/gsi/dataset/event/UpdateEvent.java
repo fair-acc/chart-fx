@@ -14,7 +14,7 @@ import java.util.EventObject;
 public class UpdateEvent extends EventObject {
     private static final long serialVersionUID = -3097725478448868303L;
     private final String msg;
-    private transient Object payload;
+    private final transient Object payload;
 
     /**
      * generates new update event
@@ -63,5 +63,4 @@ public class UpdateEvent extends EventObject {
     public Object getPayLoad() {
         return payload;
     }
-
 }

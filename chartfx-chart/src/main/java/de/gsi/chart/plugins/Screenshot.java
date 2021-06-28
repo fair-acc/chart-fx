@@ -272,8 +272,8 @@ public class Screenshot extends ChartPlugin {
     }
 
     protected class ScreenshotDialog extends Alert {
-        private TextField dirTextbox;
-        private TextField patternTextbox;
+        private final TextField dirTextbox;
+        private final TextField patternTextbox;
 
         public ScreenshotDialog() {
             super(AlertType.CONFIRMATION, "Screenshot Settings");

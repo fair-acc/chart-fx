@@ -1,5 +1,7 @@
 package de.gsi.chart.samples;
 
+import java.util.Objects;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -24,7 +26,7 @@ public class HexagonSamples extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        final Image image = new Image(HexagonSamples.class.getResourceAsStream("./testdata/EU.png"));
+        final Image image = new Image(Objects.requireNonNull(HexagonSamples.class.getResourceAsStream("./testdata/EU.png")));
         // Convert the image to hexagons
         final HexagonMap map = new HexagonMap(6, image, 80, (q, r, imagePixelColor, map1) -> {
             if (imagePixelColor.getBlue() > 0.6) {

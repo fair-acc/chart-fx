@@ -46,8 +46,8 @@ public class EventAndHelperClassTests {
         assertEquals(1, constructor1.getParameterCount());
         UpdateEvent instance1 = constructor1.newInstance(testEventSource);
         assertEquals(testEventSource, instance1.getSource(), "event source equality");
-        assertEquals(null, instance1.getMessage(), "event message equality");
-        assertEquals(null, instance1.getPayLoad(), "payload equality");
+        assertNull(instance1.getMessage(), "event message equality");
+        assertNull(instance1.getPayLoad(), "payload equality");
 
         Constructor<? extends UpdateEvent> constructor2 = eventClass.getConstructor(EventSource.class, String.class);
         assertNotNull(constructor2);
@@ -55,7 +55,7 @@ public class EventAndHelperClassTests {
         UpdateEvent instance2 = constructor2.newInstance(testEventSource, "test2");
         assertEquals(testEventSource, instance2.getSource(), "event source equality");
         assertEquals("test2", instance2.getMessage(), "event message equality");
-        assertEquals(null, instance2.getPayLoad(), "payload equality");
+        assertNull(instance2.getPayLoad(), "payload equality");
 
         Constructor<? extends UpdateEvent> constructor3 = eventClass.getConstructor(EventSource.class, String.class, Object.class);
         assertNotNull(constructor3);
@@ -77,8 +77,8 @@ public class EventAndHelperClassTests {
         AxisChangeEvent instance0 = constructor0.newInstance(testEventSource);
         assertEquals(testEventSource, instance0.getSource(), "event source equality");
         assertEquals(-1, instance0.getDimension(), "event message equality");
-        assertEquals(null, instance0.getMessage(), "event message equality");
-        assertEquals(null, instance0.getPayLoad(), "payload equality");
+        assertNull(instance0.getMessage(), "event message equality");
+        assertNull(instance0.getPayLoad(), "payload equality");
 
         Constructor<? extends AxisChangeEvent> constructor1 = eventClass.getConstructor(EventSource.class, int.class);
         assertNotNull(constructor1);
@@ -86,8 +86,8 @@ public class EventAndHelperClassTests {
         AxisChangeEvent instance1 = constructor1.newInstance(testEventSource, 5);
         assertEquals(testEventSource, instance1.getSource(), "event source equality");
         assertEquals(5, instance1.getDimension(), "axis id identity");
-        assertEquals(null, instance1.getMessage(), "event message equality");
-        assertEquals(null, instance1.getPayLoad(), "payload equality");
+        assertNull(instance1.getMessage(), "event message equality");
+        assertNull(instance1.getPayLoad(), "payload equality");
 
         Constructor<? extends AxisChangeEvent> constructor2 = eventClass.getConstructor(EventSource.class, String.class, int.class);
         assertNotNull(constructor2);
@@ -96,7 +96,7 @@ public class EventAndHelperClassTests {
         assertEquals(testEventSource, instance2.getSource(), "event source equality");
         assertEquals(5, instance2.getDimension(), "axis id identity");
         assertEquals("test2", instance2.getMessage(), "event message equality");
-        assertEquals(null, instance2.getPayLoad(), "payload equality");
+        assertNull(instance2.getPayLoad(), "payload equality");
 
         Constructor<? extends AxisChangeEvent> constructor3 = eventClass.getConstructor(EventSource.class, String.class, Object.class, int.class);
         assertNotNull(constructor3);

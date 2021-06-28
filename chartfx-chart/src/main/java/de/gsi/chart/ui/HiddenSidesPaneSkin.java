@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, ControlsFX
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without
@@ -267,9 +267,9 @@ public class HiddenSidesPaneSkin extends SkinBase<HiddenSidesPane> {
 
     private boolean isMouseMovedOutsideSides(MouseEvent event) {
         return !(getSkinnable().getLeft() != null && getSkinnable().getLeft().getBoundsInParent().contains(event.getX(), event.getY()))
-                && (!(getSkinnable().getTop() != null && getSkinnable().getTop().getBoundsInParent().contains(event.getX(), event.getY()))
-                        && (!(getSkinnable().getRight() != null && getSkinnable().getRight().getBoundsInParent().contains(event.getX(), event.getY()))
-                                && !(getSkinnable().getBottom() != null && getSkinnable().getBottom().getBoundsInParent().contains(event.getX(), event.getY()))));
+     && (!(getSkinnable().getTop() != null && getSkinnable().getTop().getBoundsInParent().contains(event.getX(), event.getY()))
+             && (!(getSkinnable().getRight() != null && getSkinnable().getRight().getBoundsInParent().contains(event.getX(), event.getY()))
+                     && !(getSkinnable().getBottom() != null && getSkinnable().getBottom().getBoundsInParent().contains(event.getX(), event.getY()))));
     }
 
     private void show(Side side) {

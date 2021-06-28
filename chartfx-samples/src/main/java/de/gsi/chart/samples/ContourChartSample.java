@@ -3,6 +3,7 @@ package de.gsi.chart.samples;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -141,7 +142,7 @@ public class ContourChartSample extends Application {
 
     public DataSet readImage() {
         try (BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+                     new InputStreamReader(Objects.requireNonNull(ContourChartSample.class.getResourceAsStream("./testdata/image.txt"))))) {
             // final BufferedReader reader = new BufferedReader(new
             // InputStreamReader(
             // ContourChartSampleReference.class.getResourceAsStream("./testdata/image.txt")));

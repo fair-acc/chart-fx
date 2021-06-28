@@ -1,6 +1,6 @@
 package de.gsi.dataset.utils.trees;
 
-/**
+/*
  * User: Vitaly Sazanovich Date: 07/02/13 Time: 19:16 Email: Vitaly.Sazanovich@gmail.com
  */
 import java.util.*;
@@ -2319,9 +2319,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
         }
 
         public final IndexedTreeMap.Entry<K, V> absHighest() {
-            final IndexedTreeMap.Entry<K, V> e = toEnd ? m.getLastEntry()
-                                                       : hiInclusive ? m.getFloorEntry(hi)
-                                                                     : m.getLowerEntry(hi);
+            final IndexedTreeMap.Entry<K, V> e = toEnd       ? m.getLastEntry()
+                                               : hiInclusive ? m.getFloorEntry(hi)
+                                                             : m.getLowerEntry(hi);
             return e == null || tooLow(e.key) ? null : e;
         }
 
@@ -2331,7 +2331,8 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
          * @return entry
          */
         public final IndexedTreeMap.Entry<K, V> absHighFence() {
-            return toEnd ? null : hiInclusive ? m.getHigherEntry(hi) : m.getCeilingEntry(hi);
+            return toEnd ? null : hiInclusive ? m.getHigherEntry(hi)
+                                              : m.getCeilingEntry(hi);
         }
 
         public final IndexedTreeMap.Entry<K, V> absLower(K key) {
@@ -2343,9 +2344,9 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
         }
 
         public final IndexedTreeMap.Entry<K, V> absLowest() {
-            final IndexedTreeMap.Entry<K, V> e = fromStart ? m.getFirstEntry()
-                                                           : loInclusive ? m.getCeilingEntry(lo)
-                                                                         : m.getHigherEntry(lo);
+            final IndexedTreeMap.Entry<K, V> e = fromStart   ? m.getFirstEntry()
+                                               : loInclusive ? m.getCeilingEntry(lo)
+                                                             : m.getHigherEntry(lo);
             return e == null || tooHigh(e.key) ? null : e;
         }
 
@@ -2355,7 +2356,8 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
          * @return entry
          */
         public final IndexedTreeMap.Entry<K, V> absLowFence() {
-            return fromStart ? null : loInclusive ? m.getLowerEntry(lo) : m.getFloorEntry(lo);
+            return fromStart ? null : loInclusive ? m.getLowerEntry(lo)
+                                                  : m.getFloorEntry(lo);
         }
 
         @Override

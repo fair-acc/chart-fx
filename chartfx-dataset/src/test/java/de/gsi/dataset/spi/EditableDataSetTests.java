@@ -1,8 +1,6 @@
 package de.gsi.dataset.spi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -68,9 +66,9 @@ public class EditableDataSetTests {
                             "check '" + dsType + "' dimIndex=" + dimIndex + " coordinate of added point");
 
                     final String errStrNeg = "check '" + dsType + "' dimIndex=" + dimIndex
-                                             + " negative error coordinate of added point";
+                                           + " negative error coordinate of added point";
                     final String errStrPos = "check '" + dsType + "' dimIndex=" + dimIndex
-                                             + " positive error coordinate of added point";
+                                           + " positive error coordinate of added point";
                     switch (errorDs.getErrorType(dimIndex)) {
                     case SYMMETRIC: // symmetric error attached to this dimension
                         assertEquals(errorCoordinates[errIndex] + i, errorDs.getErrorNegative(dimIndex, nDataLocal),
@@ -147,14 +145,11 @@ public class EditableDataSetTests {
         assertEquals(newCustomEditConstraints, dataSet.getEditConstraints(),
                 "check '" + dsType + "' EditConstraints equality");
 
-        assertEquals(false, dataSet.getEditConstraints().canAdd(0),
-                "check '" + dsType + "' EditConstraints canAdd identities");
+        assertFalse(dataSet.getEditConstraints().canAdd(0), "check '" + dsType + "' EditConstraints canAdd identities");
 
-        assertEquals(false, dataSet.getEditConstraints().canDelete(0),
-                "check '" + dsType + "' EditConstraints canDelete identities");
+        assertFalse(dataSet.getEditConstraints().canDelete(0), "check '" + dsType + "' EditConstraints canDelete identities");
 
-        assertEquals(false, dataSet.getEditConstraints().isEditable(0),
-                "check '" + dsType + "' EditConstraints isEditable identities");
+        assertFalse(dataSet.getEditConstraints().isEditable(0), "check '" + dsType + "' EditConstraints isEditable identities");
     }
 
     public static void checkInsertDataPointsInFront(final EditableDataSet dataSet, final int nCount,
@@ -191,9 +186,9 @@ public class EditableDataSetTests {
                             "check '" + dsType + "' dimIndex=" + dimIndex + " coordinate of inserted point");
 
                     final String errStrNeg = "check '" + dsType + "' dimIndex=" + dimIndex
-                                             + " negative error coordinate of inserted point";
+                                           + " negative error coordinate of inserted point";
                     final String errStrPos = "check '" + dsType + "' dimIndex=" + dimIndex
-                                             + " positive error coordinate of inserted point";
+                                           + " positive error coordinate of inserted point";
                     switch (errorDs.getErrorType(dimIndex)) {
                     case SYMMETRIC: // symmetric error attached to this dimension
                         assertEquals(errorCoordinates[errIndex] + i, errorDs.getErrorNegative(dimIndex, 0), errStrNeg);
@@ -274,9 +269,9 @@ public class EditableDataSetTests {
                             "check '" + dsType + "' dimIndex=" + dimIndex + " coordinate of set point");
 
                     final String errStrNeg = "check '" + dsType + "' dimIndex=" + dimIndex
-                                             + " negative error coordinate of set point";
+                                           + " negative error coordinate of set point";
                     final String errStrPos = "check '" + dsType + "' dimIndex=" + dimIndex
-                                             + " positive error coordinate of set point";
+                                           + " positive error coordinate of set point";
                     switch (errorDs.getErrorType(dimIndex)) {
                     case SYMMETRIC: // symmetric error attached to this dimension
                         assertEquals((2 * errorCoordinates[errIndex]) + i, errorDs.getErrorNegative(dimIndex, 0),

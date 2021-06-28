@@ -14,11 +14,11 @@ import de.gsi.financial.samples.service.order.InternalOrderIdGenerator;
  * @author afischer
  */
 public class BasicOrderExecutionService {
-    private AttributeModel context;
+    private final AttributeModel context;
     private OrderContainer orderContainer;
     private PositionContainer positionContainer;
     private String accountId;
-    private ExecutionPlatform executionPlatform;
+    private final ExecutionPlatform executionPlatform;
 
     public BasicOrderExecutionService(AttributeModel context, ExecutionPlatform executionPlatform) {
         this.context = context;

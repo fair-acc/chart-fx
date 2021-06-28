@@ -2,6 +2,7 @@ package de.gsi.chart.samples.legacy.utils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -44,7 +45,7 @@ public class JavaFXTestChart extends AbstractTestApplication implements ChartTes
         lineChart.getYAxis().setAnimated(false);
         lineChart.setHorizontalZeroLineVisible(false);
         lineChart.getStylesheets()
-                .add(RollingBufferLegacySample.class.getResource("RollingBufferLegacy.css").toExternalForm());
+                .add(Objects.requireNonNull(RollingBufferLegacySample.class.getResource("RollingBufferLegacy.css")).toExternalForm());
         series1.setName("test data [a.u.]");
         lineChart.getData().add(series1);
         lineChart.setLegendVisible(false);

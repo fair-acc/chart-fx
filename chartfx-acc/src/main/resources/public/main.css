@@ -179,11 +179,11 @@ nav ul {
 }
 
 .row-2 .col:nth-child(odd) {
-  margin: 0% 1% 0% 0%;
+  margin: 0 1% 0 0;
 }
 
 .row-2 .col:nth-child(even) {
-  margin: 0% 0% 0% 1%;
+  margin: 0 0 0 1%;
 }
 
 .row-3 .col {
@@ -191,15 +191,15 @@ nav ul {
 }
 
 .row-3 .col:nth-child(3n+1) {
-  margin: 0% 1% 0% 0%;
+  margin: 0 1% 0 0;
 }
 
 .row-3 .col:nth-child(3n+2) {
-  margin: 0% 1% 0% 1%;
+  margin: 0 1% 0 1%;
 }
 
 .row-3 .col:nth-child(3n+3) {
-  margin: 0% 0% 0% 1%;
+  margin: 0 0 0 1%;
 }
 
 @media screen and (max-width: 550px) {
@@ -256,7 +256,7 @@ a.image:hover {
 a.link {
   text-decoration: none;
   color: #008ab4;
-  padding: 0px;
+  padding: 0;
   border-radius: 5px;
 }
 

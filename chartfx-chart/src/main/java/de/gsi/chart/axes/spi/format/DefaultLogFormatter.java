@@ -21,7 +21,7 @@ public class DefaultLogFormatter extends AbstractFormatter {
             // <-> [1,10000]
     private final DecimalFormat formatterSmall = new DecimalFormat(DefaultLogFormatter.FORMAT_SMALL_SCALE);
     private final DecimalFormat formatterLarge = new DecimalFormat(DefaultLogFormatter.FORMAT_LARGE_SCALE);
-    private MyDecimalFormat formatter = new MyDecimalFormat(formatterSmall);
+    private final MyDecimalFormat formatter = new MyDecimalFormat(formatterSmall);
 
     /**
      * Construct a DefaultFormatter for the given NumberAxis

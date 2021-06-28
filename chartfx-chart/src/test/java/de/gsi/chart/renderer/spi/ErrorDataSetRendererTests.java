@@ -53,8 +53,8 @@ public class ErrorDataSetRendererTests {
     private static final int WIDTH = 600;
     private static final int HEIGHT = 480;
     private static final int N_SAMPLES = 10000;
-    private DefaultNumericAxis xAxis = new DefaultNumericAxis();
-    private DefaultNumericAxis yAxis = new DefaultNumericAxis();
+    private final DefaultNumericAxis xAxis = new DefaultNumericAxis();
+    private final DefaultNumericAxis yAxis = new DefaultNumericAxis();
     private XYChart chart;
     private ErrorDataSetRenderer renderer;
     private Image testImage;

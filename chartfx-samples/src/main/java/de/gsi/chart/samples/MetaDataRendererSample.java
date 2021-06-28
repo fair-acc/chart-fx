@@ -192,7 +192,7 @@ public class MetaDataRendererSample extends Application {
 
     class MetaInfoGausFunction extends GaussFunction implements DataSetMetaData {
         private static final long serialVersionUID = -397052291718132117L;
-        private int range;
+        private final int range;
 
         public MetaInfoGausFunction(String name, int count, int range2) {
             super(name, count);

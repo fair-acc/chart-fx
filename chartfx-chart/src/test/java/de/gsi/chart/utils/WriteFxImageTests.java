@@ -1,14 +1,6 @@
 package de.gsi.chart.utils;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -123,9 +115,9 @@ public class WriteFxImageTests {
         assertDoesNotThrow(() -> test.setParRadiusbiasshift(5));
         assertDoesNotThrow(() -> test.setParRadiusdec(6));
         assertDoesNotThrow(() -> test.setParReserveAlphaColor(true));
-        assertEquals(true, test.isParReserveAlphaColor());
+        assertTrue(test.isParReserveAlphaColor());
         assertDoesNotThrow(() -> test.setParReserveAlphaColor(false));
-        assertEquals(false, test.isParReserveAlphaColor());
+        assertFalse(test.isParReserveAlphaColor());
         assertDoesNotThrow(() -> test.setParTransparencyThreshold(10));
 
         assertNotNull(test.convert(0, 0, 0));
@@ -413,7 +405,7 @@ public class WriteFxImageTests {
 
         return (checkAlpha ? Math.sqrt((deltaA * deltaA) + (deltaR * deltaR) + (deltaG * deltaG) + (deltaB * deltaB)) / (4.0 * 255.0) //
                            : Math.sqrt((deltaR * deltaR) + (deltaG * deltaG) + (deltaB * deltaB)))
-                / (3.0 * 255.0);
+      / (3.0 * 255.0);
     }
 
     private static void assertImageEqual(final Image original, final Image recovered, final boolean... assertRGBA) {

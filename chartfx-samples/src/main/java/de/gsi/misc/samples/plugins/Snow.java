@@ -135,7 +135,7 @@ public class Snow extends ChartPlugin {
     }
 
     protected class PhysicalSnowFlake extends SnowFlake {
-        private double size;
+        private final double size;
         private double x;
         private double y;
 

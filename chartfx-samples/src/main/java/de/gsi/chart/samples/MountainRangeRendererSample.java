@@ -3,6 +3,7 @@ package de.gsi.chart.samples;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -122,7 +123,7 @@ public class MountainRangeRendererSample extends Application {
     }
 
     protected DataSet readImage() {
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(ContourChartSample.class.getResourceAsStream("./testdata/image.txt")))) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(ContourChartSample.class.getResourceAsStream("./testdata/image.txt"))))) {
             @SuppressWarnings("unused")
             String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
             // line to be read which we derive from the data itself
