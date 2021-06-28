@@ -30,5 +30,5 @@
 }
 
 .icons:hover {
-  -fx-effect: dropshadow(three-pass-box, derive(-icons-color, 0%), 0.01em, 0.0, 0, 0);
+  -fx-effect: dropshadow(three-pass-box, derive(-icons-color, 0%), 0.01em, 0, 0, 0);
 }

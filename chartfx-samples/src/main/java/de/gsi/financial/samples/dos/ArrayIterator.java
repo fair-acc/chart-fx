@@ -161,7 +161,7 @@ public class ArrayIterator implements ResettableIterator {
      *                                have already been returned
      */
     public Object next() {
-        if (hasNext() == false) {
+        if (!hasNext()) {
             throw new NoSuchElementException();
         }
         return Array.get(array, index++);

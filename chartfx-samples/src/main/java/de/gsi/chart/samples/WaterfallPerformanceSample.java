@@ -76,7 +76,7 @@ public class WaterfallPerformanceSample extends Application {
     private final CheckBox altImplementation = new CheckBox("alt impl.");
     private final CheckBox parallelImplementation = new CheckBox("parallel impl.");
 
-    private TestDataSetSource dataSet = new TestDataSetSource();
+    private final TestDataSetSource dataSet = new TestDataSetSource();
     private Timer timer;
 
     private void closeDemo(final WindowEvent evt) {

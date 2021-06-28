@@ -3,6 +3,7 @@ package de.gsi.chart.renderer.spi;
 import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -34,7 +35,7 @@ import de.gsi.dataset.utils.NoDuplicatesList;
 @SuppressWarnings("PMD.GodClass")
 public class GridRenderer extends Pane implements Renderer {
     private static final double DEG_TO_RAD = Math.PI / 180.0;
-    private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
+    private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final String STYLE_CLASS_GRID_RENDERER = "grid-renderer";
     private static final String STYLE_CLASS_MAJOR_GRID_LINE = "chart-major-grid-lines";
     private static final String STYLE_CLASS_MAJOR_GRID_LINE_H = "chart-major-horizontal-lines";

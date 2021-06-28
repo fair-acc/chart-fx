@@ -369,7 +369,7 @@ public class TRandom {
             do {
                 n++;
                 pir *= Rndm();
-            } while (!(pir <= expmean));
+            } while (pir > expmean);
             return n;
         }
         // for large value we use inversion method

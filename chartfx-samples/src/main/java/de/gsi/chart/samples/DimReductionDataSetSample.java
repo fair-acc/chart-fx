@@ -3,6 +3,7 @@ package de.gsi.chart.samples;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -215,7 +216,7 @@ public class DimReductionDataSetSample extends Application {
         final String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
-                         new InputStreamReader(EMDSample.class.getResourceAsStream(fileName)))) {
+                         new InputStreamReader(Objects.requireNonNull(EMDSample.class.getResourceAsStream(fileName))))) {
                 String line = reader.readLine();
                 final int nDim = line == null ? 0 : Integer.parseInt(line);
                 double[] ret = new double[nDim];

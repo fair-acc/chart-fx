@@ -1,5 +1,8 @@
 package de.gsi.math.samples;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,8 +15,6 @@ import de.gsi.math.DataSetMath;
 import de.gsi.math.functions.SigmoidFunction;
 import de.gsi.math.samples.utils.AbstractDemoApplication;
 import de.gsi.math.samples.utils.DemoChart;
-import javafx.application.Application;
-import javafx.scene.Node;
 
 /**
  * Sample to illustrate averaging over several data sets with an IIR and FIR low-pass filter
@@ -25,11 +26,10 @@ public class DataSetAverageSample extends AbstractDemoApplication {
     private static final int N_GRAPHS = 20;
     private static final int N_SAMPLES = 100;
     private DataSet oldAverageDataSet;
-    private DataSet oldAverageDataSet2 = new DoubleErrorDataSet("var2");
+    private final DataSet oldAverageDataSet2 = new DoubleErrorDataSet("var2");
 
     @Override
     public Node getContent() {
-
         final DemoChart chart = new DemoChart(2);
         chart.getRenderer(0).setPolyLineStyle(LineStyle.NONE);
         chart.getRenderer(0).setErrorType(ErrorStyle.NONE);

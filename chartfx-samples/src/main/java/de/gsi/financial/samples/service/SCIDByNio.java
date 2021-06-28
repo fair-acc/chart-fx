@@ -32,7 +32,7 @@ public class SCIDByNio implements AutoCloseable {
     private final Calendar cal = Calendar.getInstance();
     private int timeZone;
 
-    @SuppressWarnings({ "lgtm[java/output-resource-leak", "resource" })
+    @SuppressWarnings({ "lgtm[java/output-resource-leak" })
     public void openNewChannel(String resource) throws IOException {
         timeZone = cal.get(Calendar.ZONE_OFFSET);
 

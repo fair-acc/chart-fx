@@ -251,7 +251,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         final Random rnd = new Random();
         for (int i = 0; i < yModel.length; i++) {
             final double x = i / rate;
-            double offset = 0;
+            double offset;
             final double error = 0.1 * rnd.nextGaussian();
 
             // linear chirp with discontinuity
@@ -260,8 +260,8 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
 
             // single tone
             yModel[i] += (i > toneStart.getValue() * maxPoints && i < toneStop.getValue() * maxPoints)
-                                 ? toneAmplitude.getValue() * Math.sin(MathBase.TWO_PI * toneFreq.getValue() * x)
-                                 : 0;
+                               ? toneAmplitude.getValue() * Math.sin(MathBase.TWO_PI * toneFreq.getValue() * x)
+                               : 0;
 
             // modulation around 0.4
             final double mod = Math.cos(MathBase.TWO_PI * 0.01e6 * x);

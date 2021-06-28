@@ -14,12 +14,12 @@
     <top>
         <MenuBar>
             <Menu fx:id="mMain" text="Main">
-                <MenuItem fx:id="addCos" text="Add Cosine Dataset"></MenuItem>
-                <MenuItem fx:id="addGauss" text="Add Gauss Dataset"></MenuItem>
-                <MenuItem fx:id="addRandom" text="Add Random Walk Dataset"></MenuItem>
-                <MenuItem fx:id="clearChart" text="Clear all Chart Datasets"></MenuItem>
+                <MenuItem fx:id="addCos" text="Add Cosine Dataset"/>
+                <MenuItem fx:id="addGauss" text="Add Gauss Dataset"/>
+                <MenuItem fx:id="addRandom" text="Add Random Walk Dataset"/>
+                <MenuItem fx:id="clearChart" text="Clear all Chart Datasets"/>
                 <SeparatorMenuItem />
-                <MenuItem fx:id="mExit" text="Exit"></MenuItem>
+                <MenuItem fx:id="mExit" text="Exit"/>
             </Menu>
             <Menu fx:id="mAbout" text="About">
             </Menu>

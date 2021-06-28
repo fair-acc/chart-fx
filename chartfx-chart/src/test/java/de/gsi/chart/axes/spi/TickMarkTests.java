@@ -1,9 +1,6 @@
 package de.gsi.chart.axes.spi;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import javafx.geometry.VPos;
 import javafx.scene.paint.Color;
@@ -29,17 +26,17 @@ public class TickMarkTests {
 
         {
             TickMark tickMark = new TickMark(Side.TOP, 0.0, 0.0, 0.0, "label");
-            assertTrue(tickMark.equals(tickMark));
-            assertFalse(tickMark.equals(new Object()));
+            assertEquals(tickMark, tickMark);
+            assertNotEquals(tickMark, new Object());
             assertEquals(tickMark.hashCode(), new TickMark(Side.TOP, 0.0, 0.0, 0.0, "label").hashCode());
             assertEquals(tickMark.hashCode(), new TickMark(Side.TOP, 0.0, 0.0, 0.0, null).hashCode());
 
-            assertTrue(tickMark.equals(new TickMark(Side.TOP, 0.0, 0.0, 0.0, "label")));
-            assertTrue(tickMark.equals(new TickMark(Side.TOP, 0.0, 0.0, 0.0, "label"))); // side & label are irrelevant here
-            assertTrue(tickMark.equals(new TickMark(Side.BOTTOM, 0.0, 0.0, 0.0, "label_irrelevant"))); // side & label are irrelevant here
-            assertFalse(tickMark.equals(new TickMark(Side.TOP, 1.0, 0.0, 0.0, "label")));
-            assertFalse(tickMark.equals(new TickMark(Side.TOP, 0.0, 1.0, 0.0, "label")));
-            assertFalse(tickMark.equals(new TickMark(Side.TOP, 0.0, 0.0, 90.0, "label")));
+            assertEquals(tickMark, new TickMark(Side.TOP, 0.0, 0.0, 0.0, "label"));
+            assertEquals(tickMark, new TickMark(Side.TOP, 0.0, 0.0, 0.0, "label")); // side & label are irrelevant here
+            assertEquals(tickMark, new TickMark(Side.BOTTOM, 0.0, 0.0, 0.0, "label_irrelevant")); // side & label are irrelevant here
+            assertNotEquals(tickMark, new TickMark(Side.TOP, 1.0, 0.0, 0.0, "label"));
+            assertNotEquals(tickMark, new TickMark(Side.TOP, 0.0, 1.0, 0.0, "label"));
+            assertNotEquals(tickMark, new TickMark(Side.TOP, 0.0, 0.0, 90.0, "label"));
 
             assertEquals(0.0, tickMark.getPosition());
             tickMark.setPosition(20.0);

@@ -6,11 +6,11 @@ import static de.gsi.financial.samples.service.StandardTradePlanAttributes.POSIT
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.financial.samples.dos.Order;
 import de.gsi.financial.samples.dos.OrderContainer;
 import de.gsi.financial.samples.dos.PositionContainer;
 import de.gsi.financial.samples.service.execution.ExecutionResult.ExecutionResultEnum;
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 
 /**
  * @author afischer

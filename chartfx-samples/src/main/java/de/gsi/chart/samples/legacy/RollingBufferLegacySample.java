@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -136,7 +137,7 @@ public class RollingBufferLegacySample extends Application {
 
         final NumberAxis yAxis = new NumberAxis();
         yAxis.setTickLabelFormatter(new StringConverter<>() {
-            DecimalFormat formatter = new DecimalFormat("0.##E0");
+            final DecimalFormat formatter = new DecimalFormat("0.##E0");
 
             @Override
             public Number fromString(String string) {
@@ -184,7 +185,7 @@ public class RollingBufferLegacySample extends Application {
 
         Scene scene = new Scene(root, 1800, 400);
         scene.getStylesheets()
-                .add(RollingBufferLegacySample.class.getResource("RollingBufferLegacy.css").toExternalForm());
+                .add(Objects.requireNonNull(RollingBufferLegacySample.class.getResource("RollingBufferLegacy.css")).toExternalForm());
         HBox header = getHeaderBar(scene);
         root.setCenter(chart);
         root.setTop(header);

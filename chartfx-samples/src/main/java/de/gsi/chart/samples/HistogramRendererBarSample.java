@@ -5,10 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javafx.application.Application;
@@ -116,7 +113,7 @@ public class HistogramRendererBarSample extends Application {
     }
 
     private void loadDemoData(final String fileName) {
-        try (BufferedReader csvReader = Files.newBufferedReader(Paths.get(this.getClass().getResource(fileName).toURI()))) {
+        try (BufferedReader csvReader = Files.newBufferedReader(Paths.get(Objects.requireNonNull(this.getClass().getResource(fileName)).toURI()))) {
             // skip first row
             String row = csvReader.readLine();
             // country,age,men 1980 [%],men 2000  [%],men 2050 [%],women 1980 [%],women 2000 [%],women 2050 [%],men 1980,men 2000,men 2050,women 1980,women 2000,women 2050

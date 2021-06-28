@@ -110,8 +110,7 @@ public class FloatDataSetTests extends EditableDataSetTests {
             }
 
             if (testCase == 2) {
-                assertEquals(null, dataSet.getDataLabel(nData + i),
-                        "check '" + dsType + "' label[" + nData + i + "] value");
+                assertNull(dataSet.getDataLabel(nData + i), "check '" + dsType + "' label[" + nData + i + "] value");
             }
         }
 

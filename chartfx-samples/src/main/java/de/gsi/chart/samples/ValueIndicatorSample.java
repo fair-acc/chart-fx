@@ -1,20 +1,22 @@
 package de.gsi.chart.samples;
 
-import de.gsi.chart.XYChart;
-import de.gsi.chart.axes.spi.DefaultNumericAxis;
-import de.gsi.chart.plugins.XValueIndicator;
-import de.gsi.dataset.spi.DoubleDataSet;
+import java.util.Objects;
+
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import de.gsi.chart.XYChart;
+import de.gsi.chart.axes.spi.DefaultNumericAxis;
+import de.gsi.chart.plugins.XValueIndicator;
+import de.gsi.dataset.spi.DoubleDataSet;
+
 /**
  * @author rstein
  */
 public class ValueIndicatorSample extends Application {
-
     private static final int N_SAMPLES = 100;
 
     @Override
@@ -43,7 +45,7 @@ public class ValueIndicatorSample extends Application {
         dataSet2.set(xValues, yValues2);
 
         final XValueIndicator xValueIndicator = new XValueIndicator(xAxis, 20, "x-indicator");
-        chart.getStylesheets().add(getClass().getResource("ValueIndicatorSample.css").toExternalForm());
+        chart.getStylesheets().add(Objects.requireNonNull(getClass().getResource("ValueIndicatorSample.css")).toExternalForm());
         chart.getPlugins().add(xValueIndicator);
 
         final Scene scene = new Scene(root, 800, 600);

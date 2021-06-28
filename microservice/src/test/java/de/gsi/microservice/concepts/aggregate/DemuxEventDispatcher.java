@@ -26,7 +26,7 @@ public class DemuxEventDispatcher implements SequenceReportingEventHandler<TestE
     private final List<AggregationHandler> freeWorkers = Collections.synchronizedList(new ArrayList<>(N_WORKERS));
     private final RingBuffer<TestEventSource.IngestedEvent> rb;
     // private Map<Long, Object> aggregatedBpcts = new SoftHashMap<>(RETENTION_SIZE);
-    private Map<Long, Object> aggregatedBpcts = new Cache<>(RETENTION_SIZE);
+    private final Map<Long, Object> aggregatedBpcts = new Cache<>(RETENTION_SIZE);
     private Sequence seq;
 
     public DemuxEventDispatcher(final RingBuffer<TestEventSource.IngestedEvent> ringBuffer) {

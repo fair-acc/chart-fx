@@ -1,8 +1,6 @@
 package de.gsi.dataset.spi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
@@ -102,8 +100,7 @@ public class DoubleDataSetTests extends EditableDataSetTests {
             }
 
             if (testCase == 2) {
-                assertEquals(null, dataSet.getDataLabel(0),
-                        "check '" + dsType + "' label[" + 0 + "] value");
+                assertNull(dataSet.getDataLabel(0), "check '" + dsType + "' label[" + 0 + "] value");
             }
         }
 
@@ -169,8 +166,7 @@ public class DoubleDataSetTests extends EditableDataSetTests {
             }
 
             if (testCase == 2) {
-                assertEquals(null, dataSet.getDataLabel(nData + i),
-                        "check '" + dsType + "' label[" + nData + i + "] value");
+                assertNull(dataSet.getDataLabel(nData + i), "check '" + dsType + "' label[" + nData + i + "] value");
             }
         }
 

@@ -69,7 +69,7 @@ import de.gsi.dataset.utils.ProcessingProfiler;
  */
 public abstract class Chart extends HiddenSidesPane implements Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
-    private static final String CHART_CSS = Chart.class.getResource("chart.css").toExternalForm();
+    private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = false; // for more verbose debugging

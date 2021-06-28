@@ -3,6 +3,7 @@ package de.gsi.math.samples;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Random;
 
 import javafx.application.Application;
@@ -200,7 +201,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
     private static double[][] readDemoData() {
         final String fileName = "./BBQSpectra.dat";
         try (BufferedReader reader = new BufferedReader(
-                     new InputStreamReader(WaveletScalogram.class.getResourceAsStream(fileName)))) {
+                     new InputStreamReader(Objects.requireNonNull(WaveletScalogram.class.getResourceAsStream(fileName))))) {
             String line = reader.readLine();
             final int nDim = line == null ? 0 : Integer.parseInt(line);
             double[][] ret = new double[2][nDim];

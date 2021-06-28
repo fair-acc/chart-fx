@@ -250,7 +250,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         HORIZONTAL("Horizontal Measurements"),
         ACC("Accelerator Misc.");
 
-        private String name;
+        private final String name;
 
         MeasurementCategory(final String description) {
             name = description;
@@ -309,9 +309,9 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         PERIOD(true, HORIZONTAL, "Period"),
         FREQUENCY(true, HORIZONTAL, "Frequency");
 
-        private String name;
-        private MeasurementCategory category;
-        private boolean isVertical;
+        private final String name;
+        private final MeasurementCategory category;
+        private final boolean isVertical;
         private final int requiredSelectors;
         private final int requiredDataSets;
 

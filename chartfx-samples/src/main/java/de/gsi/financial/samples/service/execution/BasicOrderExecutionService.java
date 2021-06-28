@@ -3,10 +3,10 @@ package de.gsi.financial.samples.service.execution;
 import java.util.Date;
 import java.util.Set;
 
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.financial.samples.dos.*;
 import de.gsi.financial.samples.service.StandardTradePlanAttributes;
 import de.gsi.financial.samples.service.order.InternalOrderIdGenerator;
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 
 /**
  * Basic example of order execution processing
@@ -14,11 +14,11 @@ import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
  * @author afischer
  */
 public class BasicOrderExecutionService {
-    private AttributeModel context;
+    private final AttributeModel context;
     private OrderContainer orderContainer;
     private PositionContainer positionContainer;
     private String accountId;
-    private ExecutionPlatform executionPlatform;
+    private final ExecutionPlatform executionPlatform;
 
     public BasicOrderExecutionService(AttributeModel context, ExecutionPlatform executionPlatform) {
         this.context = context;

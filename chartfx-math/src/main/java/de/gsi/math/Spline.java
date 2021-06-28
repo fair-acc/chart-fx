@@ -6,14 +6,15 @@ package de.gsi.math;
  * @author rstein
  */
 public class Spline {
+    private final int fnPoints;
+    private final double[] fx; // input data
+    private final double[] fy;
+    private final double[] fA; // interpolation coefficients
+    private final double[] fB;
+    private final double[] fC;
 
-    private int fsrcPos = 0;
-    private int fnPoints = 0;
-    private double[] fx, fy; // input data
-    private double[] fA, fB, fC; // interpolation coefficients
-
-    private double[] fboundCond1 = new double[2];
-    private double[] fboundCondN = new double[2];
+    private final double[] fBoundCond1 = new double[2];
+    private final double[] fBoundCondN = new double[2];
 
     /**
      * default constructor
@@ -36,7 +37,6 @@ public class Spline {
      *        &lt; x.length and length &gt; 3
      */
     public Spline(double[] x, double[] y, int length, int scrPos) {
-        fsrcPos = scrPos;
         fnPoints = length;
         fx = new double[length];
         fy = new double[length];
@@ -44,8 +44,8 @@ public class Spline {
         fA = new double[length - 1];
         fB = new double[length - 1];
         fC = new double[length - 1];
-        System.arraycopy(x, fsrcPos, fx, 0, length);
-        System.arraycopy(y, fsrcPos, fy, 0, length);
+        System.arraycopy(x, scrPos, fx, 0, length);
+        System.arraycopy(y, scrPos, fy, 0, length);
         SetupBoundaryConditions();
         CalcCoefficients();
     }
@@ -54,7 +54,6 @@ public class Spline {
      * computation of natural cubic spline coefficients
      */
     private void CalcCoefficients() {
-
         double dx1, dx2;
         double dy1, dy2;
 
@@ -69,8 +68,8 @@ public class Spline {
             dx1 = dx2;
             dy1 = dy2;
         }
-        fC[0] = -fboundCond1[0] / 2.0f;
-        fB[0] = fboundCond1[1] / 2.0f;
+        fC[0] = -fBoundCond1[0] / 2.0f;
+        fB[0] = fBoundCond1[1] / 2.0f;
         fA[0] = 0.0f;
 
         for (int i = 1; i < fnPoints - 1; i++) {
@@ -80,7 +79,7 @@ public class Spline {
         }
 
         //
-        dy1 = (fboundCondN[1] - fboundCondN[0] * fB[fnPoints - 2]) / (fboundCondN[0] * fC[fnPoints - 2] + 2.0f);
+        dy1 = (fBoundCondN[1] - fBoundCondN[0] * fB[fnPoints - 2]) / (fBoundCondN[0] * fC[fnPoints - 2] + 2.0f);
 
         for (int i = fnPoints - 2; i >= 0; i--) {
             dx1 = fx[i + 1] - fx[i];
@@ -137,10 +136,10 @@ public class Spline {
      * set type 1 boundary coefficients (vanishing second order moment)
      */
     private void SetupBoundaryConditions() {
-        fboundCond1[0] = 0.0f;
-        fboundCond1[1] = 0.0f; // = 2.0f * x''(0)
-        fboundCondN[0] = 0.0f;
-        fboundCondN[1] = 0.0f; // = 2.0f * x''(N-1)
+        fBoundCond1[0] = 0.0f;
+        fBoundCond1[1] = 0.0f; // = 2.0f * x''(0)
+        fBoundCondN[0] = 0.0f;
+        fBoundCondN[1] = 0.0f; // = 2.0f * x''(N-1)
     }
 
     @Override

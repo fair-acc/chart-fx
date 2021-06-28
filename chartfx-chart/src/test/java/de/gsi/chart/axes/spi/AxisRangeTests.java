@@ -1,9 +1,6 @@
 package de.gsi.chart.axes.spi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.security.InvalidParameterException;
 
@@ -250,11 +247,11 @@ public class AxisRangeTests {
             assertFalse(test1.contains(0.5));
             assertFalse(test1.isMinDefined());
             assertFalse(test1.isMaxDefined());
-            assertTrue(test1.toString() != null);
+            assertNotNull(test1.toString());
 
             assertTrue(test1.set(-1, 1));
             assertEquals(2.0, test1.getLength());
-            assertTrue(test1.toString() != null);
+            assertNotNull(test1.toString());
             assertTrue(test1.isDefined());
             assertEquals(-1.0, test1.getMin());
             assertEquals(+1.0, test1.getMax());
@@ -277,10 +274,10 @@ public class AxisRangeTests {
             final AxisRange test2 = new AxisRange(-2.0, +2.0, 1000, 10, 100);
             assertTrue(test2.isDefined());
 
-            assertTrue(test1.equals(test1_copy));
-            assertFalse(test1.equals(test2));
+            assertEquals(test1, test1_copy);
+            assertNotEquals(test1, test2);
 
-            assertFalse(test1.equals(new Object()));
+            assertNotEquals(test1, new Object());
 
             assertEquals(test1, test1.copy());
         }

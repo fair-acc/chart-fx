@@ -335,9 +335,9 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         strokeLineWidthMarker = LabelledMarkerRenderer.DEFAULT_GRID_LINE_WIDTH;
         strokeDashPattern = LabelledMarkerRenderer.DEFAULT_GRID_DASH_PATTERM;
 
-        if (getStyle() != null) {
-            // parse user-specified marker
-        }
+        //if (getStyle() != null) {
+        //    parse user-specified marker
+        //}
 
         return getThis();
     }

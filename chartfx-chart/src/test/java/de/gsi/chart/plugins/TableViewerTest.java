@@ -1,9 +1,7 @@
 package de.gsi.chart.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
 import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
@@ -152,16 +150,16 @@ class TableViewerTest {
         tableView.getSelectionModel().select(0);
         DataSetsRow firstRowItem = tableView.getSelectionModel().getSelectedItem();
         assertEquals(firstRowItem.hashCode(), firstRowItem.hashCode());
-        assertTrue(firstRowItem.equals(firstRowItem));
+        assertEquals(firstRowItem, firstRowItem);
 
         // Equals/hashCode with other row is false
         tableView.getSelectionModel().clearAndSelect(1);
         DataSetsRow secondRowItem = tableView.getSelectionModel().getSelectedItem();
         assertNotEquals(firstRowItem.hashCode(), secondRowItem.hashCode());
-        assertFalse(firstRowItem.equals(secondRowItem));
+        assertNotEquals(firstRowItem, secondRowItem);
 
         // Equals with other type is false
-        assertFalse(firstRowItem.equals(new Object()));
+        assertNotEquals(firstRowItem, new Object());
     }
 
     private Button locateTableViewButton(final FlowPane toolbar) {

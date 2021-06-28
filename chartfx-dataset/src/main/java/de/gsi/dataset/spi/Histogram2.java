@@ -1,6 +1,3 @@
-/**
- *
- */
 package de.gsi.dataset.spi;
 
 import java.util.Collections;

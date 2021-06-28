@@ -3,6 +3,7 @@ package de.gsi.chart.samples.utils;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
@@ -60,7 +61,7 @@ public class MidiWaveformSynthesizer {
             noteFrequency[i] = (float) (2.0f * Math.PI * (440.0f + ((440.0f / 12.0f) * (i - 69))));
         }
 
-        try (final InputStream is = new BufferedInputStream(TestDataSetSource.class.getResourceAsStream(midiFile))) {
+        try (final InputStream is = new BufferedInputStream(Objects.requireNonNull(TestDataSetSource.class.getResourceAsStream(midiFile)))) {
             sequencer = MidiSystem.getSequencer(false);
             sequencer.open();
 

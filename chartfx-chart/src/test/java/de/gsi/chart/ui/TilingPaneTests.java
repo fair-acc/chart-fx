@@ -1,11 +1,6 @@
 package de.gsi.chart.ui;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -153,7 +148,7 @@ public class TilingPaneTests {
             icon = layout.getIcon();
             assertNotNull(icon);
             // check that icon is a duplicate
-            assertFalse(icon.equals(layout.getIcon()));
+            assertNotEquals(icon, layout.getIcon());
         }
     }
 }

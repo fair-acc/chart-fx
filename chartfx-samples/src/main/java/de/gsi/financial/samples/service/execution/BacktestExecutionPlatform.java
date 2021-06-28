@@ -2,6 +2,7 @@ package de.gsi.financial.samples.service.execution;
 
 import java.util.Date;
 
+import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import de.gsi.financial.samples.dos.OHLCVItem;
 import de.gsi.financial.samples.dos.Order;
 import de.gsi.financial.samples.dos.Order.OrderStatus;
@@ -10,7 +11,6 @@ import de.gsi.financial.samples.service.OhlcvChangeListener;
 import de.gsi.financial.samples.service.execution.ExecutionResult.ExecutionResultEnum;
 import de.gsi.financial.samples.service.order.ResolveOrderService;
 import de.gsi.financial.samples.service.order.ResolvePositionService;
-import de.gsi.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
 /**
  * Example of Simple Backtest Execution Platform with Market Order Implementation

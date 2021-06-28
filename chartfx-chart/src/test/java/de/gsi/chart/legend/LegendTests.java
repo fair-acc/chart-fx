@@ -51,9 +51,9 @@ import de.gsi.dataset.testdata.spi.SineFunction;
 public class LegendTests {
     private static final int WIDTH = 300;
     private static final int HEIGHT = 200;
-    private Renderer testRenderer = new TestRenderer();
-    private DataSet testDataSet = new SineFunction("sine", 100);
-    private DataSet testDataSetAlt = new SineFunction("sineAlt", 100);
+    private final Renderer testRenderer = new TestRenderer();
+    private final DataSet testDataSet = new SineFunction("sine", 100);
+    private final DataSet testDataSetAlt = new SineFunction("sineAlt", 100);
     private XYChart chart;
 
     @Start

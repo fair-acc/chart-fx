@@ -1,6 +1,6 @@
 package de.gsi.dataset.utils.trees;
 
-/**
+/*
  * User: Vitaly Sazanovich Date: 07/02/13 Time: 19:25 Email: Vitaly.Sazanovich@gmail.com
  */
 import java.util.AbstractCollection;

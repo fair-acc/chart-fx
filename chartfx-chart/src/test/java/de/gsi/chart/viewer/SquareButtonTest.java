@@ -1,8 +1,6 @@
 package de.gsi.chart.viewer;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ExecutionException;
 
@@ -51,7 +49,7 @@ public class SquareButtonTest {
     public void testSetterGetter() throws InterruptedException, ExecutionException {
         FXUtils.assertJavaFxThread();
 
-        assertEquals(null, field.getText(), "getText()");
+        assertNull(field.getText(), "getText()");
         assertNotNull(field.toString(), "toString()");
         // could not check for identity since ButtonBase slightly modifies the Graphics (css-related)
         assertEquals(icon, field.getGraphic());

@@ -28,7 +28,7 @@ class AveragingDataSetTests {
         assertEquals(2, avg.getAverageSize());
         assertEquals(4, avg.getDataCount());
         assertEquals(3, avg.getFuzzyCount());
-        assertEquals(null, avg.getStyle(0));
+        assertNull(avg.getStyle(0));
         assertArrayEquals(new double[] { 1, 2, 3, 2 }, avg.getValues(DataSet.DIM_Y));
         avg.add(new DataSetBuilder().setValues(DataSet.DIM_Y, new double[] { 1, 2, 3, 2 }).build());
         assertEquals(2, avg.getAverageCount());

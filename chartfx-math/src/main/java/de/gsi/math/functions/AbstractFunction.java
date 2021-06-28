@@ -321,7 +321,7 @@ public abstract class AbstractFunction implements Function {
     @Override
     public void setParameterValues(final double[] value) {
         if (value.length <= fnbOfParameter) {
-            System.arraycopy(value, 0, fparameter, 0, Math.min(value.length, fnbOfParameter));
+            System.arraycopy(value, 0, fparameter, 0, value.length);
             return;
         }
         throw new InvalidParameterException("setParameterValue(" + value.length + "," + Arrays.toString(value) + "): invalid parameter index [0," + (fnbOfParameter - 1) + "}");

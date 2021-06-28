@@ -17,9 +17,9 @@ import de.gsi.chart.renderer.spi.hexagon.HexagonMap.Direction;
  * A Hexagon is the building block of the grid.
  */
 public class Hexagon extends Polygon {
-    private static double[] sinAngle = { 0.5 * Math.sqrt(3), 0.5 * Math.sqrt(3), 0, -0.5 * Math.sqrt(3),
+    private static final double[] sinAngle = { 0.5 * Math.sqrt(3), 0.5 * Math.sqrt(3), 0, -0.5 * Math.sqrt(3),
         -0.5 * Math.sqrt(3), 0, 0.5 * Math.sqrt(3) };
-    private static double[] cosAngle = { 0.5, -0.5, -1, -0.5, 0.5, 1, 0.5 };
+    private static final double[] cosAngle = { 0.5, -0.5, -1, -0.5, 0.5, 1, 0.5 };
     public final GridPosition position;
     private HexagonMap map;
     private boolean isVisualObstacle;
@@ -275,7 +275,7 @@ public class Hexagon extends Polygon {
         final ArrayList<Hexagon> result = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             final Hexagon neighbour = getNeighbour(GridPosition.getDirectionFromNumber(i));
-            if (neighbour == null) {
+            if (neighbour != null) {
                 result.add(neighbour);
             }
         }
@@ -375,9 +375,9 @@ public class Hexagon extends Polygon {
         final Color ca = (Color) a;
         final Color cb = (Color) b;
         return !(Math.abs(ca.getRed() - cb.getRed()) > threshold)
-                && (!(Math.abs(ca.getGreen() - cb.getGreen()) > threshold)
-                        && (!(Math.abs(ca.getBlue() - cb.getBlue()) > threshold)
-                                && !(Math.abs(ca.getOpacity() - cb.getOpacity()) > threshold)));
+     && (!(Math.abs(ca.getGreen() - cb.getGreen()) > threshold)
+             && (!(Math.abs(ca.getBlue() - cb.getBlue()) > threshold)
+                     && !(Math.abs(ca.getOpacity() - cb.getOpacity()) > threshold)));
     }
 
     public void renderCoordinates(GraphicsContext gc) {

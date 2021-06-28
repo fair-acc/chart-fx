@@ -3,6 +3,7 @@ package de.gsi.math.samples;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.List;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -290,7 +291,7 @@ public class TSpectrumSample extends Application {
     }
 
     protected static DoubleDataSet readDemoData(final String fileName) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(TSpectrumSample.class.getResourceAsStream(fileName)))) {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(TSpectrumSample.class.getResourceAsStream(fileName))))) {
             String line = reader.readLine();
             final int nDim = line == null ? 0 : Integer.parseInt(line);
 

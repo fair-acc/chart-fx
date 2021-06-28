@@ -93,7 +93,7 @@ public final class DefaultRenderColorScheme {
     private static final ListProperty<Color> strokeColours = new SimpleListProperty<>(SELF, "defaulStrokeColours", FXCollections.observableList(TUNEVIEWER));
 
     private static final ListProperty<Color> fillColours = new SimpleListProperty<>(SELF, "defaulFillColours", FXCollections.observableList(TUNEVIEWER));
-    private static ListProperty<Paint> fillStyles = new SimpleListProperty<>(SELF, "fillStyles");
+    private static final ListProperty<Paint> fillStyles = new SimpleListProperty<>(SELF, "fillStyles");
     private static final ObjectProperty<Font> defaultFont = new SimpleObjectProperty<>(SELF, "defaultFontSize", Font.font(DEFAULT_FONT, DEFAULT_FONT_SIZE));
     private static final DoubleProperty markerLineWidth = new SimpleDoubleProperty(SELF, "defaultLineWidth", 0.5);
     private static final DoubleProperty lineWidth = new SimpleDoubleProperty(SELF, "lineWidth", 1.5);

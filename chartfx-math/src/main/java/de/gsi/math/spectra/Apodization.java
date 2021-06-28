@@ -119,22 +119,22 @@ public enum Apodization {
         case Nuttall: {
             final double a = MathBase.TWO_PI / (n - 1);
             return 0.355768 - 0.487396 * MathBase.cos(a * i) + 0.144232 * MathBase.cos(2 * a * i)
-                    - 0.012604 * MathBase.cos(3 * a * i);
+          - 0.012604 * MathBase.cos(3 * a * i);
         }
         case BlackmanHarris: {
             final double a = MathBase.TWO_PI / (n - 1);
             return 0.35875 - 0.48829 * MathBase.cos(a * i) + 0.14128 * MathBase.cos(2 * a * i)
-                    - 0.01168 * MathBase.cos(3 * a * i);
+          - 0.01168 * MathBase.cos(3 * a * i);
         }
         case BlackmanNuttall: {
             final double a = MathBase.TWO_PI / (n - 1);
             return 0.3635819 - 0.4891775 * MathBase.cos(a * i) + 0.1365995 * MathBase.cos(2 * a * i)
-                    - 0.0106411 * MathBase.cos(3 * a * i);
+          - 0.0106411 * MathBase.cos(3 * a * i);
         }
         case FlatTop: {
             final double a = MathBase.TWO_PI / (n - 1);
             return 1 - 1.93 * MathBase.cos(a * i) + 1.29 * MathBase.cos(2 * a * i)
-                    - 0.388 * MathBase.cos(3 * a * i) + 0.032 * MathBase.cos(4 * a * i);
+          - 0.388 * MathBase.cos(3 * a * i) + 0.032 * MathBase.cos(4 * a * i);
         }
         case Exponential: {
             final double a = 3 * n, exp0 = MathBase.exp(0);
@@ -187,7 +187,7 @@ public enum Apodization {
      * Changes the map used to cache the apodization windows.
      * The map should implement some sort of caching behaviour e.g
      * <ul>
-     * <li>{@link java.util.WeakHashMap} {@code<ApodizationArrayDescription, double[]>} invalidates under memory
+     * <li>{@link java.util.WeakHashMap} {@code <ApodizationArrayDescription, double[]>} invalidates under memory
      * pressure (The default)
      * <li>{@link de.gsi.dataset.utils.Cache} limits retention time and number of cached entries
      * <li>custom implementation

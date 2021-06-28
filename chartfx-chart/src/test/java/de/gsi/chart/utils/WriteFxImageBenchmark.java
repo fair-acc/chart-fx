@@ -41,7 +41,7 @@ public class WriteFxImageBenchmark {
 
     private static final int w = 333;
     private static final int h = 777;
-    private static ByteBuffer noisePixels = ByteBuffer.allocate(w * h * 4);
+    private static final ByteBuffer noisePixels = ByteBuffer.allocate(w * h * 4);
     private static PixelBuffer<ByteBuffer> noiseBuffer;
     private static WritableImage testimage; // test image with noise (N.B. hard to compress)
     private static final int w2 = 777;

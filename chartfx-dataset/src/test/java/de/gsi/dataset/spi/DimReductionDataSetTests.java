@@ -25,7 +25,7 @@ import de.gsi.dataset.spi.DimReductionDataSet.Option;
  * @author rstein
  */
 public class DimReductionDataSetTests {
-    private AtomicInteger nEvent = new AtomicInteger(0);
+    private final AtomicInteger nEvent = new AtomicInteger(0);
 
     @Test
     public void testGetterSetterConsistency() {

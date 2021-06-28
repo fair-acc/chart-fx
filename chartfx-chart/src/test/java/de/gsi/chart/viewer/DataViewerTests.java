@@ -1,10 +1,6 @@
 package de.gsi.chart.viewer;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ExecutionException;
 
@@ -45,7 +41,7 @@ public class DataViewerTests {
         final DataViewWindow dataViewWindow1 = new DataViewWindow("window name", content1);
         dataView1 = new DataView("dataView1", icon1);
 
-        assertEquals(null, dataViewWindow1.getParentView(), "parent view is null - not attached");
+        assertNull(dataViewWindow1.getParentView(), "parent view is null - not attached");
         dataView1.getVisibleChildren().add(dataViewWindow1);
         assertDoesNotThrow(() -> dataView1.sort());
 
