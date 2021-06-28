@@ -170,7 +170,7 @@ public class Order {
     @Override
     public String toString() {
         return "Order [internalOrderId=" + internalOrderId + ", orderIndex=" + orderIndex + ", userName=" + userName + ", serviceOrderId=" + serviceOrderId + ", entryTime=" + entryTime + ", symbol=" + symbol
-                + ", orderExpression=" + orderExpression + ", accountId=" + accountId + ", lastActivityTime=" + lastActivityTime + ", status=" + status
-                + ", averageFillPrice=" + averageFillPrice + "]";
+      + ", orderExpression=" + orderExpression + ", accountId=" + accountId + ", lastActivityTime=" + lastActivityTime + ", status=" + status
+      + ", averageFillPrice=" + averageFillPrice + "]";
     }
 }

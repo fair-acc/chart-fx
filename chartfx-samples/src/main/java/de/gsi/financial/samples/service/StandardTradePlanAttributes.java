@@ -1,8 +1,8 @@
 package de.gsi.financial.samples.service;
 
+import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
 import de.gsi.financial.samples.dos.OrderContainer;
 import de.gsi.financial.samples.dos.PositionContainer;
-import de.gsi.dataset.spi.financial.api.attrs.AttributeKey;
 
 public class StandardTradePlanAttributes {
     /**

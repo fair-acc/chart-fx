@@ -7,9 +7,9 @@ import java.util.Date;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 import de.gsi.financial.samples.service.ConcurrentDateFormatAccess;
 import de.gsi.financial.samples.service.period.Period;
-import de.gsi.dataset.spi.financial.api.attrs.AttributeModel;
 
 /**
  * @author afischer
@@ -360,10 +360,10 @@ public class Position implements Comparable<Position>, Serializable {
     @Override
     public String toString() {
         return "Position [positionId=" + positionId + ", positionEntryIndex=" + positionEntryIndex + ", positionExitIndex=" + positionExitIndex + ", timePosId=" + timePosId + ", entryUserName=" + entryUserName + ", strategy=" + strategy
-                + ", entryTime=" + (entryTime != null ? dateFormat.format(entryTime) : "NO ENTRY") + ", exitTime=" + (exitTime != null ? dateFormat.format(exitTime) : "NO EXIT") + ", positionType="
-                + positionType + ", positionStatus=" + positionStatus + ", symbol=" + symbol + ", accountId=" + accountId
-                + ", positionQuantity=" + positionQuantity + ", entryPrice=" + entryPrice + ", exitPrice=" + exitPrice
-                + ", MFE=" + mfe + ", MAE=" + mae + ", risk=" + risk
-                + ", period=" + period + ", pl=" + pl + ", isLive=" + isLive + "]";
+      + ", entryTime=" + (entryTime != null ? dateFormat.format(entryTime) : "NO ENTRY") + ", exitTime=" + (exitTime != null ? dateFormat.format(exitTime) : "NO EXIT") + ", positionType="
+      + positionType + ", positionStatus=" + positionStatus + ", symbol=" + symbol + ", accountId=" + accountId
+      + ", positionQuantity=" + positionQuantity + ", entryPrice=" + entryPrice + ", exitPrice=" + exitPrice
+      + ", MFE=" + mfe + ", MAE=" + mae + ", risk=" + risk
+      + ", period=" + period + ", pl=" + pl + ", isLive=" + isLive + "]";
     }
 }
