@@ -1,7 +1,8 @@
 @font-face {
   font-family: 'fair-chart-icons';
   src: url('fonts/fair-chart-icons.eot?yr8ymj');
-  src: url('fonts/fair-chart-icons.eot?yr8ymj#iefix') format('embedded-opentype'),
+  src:
+    url('fonts/fair-chart-icons.eot?yr8ymj#iefix') format('embedded-opentype'),
     url('fonts/fair-chart-icons.ttf?yr8ymj') format('truetype'),
     url('fonts/fair-chart-icons.woff?yr8ymj') format('woff'),
     url('fonts/fair-chart-icons.svg?yr8ymj#fair-chart-icons') format('svg');

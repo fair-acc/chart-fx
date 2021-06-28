@@ -4,8 +4,8 @@
 
 .chart-line-symbol {
   -fx-background-insets: 0, 0;
-  -fx-background-radius: 0px;
-  -fx-padding: 0px;
+  -fx-background-radius: 0;
+  -fx-padding: 0;
   -fx-shape: "";
   -fx-background-color: transparent;
 }

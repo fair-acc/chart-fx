@@ -1,169 +1,170 @@
 .chart-datapoint-tooltip-label {
-    -fx-background-color: rgb(153.0, 204.0, 204.0);
-    -fx-border-color: black;
-    -fx-border-radius: 3.0;
-    -fx-font-size: 12.0;
-    -fx-font-weight: bold;
-    -fx-text-alignment: center;
+  -fx-background-color: rgb(153, 204, 204);
+  -fx-border-color: black;
+  -fx-border-radius: 3;
+  -fx-font-size: 12;
+  -fx-font-weight: bold;
+  -fx-text-alignment: center;
 }
 
 .axis-label {
-    -fx-stroke: rgb(255, 0, 0);
-    -fx-axis-label-alignment: center;
+  -fx-stroke: rgb(255, 0, 0);
+  -fx-axis-label-alignment: center;
 }
 
 .chart-crosshair-path {
-    -fx-stroke-width: 1.0;
+  -fx-stroke-width: 1;
 }
 
 .chart-zoom-rect {
-    -fx-fill: dodgerblue;
-    -fx-stroke: #002966;
-    -fx-stroke-type: inside;
-    -fx-stroke-width: 1.0;
-    -fx-opacity: 0.2;
+  -fx-fill: dodgerblue;
+  -fx-stroke: #002966;
+  -fx-stroke-type: inside;
+  -fx-stroke-width: 1;
+  -fx-opacity: 0.2;
 }
 
 .chart-select-rect {
-    -fx-fill: transparent;
-    -fx-stroke: gray;
-    -fx-stroke-width: 1.5;
-    -fx-stroke-dash-offset: 6;
-    -fx-stroke-dash-array: 12 2 4 2;
-    -fx-stroke-line-cap: butt;
-    -fx-effect: dropshadow(three-pass-box, derive(gray, -20%), 10, 0, 4, 4);
+  -fx-fill: transparent;
+  -fx-stroke: gray;
+  -fx-stroke-width: 1.5;
+  -fx-stroke-dash-offset: 6;
+  -fx-stroke-dash-array: 12 2 4 2;
+  -fx-stroke-line-cap: butt;
+  -fx-effect: dropshadow(three-pass-box, derive(gray, -20%), 10, 0, 4, 4);
 }
 
 .chart-select-marker {
-    -fx-fill: transparent;
-    -fx-stroke: lightGreen;
-    -fx-stroke-width: 1.5;
-    -fx-stroke-dash-offset: 6;
-    -fx-stroke-dash-array: 12 2 4 2;
-    -fx-stroke-line-cap: butt;
-    -fx-opacity: 1.0;
-    -fx-effect: dropshadow(three-pass-box, green, 5, 0.5, 0, 0);
+  -fx-fill: transparent;
+  -fx-stroke: lightGreen;
+  -fx-stroke-width: 1.5;
+  -fx-stroke-dash-offset: 6;
+  -fx-stroke-dash-array: 12 2 4 2;
+  -fx-stroke-line-cap: butt;
+  -fx-opacity: 1;
+  -fx-effect: dropshadow(three-pass-box, green, 5, 0.5, 0, 0);
 }
 
-.chart-select-marker:noEdit {
-    -fx-fill: transparent;
-    -fx-stroke: red;
-    -fx-stroke-width: 1.5;
-    -fx-stroke-dash-offset: 6;
-    -fx-stroke-dash-array: 12 2 4 2;
-    -fx-stroke-line-cap: butt;
-    -fx-opacity: 1.0;
-    -fx-effect: dropshadow(three-pass-box, red, 5, 0.5, 0, 0);
+.chart-select-marker:noedit {
+  -fx-fill: transparent;
+  -fx-stroke: red;
+  -fx-stroke-width: 1.5;
+  -fx-stroke-dash-offset: 6;
+  -fx-stroke-dash-array: 12 2 4 2;
+  -fx-stroke-line-cap: butt;
+  -fx-opacity: 1;
+  -fx-effect: dropshadow(three-pass-box, red, 5, 0.5, 0, 0);
 }
 
 .chart-series-line {
-    -fx-stroke-width: 1.0px;
-    -fx-effect: null;
+  -fx-stroke-width: 1px;
+  -fx-effect: null;
 }
 
 .value-indicator-label {
-    -fx-background-color: #f4e242;
-    -fx-border-color: black;
-    -fx-border-radius: 2.0;
-    -fx-font-size: 12.0;
-    -fx-font-weight: bold;
-    -fx-text-alignment: center;
-    -fx-padding: 1.0 2.0 1.0 2.0;
+  -fx-background-color: #f4e242;
+  -fx-border-color: black;
+  -fx-border-radius: 2;
+  -fx-font-size: 12;
+  -fx-font-weight: bold;
+  -fx-text-alignment: center;
+  -fx-padding: 1 2 1 2;
 }
 
 .range-indicator-label {
-    -fx-background-color: #f4e242;
-    -fx-border-color: black;
-    -fx-border-radius: 2.0;
-    -fx-font-size: 12.0;
-    -fx-font-weight: bold;
-    -fx-text-alignment: center;
-    -fx-padding: 1.0 2.0 1.0 2.0;
+  -fx-background-color: #f4e242;
+  -fx-border-color: black;
+  -fx-border-radius: 2;
+  -fx-font-size: 12;
+  -fx-font-weight: bold;
+  -fx-text-alignment: center;
+  -fx-padding: 1 2 1 2;
 }
 
 .value-indicator-line {
-    -fx-stroke-width: 1;
-    -fx-stroke: black;
-    -fx-stroke-dash-array: 8;
+  -fx-stroke-width: 1;
+  -fx-stroke: black;
+  -fx-stroke-dash-array: 8;
 }
 
 .value-indicator-marker {
-    -fx-stroke-width: 0.5;
-    -fx-stroke: derive(-fx-background, -30%);
-    -fx-fill: dodgerblue;
+  -fx-stroke-width: 0.5;
+  -fx-stroke: derive(-fx-background, -30%);
+  -fx-fill: dodgerblue;
 }
 
 .value-watch-indicator-label {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-    -fx-border-radius: 0.0;
-    -fx-font-size: 11.0;
-    -fx-font-weight: bold;
-    -fx-text-fill: white;
-    -fx-text-alignment: center;
-    -fx-padding: 2.5 4.0 1.0 8.0;
+  -fx-background-color: transparent;
+  -fx-border-color: transparent;
+  -fx-border-radius: 0;
+  -fx-font-size: 11;
+  -fx-font-weight: bold;
+  -fx-text-fill: white;
+  -fx-text-alignment: center;
+  -fx-padding: 2.5 4 1 8;
 }
 
 .value-watch-indicator-line {
-    -fx-stroke-width: 1;
-    -fx-stroke: black;
-    -fx-stroke-dash-array: 8;
+  -fx-stroke-width: 1;
+  -fx-stroke: black;
+  -fx-stroke-dash-array: 8;
 }
 
 .value-watch-indicator-marker {
-    -fx-stroke-width: 0.5;
-    -fx-stroke: black;
-    -fx-fill: #416ef4ff;
+  -fx-stroke-width: 0.5;
+  -fx-stroke: black;
+  -fx-fill: #416ef4ff;
 }
 
 .range-indicator-rect {
-    -fx-stroke: transparent;
-    -fx-fill: #416ef468;
+  -fx-stroke: transparent;
+  -fx-fill: #416ef468;
 }
 
 .chart-major-grid-lines {
-    -fx-stroke: derive(-fx-background, -10%);
-    -fx-stroke-dash-array: 4.5, 2.5;
-    -fx-stroke-width: 0.5;
-    -fx-grid-on-top: true;
+  -fx-stroke: derive(-fx-background, -10%);
+  -fx-stroke-dash-array: 4.5, 2.5;
+  -fx-stroke-width: 0.5;
+  -fx-grid-on-top: true;
 }
 
-.chart-major-grid-lines:withMinor {
-    -fx-stroke: derive(-fx-background, -20%);
+.chart-major-grid-lines:withminor {
+  -fx-stroke: derive(-fx-background, -20%);
 }
 
 .chart-minor-grid-lines {
-    -fx-stroke: derive(-fx-background, -5%);
-    -fx-stroke-width: 0.5;
-    visibility: inherit;
+  -fx-stroke: derive(-fx-background, -5%);
+  -fx-stroke-width: 0.5;
+  visibility: inherit;
 }
 
 .chart-major-vertical-lines .chart-major-grid-lines {
-    /* use this to override v-specific settings */
+  /* use this to override v-specific settings */
 }
 
 .chart-major-horizontal-grid-lines .chart-major-grid-lines {
-    /* use this to override h-specific settings */
+  /* use this to override h-specific settings */
 }
 
 .chart-minor-vertical-grid-lines .chart-minor-grid-lines {
-    /* use this to override v-specific settings */
+  /* use this to override v-specific settings */
 }
 
 .chart-minor-horizontal-grid-lines .chart-minor-grid-lines {
-    /* use this to override h-specific settings */
+  /* use this to override h-specific settings */
 }
 
 .chart-alternative-column-fill {
-    -fx-fill: null;
-    -fx-stroke: null;
+  -fx-fill: null;
+  -fx-stroke: null;
 }
 
 .chart-alternative-row-fill {
-    -fx-fill: null;
-    -fx-stroke: null;
+  -fx-fill: null;
+  -fx-stroke: null;
 }
 
-.chart-vertical-zero-line, .chart-horizontal-zero-line {
-    -fx-stroke: derive(-fx-text-background-color, 40%);
+.chart-vertical-zero-line,
+.chart-horizontal-zero-line {
+  -fx-stroke: derive(-fx-text-background-color, 40%);
 }

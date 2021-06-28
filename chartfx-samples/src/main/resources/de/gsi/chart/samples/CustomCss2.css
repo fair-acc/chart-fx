@@ -1,5 +1,5 @@
 .chart-crosshair-path {
-  -fx-stroke-width: 3.0;
+  -fx-stroke-width: 3;
   -fx-stroke: orange;
 }
 
@@ -9,6 +9,7 @@
   -fx-stroke-width: 0.5;
   -fx-grid-on-top: true;
 }
+
 .axis-label {
   -fx-stroke: blue;
   -fx-axis-label-alignment: right;
