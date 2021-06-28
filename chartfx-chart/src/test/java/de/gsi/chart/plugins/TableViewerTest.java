@@ -1,9 +1,7 @@
 package de.gsi.chart.plugins;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static de.gsi.chart.plugins.TableViewer.BUTTON_BAR_STYLE_CLASS;
 import static de.gsi.chart.plugins.TableViewer.BUTTON_SWITCH_TABLE_VIEW_STYLE_CLASS;
