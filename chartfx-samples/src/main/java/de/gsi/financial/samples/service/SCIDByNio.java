@@ -36,7 +36,7 @@ public class SCIDByNio implements AutoCloseable {
     public void openNewChannel(String resource) throws IOException {
         timeZone = cal.get(Calendar.ZONE_OFFSET);
 
-        fileInputStream = new FileInputStream(FilenameUtils.getName(resource)); // lgtm[java/output-resource-leak]
+        fileInputStream = new FileInputStream(resource); // lgtm[java/output-resource-leak]
         fileChannel = fileInputStream.getChannel();
 
         bufferRecordDouble = ByteBuffer.allocate(8);

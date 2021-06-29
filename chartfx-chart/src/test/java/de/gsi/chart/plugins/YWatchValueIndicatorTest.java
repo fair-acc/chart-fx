@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
@@ -35,8 +36,10 @@ class YWatchValueIndicatorTest {
         xAxis.setTimeAxis(true);
         yAxis = new DefaultNumericAxis("price", "points");
 
-        valueWatchIndicatorTested = new YWatchValueIndicator(yAxis, "%1.2f"); // auto
-        valueWatchIndicatorTested = new YWatchValueIndicator(yAxis, "%1.2f", 50.12);
+        final YWatchValueIndicator valueWatchIndicatorTested1 = new YWatchValueIndicator(yAxis); // auto
+        valueWatchIndicatorTested1.setValue(49.0);
+        final YWatchValueIndicator valueWatchIndicatorTested2 = new YWatchValueIndicator(yAxis, 50.3); // auto
+        valueWatchIndicatorTested = new YWatchValueIndicator(yAxis, 50.12);
 
         final DefaultErrorDataSet dataSet = new DefaultErrorDataSet("TestData");
         generateCosData(dataSet);
@@ -44,20 +47,21 @@ class YWatchValueIndicatorTest {
         // prepare chart structure
         chart = new XYChart(xAxis, yAxis);
         chart.getDatasets().add(dataSet);
+        chart.getPlugins().addAll(valueWatchIndicatorTested, valueWatchIndicatorTested1, valueWatchIndicatorTested2);
         stage.setScene(new Scene(chart));
         stage.show();
     }
 
     @TestFx
     void leftSide() {
-        chart.getPlugins().add(valueWatchIndicatorTested);
+        yAxis.setSide(Side.RIGHT);
+        chart.layoutChildren();
     }
 
     @TestFx
     void rightSide() {
         yAxis.setSide(Side.RIGHT);
         chart.layoutChildren();
-        chart.getPlugins().add(valueWatchIndicatorTested);
 
         // change to unseen position
         yAxis.setAutoRanging(false);
@@ -70,7 +74,6 @@ class YWatchValueIndicatorTest {
 
     @TestFx
     void setMarkerValue() {
-        chart.getPlugins().add(valueWatchIndicatorTested);
         valueWatchIndicatorTested.setMarkerValue(35.15);
         assertEquals(" 35.2", valueWatchIndicatorTested.getText());
         assertEquals(35.15, valueWatchIndicatorTested.getValue(), 1e-2);
@@ -78,15 +81,34 @@ class YWatchValueIndicatorTest {
 
     @TestFx
     void setLineVisible() {
-        chart.getPlugins().add(valueWatchIndicatorTested);
-        valueWatchIndicatorTested.setLineVisible(true);
         valueWatchIndicatorTested.setLineVisible(false);
+        valueWatchIndicatorTested.setLineVisible(true);
     }
 
     @Test
     void setId() {
         valueWatchIndicatorTested.setId("price");
         assertEquals("price", valueWatchIndicatorTested.getId());
+    }
+
+    @Test
+    void setOcclusionPrevention(FxRobot robot) {
+        robot.interact(() -> {
+            assertFalse(valueWatchIndicatorTested.isPreventOcclusion());
+            valueWatchIndicatorTested.setPreventOcclusion(true);
+            assertTrue(valueWatchIndicatorTested.isPreventOcclusion());
+            chart.requestLayout();
+        });
+        robot.interrupt(1);
+        robot.interact(() -> {
+            yAxis.setSide(Side.RIGHT);
+        });
+        robot.interrupt(1);
+        robot.interact(() -> {
+            valueWatchIndicatorTested.setPreventOcclusion(false);
+            assertFalse(valueWatchIndicatorTested.isPreventOcclusion());
+            yAxis.setSide(Side.LEFT);
+        });
     }
 
     private static class MyMouseEvent extends MouseEvent {

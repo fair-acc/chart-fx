@@ -1,7 +1,11 @@
 package de.gsi.chart.plugins;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 
 import de.gsi.chart.axes.Axis;
@@ -29,20 +33,18 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
     protected static final String STYLE_CLASS_LABEL = "value-watch-indicator-label";
     protected static final String STYLE_CLASS_LINE = "value-watch-indicator-line";
     protected static final String STYLE_CLASS_MARKER = "value-watch-indicator-marker";
+    public static final String WATCH_INDICATOR_PREVENT_OCCLUSION = "WatchIndicatorPreventOcclusion";
 
-    protected final String valueFormat;
     protected String id;
 
     /**
      * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}.
      *
      * @param axis the axis this indicator is associated with
-     * @param valueFormat a value string format for marker visualization
      * @param value a value to be marked
      */
-    public YWatchValueIndicator(final Axis axis, final String valueFormat, final double value) {
-        super(axis, value, String.format(valueFormat, value));
-        this.valueFormat = valueFormat;
+    public YWatchValueIndicator(final Axis axis, final double value) {
+        super(axis, value, axis.getTickMarkLabel(value));
 
         // marker is visible always for this indicator
         triangle.visibleProperty().unbind();
@@ -58,10 +60,35 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
      * The Y value is updated by listeners.
      *
      * @param axis the axis this indicator is associated with
-     * @param valueFormat a value string format for marker visualization
      */
+    public YWatchValueIndicator(final Axis axis) {
+        this(axis, 0.0);
+    }
+
+    /**
+     * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}.
+     *
+     * @param axis the axis this indicator is associated with
+     * @param format formerly used to specify number format. Now the formating is controlled by the
+     * @param value a value to be marked
+     * @deprecated now uses number formatter of axis
+     */
+    @Deprecated()
+    public YWatchValueIndicator(final Axis axis, final String format, final double value) {
+        this(axis, value);
+    }
+
+    /**
+     * Creates a new instance for the specified {@code yAxis}.
+     * The Y value is updated by listeners.
+     *
+     * @param axis the axis this indicator is associated with
+     * @param valueFormat a value string format for marker visualization - deprecated
+     * @deprecated now uses number formatter of axis
+     */
+    @Deprecated
     public YWatchValueIndicator(final Axis axis, final String valueFormat) {
-        this(axis, valueFormat, 0.0);
+        this(axis, 0.0);
     }
 
     /**
@@ -131,10 +158,8 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         final boolean isRightSide = getAxis().getSide().equals(Side.RIGHT);
         if (isRightSide) {
             axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(0, 0)).getX() + 2;
-            triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeight, width, halfHeight, width, -halfHeight, 10.0, -halfHeight);
         } else {
             axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(getAxis().getWidth(), 0)).getX() - 2;
-            triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeight, -width, halfHeight, -width, -halfHeight, -10.0, -halfHeight);
         }
         final double yPosGlobal = getChart().getPlotForeground().sceneToLocal(getChart().getCanvas().localToScene(0, yPos)).getY();
 
@@ -146,7 +171,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         } else {
             layoutLine(minX, yPos, maxX, yPos);
             layoutMarker(axisPos, yPosGlobal, minX, yPos);
-            layoutWatchLabel(axisPos, yPosGlobal, isRightSide);
+            layoutWatchLabel(axisPos, yPosGlobal, isRightSide, halfHeight, width);
         }
     }
 
@@ -158,15 +183,52 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         super.layoutLine(startX, startY, endX, endY);
     }
 
-    protected void layoutWatchLabel(final double x, double y, boolean isRightSide) {
+    protected void layoutWatchLabel(final double x, double y, boolean isRightSide, final Double halfHeight, final Double width) {
         if (label.getText() == null || label.getText().isEmpty()) {
             getChartChildren().remove(label);
             return;
         }
 
-        final double width = label.prefWidth(-1);
-        final double height = label.prefHeight(width);
-        label.resizeRelocate(isRightSide ? x : x - width, y - 0.5 * height, width, height);
+        final double labelWidth = label.prefWidth(-1);
+        final double labelHeight = label.prefHeight(labelWidth);
+        final double padding = 2.0;
+        if (isPreventOcclusion()) { // iterate over all indicators and move them so they don't overlap
+            final YWatchValueIndicator[] indicators = getChart().getPlugins().filtered(p -> p instanceof YWatchValueIndicator && ((YWatchValueIndicator) p).getAxis() == getAxis()).toArray(new YWatchValueIndicator[0]);
+            Arrays.sort(indicators, Comparator.comparingDouble(AbstractSingleValueIndicator::getValue).reversed());
+            final double[] movedPosition = Arrays.stream(indicators).mapToDouble(ind -> ind.triangle.getTranslateY()).toArray();
+            for (int i = 0; i < movedPosition.length - 1; i++) { // calculate new positions
+                final double diff = movedPosition[i + 1] - movedPosition[i];
+                if (labelHeight + padding > diff) {
+                    final double offset = halfHeight - 0.5 * diff + 0.5 * padding; // amount to move indicators up/down
+                    movedPosition[i + 1] += offset;
+                    movedPosition[i] -= offset;
+                    for (int j = i - 1; j >= 0; j--) { // check if lower markers have to be moved
+                        final double diff2 = movedPosition[j + 1] - movedPosition[j];
+                        if (labelHeight + padding > diff2) {
+                            movedPosition[j] -= 2 * halfHeight - diff2 + padding;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < movedPosition.length; i++) { // layout markers and labels to new positions
+                final double offset = movedPosition[i] - indicators[i].triangle.getTranslateY();
+                final double halfHeightPos = offset + halfHeight;
+                final double halfHeightNeg = offset - halfHeight;
+                if (isRightSide) {
+                    indicators[i].triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeightPos, width, halfHeightPos, width, halfHeightNeg, 10.0, halfHeightNeg);
+                } else {
+                    indicators[i].triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeightPos, -width, halfHeightPos, -width, halfHeightNeg, -10.0, halfHeightNeg);
+                }
+                indicators[i].label.resizeRelocate(isRightSide ? x : x - labelWidth, indicators[i].triangle.getTranslateY() - 0.5 * labelHeight + offset, labelWidth, labelHeight);
+            }
+        } else { // just draw the labels at their position
+            if (isRightSide) {
+                triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeight, width, halfHeight, width, -halfHeight, 10.0, -halfHeight);
+            } else {
+                triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeight, -width, halfHeight, -width, -halfHeight, -10.0, -halfHeight);
+            }
+            label.resizeRelocate(isRightSide ? x : x - labelWidth, y - 0.5 * labelHeight, labelWidth, labelHeight);
+        }
         label.toFront();
 
         if (!getChart().getPlotForeground().getChildren().contains(label)) {
@@ -179,5 +241,23 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         setStyleClasses(label, getId() + "-", STYLE_CLASS_LABEL);
         setStyleClasses(line, getId() + "-", STYLE_CLASS_LINE);
         setStyleClasses(triangle, getId() + "-", STYLE_CLASS_MARKER);
+    }
+
+    /**
+     * @return {@code true} if occlusion detection is disabled for this indicator's axis
+     */
+    public boolean isPreventOcclusion() {
+        return (getAxis() instanceof Node) && ((Node) getAxis()).getProperties().get(WATCH_INDICATOR_PREVENT_OCCLUSION) == Boolean.TRUE;
+    }
+
+    /**
+     * @param state true: prevent occlusion of indicator labels for this indicator's axis
+     */
+    public void setPreventOcclusion(final boolean state) {
+        if (state) {
+            ((Node) getAxis()).getProperties().put(WATCH_INDICATOR_PREVENT_OCCLUSION, true);
+        } else {
+            ((Node) getAxis()).getProperties().remove(WATCH_INDICATOR_PREVENT_OCCLUSION);
+        }
     }
 }

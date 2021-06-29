@@ -95,6 +95,7 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
             SimpleOhlcvReplayDataSet replayDataSet = ((SimpleOhlcvReplayDataSet) ohlcvDataSet);
             // close prices visualization
             final YWatchValueIndicator closeIndicator = new YWatchValueIndicator(yAxis, priceFormat);
+            closeIndicator.setPreventOcclusion(true);
             closeIndicator.setId("price");
             closeIndicator.setLineVisible(false);
             closeIndicator.setEditable(false);
