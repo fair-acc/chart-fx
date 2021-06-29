@@ -1,0 +1,11 @@
+.valA-value-watch-indicator-marker {
+    -fx-stroke-width: 0.5;
+    -fx-stroke: black;
+    -fx-fill: #78015b;
+}
+
+.valB-value-watch-indicator-marker {
+    -fx-stroke-width: 0.5;
+    -fx-stroke: black;
+    -fx-fill: green;
+}

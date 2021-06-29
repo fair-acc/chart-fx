@@ -35,19 +35,16 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
     protected static final String STYLE_CLASS_MARKER = "value-watch-indicator-marker";
     public static final String WATCH_INDICATOR_PREVENT_OCCLUSION = "WatchIndicatorPreventOcclusion";
 
-    protected final String valueFormat;
     protected String id;
 
     /**
      * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}.
      *
      * @param axis the axis this indicator is associated with
-     * @param valueFormat a value string format for marker visualization
      * @param value a value to be marked
      */
-    public YWatchValueIndicator(final Axis axis, final String valueFormat, final double value) {
-        super(axis, value, String.format(valueFormat, value));
-        this.valueFormat = valueFormat;
+    public YWatchValueIndicator(final Axis axis, final double value) {
+        super(axis, value, axis.getTickMarkLabel(value));
 
         // marker is visible always for this indicator
         triangle.visibleProperty().unbind();
@@ -63,10 +60,35 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
      * The Y value is updated by listeners.
      *
      * @param axis the axis this indicator is associated with
-     * @param valueFormat a value string format for marker visualization
      */
+    public YWatchValueIndicator(final Axis axis) {
+        this(axis, 0.0);
+    }
+
+    /**
+     * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}.
+     *
+     * @param axis the axis this indicator is associated with
+     * @param format formerly used to specify number format. Now the formating is controlled by the
+     * @param value a value to be marked
+     * @deprecated now uses number formatter of axis
+     */
+    @Deprecated()
+    public YWatchValueIndicator(final Axis axis, final String format, final double value) {
+        this(axis, value);
+    }
+
+    /**
+     * Creates a new instance for the specified {@code yAxis}.
+     * The Y value is updated by listeners.
+     *
+     * @param axis the axis this indicator is associated with
+     * @param valueFormat a value string format for marker visualization - deprecated
+     * @deprecated now uses number formatter of axis
+     */
+    @Deprecated
     public YWatchValueIndicator(final Axis axis, final String valueFormat) {
-        this(axis, valueFormat, 0.0);
+        this(axis, 0.0);
     }
 
     /**
@@ -183,7 +205,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
                     for (int j = i - 1; j >= 0; j--) { // check if lower markers have to be moved
                         final double diff2 = movedPosition[j + 1] - movedPosition[j];
                         if (labelHeight + padding > diff2) {
-                            movedPosition[j] -= 2 * halfHeight - diff2;
+                            movedPosition[j] -= 2 * halfHeight - diff2 + padding;
                         }
                     }
                 }
@@ -195,7 +217,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
                 if (isRightSide) {
                     indicators[i].triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeightPos, width, halfHeightPos, width, halfHeightNeg, 10.0, halfHeightNeg);
                 } else {
-                    indicators[i].triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeightPos, -width, halfHeightPos, -width, halfHeightNeg, -10.0, -halfHeightNeg);
+                    indicators[i].triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeightPos, -width, halfHeightPos, -width, halfHeightNeg, -10.0, halfHeightNeg);
                 }
                 indicators[i].label.resizeRelocate(isRightSide ? x : x - labelWidth, indicators[i].triangle.getTranslateY() - 0.5 * labelHeight + offset, labelWidth, labelHeight);
             }
