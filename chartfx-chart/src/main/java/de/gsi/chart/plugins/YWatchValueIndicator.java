@@ -1,5 +1,10 @@
 package de.gsi.chart.plugins;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.input.MouseEvent;
@@ -29,6 +34,8 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
     protected static final String STYLE_CLASS_LABEL = "value-watch-indicator-label";
     protected static final String STYLE_CLASS_LINE = "value-watch-indicator-line";
     protected static final String STYLE_CLASS_MARKER = "value-watch-indicator-marker";
+
+    protected final BooleanProperty preventOcclusion = new SimpleBooleanProperty(this, "preventOcclusion", true);
 
     protected final String valueFormat;
     protected String id;
@@ -131,10 +138,8 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         final boolean isRightSide = getAxis().getSide().equals(Side.RIGHT);
         if (isRightSide) {
             axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(0, 0)).getX() + 2;
-            triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeight, width, halfHeight, width, -halfHeight, 10.0, -halfHeight);
         } else {
             axisPos = getChart().getPlotForeground().sceneToLocal(getAxis().getCanvas().localToScene(getAxis().getWidth(), 0)).getX() - 2;
-            triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeight, -width, halfHeight, -width, -halfHeight, -10.0, -halfHeight);
         }
         final double yPosGlobal = getChart().getPlotForeground().sceneToLocal(getChart().getCanvas().localToScene(0, yPos)).getY();
 
@@ -146,7 +151,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         } else {
             layoutLine(minX, yPos, maxX, yPos);
             layoutMarker(axisPos, yPosGlobal, minX, yPos);
-            layoutWatchLabel(axisPos, yPosGlobal, isRightSide);
+            layoutWatchLabel(axisPos, yPosGlobal, isRightSide, halfHeight, width);
         }
     }
 
@@ -158,15 +163,52 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         super.layoutLine(startX, startY, endX, endY);
     }
 
-    protected void layoutWatchLabel(final double x, double y, boolean isRightSide) {
+    protected void layoutWatchLabel(final double x, double y, boolean isRightSide, final Double halfHeight, final Double width) {
         if (label.getText() == null || label.getText().isEmpty()) {
             getChartChildren().remove(label);
             return;
         }
 
-        final double width = label.prefWidth(-1);
-        final double height = label.prefHeight(width);
-        label.resizeRelocate(isRightSide ? x : x - width, y - 0.5 * height, width, height);
+        final double labelWidth = label.prefWidth(-1);
+        final double labelHeight = label.prefHeight(labelWidth);
+        final double padding = 2.0;
+        if (isPreventOcclusion()) { // iterate over all indicators and move them so they don't overlap
+            final YWatchValueIndicator[] indicators = getChart().getPlugins().filtered(p -> p instanceof YWatchValueIndicator).toArray(new YWatchValueIndicator[0]);
+            Arrays.sort(indicators, Comparator.comparingDouble(AbstractSingleValueIndicator::getValue).reversed());
+            final double[] movedPosition = Arrays.stream(indicators).mapToDouble(ind -> ind.triangle.getTranslateY()).toArray();
+            for (int i = 0; i < movedPosition.length - 1; i++) { // calculate new positions
+                final double diff = movedPosition[i + 1] - movedPosition[i];
+                if (labelHeight + padding > diff) {
+                    final double offset = halfHeight - 0.5 * diff + 0.5 * padding; // amount to move indicators up/down
+                    movedPosition[i + 1] += offset;
+                    movedPosition[i] -= offset;
+                    for (int j = i - 1; j >= 0; j--) { // check if lower markers have to be moved
+                        final double diff2 = movedPosition[j + 1] - movedPosition[j];
+                        if (labelHeight + padding > diff2) {
+                            movedPosition[j] -= 2 * halfHeight - diff2;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < movedPosition.length; i++) { // layout markers to new positions
+                final double offset = movedPosition[i] - indicators[i].triangle.getTranslateY();
+                final double halfHeightPos = offset + halfHeight;
+                final double halfHeightNeg = offset - halfHeight;
+                if (isRightSide) {
+                    indicators[i].triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeightPos, width, halfHeightPos, width, halfHeightNeg, 10.0, halfHeightNeg);
+                } else {
+                    indicators[i].triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeightPos, -width, halfHeightPos, -width, halfHeightNeg, -10.0, -halfHeightNeg);
+                }
+                indicators[i].label.resizeRelocate(isRightSide ? x : x - labelWidth, indicators[i].triangle.getTranslateY() - 0.5 * labelHeight + offset, labelWidth, labelHeight);
+            }
+        } else { // just draw the labels at their position
+            if (isRightSide) {
+                triangle.getPoints().setAll(0.0, 0.0, 10.0, halfHeight, width, halfHeight, width, -halfHeight, 10.0, -halfHeight);
+            } else {
+                triangle.getPoints().setAll(0.0, 0.0, -10.0, halfHeight, -width, halfHeight, -width, -halfHeight, -10.0, -halfHeight);
+            }
+            label.resizeRelocate(isRightSide ? x : x - labelWidth, y - 0.5 * labelHeight, labelWidth, labelHeight);
+        }
         label.toFront();
 
         if (!getChart().getPlotForeground().getChildren().contains(label)) {
@@ -179,5 +221,17 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         setStyleClasses(label, getId() + "-", STYLE_CLASS_LABEL);
         setStyleClasses(line, getId() + "-", STYLE_CLASS_LINE);
         setStyleClasses(triangle, getId() + "-", STYLE_CLASS_MARKER);
+    }
+
+    public boolean isPreventOcclusion() {
+        return preventOcclusionProperty().get();
+    }
+
+    public void setPreventOcclusion(boolean preventOcclusionBool) {
+        preventOcclusionProperty().set(preventOcclusionBool);
+    }
+
+    public BooleanProperty preventOcclusionProperty() {
+        return preventOcclusion;
     }
 }
