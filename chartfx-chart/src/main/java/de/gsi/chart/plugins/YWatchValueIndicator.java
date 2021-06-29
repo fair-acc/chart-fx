@@ -3,10 +3,9 @@ package de.gsi.chart.plugins;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 
 import de.gsi.chart.axes.Axis;
@@ -34,8 +33,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
     protected static final String STYLE_CLASS_LABEL = "value-watch-indicator-label";
     protected static final String STYLE_CLASS_LINE = "value-watch-indicator-line";
     protected static final String STYLE_CLASS_MARKER = "value-watch-indicator-marker";
-
-    protected final BooleanProperty preventOcclusion = new SimpleBooleanProperty(this, "preventOcclusion", true);
+    public static final String WATCH_INDICATOR_PREVENT_OCCLUSION = "WatchIndicatorPreventOcclusion";
 
     protected final String valueFormat;
     protected String id;
@@ -173,7 +171,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         final double labelHeight = label.prefHeight(labelWidth);
         final double padding = 2.0;
         if (isPreventOcclusion()) { // iterate over all indicators and move them so they don't overlap
-            final YWatchValueIndicator[] indicators = getChart().getPlugins().filtered(p -> p instanceof YWatchValueIndicator).toArray(new YWatchValueIndicator[0]);
+            final YWatchValueIndicator[] indicators = getChart().getPlugins().filtered(p -> p instanceof YWatchValueIndicator && ((YWatchValueIndicator) p).getAxis() == getAxis()).toArray(new YWatchValueIndicator[0]);
             Arrays.sort(indicators, Comparator.comparingDouble(AbstractSingleValueIndicator::getValue).reversed());
             final double[] movedPosition = Arrays.stream(indicators).mapToDouble(ind -> ind.triangle.getTranslateY()).toArray();
             for (int i = 0; i < movedPosition.length - 1; i++) { // calculate new positions
@@ -190,7 +188,7 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
                     }
                 }
             }
-            for (int i = 0; i < movedPosition.length; i++) { // layout markers to new positions
+            for (int i = 0; i < movedPosition.length; i++) { // layout markers and labels to new positions
                 final double offset = movedPosition[i] - indicators[i].triangle.getTranslateY();
                 final double halfHeightPos = offset + halfHeight;
                 final double halfHeightNeg = offset - halfHeight;
@@ -223,15 +221,21 @@ public class YWatchValueIndicator extends AbstractSingleValueIndicator implement
         setStyleClasses(triangle, getId() + "-", STYLE_CLASS_MARKER);
     }
 
+    /**
+     * @return {@code true} if occlusion detection is disabled for this indicator's axis
+     */
     public boolean isPreventOcclusion() {
-        return preventOcclusionProperty().get();
+        return (getAxis() instanceof Node) && ((Node) getAxis()).getProperties().get(WATCH_INDICATOR_PREVENT_OCCLUSION) == Boolean.TRUE;
     }
 
-    public void setPreventOcclusion(boolean preventOcclusionBool) {
-        preventOcclusionProperty().set(preventOcclusionBool);
-    }
-
-    public BooleanProperty preventOcclusionProperty() {
-        return preventOcclusion;
+    /**
+     * @param state true: prevent occlusion of indicator labels for this indicator's axis
+     */
+    public void setPreventOcclusion(final boolean state) {
+        if (state) {
+            ((Node) getAxis()).getProperties().put(WATCH_INDICATOR_PREVENT_OCCLUSION, true);
+        } else {
+            ((Node) getAxis()).getProperties().remove(WATCH_INDICATOR_PREVENT_OCCLUSION);
+        }
     }
 }
