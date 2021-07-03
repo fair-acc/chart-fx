@@ -23,9 +23,9 @@ import org.jetbrains.annotations.NotNull;
  * </li>
  * <li> METRIC_PREFIX: using standard SI/metric-unit prefixes.
  *         Number of significant digits is set via #setFixedPrecision(int)
- *         The default precision is 3, i.e. 1234.5678 -> "1.234k"
+ *         The default precision is 3, i.e. 1234.5678 -&gt; "1.234k"
  * </li>
- * <li> BYTE_PREFIX: using standard SI/metric-unit prefixes with base '1024'.</si>
+ * <li> BYTE_PREFIX: using standard SI/metric-unit prefixes with base '1024'.</li>
  * <li> JDK: JDK default using the 'toString()' method</li>
  * </ul>
  *
