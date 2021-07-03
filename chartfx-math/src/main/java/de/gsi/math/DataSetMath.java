@@ -221,10 +221,10 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final int dataCount2 = prevAverage2.getDataCount();
 
         final DoubleErrorDataSet retFunction = dataCount1 == 0
-                                                       ? new DoubleErrorDataSet(functionName, newDataSet.getValues(DIM_X), newDataSet.getValues(DIM_Y),
-                                                               errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(), true)
-                                                       : new DoubleErrorDataSet(prevAverage.getName(), prevAverage.getValues(DIM_X), prevAverage.getValues(DIM_Y),
-                                                               errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(), true);
+                                                     ? new DoubleErrorDataSet(functionName, newDataSet.getValues(DIM_X), newDataSet.getValues(DIM_Y),
+                                                             errors(newDataSet, EYN), errors(newDataSet, EYP), newDataSet.getDataCount(), true)
+                                                     : new DoubleErrorDataSet(prevAverage.getName(), prevAverage.getValues(DIM_X), prevAverage.getValues(DIM_Y),
+                                                             errors(prevAverage, EYN), errors(prevAverage, EYP), newDataSet.getDataCount(), true);
 
         final double alpha = 1.0 / (1.0 + nUpdates);
         final boolean avg2Empty = dataCount2 == 0;
@@ -318,13 +318,13 @@ public final class DataSetMath { // NOPMD - nomen est omen
             final double yenC = error(function, EYN, i);
             final double yenR = error(function, EYN, i + 1);
             final double yen = MathBase.sqrt(MathBase.sqr(yenL) + MathBase.sqr(yenC) + MathBase.sqr(yenR))
-                               / 4;
+                             / 4;
 
             final double yepL = error(function, EYP, i - 1);
             final double yepC = error(function, EYP, i);
             final double yepR = error(function, EYP, i + 1);
             final double yep = MathBase.sqrt(MathBase.sqr(yepL) + MathBase.sqr(yepC) + MathBase.sqr(yepR))
-                               / 4;
+                             / 4;
 
             // simple derivative computation
             final double derivative = 0.5 * ((valC - valL) / stepL + (valR - valC) / stepR);
