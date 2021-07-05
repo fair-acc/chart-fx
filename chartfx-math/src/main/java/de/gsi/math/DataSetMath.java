@@ -80,7 +80,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     }
 
     // convenience short-hand notation for getting error variables (if defined for dataset)
-    protected static double error(final DataSet dataSet, final ErrType eType, final int index, final double x,
+    private static double error(final DataSet dataSet, final ErrType eType, final int index, final double x,
             final boolean interpolate) {
         if (!(dataSet instanceof DataSetError)) {
             // data set does not have any error definition
@@ -646,7 +646,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
     @SafeVarargs
     public static DataSet integrateFunction(final DataSet function, final double xMin, final double xMax, @NotNull final Formatter<Number>... format) {
         final int nLength = function.getDataCount();
-        final var pattern = "{0}({1})dyn|_'{'{2}'}'^'{'{3}'}')";
+        final var pattern = "{0}({1})dyn|_'{'{2}'}'^'{'{3}'}'";
         final String dataSetName = getFormatter(format).format(pattern, INTEGRAL_SYMBOL, function.getName(), xMin, xMax);
         if (nLength <= 0) {
             if (!(function instanceof GridDataSet) || function.getDimension() > 2) {
