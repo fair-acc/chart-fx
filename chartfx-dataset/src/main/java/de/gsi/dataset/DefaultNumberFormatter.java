@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
  * <li> FIXED_WIDTH_EXP: using exponential representation only. The string width is set via #setNumberOfCharacters(int)</li>
  * <li> FIXED_WIDTH_AND_EXP: using decimal or exponential representations, with preference order: shorter representation, more significant digits.
  *         The string width is set via #setNumberOfCharacters(int)
- *         N.B. This mode is only useful for #getNumberOfCharacters width greater than 6 (due to 'E[+,-]0' overhead)
+ *         N.B. This mode is only useful for #getNumberOfCharacters width &gt;= 6 (due to 'E[+,-]0' and potential decimal point overhead of '4')
  * </li>
  * <li> OPTIMAL_WIDTH (default): using the shorter of decimal vs. exponential representation
  *         Number of significant digits is set via #setFixedPrecision(int)
