@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import static de.gsi.dataset.DefaultNumberFormatter.FormatMode;
+import static de.gsi.dataset.DefaultNumberFormatter.SignConvention;
 
 import java.text.ParsePosition;
 
@@ -15,6 +16,13 @@ class FormatterTests {
     @Test
     void basicTests() {
         Formatter<Number> testFormatter = new Formatter<>() {
+            /**
+             * Use this overwrite if the default Number format isn't enough and something more specific is needed.
+             *
+             * @param pattern the pattern for this message format
+             * @param args optional arguments that are filled by the calling argument
+             * @return the formatted string
+             */
             @Override
             public @NotNull String format(@NotNull String pattern, Object... args) {
                 if (args.length <= 3) {
@@ -59,24 +67,25 @@ class FormatterTests {
         final var formatter = new DefaultNumberFormatter();
         assertDoesNotThrow(() -> formatter.setFormatMode(FormatMode.FIXED_WIDTH_ONLY));
         assertEquals(FormatMode.FIXED_WIDTH_ONLY, formatter.getFormatMode());
-        assertDoesNotThrow(() -> formatter.setNumberOfCharacters(5));
-        assertEquals(5, formatter.getNumberOfCharacters());
+        assertDoesNotThrow(() -> formatter.setNumberOfCharacters(6));
+        assertEquals(6, formatter.getNumberOfCharacters());
 
-        assertEquals("1.234", formatter.format("{0}", 1.234567890));
-        assertEquals("1.234", formatter.toString(1.234567890123456789));
-        assertEquals("1234567890", formatter.toString(1234567890));
-        assertEquals("12345678901", formatter.toString(12345678901L));
-        assertEquals("  123", formatter.toString(123));
-        assertEquals("    0", formatter.toString(0));
-        assertEquals("  0.1", formatter.toString(0.1));
-        assertEquals(" 0.01", formatter.toString(0.01));
-        assertEquals("   -∞", formatter.toString(Double.NEGATIVE_INFINITY));
-        assertEquals("   +∞", formatter.toString(Double.POSITIVE_INFINITY));
-        assertEquals("  NaN", formatter.toString(Double.NaN));
-        assertEquals("   -∞", formatter.toString(Float.NEGATIVE_INFINITY));
-        assertEquals("   +∞", formatter.toString(Float.POSITIVE_INFINITY));
-        assertEquals("  NaN", formatter.toString(Float.NaN));
-        assertEquals("0.000", formatter.toString(0.000000000123456789));
+        assertEquals(" 1.234", formatter.format("{0}", 1.234567890));
+        assertEquals(" 1.234", formatter.toString(1.234567890123456789));
+        assertEquals(" 1234567890", formatter.toString(1234567890));
+        assertEquals(" 12345678901", formatter.toString(12345678901L));
+        assertEquals("   123", formatter.toString(123));
+        assertEquals("     0", formatter.toString(0.0));
+        assertEquals("     0", formatter.toString(0));
+        assertEquals("   0.1", formatter.toString(0.1));
+        assertEquals("  0.01", formatter.toString(0.01));
+        assertEquals("    -∞", formatter.toString(Double.NEGATIVE_INFINITY));
+        assertEquals("    +∞", formatter.toString(Double.POSITIVE_INFINITY));
+        assertEquals("   NaN", formatter.toString(Double.NaN));
+        assertEquals("    -∞", formatter.toString(Float.NEGATIVE_INFINITY));
+        assertEquals("    +∞", formatter.toString(Float.POSITIVE_INFINITY));
+        assertEquals("   NaN", formatter.toString(Float.NaN));
+        assertEquals(" 0.000", formatter.toString(0.000000000123456789));
     }
 
     @Test
@@ -86,6 +95,8 @@ class FormatterTests {
         assertEquals(FormatMode.FIXED_WIDTH_EXP, formatter.getFormatMode());
         assertDoesNotThrow(() -> formatter.setNumberOfCharacters(5));
         assertEquals(5, formatter.getNumberOfCharacters());
+        assertDoesNotThrow(() -> formatter.setSignConvention(SignConvention.NONE));
+        assertEquals(SignConvention.NONE, formatter.getSignConvention());
 
         for (int i = 0; i < 15; i++) {
             final int width = i;
@@ -98,7 +109,7 @@ class FormatterTests {
             assertEquals((i < 6) ? 4 : width, string.length(), "length mismatch: string = '" + string + "' requested width = " + width);
             final double parsedValue = formatter.fromString(string).doubleValue();
             final double delta = (i < 6) ? 1 : Math.pow(10, -i + 5);
-            assertEquals(testValue, parsedValue, delta * testValue, "failed for test string: " + string + " value: " + testValue + " vs. parsed: " + parsedValue + " delta: " + delta);
+            assertEquals(testValue, parsedValue, delta * testValue, "failed for test string: " + string + "' requested width = " + width + " value: " + testValue + " vs. parsed: " + parsedValue + " delta: " + delta);
         }
     }
 
@@ -171,24 +182,40 @@ class FormatterTests {
         final var formatter = new DefaultNumberFormatter();
         assertDoesNotThrow(() -> formatter.setFormatMode(FormatMode.FIXED_WIDTH_AND_EXP));
         assertEquals(FormatMode.FIXED_WIDTH_AND_EXP, formatter.getFormatMode());
-        assertDoesNotThrow(() -> formatter.setNumberOfCharacters(7));
-        assertEquals(7, formatter.getNumberOfCharacters());
+        assertDoesNotThrow(() -> formatter.setNumberOfCharacters(8));
+        assertEquals(8, formatter.getNumberOfCharacters());
+        assertDoesNotThrow(() -> formatter.setSignConvention(SignConvention.EMPTY_SIGN));
+        assertEquals(SignConvention.EMPTY_SIGN, formatter.getSignConvention());
+        assertDoesNotThrow(() -> formatter.setSignConventionExp(SignConvention.FORCE_SIGN));
+        assertEquals(SignConvention.FORCE_SIGN, formatter.getSignConventionExp());
 
-        assertEquals("1.23456", formatter.format("{0}", 1.234567890));
-        assertEquals("1.23456", formatter.toString(1.234567890123456789));
-        assertEquals("1.23E+9", formatter.toString(1234567890));
-        assertEquals("1.2E+10", formatter.toString(12345678901L));
-        assertEquals("    123", formatter.toString(123));
-        assertEquals("      0", formatter.toString(0));
-        assertEquals("    0.1", formatter.toString(0.1));
-        assertEquals("   0.01", formatter.toString(0.01));
-        assertEquals("     -∞", formatter.toString(Double.NEGATIVE_INFINITY));
-        assertEquals("     +∞", formatter.toString(Double.POSITIVE_INFINITY));
-        assertEquals("    NaN", formatter.toString(Double.NaN));
-        assertEquals("     -∞", formatter.toString(Float.NEGATIVE_INFINITY));
-        assertEquals("     +∞", formatter.toString(Float.POSITIVE_INFINITY));
-        assertEquals("    NaN", formatter.toString(Float.NaN));
-        assertEquals("1.2E-10", formatter.toString(0.000000000123456789));
+        assertEquals(" 1.23456", formatter.format("{0}", 1.234567890));
+        assertEquals(" 1.23456", formatter.toString(1.234567890123456789));
+        assertEquals(" 1.23E+9", formatter.toString(1234567890));
+        assertEquals(" 1.2E+10", formatter.toString(12345678901L));
+        assertEquals("     123", formatter.toString(123));
+        assertEquals("       0", formatter.toString(0.0));
+        assertEquals("       0", formatter.toString(0));
+        assertEquals("     0.1", formatter.toString(0.1));
+        assertEquals("    0.01", formatter.toString(0.01));
+        assertEquals("      -∞", formatter.toString(Double.NEGATIVE_INFINITY));
+        assertEquals("      +∞", formatter.toString(Double.POSITIVE_INFINITY));
+        assertEquals("     NaN", formatter.toString(Double.NaN));
+        assertEquals("      -∞", formatter.toString(Float.NEGATIVE_INFINITY));
+        assertEquals("      +∞", formatter.toString(Float.POSITIVE_INFINITY));
+        assertEquals("     NaN", formatter.toString(Float.NaN));
+        assertEquals(" 1.2E-10", formatter.toString(0.000000000123456789));
+
+        assertEquals("-1.23456", formatter.format("{0}", -1.234567890));
+        assertEquals("-1.23456", formatter.toString(-1.234567890123456789));
+        assertEquals("-1.23E+9", formatter.toString(-1234567890));
+        assertEquals("-1.2E+10", formatter.toString(-12345678901L));
+        assertEquals("    -123", formatter.toString(-123));
+        assertEquals("      -0", formatter.toString(-0.0));
+        assertEquals("       0", formatter.toString(-0)); // negative zero does not exist for integers (2-complement)
+        assertEquals("    -0.1", formatter.toString(-0.1));
+        assertEquals("   -0.01", formatter.toString(-0.01));
+        assertEquals("-1.2E-10", formatter.toString(-0.000000000123456789));
     }
 
     @Test
@@ -263,7 +290,7 @@ class FormatterTests {
             final double testValue = 1.23 * Math.pow(10, i);
             final var string = formatter.toString(testValue);
             final double parsedValue = formatter.fromString(string).doubleValue();
-            assertEquals(testValue, parsedValue, 0.01 * testValue, "failed for test string: " + string + " value: " + testValue + " vs. parsed: " + parsedValue);
+            assertEquals(testValue, parsedValue, 0.03 * testValue, "failed for test string: " + string + " value: " + testValue + " vs. parsed: " + parsedValue);
         }
     }
 
@@ -272,6 +299,21 @@ class FormatterTests {
         final var formatter = new DefaultNumberFormatter();
         assertDoesNotThrow(() -> formatter.setFormatMode(FormatMode.FIXED_WIDTH_AND_EXP));
         assertEquals(FormatMode.FIXED_WIDTH_AND_EXP, formatter.getFormatMode());
+        assertDoesNotThrow(() -> formatter.setSignConvention(SignConvention.NONE));
+        assertEquals(SignConvention.NONE, formatter.getSignConvention());
+
+        for (int i = 0; i < 15; i++) {
+            final int width = i;
+            assertDoesNotThrow(() -> formatter.setNumberOfCharacters(width));
+            assertEquals(width, formatter.getNumberOfCharacters());
+
+            final var string = formatter.toString(1.234567890123456789e9);
+            // System.err.printf("%2d out = '%s'%n", i, string)
+            assertEquals((i < 6) ? 4 : width, string.length(), "length mismatch: string = '" + string + "' requested width = " + width);
+        }
+
+        assertDoesNotThrow(() -> formatter.setSignConventionExp(SignConvention.FORCE_SIGN));
+        assertEquals(SignConvention.FORCE_SIGN, formatter.getSignConventionExp());
 
         for (int i = 0; i < 15; i++) {
             final int width = i;

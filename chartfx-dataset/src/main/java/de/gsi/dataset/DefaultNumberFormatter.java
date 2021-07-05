@@ -37,18 +37,30 @@ public class DefaultNumberFormatter implements Formatter<Number> {
     protected static final String SI_PREFIX = "yzafpnµm kMGTPEZY";
     protected static final String SI_PREFIX_TEST = "yzafpnuµmkKMGTPEZY"; // N.B. doubling of micro and kilo representation for parsing
     protected static final int[] SI_PREFIX_EXP = { -24, -21, -18, -15, -12, -9, -6, -6, -3, 3, 3, 6, 9, 12, 15, 18, 21, 24 };
-    protected DecimalFormat decimalFormat = new DecimalFormat("#.#", DecimalFormatSymbols.getInstance(Locale.UK));
-    protected DecimalFormat decimalFormatMaxPrecision = new DecimalFormat("#.#", DecimalFormatSymbols.getInstance(Locale.UK));
+    protected final DecimalFormat[] decimalFormat = {
+        new DecimalFormat("#.#", DecimalFormatSymbols.getInstance(Locale.UK)), // no sign see #signConvention
+        new DecimalFormat("+#.#", DecimalFormatSymbols.getInstance(Locale.UK)), // forced sign see #signConvention
+        new DecimalFormat(" #.#;-#.#", DecimalFormatSymbols.getInstance(Locale.UK)) // empty sign see #signConvention
+    };
+    protected final DecimalFormat[] decimalFormatMaxPrecision = {
+        new DecimalFormat("#.#", DecimalFormatSymbols.getInstance(Locale.UK)), // no sign see #signConvention
+        new DecimalFormat("#.#", DecimalFormatSymbols.getInstance(Locale.UK)), // forced sign see #signConvention
+        new DecimalFormat("#.#", DecimalFormatSymbols.getInstance(Locale.UK)) // empty sign see #signConvention
+    };
     protected String fixedLengthFormat;
     protected String fixPrecisionFormat;
     protected String fixPrecisionFormatZero;
+    private SignConvention signConvention = SignConvention.EMPTY_SIGN;
+    private SignConvention signConventionExp = SignConvention.FORCE_SIGN;
     private int numberOfCharacters = 6; // N.B. exp-form only useful for width>=6
     private int fixedPrecision = 3;
     private FormatMode formatMode = FormatMode.OPTIMAL_WIDTH;
 
     public DefaultNumberFormatter() {
-        decimalFormat.setMaximumFractionDigits(20);
-        setNumberOfCharacters(5); // NOPMD
+        for (DecimalFormat format : decimalFormat) {
+            format.setMaximumFractionDigits(20);
+        }
+        setNumberOfCharacters(numberOfCharacters); // NOPMD
         setFixedPrecision(fixedPrecision);
     }
 
@@ -77,30 +89,48 @@ public class DefaultNumberFormatter implements Formatter<Number> {
         return fixedPrecision;
     }
 
-    public FormatMode getFormatMode() {
-        return formatMode;
-    }
-
-    public int getNumberOfCharacters() {
-        return numberOfCharacters;
-    }
-
     public void setFixedPrecision(final int fixedPrecision) {
         assert fixedPrecision >= 0 : "precision must be larger 0, is: " + fixedPrecision;
         fixPrecisionFormat = "%." + fixedPrecision + "f%c";
         fixPrecisionFormatZero = "%." + fixedPrecision + "f";
-        decimalFormatMaxPrecision.setMaximumFractionDigits(fixedPrecision);
+        for (DecimalFormat format : decimalFormatMaxPrecision) {
+            format.setMaximumFractionDigits(fixedPrecision);
+        }
         this.fixedPrecision = fixedPrecision;
+    }
+
+    public FormatMode getFormatMode() {
+        return formatMode;
     }
 
     public void setFormatMode(final FormatMode formatMode) {
         this.formatMode = formatMode;
     }
 
+    public int getNumberOfCharacters() {
+        return numberOfCharacters;
+    }
+
     public void setNumberOfCharacters(final int numberOfCharacters) {
         assert numberOfCharacters >= 0 : "numberOfCharacters must be larger 0, is: " + numberOfCharacters;
         fixedLengthFormat = "%1$" + numberOfCharacters + 's';
         this.numberOfCharacters = numberOfCharacters;
+    }
+
+    public SignConvention getSignConvention() {
+        return signConvention;
+    }
+
+    public void setSignConvention(final SignConvention signConvention) {
+        this.signConvention = signConvention;
+    }
+
+    public SignConvention getSignConventionExp() {
+        return signConventionExp;
+    }
+
+    public void setSignConventionExp(final SignConvention signConventionExp) {
+        this.signConventionExp = signConventionExp;
     }
 
     @Override
@@ -127,18 +157,56 @@ public class DefaultNumberFormatter implements Formatter<Number> {
         }
 
         if (FormatMode.FIXED_WIDTH_EXP.equals(formatMode)) {
-            return expFormatFixedWidth(number.doubleValue(), numberOfCharacters);
+            return expFormatFixedWidth(number, numberOfCharacters, signConvention, signConventionExp);
         }
 
         if (FormatMode.OPTIMAL_WIDTH.equals(formatMode)) {
-            return optimalWidthFormat(number.doubleValue());
+            return optimalWidthFormat(number);
         }
 
         if (FormatMode.FIXED_WIDTH_ONLY.equals(formatMode) || FormatMode.FIXED_WIDTH_AND_EXP.equals(formatMode)) {
-            return fixedWidthFormat(number.doubleValue());
+            return fixedWidthFormat(number);
         }
 
         return number.toString(); // JDK default
+    }
+
+    protected String fixedWidthFormat(final @NotNull Number number) {
+        if (number.doubleValue() == 0.0) {
+            // short-cut for exact and negative '0'
+            if (Math.copySign(1.0, number.doubleValue()) > 0) {
+                return String.format(fixedLengthFormat, "0");
+            } else {
+                return String.format(fixedLengthFormat, "-0");
+            }
+        }
+
+        var decimalForm = decimalFormat[signConvention.index].format(number);
+        var decimalFormLength = decimalForm.length();
+        final var indexDecimalPoint = decimalForm.indexOf('.');
+        if (formatMode.fixedWidth() && (indexDecimalPoint >= 0 && indexDecimalPoint < numberOfCharacters)) {
+            // short number with decimal point
+            decimalForm = decimalForm.substring(0, Math.min(numberOfCharacters, decimalFormLength));
+            decimalFormLength = decimalForm.length();
+            // virtual 'else' branch:
+            // large integer -> need to print all digits otherwise false mathematical representation
+            // N.B. small numbers may be truncated to zero in this mode though
+        }
+
+        if (FormatMode.FIXED_WIDTH_ONLY.equals(formatMode)) {
+            return decimalFormLength >= numberOfCharacters ? decimalForm : String.format(fixedLengthFormat, decimalForm);
+        }
+
+        final double absValue = Math.abs(number.doubleValue());
+        final String exponentialForm = expFormatFixedWidth(number, numberOfCharacters, signConvention, signConventionExp);
+
+        final double minExpLimit = Math.pow(10, -numberOfCharacters + 2.0);
+        final double maxExpLimit = Math.pow(10, numberOfCharacters - 2.0);
+
+        if ((decimalFormLength <= exponentialForm.length() || decimalFormLength <= 5) && (absValue > minExpLimit && absValue < maxExpLimit)) {
+            return decimalFormLength >= numberOfCharacters ? decimalForm : String.format(fixedLengthFormat, decimalForm);
+        }
+        return exponentialForm;
     }
 
     protected String metricFormat(final double value, final boolean byteFormat) {
@@ -159,6 +227,50 @@ public class DefaultNumberFormatter implements Formatter<Number> {
         return String.format(prefix_index != NO_PREFIX_OFFSET ? fixPrecisionFormat : fixPrecisionFormatZero, scaledValue, SI_PREFIX.charAt(prefix_index));
     }
 
+    protected String optimalWidthFormat(final @NotNull Number number) {
+        if (number.doubleValue() == 0.0) {
+            // short-cut for exact '0'
+            return "0";
+        }
+
+        var decimalForm = decimalFormatMaxPrecision[SignConvention.NONE.index].format(number);
+        var decimalFormLength = decimalForm.length();
+        // choose most compact form
+        final double absValue = Math.abs(number.doubleValue());
+        final double minPrecision = Math.pow(10, -fixedPrecision);
+        final var exponentialForm = expFormatFixedPrecision(number.doubleValue(), fixedPrecision, SignConvention.NONE, signConventionExp);
+        return decimalFormLength < exponentialForm.length() && absValue >= minPrecision ? decimalForm : exponentialForm;
+    }
+
+    protected static String expFormatFixedPrecision(final double value, final int precision, final SignConvention sign, final SignConvention signExp) {
+        final int order = (int) Math.floor(Math.log10(Math.abs(value)));
+        final double mantissa = value / Math.pow(10, order);
+
+        return String.format(getSignPrefix(sign, mantissa >= 0) + '.' + precision + "fE" + getSignPrefix(signExp, order >= 0) + 'd', mantissa, order); // NOSONAR
+    }
+
+    protected static String expFormatFixedWidth(final Number value, final int width, final SignConvention sign, final SignConvention signExp) {
+        final int order = (int) Math.floor(Math.log10(Math.abs(value.doubleValue())));
+        final int orderExp = (order == 0 ? 0 : (int) Math.floor(Math.log10(Math.abs(order)))) + 1;
+        final double mantissa = value.doubleValue() / Math.pow(10, order);
+        final int spaceForSigns = (SignConvention.NONE.equals(sign) ? 0 : 1) + (SignConvention.NONE.equals(signExp) ? 0 : 1);
+        final int precision = Math.max(0, width - (3 + orderExp + spaceForSigns));
+
+        return String.format(getSignPrefix(sign, mantissa >= 0) + '.' + precision + "fE" + getSignPrefix(signExp, order >= 0) + 'd', mantissa, order); // NOSONAR
+    }
+
+    protected static String getSignPrefix(SignConvention sign, boolean posValue) {
+        switch (sign) {
+        case FORCE_SIGN:
+            return "%+";
+        case EMPTY_SIGN:
+            return posValue ? " %" : "%";
+        case NONE:
+        default:
+            return "%";
+        }
+    }
+
     protected static double metricParse(@NotNull String str, final boolean byteFormat) {
         if (StringUtils.containsAny(str, SI_PREFIX_TEST)) {
             final String[] split = StringUtils.splitByCharacterType(str);
@@ -175,69 +287,18 @@ public class DefaultNumberFormatter implements Formatter<Number> {
         return Double.parseDouble(str);
     }
 
-    protected static String expFormatFixedWidth(final double value, final int width) {
-        final int order = (int) Math.floor(Math.log10(Math.abs(value)));
-        final int orderExp = (order == 0 ? 0 : (int) Math.floor(Math.log10(Math.abs(order)))) + 1;
-        final double mantissa = value / Math.pow(10, order);
-        final int precision = Math.max(0, width - (4 + orderExp));
+    public enum SignConvention {
+        /* omits sign or emtpy character for positive numbers */
+        NONE(0),
+        /* forces '+' sign for positive numbers */
+        FORCE_SIGN(1),
+        /* forces empty character ' ' for positive numbers */
+        EMPTY_SIGN(2);
 
-        return String.format("%." + precision + "fE%+d", mantissa, order); // NOSONAR
-    }
-
-    protected static String expFormatFixedPrecision(final double value, final int precision) {
-        final int order = (int) Math.floor(Math.log10(Math.abs(value)));
-        final double mantissa = value / Math.pow(10, order);
-
-        return String.format("%." + precision + "fE%+d", mantissa, order); // NOSONAR
-    }
-
-    protected String fixedWidthFormat(final @NotNull Number number) {
-        if (number.doubleValue() == 0.0) {
-            // short-cut for exact '0'
-            return String.format(fixedLengthFormat, "0");
+        private final int index;
+        SignConvention(final int index) {
+            this.index = index;
         }
-
-        var decimalForm = decimalFormat.format(number);
-        var decimalFormLength = decimalForm.length();
-        final var indexDecimalPoint = decimalForm.indexOf('.');
-        if (formatMode.fixedWidth() && (indexDecimalPoint >= 0 && indexDecimalPoint < numberOfCharacters)) {
-            // short number with decimal point
-            decimalForm = decimalForm.substring(0, Math.min(numberOfCharacters, decimalFormLength));
-            decimalFormLength = decimalForm.length();
-            // virtual 'else' branch:
-            // large integer -> need to print all digits otherwise false mathematical representation
-            // N.B. small numbers may be truncated to zero in this mode though
-        }
-
-        if (FormatMode.FIXED_WIDTH_ONLY.equals(formatMode)) {
-            return decimalFormLength >= numberOfCharacters ? decimalForm : String.format(fixedLengthFormat, decimalForm);
-        }
-
-        final double absValue = Math.abs(number.doubleValue());
-        final String exponentialForm = expFormatFixedWidth(number.doubleValue(), numberOfCharacters);
-
-        final double minExpLimit = Math.pow(10, -numberOfCharacters + 2.0);
-        final double maxExpLimit = Math.pow(10, numberOfCharacters - 2.0);
-
-        if ((decimalFormLength <= exponentialForm.length() || decimalFormLength <= 5) && (absValue > minExpLimit && absValue < maxExpLimit)) {
-            return decimalFormLength >= numberOfCharacters ? decimalForm : String.format(fixedLengthFormat, decimalForm);
-        }
-        return exponentialForm;
-    }
-
-    protected String optimalWidthFormat(final @NotNull Number number) {
-        if (number.doubleValue() == 0.0) {
-            // short-cut for exact '0'
-            return "0";
-        }
-
-        var decimalForm = decimalFormatMaxPrecision.format(number);
-        var decimalFormLength = decimalForm.length();
-        // choose most compact form
-        final double absValue = Math.abs(number.doubleValue());
-        final double minPrecision = Math.pow(10, -fixedPrecision);
-        final var exponentialForm = expFormatFixedPrecision(number.doubleValue(), fixedPrecision);
-        return decimalFormLength < exponentialForm.length() && absValue >= minPrecision ? decimalForm : exponentialForm;
     }
 
     public enum FormatMode {
