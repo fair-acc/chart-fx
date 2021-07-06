@@ -489,6 +489,13 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             yValuesSurface[xend - i] = localCachedPoints.errorYPos[i];
         }
 
+        if (nDataCount > 2) {
+            //flip last points
+            final double val = yValuesSurface[nDataCount - 1];
+            yValuesSurface[nDataCount - 1] = yValuesSurface[nDataCount];
+            yValuesSurface[nDataCount] = val;
+        }
+
         gc.setFillRule(FillRule.EVEN_ODD);
         gc.fillPolygon(xValuesSurface, yValuesSurface, nPolygoneEdges);
 
