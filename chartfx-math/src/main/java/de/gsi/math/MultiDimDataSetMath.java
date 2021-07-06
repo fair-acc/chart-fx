@@ -5,9 +5,14 @@ import static de.gsi.dataset.DataSet.DIM_Y;
 import static de.gsi.dataset.DataSet.DIM_Z;
 
 import java.util.Arrays;
+import java.util.Objects;
+
+import org.jetbrains.annotations.NotNull;
 
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.DefaultNumberFormatter;
+import de.gsi.dataset.Formatter;
 import de.gsi.dataset.GridDataSet;
 import de.gsi.dataset.spi.DoubleErrorDataSet;
 import de.gsi.dataset.utils.DoubleArrayCache;
@@ -18,28 +23,34 @@ import de.gsi.dataset.utils.DoubleArrayCache;
  * @author rstein
  */
 public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
+    public static Formatter<Number> DEFAULT_FORMATTER = new DefaultNumberFormatter(); // NOSONAR NOPMD -- explicitly not getter/setter
 
     private MultiDimDataSetMath() {
         // this is a utility class
     }
 
-    public static void computeIntegral(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax) {
-        computeMeanIntegral(source, output, dimIndex, xMin, xMax, false);
+    @SafeVarargs
+    public static void computeIntegral(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, @NotNull final Formatter<Number>... format) {
+        computeMeanIntegral(source, output, dimIndex, xMin, xMax, false, format);
     }
 
-    public static void computeMax(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax) {
-        computeMinMax(source, output, dimIndex, xMin, xMax, false);
+    @SafeVarargs
+    public static void computeMax(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, @NotNull final Formatter<Number>... format) {
+        computeMinMax(source, output, dimIndex, xMin, xMax, false, format);
     }
 
-    public static void computeMean(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax) {
+    @SafeVarargs
+    public static void computeMean(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, @NotNull final Formatter<Number>... format) {
         computeMeanIntegral(source, output, dimIndex, xMin, xMax, true);
     }
 
-    public static void computeMin(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax) {
-        computeMinMax(source, output, dimIndex, xMin, xMax, true);
+    @SafeVarargs
+    public static void computeMin(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, @NotNull final Formatter<Number>... format) {
+        computeMinMax(source, output, dimIndex, xMin, xMax, true, format);
     }
 
-    public static void computeSlice(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin) {
+    @SafeVarargs
+    public static void computeSlice(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, @NotNull final Formatter<Number>... format) {
         checkMultiDimDataSetCompatibility(source);
         checkOutputDataSetCompatibility(output);
         final double[] xValues = output.getValues(DIM_X);
@@ -57,7 +68,8 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
             output.set(Arrays.copyOf(source.getGridValues(dimIndex), nsize), ret, new double[nsize], new double[nsize], false);
         }
 
-        output.setName("slice(" + source.getName() + ")@" + xMin + " " + source.getAxisDescription(dimIndex).getUnit());
+        final var dataSetName = getFormatter(format).format("{0}({1})@{2} {3}", "slice", source.getName(), xMin, source.getAxisDescription(dimIndex).getUnit());
+        output.setName(dataSetName);
         output.getAxisDescription(DIM_X).set(source.getAxisDescription(dimIndex).getName(), source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_Y).set(source.getAxisDescription(DIM_Z).getName(), source.getAxisDescription(DIM_Z).getUnit());
         output.getAxisDescriptions().forEach(AxisDescription::clear);
@@ -165,7 +177,8 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
         }
     }
 
-    private static void computeMeanIntegral(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, final boolean isMean) {
+    @SafeVarargs
+    private static void computeMeanIntegral(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, final boolean isMean, @NotNull final Formatter<Number>... format) {
         checkMultiDimDataSetCompatibility(source);
         checkOutputDataSetCompatibility(output);
         final double[] xValues = output.getValues(DIM_X);
@@ -183,13 +196,15 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
             output.set(Arrays.copyOf(source.getValues(dimIndex), nsize), ret, new double[nsize], new double[nsize], false);
         }
 
-        output.setName((isMean ? "mean(" : "int(") + source.getName() + ")@" + xMin + " -> " + xMax + " " + source.getAxisDescription(dimIndex).getUnit());
+        final var dataSetName = getFormatter(format).format("{0}({1})@{2}->{3} {4}", isMean ? "mean" : "int", source.getName(), xMin, xMax, source.getAxisDescription(dimIndex).getUnit());
+        output.setName(dataSetName);
         output.getAxisDescription(DIM_X).set(source.getAxisDescription(dimIndex).getName(), source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_Y).set(source.getAxisDescription(DIM_Z).getName(), source.getAxisDescription(DIM_Z).getUnit());
         output.getAxisDescriptions().forEach(AxisDescription::clear);
     }
 
-    private static void computeMinMax(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, final boolean isMin) {
+    @SafeVarargs
+    private static void computeMinMax(final GridDataSet source, final DoubleErrorDataSet output, final int dimIndex, final double xMin, final double xMax, final boolean isMin, @NotNull final Formatter<Number>... format) {
         checkMultiDimDataSetCompatibility(source);
         checkOutputDataSetCompatibility(output);
         final double[] xValues = output.getValues(DIM_X);
@@ -207,7 +222,8 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
             output.set(Arrays.copyOf(source.getValues(dimIndex), nsize), ret, new double[nsize], new double[nsize], false);
         }
 
-        output.setName((isMin ? "min(" : "max(") + source.getName() + ")@" + xMin + " -> " + xMax + " " + source.getAxisDescription(dimIndex).getUnit());
+        final var dataSetName = getFormatter(format).format("{0}({1})@{2}->{3} {4}", isMin ? "min" : "max", source.getName(), xMin, xMax, source.getAxisDescription(dimIndex).getUnit());
+        output.setName(dataSetName);
         output.getAxisDescription(DIM_X).set(source.getAxisDescription(dimIndex).getName(), source.getAxisDescription(dimIndex).getUnit());
         output.getAxisDescription(DIM_Y).set(source.getAxisDescription(DIM_Z).getName(), source.getAxisDescription(DIM_Z).getUnit());
         output.getAxisDescriptions().forEach(AxisDescription::clear);
@@ -217,5 +233,10 @@ public final class MultiDimDataSetMath { // NOPMD -- nomen est omen
         final int size = source.getShape(dimIndex);
         final boolean invalidBuffer = buffer == null || buffer.length < size;
         return invalidBuffer ? DoubleArrayCache.getInstance().getArrayExact(size) : buffer;
+    }
+
+    @SafeVarargs
+    private static Formatter<Number> getFormatter(@NotNull final Formatter<Number>... format) {
+        return Objects.requireNonNull(format, "user-supplied format").length > 0 ? format[0] : DEFAULT_FORMATTER;
     }
 }
