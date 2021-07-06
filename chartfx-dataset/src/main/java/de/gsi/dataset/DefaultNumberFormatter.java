@@ -148,27 +148,21 @@ public class DefaultNumberFormatter implements Formatter<Number> {
             return formatMode.fixedWidth() ? String.format(fixedLengthFormat, "NaN") : "NaN";
         }
 
-        if (FormatMode.METRIC_PREFIX.equals(formatMode)) {
+        switch (formatMode) {
+        case METRIC_PREFIX:
             return metricFormat(number.doubleValue(), false);
-        }
-
-        if (FormatMode.BYTE_PREFIX.equals(formatMode)) {
+        case BYTE_PREFIX:
             return metricFormat(number.doubleValue(), true);
-        }
-
-        if (FormatMode.FIXED_WIDTH_EXP.equals(formatMode)) {
+        case FIXED_WIDTH_EXP:
             return expFormatFixedWidth(number, numberOfCharacters, signConvention, signConventionExp);
-        }
-
-        if (FormatMode.OPTIMAL_WIDTH.equals(formatMode)) {
+        case OPTIMAL_WIDTH:
             return optimalWidthFormat(number);
-        }
-
-        if (FormatMode.FIXED_WIDTH_ONLY.equals(formatMode) || FormatMode.FIXED_WIDTH_AND_EXP.equals(formatMode)) {
+        case FIXED_WIDTH_AND_EXP:
+        case FIXED_WIDTH_ONLY:
             return fixedWidthFormat(number);
+        default:
+            return number.toString(); // JDK default
         }
-
-        return number.toString(); // JDK default
     }
 
     protected String fixedWidthFormat(final @NotNull Number number) {
@@ -184,7 +178,7 @@ public class DefaultNumberFormatter implements Formatter<Number> {
         var decimalForm = decimalFormat[signConvention.index].format(number);
         var decimalFormLength = decimalForm.length();
         final var indexDecimalPoint = decimalForm.indexOf('.');
-        if (formatMode.fixedWidth() && (indexDecimalPoint >= 0 && indexDecimalPoint < numberOfCharacters)) {
+        if (indexDecimalPoint >= 0 && indexDecimalPoint < numberOfCharacters) {
             // short number with decimal point
             decimalForm = decimalForm.substring(0, Math.min(numberOfCharacters, decimalFormLength));
             decimalFormLength = decimalForm.length();
