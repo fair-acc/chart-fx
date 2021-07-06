@@ -688,7 +688,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
         if (Double.isFinite(xMin) && xMin <= function.get(DIM_X, 0)) {
             // interpolate before range where discrete function is defined
             final double x0 = xMin;
-            final double val1 = function.getValue(DIM_X, xMin);
+            final double val1 = function.getValue(DIM_Y, xMin);
             final double x1 = function.get(DIM_X, 0);
             final double val2 = function.get(DIM_Y, 0);
             final double step = x1 - x0;
@@ -728,14 +728,14 @@ public final class DataSetMath { // NOPMD - nomen est omen
             } else if (x0 < xMinLocal && x1 > xMinLocal) {
                 retFunction.add(xMin, integral, integralEN, integralEP);
                 step = x1 - xMinLocal;
-                integral += sign * 0.5 * step * (function.getValue(DIM_X, xMinLocal) + y1);
+                integral += sign * 0.5 * step * (function.getValue(DIM_Y, xMinLocal) + y1);
 
                 // assuming uncorrelated errors between bins
                 integralEN = MathBase.hypot(integralEN, 0.5 * step * (en1 + en2));
                 integralEP = MathBase.hypot(integralEP, 0.5 * step * (ep1 + ep2));
             } else if (x0 < xMaxLocal && x1 > xMaxLocal) {
                 step = xMaxLocal - x0;
-                final double yAtMax = function.getValue(DIM_X, xMaxLocal);
+                final double yAtMax = function.getValue(DIM_Y, xMaxLocal);
                 integral += sign * 0.5 * step * (y0 + yAtMax);
 
                 // assuming uncorrelated errors between bins
@@ -751,9 +751,9 @@ public final class DataSetMath { // NOPMD - nomen est omen
         if (Double.isFinite(xMax) && xMax > function.get(DIM_X, nLength - 1)) {
             // interpolate after range where discrete function is defined
             final double x0 = function.get(DIM_X, nLength - 1);
-            final double val1 = function.get(DIM_Y, 0);
+            final double val1 = function.get(DIM_Y, nLength - 1);
             final double x1 = xMax;
-            final double val2 = function.getValue(DIM_X, xMax);
+            final double val2 = function.getValue(DIM_Y, xMax);
             final double step = x1 - x0;
             final double en1 = error(function, EYN, nLength - 1);
             final double ep1 = error(function, EYP, nLength - 1);
