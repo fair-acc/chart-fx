@@ -5,7 +5,6 @@ import static de.gsi.dataset.DataSet.DIM_X;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import de.gsi.dataset.testdata.spi.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -45,6 +44,7 @@ import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
+import de.gsi.dataset.testdata.spi.*;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class ErrorDataSetRendererStylingSample extends Application {
@@ -561,5 +561,4 @@ public class ErrorDataSetRendererStylingSample extends Application {
             rowIndex++;
         }
     }
-
 }

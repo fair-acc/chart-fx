@@ -1,5 +1,9 @@
 package de.gsi.dataset.testdata.spi;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import de.gsi.dataset.AxisDescription;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
@@ -8,10 +12,6 @@ import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 import de.gsi.dataset.utils.AssertUtils;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Simple test data set for testing renderers for many different parts of the parameter envelope
@@ -43,12 +43,12 @@ public class ErrorTestDataSet implements DataSetError {
     @Override
     public double get(final int dimIndex, final int index) {
         switch (dimIndex) {
-            case DIM_X:
-                return STEP * ((N_STEP_SWEEP * N_STEP_SWEEP / 2) * (index / N_STEP_SWEEP) + (Math.pow(index % N_STEP_SWEEP, 2) / 2));
-            case DIM_Y:
-                return AMPLITUDE * Math.sin(get(DIM_X, index) * OMEGA);
-            default:
-                throw new IndexOutOfBoundsException();
+        case DIM_X:
+            return STEP * ((N_STEP_SWEEP * N_STEP_SWEEP / 2) * (index / N_STEP_SWEEP) + (Math.pow(index % N_STEP_SWEEP, 2) / 2));
+        case DIM_Y:
+            return AMPLITUDE * Math.sin(get(DIM_X, index) * OMEGA);
+        default:
+            throw new IndexOutOfBoundsException();
         }
     }
 
@@ -60,12 +60,12 @@ public class ErrorTestDataSet implements DataSetError {
     @Override
     public AxisDescription getAxisDescription(final int dim) {
         switch (dim) {
-            case DIM_X:
-                return new DefaultAxisDescription(dim, "time", "s", 0, STEP * ((N_STEP_SWEEP * N_STEP_SWEEP / 2) * (nSamples / N_STEP_SWEEP) + (Math.pow(nSamples % N_STEP_SWEEP, 2) / 2)));
-            case DIM_Y:
-                return new DefaultAxisDescription(dim, "amplitude", "V", -AMPLITUDE, AMPLITUDE);
-            default:
-                throw new IndexOutOfBoundsException();
+        case DIM_X:
+            return new DefaultAxisDescription(dim, "time", "s", 0, STEP * ((N_STEP_SWEEP * N_STEP_SWEEP / 2) * (nSamples / N_STEP_SWEEP) + (Math.pow(nSamples % N_STEP_SWEEP, 2) / 2)));
+        case DIM_Y:
+            return new DefaultAxisDescription(dim, "amplitude", "V", -AMPLITUDE, AMPLITUDE);
+        default:
+            throw new IndexOutOfBoundsException();
         }
     }
 
@@ -91,7 +91,7 @@ public class ErrorTestDataSet implements DataSetError {
         }
         final int n = (int) (x[0] / STEP);
         final int nSweep = N_STEP_SWEEP * N_STEP_SWEEP / 2;
-        return (int) (N_STEP_SWEEP * (n / nSweep) + Math.floor(Math.sqrt((n % nSweep)*2.0)));
+        return (int) (N_STEP_SWEEP * (n / nSweep) + Math.floor(Math.sqrt((n % nSweep) * 2.0)));
     }
 
     @Override
@@ -168,24 +168,24 @@ public class ErrorTestDataSet implements DataSetError {
             return getErrorPositive(dimIndex, index);
         }
         switch (dimIndex) {
-            case DIM_X:
-                return X_ERR_NEG;
-            case DIM_Y:
-                return Y_ERR_NEG;
-            default:
-                throw new IndexOutOfBoundsException();
+        case DIM_X:
+            return X_ERR_NEG;
+        case DIM_Y:
+            return Y_ERR_NEG;
+        default:
+            throw new IndexOutOfBoundsException();
         }
     }
 
     @Override
     public double getErrorPositive(final int dimIndex, final int index) {
         switch (dimIndex) {
-            case DIM_X:
-                return X_ERR_POS;
-            case DIM_Y:
-                return Y_ERR_POS;
-            default:
-                throw new IndexOutOfBoundsException();
+        case DIM_X:
+            return X_ERR_POS;
+        case DIM_Y:
+            return Y_ERR_POS;
+        default:
+            throw new IndexOutOfBoundsException();
         }
     }
 
@@ -205,29 +205,37 @@ public class ErrorTestDataSet implements DataSetError {
     }
 
     public enum ErrorType {
-        X_SYM, XY_SYM, Y_SYM, X_ASYM, XY_ASYM, Y_ASYM, X_ASYM_Y_SYM, X_SYM_Y_ASYM, NO_ERRORS;
+        X_SYM,
+        XY_SYM,
+        Y_SYM,
+        X_ASYM,
+        XY_ASYM,
+        Y_ASYM,
+        X_ASYM_Y_SYM,
+        X_SYM_Y_ASYM,
+        NO_ERRORS;
 
         public DataSetError.ErrorType getType(final int dimIndex) {
             switch (this) {
-                case X_SYM:
-                    return dimIndex == DIM_X ? DataSetError.ErrorType.SYMMETRIC : DataSetError.ErrorType.NO_ERROR;
-                case XY_SYM:
-                    return DataSetError.ErrorType.SYMMETRIC;
-                case Y_SYM:
-                    return dimIndex == DIM_Y ? DataSetError.ErrorType.SYMMETRIC : DataSetError.ErrorType.NO_ERROR;
-                case X_ASYM:
-                    return dimIndex == DIM_X ? DataSetError.ErrorType.ASYMMETRIC: DataSetError.ErrorType.NO_ERROR;
-                case XY_ASYM:
-                    return DataSetError.ErrorType.ASYMMETRIC;
-                case Y_ASYM:
-                    return dimIndex == DIM_Y ? DataSetError.ErrorType.ASYMMETRIC: DataSetError.ErrorType.NO_ERROR;
-                case X_ASYM_Y_SYM:
-                    return dimIndex == DIM_X ? DataSetError.ErrorType.ASYMMETRIC : DataSetError.ErrorType.SYMMETRIC;
-                case X_SYM_Y_ASYM:
-                    return dimIndex == DIM_X ? DataSetError.ErrorType.SYMMETRIC : DataSetError.ErrorType.ASYMMETRIC;
-                case NO_ERRORS:
-                default:
-                    return DataSetError.ErrorType.NO_ERROR;
+            case X_SYM:
+                return dimIndex == DIM_X ? DataSetError.ErrorType.SYMMETRIC : DataSetError.ErrorType.NO_ERROR;
+            case XY_SYM:
+                return DataSetError.ErrorType.SYMMETRIC;
+            case Y_SYM:
+                return dimIndex == DIM_Y ? DataSetError.ErrorType.SYMMETRIC : DataSetError.ErrorType.NO_ERROR;
+            case X_ASYM:
+                return dimIndex == DIM_X ? DataSetError.ErrorType.ASYMMETRIC : DataSetError.ErrorType.NO_ERROR;
+            case XY_ASYM:
+                return DataSetError.ErrorType.ASYMMETRIC;
+            case Y_ASYM:
+                return dimIndex == DIM_Y ? DataSetError.ErrorType.ASYMMETRIC : DataSetError.ErrorType.NO_ERROR;
+            case X_ASYM_Y_SYM:
+                return dimIndex == DIM_X ? DataSetError.ErrorType.ASYMMETRIC : DataSetError.ErrorType.SYMMETRIC;
+            case X_SYM_Y_ASYM:
+                return dimIndex == DIM_X ? DataSetError.ErrorType.SYMMETRIC : DataSetError.ErrorType.ASYMMETRIC;
+            case NO_ERRORS:
+            default:
+                return DataSetError.ErrorType.NO_ERROR;
             }
         }
     }
