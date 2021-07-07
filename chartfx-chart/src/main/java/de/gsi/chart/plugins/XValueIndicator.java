@@ -52,6 +52,9 @@ public class XValueIndicator extends AbstractSingleValueIndicator implements Eve
     }
 
     protected void handleDragMouseEvent(final MouseEvent mouseEvent) {
+        if (!isEditable()) {
+            return;
+        }
         Point2D c = getChart().getPlotArea().sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
         final double xPosData = getAxis().getValueForDisplay(c.getX() + dragDelta.x);
         if (getAxis().isValueOnAxis(xPosData)) {
