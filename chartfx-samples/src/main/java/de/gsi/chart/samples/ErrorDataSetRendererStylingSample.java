@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -43,13 +44,7 @@ import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
 import de.gsi.dataset.DataSetError;
 import de.gsi.dataset.spi.DefaultErrorDataSet;
-import de.gsi.dataset.testdata.spi.CosineFunction;
-import de.gsi.dataset.testdata.spi.GaussFunction;
-import de.gsi.dataset.testdata.spi.RandomStepFunction;
-import de.gsi.dataset.testdata.spi.RandomWalkFunction;
-import de.gsi.dataset.testdata.spi.SincFunction;
-import de.gsi.dataset.testdata.spi.SineFunction;
-import de.gsi.dataset.testdata.spi.SingleOutlierFunction;
+import de.gsi.dataset.testdata.spi.*;
 import de.gsi.dataset.utils.ProcessingProfiler;
 
 public class ErrorDataSetRendererStylingSample extends Application {
@@ -67,6 +62,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private boolean dataSetIncludeNaNs = false;
     private int nSamples = 400;
     private Timer timer;
+    private ComboBox<ErrorTestDataSet.ErrorType> errorTypeCombo;
 
     private void generateData(final XYChart chart) {
         long startTime = ProcessingProfiler.getTimeStamp();
@@ -93,6 +89,9 @@ public class ErrorDataSetRendererStylingSample extends Application {
         case MIX_TRIGONOMETRIC:
             dataSet.add(new SineFunction("dyn. sine function", nSamples, true));
             dataSet.add(new CosineFunction("dyn. cosine function", nSamples, true));
+            break;
+        case ERROR_TYPE_TEST:
+            dataSet.add(new ErrorTestDataSet(nSamples, errorTypeCombo.getValue()));
             break;
         case RANDOM_WALK:
         default:
@@ -248,6 +247,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         dataSetTypeSelector.setValue(dataSetType);
         dataSetTypeSelector.valueProperty().addListener((ch, old, selection) -> {
             dataSetType = selection;
+            errorTypeCombo.setDisable(dataSetType != DataSetType.ERROR_TYPE_TEST);
             generateData(chart);
         });
 
@@ -469,9 +469,13 @@ public class ErrorDataSetRendererStylingSample extends Application {
             sampleIndicator.setText(String.valueOf(nSamples));
             generateData(chart);
         });
+        errorTypeCombo = new ComboBox<>(FXCollections.observableList(List.of(ErrorTestDataSet.ErrorType.values())));
+        errorTypeCombo.getSelectionModel().select(0);
+        errorTypeCombo.setDisable(true);
+        errorTypeCombo.valueProperty().addListener((ch, old, n) -> generateData(chart));
 
         final HBox hBoxSlider = new HBox(new Label("Number of Samples:"), nSampleSlider, sampleIndicator,
-                actualSampleIndicator);
+                actualSampleIndicator, errorTypeCombo);
         root.setTop(new VBox(headerBar, hBoxSlider));
 
         final Button newDataSet = new Button("new DataSet");
@@ -489,14 +493,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
                 timer.cancel();
                 timer = null; // NOPMD
             }
-        });
-
-        final ComboBox<DataSetType> dataSetTypeSelector = new ComboBox<>();
-        dataSetTypeSelector.getItems().addAll(DataSetType.values());
-        dataSetTypeSelector.setValue(dataSetType);
-        dataSetTypeSelector.valueProperty().addListener((ch, old, selection) -> {
-            dataSetType = selection;
-            generateData(chart);
         });
 
         // organise parameter config according to tabs
@@ -543,6 +539,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         GAUSS,
         SINE,
         COSINE,
+        ERROR_TYPE_TEST,
         MIX_TRIGONOMETRIC
     }
 
