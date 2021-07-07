@@ -59,6 +59,9 @@ public class YValueIndicator extends AbstractSingleValueIndicator implements Eve
     }
 
     protected void handleDragMouseEvent(final MouseEvent mouseEvent) {
+        if (!isEditable()) {
+            return;
+        }
         Point2D c = getChart().getPlotArea().sceneToLocal(mouseEvent.getSceneX(), mouseEvent.getSceneY());
         final double yPosData = getAxis().getValueForDisplay(c.getY() - dragDelta.y);
 
