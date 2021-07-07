@@ -223,8 +223,8 @@ public class DefaultDataReducer implements RendererDataReducer {
         // in for loop which reduced performance, ie. this code is a hot-spot)
         xValues[count] = xValues[indexMax - 1];
         yValues[count] = yValues[indexMax - 1];
-        xPointErrorsNeg[count] = xPointErrorsPos[indexMax - 1];
-        xPointErrorsPos[count] = xPointErrorsNeg[indexMax - 1];
+        xPointErrorsNeg[count] = xPointErrorsNeg[indexMax - 1];
+        xPointErrorsPos[count] = xPointErrorsPos[indexMax - 1];
         yPointErrorsNeg[count] = yPointErrorsNeg[indexMax - 1];
         yPointErrorsPos[count] = yPointErrorsPos[indexMax - 1];
         pointSelected[count] = pointSelected[indexMax - 1];
@@ -361,8 +361,8 @@ public class DefaultDataReducer implements RendererDataReducer {
         // in for loop which reduced performance, ie. this code is a hot-spot)
         xValues[count] = xValues[indexMax - 1];
         yValues[count] = yValues[indexMax - 1];
-        yPointErrorsNeg[count] = yPointErrorsPos[indexMax - 1];
-        yPointErrorsPos[count] = yPointErrorsNeg[indexMax - 1];
+        yPointErrorsNeg[count] = yPointErrorsNeg[indexMax - 1];
+        yPointErrorsPos[count] = yPointErrorsPos[indexMax - 1];
         pointSelected[count] = pointSelected[indexMax - 1];
         styles[count] = styles[indexMax - 1];
         count++;
