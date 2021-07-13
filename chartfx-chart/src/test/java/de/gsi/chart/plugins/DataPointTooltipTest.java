@@ -35,6 +35,7 @@ import de.gsi.dataset.testdata.spi.CosineFunction;
 class DataPointTooltipTest {
     private XYChart chart;
     private CosineFunction ds1;
+    private CosineFunction ds1Copy;
     private DataSet ds2;
     private Axis xAxis1;
     private Axis yAxis1;
@@ -61,6 +62,9 @@ class DataPointTooltipTest {
         ds1 = new CosineFunction("Cosine", 50);
         ds1.addDataLabel(17, "SpecialPoint");
         renderer1.getDatasets().add(ds1);
+        ds1Copy = new CosineFunction("Cosine", 50);
+        ds1Copy.addDataLabel(17, "Special Point Copy");
+        renderer1.getDatasets().add(ds1Copy);
 
         // unordered dataset
         xAxis2 = new DefaultNumericAxis("xAxis2", "V");
