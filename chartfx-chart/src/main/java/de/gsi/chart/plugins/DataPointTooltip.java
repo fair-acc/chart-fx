@@ -111,7 +111,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
                 .flatMap(renderer -> Stream.of(renderer.getDatasets(), xyChartDatasets) //
                                              .flatMap(List::stream) // combine global and renderer specific Datasets
                                              .flatMap(dataset -> getPointsCloseToCursor(dataset, renderer, mouseLocation))) // get points in range of cursor
-                .reduce((p1, p2) -> p1.distanceFromMouse < p2.distanceFromMouse ? p1 : p2); // find closest point
+                .reduce((p1, p2) -> !(p1.distanceFromMouse > p2.distanceFromMouse) ? p1 : p2); // find closest point, tie-breaking in favor of earlier data sets to match rendering order
     }
 
     private Stream<DataPoint> getPointsCloseToCursor(final DataSet dataset, final Renderer renderer, final Point2D mouseLocation) {
