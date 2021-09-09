@@ -23,7 +23,7 @@ import org.apache.maven.project.MavenProject;
  * By default it looks for input files in src/main/codegen and writes the generated code to
  * target/generated-sources/codegen.
  *
- * There are two different types of template classes. Classes ending in `Gen` are are rewritten, by repeating the
+ * There are two different types of template classes. Classes ending in `Gen` are rewritten, by repeating the
  * blocks inside `//// codegen: originalType -&gt; outputType1, outputType2, ...` and `//// end codegen` for each
  * output type within the file. This is mostly useful for utility functions.
  * Classes ending in `Proto` have to start with a `//// codegen container: originalType -&gt; outputType1, ....` line
