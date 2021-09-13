@@ -22,6 +22,12 @@
     </description>
 
     <dependencies>
+        <!-- Artificial dependency for Maven to build generator plugin prior to this one. -->
+        <dependency>
+            <groupId>de.gsi.generate</groupId>
+            <artifactId>chartfx-generate</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>de.gsi.dataset</groupId>
             <artifactId>chartfx-dataset</artifactId>
