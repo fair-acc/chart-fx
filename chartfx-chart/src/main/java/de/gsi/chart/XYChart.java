@@ -448,8 +448,8 @@ public class XYChart extends Chart {
             return;
         }
         final boolean oldAutoState = axis.autoNotification().getAndSet(false);
-        final double oldMin = axis.getMin();
-        final double oldMax = axis.getMax();
+        final double oldMin = axis.getAutoRange().getMin();
+        final double oldMax = axis.getAutoRange().getMax();
         final double oldLength = axis.getLength();
 
         final boolean isHorizontal = axis.getSide().isHorizontal();
@@ -482,8 +482,8 @@ public class XYChart extends Chart {
         }
 
         if (axis.isAutoGrowRanging()) {
-            axis.getAutoRange().add(axis.getMin());
-            axis.getAutoRange().add(axis.getMax());
+            axis.getAutoRange().add(oldMin);
+            axis.getAutoRange().add(oldMax);
         }
 
         axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);

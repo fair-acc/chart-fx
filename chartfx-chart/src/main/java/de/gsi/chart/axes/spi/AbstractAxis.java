@@ -347,10 +347,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     @Override
     public void invalidateRange(final List<Number> data) {
         final boolean oldState = autoNotification().getAndSet(false);
-        getAutoRange().set(autoRange(getLength())); // derived axes may potentially pad and round limits
-        if (set(getAutoRange().getMin(), getAutoRange().getMax())) {
+        final AxisRange autoRange = autoRange(getLength()); // derived axes may potentially pad and round limits
+        if (set(autoRange.getMin(), autoRange.getMax())) {
             getAutoRange().setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
-            setScale(getAutoRange().getScale());
+            //setScale(getAutoRange().getScale());
+            setScale(calculateNewScale(getLength(), autoRange.getMin(), autoRange.getMax()));
             updateAxisLabelAndUnit();
             // update cache in derived classes
             updateCachedVariables();
