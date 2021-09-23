@@ -338,7 +338,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
-     * Called when data has changed and the range may not be valid any more. This is only called by the chart if
+     * Called when data has changed and the range may not be valid anymore. This is only called by the chart if
      * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
      * happen on next layout pass.
      *
@@ -439,11 +439,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return Range information, this is implementation dependent
      */
     protected AxisRange autoRange(final double length) {
-        // guess a sensible starting size for label size, that is approx 2 lines
-        // vertically or 2 charts horizontally
+        // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 charts horizontally
         if (isAutoRanging() || isAutoGrowRanging()) {
-            // guess a sensible starting size for label size, that is approx 2
-            // lines vertically or 2 charts horizontally
+            // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 charts horizontally
             final double labelSize = getTickLabelFont().getSize() * 1.2; // N.B. was '2' in earlier implementations
             return autoRange(getAutoRange().getMin(), getAutoRange().getMax(), length, labelSize);
         }
