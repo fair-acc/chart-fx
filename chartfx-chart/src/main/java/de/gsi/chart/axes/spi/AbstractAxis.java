@@ -445,7 +445,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     /**
      * This calculates the upper and lower bound based on the data provided to invalidateRange() method. This must not
-     * effect the state of the axis, changing any properties of the axis. Any results of the auto-ranging should be
+     * affect the state of the axis, changing any properties of the axis. Any results of the auto-ranging should be
      * returned in the range object. This will we passed to set(Range) if it has been decided to adopt this range for
      * this axis.
      *
