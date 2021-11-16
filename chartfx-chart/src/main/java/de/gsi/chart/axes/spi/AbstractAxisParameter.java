@@ -643,20 +643,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return overlapPolicyProperty().get();
     }
 
-    /**
-     * on auto-ranging this returns getAutoRange(), otherwise the user-specified range getUserRange() (ie. limits based
-     * on [lower,upper]Bound)
-     *
-     * @return actual range that is being used.
-     */
-    @Override
-    public AxisRange getRange() {
-        if (isAutoRanging() || isAutoGrowRanging()) {
-            return getAutoRange();
-        }
-        return getUserRange();
-    }
-
     public double getScale() {
         return scaleProperty().get();
     }

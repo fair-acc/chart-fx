@@ -31,16 +31,15 @@ class AbstractAxisParameterTests {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
         axis.set(0.0, 10.0);
 
+        assertNull(axis.getRange());
+
         assertTrue(axis.isAutoRanging());
-        assertEquals(axis.getAutoRange(), axis.getRange());
         axis.setAutoRanging(false);
-        assertEquals(axis.getUserRange(), axis.getRange());
         assertFalse(axis.isAutoRanging());
         assertFalse(axis.isAutoGrowRanging());
 
         axis.setAutoGrowRanging(true);
         assertTrue(axis.isAutoGrowRanging());
-        assertEquals(axis.getAutoRange(), axis.getRange());
         axis.setAutoGrowRanging(false);
         assertFalse(axis.isAutoGrowRanging());
 
@@ -324,6 +323,11 @@ class AbstractAxisParameterTests {
         @Override
         public void drawAxis(GraphicsContext gc, double axisWidth, double axisHeight) {
             // deliberately not implemented
+        }
+
+        @Override
+        public AxisRange getRange() {
+            return null;
         }
 
         @Override
