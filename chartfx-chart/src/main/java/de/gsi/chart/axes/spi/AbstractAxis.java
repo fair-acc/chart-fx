@@ -393,6 +393,20 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
+     * on auto-ranging this returns getAutoRange(), otherwise the user-specified range getUserRange() (ie. limits based
+     * on [lower,upper]Bound)
+     *
+     * @return actual range that is being used.
+     */
+    @Override
+    public AxisRange getRange() {
+        if (isAutoRanging() || isAutoGrowRanging()) {
+            return autoRange(getLength());
+        }
+        return getUserRange();
+    }
+
+    /**
      * Request that the axis is laid out in the next layout pass. This replaces requestLayout() as it has been
      * overridden to do nothing so that changes to children's bounds etc do not cause a layout. This was done as a
      * optimisation as the Axis knows the exact minimal set of changes that really need layout to be updated. So we only
