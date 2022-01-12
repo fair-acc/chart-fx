@@ -551,14 +551,6 @@ public class EditDataSet extends TableViewer {
         return editEnableProperty().get();
     }
 
-    protected boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
-        final Canvas canvas = getChart().getCanvas();
-        // listen to only events within the canvas
-        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
-        return screenBounds.contains(mouseLoc);
-    }
-
     protected void performPointDrag(final MouseEvent event) {
         if (event.getButton() == MouseButton.PRIMARY && !controlDown && isPointDragActive) {
             if (mouseOriginX < 0) {
