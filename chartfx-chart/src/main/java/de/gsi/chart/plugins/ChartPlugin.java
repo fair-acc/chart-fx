@@ -201,7 +201,7 @@ public abstract class ChartPlugin {
      * @param handler   the event handler to be added to the chart
      */
     protected final <T extends InputEvent> void registerInputEventHandler(final EventType<T> eventType,
-                                                                          final EventHandler<T> handler) {
+            final EventHandler<T> handler) {
         mouseEventHandlers.add(new Pair<>(eventType, handler));
     }
 

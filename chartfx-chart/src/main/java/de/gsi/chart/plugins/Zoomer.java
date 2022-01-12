@@ -1043,9 +1043,9 @@ public class Zoomer extends ChartPlugin {
 
             // pixel distance based algorithm + aspect ratio to prevent flickering when starting selection
             final boolean isZoomX = Math.abs(diffY) <= limit && Math.abs(diffX) >= limit
-                                    && Math.abs(diffX / diffY) > DEFAULT_FLICKER_THRESHOLD;
+                                 && Math.abs(diffX / diffY) > DEFAULT_FLICKER_THRESHOLD;
             final boolean isZoomY = Math.abs(diffX) <= limit && Math.abs(diffY) >= limit
-                                    && Math.abs(diffY / diffX) > DEFAULT_FLICKER_THRESHOLD;
+                                 && Math.abs(diffY / diffX) > DEFAULT_FLICKER_THRESHOLD;
 
             // alternate angle-based algorithm
             // final int angle = (int) Math.toDegrees(Math.atan2(diffY, diffX));
@@ -1203,7 +1203,7 @@ public class Zoomer extends ChartPlugin {
         @Override
         public String toString() {
             return "ZoomState[zoomRangeMin= " + zoomRangeMin + ", zoomRangeMax= " + zoomRangeMax + ", wasAutoRanging= "
-                    + wasAutoRanging + ", wasAutoGrowRanging= " + wasAutoGrowRanging + "]";
+          + wasAutoRanging + ", wasAutoGrowRanging= " + wasAutoGrowRanging + "]";
         }
 
         /**

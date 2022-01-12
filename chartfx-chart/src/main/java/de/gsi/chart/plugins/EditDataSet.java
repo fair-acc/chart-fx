@@ -907,9 +907,7 @@ public class EditDataSet extends TableViewer {
      */
     protected int findIndex(DataSet dataSet, int cachedIndex, double x, double y) {
         // fast path: cached index matches
-        if (cachedIndex >= 0 && cachedIndex < dataSet.getDataCount() &&
-                dataSet.get(DataSet.DIM_X, cachedIndex) == x &&
-                dataSet.get(DataSet.DIM_Y, cachedIndex) == y) {
+        if (cachedIndex >= 0 && cachedIndex < dataSet.getDataCount() && dataSet.get(DataSet.DIM_X, cachedIndex) == x && dataSet.get(DataSet.DIM_Y, cachedIndex) == y) {
             return cachedIndex;
         }
 
