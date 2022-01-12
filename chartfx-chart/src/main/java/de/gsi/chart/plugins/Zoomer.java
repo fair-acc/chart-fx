@@ -811,22 +811,6 @@ public class Zoomer extends ChartPlugin {
         }
     }
 
-    private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
-        final Canvas canvas = getChart().getCanvas();
-        // listen to only events within the canvas
-        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
-        return screenBounds.contains(mouseLoc);
-    }
-
-    private boolean isMouseEventWithinCanvas(final ScrollEvent mouseEvent) {
-        final Canvas canvas = getChart().getCanvas();
-        // listen to only events within the canvas
-        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
-        return screenBounds.contains(mouseLoc);
-    }
-
     /**
      * @param axis the axis to be modified
      * @return {@code true} if axis is zoomable, {@code false} otherwise

@@ -80,14 +80,6 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
         return formatData(getChart(), tuple);
     }
 
-    private boolean isMouseEventWithinCanvas(final MouseEvent mouseEvent) {
-        final Canvas canvas = getChart().getCanvas();
-        // listen to only events within the canvas
-        final Point2D mouseLoc = new Point2D(mouseEvent.getScreenX(), mouseEvent.getScreenY());
-        final Bounds screenBounds = canvas.localToScreen(canvas.getBoundsInLocal());
-        return screenBounds.contains(mouseLoc);
-    }
-
     private void updateLabel(final MouseEvent event, final Bounds plotAreaBounds) {
         coordinatesLabel.setText(formatLabelText(getLocationInPlotArea(event)));
 
