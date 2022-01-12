@@ -780,7 +780,7 @@ public class EditDataSet extends TableViewer {
     }
 
     /**
-     * limits the mouse event position to the min/max range of the canavs (N.B. event can occur to be
+     * limits the mouse event position to the min/max range of the canvas (N.B. event can occur to be
      * negative/larger/outside than the canvas) This is to avoid zooming outside the visible canvas range
      *
      * @param event the mouse event
@@ -902,12 +902,41 @@ public class EditDataSet extends TableViewer {
         }
     }
 
+    /**
+     * Finds the index of the given x and y values within a dataSet. This exists to
+     * allow subclasses to easier implement specialized use cases such as searching
+     * in sorted data sets, ignoring one axis, or to allow nan equality checks.
+     *
+     * @param dataSet     dataSet
+     * @param cachedIndex result of previous search, or -1 if not available
+     * @param x           desired x value
+     * @param y           desired y value
+     * @return index of the data point or -1 if not found
+     */
+    protected int findIndex(DataSet dataSet, int cachedIndex, double x, double y) {
+        // fast path: cached index matches
+        if (cachedIndex >= 0 && cachedIndex < dataSet.getDataCount() &&
+                dataSet.get(DataSet.DIM_X, cachedIndex) == x &&
+                dataSet.get(DataSet.DIM_Y, cachedIndex) == y) {
+            return cachedIndex;
+        }
+
+        // slow path: index may have changed, so search again
+        for (int i = 0; i < dataSet.getDataCount(); i++) {
+            if (dataSet.get(DataSet.DIM_X, i) == x && dataSet.get(DataSet.DIM_Y, i) == y) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
     protected class SelectedDataPoint extends Circle {
         private final Axis xAxis;
         private final Axis yAxis;
         private final EditableDataSet dataSet;
         private double xValue;
         private double yValue;
+        private int cachedIndex;
 
         SelectedDataPoint(final Axis xAxis, final Axis yAxis, final EditableDataSet dataSet, final int index) {
             super();
@@ -930,6 +959,7 @@ public class EditDataSet extends TableViewer {
             this.dataSet = dataSet;
             this.xValue = dataSet.get(DataSet.DIM_X, index);
             this.yValue = dataSet.get(DataSet.DIM_Y, index);
+            this.cachedIndex = index;
             this.setCenterX(getX()); // NOPMD by rstein on 13/06/19 14:14
             this.setCenterY(getY()); // NOPMD by rstein on 13/06/19 14:14
             this.setRadius(DEFAULT_MARKER_RADIUS);
@@ -957,6 +987,7 @@ public class EditDataSet extends TableViewer {
         public void applyDrag(final double deltaX, final double deltaY) {
             double nX = getX();
             double nY = getY();
+            int index = getIndex();
 
             final EditConstraints constraints = dataSet.getEditConstraints();
             if (constraints == null) {
@@ -970,12 +1001,12 @@ public class EditDataSet extends TableViewer {
 
                 final double x = xAxis.getValueForDisplay(nX);
                 final double y = yAxis.getValueForDisplay(nY);
-                dataSet.set(getIndex(), x, y);
+                dataSet.set(index, x, y);
                 xValue = x;
                 yValue = y;
                 return;
             }
-            final boolean canChange = constraints.canChange(getIndex());
+            final boolean canChange = constraints.canChange(index);
 
             if (canChange && constraints.isEditable(DataSet.DIM_X) && allowShiftX.get()) {
                 nX += deltaX;
@@ -987,7 +1018,7 @@ public class EditDataSet extends TableViewer {
 
             final double x = xAxis.getValueForDisplay(nX);
             final double y = yAxis.getValueForDisplay(nY);
-            dataSet.set(getIndex(), x, y);
+            dataSet.set(index, x, y);
             xValue = x;
             yValue = y;
 
@@ -996,16 +1027,11 @@ public class EditDataSet extends TableViewer {
 
         public boolean delete() {
             final EditConstraints constraints = dataSet.getEditConstraints();
-            if (constraints == null) {
-                dataSet.remove(getIndex());
+            int index = getIndex();
+            if (constraints == null || constraints.canDelete(index)) {
+                dataSet.remove(index);
                 return true;
             }
-
-            if (constraints.canDelete(getIndex())) {
-                dataSet.remove(getIndex());
-                return true;
-            }
-
             return false;
         }
 
@@ -1014,14 +1040,8 @@ public class EditDataSet extends TableViewer {
         }
 
         public int getIndex() {
-            for (int i = 0; i < dataSet.getDataCount(); i++) {
-                final double x0 = dataSet.get(DataSet.DIM_X, i);
-                final double y0 = dataSet.get(DataSet.DIM_Y, i);
-                if (x0 == xValue && y0 == yValue) {
-                    return i;
-                }
-            }
-            return -1;
+            cachedIndex = findIndex(dataSet, cachedIndex, xValue, yValue);
+            return cachedIndex;
         }
 
         public double getX() {
