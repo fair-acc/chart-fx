@@ -13,8 +13,10 @@ import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.canvas.Canvas;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.ScrollEvent;
 import javafx.util.Pair;
 
 import org.slf4j.Logger;
@@ -152,6 +154,30 @@ public abstract class ChartPlugin {
     }
 
     /**
+     * Tests whether the event coordinates are within the bounding box of the canvas.
+     *
+     * @param event source event
+     * @return true if the event is within bounds
+     */
+    protected boolean isMouseEventWithinCanvas(final MouseEvent event) {
+        final Canvas canvas = getChart().getCanvas();
+        var local = canvas.sceneToLocal(event.getSceneX(), event.getSceneY());
+        return canvas.getBoundsInLocal().contains(local);
+    }
+
+    /**
+     * Tests whether the event coordinates are within the bounding box of the canvas.
+     *
+     * @param event source event
+     * @return true if the event is within bounds
+     */
+    protected boolean isMouseEventWithinCanvas(final ScrollEvent event) {
+        final Canvas canvas = getChart().getCanvas();
+        var local = canvas.sceneToLocal(event.getSceneX(), event.getSceneY());
+        return canvas.getBoundsInLocal().contains(local);
+    }
+
+    /**
      * Returns the value of the {@link #addButtonsToToolBarProperty()}.
      *
      * @return {@code true} the corresponding control buttons are added to the chart tool bar
@@ -172,10 +198,10 @@ public abstract class ChartPlugin {
      * pane and are removed once the plugin is removed from the pane.
      *
      * @param eventType the event type on which the handler should be called
-     * @param handler the event handler to be added to the chart
+     * @param handler   the event handler to be added to the chart
      */
-    protected final void registerInputEventHandler(final EventType<? extends InputEvent> eventType,
-            final EventHandler<? extends InputEvent> handler) {
+    protected final <T extends InputEvent> void registerInputEventHandler(final EventType<T> eventType,
+            final EventHandler<T> handler) {
         mouseEventHandlers.add(new Pair<>(eventType, handler));
     }
 

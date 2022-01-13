@@ -373,7 +373,7 @@ modules available and accessible to chartfx:
 --add-opens javafx.graphics/com.sun.javafx.iio=ALL-UNNAMED
 --add-opens javafx.graphics/com.sun.javafx.iio.common=ALL-UNNAMED
 --add-opens javafx.graphics/com.sun.javafx.css=ALL-UNNAMED
---add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED`
+--add-opens javafx.base/com.sun.javafx.runtime=ALL-UNNAMED
 --add-exports javafx.controls/com.sun.javafx.scene.control.behavior=ALL-UNNAMED
 ```
 
