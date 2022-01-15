@@ -5,6 +5,7 @@ import java.util.List;
 
 import de.gsi.dataset.event.EventSource;
 import de.gsi.dataset.locks.DataSetLock;
+import javafx.beans.property.BooleanProperty;
 
 /**
  * Basic interface for observable data sets.
@@ -152,4 +153,15 @@ public interface DataSet extends EventSource, Serializable {
     default DataSet set(final DataSet other) {
         return set(other, true);
     }
+
+    public default boolean isVisible() {
+        return visibleProperty().get();
+    }
+
+    public default void setVisible(boolean visible) {
+        visibleProperty().set(visible);
+    }
+
+    BooleanProperty visibleProperty();
+
 }

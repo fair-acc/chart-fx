@@ -128,6 +128,11 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     @Override
+    public boolean supportsVisibility() {
+        return true;
+    }
+
+    @Override
     public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
             final ObservableList<DataSet> datasets) {
         if (!(chart instanceof XYChart)) {
@@ -168,6 +173,11 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             final int ldataSetIndex = dataSetIndex;
             stopStamp = ProcessingProfiler.getTimeStamp();
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
+
+            if(!dataSet.isVisible()) {
+                localDataSetList.remove(dataSetIndex); // TODO (ennerf): is this correct and/or necessary?
+                continue;
+            }
 
             // N.B. print out for debugging purposes, please keep (used for
             // detecting redundant or too frequent render updates)

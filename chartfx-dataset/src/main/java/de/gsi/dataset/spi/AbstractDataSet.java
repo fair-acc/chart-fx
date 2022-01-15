@@ -1,26 +1,20 @@
 package de.gsi.dataset.spi;
 
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.IntToDoubleFunction;
-
-import de.gsi.dataset.AxisDescription;
-import de.gsi.dataset.DataSet;
-import de.gsi.dataset.DataSetError;
-import de.gsi.dataset.DataSetMetaData;
-import de.gsi.dataset.EditConstraints;
-import de.gsi.dataset.EditableDataSet;
-import de.gsi.dataset.event.AxisChangeEvent;
-import de.gsi.dataset.event.AxisRecomputationEvent;
+import de.gsi.dataset.*;
 import de.gsi.dataset.event.EventListener;
-import de.gsi.dataset.event.UpdateEvent;
-import de.gsi.dataset.event.UpdatedMetaDataEvent;
+import de.gsi.dataset.event.*;
 import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.utils.MathUtils;
 import de.gsi.dataset.spi.utils.StringHashMapList;
 import de.gsi.dataset.utils.AssertUtils;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.IntToDoubleFunction;
 
 /**
  * <p>
@@ -75,6 +69,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         // forward axis description event to DataSet listener
         invokeListener(e);
         axisUpdating.set(false);
+    };
+    private final BooleanProperty visible = new SimpleBooleanProperty(true) {
+        {
+            addListener((observable, oldValue, newValue) -> fireInvalidated(new AxisChangeEvent(getThis())));
+        }
     };
 
     /**
@@ -376,6 +375,11 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
             }
         }
         return true;
+    }
+
+    @Override
+    public BooleanProperty visibleProperty() {
+        return visible;
     }
 
     /**

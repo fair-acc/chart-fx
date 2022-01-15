@@ -11,6 +11,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -106,8 +107,16 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     public LegendItem getNewLegendItem(final Renderer renderer, final DataSet series, final int seriesIndex) {
         final Canvas symbol = renderer.drawLegendSymbol(series, seriesIndex, SYMBOL_WIDTH, SYMBOL_HEIGHT);
-        return new LegendItem(series.getName(), symbol);
+        var item = new LegendItem(series.getName(), symbol);
+        if(renderer.supportsVisibility()){
+            item.setOnMouseClicked(event-> series.setVisible(!series.isVisible()));
+            item.pseudoClassStateChanged(disabledClass, !series.isVisible());
+            series.visibleProperty().addListener((obs, old, newValue) -> item.pseudoClassStateChanged(disabledClass, !newValue));
+        }
+        return item;
     }
+
+    private static final PseudoClass disabledClass = PseudoClass.getPseudoClass("disabled");
 
     @Override
     public Node getNode() {

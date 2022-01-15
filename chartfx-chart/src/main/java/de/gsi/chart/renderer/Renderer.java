@@ -67,4 +67,14 @@ public interface Renderer {
      * @return true (default) if data sets are supposed to be drawn
      */
     BooleanProperty showInLegendProperty();
+
+    /**
+     * Indicates whether the renderer supports dataset visibility.
+     *
+     * @return false (default) if the renderer does not support visibility.
+     */
+    default boolean supportsVisibility() {
+        return false;
+    }
+
 }

@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javafx.beans.property.BooleanProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,6 +194,11 @@ public class TransposedDataSet implements DataSet {
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
         throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+    }
+
+    @Override
+    public BooleanProperty visibleProperty() {
+        return this.dataSet.visibleProperty();
     }
 
     public void setTransposed(final boolean transposed) {

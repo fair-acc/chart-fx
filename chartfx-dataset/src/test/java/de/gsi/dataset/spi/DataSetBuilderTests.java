@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.dataset.AxisDescription;
@@ -231,6 +233,12 @@ class DataSetBuilderTests {
     private static class MinimalDataSet implements DataSet {
         private static final long serialVersionUID = 1L;
         private final AtomicBoolean autoNotify = new AtomicBoolean();
+        private final BooleanProperty visible = new SimpleBooleanProperty(true);
+
+        @Override
+        public BooleanProperty visibleProperty() {
+            return visible;
+        }
 
         @Override
         public AtomicBoolean autoNotification() {
