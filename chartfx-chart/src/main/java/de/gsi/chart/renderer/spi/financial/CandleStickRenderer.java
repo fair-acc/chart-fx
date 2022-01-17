@@ -138,7 +138,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         var index = 0;
 
         for (final DataSet ds : localDataSetList) {
-            if (ds.getDimension() < 7)
+            if (!ds.isVisible() || ds.getDimension() < 7)
                 continue;
             final int lindex = index;
 

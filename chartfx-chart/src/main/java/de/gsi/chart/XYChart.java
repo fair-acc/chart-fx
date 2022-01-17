@@ -258,7 +258,6 @@ public class XYChart extends Chart {
         ObservableList<DataSet> dataSets = this.getAllDatasets();
         // check that all registered data sets have proper ranges defined
         dataSets.parallelStream()
-                .filter(DataSet::isVisible) // TODO (ennerf): this does not get the dataset out of the axis. Is there a general way to do this w/o modifying the dataset itself ?
                 .forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
                         .filter(axisD -> !axisD.isDefined())
                         .forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
@@ -458,7 +457,7 @@ public class XYChart extends Chart {
         final boolean isHorizontal = axis.getSide().isHorizontal();
         final Side side = axis.getSide();
         axis.getAutoRange().clear();
-        dataSets.forEach(dataset -> dataset.lock().readLockGuard(() -> {
+        dataSets.stream().filter(DataSet::isVisible).forEach(dataset -> dataset.lock().readLockGuard(() -> {
             if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
                 if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
                     dataset.recomputeLimits(DataSet.DIM_Z);

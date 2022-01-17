@@ -68,13 +68,4 @@ public interface Renderer {
      */
     BooleanProperty showInLegendProperty();
 
-    /**
-     * Indicates whether the renderer supports dataset visibility.
-     *
-     * @return false (default) if the renderer does not support visibility.
-     */
-    default boolean supportsVisibility() {
-        return false;
-    }
-
 }

@@ -411,7 +411,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            if (!(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2) {
+            if (!dataSet.isVisible() || !(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2) {
                 continue; // DataSet not applicable to ContourChartRenderer
             }
 

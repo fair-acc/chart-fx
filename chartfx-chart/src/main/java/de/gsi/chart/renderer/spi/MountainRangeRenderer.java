@@ -97,7 +97,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
 
             // detect and fish-out 3D DataSet, ignore others
-            if (!(dataSet instanceof GridDataSet)) {
+            if (!dataSet.isVisible() || !(dataSet instanceof GridDataSet)) {
                 continue;
             }
 
