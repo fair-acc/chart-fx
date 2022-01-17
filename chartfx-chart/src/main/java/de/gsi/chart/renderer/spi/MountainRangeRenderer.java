@@ -92,7 +92,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         final double zRangeMax = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMax()).max().orElse(+1.0);
 
         // render in reverse order
-        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
 
@@ -101,7 +100,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 continue;
             }
 
-            drawnDataSet.add(dataSet);
             dataSet.lock().readLockGuardOptimistic(() -> {
                 xWeakIndexMap.clear();
                 yWeakIndexMap.clear();
@@ -129,7 +127,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         ProcessingProfiler.getTimeDiff(start);
-        return drawnDataSet;
+        return localDataSetList;
     }
 
     /**

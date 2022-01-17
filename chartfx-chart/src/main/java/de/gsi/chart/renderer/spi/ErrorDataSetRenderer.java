@@ -163,7 +163,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             ProcessingProfiler.getTimeDiff(start, "init");
         }
 
-        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final int ldataSetIndex = dataSetIndex;
             stopStamp = ProcessingProfiler.getTimeStamp();
@@ -233,7 +232,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 return Optional.of(localCachedPoints);
             });
 
-            drawnDataSet.add(dataSet);
             cachedPoints.ifPresent(value -> {
                 // invoke data reduction algorithm
                 value.reduce(rendererDataReducerProperty().get(), isReducePoints(),
@@ -253,7 +251,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         } // end of 'dataSetIndex' loop
         ProcessingProfiler.getTimeDiff(start);
 
-        return drawnDataSet;
+        return localDataSetList;
     }
 
     /**
