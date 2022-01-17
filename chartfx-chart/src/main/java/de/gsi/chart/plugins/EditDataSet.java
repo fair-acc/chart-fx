@@ -975,6 +975,10 @@ public class EditDataSet extends TableViewer {
         }
 
         public void applyDrag(final double deltaX, final double deltaY) {
+            if (!dataSet.isVisible()) {
+                return;
+            }
+
             double nX = getX();
             double nY = getY();
             int index = getIndex();
@@ -1016,6 +1020,10 @@ public class EditDataSet extends TableViewer {
         }
 
         public boolean delete() {
+            if (!dataSet.isVisible()) {
+                return false;
+            }
+
             final EditConstraints constraints = dataSet.getEditConstraints();
             int index = getIndex();
             if (constraints == null || constraints.canDelete(index)) {
