@@ -34,13 +34,15 @@ import java.lang.ref.Reference;
  * @author rstein
  *
  */
-public class DoubleArrayCache extends CacheCollection<double[]> {
+public class DoubleArrayCache extends CacheCollection<double[]> implements DoubleArrayCacheInterface {
     private static final DoubleArrayCache SELF = new DoubleArrayCache();
 
+    @Override
     public double[] getArray(final int requiredSize) {
         return getArray(requiredSize, false);
     }
 
+    @Override
     public double[] getArrayExact(final int requiredSize) {
         return getArray(requiredSize, true);
     }
