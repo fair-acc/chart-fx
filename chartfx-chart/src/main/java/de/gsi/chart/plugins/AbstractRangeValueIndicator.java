@@ -72,6 +72,7 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
         setUpperBound(upperBound);
 
         rectangle.setMouseTransparent(true);
+        rectangle.setManaged(false);
         getChartChildren().addAll(rectangle, label);
     }
 

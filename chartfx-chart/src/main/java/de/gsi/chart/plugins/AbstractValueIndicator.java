@@ -151,6 +151,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     protected void addChildNodeIfNotPresent(final Node node) {
         if (!getChartChildren().contains(node)) {
             getChartChildren().add(0, node); // add elements always at the bottom so they cannot steal focus
+            node.setManaged(false);
         }
     }
 

@@ -54,6 +54,7 @@ public class ChartOverlay extends ChartPlugin {
      * @param node value of the {@link #nodeProperty()}
      */
     public ChartOverlay(final OverlayArea area, final Node node) {
+        node.setManaged(false);
         setOverlayArea(area);
         nodeProperty().addListener((obs, oldNode, newNode) -> {
             getChartChildren().remove(oldNode);
