@@ -76,6 +76,7 @@ public class DataPointTooltip extends AbstractDataFormattingPlugin {
         label.getStyleClass().add(DataPointTooltip.STYLE_CLASS_LABEL);
         label.setWrapText(true);
         label.setMinWidth(0);
+        label.setManaged(false);
         registerInputEventHandler(MouseEvent.MOUSE_MOVED, mouseMoveHandler);
     }
 
