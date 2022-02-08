@@ -37,6 +37,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private String name;
     protected final int dimension;
+    private boolean isVisible = true;
     private final List<AxisDescription> axesDescriptions = new ArrayList<>();
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
@@ -69,11 +70,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         // forward axis description event to DataSet listener
         invokeListener(e);
         axisUpdating.set(false);
-    };
-    private final BooleanProperty visible = new SimpleBooleanProperty(true) {
-        {
-            addListener((observable, oldValue, newValue) -> fireInvalidated(new AxisChangeEvent(getThis())));
-        }
     };
 
     /**
@@ -378,8 +374,17 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     @Override
-    public BooleanProperty visibleProperty() {
-        return visible;
+    public boolean isVisible() {
+        return isVisible;
+    }
+
+    @Override
+    public D setVisible(boolean visible) {
+        if(visible != isVisible){
+            isVisible = visible;
+            fireInvalidated(new UpdatedMetaDataEvent(this, "changed visibility"));
+        }
+        return getThis();
     }
 
     /**

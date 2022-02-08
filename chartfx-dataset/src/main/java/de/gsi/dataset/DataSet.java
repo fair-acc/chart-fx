@@ -5,7 +5,6 @@ import java.util.List;
 
 import de.gsi.dataset.event.EventSource;
 import de.gsi.dataset.locks.DataSetLock;
-import javafx.beans.property.BooleanProperty;
 
 /**
  * Basic interface for observable data sets.
@@ -21,7 +20,7 @@ public interface DataSet extends EventSource, Serializable {
 
     /**
      * Gets the x value of the data point with the index i
-     * 
+     *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @param index data point index
      * @return the x value
@@ -30,7 +29,7 @@ public interface DataSet extends EventSource, Serializable {
 
     /**
      * Return the axis description of the i-th axis.
-     * 
+     *
      * @param dim 0: X-Axis, 1: Y-Axis, ...
      * @return Axis Label
      */
@@ -154,14 +153,19 @@ public interface DataSet extends EventSource, Serializable {
         return set(other, true);
     }
 
-    public default boolean isVisible() {
-        return visibleProperty().get();
-    }
+    /**
+     * Returns a boolean flag whether this {@code DataSet} should be rendered.
+     *
+     * @return true if the dataset should be rendered
+     */
+    public boolean isVisible();
 
-    public default void setVisible(boolean visible) {
-        visibleProperty().set(visible);
-    }
-
-    BooleanProperty visibleProperty();
+    /**
+     * Sets the visibility status of this {@code DataSet}.
+     *
+     * @param visible true: tells renderers to render this dataset
+     * @return itself (fluent design)
+     */
+    public DataSet setVisible(boolean visible);
 
 }

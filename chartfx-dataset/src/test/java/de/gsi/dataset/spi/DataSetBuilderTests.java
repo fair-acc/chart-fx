@@ -233,12 +233,6 @@ class DataSetBuilderTests {
     private static class MinimalDataSet implements DataSet {
         private static final long serialVersionUID = 1L;
         private final AtomicBoolean autoNotify = new AtomicBoolean();
-        private final BooleanProperty visible = new SimpleBooleanProperty(true);
-
-        @Override
-        public BooleanProperty visibleProperty() {
-            return visible;
-        }
 
         @Override
         public AtomicBoolean autoNotification() {
@@ -329,6 +323,16 @@ class DataSetBuilderTests {
         @Override
         public DataSet set(final DataSet other, final boolean copy) {
             throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+        }
+
+        @Override
+        public boolean isVisible() {
+            return true;
+        }
+
+        @Override
+        public DataSet setVisible(boolean visible) {
+            return null;
         }
     }
 }

@@ -173,7 +173,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         private static final long serialVersionUID = 3914728138839091421L;
         private final transient DataSetLock<DataSet> localLock = new DefaultDataSetLock<>(this);
         private final transient AtomicBoolean autoNotify = new AtomicBoolean(true);
-        private final BooleanProperty visible = new SimpleBooleanProperty(true);
         private final GridDataSet dataSet;
         private final int yIndex;
         private final double zMin;
@@ -191,11 +190,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             this.zMin = zMin;
             this.zMax = zMax;
             yShift = dataSet.getShape(DIM_Y) > 0 ? mountainRangeExtra * dataSet.getAxisDescription(DIM_Z).getMax() * yIndex / dataSet.getShape(DIM_Y) : 0;
-        }
-
-        @Override
-        public BooleanProperty visibleProperty() {
-            return visible;
         }
 
         @Override
@@ -312,6 +306,16 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public DataSet set(final DataSet other, final boolean copy) {
             throw new UnsupportedOperationException("copy setter not implemented for Demux3dTo2dDataSet");
+        }
+
+        @Override
+        public boolean isVisible() {
+            return dataSet.isVisible();
+        }
+
+        @Override
+        public DataSet setVisible(boolean visible) {
+            return dataSet.setVisible(visible);
         }
 
         @Override

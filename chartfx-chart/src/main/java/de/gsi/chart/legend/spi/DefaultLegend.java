@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -110,7 +111,12 @@ public class DefaultLegend extends FlowPane implements Legend {
         var item = new LegendItem(series.getName(), symbol);
         item.setOnMouseClicked(event-> series.setVisible(!series.isVisible()));
         item.pseudoClassStateChanged(disabledClass, !series.isVisible());
-        series.visibleProperty().addListener((obs, old, newValue) -> item.pseudoClassStateChanged(disabledClass, !newValue));
+        series.addListener(evt -> {
+            // TODO: are listeners strong or weak references? Do we need any cleanup?
+            if (evt instanceof UpdatedMetaDataEvent) {
+                item.pseudoClassStateChanged(disabledClass, !series.isVisible());
+            }
+        });
         return item;
     }
 

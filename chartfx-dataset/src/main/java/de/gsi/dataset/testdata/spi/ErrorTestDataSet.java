@@ -12,8 +12,6 @@ import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.DefaultAxisDescription;
 import de.gsi.dataset.utils.AssertUtils;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 
 /**
  * Simple test data set for testing renderers for many different parts of the parameter envelope
@@ -27,7 +25,6 @@ public class ErrorTestDataSet implements DataSetError {
     private final DataSetLock<ErrorTestDataSet> lock = new DefaultDataSetLock<>(this);
     private final AtomicBoolean autoNotification = new AtomicBoolean();
     private final List<EventListener> eventListeners = new ArrayList<>();
-    private final BooleanProperty visible = new SimpleBooleanProperty(true);
 
     private static final double STEP = 0.4; // multiples of this will be the step sizes in x direction
     private static final int N_STEP_SWEEP = 10; // how many times to increase step size before returning to original step size
@@ -42,11 +39,6 @@ public class ErrorTestDataSet implements DataSetError {
     public ErrorTestDataSet(final int nSamples, final ErrorType errorType) {
         this.nSamples = nSamples;
         this.errorType = errorType;
-    }
-
-    @Override
-    public BooleanProperty visibleProperty() {
-        return visible;
     }
 
     @Override
@@ -167,6 +159,16 @@ public class ErrorTestDataSet implements DataSetError {
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isVisible() {
+        return true;
+    }
+
+    @Override
+    public DataSet setVisible(boolean visible) {
         throw new UnsupportedOperationException();
     }
 

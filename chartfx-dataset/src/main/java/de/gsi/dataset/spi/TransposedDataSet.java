@@ -197,8 +197,13 @@ public class TransposedDataSet implements DataSet {
     }
 
     @Override
-    public BooleanProperty visibleProperty() {
-        return this.dataSet.visibleProperty();
+    public boolean isVisible() {
+        return dataSet.isVisible();
+    }
+
+    @Override
+    public DataSet setVisible(boolean visible) {
+        return dataSet.setVisible(visible);
     }
 
     public void setTransposed(final boolean transposed) {
