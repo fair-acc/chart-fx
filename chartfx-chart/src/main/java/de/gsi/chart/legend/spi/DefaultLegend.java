@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.gsi.dataset.event.UpdatedMetaDataEvent;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -26,6 +25,9 @@ import de.gsi.chart.legend.Legend;
 import de.gsi.chart.renderer.Renderer;
 import de.gsi.chart.utils.StyleParser;
 import de.gsi.dataset.DataSet;
+import de.gsi.dataset.event.EventListener;
+import de.gsi.dataset.event.UpdateEvent;
+import de.gsi.dataset.event.UpdatedMetaDataEvent;
 
 /**
  * A chart legend that displays a list of items with symbols in a box
@@ -58,7 +60,9 @@ public class DefaultLegend extends FlowPane implements Legend {
         }
     };
 
-    /** The legend items to display in this legend */
+    /**
+     * The legend items to display in this legend
+     */
     private final ObjectProperty<ObservableList<LegendItem>> items = new SimpleObjectProperty<>(
             this, "items") {
         private ObservableList<LegendItem> oldItems = null;
@@ -109,15 +113,27 @@ public class DefaultLegend extends FlowPane implements Legend {
     public LegendItem getNewLegendItem(final Renderer renderer, final DataSet series, final int seriesIndex) {
         final Canvas symbol = renderer.drawLegendSymbol(series, seriesIndex, SYMBOL_WIDTH, SYMBOL_HEIGHT);
         var item = new LegendItem(series.getName(), symbol);
-        item.setOnMouseClicked(event-> series.setVisible(!series.isVisible()));
+        item.setOnMouseClicked(event -> series.setVisible(!series.isVisible()));
         item.pseudoClassStateChanged(disabledClass, !series.isVisible());
-        series.addListener(evt -> {
-            // TODO: are listeners strong or weak references? Do we need any cleanup?
+        series.addListener(new DatasetVisibilityListener(item, series));
+        return item;
+    }
+
+    public static class DatasetVisibilityListener implements EventListener {
+        private LegendItem item;
+        private DataSet series;
+
+        public DatasetVisibilityListener(final LegendItem item, final DataSet series) {
+            this.item = item;
+            this.series = series;
+        }
+
+        @Override
+        public void handle(final UpdateEvent evt) {
             if (evt instanceof UpdatedMetaDataEvent) {
                 item.pseudoClassStateChanged(disabledClass, !series.isVisible());
             }
-        });
-        return item;
+        }
     }
 
     private static final PseudoClass disabledClass = PseudoClass.getPseudoClass("disabled");
@@ -129,7 +145,7 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.gsi.chart.legend.Legend#isVertical()
      */
     @Override
@@ -147,7 +163,7 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.gsi.chart.legend.Legend#setVertical(boolean)
      */
     @Override
@@ -157,7 +173,7 @@ public class DefaultLegend extends FlowPane implements Legend {
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see de.gsi.chart.legend.Legend#updateLegend(java.util.List, java.util.List)
      */
     @Override
@@ -234,7 +250,9 @@ public class DefaultLegend extends FlowPane implements Legend {
         return vertical;
     }
 
-    /** A item to be displayed on a Legend */
+    /**
+     * A item to be displayed on a Legend
+     */
     public static class LegendItem extends Label {
         public LegendItem(final String text, final Node symbol) {
             setText(text);

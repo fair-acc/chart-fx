@@ -77,10 +77,14 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
     protected final ChangeListener<? super Boolean> showingListener = (ch2, o, n) -> showing.set(n);
-    /** When true any data changes will be animated. */
+    /**
+     * When true any data changes will be animated.
+     */
     private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", true);
     // TODO: Check whether 'this' or chart contents need to be added
-    /** Animator for animating stuff on the chart */
+    /**
+     * Animator for animating stuff on the chart
+     */
     protected final ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
 
     /**
@@ -310,7 +314,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     /**
      * Creates a new default Chart instance.
-     * 
+     *
      * @param axes axes to be added to the chart
      */
     public Chart(Axis... axes) {
@@ -985,6 +989,9 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
             for (final DataSet set : change.getRemoved()) {
+                // remove Legend listeners from removed datasets
+                set.updateEventListener().removeIf(l -> l instanceof DefaultLegend.DatasetVisibilityListener);
+
                 set.removeListener(dataSetDataListener);
                 dataSetChanges = true;
             }
