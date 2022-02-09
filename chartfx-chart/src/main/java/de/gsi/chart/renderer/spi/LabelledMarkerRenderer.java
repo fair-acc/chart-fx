@@ -253,7 +253,7 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            if(!dataSet.isVisible()) {
+            if (!dataSet.isVisible()) {
                 continue;
             }
             dataSet.lock().readLockGuard(() -> {

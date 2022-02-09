@@ -167,5 +167,4 @@ public interface DataSet extends EventSource, Serializable {
      * @return itself (fluent design)
      */
     public DataSet setVisible(boolean visible);
-
 }

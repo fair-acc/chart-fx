@@ -258,9 +258,7 @@ public class XYChart extends Chart {
         ObservableList<DataSet> dataSets = this.getAllDatasets();
         // check that all registered data sets have proper ranges defined
         dataSets.parallelStream()
-                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
-                        .filter(axisD -> !axisD.isDefined())
-                        .forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
+                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
 
         final ArrayDeque<DataSet> lockQueue = new ArrayDeque<>(dataSets);
         recursiveLockGuard(lockQueue, () -> getAxes().forEach(chartAxis -> {

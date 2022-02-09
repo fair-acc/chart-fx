@@ -78,7 +78,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
         for (final DataSet ds : localDataSetList) {
-            if(!ds.isVisible()) {
+            if (!ds.isVisible()) {
                 continue;
             }
             final int lindex = index;

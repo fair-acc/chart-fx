@@ -167,7 +167,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             final int ldataSetIndex = dataSetIndex;
             stopStamp = ProcessingProfiler.getTimeStamp();
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            if(!dataSet.isVisible()) {
+            if (!dataSet.isVisible()) {
                 continue;
             }
 

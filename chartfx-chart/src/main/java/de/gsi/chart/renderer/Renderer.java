@@ -67,5 +67,4 @@ public interface Renderer {
      * @return true (default) if data sets are supposed to be drawn
      */
     BooleanProperty showInLegendProperty();
-
 }

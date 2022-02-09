@@ -383,7 +383,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if(ds.isVisible()) {
+            if (ds.isVisible()) {
                 continue;
             }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
@@ -458,7 +458,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if(ds.isVisible()) {
+            if (ds.isVisible()) {
                 continue;
             }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
@@ -517,7 +517,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if(ds.isVisible()) {
+            if (ds.isVisible()) {
                 continue;
             }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
