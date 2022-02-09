@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import javafx.beans.property.BooleanProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

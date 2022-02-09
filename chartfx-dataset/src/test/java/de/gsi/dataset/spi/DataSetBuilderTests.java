@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import org.junit.jupiter.api.Test;
 
 import de.gsi.dataset.AxisDescription;
@@ -27,7 +25,7 @@ import de.gsi.dataset.locks.DataSetLock;
 
 /**
  * Checks for the DataSetBuilder
- * 
+ *
  * @author Alexander Krimm
  */
 class DataSetBuilderTests {

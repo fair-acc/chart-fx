@@ -1,20 +1,18 @@
 package de.gsi.dataset.spi;
 
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.IntToDoubleFunction;
+
 import de.gsi.dataset.*;
-import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.event.*;
+import de.gsi.dataset.event.EventListener;
 import de.gsi.dataset.locks.DataSetLock;
 import de.gsi.dataset.locks.DefaultDataSetLock;
 import de.gsi.dataset.spi.utils.MathUtils;
 import de.gsi.dataset.spi.utils.StringHashMapList;
 import de.gsi.dataset.utils.AssertUtils;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.IntToDoubleFunction;
 
 /**
  * <p>
@@ -27,7 +25,7 @@ import java.util.function.IntToDoubleFunction;
  * <li>It maintains ranges for all dimensions of the DataSet.
  * <li>It maintains the names and units for the axes
  * </ul>
- * 
+ *
  * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
  */
 public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends AbstractStylable<D> implements DataSet, DataSetMetaData {
@@ -74,7 +72,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * default constructor
-     * 
+     *
      * @param name the default name of the data set (meta data)
      * @param dimension dimension of this data set
      */
@@ -155,7 +153,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * checks for equal data labels, may be overwritten by derived classes
-     * 
+     *
      * @param other class
      * @return {@code true} if equal
      */
@@ -176,7 +174,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * checks for equal EditConstraints, may be overwritten by derived classes
-     * 
+     *
      * @param other class
      * @return {@code true} if equal
      */
@@ -195,7 +193,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * checks for equal 'get' error values, may be overwritten by derived classes
-     * 
+     *
      * @param other class
      * @param epsilon tolerance threshold
      * @return {@code true} if equal
@@ -244,7 +242,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * checks for equal meta data, may be overwritten by derived classes
-     * 
+     *
      * @param other class
      * @return {@code true} if equal
      */
@@ -281,7 +279,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * Indicates whether some other object is "equal to" this one.
-     * 
+     *
      * @param obj the reference object with which to compare.
      * @param epsilon tolerance parameter ({@code epsilon<=0} corresponds to numerically identical)
      * @return {@code true} if this object is the same as the obj argument; {@code false} otherwise.
@@ -380,7 +378,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     @Override
     public D setVisible(boolean visible) {
-        if(visible != isVisible){
+        if (visible != isVisible) {
             isVisible = visible;
             fireInvalidated(new UpdatedMetaDataEvent(this, "changed visibility"));
         }
@@ -389,7 +387,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
-     * 
+     *
      * @param event the change event
      * @return itself (fluent design)
      */
@@ -539,7 +537,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
 
     /**
      * Sets the name of data set (meta data)
-     * 
+     *
      * @param name the new name
      * @return itself (fluent design)
      */
