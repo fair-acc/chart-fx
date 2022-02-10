@@ -383,7 +383,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if (ds.isVisible()) {
+            if (!ds.isVisible()) {
                 continue;
             }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
@@ -458,7 +458,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if (ds.isVisible()) {
+            if (!ds.isVisible()) {
                 continue;
             }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
@@ -517,7 +517,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if (ds.isVisible()) {
+            if (!ds.isVisible()) {
                 continue;
             }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
@@ -703,7 +703,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
             for (final DataSet dataSet : localDataSetList) {
                 // scheme 1
-                //final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, 1.0))
+                // final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, 1.0))
                 // scheme 2
                 final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, dataSet.getDataCount() + 1.0));
                 if (val != null && val < dataSet.getDataCount() + 1.0) {
