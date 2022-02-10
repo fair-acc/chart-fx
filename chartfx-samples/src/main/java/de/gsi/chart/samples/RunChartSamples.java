@@ -88,6 +88,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("TimeAxisSample", new TimeAxisSample()));
         buttons.getChildren().add(new MyButton("TransposedDataSetSample", new TransposedDataSetSample()));
         buttons.getChildren().add(new MyButton("ValueIndicatorSample", new ValueIndicatorSample()));
+        buttons.getChildren().add(new MyButton("VisibiltiyToggleSample", new VisibilityToggleSample()));
         buttons.getChildren().add(new MyButton("WaterfallPerformanceSample", new WaterfallPerformanceSample()));
         buttons.getChildren().add(new MyButton("WriteDataSetToFileSample", new WriteDataSetToFileSample()));
         buttons.getChildren().add(new MyButton("YWatchValueIndicatorSample", new YWatchValueIndicatorSample()));

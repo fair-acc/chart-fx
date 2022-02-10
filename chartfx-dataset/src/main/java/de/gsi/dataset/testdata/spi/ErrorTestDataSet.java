@@ -163,6 +163,16 @@ public class ErrorTestDataSet implements DataSetError {
     }
 
     @Override
+    public boolean isVisible() {
+        return true;
+    }
+
+    @Override
+    public DataSet setVisible(boolean visible) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public double getErrorNegative(final int dimIndex, final int index) {
         if (getErrorType(dimIndex) == DataSetError.ErrorType.SYMMETRIC) {
             return getErrorPositive(dimIndex, index);

@@ -77,8 +77,10 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         final double xmin = xAxis.getValueForDisplay(0);
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
-        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (final DataSet ds : localDataSetList) {
+            if (!ds.isVisible()) {
+                continue;
+            }
             final int lindex = index;
             ds.lock().readLockGuardOptimistic(() -> {
                 // update categories in case of category axes for the first
@@ -159,7 +161,7 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
         }
         ProcessingProfiler.getTimeDiff(start);
 
-        return drawnDataSet;
+        return localDataSetList;
     }
 
     public void setMaxPoints(final int maxPoints) {

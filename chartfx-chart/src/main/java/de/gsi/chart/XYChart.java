@@ -257,8 +257,8 @@ public class XYChart extends Chart {
         // lock datasets to prevent writes while updating the axes
         ObservableList<DataSet> dataSets = this.getAllDatasets();
         // check that all registered data sets have proper ranges defined
-        dataSets.parallelStream().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()) //
-                                                             .forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
+        dataSets.parallelStream()
+                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
 
         final ArrayDeque<DataSet> lockQueue = new ArrayDeque<>(dataSets);
         recursiveLockGuard(lockQueue, () -> getAxes().forEach(chartAxis -> {
@@ -455,7 +455,7 @@ public class XYChart extends Chart {
         final boolean isHorizontal = axis.getSide().isHorizontal();
         final Side side = axis.getSide();
         axis.getAutoRange().clear();
-        dataSets.forEach(dataset -> dataset.lock().readLockGuard(() -> {
+        dataSets.stream().filter(DataSet::isVisible).forEach(dataset -> dataset.lock().readLockGuard(() -> {
             if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
                 if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
                     dataset.recomputeLimits(DataSet.DIM_Z);

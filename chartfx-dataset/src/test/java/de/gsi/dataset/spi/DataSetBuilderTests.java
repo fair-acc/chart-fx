@@ -25,7 +25,7 @@ import de.gsi.dataset.locks.DataSetLock;
 
 /**
  * Checks for the DataSetBuilder
- * 
+ *
  * @author Alexander Krimm
  */
 class DataSetBuilderTests {
@@ -321,6 +321,16 @@ class DataSetBuilderTests {
         @Override
         public DataSet set(final DataSet other, final boolean copy) {
             throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
+        }
+
+        @Override
+        public boolean isVisible() {
+            return true;
+        }
+
+        @Override
+        public DataSet setVisible(boolean visible) {
+            return null;
         }
     }
 }

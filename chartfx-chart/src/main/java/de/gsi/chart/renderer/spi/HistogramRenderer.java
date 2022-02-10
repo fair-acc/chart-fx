@@ -139,6 +139,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
                     // replace DataSet with sorted variety
                     // do not need to do this for Histograms as they are always sorted by design
                     LimitedIndexedTreeDataSet newDataSet = new LimitedIndexedTreeDataSet(dataSet.getName(), Integer.MAX_VALUE);
+                    newDataSet.setVisible(dataSet.isVisible());
                     newDataSet.set(dataSet);
                     localDataSetList.set(index, newDataSet);
                 }
@@ -215,7 +216,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if (ds.getDataCount() == 0) {
+            if (!ds.isVisible() || ds.getDataCount() == 0) {
                 continue;
             }
             final double scaleValue = isAnimate() ? scaling.getOrDefault(ds.getName(), 1.0) : 1.0;
@@ -328,7 +329,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
-            if (ds.getDataCount() == 0) {
+            if (!ds.isVisible() || ds.getDataCount() == 0) {
                 continue;
             }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
@@ -382,6 +383,9 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
+            if (!ds.isVisible()) {
+                continue;
+            }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
 
             final int dimIndexAbscissa = isVerticalDataSet ? DIM_Y : DIM_X;
@@ -454,6 +458,9 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
+            if (!ds.isVisible()) {
+                continue;
+            }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
 
             final int dimIndexAbscissa = isVerticalDataSet ? DIM_Y : DIM_X;
@@ -510,6 +517,9 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         int lindex = dataSetOffset - 1;
         for (DataSet ds : dataSets) {
             lindex++;
+            if (!ds.isVisible()) {
+                continue;
+            }
             final boolean isVerticalDataSet = isVerticalDataSet(ds);
 
             final int dimIndexAbscissa = isVerticalDataSet ? DIM_Y : DIM_X;
@@ -693,7 +703,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
             for (final DataSet dataSet : localDataSetList) {
                 // scheme 1
-                //final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, 1.0))
+                // final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, 1.0))
                 // scheme 2
                 final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, dataSet.getDataCount() + 1.0));
                 if (val != null && val < dataSet.getDataCount() + 1.0) {
