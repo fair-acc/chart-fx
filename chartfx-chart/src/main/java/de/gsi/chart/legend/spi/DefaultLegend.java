@@ -39,6 +39,7 @@ public class DefaultLegend extends FlowPane implements Legend {
     private static final int GAP = 5;
     private static final int SYMBOL_WIDTH = 20;
     private static final int SYMBOL_HEIGHT = 20;
+    private static final PseudoClass disabledClass = PseudoClass.getPseudoClass("disabled");
 
     // -------------- PRIVATE FIELDS ------------------------------------------
 
@@ -135,8 +136,6 @@ public class DefaultLegend extends FlowPane implements Legend {
             }
         }
     }
-
-    private static final PseudoClass disabledClass = PseudoClass.getPseudoClass("disabled");
 
     @Override
     public Node getNode() {
