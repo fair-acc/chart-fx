@@ -1,13 +1,13 @@
 package de.gsi.dataset.spi;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import static de.gsi.dataset.DataSet.DIM_X;
 import static de.gsi.dataset.DataSet.DIM_Y;
 
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.DataSetError;
+import de.gsi.dataset.event.UpdatedMetaDataEvent;
 
 /**
  * Generic DataSet interface tests that (nearly) all DataSets should fulfill.
@@ -36,7 +37,7 @@ class GenericDataSetTests {
                 FifoDoubleErrorDataSet.class, FloatDataSet.class, FragmentedDataSet.class,
                 LimitedIndexedTreeDataSet.class,
                 MultiDimDoubleDataSet.class,
-                //RollingDataSet.class,
+                // RollingDataSet.class,
                 WrappedDataSet.class);
     }
 
@@ -52,6 +53,23 @@ class GenericDataSetTests {
         assertEquals(DEFAULT_DATASET_NAME2, dataSet2.getName());
 
         assertEquals(dataSet1, dataSet2);
+    }
+
+    @ParameterizedTest
+    @MethodSource("dataSetClassProvider")
+    @Timeout(1)
+    void testVisibility(final Class<DataSet> clazz) throws AssertionError {
+        DataSet dataSet = getDefaultTestDataSet(clazz, DEFAULT_DATASET_NAME1, DEFAULT_COUNT_MAX + 2);
+        final AtomicBoolean visibilityChanged = new AtomicBoolean(false);
+        dataSet.addListener(event -> {
+            if (event instanceof UpdatedMetaDataEvent && event.getMessage().equals("changed visibility")) {
+                visibilityChanged.set(true);
+            }
+        });
+        assertTrue(dataSet.isVisible());
+        dataSet.setVisible(false);
+        assertFalse(dataSet.isVisible());
+        assertTrue(visibilityChanged.get());
     }
 
     @ParameterizedTest

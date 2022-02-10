@@ -30,6 +30,10 @@ class HistogramTests {
 
         assertNotNull(dataSet.getWarningList());
         assertThrows(UnsupportedOperationException.class, () -> dataSet.set(dataSet, false));
+        // test visibility
+        assertTrue(dataSet.isVisible());
+        dataSet.setVisible(false);
+        assertFalse(dataSet.isVisible());
     }
 
     @Test

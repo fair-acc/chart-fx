@@ -1,8 +1,7 @@
 package de.gsi.dataset.spi;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +12,7 @@ import de.gsi.dataset.DataSet;
  * TODO: Test EventListeners
  * setValues
  * dataCount for dimIndex>dimensions
- * 
+ *
  * @author Alexander Krimm
  */
 class MultiDimDoubleDataSetTests {
@@ -89,6 +88,10 @@ class MultiDimDoubleDataSetTests {
                 trimArray(dataset.getValues(DataSet.DIM_X), dataset.getDataCount()));
         assertArrayEquals(new double[] { 6, 7, 8 },
                 trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount()));
+        // test visibility
+        assertTrue(dataset.isVisible());
+        dataset.setVisible(false);
+        assertFalse(dataset.isVisible());
     }
 
     private static double[] trimArray(final double[] values, final int dataCount) {
