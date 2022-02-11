@@ -59,6 +59,7 @@ public class ChartOverlay extends ChartPlugin {
             getChartChildren().remove(oldNode);
             if (newNode != null) {
                 getChartChildren().add(newNode);
+                node.setManaged(false);
             }
             layoutChildren();
         });

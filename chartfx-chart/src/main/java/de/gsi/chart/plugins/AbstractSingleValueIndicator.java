@@ -81,7 +81,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
 
     /**
      * Creates a new instance of AbstractSingleValueIndicator.
-     * 
+     *
      * @param axis reference axis
      * @param value a X value to be indicated
      * @param text the text to be shown by the label. Value of {@link #textProperty()}.
@@ -171,6 +171,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         triangle.visibleProperty().bind(editableIndicatorProperty());
         triangle.mouseTransparentProperty().bind(editableIndicatorProperty().not());
         triangle.setPickOnBounds(true);
+        triangle.setManaged(false); // prevent the triangle from relayouting the whole chart
         triangle.setOpacity(0.7);
         final double a = AbstractSingleValueIndicator.triangleHalfWidth;
         triangle.getPoints().setAll(-a, -a, -a, +a, +a, +a, +a, -a);
@@ -208,7 +209,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
 
     /**
      * Sets the line coordinates.
-     * 
+     *
      * @param startX start x coordinate
      * @param startY start y coordinate
      * @param endX stop x coordinate
@@ -230,7 +231,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
 
     /**
      * Sets the marker coordinates.
-     * 
+     *
      * @param startX start x coordinate
      * @param startY start y coordinate
      * @param endX stop x coordinate
@@ -246,7 +247,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         triangle.toFront();
         // triangle has to be put onto the plot foreground to be able to put it on top of axes
         // is removed when the chart is changed
-        //addChildNodeIfNotPresent(triangle);
+        // addChildNodeIfNotPresent(triangle);
         if (!getChart().getPlotForeground().getChildren().contains(triangle)) {
             getChart().getPlotForeground().getChildren().add(triangle);
         }
