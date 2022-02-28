@@ -92,6 +92,7 @@ public class RunChartSamples extends Application {
         buttons.getChildren().add(new MyButton("WriteDataSetToFileSample", new WriteDataSetToFileSample()));
         buttons.getChildren().add(new MyButton("YWatchValueIndicatorSample", new YWatchValueIndicatorSample()));
         buttons.getChildren().add(new MyButton("ZoomerSample", new ZoomerSample()));
+        buttons.getChildren().add(new MyButton("NoiseDataSample", new NoiseDataSample()));
 
         final var scene = new Scene(root);
 
