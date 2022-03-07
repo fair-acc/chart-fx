@@ -16,7 +16,7 @@ import de.gsi.chart.renderer.spi.utils.ChartIconFactory;
 
 public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDataRendererParameter<R>> {
     protected static final String STYLE_CLASS_LABELLED_MARKER = "chart-meta-data";
-    protected static final String DEFAULT_FONT = "Helvetia";
+    protected static final String DEFAULT_FONT = "Helvetica";
     protected static final int DEFAULT_FONT_SIZE = 18;
     protected static final Color DEFAULT_GRID_LINE_COLOR = Color.GREEN;
     protected static final double DEFAULT_GRID_LINE_WIDTH = 1;

@@ -29,7 +29,7 @@ import de.gsi.dataset.utils.AssertUtils;
 
 @SuppressWarnings("PMD.FieldNamingConventions")
 public final class DefaultRenderColorScheme {
-    private static final String DEFAULT_FONT = "Helvetia";
+    private static final String DEFAULT_FONT = "Helvetica";
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final DefaultRenderColorScheme SELF = new DefaultRenderColorScheme();
 
