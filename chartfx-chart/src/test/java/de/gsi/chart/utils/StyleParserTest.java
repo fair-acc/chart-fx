@@ -106,8 +106,8 @@ class StyleParserTest {
         assertEquals(Font.font("Helvetica", 18.0), StyleParser.getFontPropertyValue(null));
         assertEquals(Font.font("Helvetica", 18.0), StyleParser.getFontPropertyValue(""));
         assertEquals(
-            Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 20),
-            StyleParser.getFontPropertyValue("font=Arial; fontWeight=bold; fontSize=20; fontPosture = italic;"));
+                Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 20),
+                StyleParser.getFontPropertyValue("font=Arial; fontWeight=bold; fontSize=20; fontPosture = italic;"));
         assertNotNull(StyleParser.getFontPropertyValue("font="));
         assertNotNull(StyleParser.getFontPropertyValue("font=Helvetica"));
         assertNotNull(StyleParser.getFontPropertyValue("font2=Helvetica"));
