@@ -1229,7 +1229,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             localAxisUnit = "";
         }
 
-        if (localAxisUnit == null) {
+        if ((localAxisUnit == null || localAxisUnit.isBlank()) && axisPrefix.isBlank()) {
             getAxisLabel().setText(axisPrimaryLabel);
         } else {
             getAxisLabel().setText(axisPrimaryLabel + " [" + axisPrefix + localAxisUnit + "]");
