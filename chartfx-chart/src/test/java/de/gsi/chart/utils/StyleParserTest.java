@@ -23,7 +23,7 @@ class StyleParserTest {
     @DisplayName("Test parsing styles")
     public void testStyleParser() {
         final String testStyle = " color1 = blue; stroke= 0; bool1=true; color2 = rgb(255,0,0); unclean=\"a'; index1=2;index2=0xFE; "
-                                 + "float1=10e7; float2=10.333; malformedInt= 0.aG; emptyProperty=;invalidColor=darthRed#22;";
+                               + "float1=10e7; float2=10.333; malformedInt= 0.aG; emptyProperty=;invalidColor=darthRed#22;";
 
         assertEquals(true, StyleParser.getBooleanPropertyValue("booleanProperty=true", "booleanProperty"));
         assertEquals(false, StyleParser.getBooleanPropertyValue("booleanProperty=false", "booleanProperty"));
@@ -103,11 +103,12 @@ class StyleParserTest {
         assertNull(StyleParser.getStrokeDashPropertyValue(testStyle, "malformedInt"));
         assertNull(StyleParser.getStrokeDashPropertyValue("stroke=", "stroke2"));
 
-        final String fontTestStyle1 = "font=Helvetica; fontWeight=bold; fontSize=18; fontPosture = italic;";
-        final String fontTestStyle2 = "font=; fontWeight=bold; fontSize=18; fontPosture = italic;";
-        assertEquals(Font.font("Helvetia", 18.0), StyleParser.getFontPropertyValue(null));
-        assertEquals(Font.font("Helvetia", FontWeight.BOLD, FontPosture.ITALIC, 18), StyleParser.getFontPropertyValue(fontTestStyle1));
-        assertEquals(Font.font("Helvetia", FontWeight.BOLD, FontPosture.ITALIC, 18), StyleParser.getFontPropertyValue(fontTestStyle2));
+        assertEquals(Font.font("Helvetica", 18.0), StyleParser.getFontPropertyValue(null));
+        assertEquals(Font.font("Helvetica", 18.0), StyleParser.getFontPropertyValue(""));
+        assertEquals(
+                Font.font("Arial", FontWeight.BOLD, FontPosture.ITALIC, 20),
+                StyleParser.getFontPropertyValue("font=Arial; fontWeight=bold; fontSize=20; fontPosture = italic;"));
+        assertNotNull(StyleParser.getFontPropertyValue("font="));
         assertNotNull(StyleParser.getFontPropertyValue("font=Helvetica"));
         assertNotNull(StyleParser.getFontPropertyValue("font2=Helvetica"));
     }

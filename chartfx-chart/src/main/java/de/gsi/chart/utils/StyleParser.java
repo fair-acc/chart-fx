@@ -28,7 +28,7 @@ public final class StyleParser { // NOPMD
     private static final String COULD_NOT_PARSE_COLOR_DESCRIPTION = "could not parse color description for '{}'='{}' returning null";
     private static final String COULD_NOT_PARSE_FLOATING_POINT = "could not parse floating point for '{}'='{}' returning null";
     private static final int DEFAULT_FONT_SIZE = 18;
-    private static final String DEFAULT_FONT = "Helvetia";
+    private static final String DEFAULT_FONT = "Helvetica";
     private static final Pattern AT_LEAST_ONE_WHITESPACE_PATTERN = Pattern.compile("\\s+");
     private static final Pattern QUOTES_PATTERN = Pattern.compile("[\"']");
     private static final Pattern STYLE_ASSIGNMENT_PATTERN = Pattern.compile("[=:]");
@@ -148,6 +148,13 @@ public final class StyleParser { // NOPMD
             return Font.font(StyleParser.DEFAULT_FONT, StyleParser.DEFAULT_FONT_SIZE);
         }
 
+        String fontName;
+        final String fontN = StyleParser.getPropertyValue(style, XYChartCss.FONT);
+        if (fontN != null && !fontN.isBlank())
+            fontName = fontN;
+        else
+            fontName = StyleParser.DEFAULT_FONT;
+
         double fontSize = StyleParser.DEFAULT_FONT_SIZE;
         final Double fontSizeObj = StyleParser.getFloatingDecimalPropertyValue(style, XYChartCss.FONT_SIZE);
         if (fontSizeObj != null) {
@@ -166,8 +173,7 @@ public final class StyleParser { // NOPMD
             fontPosture = FontPosture.findByName(fontP);
         }
 
-        final String font = StyleParser.getPropertyValue(style, XYChartCss.FONT);
-        return Font.font(Objects.requireNonNullElse(font, StyleParser.DEFAULT_FONT), fontWeight, fontPosture, fontSize);
+        return Font.font(fontName, fontWeight, fontPosture, fontSize);
     }
 
     public static Integer getIntegerPropertyValue(final String style, final String key) {
