@@ -18,6 +18,7 @@ import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.renderer.ErrorStyle;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
@@ -103,16 +104,19 @@ public class NoiseDataSample extends Application {
 
         chart.getYAxis().setName("y-axis");
         chart.getYAxis().setAutoUnitScaling(true);
-        final Zoomer zoomer = new Zoomer();
-        zoomer.setAxisMode(AxisMode.XY);
-        chart.getPlugins().add(zoomer);
-        chart.getPlugins().add(new DataPointTooltip());
-        chart.getPlugins().add(new TableViewer());
+        // Not relevant for the problem:
+        //final Zoomer zoomer = new Zoomer();
+        //zoomer.setAxisMode(AxisMode.XY);
+        //chart.getPlugins().add(zoomer);
+        // chart.getPlugins().add(new DataPointTooltip());
+        // chart.getPlugins().add(new TableViewer());
 
         // set them false to make the plot faster
         chart.setAnimated(false);
 
         final ErrorDataSetRenderer errorRenderer = new ErrorDataSetRenderer();
+        // Same behavior with or without error bars
+        errorRenderer.setErrorType(ErrorStyle.NONE);
         chart.getRenderers().setAll(errorRenderer);
         
         // init menu bar
