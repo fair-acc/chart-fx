@@ -268,6 +268,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
                     gc.save();
                     DefaultRenderColorScheme.setMarkerScheme(gc, dataPointStyle, lindex);
                     DefaultRenderColorScheme.setLineScheme(gc, dataPointStyle, lindex);
+                    DefaultRenderColorScheme.setFillScheme(gc, dataPointStyle, lindex);
                     DefaultRenderColorScheme.setGraphicsContextAttributes(gc, dataPointStyle);
                 }
                 double topRadius = isRoundedCorner() ? Math.max(0, Math.min(getRoundedCornerRadius(), 0.5 * binWidth)) : 0.0;

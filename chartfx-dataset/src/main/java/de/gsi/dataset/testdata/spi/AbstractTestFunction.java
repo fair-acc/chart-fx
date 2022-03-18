@@ -62,11 +62,6 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
     }
 
     @Override
-    public final String getStyle(final int index) { // NOPMD by steinhagen on 08/06/19 10:12
-        return null;
-    }
-
-    @Override
     public D update() {
         lock().writeLockGuard(() -> {
             data = generateY(data.length);
