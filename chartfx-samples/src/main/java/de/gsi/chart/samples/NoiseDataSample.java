@@ -19,6 +19,10 @@ import de.gsi.chart.plugins.DataPointTooltip;
 import de.gsi.chart.plugins.TableViewer;
 import de.gsi.chart.plugins.Zoomer;
 import de.gsi.chart.renderer.ErrorStyle;
+import de.gsi.chart.renderer.LineStyle;
+import de.gsi.chart.renderer.RendererDataReducer;
+import de.gsi.chart.renderer.datareduction.DefaultDataReducer;
+import de.gsi.chart.renderer.datareduction.MaxDataReducer;
 import de.gsi.chart.renderer.spi.ErrorDataSetRenderer;
 import de.gsi.chart.ui.ProfilerInfoBox;
 import de.gsi.chart.ui.ProfilerInfoBox.DebugLevel;
@@ -94,7 +98,7 @@ public class NoiseDataSample extends Application {
         // for extra timing diagnostics
         ProcessingProfiler.setVerboseOutputState(true);
         ProcessingProfiler.setLoggerOutputState(true);
-        ProcessingProfiler.setDebugState(false);
+        ProcessingProfiler.setDebugState(true);
 
         final BorderPane root = new BorderPane();
         final Scene scene = new Scene(root, 1280, 1024);
@@ -117,7 +121,16 @@ public class NoiseDataSample extends Application {
         final ErrorDataSetRenderer errorRenderer = new ErrorDataSetRenderer();
         // Same behavior with or without error bars
         errorRenderer.setErrorType(ErrorStyle.NONE);
+        // errorRenderer.setPolyLineStyle(LineStyle.NONE);
         chart.getRenderers().setAll(errorRenderer);
+        
+        
+        // Different data reducer options:
+        //
+        // DefaultDataReducer dataReducer = new DefaultDataReducer();
+        // dataReducer.setMinPointPixelDistance(1);
+        // RendererDataReducer dataReducer = new MaxDataReducer();
+        // errorRenderer.setRendererDataReducer(dataReducer);
         
         // init menu bar
         root.setTop(getHeaderBar());
@@ -150,7 +163,7 @@ public class NoiseDataSample extends Application {
             flatlineAlternator[0] =! flatlineAlternator[0];
         }
         
-        System.out.println(System.currentTimeMillis() + ": Updating data. Flatline: " + doFlatline);
+        LOGGER.atInfo().log(System.currentTimeMillis() + ": Updating data. Flatline: " + doFlatline);
 
         dataSet.lock().writeLockGuard(() -> {
             dataSet.autoNotification().set(false);
@@ -188,7 +201,7 @@ public class NoiseDataSample extends Application {
         });
         dataSet.fireInvalidated(new AddedDataEvent(dataSet));
         
-        System.out.println(System.currentTimeMillis() + ": Updating data done.");
+        LOGGER.atInfo().log(System.currentTimeMillis() + ": Updating data done.");
 
         ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
     }

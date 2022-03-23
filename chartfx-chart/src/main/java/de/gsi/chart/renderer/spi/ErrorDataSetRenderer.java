@@ -248,7 +248,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
             }
         } // end of 'dataSetIndex' loop
-        ProcessingProfiler.getTimeDiff(start);
+        ProcessingProfiler.getTimeDiff(start, "end render");
 
         return drawnDataSet;
     }
@@ -721,7 +721,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             drawDefaultNoErrors(gc, localCachedPoints);
             break;
         }
-        ProcessingProfiler.getTimeDiff(start);
+        ProcessingProfiler.getTimeDiff(start, "end drawChartCompontents");
     }
 
     protected static void drawPolyLineArea(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
