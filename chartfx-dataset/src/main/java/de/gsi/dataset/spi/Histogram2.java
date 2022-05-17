@@ -175,7 +175,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
         case DIM_X:
             return xProjection.get(DIM_X, index);
         case DIM_Y:
-            return yProjection.get(DIM_X, index);
+            return yProjection.get(DIM_Y, index);
         default:
             throw new IndexOutOfBoundsException("dim Index out of bound 2");
         }
