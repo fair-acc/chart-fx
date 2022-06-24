@@ -33,7 +33,7 @@ import de.gsi.dataset.DataSet;
  * @author rstein
  */
 public class ChartAnatomySample extends Application {
-    private static final Logger LOGGER = LoggerFactory.getLogger(WriteDataSetToFileSample.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChartAnatomySample.class);
 
     @Override
     public void start(final Stage primaryStage) {

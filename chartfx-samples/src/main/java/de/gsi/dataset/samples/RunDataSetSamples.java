@@ -40,7 +40,7 @@ public class RunDataSetSamples extends Application {
         root.setCenter(buttons);
         root.setBottom(makeScreenShot);
 
-        buttons.getChildren().add(new MyButton("DataSetToByteArraySample", () -> DataSetToByteArraySample.main(null)));
+        //buttons.getChildren().add(new MyButton("DataSetToByteArraySample", () -> DataSetToByteArraySample.main(null)));
 
         final Scene scene = new Scene(root);
 

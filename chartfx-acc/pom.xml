@@ -1,5 +1,5 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -13,10 +13,17 @@
     <name>acc</name>
     <properties>
         <project.moduleName>de.gsi.chartfx.acc</project.moduleName>
+        <javalin.version>3.9.0</javalin.version>
+        <jetty.version>9.4.29.v20200521</jetty.version> <!-- always update version with Javalin -->
+        <micrometer.version>1.5.1</micrometer.version>
+        <velocity.version>2.0</velocity.version>
+        <okHttp3.version>4.8.1</okHttp3.version>
     </properties>
 
+
     <description>
-        Collection of accelerator specific widget and functionalities that directly depend on chart-fx or which no other suitable place has been identified (yet).
+        Collection of accelerator specific widget and functionalities that directly depend on chart-fx or which no other
+        suitable place has been identified (yet).
     </description>
 
     <dependencies>
@@ -26,16 +33,76 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi</groupId>
-            <artifactId>microservice</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.testfx</groupId>
             <artifactId>openjfx-monocle</artifactId>
             <version>jdk-12.0.1+2</version>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.http2</groupId>
+            <artifactId>http2-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
+        <!-- for HTTP/2 ALPN (application layer protocol negotiation) -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-conscrypt-server</artifactId>
+            <version>${jetty.version}</version>
+        </dependency>
 
+        <!-- HTTP template engine-->
+        <dependency>
+            <groupId>org.apache.velocity</groupId>
+            <artifactId>velocity-engine-core</artifactId>
+            <version>${velocity.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
+        <!-- alternate Javalin dependency injection - add all and remove those not necessary -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin-bundle</artifactId>
+            <version>${javalin.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.jetbrains.kotlin</groupId>
+                    <artifactId>kotlin-stdlib-jdk8</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cc.vileda</groupId>
+                    <artifactId>kotlin-openapi3-dsl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>io.github.classgraph</groupId>
+                    <artifactId>classgraph</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- HTTP/REST client dependencies-->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>${okHttp3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp-sse</artifactId>
+            <version>${okHttp3.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>mockwebserver</artifactId>
+            <version>${okHttp3.version}</version>
+            <scope>test</scope>
+        </dependency>
 
     </dependencies>
 </project>
