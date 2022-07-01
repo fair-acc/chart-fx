@@ -55,7 +55,7 @@ public class CrosshairIndicator extends AbstractDataFormattingPlugin {
                 return;
             }
 
-            final Bounds plotAreaBounds = getChart().getBoundsInLocal();
+            final Bounds plotAreaBounds = getChart().getPlotArea().getBoundsInLocal();
             updatePath(event, plotAreaBounds);
             updateLabel(event, plotAreaBounds);
 
