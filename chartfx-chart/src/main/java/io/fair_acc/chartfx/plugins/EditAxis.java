@@ -631,7 +631,7 @@ public class EditAxis extends ChartPlugin {
                 break;
             }
 
-            setOpacity(0.0);
+            // setOpacity(0.0); // setting this breaks the plugin on linux while not making the border transparent, see #490
             getRoot().setBackground(Background.EMPTY);
             // getRoot().setStyle("-fx-background-color: rgba(0, 255, 0, 1);");
 
