@@ -1,10 +1,10 @@
 #* @implicitly included *#
-#* @vtlvariable name="msg" type="de.gsi.acc.remote.util.MessageBundle" *#
-#* @vtlvariable name="images" type="java.lang.Iterable<de.gsi.acc.remote.clipboard.ClipboardData>" *#
-#* @vtlvariable name="image" type="de.gsi.acc.remote.clipboard.ClipboardData" *#
-#* @vtlvariable name="users" type="java.lang.Iterable<de.gsi.acc.remote.user.RestUser>" *#
+#* @vtlvariable name="msg" type="io.fair_acc.acc.remote.util.MessageBundle" *#
+#* @vtlvariable name="images" type="java.lang.Iterable<io.fair_acc.acc.remote.clipboard.ClipboardData>" *#
+#* @vtlvariable name="image" type="io.fair_acc.acc.remote.clipboard.ClipboardData" *#
+#* @vtlvariable name="users" type="java.lang.Iterable<io.fair_acc.acc.remote.user.RestUser>" *#
 #* @vtlvariable name="currentUser" type="java.lang.String" *#
-#* @vtlvariable name="currentRoles" type="java.lang.List<de.gsi.acc.remote.BasicRestRoles>" *#
+#* @vtlvariable name="currentRoles" type="java.lang.List<io.fair_acc.acc.remote.BasicRestRoles>" *#
 #* @vtlvariable name="loggedOut" type="java.lang.String" *#
 #* @vtlvariable name="authenticationFailed" type="java.lang.String" *#
 #* @vtlvariable name="authenticationSucceeded" type="java.lang.String" *#

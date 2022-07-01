@@ -4,14 +4,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.gsi</groupId>
-        <artifactId>chartfx</artifactId>
+        <groupId>io.fair-acc</groupId>
+        <artifactId>chartfx-parent</artifactId>
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>..</relativePath>
     </parent>
-    <groupId>de.gsi.report</groupId>
-    <artifactId>chartfx-report</artifactId>
-    <name>report</name>
+    <artifactId>report</artifactId>
+    <name>chartfx-report</name>
 
     <description>
         Container for handling testing and code coverage reports
@@ -19,23 +18,23 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.gsi.dataset</groupId>
-            <artifactId>chartfx-dataset</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>dataset</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi.math</groupId>
-            <artifactId>chartfx-math</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>math</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi.chart</groupId>
-            <artifactId>chartfx-chart</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>chartfx</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi.acc</groupId>
-            <artifactId>chartfx-acc</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>acc</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

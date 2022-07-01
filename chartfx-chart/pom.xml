@@ -4,16 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.gsi</groupId>
-        <artifactId>chartfx</artifactId>
+        <groupId>io.fair-acc</groupId>
+        <artifactId>chartfx-parent</artifactId>
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>..</relativePath>
     </parent>
-    <groupId>de.gsi.chart</groupId>
-    <artifactId>chartfx-chart</artifactId>
+    <artifactId>chartfx</artifactId>
     <name>chartfx-chart</name>
     <properties>
-        <project.moduleName>de.gsi.chartfx.chart</project.moduleName>
+        <project.moduleName>io.fair-acc.chartfx</project.moduleName>
     </properties>
 
     <description>This charting library ${project.artifactId}- is an extension
@@ -62,13 +61,13 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>de.gsi.dataset</groupId>
-            <artifactId>chartfx-dataset</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>dataset</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi.math</groupId>
-            <artifactId>chartfx-math</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>math</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

@@ -2,13 +2,13 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>de.gsi</groupId>
-    <artifactId>chartfx</artifactId>
+    <groupId>io.fair-acc</groupId>
+    <artifactId>chartfx-parent</artifactId>
     <!-- N.B. convention: major version number is linked to the compatible JDK Version,
         minor version number to library feature/api changes, micro version number to bug-fixes -->
     <version>${revision}${sha1}${changelist}</version>
     <packaging>pom</packaging>
-    <name>chartfx</name>
+    <name>chartfx-parent</name>
     <description>The chart-fx charting library is an extension
         in the spirit of Oracle's XYChart and performance/time-proven JDataViewer charting functionalities.
         Emphasis was put on plotting performance for both large number of data points and real-time displays,
@@ -33,7 +33,7 @@
         <changelist>-SNAPSHOT</changelist>
         <sha1 />
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.moduleName>de.gsi.chartfx</project.moduleName>
+        <project.moduleName>io.fair-acc.chartfx-parent</project.moduleName>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
 
@@ -173,7 +173,7 @@
                     <version>1.3.2</version>
                     <configuration>
                         <skip>true</skip>
-                        <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
+                        <mainClass>RunChartSamples</mainClass>
                     </configuration>
                 </plugin>
                 <plugin> <!-- Use current plugin version because of MNG-5346-->
@@ -182,8 +182,8 @@
                     <version>3.6.0</version>
                 </plugin>
                 <plugin>
-                    <groupId>de.gsi.generate</groupId>
-                    <artifactId>chartfx-generate</artifactId>
+                    <groupId>io.fair-acc</groupId>
+                    <artifactId>generate</artifactId>
                     <version>${revision}${sha1}${changelist}</version>
                     <executions>
                         <execution>

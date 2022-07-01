@@ -5,15 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.gsi</groupId>
-        <artifactId>chartfx</artifactId>
+        <groupId>io.fair-acc</groupId>
+        <artifactId>chartfx-parent</artifactId>
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>..</relativePath>
     </parent>
-    <artifactId>chartfx-samples</artifactId>
+    <artifactId>samples</artifactId>
     <name>chartfx-samples</name>
     <properties>
-        <project.moduleName>de.gsi.chartfx.samples</project.moduleName>
+        <project.moduleName>io.fair-acc.samples</project.moduleName>
     </properties>
 
     <description>
@@ -27,13 +27,13 @@
             <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi.chart</groupId>
-            <artifactId>chartfx-chart</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>chartfx</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>de.gsi.acc</groupId>
-            <artifactId>chartfx-acc</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>acc</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -55,7 +55,7 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
+                    <mainClass>io.fair_acc.chartfx.samples.RunChartSamples</mainClass>
                 </configuration>
                 <executions>
                     <execution>
@@ -64,7 +64,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>de.gsi.chart.samples.RunChartSamples</mainClass>
+                            <mainClass>io.fair_acc.chartfx.samples.RunChartSamples</mainClass>
                         </configuration>
                     </execution>
                     <execution>
@@ -73,7 +73,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>de.gsi.dataset.samples.RunDataSetSamples</mainClass>
+                            <mainClass>io.fair_acc.dataset.samples.RunDataSetSamples</mainClass>
                         </configuration>
                     </execution>
                     <execution>
@@ -82,7 +82,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>de.gsi.math.samples.RunMathSamples</mainClass>
+                            <mainClass>io.fair_acc.samples.RunMathSamples</mainClass>
                         </configuration>
                     </execution>
                     <execution>
@@ -91,7 +91,7 @@
                             <goal>java</goal>
                         </goals>
                         <configuration>
-                            <mainClass>de.gsi.acc.ui.samples.RunUiSamples</mainClass>
+                            <mainClass>io.fair_acc.acc.ui.samples.RunUiSamples</mainClass>
                         </configuration>
                     </execution>
                 </executions>

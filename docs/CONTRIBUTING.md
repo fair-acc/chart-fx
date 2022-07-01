@@ -9,7 +9,7 @@ For bugs, issues, or other discussion, please log a new issue in the GitHub repo
 GitHub supports [markdown](https://help.github.com/categories/writing-on-github/), so when filing bugs make sure you check the formatting before clicking submit.
 
 ## Other discussions
-For general "how-to" and guidance questions about using ChartFx to build and run applications, please have a look at the various [samples](https://github.com/GSI-CS-CO/chart-fx/tree/master/chartfx-samples/src/main/java/de/gsi) here or if you cannot find anything that fits your use-case use [Stack Overflow](http://stackoverflow.com/questions/tagged/chartfx-api) tagged with `ChartFx-api`.
+For general "how-to" and guidance questions about using ChartFx to build and run applications, please have a look at the various [samples](https://github.com/fair-acc/chart-fx/tree/master/chartfx-samples/src/main/java/io/fair_acc) here or if you cannot find anything that fits your use-case use [Stack Overflow](http://stackoverflow.com/questions/tagged/chartfx-api) tagged with `ChartFx-api`.
 
 ## Contributing code and content
 We welcome all forms of contributions from the community. Please read the following guidelines to maximise the chances of your PR being merged.
@@ -33,8 +33,8 @@ Please be sure to follow the usual process for submitting PRs:
  - [TODO] apply default code formatter (to minimise future refactoring)
  - Please check against the current [PMD](https://pmd.github.io/) [default rules](https://github.com/fair-acc/chart-fx/blob/master/pmd_rules.xml), [FindBugs](http://findbugs.sourceforge.net/) or similar QA code checker (N.B. other/further code improvements are welcome)
  - Create a pull request
- - Make sure your PR title is descriptive
- - Include a link back to an open issue in the PR description
+   - Make sure your PR title is descriptive
+   - Include a link back to an open issue in the PR description
 
 We reserve the right to close PRs that are not making progress. Closed PRs can be reopened again later and work can resume.
 

@@ -1,9 +1,9 @@
 # Thread-Safety and Concurrency in ChartFX
 
 Large data sets are typically -- or better 'should be' -- primarily updated in separate data-acquisition or processing threads in order not to block or overload JavaFX's main rendering thread.
-The `[DataSet](chartfx-dataset/src/main/java/de/gsi/dataset/DataSet.java)` interface thus deploys for this purpose a Read-Write-Lock pair (interface: `[DataSetLock](master/chartfx-dataset/src/main/java/de/gsi/dataset/locks/DataSetLock.java)`) that facilitates the thread-safety of the UI and non-UI parts of the ChartFx library.
+The `[DataSet](chartfx-dataset/src/main/java/io/fair_acc/dataset/DataSet.java)` interface thus deploys for this purpose a Read-Write-Lock pair (interface: `[DataSetLock](master/chartfx-dataset/src/main/java/io/fair_acc/dataset/locks/DataSetLock.java)`) that facilitates the thread-safety of the UI and non-UI parts of the ChartFx library.
 
-While the user is free to provide null or custom implementations variants when implementing custom DataSets, all default data sets (notably their setters) use the [DefaultDataSetLock](chartfx-dataset/src/main/java/de/gsi/dataset/locks/DefaultDataSetLock.java), that implements a mutually exclusive pair of 'multi-reader' and 'reentrant single-writer' lock pair.
+While the user is free to provide null or custom implementations variants when implementing custom DataSets, all default data sets (notably their setters) use the [DefaultDataSetLock](chartfx-dataset/src/main/java/io/fair_acc/dataset/locks/DefaultDataSetLock.java), that implements a mutually exclusive pair of 'multi-reader' and 'reentrant single-writer' lock pair.
 Ie. while the same writer thread can hold multiple (also recursive) write-locks, it may not hold a read-lock on the same object. Same applies vice-versa for the read-locks.
 
 **Important design choices taken:**
