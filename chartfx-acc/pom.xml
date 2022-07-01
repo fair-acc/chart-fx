@@ -3,16 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.gsi</groupId>
-        <artifactId>chartfx</artifactId>
+        <groupId>io.fair-acc</groupId>
+        <artifactId>chartfx-parent</artifactId>
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>..</relativePath>
     </parent>
-    <groupId>de.gsi.acc</groupId>
-    <artifactId>chartfx-acc</artifactId>
-    <name>acc</name>
+    <artifactId>acc</artifactId>
+    <name>chartfx-acc</name>
     <properties>
-        <project.moduleName>de.gsi.chartfx.acc</project.moduleName>
+        <project.moduleName>io.fair-acc.acc</project.moduleName>
         <javalin.version>3.9.0</javalin.version>
         <jetty.version>9.4.29.v20200521</jetty.version> <!-- always update version with Javalin -->
         <micrometer.version>1.5.1</micrometer.version>
@@ -28,8 +27,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.gsi.chart</groupId>
-            <artifactId>chartfx-chart</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>chartfx</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

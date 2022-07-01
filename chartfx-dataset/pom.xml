@@ -3,16 +3,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.gsi</groupId>
-        <artifactId>chartfx</artifactId>
+        <groupId>io.fair-acc</groupId>
+        <artifactId>chartfx-parent</artifactId>
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>de.gsi.dataset</groupId>
-    <artifactId>chartfx-dataset</artifactId>
-    <name>dataset</name>
+    <artifactId>dataset</artifactId>
+    <name>chartfx-dataset</name>
     <properties>
-        <project.moduleName>de.gsi.chartfx.dataset</project.moduleName>
+        <project.moduleName>io.fair-acc.dataset</project.moduleName>
     </properties>
 
     <description>
@@ -44,8 +43,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>de.gsi.generate</groupId>
-                <artifactId>chartfx-generate</artifactId>
+                <groupId>io.fair-acc</groupId>
+                <artifactId>generate</artifactId>
             </plugin>
         </plugins>
     </build>

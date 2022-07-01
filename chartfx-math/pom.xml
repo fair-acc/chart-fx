@@ -4,16 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>de.gsi</groupId>
-        <artifactId>chartfx</artifactId>
+        <groupId>io.fair-acc</groupId>
+        <artifactId>chartfx-parent</artifactId>
         <version>${revision}${sha1}${changelist}</version>
         <relativePath>..</relativePath>
     </parent>
-    <groupId>de.gsi.math</groupId>
-    <artifactId>chartfx-math</artifactId>
-    <name>math</name>
+    <artifactId>math</artifactId>
+    <name>chartfx_math</name>
     <properties>
-        <project.moduleName>de.gsi.chartfx.math</project.moduleName>
+        <project.moduleName>io.fair-acc.math</project.moduleName>
     </properties>
 
     <description>
@@ -23,8 +22,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>de.gsi.dataset</groupId>
-            <artifactId>chartfx-dataset</artifactId>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>dataset</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -48,8 +47,8 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>de.gsi.generate</groupId>
-                <artifactId>chartfx-generate</artifactId>
+                <groupId>io.fair-acc</groupId>
+                <artifactId>generate</artifactId>
             </plugin>
         </plugins>
     </build>
