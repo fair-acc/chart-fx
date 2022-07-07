@@ -19,7 +19,7 @@
 
     <properties>
         <javalin.version>3.9.0</javalin.version>
-        <jetty.version>9.4.29.v20200521</jetty.version> <!-- always update version with Javalin -->
+        <jetty.version>9.4.48.v20220622</jetty.version> <!-- always update version with Javalin -->
         <micrometer.version>1.5.1</micrometer.version>
         <velocity.version>2.0</velocity.version>
         <okHttp3.version>4.8.1</okHttp3.version>
