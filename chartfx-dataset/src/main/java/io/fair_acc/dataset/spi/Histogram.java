@@ -3,13 +3,13 @@ package io.fair_acc.dataset.spi;
 import java.util.Arrays;
 import java.util.List;
 
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.DataSetMetaData;
 import io.fair_acc.dataset.Histogram1D;
+import io.fair_acc.dataset.event.AddedDataEvent;
+import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Class implements simple one dimensional binned histogram backed internally by double arrays
@@ -22,7 +22,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     /**
      * Creates histogram with name and range [minX, maxX]
-     * 
+     *
      * @param name of the data sets
      * @param xBins the initial bin array (defines [minX, maxX] and nBins)
      */
@@ -32,7 +32,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     /**
      * Creates histogram with name and range [minX, maxX]
-     * 
+     *
      * @param name of the data sets
      * @param xBins the initial bin array (defines [minX, maxX] and nBins)
      * @param horizontal whether binning is performed in X
@@ -47,7 +47,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     /**
      * Creates histogram with name and range [minX, maxX]
-     * 
+     *
      * @param name of the data sets
      * @param nBins number of bins
      * @param minX minimum of range
@@ -60,7 +60,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     /**
      * Creates histogram with name and range [minX, maxX]
-     * 
+     *
      * @param name of the data sets
      * @param nBins number of bins
      * @param minX minimum of range
@@ -158,7 +158,6 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
 
     @Override
     public void reset() {
-        super.reset();
         Arrays.fill(data, 0.0);
         getDataStyleMap().clear();
         getDataLabelMap().clear();
