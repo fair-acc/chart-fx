@@ -51,6 +51,10 @@ class HistogramTests {
         assertEquals(1, dataSet.getWarningList().size(), "under-flow warning present");
         assertTrue(dataSet.getWarningList().contains(Histogram.TAG_UNDERSHOOT), "under-flow warning present");
         assertDoesNotThrow(dataSet::reset);
+        assertEquals(0.0, dataSet.getAxisDescription(DIM_X).getMin());
+        assertEquals(N_BINS, dataSet.getAxisDescription(DIM_X).getMax());
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_Y).getMin());
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_Y).getMax());
         assertEquals(0, dataSet.getBinContent(0), "under-flow bin being empty");
         assertEquals(0, dataSet.getWarningList().size(), "under-flow warning not present");
         assertFalse(dataSet.getWarningList().contains(Histogram.TAG_UNDERSHOOT), "under-flow warning not present");
@@ -158,6 +162,10 @@ class HistogramTests {
         assertEquals(0, dataSet.get(DIM_Y, 2));
 
         assertDoesNotThrow(dataSet::reset);
+        assertEquals(0.0, dataSet.getAxisDescription(DIM_X).getMin());
+        assertEquals(N_BINS, dataSet.getAxisDescription(DIM_X).getMax());
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_Y).getMin());
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_Y).getMax());
         dataSet.fillN(new double[] { 1.0, 2.0, 3.0 }, new double[] { 1.0, 2.0, 3.0 }, 1);
         assertEquals(0, dataSet.get(DIM_Y, 0));
         assertEquals(1, dataSet.get(DIM_Y, 1));
@@ -194,6 +202,10 @@ class HistogramTests {
         assertEquals(0, dataSet.get(DIM_Y, 2));
 
         assertDoesNotThrow(dataSet::reset);
+        assertEquals(-0.5, dataSet.getAxisDescription(DIM_X).getMin());
+        assertEquals(N_BINS + 0.5, dataSet.getAxisDescription(DIM_X).getMax());
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_Y).getMin());
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_Y).getMax());
         dataSet.fillN(new double[] { 1.0, 2.0, 3.0 }, new double[] { 1.0, 2.0, 3.0 }, 1);
         assertEquals(0, dataSet.get(DIM_Y, 0));
         assertEquals(1, dataSet.get(DIM_Y, 1));
@@ -275,5 +287,11 @@ class HistogramTests {
         assertEquals(2.1, dataSet.get(DIM_X, 2));
         assertEquals(3.1, dataSet.get(DIM_X, 3));
         assertEquals(0, dataSet.get(DIM_X, 4));
+
+        assertDoesNotThrow(dataSet::reset);
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_X).getMin());
+        assertEquals(Double.NaN, dataSet.getAxisDescription(DIM_X).getMax());
+        assertEquals(0.0, dataSet.getAxisDescription(DIM_Y).getMin());
+        assertEquals(6.0, dataSet.getAxisDescription(DIM_Y).getMax());
     }
 }
