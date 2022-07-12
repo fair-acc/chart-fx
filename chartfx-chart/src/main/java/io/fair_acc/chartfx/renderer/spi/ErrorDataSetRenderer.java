@@ -588,6 +588,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final double defaultMarkerSize = markerTypeColorAndSize.getThird();
         if (defaultMarkerColor != null) {
             gc.setFill(defaultMarkerColor);
+            gc.setStroke(defaultMarkerColor);
         }
         for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
             final double x = localCachedPoints.xValues[i];
