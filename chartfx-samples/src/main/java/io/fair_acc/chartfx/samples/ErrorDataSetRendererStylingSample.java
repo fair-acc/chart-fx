@@ -5,20 +5,12 @@ import static io.fair_acc.dataset.DataSet.DIM_X;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.fair_acc.dataset.testdata.spi.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -32,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.plugins.DataPointTooltip;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Panner;
@@ -45,6 +38,7 @@ import io.fair_acc.chartfx.ui.ProfilerInfoBox;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox.DebugLevel;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
+import io.fair_acc.dataset.testdata.spi.*;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 public class ErrorDataSetRendererStylingSample extends Application {
@@ -63,6 +57,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
     private int nSamples = 400;
     private Timer timer;
     private ComboBox<ErrorTestDataSet.ErrorType> errorTypeCombo;
+    private TextField dataSetStyle;
 
     private void generateData(final XYChart chart) {
         long startTime = ProcessingProfiler.getTimeStamp();
@@ -104,7 +99,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
             dataSetsWithNaN = dataSet.stream() //
                                       .map(ds -> {
                                           final DefaultErrorDataSet newDs = new DefaultErrorDataSet(ds);
-                                          for (int i = Math.min(Math.max(nSamples / 10, 500), 2); i >= 0; i--) { // how many gaps to produce
+                                          for (int i = Math.max(Math.min(nSamples / 10, 500), 2); i >= 0; i--) { // how many gaps to produce
                                               final int index = rnd.nextInt(nSamples - i);
                                               for (int j = i; j >= 0; j--) { // produce gaps with 1 to n consecutive NaNs
                                                   newDs.set(index, ds.get(DIM_X, index + j), Double.NaN);
@@ -116,6 +111,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
         } else {
             dataSetsWithNaN = dataSet;
         }
+
+        dataSetsWithNaN.forEach(dataSetError -> dataSetError.setStyle(dataSetStyle.getText()));
 
         Platform.runLater(() -> {
             chart.getRenderers().get(0).getDatasets().setAll(dataSetsWithNaN);
@@ -221,6 +218,10 @@ public class ErrorDataSetRendererStylingSample extends Application {
         chart.getGridRenderer().drawOnTopProperty().bindBidirectional(gridOnTop.selectedProperty());
         pane.addToParameterPane("Grid on top: ", gridOnTop);
 
+        final TextField style = new TextField("");
+        chart.styleProperty().bindBidirectional(style.textProperty());
+        pane.addToParameterPane("Style: ", style);
+
         return pane;
     }
 
@@ -257,6 +258,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
             generateData(chart);
         });
 
+        dataSetStyle = new TextField("");
+
         // H-Spacer
         final Region spacer = new Region();
         spacer.setMinWidth(Region.USE_PREF_SIZE);
@@ -264,7 +267,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final ProfilerInfoBox profilerInfoBox = new ProfilerInfoBox(DEBUG_UPDATE_RATE);
         profilerInfoBox.setDebugLevel(DebugLevel.VERSION);
 
-        return new HBox(new Label("Function Type: "), dataSetTypeSelector, dataSetIncludeNaNsBox, newDataSet, startTimer, spacer, profilerInfoBox);
+        return new HBox(new Label("Function Type: "), dataSetTypeSelector, dataSetIncludeNaNsBox, new Label("DataSet Style:"), dataSetStyle, newDataSet, startTimer, spacer, profilerInfoBox);
     }
 
     private ParameterTab getRendererTab(final XYChart chart, final ErrorDataSetRenderer errorRenderer) {
@@ -305,6 +308,15 @@ public class ErrorDataSetRendererStylingSample extends Application {
             chart.requestLayout();
         });
         pane.addToParameterPane("   Marker Size: ", markerSize);
+
+        final ComboBox<DefaultMarker> markerStyle = new ComboBox<>();
+        markerStyle.getItems().addAll(DefaultMarker.values());
+        markerStyle.setValue((DefaultMarker) errorRenderer.getMarker());
+        markerStyle.valueProperty().addListener((ch, old, selection) -> {
+            errorRenderer.setMarker(selection);
+            chart.requestLayout();
+        });
+        pane.addToParameterPane("   Marker Style: ", markerStyle);
 
         final Spinner<Number> dashSize = new Spinner<>(0, 100, errorRenderer.getDashSize(), 1);
         dashSize.isEditable();
@@ -549,7 +561,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         public ParameterTab(final String tabName) {
             super(tabName);
-
+            setClosable(false);
             setContent(parameterGrid);
         }
 
