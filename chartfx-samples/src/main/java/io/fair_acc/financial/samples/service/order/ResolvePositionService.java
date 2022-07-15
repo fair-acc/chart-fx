@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import io.fair_acc.financial.samples.dos.Order;
 import io.fair_acc.financial.samples.dos.Order.OrderStatus;
 import io.fair_acc.financial.samples.dos.OrderExpression.OrderBuySell;
@@ -14,11 +11,14 @@ import io.fair_acc.financial.samples.dos.Position;
 import io.fair_acc.financial.samples.dos.Position.PositionStatus;
 import io.fair_acc.financial.samples.dos.PositionContainer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * @author afischer
  */
 public class ResolvePositionService {
-    private static final Log logger = LogFactory.getLog(ResolvePositionService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResolvePositionService.class);
 
     /**
      * Main resolving of trading positions by its order commands.
@@ -113,7 +113,7 @@ public class ResolvePositionService {
     public static Position createPositionByOrder(Order order) {
         if (!OrderStatus.FILLED.equals(order.getStatus())) {
             String message = "The position cannot be created, because order " + order.getInternalOrderId() + "/" + order.getServiceOrderId() + " is not filled.";
-            logger.error(message);
+            LOGGER.error(message);
             throw new IllegalArgumentException(message);
         }
         // position type 1=LONG and -1=SHORT
