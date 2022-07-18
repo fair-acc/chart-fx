@@ -55,6 +55,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     private final StyleableDoubleProperty axisZeroValue = CSS.createDoubleProperty(this, "axisZeroValue", 0.0, true, null, this::requestAxisLayout);
     private final transient Cache cache = new Cache();
     protected boolean isUpdating;
+    private boolean computingRange = false;
 
     /**
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
@@ -164,7 +165,11 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
      * @return the range that is clamped to limits defined by {@link #getMinRange()} and {@link #getMaxRange()}.
      */
     public DataRange getClampedRange() {
-        recomputeClampedRange();
+        if (!computingRange) { // guard against infinite range computation loop
+            computingRange = true;
+            recomputeClampedRange();
+            computingRange = false;
+        }
         return clampedRange;
     }
 
