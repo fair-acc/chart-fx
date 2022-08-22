@@ -1,25 +1,25 @@
 package io.fair_acc.chartfx.viewer;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.concurrent.ExecutionException;
-
+import io.fair_acc.chartfx.ui.TilingPane.Layout;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils.JavaFxInterceptor;
+import io.fair_acc.chartfx.utils.FXUtils;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
-
+import javafx.stage.Window;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import io.fair_acc.chartfx.ui.TilingPane.Layout;
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils.JavaFxInterceptor;
-import io.fair_acc.chartfx.utils.FXUtils;
+import java.util.concurrent.ExecutionException;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Tests {@link io.fair_acc.chartfx.viewer.SquareButton }
@@ -33,6 +33,7 @@ public class SquareButtonTest {
     private SquareButton field;
     private StackPane root;
     private Group group;
+    private Window sceneWindow;
 
     @Start
     public void start(Stage stage) {
@@ -42,8 +43,10 @@ public class SquareButtonTest {
         field = new SquareButton(null, icon);
 
         root = new StackPane(field);
-        stage.setScene(new Scene(root, 120, 200));
+        Scene scene = new Scene(root, 120, 200);
+        stage.setScene(scene);
         stage.show();
+        sceneWindow = scene.getWindow();
     }
 
     @Test
@@ -68,4 +71,37 @@ public class SquareButtonTest {
         assertDoesNotThrow(() -> group = new Group(field));
         Assertions.assertDoesNotThrow(() -> group.getChildren().remove(field));
     }
+
+    @Test
+    public void heightChangeListener_fractionAppearsInParentHeightDueToScalingAndSnapToPixelFlag_theFractionIsIgnored() {
+        FXUtils.assertJavaFxThread();
+        ensureParentIsNotNull();
+        double originalRenderScaleY = sceneWindow.getRenderScaleY();
+        Region parent = (Region) field.getParent();
+        double originalParentHeight = parent.getHeight();
+        try {
+            sceneWindow.setRenderScaleY(1.17);
+            double targetHeight = parent.snapSizeY(50);
+            double targetHeightWithoutFraction = Math.floor(targetHeight);
+            assertThat(targetHeight).isNotEqualTo(targetHeightWithoutFraction);
+            forceChangingOfButtonHeightViaParent(parent, targetHeight);
+            assertThat(parent.getHeight()).isEqualTo(targetHeight);
+            assertThat(field.getPrefHeight()).isEqualTo(targetHeightWithoutFraction);
+        }
+        finally {
+            sceneWindow.setRenderScaleY(originalRenderScaleY);
+            parent.resize(parent.getWidth(), originalParentHeight);
+        }
+    }
+
+    private void forceChangingOfButtonHeightViaParent(Region parent, double targetHeight) {
+        parent.resize(parent.getWidth(), targetHeight);
+    }
+
+    private void ensureParentIsNotNull() {
+        if (!root.getChildren().contains(field)) {
+            root.getChildren().add(field);
+        }
+    }
+
 }

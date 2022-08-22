@@ -29,9 +29,15 @@ public class SquareButton extends Button {
         final Region titlePane = (Region) this.getParent();
         final double marginBar = titlePane.getInsets().getTop() + titlePane.getInsets().getBottom();
         final double paddingButton = this.getPadding().getTop() + this.getPadding().getBottom();
-        final double max = titlePane.getHeight() - marginBar - paddingButton;
+        final double max = ignoreScalingWithSnapToPixelAdjustment(
+                titlePane.getHeight() - marginBar - paddingButton
+        );
         this.setPrefSize(max, max);
         this.setMaxSize(MAX_BUTTON_SIZE, MAX_BUTTON_SIZE);
+    }
+
+    private static double ignoreScalingWithSnapToPixelAdjustment(double sizeInPixels) {
+        return Math.floor(sizeInPixels);
     }
 
     private void updateListener() {
