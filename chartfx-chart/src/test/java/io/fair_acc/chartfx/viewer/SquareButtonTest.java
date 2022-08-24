@@ -1,16 +1,23 @@
 package io.fair_acc.chartfx.viewer;
 
+import com.sun.javafx.scene.control.ContextMenuContent;
 import io.fair_acc.chartfx.ui.TilingPane.Layout;
 import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils.JavaFxInterceptor;
 import io.fair_acc.chartfx.utils.FXUtils;
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.skin.ToolBarSkin;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
@@ -19,6 +26,7 @@ import org.testfx.framework.junit5.Start;
 import java.util.concurrent.ExecutionException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -41,12 +49,19 @@ public class SquareButtonTest {
 
         icon = Layout.GRID.getIcon();
         field = new SquareButton(null, icon);
+        field.setStyle("-fx-padding: 1mm");
 
         root = new StackPane(field);
+        root.setStyle("-fx-border-color: black; -fx-border-width: 1pt");
         Scene scene = new Scene(root, 120, 200);
         stage.setScene(scene);
         stage.show();
         sceneWindow = scene.getWindow();
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        ensureParentIsNotNull();
     }
 
     @Test
@@ -71,26 +86,71 @@ public class SquareButtonTest {
         assertDoesNotThrow(() -> group = new Group(field));
         Assertions.assertDoesNotThrow(() -> group.getChildren().remove(field));
     }
-
     @Test
-    public void heightChangeListener_fractionAppearsInParentHeightDueToScalingAndSnapToPixelFlag_theFractionIsIgnored() {
+    public void heightChangeListener_scalingWithSnapToPixel_snappedPreferredHeightWithPaddingsIsCloseToSnappedParentHeightWithoutInsets() {
         FXUtils.assertJavaFxThread();
-        ensureParentIsNotNull();
+        boolean originalSnapToPixel = field.isSnapToPixel();
         double originalRenderScaleY = sceneWindow.getRenderScaleY();
         Region parent = (Region) field.getParent();
         double originalParentHeight = parent.getHeight();
         try {
+            field.setSnapToPixel(true);
             sceneWindow.setRenderScaleY(1.17);
-            double targetHeight = parent.snapSizeY(50);
-            double targetHeightWithoutFraction = Math.floor(targetHeight);
-            assertThat(targetHeight).isNotEqualTo(targetHeightWithoutFraction);
-            forceChangingOfButtonHeightViaParent(parent, targetHeight);
-            assertThat(parent.getHeight()).isEqualTo(targetHeight);
-            assertThat(field.getPrefHeight()).isEqualTo(targetHeightWithoutFraction);
+            double parentHeight = 50;
+            double snappedParentHeight = parent.snapSizeY(parentHeight);
+            assertThat(snappedParentHeight).isGreaterThan(parentHeight);
+            double childMaximumHeight = snappedParentHeight - parent.getInsets().getTop() - parent.getInsets().getBottom();
+            forceChangingOfButtonHeightViaParent(parent, snappedParentHeight);
+            assertThat(parent.getHeight()).isEqualTo(snappedParentHeight, within(0.1));
+            assertThat(field.snapSizeY(field.getPrefHeight()) + field.getPadding().getTop() + field.getPadding().getBottom())
+                    .isLessThan(childMaximumHeight)
+                    .isCloseTo(childMaximumHeight, within(0.1));
         }
         finally {
+            field.setSnapToPixel(originalSnapToPixel);
             sceneWindow.setRenderScaleY(originalRenderScaleY);
             parent.resize(parent.getWidth(), originalParentHeight);
+        }
+    }
+
+    @Test
+    public void heightChangeListener_scalingWithoutSnapToPixel_snappedPreferredHeightWithPaddingsIsCloseToSnappedParentHeightWithoutInsets() {
+        FXUtils.assertJavaFxThread();
+        boolean originalSnapToPixel = field.isSnapToPixel();
+        double originalRenderScaleY = sceneWindow.getRenderScaleY();
+        Region parent = (Region) field.getParent();
+        double originalParentHeight = parent.getHeight();
+        try {
+            field.setSnapToPixel(false);
+            sceneWindow.setRenderScaleY(1.17);
+            double parentHeight = 50;
+            double snappedParentHeight = parent.snapSizeY(parentHeight);
+            assertThat(snappedParentHeight).isGreaterThan(parentHeight);
+            double childMaximumHeight = snappedParentHeight - parent.getInsets().getTop() - parent.getInsets().getBottom();
+            forceChangingOfButtonHeightViaParent(parent, snappedParentHeight);
+            assertThat(parent.getHeight()).isEqualTo(snappedParentHeight, within(0.1));
+            assertThat(field.snapSizeY(field.getPrefHeight()) + field.getPadding().getTop() + field.getPadding().getBottom())
+                    .isCloseTo(childMaximumHeight, within(0.1));
+        }
+        finally {
+            field.setSnapToPixel(originalSnapToPixel);
+            sceneWindow.setRenderScaleY(originalRenderScaleY);
+            parent.resize(parent.getWidth(), originalParentHeight);
+        }
+    }
+
+    @Test
+    public void heightChangeListener_parentAvailableHeightIsZero_preferredHeightIsMaxButtonSize() {
+        FXUtils.assertJavaFxThread();
+        CustomMenuItem menuItem = new CustomMenuItem(field);
+        ContextMenu contextMenu = new ContextMenu(menuItem);
+        try {
+            contextMenu.show(sceneWindow);
+            assertThat(field.getPrefHeight()).isCloseTo(SquareButton.MAX_BUTTON_SIZE, within(0.1));
+            contextMenu.hide();
+        } finally {
+            menuItem.setContent(null);
+            contextMenu.getItems().remove(menuItem);
         }
     }
 

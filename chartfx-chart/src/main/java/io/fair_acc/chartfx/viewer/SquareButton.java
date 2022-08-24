@@ -7,7 +7,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.Region;
 
 public class SquareButton extends Button {
-    private static final int MAX_BUTTON_SIZE = 30;
+    static final int MAX_BUTTON_SIZE = 30;
 
     public SquareButton(final String cssName) {
         super();
@@ -29,15 +29,22 @@ public class SquareButton extends Button {
         final Region titlePane = (Region) this.getParent();
         final double marginBar = titlePane.getInsets().getTop() + titlePane.getInsets().getBottom();
         final double paddingButton = this.getPadding().getTop() + this.getPadding().getBottom();
-        final double max = ignoreScalingWithSnapToPixelAdjustment(
-                titlePane.getHeight() - marginBar - paddingButton
-        );
-        this.setPrefSize(max, max);
+        final double preferredSize;
+        if (titlePane.getHeight() < 1) {
+            preferredSize = MAX_BUTTON_SIZE + paddingButton;
+        } else {
+            preferredSize = adjustForScaling(titlePane.getHeight() - marginBar - paddingButton);
+        }
+        this.setPrefSize(preferredSize, preferredSize);
         this.setMaxSize(MAX_BUTTON_SIZE, MAX_BUTTON_SIZE);
     }
 
-    private static double ignoreScalingWithSnapToPixelAdjustment(double sizeInPixels) {
-        return Math.floor(sizeInPixels);
+    private double adjustForScaling(double sizeInPixels) {
+        if (isSnapToPixel()) {
+            double scaleY = getScaleY();
+            return Math.floor(sizeInPixels * scaleY) / scaleY;
+        }
+        return sizeInPixels;
     }
 
     private void updateListener() {
