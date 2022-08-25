@@ -49,10 +49,10 @@ public class SquareButtonTest {
 
         icon = Layout.GRID.getIcon();
         field = new SquareButton(null, icon);
-        field.setStyle("-fx-padding: 1mm");
+        field.setStyle("-fx-padding: 3.78px");
 
         root = new StackPane(field);
-        root.setStyle("-fx-border-color: black; -fx-border-width: 1pt");
+        root.setStyle("-fx-border-color: black; -fx-border-width: 1.33px");
         Scene scene = new Scene(root, 120, 200);
         stage.setScene(scene);
         stage.show();
