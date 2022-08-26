@@ -20,7 +20,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import io.fair_acc.chartfx.utils.SimplePerformanceMeter;
 
-import impl.org.controlsfx.skin.BreadCrumbBarSkin;
 
 /**
  * Simple JavaFX and Chart Performance metrics indicator. To be added into e.g. a ToolBar 
@@ -192,7 +191,7 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
         VERSION
     }
 
-    protected static class CustomBreadCrumbButton extends BreadCrumbBarSkin.BreadCrumbButton {
+    protected static class CustomBreadCrumbButton extends BreadCrumbButton {
         public CustomBreadCrumbButton(Node gfx) {
             super(null, gfx);
             setId(gfx.getId());
