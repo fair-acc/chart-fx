@@ -90,19 +90,19 @@ public class SquareButtonTest {
     @Test
     public void heightChangeListener_scalingWithSnapToPixel_snappedPreferredHeightWithPaddingsIsCloseToSnappedParentHeightWithoutInsets() {
         FXUtils.assertJavaFxThread();
-        boolean originalSnapToPixel = field.isSnapToPixel();
-        double originalRenderScaleY = sceneWindow.getRenderScaleY();
-        Region parent = (Region) field.getParent();
-        double originalParentHeight = parent.getHeight();
+        final boolean originalSnapToPixel = field.isSnapToPixel();
+        final double originalRenderScaleY = sceneWindow.getRenderScaleY();
+        final Region parent = (Region) field.getParent();
+        final double originalParentHeight = parent.getHeight();
         final double scale = 1.17;
         final double delta = 1 / scale;
         try {
             field.setSnapToPixel(true);
             sceneWindow.setRenderScaleY(scale);
-            double parentHeight = 50;
-            double snappedParentHeight = parent.snapSizeY(parentHeight);
+            final double parentHeight = 50;
+            final double snappedParentHeight = parent.snapSizeY(parentHeight);
             assertThat(snappedParentHeight).isGreaterThan(parentHeight);
-            double childMaximumHeight = snappedParentHeight - parent.getInsets().getTop() - parent.getInsets().getBottom();
+            final double childMaximumHeight = snappedParentHeight - parent.getInsets().getTop() - parent.getInsets().getBottom();
             forceChangingOfButtonHeightViaParent(parent, snappedParentHeight);
             assertThat(parent.getHeight()).isEqualTo(snappedParentHeight, within(delta));
             assertThat(field.snapSizeY(field.getPrefHeight()))
@@ -144,15 +144,17 @@ public class SquareButtonTest {
     @Test
     public void heightChangeListener_parentAvailableHeightIsZero_preferredHeightIsMaxButtonSize() {
         FXUtils.assertJavaFxThread();
-        CustomMenuItem menuItem = new CustomMenuItem(field);
-        double originalRenderScaleY = sceneWindow.getRenderScaleY();
-        ContextMenu contextMenu = new ContextMenu(menuItem);
+        final CustomMenuItem menuItem = new CustomMenuItem(field);
+        final double originalRenderScaleY = sceneWindow.getRenderScaleY();
+        final ContextMenu contextMenu = new ContextMenu(menuItem);
         final double scale = 1.17;
         final double delta = 1 / scale;
         try {
             sceneWindow.setRenderScaleY(scale);
             contextMenu.show(sceneWindow);
-            double expected = SquareButton.MAX_BUTTON_SIZE + field.getPadding().getTop() + field.getPadding().getBottom();
+            final double expected = field.snapSizeY(
+                    SquareButton.MAX_BUTTON_SIZE + field.getPadding().getTop() + field.getPadding().getBottom()
+            );
             assertThat(field.getPrefHeight()).isCloseTo(expected, within(delta));
             contextMenu.hide();
         } finally {
