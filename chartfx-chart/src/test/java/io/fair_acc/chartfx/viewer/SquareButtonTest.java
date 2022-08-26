@@ -145,20 +145,16 @@ public class SquareButtonTest {
     public void heightChangeListener_parentAvailableHeightIsZero_preferredHeightIsMaxButtonSize() {
         FXUtils.assertJavaFxThread();
         final CustomMenuItem menuItem = new CustomMenuItem(field);
-        final double originalRenderScaleY = sceneWindow.getRenderScaleY();
         final ContextMenu contextMenu = new ContextMenu(menuItem);
-        final double scale = 1.17;
-        final double delta = 1 / scale;
         try {
-            sceneWindow.setRenderScaleY(scale);
             contextMenu.show(sceneWindow);
             final double expected = field.snapSizeY(
                     SquareButton.MAX_BUTTON_SIZE + field.getPadding().getTop() + field.getPadding().getBottom()
             );
+            final double delta = 1 / field.getScene().getWindow().getRenderScaleY();
             assertThat(field.getPrefHeight()).isCloseTo(expected, within(delta));
             contextMenu.hide();
         } finally {
-            sceneWindow.setRenderScaleY(originalRenderScaleY);
             menuItem.setContent(null);
             contextMenu.getItems().remove(menuItem);
         }
