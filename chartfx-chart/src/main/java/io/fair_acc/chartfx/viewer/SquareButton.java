@@ -33,7 +33,7 @@ public class SquareButton extends Button {
         if (titlePane.getHeight() < 1) {
             preferredSize = MAX_BUTTON_SIZE + paddingButton;
         } else {
-            preferredSize = adjustForScaling(titlePane.getHeight() - marginBar - paddingButton);
+            preferredSize = adjustForScaling(titlePane.getHeight() - marginBar);
         }
         this.setPrefSize(preferredSize, preferredSize);
         this.setMaxSize(MAX_BUTTON_SIZE, MAX_BUTTON_SIZE);

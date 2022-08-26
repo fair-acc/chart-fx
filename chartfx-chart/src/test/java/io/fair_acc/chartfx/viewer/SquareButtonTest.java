@@ -49,7 +49,7 @@ public class SquareButtonTest {
 
         icon = Layout.GRID.getIcon();
         field = new SquareButton(null, icon);
-        field.setStyle("-fx-padding: 3.78px");
+        field.setStyle("-fx-padding: 1.68px");
 
         root = new StackPane(field);
         root.setStyle("-fx-border-color: black; -fx-border-width: 1.33px");
@@ -86,6 +86,7 @@ public class SquareButtonTest {
         assertDoesNotThrow(() -> group = new Group(field));
         Assertions.assertDoesNotThrow(() -> group.getChildren().remove(field));
     }
+
     @Test
     public void heightChangeListener_scalingWithSnapToPixel_snappedPreferredHeightWithPaddingsIsCloseToSnappedParentHeightWithoutInsets() {
         FXUtils.assertJavaFxThread();
@@ -93,20 +94,21 @@ public class SquareButtonTest {
         double originalRenderScaleY = sceneWindow.getRenderScaleY();
         Region parent = (Region) field.getParent();
         double originalParentHeight = parent.getHeight();
+        final double scale = 1.17;
+        final double delta = 1 / scale;
         try {
             field.setSnapToPixel(true);
-            sceneWindow.setRenderScaleY(1.17);
+            sceneWindow.setRenderScaleY(scale);
             double parentHeight = 50;
             double snappedParentHeight = parent.snapSizeY(parentHeight);
             assertThat(snappedParentHeight).isGreaterThan(parentHeight);
             double childMaximumHeight = snappedParentHeight - parent.getInsets().getTop() - parent.getInsets().getBottom();
             forceChangingOfButtonHeightViaParent(parent, snappedParentHeight);
-            assertThat(parent.getHeight()).isEqualTo(snappedParentHeight, within(0.1));
-            assertThat(field.snapSizeY(field.getPrefHeight()) + field.getPadding().getTop() + field.getPadding().getBottom())
+            assertThat(parent.getHeight()).isEqualTo(snappedParentHeight, within(delta));
+            assertThat(field.snapSizeY(field.getPrefHeight()))
                     .isLessThan(childMaximumHeight)
-                    .isCloseTo(childMaximumHeight, within(0.1));
-        }
-        finally {
+                    .isCloseTo(childMaximumHeight, within(delta));
+        } finally {
             field.setSnapToPixel(originalSnapToPixel);
             sceneWindow.setRenderScaleY(originalRenderScaleY);
             parent.resize(parent.getWidth(), originalParentHeight);
@@ -116,23 +118,23 @@ public class SquareButtonTest {
     @Test
     public void heightChangeListener_scalingWithoutSnapToPixel_snappedPreferredHeightWithPaddingsIsCloseToSnappedParentHeightWithoutInsets() {
         FXUtils.assertJavaFxThread();
-        boolean originalSnapToPixel = field.isSnapToPixel();
-        double originalRenderScaleY = sceneWindow.getRenderScaleY();
-        Region parent = (Region) field.getParent();
-        double originalParentHeight = parent.getHeight();
+        final boolean originalSnapToPixel = field.isSnapToPixel();
+        final double originalRenderScaleY = sceneWindow.getRenderScaleY();
+        final Region parent = (Region) field.getParent();
+        final double originalParentHeight = parent.getHeight();
+        final double scale = 1.17;
+        final double delta = 1 / scale;
         try {
             field.setSnapToPixel(false);
-            sceneWindow.setRenderScaleY(1.17);
-            double parentHeight = 50;
-            double snappedParentHeight = parent.snapSizeY(parentHeight);
+            sceneWindow.setRenderScaleY(scale);
+            final double parentHeight = 50;
+            final double snappedParentHeight = parent.snapSizeY(parentHeight);
             assertThat(snappedParentHeight).isGreaterThan(parentHeight);
-            double childMaximumHeight = snappedParentHeight - parent.getInsets().getTop() - parent.getInsets().getBottom();
+            final double childMaximumHeight = snappedParentHeight - parent.getInsets().getTop() - parent.getInsets().getBottom();
             forceChangingOfButtonHeightViaParent(parent, snappedParentHeight);
-            assertThat(parent.getHeight()).isEqualTo(snappedParentHeight, within(0.1));
-            assertThat(field.snapSizeY(field.getPrefHeight()) + field.getPadding().getTop() + field.getPadding().getBottom())
-                    .isCloseTo(childMaximumHeight, within(0.1));
-        }
-        finally {
+            assertThat(parent.getHeight()).isEqualTo(snappedParentHeight, within(delta));
+            assertThat(field.snapSizeY(field.getPrefHeight())).isCloseTo(childMaximumHeight, within(delta));
+        } finally {
             field.setSnapToPixel(originalSnapToPixel);
             sceneWindow.setRenderScaleY(originalRenderScaleY);
             parent.resize(parent.getWidth(), originalParentHeight);
@@ -143,12 +145,18 @@ public class SquareButtonTest {
     public void heightChangeListener_parentAvailableHeightIsZero_preferredHeightIsMaxButtonSize() {
         FXUtils.assertJavaFxThread();
         CustomMenuItem menuItem = new CustomMenuItem(field);
+        double originalRenderScaleY = sceneWindow.getRenderScaleY();
         ContextMenu contextMenu = new ContextMenu(menuItem);
+        final double scale = 1.17;
+        final double delta = 1 / scale;
         try {
+            sceneWindow.setRenderScaleY(scale);
             contextMenu.show(sceneWindow);
-            assertThat(field.getPrefHeight()).isCloseTo(SquareButton.MAX_BUTTON_SIZE, within(0.1));
+            double expected = SquareButton.MAX_BUTTON_SIZE + field.getPadding().getTop() + field.getPadding().getBottom();
+            assertThat(field.getPrefHeight()).isCloseTo(expected, within(delta));
             contextMenu.hide();
         } finally {
+            sceneWindow.setRenderScaleY(originalRenderScaleY);
             menuItem.setContent(null);
             contextMenu.getItems().remove(menuItem);
         }
