@@ -49,7 +49,7 @@ public class SquareButtonTest {
 
         icon = Layout.GRID.getIcon();
         field = new SquareButton(null, icon);
-        field.setStyle("-fx-padding: 1.68px");
+        field.setStyle("-fx-padding: 1.69px");
 
         root = new StackPane(field);
         root.setStyle("-fx-border-color: black; -fx-border-width: 1.33px");
@@ -123,7 +123,7 @@ public class SquareButtonTest {
         final Region parent = (Region) field.getParent();
         final double originalParentHeight = parent.getHeight();
         final double scale = 1.17;
-        final double delta = 1 / scale;
+        final double delta = 1 / originalRenderScaleY;
         try {
             field.setSnapToPixel(false);
             sceneWindow.setRenderScaleY(scale);
