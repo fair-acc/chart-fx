@@ -87,18 +87,19 @@ class DataPointTooltipTest {
 
     @Test
     void testThatTooltipIsShown(final FxRobot fxRobot) { // NOPMD JUnitTestsShouldIncludeAssert
+        final String NL = System.lineSeparator();
         fxRobot.interrupt();
 
         // ordered dataset
         fxRobot.moveTo(getPointOnDataSet(xAxis1, yAxis1, ds1, 17)).moveBy(1, 0);
-        FxAssert.verifyThat("." + DataPointTooltip.STYLE_CLASS_LABEL, hasText("'SpecialPoint'\n17.0, -0.8090169943749469"), DebugUtils.informedErrorMessage(fxRobot));
+        FxAssert.verifyThat("." + DataPointTooltip.STYLE_CLASS_LABEL, hasText("'SpecialPoint'" + NL + "17.0, -0.8090169943749469"), DebugUtils.informedErrorMessage(fxRobot));
         fxRobot.moveTo(getPointOnDataSet(xAxis1, yAxis1, ds1, 36)).moveBy(1, 0);
-        FxAssert.verifyThat("." + DataPointTooltip.STYLE_CLASS_LABEL, hasText("'Cosine [36]'\n36.0, 0.3090169943749491"), DebugUtils.informedErrorMessage(fxRobot));
+        FxAssert.verifyThat("." + DataPointTooltip.STYLE_CLASS_LABEL, hasText("'Cosine [36]'" + NL + "36.0, 0.3090169943749491"), DebugUtils.informedErrorMessage(fxRobot));
 
         // unordered DataSet
         fxRobot.interact(() -> renderer2.setAssumeSortedData(false));
         fxRobot.moveTo(getPointOnDataSet(xAxis2, yAxis2, ds2, 5)).moveBy(1, 0);
-        FxAssert.verifyThat("." + DataPointTooltip.STYLE_CLASS_LABEL, hasText("'nonsorted [5]'\n0.0, 0.1"), DebugUtils.informedErrorMessage(fxRobot));
+        FxAssert.verifyThat("." + DataPointTooltip.STYLE_CLASS_LABEL, hasText("'nonsorted [5]'" + NL + "0.0, 0.1"), DebugUtils.informedErrorMessage(fxRobot));
     }
 
     private Point2D getPointOnDataSet(final Axis xAxis, final Axis yAxis, final DataSet ds, final int index) {
