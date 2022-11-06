@@ -56,12 +56,12 @@ public class DefaultDataReducer implements RendererDataReducer {
     public int reducePoints(final double[] xValues, final double[] yValues, final double[] xPointErrorsPos,
             final double[] xPointErrorsNeg, final double[] yPointErrorsPos, final double[] yPointErrorsNeg,
             final String[] styles, final boolean[] pointSelected, final int indexMin, final int indexMax) {
-        AssertUtils.nonEmptyArray("xValues", xValues);
-        final int defaultDataLength = xValues.length;
-        AssertUtils.checkArrayDimension("yValues", yValues, defaultDataLength);
-        AssertUtils.checkArrayDimension("pointSelected", pointSelected, defaultDataLength);
-        AssertUtils.gtEqThanZero("indexMax", indexMin);
+        AssertUtils.gtEqThanZero("indexMin", indexMin);
         AssertUtils.gtThanZero("indexMax", indexMax);
+        AssertUtils.indexOrder(indexMin,"indexMin", indexMax,"indexMax");
+        AssertUtils.checkArrayCapacity("xValues", xValues, indexMax);
+        AssertUtils.checkArrayCapacity("yValues", yValues, indexMax);
+        AssertUtils.checkArrayCapacity("pointSelected", pointSelected, indexMax);
 
         final boolean xErrorPos = xPointErrorsPos != null;
         final boolean xErrorNeg = xPointErrorsNeg != null;
@@ -69,15 +69,15 @@ public class DefaultDataReducer implements RendererDataReducer {
         final boolean yErrorNeg = yPointErrorsNeg != null;
 
         if (xErrorPos && xErrorNeg && yErrorPos && yErrorNeg) {
-            AssertUtils.checkArrayDimension("xPointErrorsPos", xPointErrorsPos, defaultDataLength);
-            AssertUtils.checkArrayDimension("xPointErrorsNeg", xPointErrorsNeg, defaultDataLength);
-            AssertUtils.checkArrayDimension("yPointErrorsPos", yPointErrorsPos, defaultDataLength);
-            AssertUtils.checkArrayDimension("yPointErrorsNeg", yPointErrorsNeg, defaultDataLength);
+            AssertUtils.checkArrayCapacity("xPointErrorsPos", xPointErrorsPos, indexMax);
+            AssertUtils.checkArrayCapacity("xPointErrorsNeg", xPointErrorsNeg, indexMax);
+            AssertUtils.checkArrayCapacity("yPointErrorsPos", yPointErrorsPos, indexMax);
+            AssertUtils.checkArrayCapacity("yPointErrorsNeg", yPointErrorsNeg, indexMax);
             return reducePointsInternal(xValues, yValues, xPointErrorsPos, xPointErrorsNeg, yPointErrorsPos,
                     yPointErrorsNeg, styles, pointSelected, indexMin, indexMax);
         } else if (yErrorPos && yErrorNeg) {
-            AssertUtils.checkArrayDimension("yPointErrorsPos", yPointErrorsPos, defaultDataLength);
-            AssertUtils.checkArrayDimension("yPointErrorsNeg", yPointErrorsNeg, defaultDataLength);
+            AssertUtils.checkArrayCapacity("yPointErrorsPos", yPointErrorsPos, indexMax);
+            AssertUtils.checkArrayCapacity("yPointErrorsNeg", yPointErrorsNeg, indexMax);
             return reducePointsInternal(xValues, yValues, yPointErrorsPos, yPointErrorsNeg, styles, pointSelected,
                     indexMin, indexMax);
         } else {

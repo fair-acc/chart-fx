@@ -69,16 +69,16 @@ class CachedDataPoints {
 
     public CachedDataPoints(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
         maxDataCount = dataLength;
-        xValues = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-        yValues = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+        xValues = DoubleArrayCache.getInstance().getArray(maxDataCount);
+        yValues = DoubleArrayCache.getInstance().getArray(maxDataCount);
         styles = ArrayCache.getCachedStringArray(STYLES2, dataLength);
         this.indexMin = indexMin;
         this.indexMax = indexMax;
-        errorYNeg = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-        errorYPos = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+        errorYNeg = DoubleArrayCache.getInstance().getArray(maxDataCount);
+        errorYPos = DoubleArrayCache.getInstance().getArray(maxDataCount);
         if (full) {
-            errorXNeg = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-            errorXPos = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+            errorXNeg = DoubleArrayCache.getInstance().getArray(maxDataCount);
+            errorXPos = DoubleArrayCache.getInstance().getArray(maxDataCount);
         }
         selected = ArrayCache.getCachedBooleanArray(SELECTED2, dataLength);
         ArrayUtils.fillArray(styles, null);

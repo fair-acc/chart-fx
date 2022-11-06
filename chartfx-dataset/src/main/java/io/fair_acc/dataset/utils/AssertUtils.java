@@ -90,6 +90,46 @@ public final class AssertUtils {
         }
     }
 
+    public static void checkArrayCapacity(final String name, final boolean[] array, final int requiredLength) {
+        AssertUtils.notNull(name, array);
+        AssertUtils.nonEmptyArray(name, array);
+        if (array.length < requiredLength) {
+            throw new IllegalArgumentException("The " + name + " boolean array must have a length of at least " + requiredLength);
+        }
+    }
+
+    public static void checkArrayCapacity(final String name, final byte[] array, final int requiredLength) {
+        AssertUtils.notNull(name, array);
+        AssertUtils.nonEmptyArray(name, array);
+        if (array.length < requiredLength) {
+            throw new IllegalArgumentException("The " + name + " byte array must have a length of at least " + requiredLength);
+        }
+    }
+
+    public static void checkArrayCapacity(final String name, final double[] array, final int requiredLength) {
+        AssertUtils.notNull(name, array);
+        AssertUtils.nonEmptyArray(name, array);
+        if (array.length < requiredLength) {
+            throw new IllegalArgumentException("The " + name + " double array must have a length of at least " + requiredLength);
+        }
+    }
+
+    public static void checkArrayCapacity(final String name, final float[] array, final int requiredLength) {
+        AssertUtils.notNull(name, array);
+        AssertUtils.nonEmptyArray(name, array);
+        if (array.length < requiredLength) {
+            throw new IllegalArgumentException("The " + name + " float array must have a length of at least " + requiredLength);
+        }
+    }
+
+    public static void checkArrayCapacity(final String name, final int[] array, final int requiredLength) {
+        AssertUtils.notNull(name, array);
+        AssertUtils.nonEmptyArray(name, array);
+        if (array.length < requiredLength) {
+            throw new IllegalArgumentException("The " + name + " int array must have a length of at least " + requiredLength);
+        }
+    }
+
     /**
      * Asserts that the specified arrays have the same length.
      *
