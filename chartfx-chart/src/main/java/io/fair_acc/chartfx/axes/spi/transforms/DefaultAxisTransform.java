@@ -25,12 +25,12 @@ public class DefaultAxisTransform extends AbstractAxisTransform {
 
     @Override
     public double getRoundedMaximumRange(final double max) {
-        return Math.floor(max);
+        return Math.ceil(max);
     }
 
     @Override
     public double getRoundedMinimumRange(final double min) {
-        return Math.ceil(min);
+        return Math.floor(min);
     }
 
 }
