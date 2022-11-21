@@ -6,6 +6,8 @@ package io.fair_acc.chartfx.axes.spi;
  * @author rstein
  */
 public enum MetricPrefix {
+    QUETTA("quetta", "Q", 1e30),
+    RONNA("ronna", "R", 1e27),
     YOTTA("yotta", "Y", 1e24),
     ZETTA("zetta", "Z", 1e21),
     EXA("exa", "E", 1e18),
@@ -26,7 +28,9 @@ public enum MetricPrefix {
     FEMTO("femto", "f", 1e-15),
     ATTO("atto", "a", 1e-18),
     ZEPTO("zepto", "z", 1e-21),
-    YOCTO("yocto", "y", 1e-24);
+    YOCTO("yocto", "y", 1e-24),
+    RONTO("ronto", "r", 1e-27),
+    QUECTO("quecto", "q", 1e-30);
 
     final String longPrefix;
     final String shortPrefix;
