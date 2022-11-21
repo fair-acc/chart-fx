@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -37,6 +36,7 @@ import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAw
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.NbColumnColorGroup;
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.NbColumnColorGroup.FontColor;
+import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
 import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;

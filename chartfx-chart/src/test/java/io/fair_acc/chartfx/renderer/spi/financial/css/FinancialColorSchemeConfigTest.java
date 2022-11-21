@@ -6,11 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fair_acc.chartfx.renderer.spi.financial.*;
-import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEP;
-import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAware;
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
-import io.fair_acc.chartfx.ui.utils.TestFx;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -26,9 +21,14 @@ import org.testfx.framework.junit5.Start;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.renderer.spi.financial.*;
+import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEP;
+import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAware;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.FinancialTestUtils;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.FootprintRenderedAPIDummyAdapter;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.PositionFinancialDataSetDummy;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.chartfx.ui.utils.TestFx;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 

@@ -6,7 +6,6 @@ import static io.fair_acc.dataset.DataSet.DIM_Y;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fair_acc.misc.samples.plugins.Snow;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -46,10 +45,11 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DataSetBuilder;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.TransposedDataSet;
+import io.fair_acc.misc.samples.plugins.Snow;
 
 /**
  * Happy Christmas and a Happy Coding 2020
- * 
+ *
  * @author rstein
  */
 public class SnowFlakeSample extends Application {

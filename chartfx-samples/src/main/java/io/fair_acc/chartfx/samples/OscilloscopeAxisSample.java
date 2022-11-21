@@ -3,7 +3,6 @@ package io.fair_acc.chartfx.samples;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.chartfx.axes.spi.format.DefaultTickUnitSupplier;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -30,6 +29,7 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AbstractAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.axes.spi.OscilloscopeAxis;
+import io.fair_acc.chartfx.axes.spi.format.DefaultTickUnitSupplier;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;

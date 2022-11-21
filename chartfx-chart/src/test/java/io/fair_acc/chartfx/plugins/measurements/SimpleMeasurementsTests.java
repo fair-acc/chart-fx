@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
-import io.fair_acc.chartfx.ui.utils.TestFx;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
@@ -36,6 +34,8 @@ import io.fair_acc.chartfx.plugins.XValueIndicator;
 import io.fair_acc.chartfx.plugins.YValueIndicator;
 import io.fair_acc.chartfx.plugins.measurements.SimpleMeasurements.MeasurementCategory;
 import io.fair_acc.chartfx.plugins.measurements.SimpleMeasurements.MeasurementType;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.chartfx.ui.utils.TestFx;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.testdata.spi.SineFunction;
 import io.fair_acc.dataset.testdata.spi.TriangleFunction;
@@ -168,8 +168,8 @@ class SimpleMeasurementsTests {
             final double minValue = type.isVerticalMeasurement() ? 2 : 0.2;
             final double maxValue = type.isVerticalMeasurement() ? 14 : 0.8;
 
-            //autoCloseAlert();
-            // fxRobot.interact(() -> {
+            // autoCloseAlert();
+            //  fxRobot.interact(() -> {
             FXUtils.runAndWait(() -> {
                 field = new SimpleMeasurements(plugin, type);
             });
@@ -211,7 +211,7 @@ class SimpleMeasurementsTests {
             // trigger DataSet update
             sine.invokeListener();
             // force field computation
-            //FXUtils.runAndWait(() -> field.handle(null));
+            // FXUtils.runAndWait(() -> field.handle(null));
             assertTrue(FXUtils.waitForFxTicks(chart.getScene(), 3, 1000), "wait for handler to update");
 
             assertEquals(typeResults.get(type), field.getValueField().getValue(), 1e-9, "error for type = " + type);

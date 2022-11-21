@@ -2,7 +2,6 @@ package io.fair_acc.chartfx.samples;
 
 import java.util.Collections;
 
-import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -30,11 +29,12 @@ import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 
 /**
  * Example illustrating the various colour scheme options
- * 
+ *
  * @author rstein
  */
 public class CustomColourSchemeSample extends Application {

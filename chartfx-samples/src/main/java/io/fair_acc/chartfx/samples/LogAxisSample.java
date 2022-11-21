@@ -1,22 +1,23 @@
 package io.fair_acc.chartfx.samples;
 
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.plugins.EditAxis;
-import io.fair_acc.chartfx.plugins.Zoomer;
-import io.fair_acc.dataset.spi.DoubleDataSet;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.plugins.EditAxis;
+import io.fair_acc.chartfx.plugins.Zoomer;
+import io.fair_acc.dataset.spi.DoubleDataSet;
+
 /**
  *
  * Simple example of chart with log axis
- * 
+ *
  * @author rstein
- * 
+ *
  */
 public class LogAxisSample extends Application {
     private static final int N_SAMPLES = 1000;

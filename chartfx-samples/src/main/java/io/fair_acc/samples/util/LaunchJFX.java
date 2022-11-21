@@ -20,7 +20,7 @@ import io.fair_acc.chartfx.samples.RunChartSamples;
  * To be able to run JavaFX Applications outside of the chartfx project also add a classpath entry of type "Advanced",
  * "Variable", "${project_classpath}", but there is no way to add the current projects dependencies to the classpath,
  * yet.
- * 
+ *
  * @see <a href="https://stackoverflow.com/a/55300492" target="_top"> Stackoverflow: How to add JavaFX runtime to
  *      Eclipse in Java11 (2b) </a>
  * @author akrimm
@@ -31,11 +31,16 @@ public class LaunchJFX { // NOMEN EST OMEN
         if (args.length < 1 || args[0].contains(LaunchJFX.class.getName())) {
             Application.launch(RunChartSamples.class);
         } else {
-            Class<? extends Application> clazz = Class.forName(args[0]).asSubclass(Application.class);
-            if (Application.class.isAssignableFrom(clazz)) {
-                Application.launch(clazz);
-            } else {
-                LOGGER.atInfo().addArgument(clazz).log("{} is not an Application - starting default view");
+            try {
+                Class<? extends Application> clazz = Class.forName(args[0]).asSubclass(Application.class);
+                if (Application.class.isAssignableFrom(clazz)) {
+                    Application.launch(clazz);
+                } else {
+                    LOGGER.atInfo().addArgument(clazz).log("{} is not an Application - starting default view");
+                    Application.launch(RunChartSamples.class);
+                }
+            } catch (ClassCastException e) {
+                LOGGER.atInfo().addArgument(args[0]).log("{} is not an Application - starting default view");
                 Application.launch(RunChartSamples.class);
             }
         }

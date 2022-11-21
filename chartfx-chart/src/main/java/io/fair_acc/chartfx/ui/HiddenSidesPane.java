@@ -40,7 +40,7 @@ import javafx.util.Duration;
  * pane.setContent(new TableView());
  * pane.setRight(new ListView());
  * </pre>
- * 
+ *
  * comment rstein: avoided trigger for panes that are 'null'
  */
 public class HiddenSidesPane extends Control {

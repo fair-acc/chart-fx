@@ -10,8 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
-import io.fair_acc.chartfx.ui.utils.TestFx;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
@@ -25,6 +23,8 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.plugins.ParameterMeasurements;
 import io.fair_acc.chartfx.plugins.measurements.DataSetMeasurements.MeasurementCategory;
 import io.fair_acc.chartfx.plugins.measurements.DataSetMeasurements.MeasurementType;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.chartfx.ui.utils.TestFx;
 import io.fair_acc.dataset.testdata.spi.SineFunction;
 
 /**
