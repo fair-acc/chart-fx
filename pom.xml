@@ -38,16 +38,16 @@
         <maven.compiler.target>11</maven.compiler.target>
 
         <chartfx.javafx.version>13.0.1</chartfx.javafx.version>
-        <chartfx.controlsfx.version>11.1.1</chartfx.controlsfx.version>
-        <chartfx.ikonli.version>11.5.0</chartfx.ikonli.version>
+        <chartfx.controlsfx.version>11.1.2</chartfx.controlsfx.version>
+        <chartfx.ikonli.version>12.3.1</chartfx.ikonli.version>
         <chartfx.javafxsvg.version>1.3.0</chartfx.javafxsvg.version>
         <version.commons-lang3>3.12.0</version.commons-lang3>
 
-        <chartfx.slf4j.version>2.0.0-alpha0</chartfx.slf4j.version>
-        <chartfx.junit.jupiter.version>5.7.0</chartfx.junit.jupiter.version>
-        <chartfx.awaitility.version>4.0.3</chartfx.awaitility.version>
-        <chartfx.jacoco.version>0.8.6</chartfx.jacoco.version>
-        <chartfx.surefire.version>3.0.0-M5</chartfx.surefire.version>
+        <chartfx.slf4j.version>2.0.6</chartfx.slf4j.version>
+        <chartfx.junit.jupiter.version>5.9.2</chartfx.junit.jupiter.version>
+        <chartfx.awaitility.version>4.2.0</chartfx.awaitility.version>
+        <chartfx.jacoco.version>0.8.8</chartfx.jacoco.version>
+        <chartfx.surefire.version>3.0.0-M9</chartfx.surefire.version>
 
         <version.jetbrains.annotations>21.0.1</version.jetbrains.annotations>
         <version.maven-gpg-plugin>3.0.1</version.maven-gpg-plugin>
