@@ -4,7 +4,6 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
@@ -86,9 +86,9 @@ public class RollingBufferSample extends Application {
     private void generateDipoleCurrentData() {
         final long startTime = ProcessingProfiler.getTimeStamp();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                // to check
-                // for
-                // resolution
+                                                                    // to check
+                                                                    // for
+                                                                    // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
             // suppress auto notification since we plan to add multiple data points
@@ -272,7 +272,7 @@ public class RollingBufferSample extends Application {
         double offset = 0.3;
         final double y = (1 - 0.1 * subSecond) * 1e9;
         double gate = RollingBufferSample.square(2, subSecond - offset)
-                      * RollingBufferSample.square(1, subSecond - offset);
+                    * RollingBufferSample.square(1, subSecond - offset);
 
         // every 5th cycle is a booster mode cycle
         if (second % 5 == 0) {

@@ -4,7 +4,6 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
@@ -49,9 +49,9 @@ public class RollingBufferSortedTreeSample extends Application {
     private void generateData() {
         final long startTime = ProcessingProfiler.getTimeStamp();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                // to check
-                // for
-                // resolution
+                                                                    // to check
+                                                                    // for
+                                                                    // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
             rollingBufferBeamIntensity.autoNotification().set(false);
@@ -204,8 +204,8 @@ public class RollingBufferSortedTreeSample extends Application {
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
         eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
         eRenderer.setDashSize(RollingBufferSample.MIN_PIXEL_DISTANCE); // plot
-                // pixel-to-pixel
-                // distance
+                                                                       // pixel-to-pixel
+                                                                       // distance
         eRenderer.setDrawMarker(false);
         final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();
         reductionAlgorithm.setMinPointPixelDistance(RollingBufferSample.MIN_PIXEL_DISTANCE);

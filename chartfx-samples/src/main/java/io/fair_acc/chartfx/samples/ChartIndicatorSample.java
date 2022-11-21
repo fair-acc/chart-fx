@@ -7,7 +7,6 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -23,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.plugins.DataPointTooltip;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Panner;
@@ -309,7 +309,7 @@ public class ChartIndicatorSample extends Application {
         double offset = 0.3;
         final double y = (1 - 0.1 * subSecond) * 1e9;
         double gate = ChartIndicatorSample.square(2, subSecond - offset)
-                      * ChartIndicatorSample.square(1, subSecond - offset);
+                    * ChartIndicatorSample.square(1, subSecond - offset);
 
         // every 5th cycle is a booster mode cycle
         if (second % 5 == 0) {

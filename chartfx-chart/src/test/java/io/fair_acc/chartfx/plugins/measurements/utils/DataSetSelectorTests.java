@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.ExecutionException;
 
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
-import io.fair_acc.chartfx.ui.utils.TestFx;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -18,14 +16,16 @@ import org.testfx.framework.junit5.Start;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.plugins.ParameterMeasurements;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.chartfx.ui.utils.TestFx;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.testdata.spi.SineFunction;
 
 /**
-* Tests {@link DataSetSelector }
-* @author rstein
-*
-*/
+ * Tests {@link DataSetSelector }
+ * @author rstein
+ *
+ */
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(JavaFXInterceptorUtils.SelectiveJavaFxInterceptor.class)
 public class DataSetSelectorTests {

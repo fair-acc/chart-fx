@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 
-import io.fair_acc.financial.samples.service.consolidate.OhlcvConsolidationAddon;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -53,6 +52,7 @@ import io.fair_acc.financial.samples.service.CalendarUtils;
 import io.fair_acc.financial.samples.service.SimpleOhlcvDailyParser;
 import io.fair_acc.financial.samples.service.SimpleOhlcvReplayDataSet;
 import io.fair_acc.financial.samples.service.SimpleOhlcvReplayDataSet.DataInput;
+import io.fair_acc.financial.samples.service.consolidate.OhlcvConsolidationAddon;
 import io.fair_acc.financial.samples.service.period.IntradayPeriod;
 
 /**
@@ -65,8 +65,8 @@ import io.fair_acc.financial.samples.service.period.IntradayPeriod;
 public abstract class AbstractBasicFinancialApplication extends Application {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicFinancialApplication.class);
 
-    protected int prefChartWidth = 640; //1024
-    protected int prefChartHeight = 480; //768
+    protected int prefChartWidth = 640; // 1024
+    protected int prefChartHeight = 480; // 768
     protected int prefSceneWidth = 1920;
     protected int prefSceneHeight = 1080;
 
@@ -232,9 +232,9 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         }
 
         // category axis support tests
-        //final CategoryAxis xAxis = new CategoryAxis("time [iso]");
-        //xAxis.setTickLabelRotation(90);
-        //xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
+        // final CategoryAxis xAxis = new CategoryAxis("time [iso]");
+        // xAxis.setTickLabelRotation(90);
+        // xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
 
         final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("price", "points");
 

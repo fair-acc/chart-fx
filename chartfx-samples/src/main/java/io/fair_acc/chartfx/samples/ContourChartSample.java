@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Objects;
 
-import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -27,6 +26,7 @@ import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.ContourType;
 import io.fair_acc.chartfx.renderer.spi.ContourDataSetRenderer;
+import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DataSetBuilder;

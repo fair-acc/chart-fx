@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -17,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.renderer.ContourType;
 import io.fair_acc.chartfx.renderer.datareduction.ReductionType;
+import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
 import io.fair_acc.dataset.DataSet;
 
 /**

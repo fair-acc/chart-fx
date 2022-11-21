@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.fair_acc.dataset.spi.Histogram;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -40,6 +39,7 @@ import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.spi.HistogramRenderer;
 import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.dataset.spi.Histogram;
 
 public class HistogramRendererBarSample extends Application {
     public static final String TAG_REL = " rel.";

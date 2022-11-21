@@ -5,7 +5,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import io.fair_acc.chartfx.axes.spi.format.DefaultTimeTickUnitSupplier;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -19,6 +18,7 @@ import javafx.stage.Stage;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.axes.spi.format.DefaultTimeTickUnitSupplier;
 
 /**
  * Small example for testing different time axis ranges

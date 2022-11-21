@@ -4,10 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.*;
 
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConfig;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
-import io.fair_acc.chartfx.ui.utils.TestFx;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
@@ -23,10 +19,14 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConfig;
+import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.CalendarUtils;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.FinancialTestUtils;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.Interval;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.PositionFinancialDataSetDummy;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.chartfx.ui.utils.TestFx;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
