@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Small utility class to measure ns-level processing delays
- * 
+ *
  * @author rstein
  *
  */
@@ -19,15 +19,15 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
     /**
      * boolean flag controlling whether diagnostics time-marks are taken or the routine to be skipped
      */
-    protected static boolean debugState = false;
+    private static boolean debugState = false;
     /**
      * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
      */
-    protected static boolean verboseOutput = true;
+    private static boolean verboseOutput = true;
     /**
      * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
      */
-    protected static boolean loggerOutput = false;
+    private static boolean loggerOutput = false;
 
     private ProcessingProfiler() {
     }
@@ -60,7 +60,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
         return list;
     }
 
-    protected static String getCallingClassMethod(String msg) {
+    private static String getCallingClassMethod(String msg) {
         final StackTraceElement[] stacktrace = Thread.currentThread().getStackTrace();
         // this number needs to be corrected if this class is refactored
         final int nLast = msg == null ? 4 : 3;
@@ -114,7 +114,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
                 ProcessingProfiler.LOGGER.info(message);
             } else {
                 System.out.println(message); // #NOPMD, this System.out is
-                        // on purpose
+                                             // on purpose
             }
         }
         // TODO: log statistic to HashMap/histogram, etc.
@@ -147,7 +147,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
 
     /**
      * boolean flag controlling whether diagnostics time-marks are taken or the routine to be skipped
-     * 
+     *
      * @param state true: enable
      */
     public static void setDebugState(final boolean state) {
@@ -156,7 +156,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
 
     /**
      * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
-     * 
+     *
      * @param state true: enable
      */
     public static void setLoggerOutputState(final boolean state) {
@@ -165,7 +165,7 @@ public final class ProcessingProfiler { // NOPMD nomen est omen
 
     /**
      * boolean flag controlling whether the statistics/time differences are output to the logger/console or not
-     * 
+     *
      * @param state true: enable
      */
     public static void setVerboseOutputState(final boolean state) {
