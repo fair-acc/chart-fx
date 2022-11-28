@@ -1,9 +1,6 @@
 package io.fair_acc.chartfx.utils;
 
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import javafx.scene.paint.Color;
@@ -23,9 +20,6 @@ import io.fair_acc.chartfx.XYChartCss;
  */
 public final class StyleParser { // NOPMD
     private static final Logger LOGGER = LoggerFactory.getLogger(StyleParser.class);
-    private static final String COULD_NOT_PARSE_INTEGER = "could not parse integer for '{}'='{}' returning null";
-    private static final String COULD_NOT_PARSE_COLOR_DESCRIPTION = "could not parse color description for '{}'='{}' returning null";
-    private static final String COULD_NOT_PARSE_FLOATING_POINT = "could not parse floating point for '{}'='{}' returning null";
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final String DEFAULT_FONT = "Helvetica";
     private static final Pattern AT_LEAST_ONE_WHITESPACE_PATTERN = Pattern.compile("\\s+");
@@ -35,13 +29,21 @@ public final class StyleParser { // NOPMD
     private StyleParser() {
     }
 
-    public static Boolean getBooleanPropertyValue(final String style, final String key) {
+    public static String getPropertyValue(final String style, final String key) {
         if (style == null || key == null) {
             return null;
         }
-
         final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase(Locale.UK));
+        return map.get(key.toLowerCase(Locale.UK));
+    }
+
+    public static String getPropertyValue(final String style, final String key, String defaultValue) {
+        final String result = getPropertyValue(style, key);
+        return result != null ? result : defaultValue;
+    }
+
+    public static Boolean getBooleanPropertyValue(final String style, final String key) {
+        final String value = getPropertyValue(style, key);
         if (value == null) {
             return null;
         }
@@ -50,44 +52,25 @@ public final class StyleParser { // NOPMD
     }
 
     public static Color getColorPropertyValue(final String style, final String key) {
-        if (style == null || key == null) {
-            return null;
-        }
-
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase(Locale.UK));
+        final String value = getPropertyValue(style, key);
         if (value == null) {
             return null;
         }
-
         try {
             return Color.web(value);
         } catch (final IllegalArgumentException ex) {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
-            }
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
-            }
+            debugMsg(ex, key, value, "could not parse color description for '{}'='{}' returning null");
             return null;
         }
     }
 
     public static Color getColorPropertyValue(final String style, final String key, final Color defaultColor) {
-        Color color = getColorPropertyValue(style, key);
-        if (color == null) {
-            color = defaultColor;
-        }
-        return color;
+        final Color result = getColorPropertyValue(style, key);
+        return result != null ? result : defaultColor;
     }
 
     public static double[] getFloatingDecimalArrayPropertyValue(final String style, final String key) {
-        if (style == null || key == null) {
-            return null;
-        }
-
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase(Locale.UK));
+        final String value = getPropertyValue(style, key);
         if (value == null) {
             return null;
         }
@@ -100,23 +83,13 @@ public final class StyleParser { // NOPMD
             }
             return retArray;
         } catch (final NumberFormatException ex) {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
-            }
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
-            }
+            debugMsg(ex, key, value, "could not parse floating point for '{}'='{}' returning null");
             return null;
         }
     }
 
     public static Double getFloatingDecimalPropertyValue(final String style, final String key) {
-        if (style == null || key == null) {
-            return null;
-        }
-
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase(Locale.UK));
+        final String value = getPropertyValue(style, key);
         if (value == null) {
             return null;
         }
@@ -124,12 +97,7 @@ public final class StyleParser { // NOPMD
         try {
             return Double.parseDouble(value);
         } catch (final NumberFormatException ex) {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
-            }
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_FLOATING_POINT);
-            }
+            debugMsg(ex, key, value, "could not parse floating point for '{}'='{}' returning null");
             return null;
         }
     }
@@ -176,12 +144,7 @@ public final class StyleParser { // NOPMD
     }
 
     public static Integer getIntegerPropertyValue(final String style, final String key) {
-        if (style == null || key == null) {
-            return null;
-        }
-
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase(Locale.UK));
+        final String value = getPropertyValue(style, key);
         if (value == null) {
             return null;
         }
@@ -189,41 +152,12 @@ public final class StyleParser { // NOPMD
         try {
             return Integer.decode(value);
         } catch (final NumberFormatException ex) {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_INTEGER);
-            }
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_INTEGER);
-            }
+            debugMsg(ex, key, value, "could not parse integer for '{}'='{}' returning null");
             return null;
         }
     }
-
-    public static String getPropertyValue(final String style, final String key) {
-        if (style == null || key == null) {
-            return null;
-        }
-
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-
-        return map.get(key.toLowerCase(Locale.UK));
-    }
-
-    public static String getPropertyValue(final String style, final String key, String defaultValue) {
-        String value = getPropertyValue(style, key);
-        if (value == null) {
-            value = defaultValue;
-        }
-        return value;
-    }
-
     public static double[] getStrokeDashPropertyValue(final String style, final String key) {
-        if (style == null || key == null) {
-            return null;
-        }
-
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-        final String value = map.get(key.toLowerCase(Locale.UK));
+        final String value = getPropertyValue(style, key);
         if (value == null) {
             return null;
         }
@@ -231,12 +165,7 @@ public final class StyleParser { // NOPMD
         try {
             return Arrays.stream(value.split(",\\s*")).map(String::trim).mapToDouble(Double::parseDouble).toArray();
         } catch (final IllegalArgumentException ex) {
-            if (LOGGER.isTraceEnabled()) {
-                LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
-            }
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.atError().addArgument(key).addArgument(value).log(COULD_NOT_PARSE_COLOR_DESCRIPTION);
-            }
+            debugMsg(ex, key, value, "could not parse color description for '{}'='{}' returning null");
             return null;
         }
     }
@@ -252,14 +181,14 @@ public final class StyleParser { // NOPMD
     }
 
     /**
-	 * spits input string, converts keys and values to lower case, and replaces '"'
-	 * and ''' if any
-	 *
-	 * @param style the input style string
-	 * @return the sanitised map
-	 */
+     * spits input string, converts keys and values to lower case, and replaces '"'
+     * and ''' if any
+     *
+     * @param style the input style string
+     * @return the sanitised map
+     */
     public static Map<String, String> splitIntoMap(final String style) {
-        final ConcurrentHashMap<String, String> retVal = new ConcurrentHashMap<>();
+        final Map<String, String> retVal = new HashMap<>();
         if (style == null) {
             return retVal;
         }
@@ -275,5 +204,14 @@ public final class StyleParser { // NOPMD
         }
 
         return retVal;
+    }
+
+    private static void debugMsg(IllegalArgumentException ex, String key, String value, String couldNotParseColorDescription) {
+        if (LOGGER.isTraceEnabled()) {
+            LOGGER.atTrace().setCause(ex).addArgument(key).addArgument(value).log(couldNotParseColorDescription);
+        }
+        if (LOGGER.isErrorEnabled()) {
+            LOGGER.atError().addArgument(key).addArgument(value).log(couldNotParseColorDescription);
+        }
     }
 }
