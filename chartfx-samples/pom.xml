@@ -27,6 +27,11 @@
             <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-web</artifactId>
+            <version>${chartfx.javafx.version}</version>
+        </dependency>
+        <dependency>
             <groupId>io.fair-acc</groupId>
             <artifactId>chartfx</artifactId>
             <version>${project.version}</version>
@@ -46,6 +51,12 @@
             <artifactId>jafama</artifactId>
             <version>2.3.1</version>
         </dependency>
+        <dependency>
+            <groupId>org.controlsfx</groupId>
+            <artifactId>fxsampler</artifactId>
+            <!-- Newest version cannot load from classpath (see https://github.com/controlsfx/controlsfx/pull/1314) -->
+            <version>1.0.10</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -55,46 +66,8 @@
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>
                     <skip>false</skip>
-                    <mainClass>io.fair_acc.chartfx.samples.RunChartSamples</mainClass>
+                    <mainClass>io.fair_acc.sample.ChartFxSampler</mainClass>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>chart</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>io.fair_acc.chartfx.samples.RunChartSamples</mainClass>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>dataset</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>io.fair_acc.dataset.samples.RunDataSetSamples</mainClass>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>math</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>io.fair_acc.samples.RunMathSamples</mainClass>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>acc-ui</id>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>io.fair_acc.acc.ui.samples.RunUiSamples</mainClass>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

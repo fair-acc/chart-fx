@@ -103,21 +103,9 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
         final Label javaVersion = new CustomLabel(System.getProperty("java.vm.name") + " " + System.getProperty("java.version"));
         final Label javafxVersion = new CustomLabel("JavaFX: " + System.getProperty("javafx.runtime.version") /*+ " Chart-fx: " + System.getProperty("chartfx.version")*/);
         // TODO: add Chart-fx version (commit ID, release version)
-        if (scene == null) {
-            this.sceneProperty().addListener((ch, oldScene, newScene) -> {
-                if (oldScene != null) {
-                    meter.fxFrameRateProperty().removeListener(updateLabelListener);
-                }
-
-                if (newScene != null) {
-                    meter = new SimplePerformanceMeter(newScene, updateRateMillis);
-                    meter.fxFrameRateProperty().addListener(updateLabelListener);
-                }
-            });
-        } else {
-            meter = new SimplePerformanceMeter(scene, updateRateMillis);
-            meter.fxFrameRateProperty().addListener(updateLabelListener);
-        }
+        meter = new SimplePerformanceMeter(updateRateMillis);
+        meter.fxFrameRateProperty().addListener(updateLabelListener);
+        this.getChildren().add(meter);
 
         treeRoot = new TreeItem<>(new VBox(chevron));
         treeRoot.getValue().setId("ProfilerInfoBox-treeRoot");
