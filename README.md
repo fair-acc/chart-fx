@@ -232,7 +232,7 @@ mvn exec:java
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/HistogramRendererTests.png" alt="HistogramRendererTests" width=600/><figcaption><a href="chartfx-chart/src/test/java/io/fair_acc/chart/renderer/spi/HistogramRendererTests.java">HistogramRendererTests.java</a></figcaption></figure></td>         
+<td colspan=2><figure><img src="docs/pics/HistogramRendererTests.png" alt="HistogramRendererTests" width=600/><figcaption><a href="chartfx-chart/src/test/java/io/fair_acc/chartfx/renderer/spi/HistogramRendererTests.java">HistogramRendererTests.java</a></figcaption></figure></td>         
 <td></td>
 </tr>
 
