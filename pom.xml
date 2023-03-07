@@ -103,9 +103,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:https://github.com/GSI-CS-CO/chart-fx.git</connection>
-        <developerConnection>scm:git:git@github.com:GSI-CS-CO/chart-fx.git</developerConnection>
-        <url>https://github.com/GSI-CS-CO/chart-fx</url>
+        <connection>scm:git:https://github.com/fair-acc/chart-fx.git</connection>
+        <developerConnection>scm:git:git@github.com:fair-acc/chart-fx.git</developerConnection>
+        <url>https://github.com/fair-acc/chart-fx</url>
     </scm>
 
     <build>
