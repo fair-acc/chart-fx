@@ -34,7 +34,7 @@ import io.fair_acc.dataset.spi.LimitedIndexedTreeDataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 public class TimeAxisNonLinearSample extends Application {
-    private static final Timer timer = new Timer();
+    private static final Timer timer = new Timer("TimeAxisNonLinearSampleTimer", true);
 
     @Override
     public void start(final Stage primaryStage) {
