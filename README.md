@@ -188,51 +188,51 @@ mvn exec:java
 <table>
 
 <tr>
-<td><figure><img src="docs/pics/CategoryAxisSample.png" alt="CategoryAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/CategoryAxisSample.java">CategoryAxisSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/MultipleAxesSample.png" alt="MultipleAxesSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/MultipleAxesSample.java">MultipleAxesSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/TimeAxisSample.png" alt="TimeAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/TimeAxisSample.java">TimeAxisSample.java</a></figcaption></figure></td>                         
+<td><figure><img src="docs/pics/CategoryAxisSample.png" alt="CategoryAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/CategoryAxisSample.java">CategoryAxisSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/MultipleAxesSample.png" alt="MultipleAxesSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/MultipleAxesSample.java">MultipleAxesSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/TimeAxisSample.png" alt="TimeAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/TimeAxisSample.java">TimeAxisSample.java</a></figcaption></figure></td>                         
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/LogAxisSample.png" alt="LogAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/LogAxisSample.java">LogAxisSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/HistogramSample.png" alt="HistogramSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/HistogramSample.java">HistogramSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/Histogram2DimSample.png" alt="Histogram2DimSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/Histogram2DimSample.java">Histogram2DimSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/LogAxisSample.png" alt="LogAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/LogAxisSample.java">LogAxisSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/HistogramSample.png" alt="HistogramSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/HistogramSample.java">HistogramSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/Histogram2DimSample.png" alt="Histogram2DimSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/Histogram2DimSample.java">Histogram2DimSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/EditDataSample.png" alt="EditDataSetSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/EditDataSetSample.java">EditDataSetSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/PolarPlotSample.png" alt="PolarPlotSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/PolarPlotSample.java">PolarPlotSample.java</a></figcaption></figure></td>                
-<td><figure><img src="docs/pics/MetaDataRendererSample2.png" alt="EditDataSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/MetaDataRendererSample.java">MetaDataRendererSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/EditDataSample.png" alt="EditDataSetSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/EditDataSetSample.java">EditDataSetSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/PolarPlotSample.png" alt="PolarPlotSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/PolarPlotSample.java">PolarPlotSample.java</a></figcaption></figure></td>                
+<td><figure><img src="docs/pics/MetaDataRendererSample2.png" alt="EditDataSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/MetaDataRendererSample.java">MetaDataRendererSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/HistoryDataSetRendererSample.png" alt="HistoryDataSetRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/HistoryDataSetRendererSample.java">HistoryDataSetRendererSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/MountainRangeRendererSample.png" alt="MountainRangeRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/MountainRangeRendererSample.java">MountainRangeRendererSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/ChartAnatomySample.png" alt="ChartAnatomySample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ChartAnatomySample.java">ChartAnatomySample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/HistoryDataSetRendererSample.png" alt="HistoryDataSetRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/HistoryDataSetRendererSample.java">HistoryDataSetRendererSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/MountainRangeRendererSample.png" alt="MountainRangeRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/MountainRangeRendererSample.java">MountainRangeRendererSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ChartAnatomySample.png" alt="ChartAnatomySample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ChartAnatomySample.java">ChartAnatomySample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample1.png" alt="ErrorDataSetRendererStylingSample1" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ErrorDataSetRendererStylingSample.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample2.png" alt="ErrorDataSetRendererStylingSample2" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ErrorDataSetRendererStylingSample.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/LabelledMarkerSample.png" alt="LabelledMarkerSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/LabelledMarkerSample.java">LabelledMarkerSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample1.png" alt="ErrorDataSetRendererStylingSample1" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ErrorDataSetRendererStylingSample.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ErrorDataSetRendererStylingSample2.png" alt="ErrorDataSetRendererStylingSample2" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ErrorDataSetRendererStylingSample.java">ErrorDataSetRendererStylingSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/LabelledMarkerSample.png" alt="LabelledMarkerSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/LabelledMarkerSample.java">LabelledMarkerSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/ContourChartSample1.png" alt="ContourChartSample1" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/ScatterAndBubbleRendererSample1.png" alt="ScatterAndBubbleRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ScatterAndBubbleRendererSample.java">ScatterAndBubbleRendererSample.java</a></figcaption></figure></td>
+<td colspan=2><figure><img src="docs/pics/ContourChartSample1.png" alt="ContourChartSample1" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ScatterAndBubbleRendererSample1.png" alt="ScatterAndBubbleRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ScatterAndBubbleRendererSample.java">ScatterAndBubbleRendererSample.java</a></figcaption></figure></td>
 </tr>
 <tr>
-<td colspan=2><figure><img src="docs/pics/ContourChartSample2.png" alt="ContourChartSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/ScatterAndBubbleRendererSample2.png" alt="ScatterAndBubbleRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ScatterAndBubbleRendererSample.java">ScatterAndBubbleRendererSample.java</a></figcaption></figure></td>
+<td colspan=2><figure><img src="docs/pics/ContourChartSample2.png" alt="ContourChartSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
+<td><figure><img src="docs/pics/ScatterAndBubbleRendererSample2.png" alt="ScatterAndBubbleRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ScatterAndBubbleRendererSample.java">ScatterAndBubbleRendererSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/ChartIndicatorSample.png" alt="ChartIndicatorSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chart/samples/ChartIndicatorSample.java">ChartIndicatorSample.java</a></figcaption></figure></td>         
+<td colspan=2><figure><img src="docs/pics/ChartIndicatorSample.png" alt="ChartIndicatorSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/chartfx/samples/ChartIndicatorSample.java">ChartIndicatorSample.java</a></figcaption></figure></td>         
 <td></td>
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/HistogramRendererTests.png" alt="HistogramRendererTests" width=600/><figcaption><a href="chartfx-chart/src/test/java/io/fair_acc/chart/renderer/spi/HistogramRendererTests.java">HistogramRendererTests.java</a></figcaption></figure></td>         
+<td colspan=2><figure><img src="docs/pics/HistogramRendererTests.png" alt="HistogramRendererTests" width=600/><figcaption><a href="chartfx-chart/src/test/java/io/fair_acc/chartfx/renderer/spi/HistogramRendererTests.java">HistogramRendererTests.java</a></figcaption></figure></td>         
 <td></td>
 </tr>
 
