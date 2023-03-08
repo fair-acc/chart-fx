@@ -1,16 +1,17 @@
 package io.fair_acc.chartfx.axes.spi.format;
 
-import java.text.DecimalFormat;
-import java.text.ParseException;
-import java.util.WeakHashMap;
-
-import javafx.util.StringConverter;
-
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
 import io.fair_acc.chartfx.utils.DigitNumberArithmetic;
 import io.fair_acc.chartfx.utils.NumberFormatterImpl;
+import io.fair_acc.chartfx.utils.Schubfach;
 import io.fair_acc.dataset.spi.utils.Tuple;
+import javafx.util.StringConverter;
+
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
 /**
  * Default number formatter for NumberAxis, this stays in sync with auto-ranging and formats values appropriately. You
@@ -21,9 +22,10 @@ public class DefaultFormatter extends AbstractFormatter {
     private static final String FORMAT_SMALL_SCALE = "0.00";
     private static final String FORMAT_LARGE_SCALE = "#.##E0";
     public static final int DEFAULT_SMALL_AXIS = 6; // [orders of magnitude],
-            // e.g. '4' <-> [1,10000]
+    // e.g. '4' <-> [1,10000]
     private final DecimalFormat formatterSmall = new DecimalFormat(DefaultFormatter.FORMAT_SMALL_SCALE);
     private final DecimalFormat formatterLarge = new DecimalFormat(DefaultFormatter.FORMAT_LARGE_SCALE);
+    private final Schubfach.DecomposedDouble decomp = new Schubfach.DecomposedDouble();
 
     private String formatterPattern = "%f";
     private boolean isExponentialForm = false;
@@ -56,7 +58,7 @@ public class DefaultFormatter extends AbstractFormatter {
     /**
      * Construct a DefaultFormatter for the given NumberAxis with a prefix and/or suffix.
      *
-     * @param axis The axis to format tick marks for
+     * @param axis   The axis to format tick marks for
      * @param prefix The prefix to append to the start of formatted number, can be null if not needed
      * @param suffix The suffix to append to the end of formatted number, can be null if not needed
      */
@@ -95,6 +97,49 @@ public class DefaultFormatter extends AbstractFormatter {
         isExponentialForm = range < 1e-3 || range > 1e4;
         myFormatter.setExponentialForm(isExponentialForm);
 
+        if (majorTickMarksCopy != null && majorTickMarksCopy.size() > 0) {
+            // Decompose double value into minimum components
+            // TODO: cache the decomposition objects
+            var decompositions = majorTickMarksCopy.stream()
+                    .map(value -> Schubfach.decomposeDouble(value / unitScaling))
+                    .collect(Collectors.toList());
+
+            // Non-exponential forms are rendered with fixed separators, so
+            // we need to shift to the largest exponent before determining the
+            // significant digits.
+            // TODO: the number formatter also needs to know about this
+            if (!isExponentialForm) {
+                int maxExp = decompositions.get(0).getExponent();
+                for (Schubfach.DecomposedDouble decomposition : decompositions) {
+                    maxExp = Math.max(maxExp, decomposition.getExponent());
+                }
+                for (Schubfach.DecomposedDouble decomposition : decompositions) {
+                    decomposition.shiftExponentTo(maxExp);
+                }
+            }
+
+            // Find the smallest difference in the significand
+            long minDiff = 10000000000000000L;
+            for (int i = 0; i < decompositions.size() - 1; i++) {
+                long f0 = decompositions.get(i).getSignificand();
+                long f1 = decompositions.get(i + 1).getSignificand();
+                long absDiff = f0 < f1 ? f1 - f0 : f0 - f1;
+                minDiff = Math.min(minDiff, absDiff);
+            }
+
+            // check the position of the first meaningful difference. We also
+            // round it to avoid tiny floating point rounding errors that produce
+            // 9,999 (4 digits) instead of 10,000 (5 digits).
+            int decimalLength = Schubfach.getDecimalLength(minDiff);
+            int maxSigDigits = Schubfach.H_DOUBLE - decimalLength + 1;
+            int roundedDecimalLength = Schubfach.getDecimalLength(minDiff + Schubfach.getRoundingOffset(maxSigDigits));
+            if (roundedDecimalLength > decimalLength) {
+                maxSigDigits = Schubfach.H_DOUBLE - roundedDecimalLength + 1;
+            }
+            myFormatter.setPrecision(maxSigDigits);
+
+        }
+
         int maxSigDigits = 0;
         int maxDigits = 0; /* number of digits before separator */
         if (majorTickMarksCopy != null) {
@@ -109,8 +154,7 @@ public class DefaultFormatter extends AbstractFormatter {
             for (int i = 0; i < majorTickMarksCopy.size() - 1; i++) {
                 final double lower = majorTickMarksCopy.get(i) / unitScaling;
                 final double upper = majorTickMarksCopy.get(i + 1) / unitScaling;
-                final int significantDifferentDigits = DigitNumberArithmetic
-                                                               .numberDigitsUntilFirstSignificantDigit(lower, upper);
+                final int significantDifferentDigits = DigitNumberArithmetic.numberDigitsUntilFirstSignificantDigit(lower, upper);
                 maxSigDigits = Math.max(maxSigDigits, significantDifferentDigits);
 
                 // first tuple index is exp, second is number of fraction digits
@@ -144,14 +188,13 @@ public class DefaultFormatter extends AbstractFormatter {
             // maxFrac));
 
             myFormatter.setPrecision(maxSigDigits);
+            // System.out.println("'old' maxSigDigits = " + maxSigDigits);
         }
 
         // System.out.println(range+" -> "+rangeIndex+":
         // "+formatter.toPattern());
 
-        if (oldRangeIndex != rangeIndex)
-
-        {
+        if (oldRangeIndex != rangeIndex) {
             labelCache.clear();
             oldRangeIndex = rangeIndex;
         }

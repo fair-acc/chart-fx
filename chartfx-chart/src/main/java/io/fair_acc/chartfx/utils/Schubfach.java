@@ -61,7 +61,7 @@ import static java.lang.Math.*;
  * @author Raffaello Giulietti
  * @author Florian Enner (copied from QuickBuffers)
  */
-class Schubfach {
+public class Schubfach {
       /*
     For full details about this code see the following references:
 
@@ -154,12 +154,125 @@ class Schubfach {
      */
     public static int encodeDouble(double v, DoubleEncoder encoder) {
         return DoubleToDecimal.encode(v, encoder);
-
     }
 
     public interface DoubleEncoder {
         void encodeDouble(boolean negative, long significand, int exponent);
     }
+
+    public static DecomposedDouble decomposeDouble(double v) {
+        return decomposeDouble(v, new DecomposedDouble());
+    }
+
+    public static DecomposedDouble decomposeDouble(double v, DecomposedDouble result) {
+        result.zero();
+        result.type = encodeDouble(v, result::setResult);
+        return result;
+    }
+
+    public static class DecomposedDouble {
+
+        public DecomposedDouble zero() {
+            type = NON_SPECIAL;
+            negative = false;
+            f = 0;
+            exp = 0;
+            return this;
+        }
+
+        public DecomposedDouble shiftExponentTo(int exp) {
+            int shift = exp - this.exp;
+            if (shift == 0) {
+                return this;
+            } else if (shift > 0 && shift < MathUtils.pow10.length) {
+                this.f /= pow10(shift);
+                this.exp += shift;
+                return this;
+            } else {
+                throw new IllegalArgumentException("Can't shift to a smaller exponent or by more than 10^17");
+            }
+        }
+
+        void setResult(boolean negative, long f, int e) {
+            // Normalize result to populate H(17) digits
+            final int len = getDecimalLength(f);
+            this.f = f * getNormalizationScale(H_DOUBLE, len);
+            this.exp = e + len;
+            this.negative = negative;
+        }
+
+        @Override
+        public String toString() {
+            return "DecomposedDouble{" +
+                    "type=" + type +
+                    ", negative=" + negative +
+                    ", significand=" + f +
+                    ", exponent=" + exp +
+                    '}';
+        }
+
+        public int getType() {
+            return type;
+        }
+
+        public boolean isFinite() {
+            switch (type) {
+                case NON_SPECIAL:
+                case PLUS_ZERO:
+                case MINUS_ZERO:
+                    return true;
+            }
+            return false;
+        }
+
+        public boolean isNegative() {
+            return negative;
+        }
+
+        public long getSignificand() {
+            return f;
+        }
+
+        public int getExponent() {
+            return exp;
+        }
+
+        int type;
+        boolean negative;
+        long f;
+        int exp;
+    }
+
+    public static long getRoundingOffset(int maxSignificantDigits) {
+        if (maxSignificantDigits < 1 || maxSignificantDigits > 17) {
+            return 0;
+        }
+        return ROUNDING_OFFSET[maxSignificantDigits];
+    }
+
+    /**
+     * Offset map for rounding up/down to the desired precision
+     */
+    private static long[] ROUNDING_OFFSET = new long[]{
+            0L,
+            5000000000000000L,
+            500000000000000L,
+            50000000000000L,
+            5000000000000L,
+            500000000000L,
+            50000000000L,
+            5000000000L,
+            500000000L,
+            50000000L,
+            5000000L,
+            500000L,
+            50000L,
+            5000L,
+            500L,
+            50L,
+            5L,
+            0L
+    };
 
     static final class FloatToDecimal {
 

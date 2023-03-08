@@ -58,8 +58,8 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
      */
     @Override
     public NumberFormatter setPrecision(final int precision) {
-        if ((precision != DEFAULT_PRECISION && precision < 1) || precision > 17) {
-            throw new IllegalArgumentException("Limited precision must be between 1 and 17");
+        if (precision < DEFAULT_PRECISION || precision > 17) {
+            throw new IllegalArgumentException("Limited precision must be between 1 and 17: " + precision);
         }
         this.minSignificantDigits = precision;
         return this;
@@ -99,9 +99,9 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         e += len;
 
         // Round middle point
-        final int roundingPrecision = minSignificantDigits != DEFAULT_PRECISION ?
+        final int significantDigits = minSignificantDigits != DEFAULT_PRECISION ?
                 minSignificantDigits : DEFAULT_MAX_SIGNIFICANT_DIGITS;
-        f += ROUNDING_OFFSET[roundingPrecision];
+        f += Schubfach.getRoundingOffset(significantDigits);
 
         // extract digits
         long hm = multiplyHigh(f, 193428131138340668L) >>> 20;
@@ -337,32 +337,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     // Used for left-to-tight digit extraction.
     private static final int MASK_28 = (1 << 28) - 1;
-
-    /**
-     * Offset map for rounding up/down to the desired precision
-     */
-    private static long[] ROUNDING_OFFSET = new long[]{
-            0L,
-            5000000000000000L,
-            500000000000000L,
-            50000000000000L,
-            5000000000000L,
-            500000000000L,
-            50000000000L,
-            5000000000L,
-            500000000L,
-            50000000L,
-            5000000L,
-            500000L,
-            500000L,
-            50000L,
-            5000L,
-            500L,
-            500L,
-            50L,
-            5L,
-            0L
-    };
 
     public NumberFormatterImpl setDecimalFormatSymbols(DecimalFormatSymbols symbols) {
         this.DOT = (byte) symbols.getDecimalSeparator();
