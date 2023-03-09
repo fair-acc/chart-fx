@@ -12,6 +12,7 @@ import io.fair_acc.chartfx.utils.NumberFormatter;
 /**
  * @author rstein
  */
+@Deprecated // supported by DefaultFormatter
 public class DefaultLogFormatter extends AbstractFormatter {
     private static final TickUnitSupplier DEFAULT_TICK_UNIT_SUPPLIER = new DefaultTickUnitSupplier();
     private static final String FORMAT_SMALL_SCALE = "0.######";

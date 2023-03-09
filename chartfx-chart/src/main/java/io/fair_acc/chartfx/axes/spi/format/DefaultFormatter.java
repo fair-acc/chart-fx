@@ -139,8 +139,8 @@ public class DefaultFormatter extends AbstractFormatter {
         }
 
         // Find the smallest difference between all significands
-        long minDiff = 10000000000000000L;
-        for (int i = 0; i < decompositions.size() - 1; i++) {
+        long minDiff = 10000000000000000L; // max 17 digits
+        for (int i = 0; i < n - 1; i++) {
             long f0 = decompositions.get(i).getSignificand();
             long f1 = decompositions.get(i + 1).getSignificand();
             long absDiff = f0 < f1 ? f1 - f0 : f0 - f1;
@@ -169,7 +169,7 @@ public class DefaultFormatter extends AbstractFormatter {
         // The precision is interpreted as the number of digits in exponential form,
         // i.e., the number of after-comma digits plus one. This allows us to pass
         // a fixed comma point for the non-exponential form.
-        // TODO: rename precision to afterCommaDigits and maybe break some code?
+        // TODO: rename precision to afterCommaDigits and break backwards compatibility?
         if (useExponentialForm) {
             // 5 = x.yyyy
             formatter.setPrecision(maxSigDigits);
@@ -181,7 +181,8 @@ public class DefaultFormatter extends AbstractFormatter {
 
         // TODO: remove debug print
         /*System.out.println();
-        System.out.println("range = " + range);
+        System.out.println("minExp = " + minExp);
+        System.out.println("maxExp = " + maxExp);
         System.out.println("maxSigDigits = " + maxSigDigits);
         System.out.println("afterCommaDigits = " + (formatter.getPrecision() - 1));*/
     }

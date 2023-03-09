@@ -251,16 +251,16 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         removeTrailingZeroes();
     }
 
-    private void appendNDigits(int m, int l, int digits) {
+    private int appendNDigits(int m, int l, int digits) {
         if (digits > 0) {
             digits -= appendNDigits(m, digits);
         }
         if (digits > 0) {
             digits -= appendNDigits(l, digits);
         }
-        if (digits != 0) {
-            throw new AssertionError("failed to write all digits");
-        }
+        // Should always end at zero, but it's possible that users
+        // manually request >17 digits.
+        return digits;
     }
 
     /**

@@ -61,7 +61,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
          * default fall-back formatter in case no {@code axisFormatter} is specified (ie. 'null')
          */
         private final AxisLabelFormatter defaultFormatter = new DefaultFormatter(AbstractAxis.this);
-        private final AxisLabelFormatter defaultLogFormatter = new DefaultLogFormatter(AbstractAxis.this);
         private final AxisLabelFormatter defaultTimeFormatter = new DefaultTimeFormatter(AbstractAxis.this);
         private final AxisLabelFormatter defaultLogTimeFormatter = new DefaultTimeFormatter(AbstractAxis.this);
 
@@ -80,11 +79,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             }
 
             // non-time format
-            if (isLogAxis()) {
-                // TODO: remove log formatter? This is already handled by the default formatter
-                // return defaultLogFormatter;
-                return defaultFormatter;
-            }
             return defaultFormatter;
         }
 
