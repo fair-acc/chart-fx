@@ -2,16 +2,13 @@ package io.fair_acc.chartfx.axes.spi.format;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
-import io.fair_acc.chartfx.utils.DigitNumberArithmetic;
 import io.fair_acc.chartfx.utils.NumberFormatterImpl;
 import io.fair_acc.chartfx.utils.Schubfach;
-import io.fair_acc.dataset.spi.utils.Tuple;
 import javafx.util.StringConverter;
 
-import java.text.DecimalFormat;
-import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 /**
  * Default number formatter for NumberAxis, this stays in sync with auto-ranging and formats values appropriately. You
@@ -19,20 +16,10 @@ import java.util.stream.Collectors;
  */
 public class DefaultFormatter extends AbstractFormatter {
     private static final TickUnitSupplier DEFAULT_TICK_UNIT_SUPPLIER = new DefaultTickUnitSupplier();
-    private static final String FORMAT_SMALL_SCALE = "0.00";
-    private static final String FORMAT_LARGE_SCALE = "#.##E0";
-    public static final int DEFAULT_SMALL_AXIS = 6; // [orders of magnitude],
-    // e.g. '4' <-> [1,10000]
-    private final DecimalFormat formatterSmall = new DecimalFormat(DefaultFormatter.FORMAT_SMALL_SCALE);
-    private final DecimalFormat formatterLarge = new DecimalFormat(DefaultFormatter.FORMAT_LARGE_SCALE);
-    private final Schubfach.DecomposedDouble decomp = new Schubfach.DecomposedDouble();
-
-    private String formatterPattern = "%f";
-    private boolean isExponentialForm = false;
-
     private final WeakHashMap<Integer, WeakHashMap<Number, String>> numberFormatCache = new WeakHashMap<>();
 
-    protected NumberFormatterImpl myFormatter = new NumberFormatterImpl();
+    protected NumberFormatterImpl formatter = new NumberFormatterImpl();
+    private final List<Schubfach.DecomposedDouble> decompositions = new ArrayList<>();
     protected int rangeIndex = 0;
     protected int oldRangeIndex = 0;
     private String prefix;
@@ -69,7 +56,7 @@ public class DefaultFormatter extends AbstractFormatter {
     }
 
     /**
-     * Converts the string provided into a Number defined by the this converter. Format of the string and type of the
+     * Converts the string provided into a Number defined by this converter. Format of the string and type of the
      * resulting object is defined by this converter.
      *
      * @return a Number representation of the string passed in.
@@ -79,125 +66,124 @@ public class DefaultFormatter extends AbstractFormatter {
     public Number fromString(final String string) {
         final int prefixLength = prefix == null ? 0 : prefix.length();
         final int suffixLength = suffix == null ? 0 : suffix.length();
+        final String valueString = string.substring(prefixLength, string.length() - suffixLength);
         try {
-            return formatterSmall.parse(string.substring(prefixLength, string.length() - suffixLength));
-        } catch (final ParseException exc) {
-            try {
-                return formatterLarge.parse(string.substring(prefixLength, string.length() - suffixLength));
-            } catch (final ParseException ex) {
-                ex.addSuppressed(exc);
-                throw new IllegalArgumentException(ex);
-            }
+            // TODO: The previous implementation used the DecimalFormat for parsing. Did that do anything special?
+            return formatter.fromString(valueString);
+        } catch (final Throwable exc) {
+            // Matches the previous contract
+            throw new IllegalArgumentException(exc);
         }
     }
 
     @Override
     protected void rangeUpdated() {
-        final double range = getRange();
-        isExponentialForm = range < 1e-3 || range > 1e4;
-        myFormatter.setExponentialForm(isExponentialForm);
-
         if (majorTickMarksCopy != null && majorTickMarksCopy.size() > 0) {
-            // Decompose double value into minimum components
-            // TODO: cache the decomposition objects
-            var decompositions = majorTickMarksCopy.stream()
-                    .map(value -> Schubfach.decomposeDouble(value / unitScaling))
-                    .collect(Collectors.toList());
+            final boolean prevExponentialForm = formatter.isExponentialForm();
+            final int prevPrecision = formatter.getPrecision();
+            configureFormatter(majorTickMarksCopy);
 
-            // Non-exponential forms are rendered with fixed separators, so
-            // we need to shift to the largest exponent before determining the
-            // significant digits.
-            // TODO: the number formatter also needs to know about this
-            if (!isExponentialForm) {
-                int maxExp = decompositions.get(0).getExponent();
-                for (Schubfach.DecomposedDouble decomposition : decompositions) {
-                    maxExp = Math.max(maxExp, decomposition.getExponent());
-                }
-                for (Schubfach.DecomposedDouble decomposition : decompositions) {
-                    decomposition.shiftExponentTo(maxExp);
-                }
+            // Clear the cache if the formatting changed
+            if (formatter.isExponentialForm() != prevExponentialForm
+                    || formatter.getPrecision() != prevPrecision
+                    || oldRangeIndex != rangeIndex) {
+                labelCache.clear();
+
+                // TODO: what is the rangeIndex? it does not get set anywhere. Maybe that's a subclass thing?
+                oldRangeIndex = rangeIndex;
             }
+        }
+    }
 
-            // Find the smallest difference in the significand
-            long minDiff = 10000000000000000L;
-            for (int i = 0; i < decompositions.size() - 1; i++) {
-                long f0 = decompositions.get(i).getSignificand();
-                long f1 = decompositions.get(i + 1).getSignificand();
-                long absDiff = f0 < f1 ? f1 - f0 : f0 - f1;
-                minDiff = Math.min(minDiff, absDiff);
-            }
-
-            // check the position of the first meaningful difference. We also
-            // round it to avoid tiny floating point rounding errors that produce
-            // 9,999 (4 digits) instead of 10,000 (5 digits).
-            int decimalLength = Schubfach.getDecimalLength(minDiff);
-            int maxSigDigits = Schubfach.H_DOUBLE - decimalLength + 1;
-            int roundedDecimalLength = Schubfach.getDecimalLength(minDiff + Schubfach.getRoundingOffset(maxSigDigits));
-            if (roundedDecimalLength > decimalLength) {
-                maxSigDigits = Schubfach.H_DOUBLE - roundedDecimalLength + 1;
-            }
-            myFormatter.setPrecision(maxSigDigits);
-
+    void configureFormatter(List<Double> tickMarks) {
+        // Prepare enough cacheable objects
+        final int n = tickMarks.size();
+        while (decompositions.size() < n) {
+            decompositions.add(new Schubfach.DecomposedDouble());
         }
 
-        int maxSigDigits = 0;
-        int maxDigits = 0; /* number of digits before separator */
-        if (majorTickMarksCopy != null) {
-            for (int i = 0; i < majorTickMarksCopy.size(); i++) {
-                final double val = majorTickMarksCopy.get(i) / unitScaling;
-                final int nDigits = (int) Math.log10(Math.abs(val)) + 1;
-                maxDigits = Math.max(nDigits, maxDigits);
-            }
-
-            int maxExp = 0;
-            int maxFrac = 0;
-            for (int i = 0; i < majorTickMarksCopy.size() - 1; i++) {
-                final double lower = majorTickMarksCopy.get(i) / unitScaling;
-                final double upper = majorTickMarksCopy.get(i + 1) / unitScaling;
-                final int significantDifferentDigits = DigitNumberArithmetic.numberDigitsUntilFirstSignificantDigit(lower, upper);
-                maxSigDigits = Math.max(maxSigDigits, significantDifferentDigits);
-
-                // first tuple index is exp, second is number of fraction digits
-                final Tuple<Double, Double> formatTuple = DigitNumberArithmetic.formatStringForSignificantDigits(lower,
-                        upper);
-                maxExp = (int) Math.max(formatTuple.getXValue(), maxExp);
-                // rstein: added default +1 as temporary mitigation to increase significant number of digits in axis
-                // labels TODO: find a more holistic solution -> May 2019
-                maxFrac = (int) Math.max(formatTuple.getYValue() + 1, maxFrac);
-            }
-
-            final StringBuilder sb = new StringBuilder("%");
-            sb.append(maxExp + maxFrac + 1);
-            if (maxFrac > 0) {
-                sb.append('.');
-                sb.append(maxFrac);
-            } else if (maxExp == 0 && maxFrac == 0) {
-                sb.append(".1");
-            } else if (maxExp >= 0 && maxFrac == 0) {
-                sb.append(".0");
-            }
-            formatterPattern = sb.append("f").toString();
-
-            // System.err.println("myFormatter::formatterPattern = " +
-            // formatterPattern);
-            // System.err.println("myFormatter::setPrecision(...) = " +
-            // maxSigDigits);
-            // System.err.println("myFormatter::maxDigitsBeforeSeparator(...) ="
-            // + maxDigits);
-            // System.err.println(String.format("max %d:%d\n", maxExp,
-            // maxFrac));
-
-            myFormatter.setPrecision(maxSigDigits);
-            // System.out.println("'old' maxSigDigits = " + maxSigDigits);
+        // Decompose the double values into significand and exponents
+        for (int i = 0; i < n; i++) {
+            double value = tickMarks.get(i) / unitScaling;
+            Schubfach.decomposeDouble(value, decompositions.get(i));
         }
 
-        // System.out.println(range+" -> "+rangeIndex+":
-        // "+formatter.toPattern());
-
-        if (oldRangeIndex != rangeIndex) {
-            labelCache.clear();
-            oldRangeIndex = rangeIndex;
+        // Special case if we only render a single tick
+        if (n == 1) {
+            var decomp = decompositions.get(0);
+            formatter.setExponentialForm(decomp.getExponent() < -3 || decomp.getExponent() > 4);
+            formatter.setPrecision(-1);
+            return;
         }
+
+        // Determine the min and max exponents
+        int minExp = decompositions.get(0).getExponent();
+        int maxExp = minExp;
+        for (int i = 1; i < n; i++) {
+            final int exp = decompositions.get(i).getExponent();
+            minExp = Math.min(minExp, exp);
+            maxExp = Math.max(maxExp, exp);
+        }
+
+        // Use the exponential form for very large or very small numbers
+        boolean useExponentialForm = minExp < -3 || maxExp > 4;
+        formatter.setExponentialForm(useExponentialForm);
+
+        // Non-exponential forms are rendered with fixed separators, so
+        // we need to shift to the largest exponent before determining the
+        // significant digits.
+        if (!useExponentialForm && (minExp != maxExp)) {
+            for (int i = 0; i < n; i++) {
+                decompositions.get(i).shiftExponentTo(maxExp);
+            }
+        }
+
+        // Find the smallest difference between all significands
+        long minDiff = 10000000000000000L;
+        for (int i = 0; i < decompositions.size() - 1; i++) {
+            long f0 = decompositions.get(i).getSignificand();
+            long f1 = decompositions.get(i + 1).getSignificand();
+            long absDiff = f0 < f1 ? f1 - f0 : f0 - f1;
+            minDiff = Math.min(minDiff, absDiff);
+        }
+
+        // In the exponential form cases the significands are often the same,
+        // e.g., 1E0, 1E1, 1E2 etc., so we just render all significant digits
+        // to be consistent. With the length check we would otherwise get 17
+        //  after comma digits because there are no significant differences.
+        if (minDiff == 0) {
+            formatter.setPrecision(-1);
+            return;
+        }
+
+        // Check at which digit the smallest difference occurs. We also
+        // need to check rounding to avoid tiny floating point errors
+        // that produce 9,999 (4 digits) instead of 10,000 (5 digits).
+        int decimalLength = Schubfach.getDecimalLength(minDiff);
+        int maxSigDigits = Schubfach.H_DOUBLE - decimalLength + 1;
+        int roundedDecimalLength = Schubfach.getDecimalLength(minDiff + Schubfach.getRoundingOffset(maxSigDigits));
+        if (roundedDecimalLength > decimalLength) {
+            maxSigDigits = Schubfach.H_DOUBLE - roundedDecimalLength + 1;
+        }
+
+        // The precision is interpreted as the number of digits in exponential form,
+        // i.e., the number of after-comma digits plus one. This allows us to pass
+        // a fixed comma point for the non-exponential form.
+        // TODO: rename precision to afterCommaDigits and maybe break some code?
+        if (useExponentialForm) {
+            // 5 = x.yyyy
+            formatter.setPrecision(maxSigDigits);
+        } else {
+            // 5 = (xx)x.yyyy
+            int afterCommaDigits = Math.max(maxSigDigits - maxExp, 0);
+            formatter.setPrecision(Math.min(maxSigDigits, afterCommaDigits + 1));
+        }
+
+        // TODO: remove debug print
+        /*System.out.println();
+        System.out.println("range = " + range);
+        System.out.println("maxSigDigits = " + maxSigDigits);
+        System.out.println("afterCommaDigits = " + (formatter.getPrecision() - 1));*/
     }
 
     /**
@@ -208,32 +194,7 @@ public class DefaultFormatter extends AbstractFormatter {
      */
     @Override
     public String toString(final Number object) {
-        // TODO: just for testing need to clean-up w.r.t. use of cache etc.
-        // return labelCache.get(formatter, object.doubleValue());
-        // return labelCache.get(formatter, object.doubleValue());
-
-        if (isExponentialForm) {
-            return labelCache.get(myFormatter, object.doubleValue());
-        }
-        final WeakHashMap<Number, String> hash = numberFormatCache.get(formatterPattern.hashCode());
-        if (hash != null) {
-            final String label = hash.get(object);
-            if (label != null) {
-                return label;
-            }
-        }
-        // couldn't find label in cache
-        final String retVal = String.format(formatterPattern, object.doubleValue());
-        // add retVal to cache
-        if (hash == null) {
-            final WeakHashMap<Number, String> temp = new WeakHashMap<>();
-            temp.put(object, retVal);
-            numberFormatCache.put(formatterPattern.hashCode(), temp);
-            // checkCache = new WeakHashMap<>();
-        } else {
-            hash.put(object, retVal);
-        }
-
-        return retVal;
+        return labelCache.get(formatter, object.doubleValue());
     }
+
 }

@@ -5,7 +5,6 @@ import javafx.util.StringConverter;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
 
 import static io.fair_acc.chartfx.utils.Schubfach.*;
 import static java.lang.Math.*;
@@ -37,7 +36,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
      */
     @Override
     public int getPrecision() {
-        return minSignificantDigits;
+        return afterCommaDigits + 1;
     }
 
     @Override
@@ -51,17 +50,9 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         return this;
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see io.fair_acc.chartfx.utils.NumberFormatter#setPrecision(int)
-     */
     @Override
-    public NumberFormatter setPrecision(final int precision) {
-        if (precision < DEFAULT_PRECISION || precision > 17) {
-            throw new IllegalArgumentException("Limited precision must be between 1 and 17: " + precision);
-        }
-        this.minSignificantDigits = precision;
+    public NumberFormatter setPrecision(final int precision) { // TODO: replace with setAfterCommaDigits?
+        this.afterCommaDigits = Math.max(ALL_DIGITS, precision - 1);
         return this;
     }
 
@@ -72,7 +63,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
                 return bytesToString();
             case Schubfach.PLUS_ZERO:
             case Schubfach.MINUS_ZERO:
-                return "0"; // TODO: match precision
+                return encodeZero();
             case Schubfach.PLUS_INF:
                 return "+inf";
             case Schubfach.MINUS_INF:
@@ -84,7 +75,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     @Override
     public String toString(final Number object) {
-        return toString(object.doubleValue());
+        String result = toString(object.doubleValue());
+        // TODO: remove debug print
+        // System.out.println(object + " => " + result + " (afterCommaDigits = " + afterCommaDigits + ")");
+        return result;
     }
 
     private void encodeDouble(boolean negative, long f, int e) {
@@ -98,10 +92,19 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         f *= getNormalizationScale(H_DOUBLE, len);
         e += len;
 
-        // Round middle point
-        final int significantDigits = minSignificantDigits != DEFAULT_PRECISION ?
-                minSignificantDigits : DEFAULT_MAX_SIGNIFICANT_DIGITS;
-        f += Schubfach.getRoundingOffset(significantDigits);
+        // Round to the desired number of digits
+        final boolean useExponentialForm = isExponentialForm || Math.abs(e) > MAX_PLAIN_EXP;
+        if (afterCommaDigits >= 0) {
+            int significantDigits = useExponentialForm
+                    ? afterCommaDigits + 1
+                    : afterCommaDigits + e;
+            f += Schubfach.getRoundingOffset(significantDigits);
+            // Make sure the rounded result doesn't go into the next digit
+            if (f >= DIGITS_18) {
+                f /= 10;
+                e += 1;
+            }
+        }
 
         // extract digits
         long hm = multiplyHigh(f, 193428131138340668L) >>> 20;
@@ -110,107 +113,110 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         int l = (int) (f - 100000000L * hm); // lowest 8 digits
 
         // TODO: remove debug statements
-       /* System.out.println();
+        /*System.out.println();
         System.out.println("h = " + h);
         System.out.println("m = " + m);
         System.out.println("l = " + l);
         System.out.println("e = " + e);*/
 
-        if (isExponentialForm) {
-            if (minSignificantDigits == DEFAULT_PRECISION) {
-                toExponentialFormDefault(h, m, l, e);
-            } else {
-                toExponentialFormFixed(h, m, l, e);
-            }
+        if (useExponentialForm) {
+            toExponentialFormat(h, m, l, e);
         } else {
-            if (minSignificantDigits == DEFAULT_PRECISION) {
-                toFullFormDefault(h, m, l, e);
+            if (e > 0) {
+                toPlainFormat(h, m, l, e);
             } else {
-                toFullFormFixed(h, m, l, e);
+                toPlainFormatWithLeadingZeros(h, m, l, e);
             }
         }
 
     }
 
-    private void toExponentialFormDefault(int h, int m, int l, int e) {
+    private void toExponentialFormat(int h, int m, int l, int e) {
         appendDigit(h);
-        append(DOT);
-        appendNDigits(m, l, DEFAULT_MAX_SIGNIFICANT_DIGITS - 1);
-        removeTrailingZeroes();
-        exponent(e - 1);
-    }
-
-    private void toExponentialFormFixed(int h, int m, int l, int e) {
-        appendDigit(h);
-        append(DOT);
-        appendNDigits(m, l, minSignificantDigits - 1);
-        exponent(e - 1);
-    }
-
-    private void toFullFormDefault(int h, int m, int l, int e) {
-        if (e < 0) {
-            // all significant digits are on the right, e.g., 0.1234
-            if (-e > DEFAULT_MAX_SIGNIFICANT_DIGITS) {
-                // the number is so small that it's considered zero
-                append(ZERO);
-                return;
-            }
-
-            // the number has at least one significant digit that shows up
-            appendDigit(0);
+        if (afterCommaDigits > 0) {
             append(DOT);
+            appendNDigits(m, l, afterCommaDigits);
+        } else if (afterCommaDigits == ALL_DIGITS) {
+            append(DOT);
+            append8Digits(m);
+            lowDigits(l);
+        }
+        exponent(e - 1);
+    }
+
+    private void toPlainFormat(int h, int m, int l, int e) {
+        appendDigit(h);
+        int y = y(m);
+        int t;
+        int i = 1;
+        for (; i < e; ++i) {
+            t = 10 * y;
+            appendDigit(t >>> 28);
+            y = t & MASK_28;
+        }
+        if (afterCommaDigits == 0) {
+            return;
+        }
+        append(DOT);
+        if (afterCommaDigits == ALL_DIGITS) {
+            for (; i <= 8; ++i) {
+                t = 10 * y;
+                appendDigit(t >>> 28);
+                y = t & MASK_28;
+            }
+            lowDigits(l);
+        } else {
+            int remainingDigits = afterCommaDigits;
+            for (; i <= 8 && remainingDigits > 0; ++i) {
+                t = 10 * y;
+                appendDigit(t >>> 28);
+                y = t & MASK_28;
+                remainingDigits--;
+            }
+            appendNDigits(l, remainingDigits);
+        }
+    }
+
+    private void toPlainFormatWithLeadingZeros(int h, int m, int l, int e) {
+        append(ZERO);
+        if (afterCommaDigits == 0) {
+            return;
+        }
+        append(DOT);
+        if (afterCommaDigits == ALL_DIGITS) {
             for (; e < 0; ++e) {
                 append(ZERO);
             }
             appendDigit(h);
-            appendNDigits(m, DEFAULT_MAX_SIGNIFICANT_DIGITS - length);
-
-        } else if (e >= DEFAULT_MAX_SIGNIFICANT_DIGITS) {
-            // all significant digits are on the left, e.g., 123400 // TODO: should not be rounded
-            appendDigit(h);
-            appendNDigits(m, l, DEFAULT_MAX_SIGNIFICANT_DIGITS - 1);
-            Arrays.fill(bytes, length, e, ZERO);
-            length = e;
-
+            append8Digits(m);
+            lowDigits(l);
         } else {
-            // significant digits are on both sides, e.g., 12.34
-            // we write the all digits and then insert the dot
-            appendDigit(h);
-            appendNDigits(m, l, DEFAULT_MAX_SIGNIFICANT_DIGITS - 1);
-            System.arraycopy(bytes, e, bytes, e + 1, length - e);
-            bytes[e] = DOT;
-            length++;
-            removeTrailingZeroes();
+            int remainingDigits = afterCommaDigits;
+            for (; e < 0 && remainingDigits > 0; ++e) {
+                append(ZERO);
+                remainingDigits--;
+            }
+            if (remainingDigits > 0) {
+                appendDigit(h);
+                appendNDigits(m, l, remainingDigits - 1);
+            }
         }
     }
 
-    private void toFullFormFixed(int h, int m, int l, int e) {
-        if (e < 0) {
-            // all significant digits are on the right, e.g., 0.0000123456
-            append(ZERO);
+    private String encodeZero() {
+        length = 0;
+        append(ZERO);
+        if (afterCommaDigits > 0) {
             append(DOT);
-            for (; e < 0; e++) {
+            for (int i = 0; i < afterCommaDigits; i++) {
                 append(ZERO);
             }
-            appendDigit(h);
-            appendNDigits(m, l, minSignificantDigits - 1);
-
-        } else if (e >= minSignificantDigits) {
-            // all significant digits are on the left, e.g., 1234560000 // TODO: ICU4j rounds, but do we want that?
-            appendDigit(h);
-            appendNDigits(m, l, minSignificantDigits - 1);
-            Arrays.fill(bytes, length, e, ZERO);
-            length = e;
-
-        } else {
-            // significant digits are on both sides, e.g., 123.456
-            // we write the all digits and then insert the dot
-            appendDigit(h);
-            appendNDigits(m, l, minSignificantDigits - 1);
-            System.arraycopy(bytes, e, bytes, e + 1, length - e);
-            bytes[e] = DOT;
-            length++;
         }
+        if (isExponentialForm) {
+            append(EXP);
+            append(ZERO);
+        }
+        return length == 1 ? "0" : bytesToString();
     }
 
     private void append(int c) {
@@ -236,6 +242,13 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             appendDigit(t >>> 28);
             y = t & MASK_28;
         }
+    }
+
+    private void lowDigits(int l) {
+        if (l != 0) {
+            append8Digits(l);
+        }
+        removeTrailingZeroes();
     }
 
     private void appendNDigits(int m, int l, int digits) {
@@ -319,6 +332,9 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
     }
 
+    static final int ALL_DIGITS = -1;
+    private int afterCommaDigits = ALL_DIGITS;
+
     /*
     Room for the longer of the forms
     -ddddd.dddddddddddd         H + 2 characters
@@ -327,12 +343,18 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     where there are H digits d
     */
     private static final int MAX_CHARS_DOUBLE = Schubfach.H_DOUBLE + 7;
+
+    /**
+     * eventually the plain format starts going beyond the byte array limits,
+     * so we just render the exponential form instead. This is mostly to
+     * produce something sensible for manual calls as this condition should
+     * never be met in charting code.
+     */
+    private static final int MAX_PLAIN_EXP = 5;
+    private static final long DIGITS_18 = 100000000000000000L;
     byte[] bytes = new byte[MAX_CHARS_DOUBLE];
     int length = 0;
 
-    static final int DEFAULT_PRECISION = -1;
-    static final int DEFAULT_MAX_SIGNIFICANT_DIGITS = 4;
-    int minSignificantDigits = DEFAULT_PRECISION;
     boolean isExponentialForm = false;
 
     // Used for left-to-tight digit extraction.

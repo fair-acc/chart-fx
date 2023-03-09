@@ -81,7 +81,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
             // non-time format
             if (isLogAxis()) {
-                return defaultLogFormatter;
+                // TODO: remove log formatter? This is already handled by the default formatter
+                // return defaultLogFormatter;
+                return defaultFormatter;
             }
             return defaultFormatter;
         }

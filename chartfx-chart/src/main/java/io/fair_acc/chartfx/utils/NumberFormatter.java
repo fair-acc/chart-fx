@@ -8,6 +8,9 @@ public interface NumberFormatter {
 
     NumberFormatter setExponentialForm(boolean state);
 
+    /**
+     * @param precision numer of after-comma-digits plus one
+     */
     NumberFormatter setPrecision(int precision);
 
     String toString(double val);
