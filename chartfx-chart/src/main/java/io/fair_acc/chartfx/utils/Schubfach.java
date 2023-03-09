@@ -244,7 +244,7 @@ public class Schubfach {
     }
 
     public static long getRoundingOffset(int maxSignificantDigits) {
-        if (maxSignificantDigits < 1 || maxSignificantDigits > 17) {
+        if (maxSignificantDigits < 0 || maxSignificantDigits > 17) {
             return 0;
         }
         return ROUNDING_OFFSET[maxSignificantDigits];
@@ -254,7 +254,7 @@ public class Schubfach {
      * Offset map for rounding up/down to the desired precision
      */
     private static long[] ROUNDING_OFFSET = new long[]{
-            0L,
+            50000000000000000L,
             5000000000000000L,
             500000000000000L,
             50000000000000L,

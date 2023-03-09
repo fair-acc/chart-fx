@@ -81,7 +81,7 @@ public class DefaultFormatter extends AbstractFormatter {
         if (majorTickMarksCopy != null && majorTickMarksCopy.size() > 0) {
             final boolean prevExponentialForm = formatter.isExponentialForm();
             final int prevPrecision = formatter.getPrecision();
-            configureFormatter(majorTickMarksCopy);
+            configureFormatter(getRange(), majorTickMarksCopy);
 
             // Clear the cache if the formatting changed
             if (formatter.isExponentialForm() != prevExponentialForm
@@ -95,7 +95,7 @@ public class DefaultFormatter extends AbstractFormatter {
         }
     }
 
-    void configureFormatter(List<Double> tickMarks) {
+    void configureFormatter(double range, List<Double> tickMarks) {
         // Prepare enough cacheable objects
         final int n = tickMarks.size();
         while (decompositions.size() < n) {
@@ -105,6 +105,15 @@ public class DefaultFormatter extends AbstractFormatter {
         // Decompose the double values into significand and exponents
         for (int i = 0; i < n; i++) {
             double value = tickMarks.get(i) / unitScaling;
+            if (Math.abs(value) < 1E-14 && range > 1E-12) {
+                // treat rounding errors around zero as zero
+                // TODO:
+                //  (1) confirm that the threshold is sane
+                //  (2) The exp format still renders zero because
+                //      it gets the raw number. This might be easier
+                //      to fix in the tick marker generator?
+                value = 0;
+            }
             Schubfach.decomposeDouble(value, decompositions.get(i));
         }
 
@@ -138,19 +147,23 @@ public class DefaultFormatter extends AbstractFormatter {
             }
         }
 
-        // Find the smallest difference between all significands
+        // Find the difference between all significands. Both
+        // min and max should be the same, but floating point
+        // errors may cause differences.
         long minDiff = 10000000000000000L; // max 17 digits
+        long maxDiff = 0L;
         for (int i = 0; i < n - 1; i++) {
             long f0 = decompositions.get(i).getSignificand();
             long f1 = decompositions.get(i + 1).getSignificand();
             long absDiff = f0 < f1 ? f1 - f0 : f0 - f1;
             minDiff = Math.min(minDiff, absDiff);
+            maxDiff = Math.max(maxDiff, absDiff);
         }
 
         // In the exponential form cases the significands are often the same,
         // e.g., 1E0, 1E1, 1E2 etc., so we just render all significant digits
         // to be consistent. With the length check we would otherwise get 17
-        //  after comma digits because there are no significant differences.
+        // after comma digits because there are no significant differences.
         if (minDiff == 0) {
             formatter.setPrecision(-1);
             return;
@@ -169,22 +182,26 @@ public class DefaultFormatter extends AbstractFormatter {
         // The precision is interpreted as the number of digits in exponential form,
         // i.e., the number of after-comma digits plus one. This allows us to pass
         // a fixed comma point for the non-exponential form.
-        // TODO: rename precision to afterCommaDigits and break backwards compatibility?
         if (useExponentialForm) {
             // 5 = x.yyyy
             formatter.setPrecision(maxSigDigits);
         } else {
             // 5 = (xx)x.yyyy
             int afterCommaDigits = Math.max(maxSigDigits - maxExp, 0);
-            formatter.setPrecision(Math.min(maxSigDigits, afterCommaDigits + 1));
+            formatter.setPrecision(afterCommaDigits + 1);
         }
 
         // TODO: remove debug print
         /*System.out.println();
+        System.out.println("range = " + range);
+        System.out.println("minDiff = " + minDiff);
+        System.out.println("maxDiff = " + maxDiff);
         System.out.println("minExp = " + minExp);
         System.out.println("maxExp = " + maxExp);
-        System.out.println("maxSigDigits = " + maxSigDigits);
-        System.out.println("afterCommaDigits = " + (formatter.getPrecision() - 1));*/
+        System.out.println("significantDigits = " + maxSigDigits);
+        System.out.println("afterCommaDigits = " + (formatter.getPrecision() - 1));
+        System.out.println("useExponentialForm = " + useExponentialForm);
+        System.out.println();*/
     }
 
     /**

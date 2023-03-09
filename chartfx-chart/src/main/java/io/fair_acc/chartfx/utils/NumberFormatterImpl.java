@@ -63,7 +63,8 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
                 return bytesToString();
             case Schubfach.PLUS_ZERO:
             case Schubfach.MINUS_ZERO:
-                return encodeZero();
+                encodeZero();
+                return length == 1 ? "0" : bytesToString();
             case Schubfach.PLUS_INF:
                 return "+inf";
             case Schubfach.MINUS_INF:
@@ -93,13 +94,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         e += len;
 
         // Round to the desired number of digits
-        final boolean useExponentialForm = isExponentialForm || Math.abs(e) > MAX_PLAIN_EXP;
+        final boolean useExponentialForm = isExponentialForm || e > MAX_PLAIN_EXP;
         if (afterCommaDigits >= 0) {
-            int significantDigits = useExponentialForm
-                    ? afterCommaDigits + 1
-                    : afterCommaDigits + e;
+            final int significantDigits = afterCommaDigits + (useExponentialForm ? 1 : e);
             f += Schubfach.getRoundingOffset(significantDigits);
-            // Make sure the rounded result doesn't go into the next digit
             if (f >= DIGITS_18) {
                 f /= 10;
                 e += 1;
@@ -183,15 +181,19 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             return;
         }
         append(DOT);
+        int spaceLeft = bytes.length - length;
         if (afterCommaDigits == ALL_DIGITS) {
-            for (; e < 0; ++e) {
+            for (; e < 0 && spaceLeft > 0; ++e) {
                 append(ZERO);
+                spaceLeft--;
             }
-            appendDigit(h);
-            append8Digits(m);
-            lowDigits(l);
+            if (spaceLeft > 0) {
+                appendDigit(h);
+                appendNDigits(m, l, Math.min(spaceLeft - 1, 16));
+            }
+            removeTrailingZeroes();
         } else {
-            int remainingDigits = afterCommaDigits;
+            int remainingDigits = Math.min(afterCommaDigits, spaceLeft);
             for (; e < 0 && remainingDigits > 0; ++e) {
                 append(ZERO);
                 remainingDigits--;
@@ -203,7 +205,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         }
     }
 
-    private String encodeZero() {
+    private void encodeZero() {
         length = 0;
         append(ZERO);
         if (afterCommaDigits > 0) {
@@ -216,7 +218,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             append(EXP);
             append(ZERO);
         }
-        return length == 1 ? "0" : bytesToString();
     }
 
     private void append(int c) {
@@ -225,6 +226,12 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     private void append(byte c) {
         bytes[length++] = c;
+    }
+
+    private void append(byte[] bytes) {
+        for (byte b : bytes) {
+            append(b);
+        }
     }
 
     private void appendDigit(int d) {
@@ -342,7 +349,8 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     -d.ddddddddddddddddE-eee    H + 7 characters
     where there are H digits d
     */
-    private static final int MAX_CHARS_DOUBLE = Schubfach.H_DOUBLE + 7;
+    private static final int MAX_EXP_LENGTH = 5;
+    private static final int MAX_CHARS_DOUBLE = Schubfach.H_DOUBLE + 7 + MAX_EXP_LENGTH;
 
     /**
      * eventually the plain format starts going beyond the byte array limits,
@@ -350,7 +358,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
      * produce something sensible for manual calls as this condition should
      * never be met in charting code.
      */
-    private static final int MAX_PLAIN_EXP = 5;
+    private static final int MAX_PLAIN_EXP = 7;
     private static final long DIGITS_18 = 100000000000000000L;
     byte[] bytes = new byte[MAX_CHARS_DOUBLE];
     int length = 0;
@@ -361,13 +369,19 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     private static final int MASK_28 = (1 << 28) - 1;
 
     public NumberFormatterImpl setDecimalFormatSymbols(DecimalFormatSymbols symbols) {
+        String exp = symbols.getExponentSeparator();
+        if (exp.length() > MAX_EXP_LENGTH) {
+            throw new IllegalArgumentException("Exponent separator can't be longer than " + MAX_EXP_LENGTH);
+        }
+        this.EXP = "E".equals(exp) ? DEFAULT_EXP : exp.getBytes(StandardCharsets.ISO_8859_1);
         this.DOT = (byte) symbols.getDecimalSeparator();
         return this;
     }
 
-    private byte DOT = (byte) '.';
+    byte DOT = '.';
+    byte[] EXP = DEFAULT_EXP;
+    private static final byte[] DEFAULT_EXP = new byte[]{'E'};
     private static final byte ZERO = (byte) '0';
     private static final byte MINUS = (byte) '-';
-    private static final byte EXP = (byte) 'E';
 
 }
