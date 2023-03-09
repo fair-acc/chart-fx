@@ -1,6 +1,5 @@
 package io.fair_acc.chartfx.utils;
 
-import com.ibm.icu.text.DecimalFormat;
 import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
@@ -89,22 +88,5 @@ class NumberFormatterImplTest {
         formatter.setPrecision(afterCommaDigits + 1);
         return formatter::toString;
     }
-
-    private static DoubleFunction<String> createBaselineIbmFormatter(boolean exponentialForm, int afterCommaDigits) {
-        // TODO: remove
-        //  this formatter was previously used for exponential formatting. It served as a baseline,
-        //  but the behavior later changed to something more specialized for charting.
-        var formatter = new DecimalFormat();
-        formatter.setGroupingSize(0);
-        formatter.setScientificNotation(exponentialForm);
-        if (afterCommaDigits >= 0) {
-            formatter.setSignificantDigitsUsed(true);
-            formatter.setMinimumSignificantDigits(afterCommaDigits + 1);
-            formatter.setMinimumFractionDigits(2);
-            formatter.setMaximumFractionDigits(2);
-        }
-        return formatter::format;
-    }
-
 
 }
