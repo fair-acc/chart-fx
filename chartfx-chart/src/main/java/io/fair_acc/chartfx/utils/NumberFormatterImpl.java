@@ -5,6 +5,7 @@ import javafx.util.StringConverter;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormatSymbols;
+import java.util.Objects;
 
 import static io.fair_acc.chartfx.utils.Schubfach.*;
 import static java.lang.Math.*;
@@ -29,11 +30,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         return Double.parseDouble(string);
     }
 
-    /*
-     * (non-Javadoc)
-     *
-     * @see io.fair_acc.chartfx.utils.NumberFormatter#getPrecision()
-     */
     @Override
     public int getPrecision() {
         return afterCommaDigits + 1;
@@ -106,8 +102,8 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
         // extract digits
         long hm = multiplyHigh(f, 193428131138340668L) >>> 20;
-        int h = (int) (hm * 1441151881L >>> 57); // first digit
-        int m = (int) (hm - 100000000 * h); // next 8 digits
+        int h = (int) ((hm * 1441151881L) >>> 57); // first digit
+        int m = (int) (hm - 100000000L * h); // next 8 digits
         int l = (int) (f - 100000000L * hm); // lowest 8 digits
 
         // TODO: remove debug statements
@@ -220,10 +216,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         }
     }
 
-    private void append(int c) {
-        bytes[length++] = (byte) c;
-    }
-
     private void append(byte c) {
         bytes[length++] = c;
     }
@@ -330,7 +322,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         For n = 2, m = 1 the table in section 10 of [1] shows
             floor(e / 10) = floor(103 e / 2^10)
          */
-        int d = e * 103 >>> 10;
+        int d = (e * 103) >>> 10;
         appendDigit(d);
         appendDigit(e - 10 * d);
     }
@@ -373,7 +365,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         if (exp.length() > MAX_EXP_LENGTH) {
             throw new IllegalArgumentException("Exponent separator can't be longer than " + MAX_EXP_LENGTH);
         }
-        this.EXP = "E".equals(exp) ? DEFAULT_EXP : exp.getBytes(StandardCharsets.ISO_8859_1);
+        this.EXP = Objects.equals(exp, "E") ? DEFAULT_EXP : exp.getBytes(StandardCharsets.ISO_8859_1);
         this.DOT = (byte) symbols.getDecimalSeparator();
         return this;
     }

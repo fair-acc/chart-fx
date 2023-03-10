@@ -129,8 +129,12 @@ public class Schubfach {
     }
 
     /**
-     * @param len length of the significand
-     * @return scalar needed to normalize the significand to always have H digits
+     * Shifts the scalar to the left such that the current len
+     * digits fill the top H digits.
+     *
+     * @param H desired length of the significand
+     * @param len current length of the significand
+     * @return normalized significand
      */
     public static long getNormalizationScale(int H, int len) {
         return pow10(H - len);
@@ -328,7 +332,7 @@ public class Schubfach {
 
         private static int toDecimal(boolean negative, int q, int c, int dk, FloatEncoder consumer) {
             int out = c & 0x1;
-            long cb = c << 2;
+            long cb = (long) c << 2;
             long cbr = cb + 2;
             long cbl;
             int k;
@@ -352,7 +356,7 @@ public class Schubfach {
 
             int s = vb >> 2;
             if (s >= 100) {
-                int sp10 = 10 * (int) (s * 1717986919L >>> 34);
+                int sp10 = 10 * (int) ((s * 1717986919L) >>> 34);
                 int tp10 = sp10 + 10;
                 boolean upin = vbl + out <= sp10 << 2;
                 boolean wpin = (tp10 << 2) + out <= vbr;
@@ -442,7 +446,7 @@ public class Schubfach {
             long cbr = cb + 2;
             long cbl;
             int k;
-            if (c != C_MIN | q == Q_MIN) {
+            if (c != C_MIN || q == Q_MIN) {
                 // regular spacing
                 cbl = cb - 2;
                 k = flog10pow2(q);
