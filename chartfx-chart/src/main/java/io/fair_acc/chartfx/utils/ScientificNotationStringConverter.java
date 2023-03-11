@@ -42,7 +42,7 @@ public class ScientificNotationStringConverter extends StringConverter<Number> i
     }
 
     @Override
-    public int getPrecision() {
+    public int getDecimalPlaces() {
         return precision;
     }
 
@@ -57,7 +57,7 @@ public class ScientificNotationStringConverter extends StringConverter<Number> i
     }
 
     @Override
-    public NumberFormatter setPrecision(final int precision) {
+    public NumberFormatter setDecimalPlaces(final int precision) {
         this.precision = precision;
         buildFormat(precision);
         return this;

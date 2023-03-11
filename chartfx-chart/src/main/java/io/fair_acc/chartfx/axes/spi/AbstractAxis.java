@@ -31,7 +31,6 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelFormatter;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.format.DefaultFormatter;
-import io.fair_acc.chartfx.axes.spi.format.DefaultLogFormatter;
 import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.ui.ResizableCanvas;
 import io.fair_acc.chartfx.ui.geometry.Side;

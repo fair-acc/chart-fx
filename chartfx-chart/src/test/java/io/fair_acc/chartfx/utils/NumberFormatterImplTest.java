@@ -2,7 +2,6 @@ package io.fair_acc.chartfx.utils;
 
 import org.junit.jupiter.api.Test;
 
-import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.function.DoubleFunction;
 
@@ -57,7 +56,7 @@ class NumberFormatterImplTest {
     }
 
     @Test
-    void afterCommaDigits5plain() {
+    void plain5Decimals() {
         Locale.setDefault(Locale.US);
         var formatter = createFormatter(false, 5);
         assertEquals("10.00000", formatter.apply(9.999999999999998));
@@ -71,7 +70,7 @@ class NumberFormatterImplTest {
     }
 
     @Test
-    void afterCommaDigits5Exp() {
+    void exponential5Decimals() {
         Locale.setDefault(Locale.US);
         var formatter = createFormatter(true, 5);
         assertEquals("0.00000E0", formatter.apply(0));
@@ -85,6 +84,7 @@ class NumberFormatterImplTest {
 
     @Test
     void testPlainRounding() {
+        // inputs copied from actual ticks
         Locale.setDefault(Locale.US);
         var formatter = createFormatter(false, 1);
         assertEquals("0.1", formatter.apply(0.14999999999999994));
@@ -110,10 +110,10 @@ class NumberFormatterImplTest {
         assertEquals("0.00", formatter.apply(0.001000000000000004));
     }
 
-    private static DoubleFunction<String> createFormatter(boolean exponentialForm, int afterCommaDigits) {
+    private static DoubleFunction<String> createFormatter(boolean exponentialForm, int decimalPlaces) {
         var formatter = new NumberFormatterImpl();
         formatter.setExponentialForm(exponentialForm);
-        formatter.setPrecision(afterCommaDigits + 1);
+        formatter.setDecimalPlaces(decimalPlaces);
         return formatter::toString;
     }
 

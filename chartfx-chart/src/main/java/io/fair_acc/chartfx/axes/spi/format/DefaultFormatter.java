@@ -24,6 +24,25 @@ public class DefaultFormatter extends AbstractFormatter {
     protected int oldRangeIndex = 0;
     private String prefix;
     private String suffix;
+    protected DisplayFormat displayFormat = DisplayFormat.Auto;
+
+    public static enum DisplayFormat {
+        Auto,
+        Scientific,
+        Plain
+    }
+
+    public DisplayFormat getDisplayFormat() {
+        return displayFormat;
+    }
+
+    public DefaultFormatter setDisplayFormat(DisplayFormat displayFormat) {
+        if (displayFormat == null) {
+            throw new NullPointerException("displayFormat");
+        }
+        this.displayFormat = displayFormat;
+        return this;
+    }
 
     /**
      * Construct a DefaultFormatter for the given NumberAxis
@@ -68,7 +87,6 @@ public class DefaultFormatter extends AbstractFormatter {
         final int suffixLength = suffix == null ? 0 : suffix.length();
         final String valueString = string.substring(prefixLength, string.length() - suffixLength);
         try {
-            // TODO: The previous implementation used the DecimalFormat for parsing. Did that do anything special?
             return formatter.fromString(valueString);
         } catch (final Throwable exc) {
             // Matches the previous contract
@@ -79,20 +97,26 @@ public class DefaultFormatter extends AbstractFormatter {
     @Override
     protected void rangeUpdated() {
         if (majorTickMarksCopy != null && majorTickMarksCopy.size() > 0) {
-            final boolean prevExponentialForm = formatter.isExponentialForm();
-            final int prevPrecision = formatter.getPrecision();
+            final boolean prevForm = formatter.isExponentialForm();
+            final int prevDecimals = formatter.getDecimalPlaces();
             configureFormatter(getRange(), majorTickMarksCopy);
 
             // Clear the cache if the formatting changed
-            if (formatter.isExponentialForm() != prevExponentialForm
-                    || formatter.getPrecision() != prevPrecision
-                    || oldRangeIndex != rangeIndex) {
+            if (formatter.isExponentialForm() != prevForm || formatter.getDecimalPlaces() != prevDecimals) {
                 labelCache.clear();
+            }
 
-                // TODO: what is the rangeIndex? it does not get set anywhere. Maybe that's a subclass thing?
+            // TODO: Left the same as before refactoring, but this code does not seem to be used.
+            if (oldRangeIndex != rangeIndex) {
+                labelCache.clear();
                 oldRangeIndex = rangeIndex;
             }
+
         }
+    }
+
+    protected boolean shouldUseExponentialForm(double range, int minExp, int maxExp) {
+        return minExp < -3 || maxExp > 4;
     }
 
     void configureFormatter(double range, List<Double> tickMarks) {
@@ -117,14 +141,6 @@ public class DefaultFormatter extends AbstractFormatter {
             Schubfach.decomposeDouble(value, decompositions.get(i));
         }
 
-        // Special case if we only render a single tick
-        if (n == 1) {
-            var decomp = decompositions.get(0);
-            formatter.setExponentialForm(decomp.getExponent() < -3 || decomp.getExponent() > 4);
-            formatter.setPrecision(-1);
-            return;
-        }
-
         // Determine the min and max exponents
         int minExp = decompositions.get(0).getExponent();
         int maxExp = minExp;
@@ -135,8 +151,19 @@ public class DefaultFormatter extends AbstractFormatter {
         }
 
         // Use the exponential form for very large or very small numbers
-        boolean useExponentialForm = minExp < -3 || maxExp > 4;
+        final boolean useExponentialForm;
+        if (displayFormat == DisplayFormat.Auto) {
+            useExponentialForm = shouldUseExponentialForm(range, minExp, maxExp);
+        } else {
+            useExponentialForm = (displayFormat == DisplayFormat.Scientific);
+        }
         formatter.setExponentialForm(useExponentialForm);
+
+        // Special case if we only render a single tick
+        if (n == 1) {
+            formatter.setDecimalPlaces(-1);
+            return;
+        }
 
         // Non-exponential forms are rendered with fixed separators, so
         // we need to shift to the largest exponent before determining the
@@ -149,7 +176,10 @@ public class DefaultFormatter extends AbstractFormatter {
 
         // Find the difference between all significands. Both
         // min and max should be the same, but floating point
-        // errors may cause differences.
+        // errors may cause differences. It's not clear whether
+        // we should prefer the min or max, so until we run into
+        // issues we use the min and err on the side of displaying
+        // too many digits.
         long minDiff = 10000000000000000L; // max 17 digits
         long maxDiff = 0L;
         for (int i = 0; i < n - 1; i++) {
@@ -165,7 +195,7 @@ public class DefaultFormatter extends AbstractFormatter {
         // to be consistent. With the length check we would otherwise get 17
         // after comma digits because there are no significant differences.
         if (minDiff == 0) {
-            formatter.setPrecision(-1);
+            formatter.setDecimalPlaces(-1);
             return;
         }
 
@@ -173,23 +203,18 @@ public class DefaultFormatter extends AbstractFormatter {
         // need to check rounding to avoid tiny floating point errors
         // that produce 9,999 (4 digits) instead of 10,000 (5 digits).
         int decimalLength = Schubfach.getDecimalLength(minDiff);
-        int maxSigDigits = Schubfach.H_DOUBLE - decimalLength + 1;
-        int roundedDecimalLength = Schubfach.getDecimalLength(minDiff + Schubfach.getRoundingOffset(maxSigDigits));
+        int significantDigits = Schubfach.H_DOUBLE - decimalLength + 1;
+        int roundedDecimalLength = Schubfach.getDecimalLength(minDiff + Schubfach.getRoundingOffset(significantDigits));
         if (roundedDecimalLength > decimalLength) {
-            maxSigDigits = Schubfach.H_DOUBLE - roundedDecimalLength + 1;
+            significantDigits--;
         }
 
-        // The precision is interpreted as the number of digits in exponential form,
-        // i.e., the number of after-comma digits plus one. This allows us to pass
-        // a fixed comma point for the non-exponential form.
-        if (useExponentialForm) {
-            // 5 = x.yyyy
-            formatter.setPrecision(maxSigDigits);
-        } else {
-            // 5 = (xx)x.yyyy
-            int afterCommaDigits = Math.max(maxSigDigits - maxExp, 0);
-            formatter.setPrecision(afterCommaDigits + 1);
-        }
+        // We fix the number of decimal places for a right-aligned
+        // display with a consistent comma point.
+        final int decimalPlaces = useExponentialForm
+                ? significantDigits - 1 // exponential form:     x.yyyyE0
+                : significantDigits - maxExp; // plain form: (xx)x.yyyy
+        formatter.setDecimalPlaces(Math.max(decimalPlaces, 0));
 
         // TODO: remove debug print
         /*System.out.println();
@@ -198,8 +223,8 @@ public class DefaultFormatter extends AbstractFormatter {
         System.out.println("maxDiff = " + maxDiff);
         System.out.println("minExp = " + minExp);
         System.out.println("maxExp = " + maxExp);
-        System.out.println("significantDigits = " + maxSigDigits);
-        System.out.println("afterCommaDigits = " + (formatter.getPrecision() - 1));
+        System.out.println("significantDigits = " + significantDigits);
+        System.out.println("decimalPlaces = " + formatter.getDecimalPlaces());
         System.out.println("useExponentialForm = " + useExponentialForm);
         System.out.println();*/
     }

@@ -19,9 +19,9 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         setDecimalFormatSymbols(DecimalFormatSymbols.getInstance());
     }
 
-    public NumberFormatterImpl(final int precision, final boolean exponentialForm) {
+    public NumberFormatterImpl(final int decimalPlaces, final boolean exponentialForm) {
         this();
-        setPrecision(precision);
+        setDecimalPlaces(decimalPlaces);
         setExponentialForm(exponentialForm);
     }
 
@@ -31,8 +31,8 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     @Override
-    public int getPrecision() {
-        return afterCommaDigits + 1;
+    public int getDecimalPlaces() {
+        return decimalPlaces;
     }
 
     @Override
@@ -47,8 +47,8 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     @Override
-    public NumberFormatter setPrecision(final int precision) { // TODO: replace with setAfterCommaDigits?
-        this.afterCommaDigits = Math.max(ALL_DIGITS, precision - 1);
+    public NumberFormatter setDecimalPlaces(final int decimalPlaces) {
+        this.decimalPlaces = Math.max(ALL_DIGITS, decimalPlaces);
         return this;
     }
 
@@ -72,10 +72,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     @Override
     public String toString(final Number object) {
-        String result = toString(object.doubleValue());
-        // TODO: remove debug print
-        // System.out.println(object + " => " + result + " (afterCommaDigits = " + afterCommaDigits + ")");
-        return result;
+        return toString(object.doubleValue());
     }
 
     private void encodeDouble(boolean negative, long f, int e) {
@@ -91,8 +88,8 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
         // Round to the desired number of digits
         final boolean useExponentialForm = isExponentialForm || e > MAX_PLAIN_EXP;
-        if (afterCommaDigits >= 0) {
-            final int significantDigits = afterCommaDigits + (useExponentialForm ? 1 : e);
+        if (decimalPlaces >= 0) {
+            final int significantDigits = decimalPlaces + (useExponentialForm ? 1 : e);
             f += Schubfach.getRoundingOffset(significantDigits);
             if (f >= DIGITS_18) {
                 f /= 10;
@@ -127,10 +124,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     private void toExponentialFormat(int h, int m, int l, int e) {
         appendDigit(h);
-        if (afterCommaDigits > 0) {
+        if (decimalPlaces > 0) {
             append(DOT);
-            appendNDigits(m, l, afterCommaDigits);
-        } else if (afterCommaDigits == ALL_DIGITS) {
+            appendNDigits(m, l, decimalPlaces);
+        } else if (decimalPlaces == ALL_DIGITS) {
             append(DOT);
             append8Digits(m);
             lowDigits(l);
@@ -148,11 +145,11 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             appendDigit(t >>> 28);
             y = t & MASK_28;
         }
-        if (afterCommaDigits == 0) {
+        if (decimalPlaces == 0) {
             return;
         }
         append(DOT);
-        if (afterCommaDigits == ALL_DIGITS) {
+        if (decimalPlaces == ALL_DIGITS) {
             for (; i <= 8; ++i) {
                 t = 10 * y;
                 appendDigit(t >>> 28);
@@ -160,7 +157,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             }
             lowDigits(l);
         } else {
-            int remainingDigits = afterCommaDigits;
+            int remainingDigits = decimalPlaces;
             for (; i <= 8 && remainingDigits > 0; ++i) {
                 t = 10 * y;
                 appendDigit(t >>> 28);
@@ -173,12 +170,12 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     private void toPlainFormatWithLeadingZeros(int h, int m, int l, int e) {
         append(ZERO);
-        if (afterCommaDigits == 0) {
+        if (decimalPlaces == 0) {
             return;
         }
         append(DOT);
         int spaceLeft = bytes.length - length;
-        if (afterCommaDigits == ALL_DIGITS) {
+        if (decimalPlaces == ALL_DIGITS) {
             for (; e < 0 && spaceLeft > 0; ++e) {
                 append(ZERO);
                 spaceLeft--;
@@ -189,7 +186,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             }
             removeTrailingZeroes();
         } else {
-            int remainingDigits = Math.min(afterCommaDigits, spaceLeft);
+            int remainingDigits = Math.min(decimalPlaces, spaceLeft);
             for (; e < 0 && remainingDigits > 0; ++e) {
                 append(ZERO);
                 remainingDigits--;
@@ -204,9 +201,9 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     private void encodeZero() {
         length = 0;
         append(ZERO);
-        if (afterCommaDigits > 0) {
+        if (decimalPlaces > 0) {
             append(DOT);
-            for (int i = 0; i < afterCommaDigits; i++) {
+            for (int i = 0; i < decimalPlaces; i++) {
                 append(ZERO);
             }
         }
@@ -332,7 +329,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     static final int ALL_DIGITS = -1;
-    private int afterCommaDigits = ALL_DIGITS;
+    private int decimalPlaces = ALL_DIGITS;
 
     /*
     Room for the longer of the forms
