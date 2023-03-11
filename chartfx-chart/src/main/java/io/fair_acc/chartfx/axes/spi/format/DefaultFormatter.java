@@ -215,18 +215,6 @@ public class DefaultFormatter extends AbstractFormatter {
                 ? significantDigits - 1 // exponential form:     x.yyyyE0
                 : significantDigits - maxExp; // plain form: (xx)x.yyyy
         formatter.setDecimalPlaces(Math.max(decimalPlaces, 0));
-
-        // TODO: remove debug print
-        /*System.out.println();
-        System.out.println("range = " + range);
-        System.out.println("minDiff = " + minDiff);
-        System.out.println("maxDiff = " + maxDiff);
-        System.out.println("minExp = " + minExp);
-        System.out.println("maxExp = " + maxExp);
-        System.out.println("significantDigits = " + significantDigits);
-        System.out.println("decimalPlaces = " + formatter.getDecimalPlaces());
-        System.out.println("useExponentialForm = " + useExponentialForm);
-        System.out.println();*/
     }
 
     /**

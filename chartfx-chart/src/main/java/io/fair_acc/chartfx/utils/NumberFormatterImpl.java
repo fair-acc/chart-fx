@@ -103,13 +103,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         int m = (int) (hm - 100000000L * h); // next 8 digits
         int l = (int) (f - 100000000L * hm); // lowest 8 digits
 
-        // TODO: remove debug statements
-        /*System.out.println();
-        System.out.println("h = " + h);
-        System.out.println("m = " + m);
-        System.out.println("l = " + l);
-        System.out.println("e = " + e);*/
-
         if (useExponentialForm) {
             toExponentialFormat(h, m, l, e);
         } else {
