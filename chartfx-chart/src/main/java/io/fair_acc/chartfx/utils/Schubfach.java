@@ -140,6 +140,10 @@ public class Schubfach {
         return pow10(H - len);
     }
 
+    public static long pow10(int e) {
+        return MathUtils.pow10(e);
+    }
+
     public interface FloatEncoder {
         void encodeFloat(boolean negative, int significand, int exponent);
     }

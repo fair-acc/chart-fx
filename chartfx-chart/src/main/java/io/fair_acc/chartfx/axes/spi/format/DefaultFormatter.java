@@ -133,8 +133,8 @@ public class DefaultFormatter extends AbstractFormatter {
                 // treat rounding errors around zero as zero
                 // TODO:
                 //  (1) confirm that the threshold is sane
-                //  (2) The exp format still renders zero because
-                //      it gets the raw number. This might be easier
+                //  (2) The exp format still renders non-zero because
+                //      it gets the raw number. This might be best
                 //      to fix in the tick marker generator?
                 value = 0;
             }
@@ -207,6 +207,18 @@ public class DefaultFormatter extends AbstractFormatter {
         int roundedDecimalLength = Schubfach.getDecimalLength(minDiff + Schubfach.getRoundingOffset(significantDigits));
         if (roundedDecimalLength > decimalLength) {
             significantDigits--;
+        }
+
+        // A single digit is enough for unique labels, but for 0.25 steps it looks
+        // a bit odd to show labels rounded to [0.3, 0.5, 0.8] ticks. We extend
+        // the display to also include the next digit if it is non-zero.
+        long divisor = Schubfach.pow10(Schubfach.H_DOUBLE - significantDigits - 2);
+        int frac3 = (int) (minDiff / divisor); // 249992 turns into -> 249
+        int frac2 = (frac3 + 5) / 10; // round to 2nd decimal, e.g., 249 -> 25
+        int fracDigit1 = frac2 / 10; // top digit
+        int fracDigit2 = frac2 - fracDigit1 * 10; // isolated second digit
+        if (fracDigit2 != 0) {
+            significantDigits++;
         }
 
         // We fix the number of decimal places for a right-aligned
