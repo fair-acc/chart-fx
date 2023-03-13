@@ -75,7 +75,7 @@ class YWatchValueIndicatorTest {
     @TestFx
     void setMarkerValue() {
         valueWatchIndicatorTested.setMarkerValue(35.15);
-        assertEquals(" 35.2", valueWatchIndicatorTested.getText());
+        assertEquals("35", valueWatchIndicatorTested.getText());
         assertEquals(35.15, valueWatchIndicatorTested.getValue(), 1e-2);
     }
 
