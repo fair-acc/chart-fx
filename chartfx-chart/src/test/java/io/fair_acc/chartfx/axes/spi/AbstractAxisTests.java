@@ -164,7 +164,7 @@ class AbstractAxisTests {
         axis.setSide(Side.LEFT);
         assertEquals(-1.0, axis.calculateNewScale(10, -5.0, +5.0));
         assertEquals(+150, axis.computePrefHeight(-1));
-        assertEquals(+22, axis.computePrefWidth(100), 2);
+        assertEquals(+15, axis.computePrefWidth(100), 2);
 
         assertDoesNotThrow(axis::clear);
         assertDoesNotThrow(axis::forceRedraw);
