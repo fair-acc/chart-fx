@@ -159,7 +159,7 @@ public class DefaultFormatter extends AbstractFormatter {
         }
         formatter.setExponentialForm(useExponentialForm);
 
-        // Special case if we only render a single tick
+        // Special case if there is only a single tick
         if (n == 1) {
             formatter.setDecimalPlaces(-1);
             return;
@@ -192,8 +192,8 @@ public class DefaultFormatter extends AbstractFormatter {
 
         // In the exponential form cases the significands are often the same,
         // e.g., 1E0, 1E1, 1E2 etc., so we just render all significant digits
-        // to be consistent. With the length check we would otherwise get 17
-        // after comma digits because there are no significant differences.
+        // to be consistent. The length check would otherwise insist on
+        // displaying 17 digits because the decimal length of zero is 1.
         if (minDiff == 0) {
             formatter.setDecimalPlaces(-1);
             return;
@@ -210,8 +210,8 @@ public class DefaultFormatter extends AbstractFormatter {
         }
 
         // A single digit is enough for unique labels, but for 0.25 steps it looks
-        // a bit odd to show labels rounded to [0.3, 0.5, 0.8] ticks. We extend
-        // the display to also include the next digit if it is non-zero.
+        // a bit odd to show labels rounded to [0.3, 0.5, 0.8]. For better accuracy
+        // we extend the display to also include the next digit if it is non-zero.
         long divisor = Schubfach.pow10(Schubfach.H_DOUBLE - significantDigits - 2);
         int frac3 = (int) (minDiff / divisor); // 249992 turns into -> 249
         int frac2 = (frac3 + 5) / 10; // round to 2nd decimal, e.g., 249 -> 25
