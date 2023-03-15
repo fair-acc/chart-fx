@@ -46,7 +46,7 @@ import static java.lang.Float.*;
 import static java.lang.Math.*;
 
 /**
- * This class exposes methods to decompose a {@double} or {@float} into
+ * This class exposes methods to decompose a {@code double} or {@code float} into
  * its significand and exponent parts.
  * <p>
  * The Schubfach algorithm was created by Raffaelo Giuletti. Besides isolating
