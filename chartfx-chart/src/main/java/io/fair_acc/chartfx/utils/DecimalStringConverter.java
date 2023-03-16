@@ -51,7 +51,7 @@ public class DecimalStringConverter extends StringConverter<Number> implements N
      * @see io.fair_acc.chartfx.utils.NumberFormatter#getPrecision()
      */
     @Override
-    public int getPrecision() {
+    public int getDecimalPlaces() {
         return precision;
     }
 
@@ -71,7 +71,7 @@ public class DecimalStringConverter extends StringConverter<Number> implements N
      * @see io.fair_acc.chartfx.utils.NumberFormatter#setPrecision(int)
      */
     @Override
-    public NumberFormatter setPrecision(int precision) {
+    public NumberFormatter setDecimalPlaces(int precision) {
         this.precision = precision;
         buildFormat(precision);
         return this;

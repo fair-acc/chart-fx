@@ -2,13 +2,13 @@ package io.fair_acc.chartfx.utils;
 
 public interface NumberFormatter {
 
-    int getPrecision();
+    int getDecimalPlaces();
 
     boolean isExponentialForm();
 
     NumberFormatter setExponentialForm(boolean state);
 
-    NumberFormatter setPrecision(int precision);
+    NumberFormatter setDecimalPlaces(int precision);
 
     String toString(double val);
 

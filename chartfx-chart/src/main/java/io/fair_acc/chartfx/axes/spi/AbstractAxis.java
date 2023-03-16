@@ -31,7 +31,6 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelFormatter;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.format.DefaultFormatter;
-import io.fair_acc.chartfx.axes.spi.format.DefaultLogFormatter;
 import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.ui.ResizableCanvas;
 import io.fair_acc.chartfx.ui.geometry.Side;
@@ -61,7 +60,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
          * default fall-back formatter in case no {@code axisFormatter} is specified (ie. 'null')
          */
         private final AxisLabelFormatter defaultFormatter = new DefaultFormatter(AbstractAxis.this);
-        private final AxisLabelFormatter defaultLogFormatter = new DefaultLogFormatter(AbstractAxis.this);
         private final AxisLabelFormatter defaultTimeFormatter = new DefaultTimeFormatter(AbstractAxis.this);
         private final AxisLabelFormatter defaultLogTimeFormatter = new DefaultTimeFormatter(AbstractAxis.this);
 
@@ -80,9 +78,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             }
 
             // non-time format
-            if (isLogAxis()) {
-                return defaultLogFormatter;
-            }
             return defaultFormatter;
         }
 
