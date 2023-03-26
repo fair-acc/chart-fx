@@ -49,7 +49,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
     /** The initial default capacity of an array list. */
     public static final int DEFAULT_INITIAL_CAPACITY = 10;
     /** The backing array. */
-    protected transient int a[];
+    protected transient int[] a;
     /**
      * The current actual size of the list (never greater than the backing-array
      * length).
@@ -64,7 +64,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @param a
      *            the array that will be used to back this array list.
      */
-    protected IntArrayList(final int a[], @SuppressWarnings("unused") boolean dummy) {
+    protected IntArrayList(final int[] a, @SuppressWarnings("unused") boolean dummy) {
         this.a = a;
     }
     /**
@@ -124,7 +124,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @param a
      *            an array whose elements will be used to fill the array list.
      */
-    public IntArrayList(final int a[]) {
+    public IntArrayList(final int[] a) {
         this(a, 0, a.length);
     }
     /**
@@ -137,7 +137,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @param length
      *            the number of elements to use.
      */
-    public IntArrayList(final int a[], final int offset, final int length) {
+    public IntArrayList(final int[] a, final int offset, final int length) {
         this(length);
         System.arraycopy(a, offset, this.a, 0, length);
         size = length;
@@ -172,6 +172,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      *
      * @return the backing array.
      */
+    @Deprecated
     public int[] elements() {
         return a;
     }
@@ -189,7 +190,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      *            the length of the resulting array list.
      * @return a new array list of the given size, wrapping the given array.
      */
-    public static IntArrayList wrap(final int a[], final int length) {
+    public static IntArrayList wrap(final int[] a, final int length) {
         if (length > a.length)
             throw new IllegalArgumentException(
                     "The specified length (" + length + ") is greater than the array size (" + a.length + ")");
@@ -209,7 +210,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      *            an array to wrap.
      * @return a new array list wrapping the given array.
      */
-    public static IntArrayList wrap(final int a[]) {
+    public static IntArrayList wrap(final int[] a) {
         return wrap(a, a.length);
     }
     /**
@@ -246,7 +247,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         a = IntArrays.forceCapacity(a, capacity, size);
         assert size <= a.length;
     }
-    @Override
+    @Override @Deprecated
     public void add(final int index, final int k) {
         ensureIndex(index);
         grow(size + 1);
@@ -256,7 +257,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         size++;
         assert size <= a.length;
     }
-    @Override
+    @Override @Deprecated
     public boolean add(final int k) {
         grow(size + 1);
         a[size++] = k;
@@ -284,7 +285,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
                 return i;
         return -1;
     }
-    @Override
+    @Override @Deprecated
     public int removeInt(final int index) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
@@ -314,12 +315,12 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         a[index] = k;
         return old;
     }
-    @Override
+    @Override @Deprecated
     public void clear() {
         size = 0;
         assert size <= a.length;
     }
-    @Override
+    @Override @Deprecated
     public int size() {
         return size;
     }
@@ -331,7 +332,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
             Arrays.fill(a, this.size, size, (0));
         this.size = size;
     }
-    @Override
+    @Override @Deprecated
     public boolean isEmpty() {
         return size == 0;
     }
@@ -364,7 +365,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         // TODO: use Arrays.trim() and preserve type only if necessary
         if (n >= a.length || size == a.length)
             return;
-        final int t[] = new int[Math.max(n, size)];
+        final int[] t = new int[Math.max(n, size)];
         System.arraycopy(a, 0, t, 0, size);
         a = t;
         assert size <= a.length;
@@ -415,7 +416,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      *            the number of elements to add.
      */
     @Override
-    public void addElements(final int index, final int a[], final int offset, final int length) {
+    public void addElements(final int index, final int[] a, final int offset, final int length) {
         ensureIndex(index);
         IntArrays.ensureOffsetLength(a, offset, length);
         grow(size + length);
@@ -436,7 +437,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      *            the number of elements to add.
      */
     @Override
-    public void setElements(final int index, final int a[], final int offset, final int length) {
+    public void setElements(final int index, final int[] a, final int offset, final int length) {
         ensureIndex(index);
         IntArrays.ensureOffsetLength(a, offset, length);
         if (index + length > size)
@@ -445,7 +446,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         System.arraycopy(a, offset, this.a, index, length);
     }
     @Override
-    public int[] toArray(int a[]) {
+    public int[] toArray(int[] a) {
         if (a == null || a.length < size)
             a = new int[size];
         System.arraycopy(this.a, 0, a, 0, size);
@@ -625,7 +626,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
 
     public int compareTo(final IntArrayList l) {
         final int s1 = size(), s2 = l.size();
-        final int a1[] = a, a2[] = l.a;
+        final int[] a1 = a, a2 = l.a;
         int e1, e2;
         int r, i;
         for (i = 0; i < s1 && i < s2; i++) {
