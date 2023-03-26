@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.RandomAccess;
 import java.util.function.DoubleConsumer;
+import java.util.stream.DoubleStream;
 
 /**
  * A type-specific array-based list; provides some additional methods that use
@@ -59,6 +60,10 @@ public class DoubleArrayList implements RandomAccess, Cloneable, java.io.Seriali
         for (int i = 0; i < size; i++) {
             consumer.accept(a[i]);
         }
+    }
+
+    public DoubleStream stream() {
+        return Arrays.stream(a, 0, size);
     }
 
     protected void ensureIndex(final int index) {

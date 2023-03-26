@@ -1,8 +1,7 @@
 package io.fair_acc.dataset.spi.fastutil;
 
 /**
- * @author Florian Enner
- * @since 26 Mär 2023
+ * Utilities for shading fastutil lists.
  */
 class ArrayUtil {
 

@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.RandomAccess;
 import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
 
 /**
  * A type-specific array-based list; provides some additional methods that use
@@ -60,6 +61,10 @@ public class IntArrayList implements RandomAccess, Cloneable, java.io.Serializab
         for (int i = 0; i < size; i++) {
             consumer.accept(a[i]);
         }
+    }
+
+    public IntStream stream() {
+        return Arrays.stream(a, 0, size);
     }
 
     protected void ensureIndex(final int index) {
