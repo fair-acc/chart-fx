@@ -110,7 +110,9 @@ public class StringHashMapList2 implements Map<Integer, String> {
 
     @Override
     public Set<Integer> keySet() {
-        return new HashSet<>(indices);
+        Set<Integer> set = new HashSet<>();
+        indices.forEach(set::add);
+        return set;
     }
 
     @Override

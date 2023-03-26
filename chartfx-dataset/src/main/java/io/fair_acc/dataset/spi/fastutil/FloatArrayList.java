@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 package io.fair_acc.dataset.spi.fastutil;
-import it.unimi.dsi.fastutil.floats.*;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.RandomAccess;
-import java.util.NoSuchElementException;
+import java.util.function.IntConsumer;
+
 /**
  * A type-specific array-based list; provides some additional methods that use
  * polymorphism to avoid (un)boxing.
@@ -44,7 +44,7 @@ import java.util.NoSuchElementException;
  *
  * @see java.util.ArrayList
  */
-public class FloatArrayList extends AbstractFloatList implements RandomAccess, Cloneable, java.io.Serializable {
+public class FloatArrayList implements RandomAccess, Cloneable, java.io.Serializable {
     private static final long serialVersionUID = -7046029254386353130L;
     /** The initial default capacity of an array list. */
     public static final int DEFAULT_INITIAL_CAPACITY = 10;
@@ -55,6 +55,18 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      * length).
      */
     protected int size;
+
+    @FunctionalInterface
+    public interface FloatConsumer {
+        void accept(float value);
+    }
+
+    public void forEach(FloatConsumer consumer) {
+        for (int i = 0; i < size; i++) {
+            consumer.accept(a[i]);
+        }
+    }
+
     /**
      * Creates a new array list using a given array.
      *
@@ -73,7 +85,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      * @param capacity
      *            the initial capacity of the array list (may be 0).
      */
-@Deprecated
     public FloatArrayList(final int capacity) {
         if (capacity < 0)
             throw new IllegalArgumentException("Initial capacity (" + capacity + ") is negative");
@@ -87,92 +98,12 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
     public FloatArrayList() {
         a = FloatArrays.DEFAULT_EMPTY_ARRAY; // We delay allocation
     }
-    /**
-     * Creates a new array list and fills it with a given collection.
-     *
-     * @param c
-     *            a collection that will be used to fill the array list.
-     */
-    public FloatArrayList(final Collection<? extends Float> c) {
-        this(c.size());
-        size = FloatIterators.unwrap(FloatIterators.asFloatIterator(c.iterator()), a);
-    }
-    /**
-     * Creates a new array list and fills it with a given type-specific collection.
-     *
-     * @param c
-     *            a type-specific collection that will be used to fill the array
-     *            list.
-     */
-    public FloatArrayList(final FloatCollection c) {
-        this(c.size());
-        size = FloatIterators.unwrap(c.iterator(), a);
-    }
-    /**
-     * Creates a new array list and fills it with a given type-specific list.
-     *
-     * @param l
-     *            a type-specific list that will be used to fill the array list.
-     */
-    public FloatArrayList(final FloatList l) {
-        this(l.size());
-        l.getElements(0, a, 0, size = l.size());
-    }
-    /**
-     * Creates a new array list and fills it with the elements of a given array.
-     *
-     * @param a
-     *            an array whose elements will be used to fill the array list.
-     */
-    public FloatArrayList(final float[] a) {
-        this(a, 0, a.length);
-    }
-    /**
-     * Creates a new array list and fills it with the elements of a given array.
-     *
-     * @param a
-     *            an array whose elements will be used to fill the array list.
-     * @param offset
-     *            the first element to use.
-     * @param length
-     *            the number of elements to use.
-     */
-    public FloatArrayList(final float[] a, final int offset, final int length) {
-        this(length);
-        System.arraycopy(a, offset, this.a, 0, length);
-        size = length;
-    }
-    /**
-     * Creates a new array list and fills it with the elements returned by an
-     * iterator..
-     *
-     * @param i
-     *            an iterator whose returned elements will fill the array list.
-     */
-    public FloatArrayList(final Iterator<? extends Float> i) {
-        this();
-        while (i.hasNext())
-            this.add((i.next()).floatValue());
-    }
-    /**
-     * Creates a new array list and fills it with the elements returned by a
-     * type-specific iterator..
-     *
-     * @param i
-     *            a type-specific iterator whose returned elements will fill the
-     *            array list.
-     */
-    public FloatArrayList(final FloatIterator i) {
-        this();
-        while (i.hasNext())
-            this.add(i.nextFloat());
-    }
+
     /**
      * Returns the backing array of this list.
      *
      * @return the backing array.
      */
-    @Deprecated
     public float[] elements() {
         return a;
     }
@@ -190,7 +121,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      *            the length of the resulting array list.
      * @return a new array list of the given size, wrapping the given array.
      */
-    @Deprecated
     public static FloatArrayList wrap(final float[] a, final int length) {
         if (length > a.length)
             throw new IllegalArgumentException(
@@ -228,6 +158,15 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         a = FloatArrays.ensureCapacity(a, capacity, size);
         assert size <= a.length;
     }
+
+    protected void ensureIndex(final int index) {
+        // from AbstractDoubleList
+        if (index < 0)
+            throw new IndexOutOfBoundsException("Index (" + index + ") is negative");
+        if (index > size())
+            throw new IndexOutOfBoundsException("Index (" + index + ") is greater than list size (" + (size()) + ")");
+    }
+
     /**
      * Grows this array list, ensuring that it can contain the given number of
      * entries without resizing, and in case increasing the current capacity at
@@ -242,13 +181,12 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
             return;
         if (a != FloatArrays.DEFAULT_EMPTY_ARRAY)
             capacity = (int) Math.max(
-                    Math.min((long) a.length + (a.length >> 1), it.unimi.dsi.fastutil.Arrays.MAX_ARRAY_SIZE), capacity);
+                    Math.min((long) a.length + (a.length >> 1), ArrayUtil.MAX_ARRAY_SIZE), capacity);
         else if (capacity < DEFAULT_INITIAL_CAPACITY)
             capacity = DEFAULT_INITIAL_CAPACITY;
         a = FloatArrays.forceCapacity(a, capacity, size);
         assert size <= a.length;
     }
-    @Override @Deprecated
     public void add(final int index, final float k) {
         ensureIndex(index);
         grow(size + 1);
@@ -258,35 +196,30 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         size++;
         assert size <= a.length;
     }
-    @Override @Deprecated
     public boolean add(final float k) {
         grow(size + 1);
         a[size++] = k;
         assert size <= a.length;
         return true;
     }
-    @Override
     public float getFloat(final int index) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
                     "Index (" + index + ") is greater than or equal to list size (" + size + ")");
         return a[index];
     }
-    @Override
     public int indexOf(final float k) {
         for (int i = 0; i < size; i++)
             if ((Float.floatToIntBits(k) == Float.floatToIntBits(a[i])))
                 return i;
         return -1;
     }
-    @Override
     public int lastIndexOf(final float k) {
         for (int i = size; i-- != 0;)
             if ((Float.floatToIntBits(k) == Float.floatToIntBits(a[i])))
                 return i;
         return -1;
     }
-    @Override
     public float removeFloat(final int index) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
@@ -298,7 +231,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         assert size <= a.length;
         return old;
     }
-    @Override
     public boolean rem(final float k) {
         int index = indexOf(k);
         if (index == -1)
@@ -307,7 +239,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         assert size <= a.length;
         return true;
     }
-    @Override
     public float set(final int index, final float k) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
@@ -316,17 +247,13 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         a[index] = k;
         return old;
     }
-    @Override @Deprecated
     public void clear() {
         size = 0;
         assert size <= a.length;
     }
-    @Override
-    @Deprecated
     public int size() {
         return size;
     }
-    @Override @Deprecated
     public void size(final int size) {
         if (size > a.length)
             a = FloatArrays.forceCapacity(a, size, this.size);
@@ -334,7 +261,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
             Arrays.fill(a, this.size, size, (0));
         this.size = size;
     }
-    @Override
     public boolean isEmpty() {
         return size == 0;
     }
@@ -362,7 +288,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      * @param n
      *            the threshold for the trimming.
      */
-@Deprecated
     public void trim(final int n) {
         // TODO: use Arrays.trim() and preserve type only if necessary
         if (n >= a.length || size == a.length)
@@ -386,7 +311,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      * @param length
      *            the number of elements to be copied.
      */
-    @Override
     public void getElements(final int from, final float[] a, final int offset, final int length) {
         FloatArrays.ensureOffsetLength(a, offset, length);
         System.arraycopy(this.a, from, a, offset, length);
@@ -399,9 +323,8 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      * @param to
      *            the end index (exclusive).
      */
-    @Override @Deprecated
     public void removeElements(final int from, final int to) {
-        it.unimi.dsi.fastutil.Arrays.ensureFromTo(size, from, to);
+        ArrayUtil.ensureFromTo(size, from, to);
         System.arraycopy(a, to, a, from, size - to);
         size -= (to - from);
     }
@@ -417,7 +340,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      * @param length
      *            the number of elements to add.
      */
-    @Override @Deprecated
     public void addElements(final int index, final float[] a, final int offset, final int length) {
         ensureIndex(index);
         FloatArrays.ensureOffsetLength(a, offset, length);
@@ -426,6 +348,11 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         System.arraycopy(a, offset, this.a, index, length);
         size += length;
     }
+
+    public void addElements(final int index, final float[] a) {
+        addElements(index, a, 0, a.length);
+    }
+
     /**
      * Sets elements to this type-specific list using optimized system calls.
      *
@@ -438,7 +365,6 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
      * @param length
      *            the number of elements to add.
      */
-    @Override
     public void setElements(final int index, final float[] a, final int offset, final int length) {
         ensureIndex(index);
         FloatArrays.ensureOffsetLength(a, offset, length);
@@ -447,55 +373,37 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
                     "End index (" + (index + length) + ") is greater than list size (" + size + ")");
         System.arraycopy(a, offset, this.a, index, length);
     }
-    @Override
+
+    /**
+     * Set (hopefully quickly) elements to match the array given.
+     *
+     * @param a
+     *            the array containing the elements.
+     * @since 8.3.0
+     */
+    public void setElements(float[] a) {
+        setElements(0, a);
+    }
+    /**
+     * Set (hopefully quickly) elements to match the array given.
+     *
+     * @param index
+     *            the index at which to start setting elements.
+     * @param a
+     *            the array containing the elements.
+     * @since 8.3.0
+     */
+    public void setElements(int index, float[] a) {
+        setElements(index, a, 0, a.length);
+    }
+
     public float[] toArray(float[] a) {
         if (a == null || a.length < size)
             a = new float[size];
         System.arraycopy(this.a, 0, a, 0, size);
         return a;
     }
-    @Override
-    public boolean addAll(int index, final FloatCollection c) {
-        ensureIndex(index);
-        int n = c.size();
-        if (n == 0)
-            return false;
-        grow(size + n);
-        if (index != size)
-            System.arraycopy(a, index, a, index + n, size - index);
-        final FloatIterator i = c.iterator();
-        size += n;
-        while (n-- != 0)
-            a[index++] = i.nextFloat();
-        assert size <= a.length;
-        return true;
-    }
-    @Override
-    public boolean addAll(final int index, final FloatList l) {
-        ensureIndex(index);
-        final int n = l.size();
-        if (n == 0)
-            return false;
-        grow(size + n);
-        if (index != size)
-            System.arraycopy(a, index, a, index + n, size - index);
-        l.getElements(0, a, index, n);
-        size += n;
-        assert size <= a.length;
-        return true;
-    }
-    @Override
-    public boolean removeAll(final FloatCollection c) {
-        final float[] a = this.a;
-        int j = 0;
-        for (int i = 0; i < size; i++)
-            if (!c.contains(a[i]))
-                a[j++] = a[i];
-        final boolean modified = size != j;
-        size = j;
-        return modified;
-    }
-    @Override
+
     public boolean removeAll(final Collection<?> c) {
         final float[] a = this.a;
         int j = 0;
@@ -506,81 +414,7 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         size = j;
         return modified;
     }
-    @Override
-    public FloatListIterator listIterator(final int index) {
-        ensureIndex(index);
-        return new FloatListIterator() {
-            int pos = index, last = -1;
-            @Override
-            public boolean hasNext() {
-                return pos < size;
-            }
-            @Override
-            public boolean hasPrevious() {
-                return pos > 0;
-            }
-            @Override
-            public float nextFloat() {
-                if (!hasNext())
-                    throw new NoSuchElementException();
-                return a[last = pos++];
-            }
-            @Override
-            public float previousFloat() {
-                if (!hasPrevious())
-                    throw new NoSuchElementException();
-                return a[last = --pos];
-            }
-            @Override
-            public int nextIndex() {
-                return pos;
-            }
-            @Override
-            public int previousIndex() {
-                return pos - 1;
-            }
-            @Override
-            public void add(float k) {
-                FloatArrayList.this.add(pos++, k);
-                last = -1;
-            }
-            @Override
-            public void set(float k) {
-                if (last == -1)
-                    throw new IllegalStateException();
-                FloatArrayList.this.set(last, k);
-            }
-            @Override
-            public void remove() {
-                if (last == -1)
-                    throw new IllegalStateException();
-                FloatArrayList.this.removeFloat(last);
-                /*
-                 * If the last operation was a next(), we are removing an element *before* us,
-                 * and we must decrease pos correspondingly.
-                 */
-                if (last < pos)
-                    pos--;
-                last = -1;
-            }
-        };
-    }
-    @Override
-    public void sort(final FloatComparator comp) {
-        if (comp == null) {
-            FloatArrays.stableSort(a, 0, size);
-        } else {
-            FloatArrays.stableSort(a, 0, size, comp);
-        }
-    }
-    @Override
-    public void unstableSort(final FloatComparator comp) {
-        if (comp == null) {
-            FloatArrays.unstableSort(a, 0, size);
-        } else {
-            FloatArrays.unstableSort(a, 0, size, comp);
-        }
-    }
+
     @Override
     public FloatArrayList clone() {
         FloatArrayList c = new FloatArrayList(size);
@@ -588,31 +422,7 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         c.size = size;
         return c;
     }
-    /**
-     * Compares this type-specific array list to another one.
-     *
-     * <p>
-     * This method exists only for sake of efficiency. The implementation inherited
-     * from the abstract implementation would already work.
-     *
-     * @param l
-     *            a type-specific array list.
-     * @return true if the argument contains the same elements of this type-specific
-     *         array list.
-     */
-    public boolean equals(final FloatArrayList l) {
-        if (l == this)
-            return true;
-        int s = size();
-        if (s != l.size())
-            return false;
-        final float[] a1 = a;
-        final float[] a2 = l.a;
-        while (s-- != 0)
-            if (a1[s] != a2[s])
-                return false;
-        return true;
-    }
+
     /**
      * Compares this array list to another array list.
      *
@@ -651,4 +461,31 @@ public class FloatArrayList extends AbstractFloatList implements RandomAccess, C
         for (int i = 0; i < size; i++)
             a[i] = s.readFloat();
     }
+
+    private static class FloatArrays {
+        public static final float[] EMPTY_ARRAY = {};
+        public static final float[] DEFAULT_EMPTY_ARRAY = {};
+
+        public static void ensureOffsetLength(final float[] a, final int offset, final int length) {
+            ensureOffsetLength(a.length, offset, length);
+        }
+
+        public static void ensureOffsetLength(final int arrayLength, final int offset, final int length) {
+            if (offset < 0) throw new ArrayIndexOutOfBoundsException("Offset (" + offset + ") is negative");
+            if (length < 0) throw new IllegalArgumentException("Length (" + length + ") is negative");
+            if (offset + length > arrayLength) throw new ArrayIndexOutOfBoundsException("Last index (" + (offset + length) + ") is greater than array length (" + arrayLength + ")");
+        }
+
+        public static float[] ensureCapacity(final float[] array, final int length, final int preserve) {
+            return length > array.length ? forceCapacity(array, length, preserve) : array;
+        }
+
+        public static float[] forceCapacity(final float[] array, final int length, final int preserve) {
+            final float[] t = new float[length];
+            System.arraycopy(array, 0, t, 0, preserve);
+            return t;
+        }
+
+    }
+
 }

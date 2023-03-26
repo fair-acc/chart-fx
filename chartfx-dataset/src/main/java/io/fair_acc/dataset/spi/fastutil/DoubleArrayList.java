@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 package io.fair_acc.dataset.spi.fastutil;
-import it.unimi.dsi.fastutil.doubles.*;
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.RandomAccess;
-import java.util.NoSuchElementException;
+import java.util.function.DoubleConsumer;
+
 /**
  * A type-specific array-based list; provides some additional methods that use
  * polymorphism to avoid (un)boxing.
@@ -44,7 +43,7 @@ import java.util.NoSuchElementException;
  *
  * @see java.util.ArrayList
  */
-public class DoubleArrayList extends AbstractDoubleList implements RandomAccess, Cloneable, java.io.Serializable {
+public class DoubleArrayList implements RandomAccess, Cloneable, java.io.Serializable {
     private static final long serialVersionUID = -7046029254386353130L;
     /** The initial default capacity of an array list. */
     public static final int DEFAULT_INITIAL_CAPACITY = 10;
@@ -55,6 +54,21 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      * length).
      */
     protected int size;
+
+    public void forEach(DoubleConsumer consumer) {
+        for (int i = 0; i < size; i++) {
+            consumer.accept(a[i]);
+        }
+    }
+
+    protected void ensureIndex(final int index) {
+        // from AbstractDoubleList
+        if (index < 0)
+            throw new IndexOutOfBoundsException("Index (" + index + ") is negative");
+        if (index > size())
+            throw new IndexOutOfBoundsException("Index (" + index + ") is greater than list size (" + (size()) + ")");
+    }
+
     /**
      * Creates a new array list using a given array.
      *
@@ -84,96 +98,15 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
     }
     /** Creates a new array list with {@link #DEFAULT_INITIAL_CAPACITY} capacity. */
 
-    @Deprecated
     public DoubleArrayList() {
         a = DoubleArrays.DEFAULT_EMPTY_ARRAY; // We delay allocation
     }
-    /**
-     * Creates a new array list and fills it with a given collection.
-     *
-     * @param c
-     *            a collection that will be used to fill the array list.
-     */
-    public DoubleArrayList(final Collection<? extends Double> c) {
-        this(c.size());
-        size = DoubleIterators.unwrap(DoubleIterators.asDoubleIterator(c.iterator()), a);
-    }
-    /**
-     * Creates a new array list and fills it with a given type-specific collection.
-     *
-     * @param c
-     *            a type-specific collection that will be used to fill the array
-     *            list.
-     */
-    public DoubleArrayList(final DoubleCollection c) {
-        this(c.size());
-        size = DoubleIterators.unwrap(c.iterator(), a);
-    }
-    /**
-     * Creates a new array list and fills it with a given type-specific list.
-     *
-     * @param l
-     *            a type-specific list that will be used to fill the array list.
-     */
-    public DoubleArrayList(final DoubleList l) {
-        this(l.size());
-        l.getElements(0, a, 0, size = l.size());
-    }
-    /**
-     * Creates a new array list and fills it with the elements of a given array.
-     *
-     * @param a
-     *            an array whose elements will be used to fill the array list.
-     */
-    public DoubleArrayList(final double[] a) {
-        this(a, 0, a.length);
-    }
-    /**
-     * Creates a new array list and fills it with the elements of a given array.
-     *
-     * @param a
-     *            an array whose elements will be used to fill the array list.
-     * @param offset
-     *            the first element to use.
-     * @param length
-     *            the number of elements to use.
-     */
-    public DoubleArrayList(final double[] a, final int offset, final int length) {
-        this(length);
-        System.arraycopy(a, offset, this.a, 0, length);
-        size = length;
-    }
-    /**
-     * Creates a new array list and fills it with the elements returned by an
-     * iterator..
-     *
-     * @param i
-     *            an iterator whose returned elements will fill the array list.
-     */
-    public DoubleArrayList(final Iterator<? extends Double> i) {
-        this();
-        while (i.hasNext())
-            this.add((i.next()).doubleValue());
-    }
-    /**
-     * Creates a new array list and fills it with the elements returned by a
-     * type-specific iterator..
-     *
-     * @param i
-     *            a type-specific iterator whose returned elements will fill the
-     *            array list.
-     */
-    public DoubleArrayList(final DoubleIterator i) {
-        this();
-        while (i.hasNext())
-            this.add(i.nextDouble());
-    }
+
     /**
      * Returns the backing array of this list.
      *
      * @return the backing array.
      */
-    @Deprecated
     public double[] elements() {
         return a;
     }
@@ -191,7 +124,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      *            the length of the resulting array list.
      * @return a new array list of the given size, wrapping the given array.
      */
-    @Deprecated
     public static DoubleArrayList wrap(final double[] a, final int length) {
         if (length > a.length)
             throw new IllegalArgumentException(
@@ -212,7 +144,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      *            an array to wrap.
      * @return a new array list wrapping the given array.
      */
-    @Deprecated
     public static DoubleArrayList wrap(final double[] a) {
         return wrap(a, a.length);
     }
@@ -244,14 +175,13 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
             return;
         if (a != DoubleArrays.DEFAULT_EMPTY_ARRAY)
             capacity = (int) Math.max(
-                    Math.min((long) a.length + (a.length >> 1), it.unimi.dsi.fastutil.Arrays.MAX_ARRAY_SIZE), capacity);
+                    Math.min((long) a.length + (a.length >> 1), ArrayUtil.MAX_ARRAY_SIZE), capacity);
         else if (capacity < DEFAULT_INITIAL_CAPACITY)
             capacity = DEFAULT_INITIAL_CAPACITY;
         a = DoubleArrays.forceCapacity(a, capacity, size);
         assert size <= a.length;
     }
-    @Override
-    @Deprecated
+
     public void add(final int index, final double k) {
         ensureIndex(index);
         grow(size + 1);
@@ -261,36 +191,32 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         size++;
         assert size <= a.length;
     }
-    @Override
-    @Deprecated
+
     public boolean add(final double k) {
         grow(size + 1);
         a[size++] = k;
         assert size <= a.length;
         return true;
     }
-    @Override
+
     public double getDouble(final int index) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
                     "Index (" + index + ") is greater than or equal to list size (" + size + ")");
         return a[index];
     }
-    @Override
     public int indexOf(final double k) {
         for (int i = 0; i < size; i++)
             if ((Double.doubleToLongBits(k) == Double.doubleToLongBits(a[i])))
                 return i;
         return -1;
     }
-    @Override
     public int lastIndexOf(final double k) {
         for (int i = size; i-- != 0;)
             if ((Double.doubleToLongBits(k) == Double.doubleToLongBits(a[i])))
                 return i;
         return -1;
     }
-    @Override
     public double removeDouble(final int index) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
@@ -302,7 +228,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         assert size <= a.length;
         return old;
     }
-    @Override
     public boolean rem(final double k) {
         int index = indexOf(k);
         if (index == -1)
@@ -311,7 +236,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         assert size <= a.length;
         return true;
     }
-    @Override
     public double set(final int index, final double k) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
@@ -320,19 +244,15 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         a[index] = k;
         return old;
     }
-    @Override
-    @Deprecated
     public void clear() {
         size = 0;
         assert size <= a.length;
     }
-    @Override
-    @Deprecated
+
     public int size() {
         return size;
     }
-    @Override
-    @Deprecated
+
     public void size(final int size) {
         if (size > a.length)
             a = DoubleArrays.forceCapacity(a, size, this.size);
@@ -340,10 +260,10 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
             Arrays.fill(a, this.size, size, (0));
         this.size = size;
     }
-    @Override
     public boolean isEmpty() {
         return size == 0;
     }
+
     /**
      * Trims this array list so that the capacity is equal to the size.
      *
@@ -352,6 +272,7 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
     public void trim() {
         trim(0);
     }
+
     /**
      * Trims the backing array if it is too large.
      *
@@ -368,7 +289,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      * @param n
      *            the threshold for the trimming.
      */
-    @Deprecated
     public void trim(final int n) {
         // TODO: use Arrays.trim() and preserve type only if necessary
         if (n >= a.length || size == a.length)
@@ -378,6 +298,7 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         a = t;
         assert size <= a.length;
     }
+
     /**
      * Copies element of this type-specific list into the given array using
      * optimized system calls.
@@ -392,11 +313,11 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      * @param length
      *            the number of elements to be copied.
      */
-    @Override
     public void getElements(final int from, final double[] a, final int offset, final int length) {
         DoubleArrays.ensureOffsetLength(a, offset, length);
         System.arraycopy(this.a, from, a, offset, length);
     }
+
     /**
      * Removes elements of this type-specific list using optimized system calls.
      *
@@ -405,13 +326,12 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      * @param to
      *            the end index (exclusive).
      */
-    @Override
-    @Deprecated
     public void removeElements(final int from, final int to) {
-        it.unimi.dsi.fastutil.Arrays.ensureFromTo(size, from, to);
+        ArrayUtil.ensureFromTo(size, from, to);
         System.arraycopy(a, to, a, from, size - to);
         size -= (to - from);
     }
+
     /**
      * Adds elements to this type-specific list using optimized system calls.
      *
@@ -424,8 +344,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      * @param length
      *            the number of elements to add.
      */
-    @Override
-    @Deprecated
     public void addElements(final int index, final double[] a, final int offset, final int length) {
         ensureIndex(index);
         DoubleArrays.ensureOffsetLength(a, offset, length);
@@ -435,8 +353,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         size += length;
     }
 
-    @Override
-    @Deprecated
     public void addElements(final int index, final double a[]) {
         addElements(index, a, 0, a.length);
     }
@@ -453,7 +369,6 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
      * @param length
      *            the number of elements to add.
      */
-    @Override
     public void setElements(final int index, final double[] a, final int offset, final int length) {
         ensureIndex(index);
         DoubleArrays.ensureOffsetLength(a, offset, length);
@@ -462,55 +377,30 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
                     "End index (" + (index + length) + ") is greater than list size (" + size + ")");
         System.arraycopy(a, offset, this.a, index, length);
     }
-    @Override
-    public double[] toArray(double[] a) {
-        if (a == null || a.length < size)
-            a = new double[size];
-        System.arraycopy(this.a, 0, a, 0, size);
-        return a;
+
+    /**
+     * Set (hopefully quickly) elements to match the array given.
+     *
+     * @param a
+     *            the array containing the elements.
+     * @since 8.3.0
+     */
+    public void setElements(double[] a) {
+        setElements(0, a);
     }
-    @Override
-    public boolean addAll(int index, final DoubleCollection c) {
-        ensureIndex(index);
-        int n = c.size();
-        if (n == 0)
-            return false;
-        grow(size + n);
-        if (index != size)
-            System.arraycopy(a, index, a, index + n, size - index);
-        final DoubleIterator i = c.iterator();
-        size += n;
-        while (n-- != 0)
-            a[index++] = i.nextDouble();
-        assert size <= a.length;
-        return true;
+    /**
+     * Set (hopefully quickly) elements to match the array given.
+     *
+     * @param index
+     *            the index at which to start setting elements.
+     * @param a
+     *            the array containing the elements.
+     * @since 8.3.0
+     */
+    public void setElements(int index, double[] a) {
+        setElements(index, a, 0, a.length);
     }
-    @Override
-    public boolean addAll(final int index, final DoubleList l) {
-        ensureIndex(index);
-        final int n = l.size();
-        if (n == 0)
-            return false;
-        grow(size + n);
-        if (index != size)
-            System.arraycopy(a, index, a, index + n, size - index);
-        l.getElements(0, a, index, n);
-        size += n;
-        assert size <= a.length;
-        return true;
-    }
-    @Override
-    public boolean removeAll(final DoubleCollection c) {
-        final double[] a = this.a;
-        int j = 0;
-        for (int i = 0; i < size; i++)
-            if (!c.contains(a[i]))
-                a[j++] = a[i];
-        final boolean modified = size != j;
-        size = j;
-        return modified;
-    }
-    @Override
+
     public boolean removeAll(final Collection<?> c) {
         final double[] a = this.a;
         int j = 0;
@@ -521,81 +411,7 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         size = j;
         return modified;
     }
-    @Override
-    public DoubleListIterator listIterator(final int index) {
-        ensureIndex(index);
-        return new DoubleListIterator() {
-            int pos = index, last = -1;
-            @Override
-            public boolean hasNext() {
-                return pos < size;
-            }
-            @Override
-            public boolean hasPrevious() {
-                return pos > 0;
-            }
-            @Override
-            public double nextDouble() {
-                if (!hasNext())
-                    throw new NoSuchElementException();
-                return a[last = pos++];
-            }
-            @Override
-            public double previousDouble() {
-                if (!hasPrevious())
-                    throw new NoSuchElementException();
-                return a[last = --pos];
-            }
-            @Override
-            public int nextIndex() {
-                return pos;
-            }
-            @Override
-            public int previousIndex() {
-                return pos - 1;
-            }
-            @Override
-            public void add(double k) {
-                DoubleArrayList.this.add(pos++, k);
-                last = -1;
-            }
-            @Override
-            public void set(double k) {
-                if (last == -1)
-                    throw new IllegalStateException();
-                DoubleArrayList.this.set(last, k);
-            }
-            @Override
-            public void remove() {
-                if (last == -1)
-                    throw new IllegalStateException();
-                DoubleArrayList.this.removeDouble(last);
-                /*
-                 * If the last operation was a next(), we are removing an element *before* us,
-                 * and we must decrease pos correspondingly.
-                 */
-                if (last < pos)
-                    pos--;
-                last = -1;
-            }
-        };
-    }
-    @Override
-    public void sort(final DoubleComparator comp) {
-        if (comp == null) {
-            DoubleArrays.stableSort(a, 0, size);
-        } else {
-            DoubleArrays.stableSort(a, 0, size, comp);
-        }
-    }
-    @Override
-    public void unstableSort(final DoubleComparator comp) {
-        if (comp == null) {
-            DoubleArrays.unstableSort(a, 0, size);
-        } else {
-            DoubleArrays.unstableSort(a, 0, size, comp);
-        }
-    }
+
     @Override
     public DoubleArrayList clone() {
         DoubleArrayList c = new DoubleArrayList(size);
@@ -628,6 +444,7 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
                 return false;
         return true;
     }
+
     /**
      * Compares this array list to another array list.
      *
@@ -654,6 +471,7 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         }
         return i < s2 ? -1 : (i < s1 ? 1 : 0);
     }
+
     private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException {
         s.defaultWriteObject();
         for (int i = 0; i < size; i++)
@@ -666,4 +484,31 @@ public class DoubleArrayList extends AbstractDoubleList implements RandomAccess,
         for (int i = 0; i < size; i++)
             a[i] = s.readDouble();
     }
+
+    private static class DoubleArrays {
+        public static final double[] EMPTY_ARRAY = {};
+        public static final double[] DEFAULT_EMPTY_ARRAY = {};
+
+        public static void ensureOffsetLength(final double[] a, final int offset, final int length) {
+            ensureOffsetLength(a.length, offset, length);
+        }
+
+        public static void ensureOffsetLength(final int arrayLength, final int offset, final int length) {
+            if (offset < 0) throw new ArrayIndexOutOfBoundsException("Offset (" + offset + ") is negative");
+            if (length < 0) throw new IllegalArgumentException("Length (" + length + ") is negative");
+            if (offset + length > arrayLength) throw new ArrayIndexOutOfBoundsException("Last index (" + (offset + length) + ") is greater than array length (" + arrayLength + ")");
+        }
+
+        public static double[] ensureCapacity(final double[] array, final int length, final int preserve) {
+            return length > array.length ? forceCapacity(array, length, preserve) : array;
+        }
+
+        public static double[] forceCapacity(final double[] array, final int length, final int preserve) {
+            final double[] t= new double[length];
+            System.arraycopy(array, 0, t, 0, preserve);
+            return t;
+        }
+
+    }
+
 }

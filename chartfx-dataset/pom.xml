@@ -20,11 +20,6 @@
 	</description>
 
     <dependencies>
-        <dependency>
-            <groupId>it.unimi.dsi</groupId>
-            <artifactId>fastutil</artifactId>
-            <version>8.3.1</version>
-        </dependency>
         <!-- micro-benchmarking framework -->
         <dependency>
             <groupId>org.openjdk.jmh</groupId>

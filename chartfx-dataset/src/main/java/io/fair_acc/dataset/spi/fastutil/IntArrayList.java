@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 package io.fair_acc.dataset.spi.fastutil;
-import it.unimi.dsi.fastutil.ints.*;
+
 
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.RandomAccess;
-import java.util.NoSuchElementException;
+import java.util.function.IntConsumer;
+
 /**
  * A type-specific array-based list; provides some additional methods that use
  * polymorphism to avoid (un)boxing.
@@ -44,7 +44,7 @@ import java.util.NoSuchElementException;
  *
  * @see java.util.ArrayList
  */
-public class IntArrayList extends AbstractIntList implements RandomAccess, Cloneable, java.io.Serializable {
+public class IntArrayList implements RandomAccess, Cloneable, java.io.Serializable {
     private static final long serialVersionUID = -7046029254386353130L;
     /** The initial default capacity of an array list. */
     public static final int DEFAULT_INITIAL_CAPACITY = 10;
@@ -55,6 +55,21 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * length).
      */
     protected int size;
+
+    public void forEach(IntConsumer consumer) {
+        for (int i = 0; i < size; i++) {
+            consumer.accept(a[i]);
+        }
+    }
+
+    protected void ensureIndex(final int index) {
+        // from AbstractDoubleList
+        if (index < 0)
+            throw new IndexOutOfBoundsException("Index (" + index + ") is negative");
+        if (index > size())
+            throw new IndexOutOfBoundsException("Index (" + index + ") is greater than list size (" + (size()) + ")");
+    }
+
     /**
      * Creates a new array list using a given array.
      *
@@ -87,92 +102,12 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
     public IntArrayList() {
         a = IntArrays.DEFAULT_EMPTY_ARRAY; // We delay allocation
     }
-    /**
-     * Creates a new array list and fills it with a given collection.
-     *
-     * @param c
-     *            a collection that will be used to fill the array list.
-     */
-    public IntArrayList(final Collection<? extends Integer> c) {
-        this(c.size());
-        size = IntIterators.unwrap(IntIterators.asIntIterator(c.iterator()), a);
-    }
-    /**
-     * Creates a new array list and fills it with a given type-specific collection.
-     *
-     * @param c
-     *            a type-specific collection that will be used to fill the array
-     *            list.
-     */
-    public IntArrayList(final IntCollection c) {
-        this(c.size());
-        size = IntIterators.unwrap(c.iterator(), a);
-    }
-    /**
-     * Creates a new array list and fills it with a given type-specific list.
-     *
-     * @param l
-     *            a type-specific list that will be used to fill the array list.
-     */
-    public IntArrayList(final IntList l) {
-        this(l.size());
-        l.getElements(0, a, 0, size = l.size());
-    }
-    /**
-     * Creates a new array list and fills it with the elements of a given array.
-     *
-     * @param a
-     *            an array whose elements will be used to fill the array list.
-     */
-    public IntArrayList(final int[] a) {
-        this(a, 0, a.length);
-    }
-    /**
-     * Creates a new array list and fills it with the elements of a given array.
-     *
-     * @param a
-     *            an array whose elements will be used to fill the array list.
-     * @param offset
-     *            the first element to use.
-     * @param length
-     *            the number of elements to use.
-     */
-    public IntArrayList(final int[] a, final int offset, final int length) {
-        this(length);
-        System.arraycopy(a, offset, this.a, 0, length);
-        size = length;
-    }
-    /**
-     * Creates a new array list and fills it with the elements returned by an
-     * iterator..
-     *
-     * @param i
-     *            an iterator whose returned elements will fill the array list.
-     */
-    public IntArrayList(final Iterator<? extends Integer> i) {
-        this();
-        while (i.hasNext())
-            this.add((i.next()).intValue());
-    }
-    /**
-     * Creates a new array list and fills it with the elements returned by a
-     * type-specific iterator..
-     *
-     * @param i
-     *            a type-specific iterator whose returned elements will fill the
-     *            array list.
-     */
-    public IntArrayList(final IntIterator i) {
-        this();
-        while (i.hasNext())
-            this.add(i.nextInt());
-    }
+
     /**
      * Returns the backing array of this list.
      *
      * @return the backing array.
      */
-    @Deprecated
     public int[] elements() {
         return a;
     }
@@ -241,13 +176,12 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
             return;
         if (a != IntArrays.DEFAULT_EMPTY_ARRAY)
             capacity = (int) Math.max(
-                    Math.min((long) a.length + (a.length >> 1), it.unimi.dsi.fastutil.Arrays.MAX_ARRAY_SIZE), capacity);
+                    Math.min((long) a.length + (a.length >> 1), ArrayUtil.MAX_ARRAY_SIZE), capacity);
         else if (capacity < DEFAULT_INITIAL_CAPACITY)
             capacity = DEFAULT_INITIAL_CAPACITY;
         a = IntArrays.forceCapacity(a, capacity, size);
         assert size <= a.length;
     }
-    @Override @Deprecated
     public void add(final int index, final int k) {
         ensureIndex(index);
         grow(size + 1);
@@ -257,35 +191,32 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         size++;
         assert size <= a.length;
     }
-    @Override @Deprecated
+
     public boolean add(final int k) {
         grow(size + 1);
         a[size++] = k;
         assert size <= a.length;
         return true;
     }
-    @Override
     public int getInt(final int index) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
                     "Index (" + index + ") is greater than or equal to list size (" + size + ")");
         return a[index];
     }
-    @Override
     public int indexOf(final int k) {
         for (int i = 0; i < size; i++)
             if (((k) == (a[i])))
                 return i;
         return -1;
     }
-    @Override
     public int lastIndexOf(final int k) {
         for (int i = size; i-- != 0;)
             if (((k) == (a[i])))
                 return i;
         return -1;
     }
-    @Override @Deprecated
+
     public int removeInt(final int index) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
@@ -297,7 +228,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         assert size <= a.length;
         return old;
     }
-    @Override
+
     public boolean rem(final int k) {
         int index = indexOf(k);
         if (index == -1)
@@ -306,7 +237,6 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         assert size <= a.length;
         return true;
     }
-    @Override
     public int set(final int index, final int k) {
         if (index >= size)
             throw new IndexOutOfBoundsException(
@@ -315,16 +245,14 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         a[index] = k;
         return old;
     }
-    @Override @Deprecated
     public void clear() {
         size = 0;
         assert size <= a.length;
     }
-    @Override @Deprecated
     public int size() {
         return size;
     }
-    @Override
+
     public void size(final int size) {
         if (size > a.length)
             a = IntArrays.forceCapacity(a, size, this.size);
@@ -332,7 +260,6 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
             Arrays.fill(a, this.size, size, (0));
         this.size = size;
     }
-    @Override @Deprecated
     public boolean isEmpty() {
         return size == 0;
     }
@@ -344,6 +271,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
     public void trim() {
         trim(0);
     }
+
     /**
      * Trims the backing array if it is too large.
      *
@@ -384,11 +312,11 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @param length
      *            the number of elements to be copied.
      */
-    @Override
     public void getElements(final int from, final int[] a, final int offset, final int length) {
         IntArrays.ensureOffsetLength(a, offset, length);
         System.arraycopy(this.a, from, a, offset, length);
     }
+
     /**
      * Removes elements of this type-specific list using optimized system calls.
      *
@@ -397,12 +325,12 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @param to
      *            the end index (exclusive).
      */
-    @Override
     public void removeElements(final int from, final int to) {
-        it.unimi.dsi.fastutil.Arrays.ensureFromTo(size, from, to);
+        ArrayUtil.ensureFromTo(size, from, to);
         System.arraycopy(a, to, a, from, size - to);
         size -= (to - from);
     }
+
     /**
      * Adds elements to this type-specific list using optimized system calls.
      *
@@ -415,7 +343,6 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @param length
      *            the number of elements to add.
      */
-    @Override
     public void addElements(final int index, final int[] a, final int offset, final int length) {
         ensureIndex(index);
         IntArrays.ensureOffsetLength(a, offset, length);
@@ -424,6 +351,11 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         System.arraycopy(a, offset, this.a, index, length);
         size += length;
     }
+
+    public void addElements(final int index, final int[] a) {
+        addElements(index, a, 0, a.length);
+    }
+
     /**
      * Sets elements to this type-specific list using optimized system calls.
      *
@@ -436,7 +368,6 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @param length
      *            the number of elements to add.
      */
-    @Override
     public void setElements(final int index, final int[] a, final int offset, final int length) {
         ensureIndex(index);
         IntArrays.ensureOffsetLength(a, offset, length);
@@ -445,55 +376,38 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
                     "End index (" + (index + length) + ") is greater than list size (" + size + ")");
         System.arraycopy(a, offset, this.a, index, length);
     }
-    @Override
+
+    /**
+     * Set (hopefully quickly) elements to match the array given.
+     *
+     * @param a
+     *            the array containing the elements.
+     * @since 8.3.0
+     */
+    public void setElements(int[] a) {
+        setElements(0, a);
+    }
+
+    /**
+     * Set (hopefully quickly) elements to match the array given.
+     *
+     * @param index
+     *            the index at which to start setting elements.
+     * @param a
+     *            the array containing the elements.
+     * @since 8.3.0
+     */
+    public void setElements(int index, int[] a) {
+        setElements(index, a, 0, a.length);
+    }
+
     public int[] toArray(int[] a) {
         if (a == null || a.length < size)
             a = new int[size];
         System.arraycopy(this.a, 0, a, 0, size);
         return a;
     }
-    @Override
-    public boolean addAll(int index, final IntCollection c) {
-        ensureIndex(index);
-        int n = c.size();
-        if (n == 0)
-            return false;
-        grow(size + n);
-        if (index != size)
-            System.arraycopy(a, index, a, index + n, size - index);
-        final IntIterator i = c.iterator();
-        size += n;
-        while (n-- != 0)
-            a[index++] = i.nextInt();
-        assert size <= a.length;
-        return true;
-    }
-    @Override
-    public boolean addAll(final int index, final IntList l) {
-        ensureIndex(index);
-        final int n = l.size();
-        if (n == 0)
-            return false;
-        grow(size + n);
-        if (index != size)
-            System.arraycopy(a, index, a, index + n, size - index);
-        l.getElements(0, a, index, n);
-        size += n;
-        assert size <= a.length;
-        return true;
-    }
-    @Override
-    public boolean removeAll(final IntCollection c) {
-        final int[] a = this.a;
-        int j = 0;
-        for (int i = 0; i < size; i++)
-            if (!c.contains(a[i]))
-                a[j++] = a[i];
-        final boolean modified = size != j;
-        size = j;
-        return modified;
-    }
-    @Override
+
     public boolean removeAll(final Collection<?> c) {
         final int[] a = this.a;
         int j = 0;
@@ -504,81 +418,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         size = j;
         return modified;
     }
-    @Override
-    public IntListIterator listIterator(final int index) {
-        ensureIndex(index);
-        return new IntListIterator() {
-            int pos = index, last = -1;
-            @Override
-            public boolean hasNext() {
-                return pos < size;
-            }
-            @Override
-            public boolean hasPrevious() {
-                return pos > 0;
-            }
-            @Override
-            public int nextInt() {
-                if (!hasNext())
-                    throw new NoSuchElementException();
-                return a[last = pos++];
-            }
-            @Override
-            public int previousInt() {
-                if (!hasPrevious())
-                    throw new NoSuchElementException();
-                return a[last = --pos];
-            }
-            @Override
-            public int nextIndex() {
-                return pos;
-            }
-            @Override
-            public int previousIndex() {
-                return pos - 1;
-            }
-            @Override
-            public void add(int k) {
-                IntArrayList.this.add(pos++, k);
-                last = -1;
-            }
-            @Override
-            public void set(int k) {
-                if (last == -1)
-                    throw new IllegalStateException();
-                IntArrayList.this.set(last, k);
-            }
-            @Override
-            public void remove() {
-                if (last == -1)
-                    throw new IllegalStateException();
-                IntArrayList.this.removeInt(last);
-                /*
-                 * If the last operation was a next(), we are removing an element *before* us,
-                 * and we must decrease pos correspondingly.
-                 */
-                if (last < pos)
-                    pos--;
-                last = -1;
-            }
-        };
-    }
-    @Override
-    public void sort(final IntComparator comp) {
-        if (comp == null) {
-            IntArrays.stableSort(a, 0, size);
-        } else {
-            IntArrays.stableSort(a, 0, size, comp);
-        }
-    }
-    @Override
-    public void unstableSort(final IntComparator comp) {
-        if (comp == null) {
-            IntArrays.unstableSort(a, 0, size);
-        } else {
-            IntArrays.unstableSort(a, 0, size, comp);
-        }
-    }
+
     @Override
     public IntArrayList clone() {
         IntArrayList c = new IntArrayList(size);
@@ -586,6 +426,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         c.size = size;
         return c;
     }
+
     /**
      * Compares this type-specific array list to another one.
      *
@@ -611,6 +452,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
                 return false;
         return true;
     }
+
     /**
      * Compares this array list to another array list.
      *
@@ -623,7 +465,6 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
      * @return a negative integer, zero, or a positive integer as this list is
      *         lexicographically less than, equal to, or greater than the argument.
      */
-
     public int compareTo(final IntArrayList l) {
         final int s1 = size(), s2 = l.size();
         final int[] a1 = a, a2 = l.a;
@@ -637,6 +478,7 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         }
         return i < s2 ? -1 : (i < s1 ? 1 : 0);
     }
+
     private void writeObject(java.io.ObjectOutputStream s) throws java.io.IOException {
         s.defaultWriteObject();
         for (int i = 0; i < size; i++)
@@ -649,4 +491,31 @@ public class IntArrayList extends AbstractIntList implements RandomAccess, Clone
         for (int i = 0; i < size; i++)
             a[i] = s.readInt();
     }
+
+    private static class IntArrays {
+        public static final int[] EMPTY_ARRAY = {};
+        public static final int[] DEFAULT_EMPTY_ARRAY = {};
+
+        public static void ensureOffsetLength(final int[] a, final int offset, final int length) {
+            ensureOffsetLength(a.length, offset, length);
+        }
+
+        public static void ensureOffsetLength(final int arrayLength, final int offset, final int length) {
+            if (offset < 0) throw new ArrayIndexOutOfBoundsException("Offset (" + offset + ") is negative");
+            if (length < 0) throw new IllegalArgumentException("Length (" + length + ") is negative");
+            if (offset + length > arrayLength) throw new ArrayIndexOutOfBoundsException("Last index (" + (offset + length) + ") is greater than array length (" + arrayLength + ")");
+        }
+
+        public static int[] ensureCapacity(final int[] array, final int length, final int preserve) {
+            return length > array.length ? forceCapacity(array, length, preserve) : array;
+        }
+
+        public static int[] forceCapacity(final int[] array, final int length, final int preserve) {
+            final int[] t = new int[length];
+            System.arraycopy(array, 0, t, 0, preserve);
+            return t;
+        }
+
+    }
+
 }
