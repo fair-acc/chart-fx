@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
+import io.fair_acc.dataset.spi.fastutil.IntArrayList;
 
 public class StringHashMapList2 implements Map<Integer, String> {
     private static final long PARALLELISM_THRESHOLD = 1000;

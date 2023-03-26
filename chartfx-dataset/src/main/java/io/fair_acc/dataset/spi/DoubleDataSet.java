@@ -9,7 +9,7 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.EditableDataSet;
 
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * Implementation of the {@code DataSet} interface which stores x,y values in two separate arrays. It provides methods

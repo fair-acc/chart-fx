@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.dataset.spi.FloatDataSet;
 import io.fair_acc.math.TRandom;
 
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 @SuppressWarnings("PMD") // this class tests possible performance bottle-necks
 // not code style/readability
