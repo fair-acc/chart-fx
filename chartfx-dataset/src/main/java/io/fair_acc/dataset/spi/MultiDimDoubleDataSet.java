@@ -8,7 +8,7 @@ import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.EditableDataSet;
 
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * Implementation of the {@code DataSet} interface which stores x,y,... values in nDim separate arrays. It provides

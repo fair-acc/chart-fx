@@ -10,7 +10,7 @@ import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.EditableDataSet;
 
-import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * Implementation of the {@code DataSetError} interface which stores x,y, +eyn, and -eyn values in separate double

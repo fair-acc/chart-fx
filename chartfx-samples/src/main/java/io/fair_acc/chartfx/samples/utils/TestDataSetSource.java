@@ -26,7 +26,7 @@ import io.fair_acc.math.ArrayUtils;
 import io.fair_acc.math.spectra.Apodization;
 import io.fair_acc.math.spectra.SpectrumTools;
 
-import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import io.fair_acc.dataset.spi.fastutil.FloatArrayList;
 
 /**
  * DataSet source for testing real-time continuous 2D and 3D type data.
