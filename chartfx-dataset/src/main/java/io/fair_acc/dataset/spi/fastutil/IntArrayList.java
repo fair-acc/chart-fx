@@ -1,4 +1,8 @@
 /*
+ * This file was originally part of https://github.com/vigna/fastutil and was
+ * modified for the specific use case in chartfx by removing all unused
+ * functionality.
+ *
  * Copyright (C) 2002-2020 Sebastiano Vigna
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
