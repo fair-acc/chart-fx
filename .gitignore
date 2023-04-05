@@ -162,3 +162,4 @@ $RECYCLE.BIN/
 # intermediated scan results for coverity
 /*.tgz
 
+chartfx-samples/output/
