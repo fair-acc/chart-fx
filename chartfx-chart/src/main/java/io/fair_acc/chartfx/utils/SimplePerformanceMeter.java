@@ -14,6 +14,7 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
+import com.sun.javafx.scene.NodeHelper;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -252,13 +253,17 @@ public class SimplePerformanceMeter extends Region {
             return false;
         }
         try {
+            // implementation based on reflection
             return dirtyNodesSize.getInt(this.getScene()) != 0 || dirtyRootBits.getInt(this.getScene().getRoot()) != 0;
         } catch (IllegalAccessException | IllegalArgumentException exception) {
-            LOGGER.atError().setCause(exception).log("cannot access scene root's dirtyBits field");
-            return true;
+            try {
+                // alternate implementation (potential issues with Java Jigsaw (com.sun... dependency):
+                return !NodeHelper.isDirtyEmpty(this.getScene().getRoot());
+            } catch (Throwable t) {
+                LOGGER.atError().setCause(exception).log("cannot access scene root's dirtyBits field");
+                return true;
+            }
         }
-        // alternate implementation (potential issues with Java Jigsaw (com.sun... dependency):
-        // return !NodeHelper.isDirtyEmpty(scene.getRoot())
     }
 
     protected static double computeAverage(final double newValue, final double oldValue, final double alpha) {

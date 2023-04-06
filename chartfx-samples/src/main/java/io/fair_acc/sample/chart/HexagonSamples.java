@@ -25,7 +25,7 @@ public class HexagonSamples extends ChartSample {
 
     @Override
     public Node getChartPanel(Stage primaryStage) {
-        final Image image = new Image(Objects.requireNonNull(HexagonSamples.class.getResourceAsStream("./testdata/EU.png")));
+        final Image image = new Image(Objects.requireNonNull(HexagonSamples.class.getResourceAsStream("testdata/EU.png")));
         // Convert the image to hexagons
         final HexagonMap map = new HexagonMap(6, image, 80, (q, r, imagePixelColor, map1) -> {
             if (imagePixelColor.getBlue() > 0.6) {

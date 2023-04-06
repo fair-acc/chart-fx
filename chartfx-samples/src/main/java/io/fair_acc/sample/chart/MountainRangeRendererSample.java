@@ -117,7 +117,7 @@ public class MountainRangeRendererSample extends ChartSample {
     }
 
     protected DataSet readImage() {
-        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(ContourChartSample.class.getResourceAsStream("./testdata/image.txt"))))) {
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(ContourChartSample.class.getResourceAsStream("testdata/image.txt"))))) {
             @SuppressWarnings("unused")
             String skipLine; // NOPMD variable is needed to skip/check line that contains the dimension of the following
             // line to be read which we derive from the data itself

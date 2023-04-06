@@ -2,6 +2,7 @@ package io.fair_acc.sample.chart;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -110,7 +111,8 @@ public class HistogramRendererBarSample extends ChartSample {
     }
 
     private void loadDemoData(final String fileName) {
-        try (BufferedReader csvReader = Files.newBufferedReader(Paths.get(Objects.requireNonNull(this.getClass().getResource(fileName)).toURI()))) {
+        try (BufferedReader csvReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(this.getClass().getResourceAsStream(fileName))))){
+
             // skip first row
             String row = csvReader.readLine();
             // country,age,men 1980 [%],men 2000  [%],men 2050 [%],women 1980 [%],women 2000 [%],women 2050 [%],men 1980,men 2000,men 2050,women 1980,women 2000,women 2050
@@ -154,7 +156,7 @@ public class HistogramRendererBarSample extends ChartSample {
                 absMenDistribution2000.fill(ageCategory, -Double.parseDouble(data[9]));
                 absMenDistribution2050.fill(ageCategory, -Double.parseDouble(data[10]));
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.atError().setCause(e).log("InterruptedException");
             }

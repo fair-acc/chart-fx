@@ -2,6 +2,7 @@ package io.fair_acc.sample.chart;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -53,8 +54,7 @@ public class ScatterAndBubbleRendererSample extends ChartSample {
     private double maxPopulation = 1.0;
 
     private void loadDemoData(final String fileName) {
-        try (BufferedReader csvReader = Files
-                                                .newBufferedReader(Paths.get(Objects.requireNonNull(this.getClass().getResource(fileName)).toURI()))) {
+        try (BufferedReader csvReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(this.getClass().getResourceAsStream(fileName))))) {
             // skip first row
             String row = csvReader.readLine();
             // LOCATION,TIME,LIFEEXP65 – WOMEN,LIFEEXP65 – MEN,TIME,USD_CAP,TIME,MLN_PER
@@ -68,7 +68,7 @@ public class ScatterAndBubbleRendererSample extends ChartSample {
                 gdpPerCapita.put(data[0], Double.parseDouble(data[5]));
                 population.put(data[0], pop);
             }
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             if (LOGGER.isErrorEnabled()) {
                 LOGGER.atError().setCause(e).log("InterruptedException");
             }

@@ -100,7 +100,7 @@ public class IIRFilterSample extends ChartSample {
         // initalise return data set
         final DoubleDataSet ret = new DoubleDataSet("raw data@" + offset);
         // read measurement data: 400 000 samples, 1MS/s
-        InputStream inputStream = IIRFilterSample.class.getResourceAsStream("./20190319_Schottky_SumX.csv.zip");
+        InputStream inputStream = IIRFilterSample.class.getResourceAsStream("20190319_Schottky_SumX.csv.zip");
         try (ZipInputStream zipStream = new ZipInputStream(inputStream)) {
             while (zipStream.getNextEntry() != null) {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(zipStream))) {
