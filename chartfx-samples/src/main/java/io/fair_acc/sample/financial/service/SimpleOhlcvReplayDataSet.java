@@ -41,7 +41,7 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
 
     private static final String DATA_SOURCE_OHLC_TICK = "NQ-201609-GLOBEX";
 
-    private static final String DATA_SOURCE_PATH = "chartfx-samples/target/classes/io/fair_acc/chartfx/samples/financial/%s.scid";
+    private static final String DATA_SOURCE_PATH = "chartfx-samples/target/classes/io/fair_acc/sample/chart/financial/%s.scid";
 
     private final transient DoubleProperty replayMultiply = new SimpleDoubleProperty(this, "replayMultiply", 1.0);
 

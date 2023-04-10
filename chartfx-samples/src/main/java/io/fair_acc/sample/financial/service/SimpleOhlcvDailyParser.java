@@ -22,7 +22,7 @@ import io.fair_acc.sample.financial.dos.OHLCVItem;
  * @author afischer
  */
 public class SimpleOhlcvDailyParser {
-    private static final String CHART_SAMPLE_PATH = StreamUtils.CLASSPATH_PREFIX + "io/fair_acc/chartfx/samples/financial/%s.csv";
+    private static final String CHART_SAMPLE_PATH = StreamUtils.CLASSPATH_PREFIX + "io/fair_acc/sample/chart/financial/%s.csv";
 
     private static final ConcurrentDateFormatAccess dateFormatParsing = new ConcurrentDateFormatAccess("MM/dd/yyyy HH:mm");
     private static final ConcurrentDateFormatAccess olderDateFormatParsing = new ConcurrentDateFormatAccess("MM/dd/yyyy HHmm");
