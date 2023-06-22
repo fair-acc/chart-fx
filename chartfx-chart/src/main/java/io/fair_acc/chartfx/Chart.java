@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.ui.*;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -42,10 +43,6 @@ import io.fair_acc.chartfx.legend.spi.DefaultLegend;
 import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
-import io.fair_acc.chartfx.ui.ChartLayoutAnimator;
-import io.fair_acc.chartfx.ui.HiddenSidesPane;
-import io.fair_acc.chartfx.ui.ResizableCanvas;
-import io.fair_acc.chartfx.ui.ToolBarFlowPane;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
@@ -127,25 +124,29 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected final Pane plotForeGround = new Pane();
     protected final Pane canvasForeground = new Pane();
 
-    protected final Map<Corner, StackPane> axesCorner = new ConcurrentHashMap<>(4);
-    protected final Map<Side, Pane> axesPane = new ConcurrentHashMap<>(4);
-    protected final Map<Side, Pane> measurementBar = new ConcurrentHashMap<>(4);
-    protected final Map<Corner, StackPane> titleLegendCorner = new ConcurrentHashMap<>(4);
-    protected final Map<Side, Pane> titleLegendPane = new ConcurrentHashMap<>(4);
+    protected final ChartGridLayout measurementBar = new ChartGridLayout();
+    protected final ChartGridLayout axesGrid = new ChartGridLayout();
+    protected final ChartGridLayout titleLegendGrid = new ChartGridLayout();
+
+
     {
         for (final Corner corner : Corner.values()) {
-            axesCorner.put(corner, new StackPane()); // NOPMD - default init
-            titleLegendCorner.put(corner, new StackPane()); // NOPMD - default init
+            axesGrid.setCorner(corner, new StackPane()); // NOPMD - default init
+            titleLegendGrid.setCorner(corner, new StackPane()); // NOPMD - default init
         }
         for (final Side side : Side.values()) {
-            titleLegendPane.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
-            axesPane.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
+            titleLegendGrid.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
+            axesGrid.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
             if (side == Side.CENTER_HOR || side == Side.CENTER_VER) {
-                axesPane.get(side).setMouseTransparent(true);
+                axesGrid.getSide(side).setMouseTransparent(true);
             }
 
-            measurementBar.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
+            measurementBar.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
         }
+        setContent(measurementBar);
+        measurementBar.getContentNodes().add(titleLegendGrid);
+        titleLegendGrid.getContentNodes().add(axesGrid);
+        axesGrid.getContentNodes().addAll(plotBackground, axesAndCanvasPane, plotForeGround);
     }
 
     private final EventListener axisChangeListener = obs -> FXUtils.runFX(() -> axesInvalidated(obs));
@@ -347,47 +348,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 //        localBorderPane.setBottom(getMeasurementBar(Side.BOTTOM));
 //        localBorderPane.setLeft(getMeasurementBar(Side.LEFT));
 //        localBorderPane.setRight(getMeasurementBar(Side.RIGHT));
-
-        getChildren().addAll(
-                // measurement bars
-                getMeasurementBar(Side.TOP),
-                getMeasurementBar(Side.BOTTOM),
-                getMeasurementBar(Side.LEFT),
-                getMeasurementBar(Side.RIGHT),
-
-                // titles & legends
-                getTitleLegendPane(Side.TOP),
-                getTitleLegendPane(Side.BOTTOM),
-                getTitleLegendPane(Side.LEFT),
-                getTitleLegendPane(Side.RIGHT),
-
-                // axes
-                getAxesPane(Side.LEFT), // left-centre
-                getAxesPane(Side.RIGHT), // centre-centre
-                getAxesPane(Side.TOP), // centre-top
-                getAxesPane(Side.BOTTOM), // centre-bottom
-                getAxesPane(Side.CENTER_VER),
-                getAxesPane(Side.CENTER_HOR),
-
-                // add default corner BorderPane fields -- inner rim
-                getAxesCornerPane(Corner.TOP_LEFT),
-                getAxesCornerPane(Corner.TOP_RIGHT),
-                getAxesCornerPane(Corner.BOTTOM_LEFT),
-                getAxesCornerPane(Corner.BOTTOM_RIGHT),
-
-                // add default corner BorderPane fields -- outer rim
-                getTitleLegendCornerPane(Corner.TOP_LEFT),
-                getTitleLegendCornerPane(Corner.TOP_RIGHT),
-                getTitleLegendCornerPane(Corner.BOTTOM_LEFT),
-                getTitleLegendCornerPane(Corner.BOTTOM_RIGHT),
-
-                // main chart area
-                plotBackground,
-                axesAndCanvasPane,
-                plotForeGround
-        );
-
-
 
         plotBackground.toBack();
         plotForeGround.toFront();
@@ -611,11 +571,11 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public final StackPane getAxesCornerPane(final Corner corner) {
-        return axesCorner.get(corner);
+        return (StackPane) axesGrid.getCorner(corner);
     }
 
     public final Pane getAxesPane(final Side side) {
-        return axesPane.get(side);
+        return (Pane) axesGrid.getSide(side);
     }
 
     /**
@@ -682,7 +642,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public final Pane getMeasurementBar(final Side side) {
-        return measurementBar.get(side);
+        return (Pane) measurementBar.getSide(side);
     }
 
     public final Side getMeasurementBarSide() {
@@ -722,11 +682,11 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public final StackPane getTitleLegendCornerPane(final Corner corner) {
-        return titleLegendCorner.get(corner);
+        return (StackPane) titleLegendGrid.getCorner(corner);
     }
 
     public final Pane getTitleLegendPane(final Side side) {
-        return titleLegendPane.get(side);
+        return (Pane) titleLegendGrid.getSide(side);
     }
 
     public final Side getTitleSide() {
@@ -813,142 +773,16 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     private void doLayout() {
+        // TODO: remove normal layout when everything is done
+        super.layoutChildren();
+
         // Do layout w/ existing hierarchy
         // Account for margin and border insets
         final double x = snappedLeftInset();
         final double y = snappedTopInset();
         final double w = snapSizeX(getWidth()) - x - snappedRightInset();
         final double h = snapSizeY(getHeight()) - y - snappedBottomInset();
-        layoutMeasurementBars(x, y, w, h);
-    }
-
-    private void layoutMeasurementBars(double x, double y, double width, double height) {
-        // (1) layout horizontal
-        var bottom = getMeasurementBar(Side.BOTTOM);
-        if (bottom != null && bottom.isVisible()) {
-            double nodeHeight = bottom.prefHeight(width);
-            bottom.resizeRelocate(x, y + height - nodeHeight, width, nodeHeight);
-            height -= nodeHeight;
-        }
-        var top = getMeasurementBar(Side.TOP);
-        if (top != null && top.isVisible()) {
-            double nodeHeight = top.prefHeight(width);
-            top.resizeRelocate(x, y, width, nodeHeight);
-            y += nodeHeight;
-            height -= nodeHeight;
-        }
-
-        // (2) layout vertical (order matches existing pane)
-        var right = getMeasurementBar(Side.RIGHT);
-        if (right != null && right.isVisible()) {
-            double nodeWidth = right.prefWidth(height);
-            right.resizeRelocate(x + width - nodeWidth, y, nodeWidth, height);
-            width -= nodeWidth;
-        }
-        var left = getMeasurementBar(Side.LEFT);
-        if (left != null && left.isVisible()) {
-            double nodeWidth = left.prefWidth(height);
-            left.resizeRelocate(x, y, nodeWidth, height);
-            x += nodeWidth;
-            width -= nodeWidth;
-        }
-
-        layoutTitleLegends(x, y, width, height);
-    }
-
-    private void layoutTitleLegends(double x, double y, double width, double height) {
-        var bottom = getTitleLegendPane(Side.BOTTOM);
-        var top = getTitleLegendPane(Side.TOP);
-        var right = getTitleLegendPane(Side.RIGHT);
-        var left = getTitleLegendPane(Side.LEFT);
-
-        var topHeight = getPrefHeight(top, width);
-        var bottomHeight = getPrefHeight(bottom, width);
-        var innerHeight = height - topHeight - bottomHeight;
-
-        var leftWidth = getPrefWidth(left, innerHeight);
-        var rightWidth = getPrefWidth(right, innerHeight);
-        var innerWidth = width - leftWidth - rightWidth;
-
-        var innerX = x + leftWidth;
-        var innerY = y + topHeight;
-
-        top.resizeRelocate(innerX, y, innerWidth, topHeight);
-        bottom.resizeRelocate(innerX, innerY + innerHeight, innerWidth, bottomHeight);
-        left.resizeRelocate(x, innerY, leftWidth, innerHeight);
-        right.resizeRelocate(innerX + innerWidth, innerY, rightWidth, innerHeight);
-
-        getTitleLegendCornerPane(Corner.TOP_LEFT).resizeRelocate(x, y, leftWidth, topHeight);
-        getTitleLegendCornerPane(Corner.TOP_RIGHT).resizeRelocate(innerX + innerWidth, y, rightWidth, topHeight);
-        getTitleLegendCornerPane(Corner.BOTTOM_LEFT).resizeRelocate(x, innerY + innerHeight, leftWidth, bottomHeight);
-        getTitleLegendCornerPane(Corner.BOTTOM_RIGHT).resizeRelocate(innerX + innerWidth, innerY + innerHeight, rightWidth, bottomHeight);
-
-        layoutAxes(innerX, innerY, innerWidth, innerHeight);
-    }
-
-    private void layoutAxes(double x, double y, double width, double height) {
-        var bottom = getAxesPane(Side.BOTTOM);
-        var top = getAxesPane(Side.TOP);
-        var right = getAxesPane(Side.RIGHT);
-        var left = getAxesPane(Side.LEFT);
-        var centerVer = getAxesPane(Side.CENTER_VER);
-        var centerHor = getAxesPane(Side.CENTER_HOR);
-
-        // determine remaining chart dimensions
-        // note: to start off with the height can be considered static (a function of
-        // letter height), while the width is dependent on the size and the resolution
-        // (i.e. potentially extra digits to show). TODO: handle rotated labels
-        var topHeight = getPrefHeight(top, width);
-        var bottomHeight = getPrefHeight(bottom, width);
-        var innerHeight = height - topHeight - bottomHeight;
-
-        var leftWidth = getPrefWidth(left, innerHeight);
-        var rightWidth = getPrefWidth(right, innerHeight);
-        var innerWidth = width - leftWidth - rightWidth;
-
-        var innerX = x + leftWidth;
-        var innerY = y + topHeight;
-
-        // layout
-        top.resizeRelocate(innerX, y, innerWidth, topHeight);
-        bottom.resizeRelocate(innerX, innerY + innerHeight, innerWidth, bottomHeight);
-        left.resizeRelocate(x, innerY, leftWidth, innerHeight);
-        right.resizeRelocate(innerX + innerWidth, innerY, rightWidth, innerHeight);
-
-        // center axes
-        var horizontalHeight = getPrefHeight(centerVer, innerWidth);
-        centerHor.resizeRelocate(innerX, y + height / 2 - horizontalHeight / 2, innerWidth, horizontalHeight);
-
-        var verticalWidth = getPrefWidth(centerHor, innerHeight);
-        centerVer.resizeRelocate(x + width / 2 - verticalWidth / 2, innerY, verticalWidth, innerHeight);
-
-        // layout corners
-        getAxesCornerPane(Corner.TOP_LEFT).resizeRelocate(x, y, leftWidth, topHeight);
-        getAxesCornerPane(Corner.TOP_RIGHT).resizeRelocate(innerX + innerWidth, y, rightWidth, topHeight);
-        getAxesCornerPane(Corner.BOTTOM_LEFT).resizeRelocate(x, innerY + innerHeight, leftWidth, bottomHeight);
-        getAxesCornerPane(Corner.BOTTOM_RIGHT).resizeRelocate(innerX + innerWidth, innerY + innerHeight, rightWidth, bottomHeight);
-
-        layoutChartArea(innerX, innerY, innerWidth, innerHeight);
-    }
-
-    private void layoutChartArea(double x, double y, double width, double height) {
-        plotBackground.resizeRelocate(x, y, width, height);
-        axesAndCanvasPane.resizeRelocate(x, y, width, height);
-        plotForeGround.resizeRelocate(x, y, width, height);
-    }
-
-    private double getPrefHeight(Node node, double width) {
-        if (node == null || !node.isVisible()) {
-            return 0;
-        }
-        return node.prefHeight(width);
-    }
-
-    private double getPrefWidth(Node node, double height){
-        if(node == null || !node.isVisible()){
-            return 0;
-        }
-        return node.prefWidth(height);
+        measurementBar.resizeRelocate(x, y, w, h);
     }
 
     public final ObjectProperty<Legend> legendProperty() {
