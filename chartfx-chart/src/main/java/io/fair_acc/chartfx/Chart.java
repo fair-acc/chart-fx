@@ -109,9 +109,6 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     protected final ResizableCanvas canvas = new ResizableCanvas();
-    // contains axes (left, bottom, top, right) panes & HiddenSidePane with the
-    // Canvas at it's centre
-    protected final GridPane axesAndCanvasPane = new GridPane();
     protected final Group pluginsArea = Chart.createChildGroup();
 
     protected boolean isAxesUpdate;
@@ -119,34 +116,38 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     protected final ToolBarFlowPane toolBar = new ToolBarFlowPane(this);
     protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
 
-    protected final HiddenSidesPane hiddenPane = new HiddenSidesPane();
-    protected final Pane plotBackground = new Pane();
-    protected final Pane plotForeGround = new Pane();
+
+
     protected final Pane canvasForeground = new Pane();
 
     protected final ChartGridLayout measurementBar = new ChartGridLayout();
-    protected final ChartGridLayout axesGrid = new ChartGridLayout();
     protected final ChartGridLayout titleLegendGrid = new ChartGridLayout();
+    protected final ChartGridLayout axesAndCanvasGrid = new ChartGridLayout();
+
+    protected final Pane plotBackground = new Pane();
+    protected final HiddenSidesPane plotArea = new HiddenSidesPane();
+    protected final Pane plotForeGround = new Pane();
 
 
     {
         for (final Corner corner : Corner.values()) {
-            axesGrid.setCorner(corner, new StackPane()); // NOPMD - default init
+            axesAndCanvasGrid.setCorner(corner, new StackPane()); // NOPMD - default init
             titleLegendGrid.setCorner(corner, new StackPane()); // NOPMD - default init
         }
         for (final Side side : Side.values()) {
             titleLegendGrid.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
-            axesGrid.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
+            axesAndCanvasGrid.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
             if (side == Side.CENTER_HOR || side == Side.CENTER_VER) {
-                axesGrid.getSide(side).setMouseTransparent(true);
+                axesAndCanvasGrid.getSide(side).setMouseTransparent(true);
             }
 
             measurementBar.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
         }
         setContent(measurementBar);
         measurementBar.getContentNodes().add(titleLegendGrid);
-        titleLegendGrid.getContentNodes().add(axesGrid);
-        axesGrid.getContentNodes().addAll(plotBackground, axesAndCanvasPane, plotForeGround);
+        titleLegendGrid.getContentNodes().add(axesAndCanvasGrid);
+        axesAndCanvasGrid.getContentNodes().addAll(plotBackground, plotArea, plotForeGround);
+        plotArea.setContent(new StackPane(getCanvas(), getCanvasForeground(), pluginsArea));
     }
 
     private final EventListener axisChangeListener = obs -> FXUtils.runFX(() -> axesInvalidated(obs));
@@ -336,33 +337,15 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
         setPadding(Insets.EMPTY);
 
-        // populate SidesPane with default container
-//        final BorderPane localBorderPane = new BorderPane();
-//        axesAndCanvasPane.setPadding(Insets.EMPTY);
-//        localBorderPane.setCenter(new StackPane(plotBackground, axesAndCanvasPane, plotForeGround));
-
-        for (final Side side : Side.values()) {
-            BorderPane.setAlignment(getMeasurementBar(side), Pos.CENTER);
-        }
-//        localBorderPane.setTop(getMeasurementBar(Side.TOP));
-//        localBorderPane.setBottom(getMeasurementBar(Side.BOTTOM));
-//        localBorderPane.setLeft(getMeasurementBar(Side.LEFT));
-//        localBorderPane.setRight(getMeasurementBar(Side.RIGHT));
-
         plotBackground.toBack();
         plotForeGround.toFront();
         plotForeGround.setMouseTransparent(true);
 
-//        super.setContent(localBorderPane);
-
         // hiddenPane.setTriggerDistance(DEFAULT_TRIGGER_DISTANCE);
-        hiddenPane.triggerDistanceProperty().bindBidirectional(triggerDistanceProperty());
-        hiddenPane.setAnimationDelay(Duration.millis(500));
+        plotArea.triggerDistanceProperty().bindBidirectional(triggerDistanceProperty());
+        plotArea.setAnimationDelay(Duration.millis(500));
         // hiddenPane.setMouseTransparent(true);
-        hiddenPane.setPickOnBounds(false);
-
-        final StackPane stackPane = new StackPane(getCanvas(), getCanvasForeground(), pluginsArea);
-        hiddenPane.setContent(stackPane);
+        plotArea.setPickOnBounds(false);
 
         // alt: canvas resize (default JavaFX Canvas does not automatically
         // resize to pref width/height according to parent constraints
@@ -395,7 +378,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         getCanvasForeground().toFront();
         pluginsArea.toFront();
 
-        hiddenPane.getStyleClass().setAll("plot-content");
+        plotArea.getStyleClass().setAll("plot-content");
 
         plotBackground.getStyleClass().setAll("chart-plot-background");
 
@@ -404,61 +387,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             canvas.setCacheHint(CacheHint.QUALITY);
         }
 
-        axesAndCanvasPane.add(hiddenPane, 2, 2); // centre-centre
         canvas.setStyle("-fx-background-color: rgba(200, 250, 200, 0.5);");
-
-        final int rowSpan1 = 1;
-        final int colSpan1 = 1;
-        final int rowSpan3 = 3;
-        final int colSpan3 = 3;
-
-        // outer title/legend/parameter pane border (outer rim)
-//        axesAndCanvasPane.add(getTitleLegendPane(Side.LEFT), 0, 1, colSpan1, rowSpan3); // left-centre
-//        axesAndCanvasPane.add(getTitleLegendPane(Side.RIGHT), 4, 1, colSpan1, rowSpan3); // centre-centre
-//        axesAndCanvasPane.add(getTitleLegendPane(Side.TOP), 1, 0, colSpan3, rowSpan1); // centre-top
-//        axesAndCanvasPane.add(getTitleLegendPane(Side.BOTTOM), 1, 4, colSpan3, rowSpan1); // centre-bottom
-
-        // add default axis panes (inner rim)
-//        axesAndCanvasPane.add(getAxesPane(Side.LEFT), 1, 2); // left-centre
-//        axesAndCanvasPane.add(getAxesPane(Side.RIGHT), 3, 2); // centre-centre
-//        axesAndCanvasPane.add(getAxesPane(Side.TOP), 2, 1); // centre-top
-//        axesAndCanvasPane.add(getAxesPane(Side.BOTTOM), 2, 3); // centre-bottom
-
-//        final Pane pane = getAxesPane(Side.CENTER_VER);
-//        GridPane.setFillHeight(pane, true);
-//        GridPane.setFillWidth(pane, true);
-//
-//        axesAndCanvasPane.add(getAxesPane(Side.CENTER_VER), 2, 2); // centre-vertical
-//        axesAndCanvasPane.add(getAxesPane(Side.CENTER_HOR), 2, 2); // centre-vertical
-
-//        // add default corner BorderPane fields -- inner rim
-//        axesAndCanvasPane.add(getAxesCornerPane(Corner.TOP_LEFT), 1, 1);
-//        axesAndCanvasPane.add(getAxesCornerPane(Corner.TOP_RIGHT), 3, 1);
-//        axesAndCanvasPane.add(getAxesCornerPane(Corner.BOTTOM_LEFT), 1, 3);
-//        axesAndCanvasPane.add(getAxesCornerPane(Corner.BOTTOM_RIGHT), 3, 3);
-//
-//        // add default corner BorderPane fields -- outer rim
-//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.TOP_LEFT), 0, 0);
-//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.TOP_RIGHT), 4, 0);
-//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.BOTTOM_LEFT), 0, 4);
-//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.BOTTOM_RIGHT), 4, 4);
-
-        // set row/colum constraints for grid pane
-        for (int i = 0; i < 4; i++) {
-            final RowConstraints rowConstraint = new RowConstraints();
-            if (i == 2) {
-                rowConstraint.setVgrow(Priority.ALWAYS);
-                rowConstraint.setFillHeight(true);
-            }
-            axesAndCanvasPane.getRowConstraints().add(i, rowConstraint);
-
-            final ColumnConstraints colConstraint = new ColumnConstraints();
-            if (i == 2) {
-                colConstraint.setHgrow(Priority.ALWAYS);
-                colConstraint.setFillWidth(true);
-            }
-            axesAndCanvasPane.getColumnConstraints().add(i, colConstraint);
-        }
 
         // add plugin handling and listeners
         getPlugins().addListener(pluginsChangedListener);
@@ -493,7 +422,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         // set CSS stuff
         titleLabel.getStyleClass().add("chart-title");
         getStyleClass().add("chart");
-        axesAndCanvasPane.getStyleClass().add("chart-content");
+        axesAndCanvasGrid.getStyleClass().add("chart-content");
 
         registerShowingListener(); // NOPMD - unlikely but allowed override
     }
@@ -566,16 +495,17 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return axesList;
     }
 
+    @Deprecated
     public GridPane getAxesAndCanvasPane() {
-        return axesAndCanvasPane;
+        throw new IllegalStateException("axesAndCanvasPane no longer exists");
     }
 
     public final StackPane getAxesCornerPane(final Corner corner) {
-        return (StackPane) axesGrid.getCorner(corner);
+        return (StackPane) axesAndCanvasGrid.getCorner(corner);
     }
 
     public final Pane getAxesPane(final Side side) {
-        return (Pane) axesGrid.getSide(side);
+        return (Pane) axesAndCanvasGrid.getSide(side);
     }
 
     /**
@@ -650,7 +580,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     public final HiddenSidesPane getPlotArea() {
-        return hiddenPane;
+        return plotArea;
     }
 
     public final Pane getPlotBackground() {
