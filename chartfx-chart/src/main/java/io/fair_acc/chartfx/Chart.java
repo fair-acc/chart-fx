@@ -336,22 +336,64 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         setPadding(Insets.EMPTY);
 
         // populate SidesPane with default container
-        final BorderPane localBorderPane = new BorderPane();
-        axesAndCanvasPane.setPadding(Insets.EMPTY);
-        localBorderPane.setCenter(new StackPane(plotBackground, axesAndCanvasPane, plotForeGround));
-        plotBackground.toBack();
-        plotForeGround.toFront();
-        plotForeGround.setMouseTransparent(true);
+//        final BorderPane localBorderPane = new BorderPane();
+//        axesAndCanvasPane.setPadding(Insets.EMPTY);
+//        localBorderPane.setCenter(new StackPane(plotBackground, axesAndCanvasPane, plotForeGround));
 
         for (final Side side : Side.values()) {
             BorderPane.setAlignment(getMeasurementBar(side), Pos.CENTER);
         }
-        localBorderPane.setTop(getMeasurementBar(Side.TOP));
-        localBorderPane.setBottom(getMeasurementBar(Side.BOTTOM));
-        localBorderPane.setLeft(getMeasurementBar(Side.LEFT));
-        localBorderPane.setRight(getMeasurementBar(Side.RIGHT));
+//        localBorderPane.setTop(getMeasurementBar(Side.TOP));
+//        localBorderPane.setBottom(getMeasurementBar(Side.BOTTOM));
+//        localBorderPane.setLeft(getMeasurementBar(Side.LEFT));
+//        localBorderPane.setRight(getMeasurementBar(Side.RIGHT));
 
-        super.setContent(localBorderPane);
+        getChildren().addAll(
+                // measurement bars
+                getMeasurementBar(Side.TOP),
+                getMeasurementBar(Side.BOTTOM),
+                getMeasurementBar(Side.LEFT),
+                getMeasurementBar(Side.RIGHT),
+
+                // titles & legends
+                getTitleLegendPane(Side.TOP),
+                getTitleLegendPane(Side.BOTTOM),
+                getTitleLegendPane(Side.LEFT),
+                getTitleLegendPane(Side.RIGHT),
+
+                // axes
+                getAxesPane(Side.LEFT), // left-centre
+                getAxesPane(Side.RIGHT), // centre-centre
+                getAxesPane(Side.TOP), // centre-top
+                getAxesPane(Side.BOTTOM), // centre-bottom
+                getAxesPane(Side.CENTER_VER),
+                getAxesPane(Side.CENTER_HOR),
+
+                // add default corner BorderPane fields -- inner rim
+                getAxesCornerPane(Corner.TOP_LEFT),
+                getAxesCornerPane(Corner.TOP_RIGHT),
+                getAxesCornerPane(Corner.BOTTOM_LEFT),
+                getAxesCornerPane(Corner.BOTTOM_RIGHT),
+
+                // add default corner BorderPane fields -- outer rim
+                getTitleLegendCornerPane(Corner.TOP_LEFT),
+                getTitleLegendCornerPane(Corner.TOP_RIGHT),
+                getTitleLegendCornerPane(Corner.BOTTOM_LEFT),
+                getTitleLegendCornerPane(Corner.BOTTOM_RIGHT),
+
+                // main chart area
+                plotBackground,
+                axesAndCanvasPane,
+                plotForeGround
+        );
+
+
+
+        plotBackground.toBack();
+        plotForeGround.toFront();
+        plotForeGround.setMouseTransparent(true);
+
+//        super.setContent(localBorderPane);
 
         // hiddenPane.setTriggerDistance(DEFAULT_TRIGGER_DISTANCE);
         hiddenPane.triggerDistanceProperty().bindBidirectional(triggerDistanceProperty());
@@ -411,35 +453,35 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         final int colSpan3 = 3;
 
         // outer title/legend/parameter pane border (outer rim)
-        axesAndCanvasPane.add(getTitleLegendPane(Side.LEFT), 0, 1, colSpan1, rowSpan3); // left-centre
-        axesAndCanvasPane.add(getTitleLegendPane(Side.RIGHT), 4, 1, colSpan1, rowSpan3); // centre-centre
-        axesAndCanvasPane.add(getTitleLegendPane(Side.TOP), 1, 0, colSpan3, rowSpan1); // centre-top
-        axesAndCanvasPane.add(getTitleLegendPane(Side.BOTTOM), 1, 4, colSpan3, rowSpan1); // centre-bottom
+//        axesAndCanvasPane.add(getTitleLegendPane(Side.LEFT), 0, 1, colSpan1, rowSpan3); // left-centre
+//        axesAndCanvasPane.add(getTitleLegendPane(Side.RIGHT), 4, 1, colSpan1, rowSpan3); // centre-centre
+//        axesAndCanvasPane.add(getTitleLegendPane(Side.TOP), 1, 0, colSpan3, rowSpan1); // centre-top
+//        axesAndCanvasPane.add(getTitleLegendPane(Side.BOTTOM), 1, 4, colSpan3, rowSpan1); // centre-bottom
 
         // add default axis panes (inner rim)
-        axesAndCanvasPane.add(getAxesPane(Side.LEFT), 1, 2); // left-centre
-        axesAndCanvasPane.add(getAxesPane(Side.RIGHT), 3, 2); // centre-centre
-        axesAndCanvasPane.add(getAxesPane(Side.TOP), 2, 1); // centre-top
-        axesAndCanvasPane.add(getAxesPane(Side.BOTTOM), 2, 3); // centre-bottom
+//        axesAndCanvasPane.add(getAxesPane(Side.LEFT), 1, 2); // left-centre
+//        axesAndCanvasPane.add(getAxesPane(Side.RIGHT), 3, 2); // centre-centre
+//        axesAndCanvasPane.add(getAxesPane(Side.TOP), 2, 1); // centre-top
+//        axesAndCanvasPane.add(getAxesPane(Side.BOTTOM), 2, 3); // centre-bottom
 
-        final Pane pane = getAxesPane(Side.CENTER_VER);
-        GridPane.setFillHeight(pane, true);
-        GridPane.setFillWidth(pane, true);
+//        final Pane pane = getAxesPane(Side.CENTER_VER);
+//        GridPane.setFillHeight(pane, true);
+//        GridPane.setFillWidth(pane, true);
+//
+//        axesAndCanvasPane.add(getAxesPane(Side.CENTER_VER), 2, 2); // centre-vertical
+//        axesAndCanvasPane.add(getAxesPane(Side.CENTER_HOR), 2, 2); // centre-vertical
 
-        axesAndCanvasPane.add(getAxesPane(Side.CENTER_VER), 2, 2); // centre-vertical
-        axesAndCanvasPane.add(getAxesPane(Side.CENTER_HOR), 2, 2); // centre-vertical
-
-        // add default corner BorderPane fields -- inner rim
-        axesAndCanvasPane.add(getAxesCornerPane(Corner.TOP_LEFT), 1, 1);
-        axesAndCanvasPane.add(getAxesCornerPane(Corner.TOP_RIGHT), 3, 1);
-        axesAndCanvasPane.add(getAxesCornerPane(Corner.BOTTOM_LEFT), 1, 3);
-        axesAndCanvasPane.add(getAxesCornerPane(Corner.BOTTOM_RIGHT), 3, 3);
-
-        // add default corner BorderPane fields -- outer rim
-        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.TOP_LEFT), 0, 0);
-        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.TOP_RIGHT), 4, 0);
-        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.BOTTOM_LEFT), 0, 4);
-        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.BOTTOM_RIGHT), 4, 4);
+//        // add default corner BorderPane fields -- inner rim
+//        axesAndCanvasPane.add(getAxesCornerPane(Corner.TOP_LEFT), 1, 1);
+//        axesAndCanvasPane.add(getAxesCornerPane(Corner.TOP_RIGHT), 3, 1);
+//        axesAndCanvasPane.add(getAxesCornerPane(Corner.BOTTOM_LEFT), 1, 3);
+//        axesAndCanvasPane.add(getAxesCornerPane(Corner.BOTTOM_RIGHT), 3, 3);
+//
+//        // add default corner BorderPane fields -- outer rim
+//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.TOP_LEFT), 0, 0);
+//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.TOP_RIGHT), 4, 0);
+//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.BOTTOM_LEFT), 0, 4);
+//        axesAndCanvasPane.add(getTitleLegendCornerPane(Corner.BOTTOM_RIGHT), 4, 4);
 
         // set row/colum constraints for grid pane
         for (int i = 0; i < 4; i++) {
@@ -750,7 +792,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
 
         // update chart parent according to possible size changes
-        super.layoutChildren();
+        doLayout();
 
         // request re-layout of canvas
         redrawCanvas();
@@ -768,6 +810,145 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             LOGGER.debug("chart layoutChildren() - done");
         }
         fireInvalidated();
+    }
+
+    private void doLayout() {
+        // Do layout w/ existing hierarchy
+        // Account for margin and border insets
+        final double x = snappedLeftInset();
+        final double y = snappedTopInset();
+        final double w = snapSizeX(getWidth()) - x - snappedRightInset();
+        final double h = snapSizeY(getHeight()) - y - snappedBottomInset();
+        layoutMeasurementBars(x, y, w, h);
+    }
+
+    private void layoutMeasurementBars(double x, double y, double width, double height) {
+        // (1) layout horizontal
+        var bottom = getMeasurementBar(Side.BOTTOM);
+        if (bottom != null && bottom.isVisible()) {
+            double nodeHeight = bottom.prefHeight(width);
+            bottom.resizeRelocate(x, y + height - nodeHeight, width, nodeHeight);
+            height -= nodeHeight;
+        }
+        var top = getMeasurementBar(Side.TOP);
+        if (top != null && top.isVisible()) {
+            double nodeHeight = top.prefHeight(width);
+            top.resizeRelocate(x, y, width, nodeHeight);
+            y += nodeHeight;
+            height -= nodeHeight;
+        }
+
+        // (2) layout vertical (order matches existing pane)
+        var right = getMeasurementBar(Side.RIGHT);
+        if (right != null && right.isVisible()) {
+            double nodeWidth = right.prefWidth(height);
+            right.resizeRelocate(x + width - nodeWidth, y, nodeWidth, height);
+            width -= nodeWidth;
+        }
+        var left = getMeasurementBar(Side.LEFT);
+        if (left != null && left.isVisible()) {
+            double nodeWidth = left.prefWidth(height);
+            left.resizeRelocate(x, y, nodeWidth, height);
+            x += nodeWidth;
+            width -= nodeWidth;
+        }
+
+        layoutTitleLegends(x, y, width, height);
+    }
+
+    private void layoutTitleLegends(double x, double y, double width, double height) {
+        var bottom = getTitleLegendPane(Side.BOTTOM);
+        var top = getTitleLegendPane(Side.TOP);
+        var right = getTitleLegendPane(Side.RIGHT);
+        var left = getTitleLegendPane(Side.LEFT);
+
+        var topHeight = getPrefHeight(top, width);
+        var bottomHeight = getPrefHeight(bottom, width);
+        var innerHeight = height - topHeight - bottomHeight;
+
+        var leftWidth = getPrefWidth(left, innerHeight);
+        var rightWidth = getPrefWidth(right, innerHeight);
+        var innerWidth = width - leftWidth - rightWidth;
+
+        var innerX = x + leftWidth;
+        var innerY = y + topHeight;
+
+        top.resizeRelocate(innerX, y, innerWidth, topHeight);
+        bottom.resizeRelocate(innerX, innerY + innerHeight, innerWidth, bottomHeight);
+        left.resizeRelocate(x, innerY, leftWidth, innerHeight);
+        right.resizeRelocate(innerX + innerWidth, innerY, rightWidth, innerHeight);
+
+        getTitleLegendCornerPane(Corner.TOP_LEFT).resizeRelocate(x, y, leftWidth, topHeight);
+        getTitleLegendCornerPane(Corner.TOP_RIGHT).resizeRelocate(innerX + innerWidth, y, rightWidth, topHeight);
+        getTitleLegendCornerPane(Corner.BOTTOM_LEFT).resizeRelocate(x, innerY + innerHeight, leftWidth, bottomHeight);
+        getTitleLegendCornerPane(Corner.BOTTOM_RIGHT).resizeRelocate(innerX + innerWidth, innerY + innerHeight, rightWidth, bottomHeight);
+
+        layoutAxes(innerX, innerY, innerWidth, innerHeight);
+    }
+
+    private void layoutAxes(double x, double y, double width, double height) {
+        var bottom = getAxesPane(Side.BOTTOM);
+        var top = getAxesPane(Side.TOP);
+        var right = getAxesPane(Side.RIGHT);
+        var left = getAxesPane(Side.LEFT);
+        var centerVer = getAxesPane(Side.CENTER_VER);
+        var centerHor = getAxesPane(Side.CENTER_HOR);
+
+        // determine remaining chart dimensions
+        // note: to start off with the height can be considered static (a function of
+        // letter height), while the width is dependent on the size and the resolution
+        // (i.e. potentially extra digits to show). TODO: handle rotated labels
+        var topHeight = getPrefHeight(top, width);
+        var bottomHeight = getPrefHeight(bottom, width);
+        var innerHeight = height - topHeight - bottomHeight;
+
+        var leftWidth = getPrefWidth(left, innerHeight);
+        var rightWidth = getPrefWidth(right, innerHeight);
+        var innerWidth = width - leftWidth - rightWidth;
+
+        var innerX = x + leftWidth;
+        var innerY = y + topHeight;
+
+        // layout
+        top.resizeRelocate(innerX, y, innerWidth, topHeight);
+        bottom.resizeRelocate(innerX, innerY + innerHeight, innerWidth, bottomHeight);
+        left.resizeRelocate(x, innerY, leftWidth, innerHeight);
+        right.resizeRelocate(innerX + innerWidth, innerY, rightWidth, innerHeight);
+
+        // center axes
+        var horizontalHeight = getPrefHeight(centerVer, innerWidth);
+        centerHor.resizeRelocate(innerX, y + height / 2 - horizontalHeight / 2, innerWidth, horizontalHeight);
+
+        var verticalWidth = getPrefWidth(centerHor, innerHeight);
+        centerVer.resizeRelocate(x + width / 2 - verticalWidth / 2, innerY, verticalWidth, innerHeight);
+
+        // layout corners
+        getAxesCornerPane(Corner.TOP_LEFT).resizeRelocate(x, y, leftWidth, topHeight);
+        getAxesCornerPane(Corner.TOP_RIGHT).resizeRelocate(innerX + innerWidth, y, rightWidth, topHeight);
+        getAxesCornerPane(Corner.BOTTOM_LEFT).resizeRelocate(x, innerY + innerHeight, leftWidth, bottomHeight);
+        getAxesCornerPane(Corner.BOTTOM_RIGHT).resizeRelocate(innerX + innerWidth, innerY + innerHeight, rightWidth, bottomHeight);
+
+        layoutChartArea(innerX, innerY, innerWidth, innerHeight);
+    }
+
+    private void layoutChartArea(double x, double y, double width, double height) {
+        plotBackground.resizeRelocate(x, y, width, height);
+        axesAndCanvasPane.resizeRelocate(x, y, width, height);
+        plotForeGround.resizeRelocate(x, y, width, height);
+    }
+
+    private double getPrefHeight(Node node, double width) {
+        if (node == null || !node.isVisible()) {
+            return 0;
+        }
+        return node.prefHeight(width);
+    }
+
+    private double getPrefWidth(Node node, double height){
+        if(node == null || !node.isVisible()){
+            return 0;
+        }
+        return node.prefWidth(height);
     }
 
     public final ObjectProperty<Legend> legendProperty() {
