@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.ui.layout.GridLayout;
+import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
@@ -64,7 +66,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * @author original conceptual design by Oracle (2010, 2014)
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
-public abstract class Chart extends HiddenSidesPane implements Observable {
+public abstract class Chart extends Region implements Observable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
@@ -120,14 +122,14 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
     protected final Pane canvasForeground = new Pane();
 
-    protected final ChartGridLayout measurementBar = new ChartGridLayout();
-    protected final ChartGridLayout titleLegendGrid = new ChartGridLayout();
-    protected final ChartGridLayout axesAndCanvasGrid = new ChartGridLayout();
+    protected final GridLayout measurementBar = new GridLayout();
+    protected final GridLayout titleLegendGrid = new GridLayout();
+    protected final GridLayout axesAndCanvasGrid = new GridLayout();
 
     protected final Pane plotBackground = new Pane();
     protected final HiddenSidesPane plotArea = new HiddenSidesPane();
+    protected final HiddenSidesPane menuPane = new HiddenSidesPane();
     protected final Pane plotForeGround = new Pane();
-
 
     {
         for (final Corner corner : Corner.values()) {
@@ -143,11 +145,14 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
             measurementBar.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
         }
-        setContent(measurementBar);
+
+        // build hierarchy
+        menuPane.setContent(measurementBar);
         measurementBar.getContentNodes().add(titleLegendGrid);
         titleLegendGrid.getContentNodes().add(axesAndCanvasGrid);
         axesAndCanvasGrid.getContentNodes().addAll(plotBackground, plotArea, plotForeGround);
-        plotArea.setContent(new StackPane(getCanvas(), getCanvasForeground(), pluginsArea));
+        plotArea.setContent(new PlotAreaPane(getCanvas(), getCanvasForeground(), pluginsArea));
+        getChildren().add(menuPane);
     }
 
     private final EventListener axisChangeListener = obs -> FXUtils.runFX(() -> axesInvalidated(obs));
@@ -288,27 +293,27 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
                 AssertUtils.notNull("Side must not be null", newVal);
                 // remove tool bar from potential other chart side pane locations
-                Chart.this.setTop(null);
-                Chart.this.setBottom(null);
-                Chart.this.setLeft(null);
-                Chart.this.setRight(null);
+                menuPane.setTop(null);
+                menuPane.setBottom(null);
+                menuPane.setLeft(null);
+                menuPane.setRight(null);
                 switch (newVal) {
                 case LEFT:
                     getToolBar().setOrientation(Orientation.VERTICAL);
-                    Chart.this.setLeft(getToolBar());
+                    menuPane.setLeft(getToolBar());
                     break;
                 case RIGHT:
                     getToolBar().setOrientation(Orientation.VERTICAL);
-                    Chart.this.setRight(getToolBar());
+                    menuPane.setRight(getToolBar());
                     break;
                 case BOTTOM:
                     getToolBar().setOrientation(Orientation.HORIZONTAL);
-                    Chart.this.setBottom(getToolBar());
+                    menuPane.setBottom(getToolBar());
                     break;
                 case TOP:
                 default:
                     getToolBar().setOrientation(Orientation.HORIZONTAL);
-                    Chart.this.setTop(getToolBar());
+                    menuPane.setTop(getToolBar());
                     break;
                 }
                 return (newVal);
@@ -331,7 +336,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
             }
         }
 
-        setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
+        menuPane.setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
         setMinSize(0, 0);
         setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
         setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
@@ -342,7 +347,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         plotForeGround.setMouseTransparent(true);
 
         // hiddenPane.setTriggerDistance(DEFAULT_TRIGGER_DISTANCE);
-        plotArea.triggerDistanceProperty().bindBidirectional(triggerDistanceProperty());
+        plotArea.triggerDistanceProperty().bindBidirectional(menuPane.triggerDistanceProperty());
         plotArea.setAnimationDelay(Duration.millis(500));
         // hiddenPane.setMouseTransparent(true);
         plotArea.setPickOnBounds(false);
@@ -401,7 +406,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
 
         // register listener in tool bar FlowPane
         toolBar.registerListener();
-        setTop(getToolBar());
+        menuPane.setTop(getToolBar());
 
         getTitleLegendPane(Side.TOP).getChildren().add(titleLabel);
 
@@ -583,6 +588,10 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
         return plotArea;
     }
 
+    public final HiddenSidesPane getMenuPane() {
+        return menuPane;
+    }
+
     public final Pane getPlotBackground() {
         return plotBackground;
     }
@@ -703,16 +712,15 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
     }
 
     private void doLayout() {
-        // TODO: remove normal layout when everything is done
-        super.layoutChildren();
-
         // Do layout w/ existing hierarchy
         // Account for margin and border insets
         final double x = snappedLeftInset();
         final double y = snappedTopInset();
         final double w = snapSizeX(getWidth()) - x - snappedRightInset();
         final double h = snapSizeY(getHeight()) - y - snappedBottomInset();
-        measurementBar.resizeRelocate(x, y, w, h);
+        for (Node child : getChildren()) {
+            child.resizeRelocate(x, y, w, h);
+        }
     }
 
     public final ObjectProperty<Legend> legendProperty() {
@@ -965,7 +973,7 @@ public abstract class Chart extends HiddenSidesPane implements Observable {
      * @return unmodifiable list of the controls css styleable properties
      * @since JavaFX 8.0
      */
-    @Override
+    @Deprecated // A remnant of extending Control. Do we need it?
     protected List<CssMetaData<? extends Styleable, ?>> getControlCssMetaData() {
         return Chart.getClassCssMetaData();
     }

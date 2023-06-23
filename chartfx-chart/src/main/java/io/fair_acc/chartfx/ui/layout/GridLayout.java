@@ -1,4 +1,4 @@
-package io.fair_acc.chartfx.ui;
+package io.fair_acc.chartfx.ui.layout;
 
 import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
@@ -28,18 +28,19 @@ import java.util.function.Consumer;
  * axis labels.
  * <p>
  * TODO: disallow computePrefWidth and computePrefHeight?
+ * TODO: remove nodes if the area is too small?
  *
  * @author Florian Enner
  * @since 22 Jun 2023
  */
-public class ChartGridLayout extends Region {
+public class GridLayout extends Region {
 
-    public static ChartGridLayout create() {
-        return new ChartGridLayout();
+    public static GridLayout create() {
+        return new GridLayout();
     }
 
-    public static ChartGridLayout create(Consumer<ChartGridLayout> init) {
-        var region = new ChartGridLayout();
+    public static GridLayout create(Consumer<GridLayout> init) {
+        var region = new GridLayout();
         init.accept(region);
         return region;
     }
@@ -54,22 +55,26 @@ public class ChartGridLayout extends Region {
 
     public void setSide(Side side, Node node) {
         Node previous = sides.put(side, node);
-        if (previous != null) {
-            getChildren().remove(previous);
-        }
-        getChildren().add(node);
+        replace(previous, node);
     }
 
     public void setCorner(Corner corner, Node node) {
         Node previous = corners.put(corner, node);
-        if (previous != null) {
-            getChildren().remove(previous);
-        }
-        getChildren().add(node);
+        replace(previous, node);
     }
 
     public ObservableList<Node> getContentNodes() {
         return content;
+    }
+
+    private void replace(Node previous, Node node) {
+        if (previous != null) {
+            getChildren().remove(previous);
+        }
+        if (getChildren().contains(node)) {
+            throw new IllegalArgumentException("The node is already a child");
+        }
+        getChildren().add(node);
     }
 
     private final Map<Side, Node> sides = new EnumMap<>(Side.class);
