@@ -121,10 +121,10 @@ public class ToolBarFlowPane extends FlowPane {
         });
         chart.toolBarPinnedProperty().addListener((obj, valOld, valNew) -> {
             if (valNew) {
-                chart.setPinnedSide(javafx.geometry.Side.TOP);
+                chart.getMenuPane().setPinnedSide(javafx.geometry.Side.TOP);
                 this.setBackground(new Background(new BackgroundFill(selectedColour, CornerRadii.EMPTY, Insets.EMPTY)));
             } else {
-                chart.setPinnedSide(null);
+                chart.getMenuPane().setPinnedSide(null);
                 this.setBackground(new Background(new BackgroundFill(defaultColour, CornerRadii.EMPTY, Insets.EMPTY)));
             }
             chart.requestLayout();
