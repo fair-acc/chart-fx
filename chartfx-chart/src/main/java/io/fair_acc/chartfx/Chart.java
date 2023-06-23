@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import io.fair_acc.chartfx.ui.layout.GridLayout;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
+import io.fair_acc.chartfx.ui.utils.PostLayoutHook;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -672,6 +673,8 @@ public abstract class Chart extends Region implements Observable {
         return toolBarPinned.get();
     }
 
+    private final PostLayoutHook redrawCanvasAction = new PostLayoutHook(this, this::redrawCanvas);
+
     @Override
     public void layoutChildren() {
         if (DEBUG && LOGGER.isDebugEnabled()) {
@@ -694,7 +697,7 @@ public abstract class Chart extends Region implements Observable {
         doLayout();
 
         // request re-layout of canvas
-        redrawCanvas();
+        redrawCanvasAction.runPostLayout();
 
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
 
