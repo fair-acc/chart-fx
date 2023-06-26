@@ -21,12 +21,6 @@ import java.util.function.Consumer;
  * LEFT  -   CONTENT  -   RIGHT
  * BL    -   BOTTOM   -   BR
  * <p>
- * Note: to start off with we can consider the axis height static (a function
- * of letter height), and the width to be a function of the axis resolution and
- * label size (more letters => wider). This breaks down for rotated labels,
- * so at some point we should create a specialized container that handles rotated
- * axis labels.
- * <p>
  * TODO: disallow computePrefWidth and computePrefHeight?
  * TODO: remove nodes if the area is too small?
  *
@@ -150,20 +144,20 @@ public class GridLayout extends Region {
 
     }
 
-    private static void resizeRelocate(Node node, double x, double y, double width, double height) {
+    static void resizeRelocate(Node node, double x, double y, double width, double height) {
         if (node != null) {
             node.resizeRelocate(x, y, width, height);
         }
     }
 
-    private static double getPrefHeight(Node node, double width) {
+    static double getPrefHeight(Node node, double width) {
         if (node == null || !node.isVisible()) {
             return 0;
         }
         return node.prefHeight(width);
     }
 
-    private static double getPrefWidth(Node node, double height) {
+    static double getPrefWidth(Node node, double height) {
         if (node == null || !node.isVisible()) {
             return 0;
         }

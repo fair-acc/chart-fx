@@ -4,6 +4,18 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 
 /**
+ * Utility class for registering a post-layout action
+ * for one run. It is intended to be registered inside
+ * the layoutChildren() phase and will only be run once.
+ *
+ * Drawing inside layoutChildren is problematic because
+ * the layout may be done multiple times and can result
+ * in many unnecessary drawing operations.
+ *
+ * Continuously keeping a post-layout action is also problematic
+ * because it (as far as I understand) forces a pulse to happen
+ * even if nothing needs to be drawn.
+ *
  * @author Florian Enner
  * @since 23 Jun 2023
  */
