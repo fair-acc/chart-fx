@@ -237,8 +237,8 @@ public final class FXUtils {
         }
     }
 
-    // Copied from internal Pane::setConstraint
-    public static void setConstraint(Node node, Object key, Object value) {
+    // Similar to internal Pane::setConstraint
+    public static <N extends Node> N setConstraint(N node, Object key, Object value) {
         if (value == null) {
             node.getProperties().remove(key);
         } else {
@@ -247,9 +247,10 @@ public final class FXUtils {
         if (node.getParent() != null) {
             node.getParent().requestLayout();
         }
+        return node;
     }
 
-    // Copied from internal Pane::getConstraint
+    // Similar to nternal Pane::getConstraint
     public static Object getConstraint(Node node, Object key) {
         if (node.hasProperties()) {
             Object value = node.getProperties().get(key);
