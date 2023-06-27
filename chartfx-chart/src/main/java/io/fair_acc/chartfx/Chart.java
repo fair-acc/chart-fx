@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import io.fair_acc.chartfx.ui.layout.GridLayout;
+import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
 import io.fair_acc.chartfx.ui.utils.PostLayoutHook;
@@ -111,48 +111,76 @@ public abstract class Chart extends Region implements Observable {
         getRenderers().addListener(this::rendererChanged);
     }
 
-    protected final ResizableCanvas canvas = new ResizableCanvas();
-    protected final Group pluginsArea = Chart.createChildGroup();
 
     protected boolean isAxesUpdate;
-    // containing the plugin handler/modifier
+
+    // Inner canvas for the drawn content
+    protected final ResizableCanvas canvas = new ResizableCanvas();
+    protected final Pane canvasForeground = new Pane();
+    protected final Group pluginsArea = Chart.createChildGroup();
+
+    // Area where plots get drawn
+    protected final Pane plotBackground = new Pane();
+    protected final HiddenSidesPane plotArea = new HiddenSidesPane();
+    protected final Pane plotForeGround = new Pane();
+
+    // Outer chart elements
+    protected final ChartPane measurementPane = new ChartPane();
+    protected final ChartPane titleLegendPane = new ChartPane();
+    protected final ChartPane axesAndCanvasPane = new ChartPane();
+
+    // Outer area with hidden toolbars
+    protected final HiddenSidesPane menuPane = new HiddenSidesPane();
     protected final ToolBarFlowPane toolBar = new ToolBarFlowPane(this);
     protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
 
-
-
-    protected final Pane canvasForeground = new Pane();
-
-    protected final GridLayout measurementBar = new GridLayout();
-    protected final GridLayout titleLegendGrid = new GridLayout();
-    protected final GridLayout axesAndCanvasGrid = new GridLayout();
-
-    protected final Pane plotBackground = new Pane();
-    protected final HiddenSidesPane plotArea = new HiddenSidesPane();
-    protected final HiddenSidesPane menuPane = new HiddenSidesPane();
-    protected final Pane plotForeGround = new Pane();
+    // Map for optional elements
+    protected final Map<Corner, StackPane> axesCornerMap = new ConcurrentHashMap<>(4);
+    protected final Map<Side, Pane> axesMap = new ConcurrentHashMap<>(4);
+    protected final Map<Side, Pane> measurementBarMap = new ConcurrentHashMap<>(4);
+    protected final Map<Corner, StackPane> titleLegendCornerMap = new ConcurrentHashMap<>(4);
+    protected final Map<Side, Pane> titleLegendMap = new ConcurrentHashMap<>(4);
 
     {
         for (final Corner corner : Corner.values()) {
-            axesAndCanvasGrid.setCorner(corner, new StackPane()); // NOPMD - default init
-            titleLegendGrid.setCorner(corner, new StackPane()); // NOPMD - default init
+            axesCornerMap.put(corner, new StackPane()); // NOPMD - default init
+            titleLegendCornerMap.put(corner, new StackPane()); // NOPMD - default init
         }
         for (final Side side : Side.values()) {
-            titleLegendGrid.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
-            axesAndCanvasGrid.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
+            titleLegendMap.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
+            axesMap.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
             if (side == Side.CENTER_HOR || side == Side.CENTER_VER) {
-                axesAndCanvasGrid.getSide(side).setMouseTransparent(true);
+                axesMap.get(side).setMouseTransparent(true);
             }
 
-            measurementBar.setSide(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
+            measurementBarMap.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
         }
 
-        // build hierarchy
-        menuPane.setContent(measurementBar);
-        measurementBar.getContentNodes().add(titleLegendGrid);
-        titleLegendGrid.getContentNodes().add(axesAndCanvasGrid);
-        axesAndCanvasGrid.getContentNodes().addAll(plotBackground, plotArea, plotForeGround);
+        // Add to scenegraph
+        axesCornerMap.forEach(axesAndCanvasPane::addCorner);
+        axesMap.forEach(axesAndCanvasPane::addSide);
+        titleLegendCornerMap.forEach(titleLegendPane::addCorner);
+        titleLegendMap.forEach(titleLegendPane::addSide);
+        measurementBarMap.forEach(measurementPane::addSide);
+    }
+
+    {
+        // Build hierarchy
+        // > menuPane (hidden toolbars that slide in from top/bottom)
+        //   > measurement pane (labels/menus for working with data)
+        //     > legend & title pane (static legend and title)
+        //       > axis pane (x/y axes)
+        //         > axes
+        //         > plot area (plotted content, hidden elements for zoom etc.)
+        //           > canvas (main)
+        //           > canvas foreground
+        //           > plugins
+        //         > plot background/foreground
         plotArea.setContent(new PlotAreaPane(getCanvas(), getCanvasForeground(), pluginsArea));
+        axesAndCanvasPane.addCenter(getPlotBackground(), getPlotArea(), getPlotForeground());
+        titleLegendPane.addCenter(axesAndCanvasPane);
+        measurementPane.addCenter(titleLegendPane);
+        menuPane.setContent(measurementPane);
         getChildren().add(menuPane);
     }
 
@@ -428,7 +456,7 @@ public abstract class Chart extends Region implements Observable {
         // set CSS stuff
         titleLabel.getStyleClass().add("chart-title");
         getStyleClass().add("chart");
-        axesAndCanvasGrid.getStyleClass().add("chart-content");
+        axesAndCanvasPane.getStyleClass().add("chart-content");
 
         registerShowingListener(); // NOPMD - unlikely but allowed override
     }
@@ -507,11 +535,11 @@ public abstract class Chart extends Region implements Observable {
     }
 
     public final StackPane getAxesCornerPane(final Corner corner) {
-        return (StackPane) axesAndCanvasGrid.getCorner(corner);
+        return axesCornerMap.get(corner);
     }
 
     public final Pane getAxesPane(final Side side) {
-        return (Pane) axesAndCanvasGrid.getSide(side);
+        return axesMap.get(side);
     }
 
     /**
@@ -578,7 +606,7 @@ public abstract class Chart extends Region implements Observable {
     }
 
     public final Pane getMeasurementBar(final Side side) {
-        return (Pane) measurementBar.getSide(side);
+        return measurementBarMap.get(side);
     }
 
     public final Side getMeasurementBarSide() {
@@ -622,11 +650,11 @@ public abstract class Chart extends Region implements Observable {
     }
 
     public final StackPane getTitleLegendCornerPane(final Corner corner) {
-        return (StackPane) titleLegendGrid.getCorner(corner);
+        return titleLegendCornerMap.get(corner);
     }
 
     public final Pane getTitleLegendPane(final Side side) {
-        return (Pane) titleLegendGrid.getSide(side);
+        return titleLegendMap.get(side);
     }
 
     public final Side getTitleSide() {
