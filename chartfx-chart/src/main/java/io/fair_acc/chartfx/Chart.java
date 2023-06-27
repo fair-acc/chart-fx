@@ -2,6 +2,7 @@ package io.fair_acc.chartfx;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.ui.layout.ChartPane;
@@ -134,35 +135,35 @@ public abstract class Chart extends Region implements Observable {
     protected final ToolBarFlowPane toolBar = new ToolBarFlowPane(this);
     protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
 
-    // Map for optional elements
-    protected final Map<Corner, StackPane> axesCornerMap = new ConcurrentHashMap<>(4);
-    protected final Map<Side, Pane> axesMap = new ConcurrentHashMap<>(4);
-    protected final Map<Side, Pane> measurementBarMap = new ConcurrentHashMap<>(4);
-    protected final Map<Corner, StackPane> titleLegendCornerMap = new ConcurrentHashMap<>(4);
-    protected final Map<Side, Pane> titleLegendMap = new ConcurrentHashMap<>(4);
+    // ========================================= Optional elements for backwards compatibility
+    // Chart used to always add all elements, even if unused. For backwards compatibility
+    // we can instantiate items on demand, but many of them can probably be removed in the future.
+    // TODO: remove after refactoring
+    private final Map<Corner, StackPane> axesCornerMap = new ConcurrentHashMap<>(4);
+    private final Map<Side, Pane> axesMap = new ConcurrentHashMap<>(4);
+    private final Map<Side, Pane> measurementBarMap = new ConcurrentHashMap<>(4);
+    private final Map<Corner, StackPane> titleLegendCornerMap = new ConcurrentHashMap<>(4);
+    private final Map<Side, Pane> titleLegendMap = new ConcurrentHashMap<>(4);
 
-    {
-        for (final Corner corner : Corner.values()) {
-            axesCornerMap.put(corner, new StackPane()); // NOPMD - default init
-            titleLegendCornerMap.put(corner, new StackPane()); // NOPMD - default init
-        }
-        for (final Side side : Side.values()) {
-            titleLegendMap.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
-            axesMap.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default init
-            if (side == Side.CENTER_HOR || side == Side.CENTER_VER) {
-                axesMap.get(side).setMouseTransparent(true);
-            }
-
-            measurementBarMap.put(side, side.isVertical() ? new ChartHBox() : new ChartVBox()); // NOPMD - default
-        }
-
-        // Add to scenegraph
-        axesCornerMap.forEach(axesAndCanvasPane::addCorner);
-        axesMap.forEach(axesAndCanvasPane::addSide);
-        titleLegendCornerMap.forEach(titleLegendPane::addCorner);
-        titleLegendMap.forEach(titleLegendPane::addSide);
-        measurementBarMap.forEach(measurementPane::addSide);
+    private static StackPane getCornerPane(Corner corner, ChartPane parent, Map<Corner, StackPane> map) {
+        return map.computeIfAbsent(corner, key -> {
+            var node = new StackPane(); // NOPMD - default init
+            parent.addCorner(key, node);
+            return node;
+        });
     }
+
+    private static Pane getSidePane(Side side, ChartPane parent, Map<Side, Pane> map, Consumer<Pane> onCenter) {
+        return map.computeIfAbsent(side, key -> {
+            var node = key.isVertical() ? new ChartHBox() : new ChartVBox(); // NOPMD - default init
+            parent.addSide(key, node);
+            if (key == Side.CENTER_HOR || key == Side.CENTER_VER) {
+                onCenter.accept(node);
+            }
+            return node;
+        });
+    }
+    // =========================================
 
     {
         // Build hierarchy
@@ -529,17 +530,16 @@ public abstract class Chart extends Region implements Observable {
         return axesList;
     }
 
-    @Deprecated
-    public GridPane getAxesAndCanvasPane() {
-        throw new IllegalStateException("axesAndCanvasPane no longer exists");
+    public ChartPane getAxesAndCanvasPane() {
+        return axesAndCanvasPane;
     }
 
     public final StackPane getAxesCornerPane(final Corner corner) {
-        return axesCornerMap.get(corner);
+        return getCornerPane(corner, axesAndCanvasPane, axesCornerMap);
     }
 
     public final Pane getAxesPane(final Side side) {
-        return axesMap.get(side);
+        return getSidePane(side, axesAndCanvasPane, axesMap, center -> center.setMouseTransparent(true));
     }
 
     /**
@@ -606,7 +606,7 @@ public abstract class Chart extends Region implements Observable {
     }
 
     public final Pane getMeasurementBar(final Side side) {
-        return measurementBarMap.get(side);
+        return getSidePane(side, measurementPane, measurementBarMap, Node::toBack); // don't draw over chart area
     }
 
     public final Side getMeasurementBarSide() {
@@ -650,11 +650,11 @@ public abstract class Chart extends Region implements Observable {
     }
 
     public final StackPane getTitleLegendCornerPane(final Corner corner) {
-        return titleLegendCornerMap.get(corner);
+        return getCornerPane(corner, titleLegendPane, titleLegendCornerMap);
     }
 
     public final Pane getTitleLegendPane(final Side side) {
-        return titleLegendMap.get(side);
+        return getSidePane(side, titleLegendPane, titleLegendMap, Node::toBack); // don't draw over chart area
     }
 
     public final Side getTitleSide() {

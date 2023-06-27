@@ -1,13 +1,9 @@
 package io.fair_acc.chartfx.ui.layout;
 
-import io.fair_acc.chartfx.axes.spi.AbstractAxisParameter;
 import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
@@ -48,36 +44,55 @@ public class ChartPane extends Pane {
         return FXUtils.getConstraint(node, CHART_ELEMENT);
     }
 
-    public static void setSide(Node node, Side value) {
-        FXUtils.setConstraint(node, CHART_ELEMENT, value);
+    public static <N extends Node> N setSide(N node, Side value) {
+       return FXUtils.setConstraint(node, CHART_ELEMENT, value);
     }
 
-    public static void setCorner(Node node, Corner value) {
-        FXUtils.setConstraint(node, CHART_ELEMENT, value);
+    public static <N extends Node> N setCorner(N node, Corner value) {
+        return FXUtils.setConstraint(node, CHART_ELEMENT, value);
     }
 
-    public static void setCenter(Node node) {
-        FXUtils.setConstraint(node, CHART_ELEMENT, null);
+    public static <N extends Node> N setCenter(N node) {
+        return FXUtils.setConstraint(node, CHART_ELEMENT, null);
     }
 
-    public ChartPane addSide(Side side, Node... nodes) {
-        getChildren().addAll(nodes);
-        for (Node node : nodes) {
-            setSide(node, side);
+    static void resizeRelocate(Node node, double x, double y, double width, double height) {
+        if (node != null) {
+            node.resizeRelocate(x, y, width, height);
         }
+    }
+
+    static double getPrefHeight(Node node, double width) {
+        if (node == null || !node.isVisible()) {
+            return 0;
+        }
+        return node.prefHeight(width);
+    }
+
+    static double getPrefWidth(Node node, double height) {
+        if (node == null || !node.isVisible()) {
+            return 0;
+        }
+        return node.prefWidth(height);
+    }
+
+    public ChartPane addSide(Side side, Node node) {
+        getChildren().add(node);
+        setSide(node, side);
         return this;
     }
 
-    public ChartPane addCorner(Corner corner, Node... nodes) {
-        getChildren().addAll(nodes);
-        for (Node node : nodes) {
-            setCorner(node, corner);
-        }
+    public ChartPane addCorner(Corner corner, Node node) {
+        getChildren().add(node);
+        setCorner(node, corner);
         return this;
     }
 
-    public ChartPane addCenter(Node... node) {
-        getChildren().addAll(node);
+    public ChartPane addCenter(Node node, Node... more) {
+        getChildren().add(node);
+        if (more.length > 0) {
+            getChildren().addAll(more);
+        }
         requestLayout();
         return this;
     }
@@ -113,17 +128,17 @@ public class ChartPane extends Pane {
             if (location instanceof Side) {
                 switch ((Side) location) {
                     case TOP:
-                        prefSize = GridLayout.getPrefHeight(child, width);
+                        prefSize = getPrefHeight(child, width);
                         cachedPrefSize.set(i, prefSize);
                         topHeight += prefSize;
                         break;
                     case BOTTOM:
-                        prefSize = GridLayout.getPrefHeight(child, width);
+                        prefSize = getPrefHeight(child, width);
                         cachedPrefSize.set(i, prefSize);
                         bottomHeight += prefSize;
                         break;
                     case CENTER_HOR:
-                        prefSize = GridLayout.getPrefHeight(child, width);
+                        prefSize = getPrefHeight(child, width);
                         cachedPrefSize.set(i, prefSize);
                         break;
                 }
@@ -141,17 +156,17 @@ public class ChartPane extends Pane {
             if (location instanceof Side) {
                 switch ((Side) location) {
                     case LEFT:
-                        prefSize = GridLayout.getPrefWidth(child, contentHeight);
+                        prefSize = getPrefWidth(child, contentHeight);
                         cachedPrefSize.set(i, prefSize);
                         leftWidth += prefSize;
                         break;
                     case RIGHT:
-                        prefSize = GridLayout.getPrefWidth(child, contentHeight);
+                        prefSize = getPrefWidth(child, contentHeight);
                         cachedPrefSize.set(i, prefSize);
                         rightWidth += prefSize;
                         break;
                     case CENTER_VER:
-                        prefSize = GridLayout.getPrefWidth(child, contentHeight);
+                        prefSize = getPrefWidth(child, contentHeight);
                         cachedPrefSize.set(i, prefSize);
                         break;
                 }
@@ -178,45 +193,45 @@ public class ChartPane extends Pane {
             prefSize = cachedPrefSize.getDouble(i++);
 
             if (location == null) { // Center nodes
-                GridLayout.resizeRelocate(child, xContent, yContent, contentWidth, contentHeight);
+                resizeRelocate(child, xContent, yContent, contentWidth, contentHeight);
             } else if (location instanceof Corner) { // Corner nodes
                 switch ((Corner) location) {
                     case TOP_LEFT:
-                        GridLayout.resizeRelocate(child, xLeft, yTop, leftWidth, topHeight);
+                        resizeRelocate(child, xLeft, yTop, leftWidth, topHeight);
                         break;
                     case TOP_RIGHT:
-                        GridLayout.resizeRelocate(child, xRight, yTop, rightWidth, topHeight);
+                        resizeRelocate(child, xRight, yTop, rightWidth, topHeight);
                         break;
                     case BOTTOM_LEFT:
-                        GridLayout.resizeRelocate(child, xLeft, yBottom, leftWidth, bottomHeight);
+                        resizeRelocate(child, xLeft, yBottom, leftWidth, bottomHeight);
                         break;
                     case BOTTOM_RIGHT:
-                        GridLayout.resizeRelocate(child, xRight, yBottom, rightWidth, bottomHeight);
+                        resizeRelocate(child, xRight, yBottom, rightWidth, bottomHeight);
                         break;
                 }
             } else if (location instanceof Side) {  // Side nodes
                 switch ((Side) location) {
                     case TOP:
-                        GridLayout.resizeRelocate(child, xContent, yTop + yOffsetTop, contentWidth, prefSize);
+                        resizeRelocate(child, xContent, yTop + yOffsetTop, contentWidth, prefSize);
                         yOffsetTop += prefSize;
                         break;
                     case BOTTOM:
-                        GridLayout.resizeRelocate(child, xContent, yBottom + yOffsetBottom, contentWidth, prefSize);
+                        resizeRelocate(child, xContent, yBottom + yOffsetBottom, contentWidth, prefSize);
                         yOffsetBottom += prefSize;
                         break;
                     case LEFT:
-                        GridLayout.resizeRelocate(child, xLeft + xOffsetLeft, yContent, prefSize, contentHeight);
+                        resizeRelocate(child, xLeft + xOffsetLeft, yContent, prefSize, contentHeight);
                         xOffsetLeft += prefSize;
                         break;
                     case RIGHT:
-                        GridLayout.resizeRelocate(child, xRight + xOffsetRight, yContent, prefSize, contentHeight);
+                        resizeRelocate(child, xRight + xOffsetRight, yContent, prefSize, contentHeight);
                         xOffsetRight += prefSize;
                         break;
                     case CENTER_HOR:
-                        GridLayout.resizeRelocate(child, xContent, yContent + contentHeight / 2 - prefSize / 2, contentWidth, prefSize);
+                        resizeRelocate(child, xContent, yContent + contentHeight / 2 - prefSize / 2, contentWidth, prefSize);
                         break;
                     case CENTER_VER:
-                        GridLayout.resizeRelocate(child, xContent + contentWidth / 2 - prefSize / 2, yContent, prefSize, contentHeight);
+                        resizeRelocate(child, xContent + contentWidth / 2 - prefSize / 2, yContent, prefSize, contentHeight);
                         break;
                 }
             }

@@ -30,7 +30,7 @@ public class PostLayoutHook {
         if (registeredScene != null && registeredScene != node.getScene()) {
             unregister();
         }
-        if (registeredScene == null) {
+        if (registeredScene == null && node.getScene() != null) {
             registeredScene = node.getScene();
             registeredScene.addPostLayoutPulseListener(pulseListener);
         }
