@@ -73,7 +73,7 @@ public abstract class Chart extends Region implements Observable {
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
-    protected static final boolean DEBUG = false; // for more verbose debugging
+    protected static final boolean DEBUG = Boolean.getBoolean("chartfx.debug"); // for more verbose debugging
 
     protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
@@ -653,6 +653,10 @@ public abstract class Chart extends Region implements Observable {
         return getCornerPane(corner, titleLegendPane, titleLegendCornerMap);
     }
 
+    public final ChartPane getTitleLegendPane() {
+        return titleLegendPane;
+    }
+
     public final Pane getTitleLegendPane(final Side side) {
         return getSidePane(side, titleLegendPane, titleLegendMap, Node::toBack); // don't draw over chart area
     }
@@ -768,20 +772,6 @@ public abstract class Chart extends Region implements Observable {
 
     public final ObjectProperty<Side> measurementBarSideProperty() {
         return measurementBarSide;
-    }
-
-    public boolean removeFromAllAxesPanes(final Axis node) {
-        if (!(node instanceof Node)) {
-            return false;
-        }
-        final Node axisNode = (Node) node;
-        // remove axis from all axis panes
-        for (final Side side : Side.values()) {
-            if (getAxesPane(side).getChildren().remove(axisNode)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
