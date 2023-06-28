@@ -285,7 +285,7 @@ public abstract class Chart extends Region implements Observable {
             Legend newLegend = get();
 
             if (oldLegend != null) {
-                getTitleLegendPane().getChildren().remove(oldLegend.getNode());
+                getTitleLegendPane().remove(oldLegend.getNode());
             }
 
             if (newLegend != null) {
