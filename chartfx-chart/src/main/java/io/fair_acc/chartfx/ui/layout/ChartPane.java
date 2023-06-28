@@ -103,6 +103,13 @@ public class ChartPane extends Pane {
         return this;
     }
 
+    public void remove(Node node, Node... more){
+        getChildren().remove(node);
+        if(more.length > 0){
+            getChildren().removeAll(more);
+        }
+    }
+
     private void addNode(Object section, Node node) {
         getChildren().add(node);
         node.getProperties().put(CHART_ELEMENT, section);

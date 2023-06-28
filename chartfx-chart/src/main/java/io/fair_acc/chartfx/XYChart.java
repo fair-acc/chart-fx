@@ -17,7 +17,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -303,7 +302,7 @@ public class XYChart extends Chart {
                 //  check if axis is associated with an existing renderer, if yes
                 //  -&gt; throw an exception
                 if (axis instanceof Node) {
-                    axesAndCanvasPane.getChildren().remove((Node) axis);
+                    axesAndCanvasPane.remove((Node) axis);
                 }
             });
 
@@ -317,7 +316,7 @@ public class XYChart extends Chart {
                     throw new InvalidParameterException("axis '" + axis.getName() + "' has 'null' as side being set");
                 }
                 if (axis instanceof Node) {
-                    axesAndCanvasPane.getChildren().add((Node) axis);
+                    axesAndCanvasPane.addSide(side, (Node) axis);
                 }
             });
         }
