@@ -94,13 +94,10 @@ public class ChartAnatomySample extends Application {
             chart.getToolBar().getChildren().add(toolBarButton);
         }
 
-        chart.getAxesPane(Side.BOTTOM).getChildren().add(xAxis1);
-        chart.getAxesPane(Side.TOP).getChildren().add(xAxis2);
-        chart.getAxesPane(Side.CENTER_HOR).getChildren().add(xAxis3);
-        chart.getAxesPane(Side.LEFT).getChildren().add(yAxis1);
-        chart.getAxesPane(Side.RIGHT).getChildren().add(yAxis2);
-        chart.getAxesPane(Side.RIGHT).getChildren().add(yAxis3);
-        chart.getAxesPane(Side.CENTER_VER).getChildren().add(yAxis4);
+        chart.getAxesAndCanvasPane().getChildren().addAll(
+                xAxis1, xAxis2, xAxis3,
+                yAxis1, yAxis2, yAxis3, yAxis4
+        );
 
         chart.getTitleLegendPane(Side.LEFT).getChildren().add(new MyLabel("Title/Legend - left", true));
         chart.getTitleLegendPane(Side.RIGHT).getChildren().add(new MyLabel("Title/Legend - right", true));
@@ -150,6 +147,7 @@ public class ChartAnatomySample extends Application {
             super(label);
             VBox.setVgrow(this, Priority.ALWAYS);
             HBox.setHgrow(this, Priority.ALWAYS);
+            setAlignment(Pos.CENTER);
             setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
         }
 

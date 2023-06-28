@@ -60,7 +60,6 @@ public class XYChart extends Chart {
     protected final ChangeListener<? super Boolean> gridLineVisibilitychange = (ob, o, n) -> requestLayout();
     private long lastCanvasUpdate;
     private boolean callCanvasUpdateLater;
-    private final ChangeListener<Side> axisSideChangeListener = this::axisSideChanged;
 
     /**
      * Construct a new XYChart with the given axes.
@@ -300,11 +299,12 @@ public class XYChart extends Chart {
         while (change.next()) {
             change.getRemoved().forEach(axis -> {
                 AssertUtils.notNull("to be removed axis is null", axis);
-                // check if axis is associated with an existing renderer, if yes
-                // -&gt; throw an exception
-                // remove from axis.side property side listener
-                removeFromAllAxesPanes(axis);
-                axis.sideProperty().removeListener(axisSideChangeListener);
+                // TODO:
+                //  check if axis is associated with an existing renderer, if yes
+                //  -&gt; throw an exception
+                if (axis instanceof Node) {
+                    axesAndCanvasPane.getChildren().remove((Node) axis);
+                }
             });
 
             change.getAddedSubList().forEach(axis -> {
@@ -316,40 +316,12 @@ public class XYChart extends Chart {
                 if (side == null) {
                     throw new InvalidParameterException("axis '" + axis.getName() + "' has 'null' as side being set");
                 }
-                if (axis instanceof Node && !getAxesPane(axis.getSide()).getChildren().contains(axis)) {
-                    getAxesPane(axis.getSide()).getChildren().add((Node) axis);
+                if (axis instanceof Node) {
+                    axesAndCanvasPane.getChildren().add((Node) axis);
                 }
-
-                axis.sideProperty().addListener(axisSideChangeListener);
             });
         }
 
-        requestLayout();
-    }
-
-    protected void axisSideChanged(final ObservableValue<? extends Side> change, final Side oldValue, final Side newValue) {
-        if (newValue != null && newValue.equals(oldValue)) {
-            return;
-        }
-        // loop through all registered axis
-        for (final Axis axis : axesList) {
-            if (axis.getSide() == null) {
-                // remove axis from all axis panes
-                removeFromAllAxesPanes(axis);
-            }
-
-            // check if axis is in correct pane
-            if (axis instanceof Node && getAxesPane(axis.getSide()).getChildren().contains(axis)) {
-                // yes, it is continue with next axis
-                continue;
-            }
-            // axis needs to be moved to new pane location
-            // first: remove axis from all axis panes
-            removeFromAllAxesPanes(axis);
-
-            // second: add axis to correct axis pane
-            getAxesPane(axis.getSide()).getChildren().add((Node) axis);
-        }
         requestLayout();
     }
 
