@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.utils;
 
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -242,7 +243,10 @@ public final class FXUtils {
         if (value == null) {
             node.getProperties().remove(key);
         } else {
-            node.getProperties().put(key, value);
+            Object old = node.getProperties().put(key, value);
+            if (Objects.equals(old, value)) {
+                return node; // No changes -> no need to force a layout
+            }
         }
         if (node.getParent() != null) {
             node.getParent().requestLayout();
