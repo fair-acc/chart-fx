@@ -76,7 +76,7 @@ public class ParameterMeasurements extends ChartPlugin {
                 oldChart.getToolBar().getChildren().remove(parameterMenu);
 
                 // remove measurement display pane
-                oldChart.getMeasurementPane().getChildren().remove(dataView);
+                oldChart.getMeasurementPane().remove(dataView);
             }
 
             if (newChart != null) {
