@@ -53,4 +53,8 @@ public enum Side {
     public boolean isVertical() {
         return this == LEFT || this == RIGHT || this == CENTER_VER;
     }
+
+    public boolean isCenter() {
+        return this == CENTER_VER || this == CENTER_HOR;
+    }
 }

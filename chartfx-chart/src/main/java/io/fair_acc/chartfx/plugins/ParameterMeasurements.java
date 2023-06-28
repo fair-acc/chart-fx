@@ -76,7 +76,7 @@ public class ParameterMeasurements extends ChartPlugin {
                 oldChart.getToolBar().getChildren().remove(parameterMenu);
 
                 // remove measurement display pane
-                oldChart.getMeasurementBar(side).getChildren().remove(dataView);
+                oldChart.getMeasurementPane().getChildren().remove(dataView);
             }
 
             if (newChart != null) {
@@ -86,7 +86,7 @@ public class ParameterMeasurements extends ChartPlugin {
                 }
 
                 // add measurement display pane
-                newChart.getMeasurementBar(side).getChildren().add(dataView);
+                newChart.getMeasurementPane().addSide(side, dataView);
             }
         });
 
