@@ -141,7 +141,6 @@ public abstract class Chart extends Region implements Observable {
     // TODO: remove after refactoring
     private final Map<Corner, StackPane> axesCornerMap = new ConcurrentHashMap<>(4);
     private final Map<Side, Pane> axesMap = new ConcurrentHashMap<>(4);
-    private final Map<Side, Pane> measurementBarMap = new ConcurrentHashMap<>(4);
     private final Map<Corner, StackPane> titleLegendCornerMap = new ConcurrentHashMap<>(4);
     private final Map<Side, Pane> titleLegendMap = new ConcurrentHashMap<>(4);
 
@@ -251,15 +250,6 @@ public abstract class Chart extends Region implements Observable {
             StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
                 AssertUtils.notNull("Side must not be null", newVal);
                 ChartPane.setSide(titleLabel, newVal);
-                return newVal;
-            }, this::requestLayout);
-
-    /**
-     * The side of the chart where the title is displayed default Side.TOP
-     */
-    private final StyleableObjectProperty<Side> measurementBarSide = CSS.createObjectProperty(this, "measurementBarSide", Side.RIGHT, false,
-            StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
-                AssertUtils.notNull("Side must not be null", newVal);
                 return newVal;
             }, this::requestLayout);
 
@@ -589,12 +579,8 @@ public abstract class Chart extends Region implements Observable {
         return legendSide.get();
     }
 
-    public final Pane getMeasurementBar(final Side side) {
-        return getSidePane(side, measurementPane, measurementBarMap, Node::toBack); // don't draw over chart area
-    }
-
-    public final Side getMeasurementBarSide() {
-        return measurementBarSide.get();
+    public final ChartPane getMeasurementPane() {
+        return measurementPane;
     }
 
     public final HiddenSidesPane getPlotArea() {
@@ -755,10 +741,6 @@ public abstract class Chart extends Region implements Observable {
         return legendVisible;
     }
 
-    public final ObjectProperty<Side> measurementBarSideProperty() {
-        return measurementBarSide;
-    }
-
     @Override
     public void removeListener(final InvalidationListener listener) {
         listeners.remove(listener);
@@ -796,10 +778,6 @@ public abstract class Chart extends Region implements Observable {
 
     public final void setLegendVisible(final boolean value) {
         legendVisible.set(value);
-    }
-
-    public final void setMeasurementBarSide(final Side value) {
-        measurementBarSide.set(value);
     }
 
     public final void setTitle(final String value) {

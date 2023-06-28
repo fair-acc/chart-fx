@@ -115,9 +115,24 @@ public class ChartAnatomySample extends Application {
         }
 
         for (final Side side : Side.values()) {
-            chart.getMeasurementBar(side).getChildren().add(new MyLabel("ParBox - " + side)); // NOPMD
-            chart.getMeasurementBar(side).setStyle("-fx-background-color: rgba(125, 125, 125, 0.5);");
-            // chart.setPinned(side, true);
+            if (side.isHorizontal()) {
+                chart.getTitleLegendPane(side).setStyle("-fx-background-color: rgba(0, 125, 125, 0.5);");
+            } else {
+                chart.getTitleLegendPane(side).setStyle("-fx-background-color: rgba(0, 255, 125, 0.5);");
+
+            }
+        }
+
+        for (final Side side : Side.values()) {
+            StackPane pane = new StackPane();
+            pane.setStyle(side.isHorizontal()
+                    ? "-fx-background-color: rgba(125, 125, 125, 0.5);"
+                    : "-fx-background-color: rgba(125, 255, 125, 0.5);");
+            pane.getChildren().add(new MyLabel("ParBox - " + side)); // NOPMD
+            chart.getMeasurementPane().addSide(side, pane);
+            if (side.isCenter()) {
+                pane.toBack();
+            }
         }
 
         chart.getCanvas().setMouseTransparent(false);
