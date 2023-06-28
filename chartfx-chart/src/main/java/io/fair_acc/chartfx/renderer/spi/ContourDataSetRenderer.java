@@ -317,7 +317,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         zAxisNode.getProperties().put(Zoomer.ZOOMER_OMIT_AXIS, Boolean.TRUE);
 
         if (localZAxis.getSide().isHorizontal()) {
-            zAxisNode.setLayoutX(50);
+            // zAxisNode.setLayoutX(50); // TODO: why was the layout modified manually w/ managed=true? (ennerf)
             gradientRect.setX(0);
             gradientRect.setWidth(localZAxis.getWidth());
             gradientRect.setHeight(20);
@@ -332,7 +332,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
                 parent.getChildren().add(gradientRect);
             }
         } else {
-            zAxisNode.setLayoutY(50);
+            // zAxisNode.setLayoutY(50); // TODO: why was the layout modified manually w/ managed=true? (ennerf)
             gradientRect.setWidth(20);
             gradientRect.setHeight(localZAxis.getHeight());
             gradientRect.setFill(new LinearGradient(0, 1, 0, 0, true, NO_CYCLE, getColorGradient().getStops()));
