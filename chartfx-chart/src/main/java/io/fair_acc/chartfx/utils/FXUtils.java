@@ -238,7 +238,7 @@ public final class FXUtils {
     }
 
     // Similar to internal Pane::setConstraint
-    public static <N extends Node> N setConstraint(N node, Object key, Object value) {
+    public static <NODE extends Node> NODE setConstraint(NODE node, Object key, Object value) {
         if (value == null) {
             node.getProperties().remove(key);
         } else {
