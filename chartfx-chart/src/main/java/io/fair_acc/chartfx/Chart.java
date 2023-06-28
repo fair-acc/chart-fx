@@ -250,12 +250,8 @@ public abstract class Chart extends Region implements Observable {
     private final StyleableObjectProperty<Side> titleSide = CSS.createObjectProperty(this, "titleSide", Side.TOP, false,
             StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
                 AssertUtils.notNull("Side must not be null", newVal);
-
-                for (final Side s : Side.values()) {
-                    getTitleLegendPane(s).getChildren().remove(titleLabel);
-                }
-                getTitleLegendPane(newVal).getChildren().add(titleLabel);
-                return (newVal);
+                ChartPane.setSide(titleLabel, newVal);
+                return newVal;
             }, this::requestLayout);
 
     /**
@@ -278,10 +274,7 @@ public abstract class Chart extends Region implements Observable {
                 if (legend == null) {
                     return newVal;
                 }
-                for (final Side s : Side.values()) {
-                    getTitleLegendPane(s).getChildren().remove(legend.getNode());
-                }
-                getTitleLegendPane(newVal).getChildren().add(legend.getNode());
+                ChartPane.setSide(legend.getNode(), newVal);
                 legend.setVertical(newVal.isVertical());
 
                 return newVal;
@@ -294,7 +287,7 @@ public abstract class Chart extends Region implements Observable {
     private final ObjectProperty<Legend> legend = new SimpleObjectProperty<>(this, "legend", new DefaultLegend()) {
         private Legend oldLegend = get();
         {
-            getTitleLegendPane(getLegendSide()).getChildren().add(oldLegend.getNode());
+            getTitleLegendPane().addSide(getLegendSide(), oldLegend.getNode());
         }
 
         @Override
@@ -302,16 +295,12 @@ public abstract class Chart extends Region implements Observable {
             Legend newLegend = get();
 
             if (oldLegend != null) {
-                for (final Side s : Side.values()) {
-                    getTitleLegendPane(s).getChildren().remove(oldLegend.getNode());
-                }
+                getTitleLegendPane().getChildren().remove(oldLegend.getNode());
             }
 
             if (newLegend != null) {
-                if (getLegendSide() != null && isLegendVisible()) {
-                    getTitleLegendPane(getLegendSide()).getChildren().add(newLegend.getNode());
-                }
                 newLegend.getNode().setVisible(isLegendVisible());
+                getTitleLegendPane().addSide(getLegendSide(), newLegend.getNode());
             }
             super.set(newLegend);
             oldLegend = newLegend;
@@ -438,20 +427,14 @@ public abstract class Chart extends Region implements Observable {
         toolBar.registerListener();
         menuPane.setTop(getToolBar());
 
-        getTitleLegendPane(Side.TOP).getChildren().add(titleLabel);
+        getTitleLegendPane().addSide(Side.TOP, titleLabel);
 
         legendVisibleProperty().addListener((ch, old, visible) -> {
             if (getLegend() == null) {
                 return;
             }
             getLegend().getNode().setVisible(visible);
-            if (Boolean.TRUE.equals(visible)) {
-                if (!getTitleLegendPane(getLegendSide()).getChildren().contains(getLegend().getNode())) {
-                    getTitleLegendPane(getLegendSide()).getChildren().add(getLegend().getNode());
-                }
-            } else {
-                getTitleLegendPane(getLegendSide()).getChildren().remove(getLegend().getNode());
-            }
+            getLegend().getNode().setManaged(visible);
         });
 
         // set CSS stuff
@@ -538,6 +521,7 @@ public abstract class Chart extends Region implements Observable {
         return getCornerPane(corner, axesAndCanvasPane, axesCornerMap);
     }
 
+    @Deprecated // use ChartPane::setSide property
     public final Pane getAxesPane(final Side side) {
         return getSidePane(side, axesAndCanvasPane, axesMap, center -> center.setMouseTransparent(true));
     }
@@ -657,6 +641,7 @@ public abstract class Chart extends Region implements Observable {
         return titleLegendPane;
     }
 
+    @Deprecated // use ChartPane::setSide property
     public final Pane getTitleLegendPane(final Side side) {
         return getSidePane(side, titleLegendPane, titleLegendMap, Node::toBack); // don't draw over chart area
     }
