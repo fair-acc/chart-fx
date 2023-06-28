@@ -44,16 +44,16 @@ public class ChartPane extends Pane {
         return FXUtils.getConstraint(node, CHART_ELEMENT);
     }
 
-    public static <N extends Node> N setSide(N node, Side value) {
-       return FXUtils.setConstraint(node, CHART_ELEMENT, value);
+    public static void setSide(Node node, Side value) {
+        FXUtils.setConstraint(node, CHART_ELEMENT, value);
     }
 
-    public static <N extends Node> N setCorner(N node, Corner value) {
-        return FXUtils.setConstraint(node, CHART_ELEMENT, value);
+    public static void setCorner(Node node, Corner value) {
+        FXUtils.setConstraint(node, CHART_ELEMENT, value);
     }
 
-    public static <N extends Node> N setCenter(N node) {
-        return FXUtils.setConstraint(node, CHART_ELEMENT, null);
+    public static void setCenter(Node node) {
+        FXUtils.setConstraint(node, CHART_ELEMENT, null);
     }
 
     static void resizeRelocate(Node node, double x, double y, double width, double height) {
@@ -76,29 +76,31 @@ public class ChartPane extends Pane {
         return node.prefWidth(height);
     }
 
-    public ChartPane addSide(Side side, Node node) {
+    public ChartPane addSide(Side side, Node node, Node... more) {
         getChildren().add(node);
         setSide(node, side);
+        for (Node next : more) {
+            addSide(side, next);
+        }
         return this;
     }
 
-    public ChartPane addCorner(Corner corner, Node node) {
+    public ChartPane addCorner(Corner corner, Node node, Node... more) {
         getChildren().add(node);
         setCorner(node, corner);
+        for (Node next : more) {
+            addCorner(corner, next);
+        }
         return this;
     }
 
     public ChartPane addCenter(Node node, Node... more) {
         getChildren().add(node);
-        if (more.length > 0) {
-            getChildren().addAll(more);
+        setCenter(node);
+        for (Node next : more) {
+            addCenter(next);
         }
-        requestLayout();
         return this;
-    }
-
-    public void setSide(Side side, Node node) {
-        addNode(side, node);
     }
 
     private void addNode(Object section, Node node) {
@@ -124,6 +126,7 @@ public class ChartPane extends Pane {
         int i = 0;
         double prefSize = 0;
         for (Node child : getChildren()) {
+            if (!child.isManaged()) continue;
             Object location = getLocation(child);
             if (location instanceof Side) {
                 switch ((Side) location) {
@@ -152,6 +155,7 @@ public class ChartPane extends Pane {
         double rightWidth = 0;
         i = 0;
         for (Node child : getChildren()) {
+            if (!child.isManaged()) continue;
             Object location = getLocation(child);
             if (location instanceof Side) {
                 switch ((Side) location) {
@@ -189,6 +193,7 @@ public class ChartPane extends Pane {
         // Layout all children
         i = 0;
         for (Node child : getChildren()) {
+            if (!child.isManaged()) continue;
             Object location = getLocation(child);
             prefSize = cachedPrefSize.getDouble(i++);
 
