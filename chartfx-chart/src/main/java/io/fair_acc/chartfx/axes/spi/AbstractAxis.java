@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.fair_acc.chartfx.ui.utils.PostLayoutHook;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -514,11 +515,16 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return 150;
         }
 
-        if (getTickMarks().isEmpty()) {
+        if(computeTickMarksForLength(width)){
+            invalidate();
+            postLayout.runPostLayout();
+        }
+
+/*        if (getTickMarks().isEmpty()) {
             final AxisRange range = autoRange(width);
             computeTickMarks(range, true);
             invalidate();
-        }
+        }*/
 
         // we need to first auto range as this may/will effect tick marks
         // calculate max tick label height
@@ -552,11 +558,16 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return 150;
         }
 
-        if (getTickMarks().isEmpty()) {
+        if(computeTickMarksForLength(height)){
+            invalidate();
+            postLayout.runPostLayout();
+        }
+
+/*        if (getTickMarks().isEmpty()) {
             final AxisRange range = autoRange(height);
             computeTickMarks(range, true);
             invalidate();
-        }
+        }*/
 
         // calculate max tick label width
         final double maxLabelWidthLocal = isTickLabelsVisible() ? maxLabelWidth : 0.0;
@@ -1141,19 +1152,23 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (side == null) {
             return;
         }
-        final double axisWidth = getWidth();
-        final double axisHeight = getHeight();
-        final double axisLength = side.isVertical() ? axisHeight : axisWidth; // [pixel]
+/*        if(computeTickMarksForLength(side.isVertical() ? getHeight() : getWidth())) {
+            fireInvalidated();
+        };*/
 
+
+
+        super.layoutChildren();
+        validProperty().set(true);
+    }
+
+    private boolean computeTickMarksForLength(final double axisLength) {
         // we have done all auto calcs, let Axis position major tickmarks
         final double preferredTickUnit = computePreferredTickUnit(axisLength);
         final boolean tickUnitDiffers = getTickUnit() != preferredTickUnit;
         final boolean lengthDiffers = oldAxisLength != axisLength;
         final boolean rangeDiffers = oldAxisMin != getMin() || oldAxisMax != getMax() || oldTickUnit != getTickUnit();
-        var recomputedTicks = false;
         if (lengthDiffers || rangeDiffers || tickUnitDiffers) {
-            recomputedTicks = true;
-
             recomputeTickMarks();
 
             // mark all done
@@ -1178,7 +1193,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             double totalLabelsSize = 0;
             double maxLabelSize = 0;
             for (final TickMark m : getTickMarks()) {
-                final double tickSize = (side.isHorizontal() ? m.getWidth() : m.getHeight()) + (2 * getTickLabelSpacing());
+                final double tickSize = (getSide().isHorizontal() ? m.getWidth() : m.getHeight()) + (2 * getTickLabelSpacing());
                 totalLabelsSize += tickSize;
                 maxLabelSize = Math.round(Math.max(maxLabelSize, tickSize));
             }
@@ -1189,67 +1204,66 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             final double projectedLengthFromIndividualMarks = (majorTickMarks.size() + 1) * maxLabelSize;
 
             switch (getOverlapPolicy()) {
-            case NARROW_FONT:
-                final double scale = axisLength / projectedLengthFromIndividualMarks;
-                if ((scale >= MIN_NARROW_FONT_SCALE) && (scale <= MAX_NARROW_FONT_SCALE)) {
-                    scaleFont = scale;
-                    break;
-                }
-                scaleFont = Math.min(Math.max(scale, MIN_NARROW_FONT_SCALE), MAX_NARROW_FONT_SCALE);
-                // fall through to SKIP_ALT
-                // $FALL-THROUGH$
-            case SKIP_ALT:
-                var numLabelsToSkip = 0;
-                if ((maxLabelSize > 0) && (axisLength < totalLabelsSize)) {
-                    numLabelsToSkip = (int) (projectedLengthFromIndividualMarks / axisLength);
-                    labelOverlap = true;
-                }
-                if (numLabelsToSkip > 0) {
-                    var tickIndex = 0;
-                    for (final TickMark m : majorTickMarks) {
-                        if (m.isVisible()) {
-                            m.setVisible((tickIndex++ % numLabelsToSkip) == 0);
+                case NARROW_FONT:
+                    final double scale = axisLength / projectedLengthFromIndividualMarks;
+                    if ((scale >= MIN_NARROW_FONT_SCALE) && (scale <= MAX_NARROW_FONT_SCALE)) {
+                        scaleFont = scale;
+                        break;
+                    }
+                    scaleFont = Math.min(Math.max(scale, MIN_NARROW_FONT_SCALE), MAX_NARROW_FONT_SCALE);
+                    // fall through to SKIP_ALT
+                    // $FALL-THROUGH$
+                case SKIP_ALT:
+                    var numLabelsToSkip = 0;
+                    if ((maxLabelSize > 0) && (axisLength < totalLabelsSize)) {
+                        numLabelsToSkip = (int) (projectedLengthFromIndividualMarks / axisLength);
+                        labelOverlap = true;
+                    }
+                    if (numLabelsToSkip > 0) {
+                        var tickIndex = 0;
+                        for (final TickMark m : majorTickMarks) {
+                            if (m.isVisible()) {
+                                m.setVisible((tickIndex++ % numLabelsToSkip) == 0);
+                            }
                         }
                     }
-                }
-                break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
             }
 
             // set all Tick labels which are still overlapping to invisible
             switch (getOverlapPolicy()) {
-            case SHIFT_ALT:
-                labelOverlap = checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(),
-                        isInvertedAxis(), false);
-                if (!labelOverlap) {
+                case SHIFT_ALT:
+                    labelOverlap = checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(),
+                            isInvertedAxis(), false);
+                    if (!labelOverlap) {
+                        break;
+                    }
+                    // fallthrough to forced case
+                case FORCED_SHIFT_ALT:
+                    labelOverlap = true;
+                    checkOverlappingLabels(0, 2, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
+                    checkOverlappingLabels(1, 2, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
                     break;
-                }
-                // fallthrough to forced case
-            case FORCED_SHIFT_ALT:
-                labelOverlap = true;
-                checkOverlappingLabels(0, 2, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
-                checkOverlappingLabels(1, 2, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
-                break;
-            default:
-                checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
+                default:
+                    checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
             }
 
             // update potential other functions before drawing
             tickMarksUpdated();
+            return true;
         }
+        return false;
+    }
 
+    final PostLayoutHook postLayout = new PostLayoutHook(this, this::redraw);
+
+    private void redraw() {
         // draw minor / major tick marks on canvas
         final var gc = canvas.getGraphicsContext2D();
         clearAxisCanvas(gc, canvas.getWidth(), canvas.getHeight());
-        drawAxis(gc, axisWidth, axisHeight);
-
-        if (recomputedTicks) {
-            fireInvalidated();
-        }
-
-        super.layoutChildren();
-        validProperty().set(true);
+        drawAxis(gc, getWidth(), getHeight());
     }
 
     private static boolean checkOverlappingLabels(final int start, final int stride,
