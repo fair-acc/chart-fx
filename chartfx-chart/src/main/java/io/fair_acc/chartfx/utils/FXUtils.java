@@ -238,6 +238,23 @@ public final class FXUtils {
         }
     }
 
+    public static <NODE extends Node> NODE hiddenStyleNode(NODE node, String... styles) {
+        hide(node);
+        addStyles(node, styles);
+        return node;
+    }
+
+    public static <NODE extends Node> NODE addStyles(NODE node, String... styles) {
+        node.getStyleClass().addAll(styles);
+        return node;
+    }
+
+    public static <NODE extends Node> NODE hide(NODE node) {
+        node.setVisible(false);
+        node.setManaged(false);
+        return node;
+    }
+
     // Similar to internal Pane::setConstraint
     public static <NODE extends Node> NODE setConstraint(NODE node, Object key, Object value) {
         if (value == null) {
