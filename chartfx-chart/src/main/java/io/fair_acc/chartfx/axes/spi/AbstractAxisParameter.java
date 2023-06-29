@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.fair_acc.chartfx.ui.layout.ChartPane;
+import io.fair_acc.chartfx.utils.FXUtils;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -55,14 +56,20 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
 
     private final transient StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, this::requestAxisLayout);
+
     /**
      * Paths used for css-type styling. Not used for actual drawing. Used as a storage container for the settings
      * applied to GraphicsContext which allow much faster (and less complex) drawing routines but do no not allow
      * CSS-type styling.
      */
-    private final transient Path majorTickStyle = new Path();
-    private final transient Path minorTickStyle = new Path();
-    private final transient AxisLabel axisLabel = new AxisLabel();
+    private final transient Path majorTickStyle = FXUtils.hiddenStyleNode(new Path(), "axis-tick-mark");
+    private final transient Path minorTickStyle = FXUtils.hiddenStyleNode(new Path(), "axis-minor-tick-mark");
+    private final transient Text axisLabel = FXUtils.hiddenStyleNode(new Text(), "axis-label");
+    {
+        FXUtils.addStyles(this, "axis");
+        getChildren().addAll(axisLabel, majorTickStyle, minorTickStyle);
+    }
+
     /**
      * This is the minimum/maximum current data value and it is used while auto ranging. Package private solely for test purposes
      *
@@ -367,10 +374,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public AbstractAxisParameter() {
         super();
-        getStyleClass().setAll("axis");
-        majorTickStyle.getStyleClass().add("axis-tick-mark");
-        minorTickStyle.getStyleClass().add("axis-minor-tick-mark");
-        getChildren().addAll(axisLabel, majorTickStyle, minorTickStyle);
         autoRangingProperty().addListener(ch -> {
             // disable auto grow if auto range is enabled
             if (isAutoRanging()) {
@@ -408,9 +411,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         };
         minProperty().addListener(userLimitChangeListener);
         maxProperty().addListener(userLimitChangeListener);
-        majorTickStyle.applyCss();
-        minorTickStyle.applyCss();
-        axisLabel.applyCss();
 
         minProperty().addListener(scaleChangeListener);
         maxProperty().addListener(scaleChangeListener);
