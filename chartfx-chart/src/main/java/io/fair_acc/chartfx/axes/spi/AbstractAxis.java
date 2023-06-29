@@ -44,14 +44,9 @@ import io.fair_acc.dataset.utils.SoftHashMap;
 public abstract class AbstractAxis extends AbstractAxisParameter implements Axis {
     protected static final double MIN_NARROW_FONT_SCALE = 0.7;
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
-    protected static final int RANGE_ANIMATION_DURATION_MS = 700;
-    protected static final int BURST_LIMIT_CSS_MS = 3000;
-    private long lastCssUpdate;
-    private boolean callCssUpdater;
     private final transient Canvas canvas = new ResizableCanvas();
     protected boolean labelOverlap;
     protected double scaleFont = 1.0;
-    protected final ReentrantLock lock = new ReentrantLock();
     protected double maxLabelHeight;
     protected double maxLabelWidth;
 
@@ -188,9 +183,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         drawAxisPre();
-
-        // update CSS data
-        updateCSS();
+        
         final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
 
         if (!isTickMarkVisible()) {
@@ -1336,28 +1329,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * reaction.
      */
     protected void tickMarksUpdated() { // NOPMD by rstein function can but does not have to be overwritten
-    }
-
-    protected void updateCSS() {
-        final long now = System.nanoTime();
-        final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCssUpdate);
-        if (diffMillisSinceLastUpdate < AbstractAxis.BURST_LIMIT_CSS_MS) {
-            if (!callCssUpdater) {
-                callCssUpdater = true;
-                // repaint 20 ms later in case this was just a burst operation
-                final var kf1 = new KeyFrame(Duration.millis(20), e -> requestLayout());
-
-                final var timeline = new Timeline(kf1);
-                Platform.runLater(timeline::play);
-            }
-
-            return;
-        }
-        lastCssUpdate = now;
-        callCssUpdater = false;
-        getMajorTickStyle().applyCss();
-        getMinorTickStyle().applyCss();
-        getAxisLabel().applyCss();
     }
 
     /**

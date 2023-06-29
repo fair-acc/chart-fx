@@ -139,8 +139,6 @@ public class ColorGradientAxis extends DefaultNumericAxis {
 
         drawAxisPre();
 
-        // update CSS data
-        updateCSS();
         final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
 
         // draw colorBar
