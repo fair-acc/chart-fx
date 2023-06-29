@@ -35,7 +35,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 /**
  * @author rstein
  */
-class RollingBufferSortedTreeSample extends ChartSample {
+public class RollingBufferSortedTreeSample extends ChartSample {
     private static final String MONOSPACED = "Monospaced";
     private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSortedTreeSample.class);
     public final LimitedIndexedTreeDataSet rollingBufferDipoleCurrent = new LimitedIndexedTreeDataSet(
