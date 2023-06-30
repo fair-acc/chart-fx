@@ -73,7 +73,8 @@ public class TimeAxisRangeSample extends ChartSample {
                     xAxisDyn.minProperty().set(now - range);
                     final String text = "actual range [s]: " + String.format("%#.3f", range) + " ("
                                       + String.format("%#.1f", range / 3600 / 24) + " days)";
-                    xAxisDyn.setTickUnit(range / 12);
+                    xAxisDyn.setAutoRanging(false);
+                    xAxisDyn.setUserTickUnit(range / 12);
                     xAxisDyn.forceRedraw();
                     xAxis9Text.setText(text);
                 });
