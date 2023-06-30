@@ -26,6 +26,17 @@ public class AxisRange extends DataRange {
         this(other.getMin(), other.getMax(), other.getAxisLength(), other.getScale(), other.getTickUnit());
     }
 
+    public boolean set(final AxisRange range) {
+        boolean change = !this.equals(range);
+        if(change) {
+            super.set(range);
+            this.axisLength = range.axisLength;
+            this.scale = range.scale;
+            this.tickUnit = range.tickUnit;
+        }
+        return change;
+    }
+
     public AxisRange(final double lowerBound, final double upperBound, final double axisLength, final double scale,
             final double tickUnit) {
         super(lowerBound, upperBound);
