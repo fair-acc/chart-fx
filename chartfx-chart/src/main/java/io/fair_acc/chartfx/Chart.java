@@ -676,7 +676,7 @@ public abstract class Chart extends Region implements Observable {
         return toolBarPinned.get();
     }
 
-    private final PostLayoutHook redrawCanvasAction = new PostLayoutHook(this, this::redrawCanvas);
+    private final PostLayoutHook drawPhase = new PostLayoutHook(this, this::drawChart);
 
     @Override
     public void layoutChildren() {
@@ -700,7 +700,7 @@ public abstract class Chart extends Region implements Observable {
         doLayout();
 
         // request re-layout of canvas
-        redrawCanvasAction.runPostLayout();
+        drawPhase.runPostLayout();
 
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
 
@@ -990,6 +990,13 @@ public abstract class Chart extends Region implements Observable {
             change.getAddedSubList().forEach(this::pluginAdded);
         }
         updatePluginsArea();
+    }
+
+    protected void drawChart() {
+        for (Axis axis : axesList) {
+            axis.drawAxis();
+        }
+        redrawCanvas();
     }
 
     /**

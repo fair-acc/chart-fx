@@ -432,8 +432,6 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         initDataSets();
         xAxis.setSide(Side.TOP);
         yAxis.setSide(Side.RIGHT);
-        xAxis.invalidateCaches();
-        yAxis.invalidateCaches();
 
         if (graphDetached.get() && externalStage != null && externalStage.getOnCloseRequest() != null) {
             externalStage.getOnCloseRequest().handle(new WindowEvent(externalStage, WindowEvent.WINDOW_CLOSE_REQUEST));
@@ -943,10 +941,6 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
 
             FXUtils.runFX(() -> {
                 localChart.set(chart);
-                xAxis.invalidateCaches();
-                yAxis.invalidateCaches();
-                xAxis.applyCss();
-                yAxis.applyCss();
                 xAxis.setSide(Side.BOTTOM);
                 yAxis.setSide(Side.LEFT);
             });
@@ -955,8 +949,6 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
                 chart.getRenderers().remove(renderer);
                 chart.getAxes().clear();
                 renderer.getDatasets().get(0).removeListener(titleListener);
-                xAxis.invalidateCaches();
-                yAxis.invalidateCaches();
                 xAxis.setSide(Side.TOP);
                 yAxis.setSide(Side.RIGHT);
                 graphDetached.set(false);

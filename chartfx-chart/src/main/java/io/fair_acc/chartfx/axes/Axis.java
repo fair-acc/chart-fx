@@ -47,6 +47,12 @@ public interface Axis extends AxisDescription {
     void drawAxis(GraphicsContext gc, double axisWidth, double axisHeight);
 
     /**
+     * Draws the axis into the axis Canvas. This needs to be called from the containing Chart and
+     * before drawing other items. The axis may omit drawing if nothing has changed.
+     */
+    void drawAxis();
+
+    /**
      * forces redrawing of axis (via layoutChildren()). This is used to force an update while the main chart area is
      * being updated (a requestLayout()) would be executed only during the next pulse. This is used explicitly in the
      * Chart class. Outside use of this context should be limited to a minimum... handle with care
