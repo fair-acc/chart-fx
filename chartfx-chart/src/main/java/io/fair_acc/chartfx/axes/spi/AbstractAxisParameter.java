@@ -76,12 +76,18 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * auto).... actual is used to compute tick marks and defined by either user or auto (ie. auto axis is always being
      * computed), ALSO add maybe a zoom range (ie. limited by user-set/auto-range range)
      */
-    protected double oldAxisLength = -1;
-    protected double oldAxisMin = -Double.MAX_VALUE;
-    protected double oldAxisMax = -Double.MAX_VALUE;
-    protected double oldTickUnit = -Double.MAX_VALUE;
-
+    private static final AxisRange RANGE_INVALID = new AxisRange(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+    final AxisRange compRange = new AxisRange(RANGE_INVALID);
+    final AxisRange displayedRange = new AxisRange(RANGE_INVALID);
     protected final transient BooleanProperty valid = new SimpleBooleanProperty(this, "valid", false);
+    {
+        valid.addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                displayedRange.set(RANGE_INVALID);
+                requestLayout();
+            }
+        });
+    }
     protected final transient ObservableList<Double> majorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
     protected final transient ObservableList<Double> minorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
     protected final transient ObservableList<TickMark> majorTickMarks = FXCollections.observableArrayList(new NoDuplicatesList<>());
@@ -1302,7 +1308,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         } else {
             getAxisLabel().setText(axisPrimaryLabel + " [" + axisPrefix + localAxisUnit + "]");
         }
-        invalidate();
+        //invalidate(); // TODO: needed?
     }
 
     protected void updateScaleAndUnitPrefix() {
