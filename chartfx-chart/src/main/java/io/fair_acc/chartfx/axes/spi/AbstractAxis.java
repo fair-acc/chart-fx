@@ -429,11 +429,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     /**
      * Calculate a list of all the data values for each tick mark in range
      *
-     * @param length The length of the axis in display units
      * @param range A range object returned from autoRange()
      * @return A list of tick marks that fit along the axis if it was the given length
      */
-    protected abstract List<Double> calculateMajorTickValues(double length, AxisRange range);
+    protected abstract List<Double> calculateMajorTickValues(AxisRange range);
 
     /**
      * Calculate a list of the data values for every minor tick mark
@@ -561,7 +560,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final List<TickMark> oldTickMarks = majorTickMark ? getTickMarks() : getMinorTickMarks();
 
         final List<Double> oldTickValues = majorTickMark ? getTickMarkValues() : getMinorTickMarkValues();
-        final List<Double> newTickValues = majorTickMark ? calculateMajorTickValues(range.axisLength, range) : calculateMinorTickValues();
+        final List<Double> newTickValues = majorTickMark ? calculateMajorTickValues(range) : calculateMinorTickValues();
 
         if (!oldTickValues.isEmpty() && !oldTickMarks.isEmpty() && newTickValues.equals(oldTickValues)) {
             // do not need to recompute TickMarks just reposition them

@@ -425,7 +425,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     }
 
     @Override
-    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange axisRange) {
+    protected List<Double> calculateMajorTickValues(final AxisRange axisRange) {
         final List<Double> tickValues = new ArrayList<>(getMaxMajorTickLabelCount());
         if (isLogAxis) {
             if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {

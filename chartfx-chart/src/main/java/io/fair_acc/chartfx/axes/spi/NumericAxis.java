@@ -461,7 +461,7 @@ public final class NumericAxis extends AbstractAxis {
     }
 
     @Override
-    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
+    protected List<Double> calculateMajorTickValues(final AxisRange range) {
         if (range.getLowerBound() == range.getUpperBound() || range.getTickUnit() <= 0) {
             return Collections.singletonList(range.getLowerBound());
         }

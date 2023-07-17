@@ -72,7 +72,7 @@ class AbstractAxisTests {
 
         Assertions.assertDoesNotThrow(() -> axis.computeTickMarks(autoRange, false));
 
-        List<Number> numberList = Collections.unmodifiableList(axis.calculateMajorTickValues(DEFAULT_AXIS_LENGTH, autoRange));
+        List<Number> numberList = Collections.unmodifiableList(axis.calculateMajorTickValues(autoRange));
         axis.invalidateRange(new ArrayList<>(numberList));
     }
 
@@ -267,7 +267,7 @@ class AbstractAxisTests {
         }
 
         @Override
-        protected List<Double> calculateMajorTickValues(final double length, final AxisRange axisRange) {
+        protected List<Double> calculateMajorTickValues(final AxisRange axisRange) {
             final List<Double> majorTicks = new ArrayList<>();
             final double range = Math.abs(axisRange.getMax() - axisRange.getMin());
             final double min = Math.min(getMin(), getMax());

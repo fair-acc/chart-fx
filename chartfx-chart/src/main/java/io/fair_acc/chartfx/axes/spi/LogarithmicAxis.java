@@ -330,7 +330,7 @@ public class LogarithmicAxis extends AbstractAxis {
     }
 
     @Override
-    protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange range) {
+    protected List<Double> calculateMajorTickValues(final AxisRange range) {
         if (range == null) {
             throw new InvalidParameterException("range is null");
         }
