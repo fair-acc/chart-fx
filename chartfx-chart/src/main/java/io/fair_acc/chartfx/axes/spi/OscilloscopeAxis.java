@@ -237,7 +237,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     }
 
     @Override
-    protected List<Double> calculateMajorTickValues(double length, AxisRange axisRange) {
+    protected List<Double> calculateMajorTickValues(AxisRange axisRange) {
         final List<Double> tickValues = new ArrayList<>();
         if (axisRange.getMin() == axisRange.getMax() || axisRange.getTickUnit() <= 0) {
             return Collections.singletonList(axisRange.getMin());

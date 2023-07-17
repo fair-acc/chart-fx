@@ -191,7 +191,13 @@ public class TimeAxisNonLinearSample extends ChartSample {
         }
 
         @Override
-        protected List<Double> calculateMajorTickValues(final double axisLength, final AxisRange axisRange) {
+        protected List<Double> calculateMajorTickValues(final AxisRange axisRange) {
+            // TODO:
+            //  axisLength used to be passed in, but the ticks should be computed before the length is available.
+            //  this example is the only one that depends on the length, but there is already a dependency on
+            //  getWidth() in getValueForDisplay(), so we might as well use it here. Overall, the example could
+            //  probably be refactored to work on the range directly.
+            final double axisLength = getWidth();
             final int nTicks = getMaxMajorTickLabelCount();
             final List<Double> tickValues = new ArrayList<>(nTicks);
 
