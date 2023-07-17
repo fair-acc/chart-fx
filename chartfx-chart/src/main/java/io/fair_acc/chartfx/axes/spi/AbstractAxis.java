@@ -3,12 +3,14 @@ package io.fair_acc.chartfx.axes.spi;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.ToDoubleFunction;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
+import javafx.geometry.Bounds;
 import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
@@ -476,30 +478,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             // default axis size for uninitalised axis
             return 150;
         }
-        computeTickMarksForLength(width);
-
-/*        if (getTickMarks().isEmpty()) {
-            final AxisRange range = autoRange(width);
-            computeTickMarks(range, true);
-            invalidate();
-        }*/
-
-        // we need to first auto range as this may/will effect tick marks
-        // calculate max tick label height
-        // calculate the new tick mark label height
-        final double maxLabelHeightLocal = isTickLabelsVisible() ? maxLabelHeight : 0.0;
-
-        // calculate tick mark length
-        final double tickMarkLength = isTickMarkVisible() && (getTickLength() > 0) ? getTickLength() : 0;
-        // calculate label height
-        final Text axisLabel = getAxisLabel();
-        final String axisLabelText = axisLabel.getText();
-        final double labelHeight = (axisLabelText == null) || axisLabelText.isEmpty() ? 0 : axisLabel.prefHeight(-1) + (2 * getAxisLabelGap());
-        final double shiftedLabels = ((getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT) && isLabelOverlapping())
-                                                  || (getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT)
-                                           ? labelHeight
-                                           : 0.0;
-        return tickMarkLength + maxLabelHeightLocal + labelHeight + shiftedLabels;
+        return computePrefLength(width, Bounds::getHeight);
     }
 
     /**
@@ -515,26 +494,53 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             // default axis size for uninitalised axis
             return 150;
         }
+        return computePrefLength(height, Bounds::getWidth);
+    }
 
-        if (!isNeedsLayout()) {
+    private double computePrefLength(final double otherSideLength, ToDoubleFunction<Bounds> getTextLength) {
+
+        if (!getTickMarkValues().isEmpty() && !isNeedsLayout() && Double.isFinite(cachedPrefLength)) {
             return cachedPrefLength;
         }
-        computeTickMarksForLength(height);
 
-        // calculate max tick label width
-        final double maxLabelWidthLocal = isTickLabelsVisible() ? maxLabelWidth : 0.0;
-        // calculate tick mark length
-        final double tickMarkLength = isTickMarkVisible() && (getTickLength() > 0) ? getTickLength() : 0;
-        // calculate label height
+        // Length of the marks
+        double tickLength = 0;
+        if (isTickMarkVisible() && getTickLength() > 0) {
+            tickLength = getTickLength();
+        }
+
+        // Maximum length of the tick labels
+        // TODO: maybe there is a better location, but for now generate the tick marks here.
+        double tickLabelLength = 0;
+        if (isTickLabelsVisible()) {
+            double maxLabelLength = 0;
+            var ticks = computeTickMarks(getRange(), true);
+            for (TickMark tick : ticks) {
+                maxLabelLength = Math.max(maxLabelLength, getTextLength.applyAsDouble(tick.getBoundsInParent()));
+            }
+
+            // TODO: check whether the overlap check requires the size to be set
+            final boolean shiftLabels = (getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT)
+                    || (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT && checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(),
+                    isInvertedAxis(), false));
+            if (shiftLabels) {
+                tickLabelLength = 2 * maxLabelLength + 3 * getTickLabelGap();
+            } else {
+                tickLabelLength = maxLabelLength + 2 * getTickLabelGap();
+            }
+
+        }
+
+        // Size of the axis label w/ units
+        double axisLabelWidth = 0;
         final Text axisLabel = getAxisLabel();
-        final String axisLabelText = axisLabel.getText();
-        final double labelHeight = (axisLabelText == null) || axisLabelText.isEmpty() ? 0 : axisLabel.prefHeight(-1) + (2 * getAxisLabelGap());
+        if (axisLabel.getText() != null && !axisLabel.getText().isBlank()) {
+            axisLabelWidth = getTextLength.applyAsDouble(axisLabel.getBoundsInParent()) + 2 * getAxisLabelGap();
+        }
 
-        final double shiftedLabels = ((getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT) && isLabelOverlapping())
-                                                  || (getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT)
-                                           ? labelHeight
-                                           : 0.0;
-        return cachedPrefLength = maxLabelWidthLocal + tickMarkLength + labelHeight + shiftedLabels;
+        // Total estimate
+        return cachedPrefLength = tickLength + tickLabelLength + axisLabelWidth;
+
     }
 
     private double cachedPrefLength = Double.NaN;
