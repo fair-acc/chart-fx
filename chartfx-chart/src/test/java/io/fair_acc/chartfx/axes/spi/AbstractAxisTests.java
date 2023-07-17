@@ -72,8 +72,7 @@ class AbstractAxisTests {
 
         Assertions.assertDoesNotThrow(() -> axis.computeTickMarks(autoRange, false));
 
-        List<Number> numberList = Collections.unmodifiableList(axis.calculateMajorTickValues(autoRange));
-        axis.invalidateRange(new ArrayList<>(numberList));
+        axis.invalidateRange();
     }
 
     @Test
