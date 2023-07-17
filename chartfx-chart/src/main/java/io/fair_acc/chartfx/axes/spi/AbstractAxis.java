@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import io.fair_acc.chartfx.ui.utils.PostLayoutHook;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -317,11 +316,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * Called when data has changed and the range may not be valid anymore. This is only called by the chart if
      * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
      * happen on next layout pass.
-     *
-     * @param data The current set of all data that needs to be plotted on this axis N.B. not needed anymore now stored in getAutoRange()
      */
     @Override
-    public void invalidateRange(final List<Number> data) {
+    public void invalidateRange() {
         final boolean oldState = autoNotification().getAndSet(false);
         final AxisRange autoRange = autoRange(getLength()); // derived axes may potentially pad and round limits
         if (set(autoRange.getMin(), autoRange.getMax())) {

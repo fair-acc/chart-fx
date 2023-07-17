@@ -326,6 +326,11 @@ class AbstractAxisParameterTests {
         }
 
         @Override
+        public void drawAxis() {
+            // deliberately not implemented
+        }
+
+        @Override
         public AxisRange getRange() {
             return null;
         }
@@ -377,7 +382,7 @@ class AbstractAxisParameterTests {
         }
 
         @Override
-        public void invalidateRange(List<Number> data) {
+        public void invalidateRange() {
             // deliberately not implemented
         }
 
