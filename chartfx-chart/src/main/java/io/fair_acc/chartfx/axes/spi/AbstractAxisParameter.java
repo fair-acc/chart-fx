@@ -71,6 +71,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     {
         StyleUtil.addStyles(this, "axis");
         getChildren().addAll(axisLabel, tickLabelStyle, majorTickStyle, minorTickStyle);
+        majorTickStyle.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
+        minorTickStyle.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
+        tickLabelStyle.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
+        axisLabel.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
     }
 
     protected final transient BooleanProperty valid = new SimpleBooleanProperty(this, "valid", false);
