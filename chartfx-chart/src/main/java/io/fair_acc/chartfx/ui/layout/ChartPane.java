@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.ui.layout;
 
+import io.fair_acc.chartfx.axes.spi.AbstractAxis;
 import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -20,17 +21,17 @@ import javafx.scene.layout.Pane;
  * a StackPane. Side nodes get laid out next to each other, similar to the behavior if
  * they were wrapped in a HBox or VBox.
  * <p>
- * Note: to start off with we can consider the axis height static (a function
- * of letter height), and the width to be a function of the axis resolution and
- * label size (more letters => wider). This breaks down for rotated labels,
- * so in the future we need to add a secondary check whether the actual size
- * resulted in a range/resolution (digits) change.
+ * The axis size depends on the resolution, the rotation, and whether labels overlap
+ * (i.e. label shifting). Since the real overlap is not know until after the layout,
+ * we use some basic heuristics for approximation to avoid recursive loops.
+ * 1) guess an approximate height of the content
+ * 2) determine the content width based on approximated vertical labels
+ * 3) determine the content height based on correct horizontal labels
+ * 4) lay out everything
  * <p>
- * TODO: disallow computePrefWidth and computePrefHeight?
  * TODO: remove nodes if the area is too small?
  *
- * @author Florian Enner
- * @since 22 Jun 2023
+ * @author ennerf
  */
 public class ChartPane extends Pane {
 
@@ -105,7 +106,7 @@ public class ChartPane extends Pane {
 
     public void remove(Node node, Node... more){
         getChildren().remove(node);
-        if(more.length > 0){
+        if(more.length > 0) {
             getChildren().removeAll(more);
         }
     }
@@ -116,6 +117,22 @@ public class ChartPane extends Pane {
         requestLayout();
     }
 
+    private double estimateHeightOfAllHorizontalAxes() {
+        double sum = 0;
+        for (Node child : getChildren()) {
+            if (!child.isManaged() || !(child instanceof AbstractAxis)) {
+                continue;
+            }
+            Object location = getLocation(child);
+            if(location == Side.TOP || location == Side.BOTTOM) {
+                // default to use the previous height or some set minimum
+                var axis = (AbstractAxis) child;
+                sum += Math.max(0, axis.getHeight() > 0 ? axis.getHeight() : axis.getMinHeight());
+            }
+        }
+        return sum;
+    }
+
     @Override
     protected void layoutChildren() {
         // Account for margin and border insets
@@ -124,40 +141,18 @@ public class ChartPane extends Pane {
         final double width = snapSizeX(getWidth()) - xLeft - snappedRightInset();
         final double height = snapSizeY(getHeight()) - yTop - snappedBottomInset();
 
-        // Determine height of all horizontal parts
+        // Reset state
         cachedPrefSize.clear();
         cachedPrefSize.size(getChildren().size());
-        var topHeight = 0;
-        var bottomHeight = 0;
+        double prefSize;
+        int i;
 
-        int i = 0;
-        double prefSize = 0;
-        for (Node child : getChildren()) {
-            if (!child.isManaged()) continue;
-            Object location = getLocation(child);
-            if (location instanceof Side) {
-                switch ((Side) location) {
-                    case TOP:
-                        prefSize = getPrefHeight(child, width);
-                        cachedPrefSize.set(i, prefSize);
-                        topHeight += prefSize;
-                        break;
-                    case BOTTOM:
-                        prefSize = getPrefHeight(child, width);
-                        cachedPrefSize.set(i, prefSize);
-                        bottomHeight += prefSize;
-                        break;
-                    case CENTER_HOR:
-                        prefSize = getPrefHeight(child, width);
-                        cachedPrefSize.set(i, prefSize);
-                        break;
-                }
-            }
-            i++;
-        }
-        final double contentHeight = height - topHeight - bottomHeight;
+        // (1) Approximate axis height to improve the label overlap estimate
+        final double guessedContentHeight = height - estimateHeightOfAllHorizontalAxes();
 
-        // Determine width of all vertical parts
+        // (2) Determine width of all vertical parts. The labels are generated
+        // for the approximate height, so the overlap may not be perfect, but it's
+        // a pretty good guess with a low cost of failure.
         double leftWidth = 0;
         double rightWidth = 0;
         i = 0;
@@ -167,17 +162,17 @@ public class ChartPane extends Pane {
             if (location instanceof Side) {
                 switch ((Side) location) {
                     case LEFT:
-                        prefSize = getPrefWidth(child, contentHeight);
+                        prefSize = getPrefWidth(child, guessedContentHeight);
                         cachedPrefSize.set(i, prefSize);
                         leftWidth += prefSize;
                         break;
                     case RIGHT:
-                        prefSize = getPrefWidth(child, contentHeight);
+                        prefSize = getPrefWidth(child, guessedContentHeight);
                         cachedPrefSize.set(i, prefSize);
                         rightWidth += prefSize;
                         break;
                     case CENTER_VER:
-                        prefSize = getPrefWidth(child, contentHeight);
+                        prefSize = getPrefWidth(child, guessedContentHeight);
                         cachedPrefSize.set(i, prefSize);
                         break;
                 }
@@ -185,6 +180,36 @@ public class ChartPane extends Pane {
             i++;
         }
         final double contentWidth = width - leftWidth - rightWidth;
+
+        // (3) Determine the height of all horizontal parts. The labels are generated
+        // for the actual width, so the placement should be correct.
+        var topHeight = 0;
+        var bottomHeight = 0;
+        i = 0;
+        for (Node child : getChildren()) {
+            if (!child.isManaged()) continue;
+            Object location = getLocation(child);
+            if (location instanceof Side) {
+                switch ((Side) location) {
+                    case TOP:
+                        prefSize = getPrefHeight(child, contentWidth);
+                        cachedPrefSize.set(i, prefSize);
+                        topHeight += prefSize;
+                        break;
+                    case BOTTOM:
+                        prefSize = getPrefHeight(child, contentWidth);
+                        cachedPrefSize.set(i, prefSize);
+                        bottomHeight += prefSize;
+                        break;
+                    case CENTER_HOR:
+                        prefSize = getPrefHeight(child, contentWidth);
+                        cachedPrefSize.set(i, prefSize);
+                        break;
+                }
+            }
+            i++;
+        }
+        final double contentHeight = height - topHeight - bottomHeight;
 
         // Layout all center content
         final var xContent = xLeft + leftWidth;
