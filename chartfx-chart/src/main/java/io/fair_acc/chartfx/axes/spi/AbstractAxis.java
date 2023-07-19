@@ -585,7 +585,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 break;
 
             case NARROW_FONT:
-                // TODO: scaleFont is currently not used, but it looks like it wasn't before either?
                 // '+1' tick label more because first and last tick are half outside axis length
                 double maxLabelSize = getSide().isHorizontal() ? maxLabelWidth : maxLabelHeight;
                 double projectedLengthFromIndividualMarks = (majorTickMarks.size() + 1) * maxLabelSize;
@@ -628,7 +627,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
         getMinorTickMarkValues().setAll(newTickValues);
 
-        // TODO: do we actually need the TickMark objects? Are they used for anything other than as a cache for the display position?
         List<TickMark> marks = FXUtils.sizedList(getMinorTickMarks(), newTickValues.size(), () -> new TickMark(getTickLabelStyle()));
         int i = 0;
         for (var tick : newTickValues) {
@@ -815,11 +813,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double tickLabelGap = getTickLabelGap();
         final boolean isHorizontal = getSide().isHorizontal();
 
-        // save css-styled label parameters
-        gc.save();
-        getTickLabelStyle().copyStyleTo(gc);
-
-        // determine the offsets for the label lines TODO: account for font scaling
+        // determine the offsets for the label lines
         double altOffset = !shiftLabels ? 0 : tickLabelGap + (isHorizontal ? maxLabelHeight : maxLabelWidth);
         double line0 = 0;
         switch (getSide()) {
@@ -864,7 +858,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         }
 
-        gc.restore();
     }
 
     protected void drawTickMarks(final GraphicsContext gc, final double axisLength, final double axisWidth,
@@ -1090,7 +1083,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             if (!current.isVisible()) {
                 continue;
             }
-            if (lastVisible != null && isTickLabelsOverlap(lastVisible, current, getSide(), getTickLabelGap())) {
+            if (lastVisible != null && isTickLabelsOverlap(lastVisible, current, getSide(), getTickLabelGap(), scaleFont)) {
                 return true;
             }
             lastVisible = current;
@@ -1107,9 +1100,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @param gap  minimum space between labels
      * @return true if labels overlap
      */
-    private static boolean isTickLabelsOverlap(final TickMark m1, final TickMark m2, final Side side, final double gap) {
+    private static boolean isTickLabelsOverlap(final TickMark m1, final TickMark m2, final Side side, final double gap, final double scaleFont) {
         final double available = Math.abs(m2.getPosition() - m1.getPosition());
-        final double required = gap + (side.isHorizontal()
+        final double required = gap + scaleFont * (side.isHorizontal()
                 ? (m1.getWidth() + m2.getWidth())/2
                 : (m1.getHeight() + m2.getHeight())/2);
         return available < required;
@@ -1117,18 +1110,30 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final TextStyle label) {
         gc.save();
-        label.copyStyleTo(gc);
         gc.translate(x, y);
+        label.copyStyleTo(gc);
         gc.fillText(label.getText(), 0, 0);
         gc.restore();
     }
 
     protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
                                             final double scaleFont, final TickMark tickMark) {
-        // Needs the style to be set beforehand
-        gc.fillText(tickMark.getText(), x, y);
-        // TODO: support scaleFont
-        // TODO: should we also support strokeText() for outlined text? maybe defaults to transparent?
+        gc.save();
+        gc.translate(x, y); // translate before applying any rotation
+        tickMark.getStyle().copyStyleTo(gc);
+
+        if (scaleFont != 1.0) {
+            gc.scale(scaleFont, scaleFont);
+        }
+
+        gc.fillText(tickMark.getText(), 0, 0);
+
+        // TODO: support strokes for outlined labels?
+        // if (!Objects.equals(style.getStroke(), Color.TRANSPARENT) && !Objects.equals(style.getStroke(), style.getFill())) {
+        //     gc.strokeText(tickMark.getText(), 0, 0);
+        // }
+
+        gc.restore();
     }
 
     /**
