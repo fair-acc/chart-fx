@@ -167,7 +167,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         }
         if (!isTickMarkVisible()) {
             // draw axis title w/o major TickMark
-            drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), null, getTickLength());
+            drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
             drawAxisPost();
             return;
         }
@@ -191,7 +191,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
 
         // draw axis title
-        drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), majorTicks, getTickLength());
+        drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
         drawAxisPost();
         gc.restore(); // restore colorBar offset
     }
