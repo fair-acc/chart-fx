@@ -1,7 +1,6 @@
 package io.fair_acc.chartfx.axes.spi;
 
 import java.util.List;
-import java.util.function.ToDoubleFunction;
 
 import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
@@ -9,9 +8,7 @@ import io.fair_acc.chartfx.utils.FXUtils;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
-import javafx.geometry.Bounds;
 import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
@@ -39,6 +36,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected static final double MIN_NARROW_FONT_SCALE = 0.7;
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     private final transient Canvas canvas = new ResizableCanvas();
+    private boolean shiftLabels;
     protected boolean labelOverlap;
     protected double scaleFont = 1.0;
     protected double maxLabelHeight;
@@ -177,7 +175,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // (long) line along the axis with the style of the major-tick is
         // visible
         updateTickMarkPositions(majorTickMarks);
-        hideCollidingLabels(majorTickMarks);
+        updateOverlapVisibility(majorTickMarks);
 
         // computeTickMarksForLength(getLength());
 
@@ -463,6 +461,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         maxLabelHeight = 0;
         maxLabelWidth = 0;
         scaleFont = 1.0;
+        shiftLabels = false;
         labelOverlap = false;
 
         // Size of the axis label w/ units
@@ -493,68 +492,31 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (isTickLabelsVisible()) {
 
             // Figure out maximum sizes
-            double totalLabelsSize = 0;
-            double maxLabelSize = 0;
             for (TickMark tickMark : getTickMarks()) {
-                tickMark.setVisible(true); // default to all visible
-                var tickSize = (isHorizontal ? tickMark.getWidth() : tickMark.getHeight())
-                        + 2 * getTickLabelSpacing(); // TODO: copied from before. Is this really 2x for each?
-                totalLabelsSize += tickSize;
-                maxLabelSize = Math.max(maxLabelSize, tickSize);
                 maxLabelHeight = Math.max(maxLabelHeight, tickMark.getHeight());
                 maxLabelWidth = Math.max(maxLabelWidth, tickMark.getWidth());
             }
 
-            // '+1' tick label more because first and last tick are half outside axis length
-            final double projectedLengthFromIndividualMarks = (majorTickMarks.size() + 1) * maxLabelSize;
-
+            // Label shifting is the only overlap policy relevant to the layout
             switch (getOverlapPolicy()) {
-                case NARROW_FONT:
-                    final double scale = maxAxisLength / projectedLengthFromIndividualMarks;
-                    if ((scale >= MIN_NARROW_FONT_SCALE) && (scale <= MAX_NARROW_FONT_SCALE)) {
-                        scaleFont = scale;
-                        break;
-                    }
-                    scaleFont = Math.min(Math.max(scale, MIN_NARROW_FONT_SCALE), MAX_NARROW_FONT_SCALE);
-                    // TODO: should this change the max width/height numbers?
-                    // fall through to SKIP_ALT
-                    // $FALL-THROUGH$
-                case SKIP_ALT:
-                    var numLabelsToSkip = 0;
-                    if ((maxLabelSize > 0) && (maxAxisLength < totalLabelsSize)) {
-                        numLabelsToSkip = (int) (projectedLengthFromIndividualMarks / maxAxisLength);
-                        labelOverlap = true;
-                    }
-                    if (numLabelsToSkip > 0) {
-                        var tickIndex = 0;
-                        for (final TickMark m : majorTickMarks) {
-                            if (m.isVisible()) {
-                                m.setVisible((tickIndex++ % numLabelsToSkip) == 0);
-                            }
-                        }
-                    }
-                    break;
                 case FORCED_SHIFT_ALT:
-                    labelOverlap = true;
+                    shiftLabels = true;
                     break;
                 case SHIFT_ALT:
                     // TODO:
-                    //   For now we use a simple heuristic, but this should be based on the actual
-                    //   display position to support non-linear axes  and non-uniform labels. The
-                    //   'getDisplayPosition()' method uses the node size though, and setting that
-                    //   may trigger a new layout. Fixing this will need more refactoring.
-                    //   previous check based on:
-                    //     checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false)
-                    labelOverlap = projectedLengthFromIndividualMarks > maxAxisLength;
+                    //  The max size here does not represent the actual size.
+                    //  Maybe we can approximate a more realistic length by
+                    //  subtracting a minimum size for each axis that will reduce it.
+                    shiftLabels = computeLabelOverlapForLength(maxAxisLength);
                     break;
             }
 
-            // Add an extra row/col for shifted labels
+            // Add extra space for shifted labels
             tickLabelLength = isHorizontal ? maxLabelHeight : maxLabelWidth;
-            if (labelOverlap) {
-                tickLabelLength = 2 * tickLabelLength + 3 * getTickLabelGap();
+            if (shiftLabels) {
+                tickLabelLength = 2 * tickLabelLength + 3 * getTickLabelSpacing();
             } else {
-                tickLabelLength += 2 * getTickLabelGap();
+                tickLabelLength += 2 * getTickLabelSpacing();
             }
 
         }
@@ -570,13 +532,72 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     }
 
-    private void hideCollidingLabels(List<TickMark> tickMarks) {
-        if (!labelOverlap) {
-            checkOverlappingLabels(0, 1, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
-        } else {
-            checkOverlappingLabels(0, 2, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
-            checkOverlappingLabels(1, 2, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), true);
+    private boolean computeLabelOverlapForLength(double length) {
+        // TODO:
+        //   For now we use a simple heuristic, but this should be based on the actual
+        //   display position to support non-linear axes  and non-uniform labels. This
+        //   will require more refactoring as 'getDisplayPosition()' uses the node size,
+        //   which will trigger a new layout when set arbitrarily.
+        //   previous check based on:
+        //     checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false)
+
+        double maxLabelSize = getSide().isHorizontal() ? maxLabelWidth : maxLabelHeight;
+        maxLabelSize += 2 * getTickLabelGap(); // TODO: 2x copied from before. is this correct?
+
+        // '+1' tick label more because first and last tick are half outside axis length
+        double projectedTotalLength = (getTickMarks().size() + 1) * maxLabelSize;
+        return projectedTotalLength > length;
+    }
+
+    private void updateOverlapVisibility(List<TickMark> tickMarks) {
+        // Default to all visible
+        for (TickMark tickMark : tickMarks) {
+            tickMark.setVisible(true);
         }
+
+        // Check whether any labels overlap.
+        // Note: We technically only need to compute it for cases that
+        // hide/modify labels, but we leave it in for diagnostics.
+        if (!shiftLabels) {
+            labelOverlap = checkOverlappingLabels(0, 1, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false);
+        } else {
+            labelOverlap = checkOverlappingLabels(0, 2, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false)
+                    || checkOverlappingLabels(1, 2, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false);
+        }
+
+        // No overlap -> no need for an overlap policy
+        if (!labelOverlap) {
+            return;
+        }
+
+        switch (getOverlapPolicy()) {
+            case DO_NOTHING:
+                break;
+
+            case FORCED_SHIFT_ALT:
+            case SHIFT_ALT:
+                // the shift flag was already set during layout, and
+                // we can't change it without triggering a new layout.
+                break;
+
+            case SKIP_ALT:
+                // make every other label visible to gain a factor 2 margin
+                for (int i = 1; i < tickMarks.size(); i += 2) {
+                    tickMarks.get(i).setVisible(false);
+                }
+                break;
+
+            case NARROW_FONT:
+                // TODO: scaleFont is currently not used, but it looks like it wasn't before either?
+                // '+1' tick label more because first and last tick are half outside axis length
+                double maxLabelSize = getSide().isHorizontal() ? maxLabelWidth : maxLabelHeight;
+                double projectedLengthFromIndividualMarks = (majorTickMarks.size() + 1) * maxLabelSize;
+                double scale = getLength() / projectedLengthFromIndividualMarks;
+                scaleFont = Math.min(Math.max(scale, MIN_NARROW_FONT_SCALE), MAX_NARROW_FONT_SCALE);
+                break;
+
+        }
+
     }
 
     protected void updateMajorTickMarks(AxisRange range) {
@@ -668,10 +689,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // find largest tick label size (width for horizontal axis, height for
         // vertical axis)
         final double tickLabelSize = isHorizontal ? maxLabelHeight : maxLabelWidth;
-        final double shiftedLabels = ((getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT) && isLabelOverlapping())
-                                                  || (getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT)
-                                           ? tickLabelSize + tickLabelGap
-                                           : 0.0;
+        final double shiftedLabels = shiftLabels ? tickLabelSize + tickLabelGap : 0.0;
 
         // N.B. streams, filter, and forEach statements have been evaluated and
         // appear to give no (or negative) performance for little/arguable
@@ -795,6 +813,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if ((tickLength <= 0) || tickMarks.isEmpty()) {
             return;
         }
+
+        // TODO: this re-computes all overlaps etc. and doesn't necessarily match
 
         // for relative positioning of axes drawn on top of the main canvas
         final double axisCentre = getAxisCenterPosition();
