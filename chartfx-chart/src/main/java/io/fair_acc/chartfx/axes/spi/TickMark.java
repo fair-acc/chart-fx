@@ -26,7 +26,7 @@ public class TickMark {
     private double width = Double.NaN; // the label width in display units
 
     private double tickPosition = Double.NaN; // tick position along axis in display units
-    private final BooleanProperty visible = new SimpleBooleanProperty(true); // whether the tick mark should be displayed
+    private boolean visible = true; // whether the tick mark should be displayed
     private final TextStyle style;
     private long usedStyle = -1;
 
@@ -121,11 +121,11 @@ public class TickMark {
     }
 
     public boolean isVisible() {
-        return visible.get();
+        return visible;
     }
 
     public void setVisible(boolean visible) {
-        this.visible.set(visible);
+        this.visible = visible;
     }
 
     // ------- deprecated methods for backwards compatibility with unit tests -------
@@ -137,11 +137,6 @@ public class TickMark {
         setValue(tickValue, tickMarkLabel);
         this.style.setRotate(tickRotation);
         this.tickPosition = tickPosition;
-    }
-
-    @Deprecated // for testing purposes
-    BooleanProperty visibleProperty() {
-        return visible;
     }
 
     @Deprecated // for testing purposes
