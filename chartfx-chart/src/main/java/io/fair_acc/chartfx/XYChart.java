@@ -299,26 +299,13 @@ public class XYChart extends Chart {
         while (change.next()) {
             change.getRemoved().forEach(axis -> {
                 AssertUtils.notNull("to be removed axis is null", axis);
-                // TODO:
-                //  check if axis is associated with an existing renderer, if yes
-                //  -&gt; throw an exception
-                if (axis instanceof Node) {
-                    axesAndCanvasPane.remove((Node) axis);
-                }
+                // TODO: throw an exception if axis is associated with an existing renderer?
             });
 
             change.getAddedSubList().forEach(axis -> {
                 // check if axis is associated with an existing renderer,
                 // if yes -&gt; throw an exception
                 AssertUtils.notNull("to be added axis is null", axis);
-
-                final Side side = axis.getSide();
-                if (side == null) {
-                    throw new InvalidParameterException("axis '" + axis.getName() + "' has 'null' as side being set");
-                }
-                if (axis instanceof Node) {
-                    axesAndCanvasPane.addSide(side, (Node) axis);
-                }
             });
         }
 
