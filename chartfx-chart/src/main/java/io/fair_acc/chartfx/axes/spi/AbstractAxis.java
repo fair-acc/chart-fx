@@ -557,10 +557,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // Note: We technically only need to compute it for cases that
         // hide/modify labels, but we leave it in for diagnostics.
         if (!shiftLabels) {
-            labelOverlap = checkOverlappingLabels(0, 1, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false);
+            labelOverlap = isTickLabelsOverlap(tickMarks, 0, 1);
         } else {
-            labelOverlap = checkOverlappingLabels(0, 2, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false)
-                    || checkOverlappingLabels(1, 2, tickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false);
+            labelOverlap = isTickLabelsOverlap(tickMarks, 0, 2) || isTickLabelsOverlap(tickMarks, 1, 2);
         }
 
         // No overlap -> no need for an overlap policy
@@ -814,15 +813,14 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double axisCentre = getAxisCenterPosition();
         final AxisLabelOverlapPolicy overlapPolicy = getOverlapPolicy();
         final double tickLabelGap = getTickLabelGap();
+        final boolean isHorizontal = getSide().isHorizontal();
 
         // save css-styled label parameters
         gc.save();
-        var style = getTickLabelStyle();
-        var fontSize = style.getFont().getSize();
-        style.copyStyleTo(gc);
+        getTickLabelStyle().copyStyleTo(gc);
 
-        // determine the offsets for the label lines
-        double altOffset = shiftLabels ? tickLabelGap + fontSize: 0; // TODO: account for font scaling
+        // determine the offsets for the label lines TODO: account for font scaling
+        double altOffset = !shiftLabels ? 0 : tickLabelGap + (isHorizontal ? maxLabelHeight : maxLabelWidth);
         double line0 = 0;
         switch (getSide()) {
             case BOTTOM:
@@ -847,7 +845,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double line1 = line0 + altOffset;
 
         // draw the labels
-        boolean isHorizontal = getSide().isHorizontal();
         boolean isEven = false; // TODO: check why the flag/counter used to be based on the first tick value
         for (TickMark tickMark : tickMarks) {
             isEven = !isEven;
@@ -984,25 +981,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     }
 
-    private static boolean checkOverlappingLabels(final int start, final int stride,
-            List<TickMark> majorTickMarks, Side side, double gap, boolean isInverted, boolean makeInvisible) {
-        var labelHidden = false;
-        TickMark lastVisible = null;
-        for (int i = start; i < majorTickMarks.size(); i += stride) {
-            final var current = majorTickMarks.get(i);
-            if (!current.isVisible()) {
-                continue;
-            }
-            if (lastVisible == null || !isTickLabelsOverlap(side, isInverted, lastVisible, current, gap)) {
-                lastVisible = current;
-            } else {
-                labelHidden = true;
-                current.setVisible(!makeInvisible);
-            }
-        }
-        return labelHidden;
-    }
-
     protected double measureTickMarkLength(final Double major) {
         // N.B. this is a known performance hot-spot -> start optimisation here
         tmpTickMark.setValue(major, getTickMarkLabel(major));
@@ -1100,23 +1078,41 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
+     * @param majorTickMarks list of tick marks
+     * @param start start index into the list
+     * @param stride stride within the list
+     * @return true if any two subsequent visible labels overlap
+     */
+    private boolean isTickLabelsOverlap(final List<TickMark> majorTickMarks, final int start, final int stride) {
+        TickMark lastVisible = null;
+        for (int i = start; i < majorTickMarks.size(); i += stride) {
+            final var current = majorTickMarks.get(i);
+            if (!current.isVisible()) {
+                continue;
+            }
+            if (lastVisible != null && isTickLabelsOverlap(lastVisible, current, getSide(), getTickLabelGap())) {
+                return true;
+            }
+            lastVisible = current;
+        }
+        return false;
+    }
+
+    /**
      * Checks if two consecutive tick mark labels overlaps.
      *
+     * @param m1   first tick mark
+     * @param m2   second tick mark
      * @param side side of the Axis
-     * @param m1 first tick mark
-     * @param m2 second tick mark
-     * @param gap minimum space between labels
+     * @param gap  minimum space between labels
      * @return true if labels overlap
      */
-    private static boolean isTickLabelsOverlap(final Side side, final boolean isInverted, final TickMark m1,
-            final TickMark m2, final double gap) {
-        final double m1Size = side.isHorizontal() ? m1.getWidth() : m1.getHeight();
-        final double m2Size = side.isHorizontal() ? m2.getWidth() : m2.getHeight();
-        final double m1Start = m1.getPosition() - (m1Size / 2);
-        final double m1End = m1.getPosition() + (m1Size / 2);
-        final double m2Start = m2.getPosition() - (m2Size / 2);
-        final double m2End = m2.getPosition() + (m2Size / 2);
-        return side.isVertical() && !isInverted ? Math.abs(m1Start - m2End) <= gap : Math.abs(m2Start - m1End) <= gap;
+    private static boolean isTickLabelsOverlap(final TickMark m1, final TickMark m2, final Side side, final double gap) {
+        final double available = Math.abs(m2.getPosition() - m1.getPosition());
+        final double required = gap + (side.isHorizontal()
+                ? (m1.getWidth() + m2.getWidth())/2
+                : (m1.getHeight() + m2.getHeight())/2);
+        return available < required;
     }
 
     protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final TextStyle label) {
