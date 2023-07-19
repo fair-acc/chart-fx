@@ -143,47 +143,38 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if ((gc == null) || (getSide() == null)) {
             return;
         }
-
-        drawAxisPre();
-
         final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
 
-        if (!isTickMarkVisible()) {
-            // draw axis title w/o major TickMark
-            drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
-            drawAxisLine(gc, axisLength, axisWidth, axisHeight);
-            drawAxisPost();
-            return;
-        }
-
-        updateMinorTickMarks();
+        drawAxisPre();
         updateCachedVariables();
 
-        final ObservableList<TickMark> majorTicks = getTickMarks();
-        final ObservableList<TickMark> minorTicks = getMinorTickMarks();
+        if (isTickMarkVisible()) {
+            final ObservableList<TickMark> majorTicks = getTickMarks();
 
-        if (isMinorTickVisible()) {
-            // Don't draw minor ticks if there isn't enough space
-            double minRequiredLength = majorTicks.size() * (getMajorTickStyle().getStrokeWidth() + MIN_TICK_GAP)
-                    + minorTicks.size() * (getMinorTickStyle().getStrokeWidth() + MIN_TICK_GAP);
-            if (axisLength > minRequiredLength) {
-                updateTickMarkPositions(minorTickMarks);
-                drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
+            // Minor ticks. Ignore if there isn't enough space
+            if (isMinorTickVisible()) {
+                updateMinorTickMarks();
+                final ObservableList<TickMark> minorTicks = getMinorTickMarks();
+                double minRequiredLength = majorTicks.size() * (getMajorTickStyle().getStrokeWidth() + MIN_TICK_GAP)
+                        + minorTicks.size() * (getMinorTickStyle().getStrokeWidth() + MIN_TICK_GAP);
+                if (axisLength > minRequiredLength) {
+                    updateTickMarkPositions(minorTickMarks);
+                    drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
+                }
             }
+
+            // draw major tick-mark over minor tick-marks so that the visible (long) line
+            // along the axis with the style of the major-tick is visible
+            updateTickMarkPositions(majorTickMarks);
+            enforceOverlapPolicy(majorTickMarks);
+            drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
+            drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
+
         }
-
-        // draw major tick-mark over minor tick-marks so that the visible (long) line
-        // along the axis with the style of the major-tick is visible
-        updateTickMarkPositions(majorTickMarks);
-        enforceOverlapPolicy(majorTickMarks);
-
-        drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
-        drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
 
         // draw axis title and dominant line
         drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
         drawAxisLine(gc, axisLength, axisWidth, axisHeight);
-
         drawAxisPost();
     }
 
@@ -433,7 +424,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             // default axis size for uninitalised axis
             return 150;
         }
-        return computePrefLength(width);
+        return computePrefSize(width);
     }
 
     /**
@@ -449,31 +440,37 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             // default axis size for uninitalised axis
             return 150;
         }
-        return computePrefLength(height);
+        return computePrefSize(height);
     }
 
     // Note: elements need to match what gets drawn in drawAxis!
-    private double computePrefLength(final double maxAxisLength) {
+    private double computePrefSize(final double axisLength) {
 
         boolean isHorizontal = getSide().isHorizontal();
+        scaleFont = 1.0;
         maxLabelHeight = 0;
         maxLabelWidth = 0;
-        scaleFont = 1.0;
         shiftLabels = false;
         labelOverlap = false;
 
         // Size of the axis label w/ units
-        double axisLabelLength = 0;
+        double axisLabelSize = 0;
         updateAxisLabelAndUnit(); // TODO: is there a better spot to do it?
         final Text axisLabel = getAxisLabel();
         if (axisLabel.getText() != null && !axisLabel.getText().isBlank()) {
             var bounds = axisLabel.getBoundsInParent();
-            axisLabelLength = (isHorizontal ? bounds.getHeight() : bounds.getWidth()) + 2 * getAxisLabelGap();
+            axisLabelSize = (isHorizontal ? bounds.getHeight() : bounds.getWidth()) + 2 * getAxisLabelGap();
         }
 
         // Draws only a line w/ label, so we don't need any cached data
         if (!isTickMarkVisible()) {
-            return axisLabelLength + getMajorTickStyle().getStrokeWidth() + getTickLabelGap();
+            return axisLabelSize + getMajorTickStyle().getStrokeWidth() + getTickLabelGap();
+        }
+
+        // Size of the tick marks
+        double tickSize = 0;
+        if (isTickMarkVisible() && getTickLength() > 0) {
+            tickSize = getTickLength();
         }
 
         // TODO: can we cache here? what would be a valid condition?
@@ -481,12 +478,12 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return cachedPrefLength;
         }*/
 
-        // TODO: is there a better location for generating the major tick marks?
-        setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(maxAxisLength) : getUserTickUnit());
+        // Generate new tick marks TODO: is this using the node dimensions?
+        setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(axisLength) : getUserTickUnit());
         updateMajorTickMarks(getRange());
 
         // Maximum length of the tick labels
-        double tickLabelLength = 0;
+        double tickLabelSize = 0;
         if (isTickLabelsVisible()) {
 
             // Figure out maximum sizes
@@ -496,55 +493,49 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             }
 
             // Label shifting is the only overlap policy relevant to the layout
+            // TODO: should fontScale reduce the size?
             switch (getOverlapPolicy()) {
                 case FORCED_SHIFT_ALT:
                     shiftLabels = true;
                     break;
                 case SHIFT_ALT:
-                    // TODO:
-                    //  The max size here does not represent the actual size.
-                    //  Maybe we can approximate a more realistic length by
-                    //  subtracting a minimum size for each axis that will reduce it.
-                    shiftLabels = computeLabelOverlapForLength(maxAxisLength);
+                    shiftLabels = isLabelOverlapAtLength(axisLength);
                     break;
             }
 
             // Add extra space for shifted labels
-            tickLabelLength = isHorizontal ? maxLabelHeight : maxLabelWidth;
+            tickLabelSize = isHorizontal ? maxLabelHeight : maxLabelWidth;
             if (shiftLabels) {
-                tickLabelLength = 2 * tickLabelLength + 3 * getTickLabelSpacing();
+                tickLabelSize = 2 * tickLabelSize + 3 * getTickLabelSpacing();
             } else {
-                tickLabelLength += 2 * getTickLabelSpacing();
+                tickLabelSize += 2 * getTickLabelSpacing();
             }
 
         }
 
-        // Length of the marks
-        double tickLength = 0;
-        if (isTickMarkVisible() && getTickLength() > 0) {
-            tickLength = getTickLength();
-        }
-
         // Total estimate
-        return tickLength + tickLabelLength + axisLabelLength;
+        return tickSize + tickLabelSize + axisLabelSize;
 
     }
 
-    private boolean computeLabelOverlapForLength(double length) {
-        // TODO:
-        //   For now we use a simple heuristic, but this should be based on the actual
-        //   display position to support non-linear axes  and non-uniform labels. This
-        //   will require more refactoring as 'getDisplayPosition()' uses the node size,
-        //   which will trigger a new layout when set arbitrarily.
-        //   previous check based on:
-        //     checkOverlappingLabels(0, 1, majorTickMarks, getSide(), getTickLabelGap(), isInvertedAxis(), false)
-
-        double maxLabelSize = getSide().isHorizontal() ? maxLabelWidth : maxLabelHeight;
-        maxLabelSize += 2 * getTickLabelGap(); // TODO: 2x copied from before. is this correct?
-
+    /**
+     * Determines whether the current labels would overlap at the given length.
+     * Can be called before the layout size is known.
+     * <p>
+     * TODO:
+     *   This should be based on actual display position to support
+     *   non-linear axes and non-uniform labels, but this will require
+     *   more refactoring as 'getDisplayPosition()' uses the node size,
+     *   and changing that will trigger a new layout.
+     *
+     * @param axisLength desired axis length
+     * @return true if labels will overlap at the given length
+     */
+    protected boolean isLabelOverlapAtLength(double axisLength) {
         // '+1' tick label more because first and last tick are half outside axis length
-        double projectedTotalLength = (getTickMarks().size() + 1) * maxLabelSize;
-        return projectedTotalLength > length;
+        double maxLabelLength = getSide().isHorizontal() ? maxLabelWidth : maxLabelHeight;
+        double projectedTotalLength = (getTickMarks().size() + 1) * (maxLabelLength + getTickLabelGap());
+        return projectedTotalLength > axisLength;
     }
 
     private void enforceOverlapPolicy(List<TickMark> tickMarks) {
@@ -946,13 +937,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     @Override
     protected void layoutChildren() {
         // Add some padding to the canvas to be able to render tick marks on the edge
-        if(getSide() == null) {
+        if (getSide() == null) {
             canvasPadX = 0;
             canvasPadY = 0;
-        }else if(getSide().isHorizontal()) {
+        } else if (getSide().isHorizontal()) {
             canvasPadX = getAxisPadding();
             canvasPadY = 0;
-        }else {
+        } else {
             canvasPadX = 0;
             canvasPadY = getAxisPadding();
         }
@@ -1120,6 +1111,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final TextStyle label) {
+        if (label.getText() == null || label.getText().isBlank()) {
+            return;
+        }
+
         gc.save();
         gc.translate(x, y);
         label.copyStyleTo(gc);
@@ -1129,6 +1124,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
                                             final double scaleFont, final TickMark tickMark) {
+        if (tickMark.getText() == null || tickMark.getText().isBlank()) {
+            return;
+        }
+
         gc.save();
         gc.translate(x, y); // translate before applying any rotation
         tickMark.getStyle().copyStyleTo(gc);
@@ -1152,7 +1151,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return coordinate that is snapped to pixel (for a 'crisper' display)
      */
     protected static double snap(final double coordinate) {
-        return Math.round(coordinate + 0.5);
+        return Math.round(coordinate) + 0.5; // center of a pixel, so 1px lines render exact. TODO: depend on line width?
     }
 
 }
