@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.fair_acc.chartfx.ui.css.PathStyle;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
-import io.fair_acc.chartfx.utils.FXUtils;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -17,9 +19,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.shape.Path;
 import javafx.scene.text.Font;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
 
@@ -58,40 +58,33 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, this::requestAxisLayout);
 
     /**
-     * Paths used for css-type styling. Not used for actual drawing. Used as a storage container for the settings
+     * Nodes used for css-type styling. Not used for actual drawing. Used as a storage container for the settings
      * applied to GraphicsContext which allow much faster (and less complex) drawing routines but do no not allow
      * CSS-type styling.
+     * Note that we can use the tick label style as a temporary node for getting the font metrics w/ the correct style.
+     * Unmanaged nodes do not trigger a re-layout of the parent, but invisible text still computes valid font metrics.
      */
-    private final transient Path majorTickStyle = FXUtils.hiddenStyleNode(new Path(), "axis-tick-mark");
-    private final transient Path minorTickStyle = FXUtils.hiddenStyleNode(new Path(), "axis-minor-tick-mark");
-    private final transient Text axisLabel = FXUtils.hiddenStyleNode(new Text(), "axis-label");
+    private final transient PathStyle majorTickStyle = new PathStyle("axis-tick-mark");
+    private final transient PathStyle minorTickStyle =new PathStyle( "axis-minor-tick-mark");
+    private final transient TextStyle tickLabelStyle = new TextStyle("axis-tick-label");
+    private final transient TextStyle axisLabel = new TextStyle("axis-label");
     {
-        FXUtils.addStyles(this, "axis");
-        getChildren().addAll(axisLabel, majorTickStyle, minorTickStyle);
+        StyleUtil.addStyles(this, "axis");
+        getChildren().addAll(axisLabel, tickLabelStyle, majorTickStyle, minorTickStyle);
     }
 
-    /**
-     * This is the minimum/maximum current data value and it is used while auto ranging. Package private solely for test purposes
-     *
-     * auto).... actual is used to compute tick marks and defined by either user or auto (ie. auto axis is always being
-     * computed), ALSO add maybe a zoom range (ie. limited by user-set/auto-range range)
-     */
-    private static final AxisRange RANGE_INVALID = new AxisRange(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
-    final AxisRange compRange = new AxisRange(RANGE_INVALID);
-    final AxisRange displayedRange = new AxisRange(RANGE_INVALID);
     protected final transient BooleanProperty valid = new SimpleBooleanProperty(this, "valid", false);
     {
         valid.addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
-                displayedRange.set(RANGE_INVALID);
                 requestLayout();
             }
         });
     }
     protected final transient ObservableList<Double> majorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
     protected final transient ObservableList<Double> minorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
-    protected final transient ObservableList<TickMark> majorTickMarks = FXCollections.observableArrayList(new NoDuplicatesList<>());
-    protected final transient ObservableList<TickMark> minorTickMarks = FXCollections.observableArrayList(new NoDuplicatesList<>());
+    protected final transient ObservableList<TickMark> majorTickMarks = FXCollections.observableArrayList();
+    protected final transient ObservableList<TickMark> minorTickMarks = FXCollections.observableArrayList();
 
     /**
      * if available (last) auto-range that has been computed
@@ -148,8 +141,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     /**
      * The length of tick mark lines
-     */
-    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0, this::requestAxisLayout);
+     */ 
+    // TODO: was 15.0 default. Needs to be fixed/supported.
+    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 0.0, this::requestAxisLayout);
 
     /**
      * The length of tick mark lines
@@ -164,13 +158,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The font for all tick labels
      */
-    private final transient StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, () -> {
-        // TODO: remove once verified that measure isn't needed anymore
-        final Font f = tickLabelFontProperty().get();
-        getTickMarks().forEach(tm -> tm.setFont(f));
-        invalidate();
-        invokeListener(new AxisChangeEvent(this));
-    });
+    private final transient StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, this::requestAxisLayout);
 
     /**
      * The fill for all tick labels
@@ -211,6 +199,13 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * Rotation in degrees of tick mark labels from their normal horizontal.
      */
     protected final transient StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0, this::requestAxisLayout);
+
+    {
+        // TODO: remove and use the style directly?
+        tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
+        tickLabelStyle.fontProperty().bindBidirectional(tickLabelFont);
+        tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
+    }
 
     /**
      * true if minor tick marks should be displayed
@@ -595,7 +590,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * @return the axisLabel
      */
-    public Text getAxisLabel() {
+    public TextStyle getAxisLabel() {
         return axisLabel;
     }
 
@@ -645,7 +640,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * @return the majorTickStyle for custom user-code based styling
      */
-    public Path getMajorTickStyle() {
+    public PathStyle getMajorTickStyle() {
         return majorTickStyle;
     }
 
@@ -690,8 +685,15 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * @return the minorTickStyle for custom user-code based styling
      */
-    public Path getMinorTickStyle() {
+    public PathStyle getMinorTickStyle() {
         return minorTickStyle;
+    }
+
+    /**
+     * @return the tickLabelStyle for custom user-code based styling
+     */
+    public TextStyle getTickLabelStyle() {
+        return tickLabelStyle;
     }
 
     @Override
