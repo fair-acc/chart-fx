@@ -142,8 +142,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The length of tick mark lines
      */ 
-    // TODO: was 15.0 default. Needs to be fixed/supported.
-    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 0.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0, this::requestAxisLayout);
 
     /**
      * The length of tick mark lines
