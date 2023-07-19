@@ -199,11 +199,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     @Override
     protected void drawAxisLine(final GraphicsContext gc, final double axisLength, final double axisWidth,
             final double axisHeight) {
-        // N.B. axis canvas is (by-design) larger by 'padding' w.r.t.
-        // required/requested axis length (needed for nicer label placements on
-        // border.
-        final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
-        final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
+
         // for relative positioning of axes drawn on top of the main canvas
         final double axisCentre = getAxisCenterPosition();
 
@@ -220,10 +216,6 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         } else {
             gc.setFill(new LinearGradient(0, axisLength, 0, 0, false, NO_CYCLE, getColorGradient().getStops()));
         }
-
-        // N.B. important: translate by padding ie. canvas is +padding larger on
-        // all size compared to region
-        gc.translate(paddingX, paddingY);
 
         switch (getSide()) {
         case LEFT:

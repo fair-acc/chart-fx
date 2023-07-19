@@ -43,6 +43,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected double scaleFont = 1.0;
     protected double maxLabelHeight;
     protected double maxLabelWidth;
+    private double canvasPadX;
+    private double canvasPadY;
 
     private final transient ObjectProperty<AxisLabelFormatter> axisFormatter = new SimpleObjectProperty<>(this,
             "axisLabelFormatter", null) {
@@ -91,40 +93,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
         getChildren().add(canvas);
 
-        // TODO: what is this for? potentially removable? could we just disable padding on the Canvas?
-        final ChangeListener<? super Number> axisSizeChangeListener = (c, o, n) -> {
-            // N.B. add padding along axis to allow oversized labels
-            final double padding = getAxisPadding();
-            if (getSide().isHorizontal()) {
-                canvas.resize(getWidth() + (2 * padding), getHeight());
-                canvas.setLayoutX(-padding);
-            } else {
-                canvas.resize(getWidth(), getHeight() + (2 * padding));
-                canvas.setLayoutY(-padding);
-            }
-            invalidate();
-            requestLayout();
-        };
-
-
-        axisPaddingProperty().addListener((ch, o, n) -> {
-            final double padding = getAxisPadding();
-            if (getSide().isHorizontal()) {
-                canvas.resize(getWidth() + (2 * padding), getHeight());
-                canvas.setLayoutX(-padding);
-            } else {
-                canvas.resize(getWidth() + (2 * padding), getHeight() + (2 * padding)); // TODO: why is this different from the axisSizeChangeListener?
-                canvas.setLayoutY(-padding);
-            }
-        });
-
-        widthProperty().addListener(axisSizeChangeListener);
-        heightProperty().addListener(axisSizeChangeListener);
-        rotateProperty().addListener((observable, oldValue, value) -> {
-            updateTickLabelAlignment();
-        });
-
         // set default axis title/label alignment
+        updateTickLabelAlignment();
+        rotateProperty().addListener((obs, old, value) -> updateTickLabelAlignment());
         sideProperty().addListener((ch, o, n) -> {
             updateTickLabelAlignment();
             switch (n) {
@@ -141,8 +112,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 break;
             }
         });
-        updateTickLabelAlignment();
 
+        // TODO: remove?
         invertAxisProperty().addListener((ch, o, n) -> Platform.runLater(this::forceRedraw));
 
         VBox.setVgrow(this, Priority.ALWAYS);
@@ -669,8 +640,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected void drawAxisLabel(final GraphicsContext gc, final double axisWidth, final double axisHeight,
                                  final TextStyle axisLabel, final double tickLength) {
-        final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
-        final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
         final boolean isHorizontal = getSide().isHorizontal();
         final double tickLabelGap = getTickLabelGap();
         final double axisLabelGap = getAxisLabelGap();
@@ -704,9 +673,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                                            ? tickLabelSize + tickLabelGap
                                            : 0.0;
 
-        // save css-styled label parameters
-        gc.save();
-        gc.translate(paddingX, paddingY);
         // N.B. streams, filter, and forEach statements have been evaluated and
         // appear to give no (or negative) performance for little/arguable
         // readability improvement (CG complexity from 40 -> 28, but mere
@@ -716,40 +682,43 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double y;
         switch (getSide()) {
         case LEFT:
-            gc.setTextBaseline(VPos.BASELINE);
+            axisLabel.setTextOrigin(VPos.BASELINE);
+            axisLabel.setRotate(-90);
             x = axisWidth - tickLength - (2 * tickLabelGap) - tickLabelSize - axisLabelGap - shiftedLabels;
             y = ((1.0 - labelPosition) * axisHeight) - labelGap;
-            axisLabel.setRotate(-90);
             break;
 
         case RIGHT:
-            gc.setTextBaseline(VPos.TOP);
+            axisLabel.setTextOrigin(VPos.TOP);
             axisLabel.setRotate(-90);
             x = tickLength + tickLabelGap + tickLabelSize + axisLabelGap + shiftedLabels;
             y = ((1.0 - labelPosition) * axisHeight) - labelGap;
             break;
 
         case TOP:
-            gc.setTextBaseline(VPos.BOTTOM);
+            axisLabel.setTextOrigin(VPos.BOTTOM);
+            axisLabel.setRotate(0);
             x = (labelPosition * axisWidth) + labelGap;
             y = axisHeight - tickLength - tickLabelGap - tickLabelSize - axisLabelGap - shiftedLabels;
             break;
 
         case BOTTOM:
-            gc.setTextBaseline(VPos.TOP);
+            axisLabel.setTextOrigin(VPos.TOP);
+            axisLabel.setRotate(0);
             x = (labelPosition * axisWidth) + labelGap;
             y = tickLength + tickLabelGap + tickLabelSize + axisLabelGap + shiftedLabels;
             break;
 
         case CENTER_VER:
-            gc.setTextBaseline(VPos.TOP);
+            axisLabel.setTextOrigin(VPos.TOP);
             axisLabel.setRotate(-90);
             x = (axisCentre * axisWidth) - tickLength - (2 * tickLabelGap) - tickLabelSize - axisLabelGap - shiftedLabels;
             y = ((1.0 - labelPosition) * axisHeight) - labelGap;
             break;
 
         case CENTER_HOR:
-            gc.setTextBaseline(VPos.TOP);
+            axisLabel.setTextOrigin(VPos.TOP);
+            axisLabel.setRotate(0);
             x = (labelPosition * axisWidth) + labelGap;
             y = (axisCentre * axisHeight) + tickLength + tickLabelGap + tickLabelSize + axisLabelGap + shiftedLabels;
             break;
@@ -759,16 +728,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
         drawAxisLabel(gc, x, y, axisLabel);
 
-        gc.restore();
     }
 
     protected void drawAxisLine(final GraphicsContext gc, final double axisLength, final double axisWidth,
             final double axisHeight) {
-        // N.B. axis canvas is (by-design) larger by 'padding' w.r.t.
-        // required/requested axis length (needed for nicer label placements on
-        // border.
-        final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
-        final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
         // for relative positioning of axes drawn on top of the main canvas
         final double axisCentre = getAxisCenterPosition();
 
@@ -778,7 +741,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // N.B. important: translate by padding ie. canvas is +padding larger on
         // all size compared to region
-        gc.translate(paddingX, paddingY);
         switch (getSide()) {
         case LEFT:
             // axis line on right side of canvas N.B. 'width - 1' because otherwise snap shifts line outside of canvas
@@ -833,8 +795,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if ((tickLength <= 0) || tickMarks.isEmpty()) {
             return;
         }
-        final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
-        final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
+
         // for relative positioning of axes drawn on top of the main canvas
         final double axisCentre = getAxisCenterPosition();
         final AxisLabelOverlapPolicy overlapPolicy = getOverlapPolicy();
@@ -846,9 +807,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         var fontSize = style.getFont().getSize();
         style.copyStyleTo(gc);
 
-        // N.B. important: translate by padding ie. canvas is +padding larger on
-        // all size compared to region
-         gc.translate(paddingX, paddingY);
         // N.B. streams, filter, and forEach statements have been evaluated and
         // appear to give no (or negative) performance for little/arguable
         // readability improvement (CG complexity from 40 -> 28, but mere
@@ -1022,16 +980,12 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (tickLength <= 0) {
             return;
         }
-        final double paddingX = getSide().isHorizontal() ? getAxisPadding() : 0.0;
-        final double paddingY = getSide().isVertical() ? getAxisPadding() : 0.0;
         // for relative positioning of axes drawn on top of the main canvas
         final double axisCentre = getAxisCenterPosition();
 
-        gc.save();
         // save css-styled line parameters
+        gc.save();
         tickStyle.copyStyleTo(gc);
-        // N.B. important: translate by padding ie. canvas is +padding larger on all size compared to region
-        gc.translate(paddingX, paddingY);
 
         // N.B. streams, filter, and forEach statements have been evaluated and
         // appear to give no (or negative) performance for little/arguable
@@ -1143,11 +1097,22 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     protected void layoutChildren() {
+        // Add some padding to the canvas to be able to render tick marks on the edge
+        if(getSide() == null) {
+            canvasPadX = 0;
+            canvasPadY = 0;
+        }else if(getSide().isHorizontal()) {
+            canvasPadX = getAxisPadding();
+            canvasPadY = 0;
+        }else {
+            canvasPadX = 0;
+            canvasPadY = getAxisPadding();
+        }
+
         // full-size the canvas. The axis gets drawn from the Chart
         // to guarantee ordering (e.g. ticks are available before the grid)
-        canvas.resizeRelocate(0, 0, getWidth(), getHeight());
+        canvas.resizeRelocate(-canvasPadX, -canvasPadY, getWidth() + 2 * canvasPadX, getHeight() + 2 * canvasPadY);
         needsToBeDrawn = true;
-        // TODO: support canvas padding
     }
 
     private boolean needsToBeDrawn = true;
@@ -1161,7 +1126,15 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // draw minor / major tick marks on canvas
         final var gc = canvas.getGraphicsContext2D();
         clearAxisCanvas(gc, canvas.getWidth(), canvas.getHeight());
-        drawAxis(gc, getWidth(), getHeight());
+
+        // the canvas has extra padding, so move in a bit
+        try {
+            gc.translate(canvasPadX, canvasPadY);
+            drawAxis(gc, getWidth(), getHeight());
+        } finally {
+            gc.translate(-canvasPadX, -canvasPadY);
+        }
+
     }
 
     private static boolean checkOverlappingLabels(final int start, final int stride,
