@@ -78,8 +78,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
     };
 
-
-
     protected AbstractAxis() {
         super();
         setMouseTransparent(false);
@@ -132,29 +130,36 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if ((gc == null) || (getSide() == null)) {
             return;
         }
-        final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
 
-        drawAxisPre();
+        // Always update tick marks so the grid renderer can access them
+        updateMinorTickMarks();
+        final ObservableList<TickMark> majorTicks = getTickMarks();
+        final ObservableList<TickMark> minorTicks = getMinorTickMarks();
+        updateTickMarkPositions(majorTicks);
+        updateTickMarkPositions(minorTicks);
         updateCachedVariables();
 
-        if (isTickMarkVisible()) {
-            final ObservableList<TickMark> majorTicks = getTickMarks();
+        // Nothing shown -> no need to draw anything
+        if (!isVisible()) {
+            return;
+        }
 
-            // Minor ticks. Ignore if there isn't enough space
+        drawAxisPre();
+
+        final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
+        if (isTickMarkVisible()) {
+
+            // Ignore minor ticks if there isn't enough space
             if (isMinorTickVisible() && getMinorTickLength() > 0) {
-                updateMinorTickMarks();
-                final ObservableList<TickMark> minorTicks = getMinorTickMarks();
                 double minRequiredLength = majorTicks.size() * (getMajorTickStyle().getStrokeWidth() + MIN_TICK_GAP)
                         + minorTicks.size() * (getMinorTickStyle().getStrokeWidth() + MIN_TICK_GAP);
                 if (axisLength > minRequiredLength) {
-                    updateTickMarkPositions(minorTickMarks);
                     drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
                 }
             }
 
             // draw major tick-mark over minor tick-marks so that the visible (long) line
             // along the axis with the style of the major-tick is visible
-            updateTickMarkPositions(majorTickMarks);
             enforceOverlapPolicy(majorTickMarks);
             drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
             drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
@@ -409,7 +414,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     @Override
     protected double computePrefHeight(final double width) {
         final var side = getSide();
-        if ((side == null) || (side == Side.CENTER_HOR) || side.isVertical()) {
+        if ((side == null) || side.isVertical()) {
             // default axis size for uninitalised axis
             return 150;
         }
@@ -425,7 +430,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     @Override
     protected double computePrefWidth(final double height) {
         final var side = getSide();
-        if ((side == null) || (side == Side.CENTER_VER) || side.isHorizontal()) {
+        if ((side == null) || side.isHorizontal()) {
             // default axis size for uninitalised axis
             return 150;
         }
@@ -506,13 +511,16 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         evenLabelsOffset = tickSize + getTickLabelGap();
         oddLabelsOffset = !shiftLabels ? evenLabelsOffset : evenLabelsOffset + labelSize + getTickLabelGap();
         axisLabelOffset = oddLabelsOffset + labelSize + getAxisLabelGap();
+        double totalSize = axisLabelOffset + nameSize + getAxisLabelGap();
+
+        // Special case axis labels to match the previous implementation
         if (getSide() == Side.LEFT) {
-            // For some reason the old code added an extra tick label gap on left axes.
-            // TODO: without it the text gets very close, but this was probably a bug?
-            axisLabelOffset += getTickLabelGap();
+            axisLabelOffset += getTickLabelGap(); // extra gap
+        } else if (getSide() == Side.CENTER_VER) {
+            axisLabelOffset += getTickLabelGap(); // extra gap
+            axisLabelOffset = -axisLabelOffset; // render on other side
         }
 
-        double totalSize = axisLabelOffset + nameSize + getAxisLabelGap();
         return getSide().isCenter() ? 2 * totalSize : totalSize;
 
     }
@@ -657,11 +665,40 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected void drawAxisLabel(final GraphicsContext gc, final double axisWidth, final double axisHeight,
                                  final TextStyle axisLabel, final double tickLength) {
+
+        final boolean isHorizontal = getSide().isHorizontal();
+        final double tickLabelGap = getTickLabelGap();
+        final double axisLabelGap = getAxisLabelGap();
+
+        // for relative positioning of axes drawn on top of the main canvas
+        final double axisCentre = getAxisCenterPosition();
+        double labelPosition;
+        double labelGap;
+        switch (axisLabel.getTextAlignment()) {
+            case LEFT:
+                labelPosition = 0.0;
+                labelGap = +tickLabelGap;
+                break;
+            case RIGHT:
+                labelPosition = 1.0;
+                labelGap = -tickLabelGap;
+                break;
+            case CENTER:
+            case JUSTIFY:
+            default:
+                labelPosition = 0.5;
+                labelGap = 0.0;
+                break;
+        }
+
+        // draw on determined coordinates
         double labelCoord = getCanvasCoordinate(axisWidth, axisHeight, axisLabelOffset);
         if (getSide().isHorizontal()) {
-            drawAxisLabel(gc, axisWidth / 2, labelCoord, axisLabel);
+            double x0 = labelPosition * axisWidth + labelGap;
+            drawAxisLabel(gc, x0, labelCoord, axisLabel);
         } else {
-            drawAxisLabel(gc, labelCoord, axisHeight / 2, axisLabel);
+            double y0 = (1.0 - labelPosition) * axisHeight + Math.signum(axisLabelOffset) * labelGap;
+            drawAxisLabel(gc, labelCoord, y0, axisLabel);
         }
     }
 
@@ -762,11 +799,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             }
 
             double position = tickMark.getPosition();
-            double line = isEven ? evenCoord : oddCoord;
+            double coord = isEven ? evenCoord : oddCoord;
             if (isHorizontal) {
-                drawTickMarkLabel(gc, position, line, scaleFont, tickMark);
+                drawTickMarkLabel(gc, position, coord, scaleFont, tickMark);
             } else {
-                drawTickMarkLabel(gc, line, position, scaleFont, tickMark);
+                drawTickMarkLabel(gc, coord, position, scaleFont, tickMark);
             }
 
         }
@@ -843,7 +880,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (!needsToBeDrawn) return;
         needsToBeDrawn = false;
 
-        // draw minor / major tick marks on canvas
+        // clear outdated canvas content
         final var gc = canvas.getGraphicsContext2D();
         clearAxisCanvas(gc, canvas.getWidth(), canvas.getHeight());
 
