@@ -1,6 +1,8 @@
 package io.fair_acc.chartfx.axes.spi;
 
 import io.fair_acc.chartfx.ui.css.TextStyle;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.VPos;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -24,7 +26,7 @@ public class TickMark {
     private double width = Double.NaN; // the label width in display units
 
     private double tickPosition = Double.NaN; // tick position along axis in display units
-    private boolean visible = false; // whether the tick mark should be displayed
+    private final BooleanProperty visible = new SimpleBooleanProperty(true); // whether the tick mark should be displayed
     private final TextStyle style;
     private long usedStyle = -1;
 
@@ -65,6 +67,13 @@ public class TickMark {
             }
             usedStyle = style.getChangeCounter();
         }
+    }
+
+    /**
+     * @return the style applied to this tickmark
+     */
+    public TextStyle getStyle() {
+        return style;
     }
 
     /**
@@ -112,11 +121,42 @@ public class TickMark {
     }
 
     public boolean isVisible() {
-        return visible;
+        return visible.get();
     }
 
     public void setVisible(boolean visible) {
-        this.visible = visible;
+        this.visible.set(visible);
+    }
+
+    // ------- deprecated methods for backwards compatibility with unit tests -------
+
+    @Deprecated // TODO: update tests
+    TickMark(final Side side, final double tickValue, final double tickPosition, final double tickRotation,
+             final String tickMarkLabel) {
+        this(new TextStyle());
+        setValue(tickValue, tickMarkLabel);
+        this.style.setRotate(tickRotation);
+        this.tickPosition = tickPosition;
+    }
+
+    @Deprecated // for testing purposes
+    BooleanProperty visibleProperty() {
+        return visible;
+    }
+
+    @Deprecated // for testing purposes
+    double getRotation() {
+        return style.getRotate();
+    }
+
+    @Deprecated // for testing purposes
+    void setRotation(double rotation) {
+        style.setRotate(rotation);
+    }
+
+    @Deprecated
+    void setValue(double v) {
+        this.tickValue = v;
     }
 
 }

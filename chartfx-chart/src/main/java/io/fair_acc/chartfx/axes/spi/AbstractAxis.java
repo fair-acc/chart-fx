@@ -596,6 +596,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     }
 
+    @Deprecated // TODO: update tests
+    List<TickMark> computeTickMarks(AxisRange range, boolean major) {
+        if (major) {
+            updateMajorTickMarks(range);
+            return majorTickMarks;
+        } else {
+            updateMinorTickMarks();
+            return minorTickMarks;
+        }
+    }
+
     protected void updateMajorTickMarks(AxisRange range) {
         // TODO: cache if the range and tick units have not changed?
         var newTickValues = calculateMajorTickValues(range);
