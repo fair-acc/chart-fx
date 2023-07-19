@@ -514,10 +514,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         double totalSize = axisLabelOffset + nameSize + getAxisLabelGap();
 
         // Special case axis labels to match the previous implementation
+        // TODO: the extra gaps should probably use axisLabelGap?
         if (getSide() == Side.LEFT) {
-            axisLabelOffset += getTickLabelGap(); // extra gap
+            axisLabelOffset += getTickLabelGap();
         } else if (getSide() == Side.CENTER_VER) {
-            axisLabelOffset += getTickLabelGap(); // extra gap
+            axisLabelOffset += getTickLabelGap();
             axisLabelOffset = -axisLabelOffset; // render on other side
         }
 
@@ -666,22 +667,18 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected void drawAxisLabel(final GraphicsContext gc, final double axisWidth, final double axisHeight,
                                  final TextStyle axisLabel, final double tickLength) {
 
-        final boolean isHorizontal = getSide().isHorizontal();
-        final double tickLabelGap = getTickLabelGap();
-        final double axisLabelGap = getAxisLabelGap();
-
-        // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getAxisCenterPosition();
-        double labelPosition;
+        // relative positioning of the label based on the text alignment
+        // TODO: why tickLabelGap instead of axisLabelGap?
+        final double labelPosition;
         double labelGap;
         switch (axisLabel.getTextAlignment()) {
             case LEFT:
                 labelPosition = 0.0;
-                labelGap = +tickLabelGap;
+                labelGap = +getTickLabelGap();
                 break;
             case RIGHT:
                 labelPosition = 1.0;
-                labelGap = -tickLabelGap;
+                labelGap = -getTickLabelGap();
                 break;
             case CENTER:
             case JUSTIFY:
@@ -691,14 +688,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 break;
         }
 
+        // reverse in case a label is drawn on the other side
+        labelGap *= Math.signum(axisLabelOffset);
+
         // draw on determined coordinates
-        double labelCoord = getCanvasCoordinate(axisWidth, axisHeight, axisLabelOffset);
+        double coord = getCanvasCoordinate(axisWidth, axisHeight, axisLabelOffset);
         if (getSide().isHorizontal()) {
-            double x0 = labelPosition * axisWidth + labelGap;
-            drawAxisLabel(gc, x0, labelCoord, axisLabel);
+            double x = labelPosition * axisWidth + labelGap;
+            drawAxisLabel(gc, x, coord, axisLabel);
         } else {
-            double y0 = (1.0 - labelPosition) * axisHeight + Math.signum(axisLabelOffset) * labelGap;
-            drawAxisLabel(gc, labelCoord, y0, axisLabel);
+            double y = (1.0 - labelPosition) * axisHeight + labelGap;
+            drawAxisLabel(gc, coord, y, axisLabel);
         }
     }
 
