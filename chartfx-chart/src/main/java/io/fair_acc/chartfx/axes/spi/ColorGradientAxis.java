@@ -6,6 +6,8 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -36,6 +38,9 @@ public class ColorGradientAxis extends DefaultNumericAxis {
             ColorGradient.DEFAULT);
 
     private final DoubleProperty gradientWidth = new SimpleDoubleProperty(this, "gradientWidth", 20);
+    {
+        gradientWidth.addListener((obs, old, value) -> requestAxisLayout());
+    }
 
     /**
      * @param lowerBound the mininum axis value
@@ -129,93 +134,58 @@ public class ColorGradientAxis extends DefaultNumericAxis {
         return super.computePrefWidth(height) + getGradientWidth();
     }
 
-    @Override
+    @Override // TODO: code has not been tested after refactoring
     public void drawAxis(final GraphicsContext gc, final double axisWidth, final double axisHeight) {
         if ((gc == null) || (getSide() == null)) {
             return;
         }
 
-        clearAxisCanvas(gc, axisWidth, axisHeight); // seems not to work?
-
-        drawAxisPre();
-
-        final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
-
         // draw colorBar
-        drawAxisLine(gc, axisLength, axisWidth, axisHeight);
+        final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
+        drawGradient(gc, axisLength, axisWidth, axisHeight);
 
-        // translate
-        final double gradientWidth = getGradientWidth();
-        gc.save();
+        // Draw gradient
+        final double gradientSize = getGradientWidth();
+        double offsetX = 0, offsetY = 0;
         switch (getSide()) {
         case LEFT:
         case CENTER_VER:
-            gc.translate(-gradientWidth, 0);
+            offsetX = -gradientSize;
             break;
         case RIGHT:
         case CENTER_HOR:
-            gc.translate(gradientWidth, 0);
+            offsetX = gradientSize;
             break;
         case TOP:
-            gc.translate(0, -gradientWidth);
+            offsetY = -gradientSize;
             break;
         case BOTTOM:
-            gc.translate(0, gradientWidth);
+            offsetY = gradientSize;
             break;
         default:
             break;
         }
-        if (!isTickMarkVisible()) {
-            // draw axis title w/o major TickMark
-            drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
-            drawAxisPost();
-            return;
+
+        try {
+            gc.translate(offsetX, offsetY);
+            super.drawAxis(gc, axisWidth - Math.abs(offsetX), axisHeight - Math.abs(offsetY));
+        } finally {
+            gc.translate(-offsetX, -offsetY);
         }
-
-        final ObservableList<TickMark> majorTicks = getTickMarks();
-        final ObservableList<TickMark> minorTicks = getMinorTickMarks();
-
-        // neededLength assumes tick-mark width of one, needed to suppress minor
-        // ticks if tick-mark pixel are overlapping
-        final double neededLength = (getTickMarks().size() + minorTicks.size()) * 2.0;
-        // Don't draw minor tick marks if there isn't enough space for them!
-        if (isMinorTickVisible() && (axisLength > neededLength)) {
-            drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
-            drawTickLabels(gc, axisWidth, axisHeight, minorTicks, getMinorTickLength());
-        }
-
-        // draw major tick-mark over minor tick-marks so that the visible
-        // (long) line along the axis with the style of the major-tick is
-        // visible
-        drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
-        drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
-
-        // draw axis title
-        drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
-        drawAxisPost();
-        gc.restore(); // restore colorBar offset
     }
 
-    @Override
-    protected void drawAxisLine(final GraphicsContext gc, final double axisLength, final double axisWidth,
-            final double axisHeight) {
-
-        // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getAxisCenterPosition();
-
-        final double gradientWidth = getGradientWidth();
-
-        // save css-styled line parameters
-        final Path tickStyle = getMajorTickStyle();
+    private void drawGradient(final GraphicsContext gc, final double axisLength, final double axisWidth, final double axisHeight) {
         gc.save();
-        gc.setStroke(tickStyle.getStroke());
-        gc.setLineWidth(tickStyle.getStrokeWidth());
-
+        getMajorTickStyle().copyStyleTo(gc);
         if (getSide().isHorizontal()) {
             gc.setFill(new LinearGradient(0, 0, axisLength, 0, false, NO_CYCLE, getColorGradient().getStops()));
         } else {
             gc.setFill(new LinearGradient(0, axisLength, 0, 0, false, NO_CYCLE, getColorGradient().getStops()));
         }
+
+        // for relative positioning of axes drawn on top of the main canvas
+        final double gradientWidth = getGradientWidth();
+        final double axisCentre = getAxisCenterPosition();
 
         switch (getSide()) {
         case LEFT:
