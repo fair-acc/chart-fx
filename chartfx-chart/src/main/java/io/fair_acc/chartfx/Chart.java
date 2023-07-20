@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;

@@ -133,7 +133,7 @@ class HighLowRendererTest {
         assertFalse(highLowRenderer.isPaintVolume());
     }
 
-    @Test
+    @TestFx
     void noXyChartInstance() {
         assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null)); // NOSONAR NOPMD
     }
