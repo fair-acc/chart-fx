@@ -17,6 +17,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
@@ -437,7 +438,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return computePrefSize(height);
     }
 
-    private final double tickMarkOffset = 0;
+    private double tickMarkOffset;
     private double evenLabelsOffset;
     private double oddLabelsOffset;
     private double axisLabelOffset;
@@ -505,7 +506,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         double nameSize = getAxisLabelSize();
 
         // Compute offsets
-        evenLabelsOffset = tickSize + getTickLabelGap();
+        tickMarkOffset = getTickMarkGap();
+        evenLabelsOffset = tickMarkOffset + tickSize + getTickLabelGap();
         oddLabelsOffset = !shiftLabels ? evenLabelsOffset : evenLabelsOffset + labelSize + getTickLabelGap();
         axisLabelOffset = oddLabelsOffset + labelSize + getAxisLabelGap() + getExtraLabelOffset();
         double totalSize = axisLabelOffset + nameSize + getAxisLabelGap();
@@ -548,7 +550,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         double nameSize = getAxisLabelSize();
 
         // Compute total size
-        double totalSize = tickSize + getTickLabelGap()
+        double totalSize = getTickMarkGap()
+                + tickSize + getTickLabelGap()
                 + labelSize + getAxisLabelGap()
                 + nameSize + getAxisLabelGap() + getExtraLabelOffset();
         return getSide().isCenter() ? 2 * totalSize : totalSize;
@@ -754,42 +757,25 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected void drawAxisLine(final GraphicsContext gc, final double axisLength, final double axisWidth,
             final double axisHeight) {
-        // for relative positioning of axes drawn on top of the main canvas
-        final double axisCentre = getAxisCenterPosition();
 
         // save css-styled line parameters
         gc.save();
         getMajorTickStyle().copyStyleTo(gc);
 
-        switch (getSide()) {
-        case LEFT:
-            // axis line on right side of canvas N.B. 'width - 1' because otherwise snap shifts line outside of canvas
-            gc.strokeLine(snap(axisWidth) - 1, snap(0), snap(axisWidth) - 1, snap(axisLength));
-            break;
-        case RIGHT:
-            // axis line on left side of canvas
-            gc.strokeLine(snap(0), snap(0), snap(0), snap(axisLength));
-            break;
-        case TOP:
-            // line on bottom side of canvas (N.B. (0,0) is top left corner)
-            gc.strokeLine(snap(0), snap(axisHeight) - 1, snap(axisLength), snap(axisHeight) - 1);
-            break;
-        case BOTTOM:
-            // line on top side of canvas (N.B. (0,0) is top left corner)
-            gc.strokeLine(snap(0), snap(0), snap(axisLength), snap(0));
-            break;
-        case CENTER_HOR:
-            // axis line at the centre of the canvas
-            gc.strokeLine(snap(0), axisCentre * axisHeight, snap(axisLength), snap(axisCentre * axisHeight));
+        // draw edge lines further into the canvas to avoid snap shifting it into an invalid region
+        double offset = tickMarkOffset;
+        if (offset == 0 && (getSide() == Side.LEFT || getSide() == Side.TOP)) {
+            offset += 1;
+        }
 
-            break;
-        case CENTER_VER:
-            // axis line at the centre of the canvas
-            gc.strokeLine(snap(axisCentre * axisWidth), snap(0), snap(axisCentre * axisWidth), snap(axisLength));
-
-            break;
-        default:
-            break;
+        // draw a line across the entire length
+        final double coord = snap(getCanvasCoordinate(axisWidth, axisHeight, offset));
+        final double lineStart = snap(0);
+        final double lineEnd = snap(axisLength);
+        if (getSide().isHorizontal()) {
+            gc.strokeLine(lineStart, coord, lineEnd, coord);
+        } else {
+            gc.strokeLine(coord, lineStart, coord, lineEnd);
         }
         gc.restore();
     }
