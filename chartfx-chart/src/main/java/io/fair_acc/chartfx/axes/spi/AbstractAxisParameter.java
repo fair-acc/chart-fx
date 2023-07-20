@@ -169,6 +169,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient StyleableObjectProperty<Paint> tickLabelFill = CSS.createObjectProperty(this, "tickLabelFill", Color.BLACK, StyleConverter.getPaintConverter());
 
     /**
+     * The gap between tick marks and the canvas area
+     */
+    private final transient StyleableDoubleProperty tickMarkGap = CSS.createDoubleProperty(this, "tickMarkGap", 0.0, this::requestAxisLayout);
+
+    /**
      * The gap between tick labels and the tick mark lines
      */
     private final transient StyleableDoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", 3.0, this::requestAxisLayout);
@@ -733,6 +738,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
+    public double getTickMarkGap() {
+        return tickMarkGapProperty().get();
+    }
+
+    @Override
     public double getTickLabelGap() {
         return tickLabelGapProperty().get();
     }
@@ -1143,6 +1153,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         tickLabelFormatterProperty().setValue(value);
     }
 
+    public void setTickMarkGap(final double value) {
+        tickMarkGapProperty().set(value);
+    }
+
     public void setTickLabelGap(final double value) {
         tickLabelGapProperty().set(value);
     }
@@ -1225,6 +1239,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public ObjectProperty<StringConverter<Number>> tickLabelFormatterProperty() {
         return tickLabelFormatter;
+    }
+
+    public DoubleProperty tickMarkGapProperty() {
+        return tickMarkGap;
     }
 
     public DoubleProperty tickLabelGapProperty() {
