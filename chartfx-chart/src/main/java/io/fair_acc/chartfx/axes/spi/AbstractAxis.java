@@ -762,14 +762,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         gc.save();
         getMajorTickStyle().copyStyleTo(gc);
 
-        // draw edge lines further into the canvas to avoid snap shifting it into an invalid region
-        double offset = tickMarkOffset;
-        if (offset == 0 && (getSide() == Side.LEFT || getSide() == Side.TOP)) {
-            offset += 1;
-        }
-
-        // draw a line across the entire length
-        final double coord = snap(getCanvasCoordinate(axisWidth, axisHeight, offset));
+        // draw a line across the entire length (snap the offset directly to avoid issues with pushing out of bounds)
+        final double coord = getCanvasCoordinate(axisWidth, axisHeight, snap(tickMarkOffset));
         final double lineStart = snap(0);
         final double lineEnd = snap(axisLength);
         if (getSide().isHorizontal()) {
@@ -855,9 +849,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // Determine line coordinates. Draw center ticks symmetric on both sides
         final double lineStart = getSide().isCenter()
-                ? snap(getCanvasCoordinate(axisWidth, axisHeight, tickMarkOffset - tickLength))
-                : snap(getCanvasCoordinate(axisWidth, axisHeight, tickMarkOffset));
-        final double lineEnd = snap(getCanvasCoordinate(axisWidth, axisHeight, tickMarkOffset + tickLength));
+                ? getCanvasCoordinate(axisWidth, axisHeight, snap(tickMarkOffset - tickLength))
+                : getCanvasCoordinate(axisWidth, axisHeight, snap(tickMarkOffset));
+        final double lineEnd = getCanvasCoordinate(axisWidth, axisHeight, snap(tickMarkOffset + tickLength));
         final boolean isHorizontal = getSide().isHorizontal();
 
         // save css-styled line parameters
@@ -868,15 +862,15 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         for (final TickMark tickMark : tickMarks) {
 
             // skip tick-marks outside the nominal axis length
-            final double pos = snap(tickMark.getPosition());
-            if ((pos < 0) || (pos > axisLength)) {
+            final double coord = snap(tickMark.getPosition());
+            if ((coord < 0) || (coord > axisLength)) {
                 continue;
             }
 
             if (isHorizontal) {
-                gc.strokeLine(pos, lineStart, pos, lineEnd);
+                gc.strokeLine(coord, lineStart, coord, lineEnd);
             } else {
-                gc.strokeLine(lineStart, pos, lineEnd, pos);
+                gc.strokeLine(lineStart, coord, lineEnd, coord);
             }
         }
 
