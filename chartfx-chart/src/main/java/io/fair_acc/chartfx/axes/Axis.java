@@ -119,6 +119,11 @@ public interface Axis extends AxisDescription {
     StringConverter<Number> getTickLabelFormatter();
 
     /**
+     * @return the gap between the tick mark lines and the chart canvas
+     */
+    double getTickMarkGap();
+
+    /**
      * @return the gap between tick labels and the tick mark lines
      */
     double getTickLabelGap();
