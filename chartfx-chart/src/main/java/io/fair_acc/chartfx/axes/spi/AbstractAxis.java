@@ -454,6 +454,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return cachedPrefLength;
         }*/
 
+        // Always update tick marks so e.g. the grid renderer can use them even if not displayed
+        // TODO: is this using node dimensions?
+        setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(axisLength) : getUserTickUnit());
+        updateMajorTickMarks(getRange());
+
         boolean isHorizontal = getSide().isHorizontal();
         scaleFont = 1.0;
         maxLabelHeight = 0;
@@ -461,100 +466,99 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         shiftLabels = false;
         labelOverlap = false;
 
-        double tickSize = 0;
-        double labelSize = 0;
-        if (isTickMarkVisible()) {
+        // Tick marks or just the main line
+        final double tickSize = isTickMarkVisible() ? getTickLength() : getMajorTickStyle().getStrokeWidth();
 
-            // Generate new tick marks TODO: is this using the node dimensions?
-            setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(axisLength) : getUserTickUnit());
-            updateMajorTickMarks(getRange());
+        // Optional tick mark labels
+        double tickLabelSize = 0;
+        if (isTickMarkVisible() && isTickLabelsVisible()) {
 
-            // Tick marks or at least the main line
-            tickSize = Math.max(getTickLength(), getMajorTickStyle().getStrokeWidth());
+            // Figure out maximum sizes
+            for (TickMark tickMark : getTickMarks()) {
+                maxLabelHeight = Math.max(maxLabelHeight, tickMark.getHeight());
+                maxLabelWidth = Math.max(maxLabelWidth, tickMark.getWidth());
+            }
+            tickLabelSize = (isHorizontal ? maxLabelHeight : maxLabelWidth);
 
-            // Tick mark labels
-            if (isTickLabelsVisible()) {
-
-                // Figure out maximum sizes
-                for (TickMark tickMark : getTickMarks()) {
-                    maxLabelHeight = Math.max(maxLabelHeight, tickMark.getHeight());
-                    maxLabelWidth = Math.max(maxLabelWidth, tickMark.getWidth());
-                }
-                labelSize = isHorizontal ? maxLabelHeight : maxLabelWidth;
-
-                // Figure out whether we need another row due to label shifting. The other
-                // overlap policies are not relevant to the layout, although fontScale could
-                // technically reduce the height a bit.
-                // TODO: should fontScale reduce the size?
-                switch (getOverlapPolicy()) {
-                    case FORCED_SHIFT_ALT:
-                        shiftLabels = true;
-                        break;
-                    case SHIFT_ALT:
-                        shiftLabels = isLabelOverlapAtLength(axisLength);
-                        break;
-                }
-
+            // Figure out whether we need another row due to label shifting. The other
+            // overlap policies are not relevant to the layout, although fontScale could
+            // technically reduce the height a bit.
+            // TODO: should fontScale reduce the size?
+            switch (getOverlapPolicy()) {
+                case FORCED_SHIFT_ALT:
+                    shiftLabels = true;
+                    break;
+                case SHIFT_ALT:
+                    shiftLabels = isLabelOverlapAtLength(axisLength);
+                    break;
             }
 
         }
 
-        // TODO: make sure this is properly updated/invalidated via change listeners
-        updateAxisLabelAndUnit();
-
         // Size of the axis label w/ units
-        double nameSize = getAxisLabelSize();
+        updateAxisLabelAndUnit(); // TODO: make sure this is properly updated/invalidated via change listeners
+        final double axisLabelSize = getAxisLabelSize();
+
+        // Remove gaps between empty space
+        final double tickLabelGap = tickLabelSize <= 0 ? 0 : getTickLabelGap();
+        final double axisLabelGap = axisLabelSize <= 0 ? 0 : getAxisLabelGap();
+        final double extraLabelOffset = axisLabelSize <= 0 ? 0 : getExtraLabelOffset();
 
         // Compute offsets
         tickMarkOffset = getTickMarkGap();
-        evenLabelsOffset = tickMarkOffset + tickSize + getTickLabelGap();
-        oddLabelsOffset = !shiftLabels ? evenLabelsOffset : evenLabelsOffset + labelSize + getTickLabelGap();
-        axisLabelOffset = oddLabelsOffset + labelSize + getAxisLabelGap() + getExtraLabelOffset();
-        double totalSize = axisLabelOffset + nameSize + getAxisLabelGap();
+        evenLabelsOffset = tickMarkOffset + tickSize + tickLabelGap;
+        oddLabelsOffset = evenLabelsOffset;
+        if (shiftLabels) {
+            oddLabelsOffset += tickLabelSize + tickLabelGap;
+        }
+        axisLabelOffset = oddLabelsOffset + tickLabelSize + axisLabelGap + extraLabelOffset;
+        final double totalSize = axisLabelOffset + axisLabelSize + getAxisLabelGap();
 
         // Render label on the other side
         if(getSide() == Side.CENTER_VER) {
             axisLabelOffset = -axisLabelOffset;
         }
 
-        return getSide().isCenter() ? 2 * totalSize : totalSize;
+        return Math.ceil(getSide().isCenter() ? 2 * totalSize : totalSize);
 
     }
 
     // minimum size estimate that does not modify local state
     private double computeMinSize() {
-        boolean isHorizontal = getSide().isHorizontal();
-        double tickSize = 0;
-        double labelSize = 0;
-        if (isTickMarkVisible()) {
 
-            // Tick marks or at least the main line
-            tickSize = Math.max(getTickLength(), getMajorTickStyle().getStrokeWidth());
+        // Tick marks or just the main line
+        final double tickSize = isTickMarkVisible() ? getTickLength() : getMajorTickStyle().getStrokeWidth();
 
-            // Guess label size for a minimal label. This is called for estimating
-            // the height of a horizontal axis, so with the default rotation the digits
-            // don't matter.
-            if (isTickLabelsVisible()) {
-                tmpTickMark.setValue(0, "0");
-                labelSize = isHorizontal ? tmpTickMark.getHeight() : tmpTickMark.getWidth();
-            }
+        // Guess label size for a minimal label. This is called for estimating
+        // the height of a horizontal axis, so with the default rotation the digits
+        // don't matter.
+        double tickLabelSize = 0;
+        boolean shiftedLabels = false;
+        if (isTickMarkVisible() && isTickLabelsVisible()) {
+            tmpTickMark.setValue(0, "0.0");
+            tickLabelSize = getSide().isHorizontal() ? tmpTickMark.getHeight() : tmpTickMark.getWidth();
 
-            // Assume no extra line unless it is forced
+            // Assume no extra line unless one is forced
             if(getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT) {
-                labelSize = 2 * labelSize + getTickLabelGap();
+                shiftedLabels = true;
             }
-
         }
 
         // Size of the axis label w/ units
-        double nameSize = getAxisLabelSize();
+        final double axisLabelSize = getAxisLabelSize();
+
+        // Remove gaps between empty space
+        final double tickLabelGap = tickLabelSize <= 0 ? 0 : getTickLabelGap();
+        final double axisLabelGap = axisLabelSize <= 0 ? 0 : getAxisLabelGap();
+        final double extraLabelOffset = axisLabelSize <= 0 ? 0 : getExtraLabelOffset();
 
         // Compute total size
-        double totalSize = getTickMarkGap()
-                + tickSize + getTickLabelGap()
-                + labelSize + getAxisLabelGap()
-                + nameSize + getAxisLabelGap() + getExtraLabelOffset();
-        return getSide().isCenter() ? 2 * totalSize : totalSize;
+        final double totalSize = getTickMarkGap()
+                + tickSize + tickLabelGap
+                + (shiftedLabels ? tickLabelSize + tickLabelGap : 0)
+                + tickLabelSize + axisLabelGap + extraLabelOffset
+                + axisLabelSize + getAxisLabelGap();
+        return Math.ceil(getSide().isCenter() ? 2 * totalSize : totalSize);
     }
 
     private double getAxisLabelSize() {
