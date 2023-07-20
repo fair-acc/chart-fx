@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.axes.spi;
 
 import java.util.List;
 
+import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -22,7 +23,6 @@ import javafx.util.StringConverter;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelFormatter;
-import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.format.DefaultFormatter;
 import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.ui.ResizableCanvas;
@@ -437,7 +437,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return computePrefSize(height);
     }
 
-
     private final double tickMarkOffset = 0;
     private double evenLabelsOffset;
     private double oddLabelsOffset;
@@ -445,6 +444,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     // Note: elements need to match what gets drawn in drawAxis!
     private double computePrefSize(final double axisLength) {
+        if (axisLength == -1) {
+            return computeMinSize();
+        }
 
         // TODO: would caching be useful? what would be a valid condition?
         /*if (!isNeedsLayout() && Double.isFinite(cachedPrefLength)) {
@@ -466,7 +468,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(axisLength) : getUserTickUnit());
             updateMajorTickMarks(getRange());
 
-            // Tick marks or just the main line
+            // Tick marks or at least the main line
             tickSize = Math.max(getTickLength(), getMajorTickStyle().getStrokeWidth());
 
             // Tick mark labels
@@ -500,30 +502,78 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         updateAxisLabelAndUnit();
 
         // Size of the axis label w/ units
-        double nameSize = 0;
-        final Text axisLabel = getAxisLabel();
-        if (axisLabel.getText() != null && !axisLabel.getText().isBlank()) {
-            var bounds = axisLabel.getBoundsInParent();
-            nameSize = isHorizontal ? bounds.getHeight() : bounds.getWidth();
-        }
+        double nameSize = getAxisLabelSize();
 
         // Compute offsets
         evenLabelsOffset = tickSize + getTickLabelGap();
         oddLabelsOffset = !shiftLabels ? evenLabelsOffset : evenLabelsOffset + labelSize + getTickLabelGap();
-        axisLabelOffset = oddLabelsOffset + labelSize + getAxisLabelGap();
+        axisLabelOffset = oddLabelsOffset + labelSize + getAxisLabelGap() + getExtraLabelOffset();
         double totalSize = axisLabelOffset + nameSize + getAxisLabelGap();
 
-        // Special case axis labels to match the previous implementation
-        // TODO: the extra gaps should probably use axisLabelGap?
-        if (getSide() == Side.LEFT) {
-            axisLabelOffset += getTickLabelGap();
-        } else if (getSide() == Side.CENTER_VER) {
-            axisLabelOffset += getTickLabelGap();
-            axisLabelOffset = -axisLabelOffset; // render on other side
+        // Render label on the other side
+        if(getSide() == Side.CENTER_VER) {
+            axisLabelOffset = -axisLabelOffset;
         }
 
         return getSide().isCenter() ? 2 * totalSize : totalSize;
 
+    }
+
+    // minimum size estimate that does not modify local state
+    private double computeMinSize() {
+        boolean isHorizontal = getSide().isHorizontal();
+        double tickSize = 0;
+        double labelSize = 0;
+        if (isTickMarkVisible()) {
+
+            // Tick marks or at least the main line
+            tickSize = Math.max(getTickLength(), getMajorTickStyle().getStrokeWidth());
+
+            // Guess label size for a minimal label. This is called for estimating
+            // the height of a horizontal axis, so with the default rotation the digits
+            // don't matter.
+            if (isTickLabelsVisible()) {
+                tmpTickMark.setValue(0, "0");
+                labelSize = isHorizontal ? tmpTickMark.getHeight() : tmpTickMark.getWidth();
+            }
+
+            // Assume no extra line unless it is forced
+            if(getOverlapPolicy() == AxisLabelOverlapPolicy.FORCED_SHIFT_ALT) {
+                labelSize = 2 * labelSize + getTickLabelGap();
+            }
+
+        }
+
+        // Size of the axis label w/ units
+        double nameSize = getAxisLabelSize();
+
+        // Compute total size
+        double totalSize = tickSize + getTickLabelGap()
+                + labelSize + getAxisLabelGap()
+                + nameSize + getAxisLabelGap() + getExtraLabelOffset();
+        return getSide().isCenter() ? 2 * totalSize : totalSize;
+    }
+
+    private double getAxisLabelSize() {
+        final Text axisLabel = getAxisLabel();
+        if (axisLabel.getText() != null && !axisLabel.getText().isBlank()) {
+            var bounds = axisLabel.getBoundsInParent();
+            return getSide().isHorizontal() ? bounds.getHeight() : bounds.getWidth();
+        }
+        return 0;
+    }
+
+    /**
+     * @return extra gap between the tick labels and the axis label to match original implementation
+     */
+    private double getExtraLabelOffset() {
+        // TODO: the extra gaps should probably use axisLabelGap?
+        switch (getSide()) {
+            case LEFT:
+            case CENTER_VER:
+                return getTickLabelGap();
+        }
+        return 0;
     }
 
     /**
