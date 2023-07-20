@@ -10,6 +10,7 @@ import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -226,6 +227,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient ReadOnlyDoubleWrapper scale = new ReadOnlyDoubleWrapper(this, "scale", 1);
 
     /**
+     * The axis length in pixels
+     */
+    private final transient DoubleProperty length = new SimpleDoubleProperty(Double.NaN);
+
+    /**
      * The value for the upper bound of this axis, ie max value. This is automatically set if auto ranging is on.
      */
     protected final transient DoubleProperty maxProp = new SimpleDoubleProperty(this, "upperBound", DEFAULT_MAX_RANGE) {
@@ -366,7 +372,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected final transient DoubleProperty tickUnit = new SimpleDoubleProperty(Double.NaN);
 
     protected final transient ChangeListener<? super Number> scaleChangeListener = (ch, o, n) -> {
-        final double axisLength = getSide().isVertical() ? getHeight() : getWidth(); // [pixel]
+        final double axisLength = getLength(); // [pixel]
         final double lowerBound = getMin();
         final double upperBound = getMax();
         if (!Double.isFinite(axisLength) || !Double.isFinite(lowerBound) || !Double.isFinite(upperBound)) {
@@ -412,6 +418,15 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
         axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
 
+        // Provide a binding for the axis length
+        var layoutLength = Bindings.createDoubleBinding(() -> {
+            if (getSide() == null) {
+                return Double.NaN;
+            }
+            return getSide().isHorizontal() ? getWidth() : getHeight();
+        }, sideProperty(), widthProperty(), heightProperty());
+        length.bind(layoutLength);
+
         // bind limits to user-specified axis range
         // userRange.set
         final ChangeListener<? super Number> userLimitChangeListener = (ch, o, n) -> {
@@ -431,8 +446,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
         minProperty().addListener(scaleChangeListener);
         maxProperty().addListener(scaleChangeListener);
-        widthProperty().addListener(scaleChangeListener);
-        heightProperty().addListener(scaleChangeListener);
+        lengthProperty().addListener(scaleChangeListener);
     }
 
     @Override
@@ -637,10 +651,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     @Override
     public double getLength() {
-        if (getSide() == null) {
-            return Double.NaN;
-        }
-        return getSide().isHorizontal() ? getWidth() : getHeight();
+        return lengthProperty().get();
+    }
+
+    protected DoubleProperty lengthProperty() {
+        return length;
     }
 
     // JavaFx Properties
