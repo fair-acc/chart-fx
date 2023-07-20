@@ -1,7 +1,5 @@
 package io.fair_acc.chartfx.axes;
 
-import java.util.List;
-
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
@@ -45,6 +43,12 @@ public interface Axis extends AxisDescription {
      * @param axisHeight the axis height in pixel (N.B. padding is being added)
      */
     void drawAxis(GraphicsContext gc, double axisWidth, double axisHeight);
+
+    /**
+     * Draws the axis into the axis Canvas. This needs to be called from the containing Chart and
+     * before drawing other items. The axis may omit drawing if nothing has changed.
+     */
+    void drawAxis();
 
     /**
      * forces redrawing of axis (via layoutChildren()). This is used to force an update while the main chart area is
@@ -169,13 +173,11 @@ public interface Axis extends AxisDescription {
     double getZeroPosition();
 
     /**
-     * Called when data has changed and the range may not be valid any more. This is only called by the chart if
+     * Called when data has changed and the range may not be valid anymore. This is only called by the chart if
      * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
      * happen on next layout pass.
-     *
-     * @param data The current set of all data that needs to be plotted on this axis
      */
-    void invalidateRange(List<Number> data);
+    void invalidateRange();
 
     /**
      * This is {@code true} when the axis labels and data point order should be inverted

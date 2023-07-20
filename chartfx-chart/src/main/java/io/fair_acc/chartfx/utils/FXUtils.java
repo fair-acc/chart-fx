@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.utils;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -238,23 +239,6 @@ public final class FXUtils {
         }
     }
 
-    public static <NODE extends Node> NODE hiddenStyleNode(NODE node, String... styles) {
-        hide(node);
-        addStyles(node, styles);
-        return node;
-    }
-
-    public static <NODE extends Node> NODE addStyles(NODE node, String... styles) {
-        node.getStyleClass().addAll(styles);
-        return node;
-    }
-
-    public static <NODE extends Node> NODE hide(NODE node) {
-        node.setVisible(false);
-        node.setManaged(false);
-        return node;
-    }
-
     // Similar to internal Pane::setConstraint
     public static <NODE extends Node> NODE setConstraint(NODE node, Object key, Object value) {
         if (value == null) {
@@ -280,6 +264,22 @@ public final class FXUtils {
             }
         }
         return null;
+    }
+
+    public static <T extends Object> List<T> sizedList(List<T> list, int desiredSize, Supplier<T> constructor) {
+        int delta = desiredSize - list.size();
+        if(delta == 0) {
+            return list;
+        }
+        while(delta > 0) {
+            list.add(constructor.get());
+            delta--;
+        }
+        while(delta < 0) {
+            list.remove(list.size() - 1);
+            delta++;
+        }
+        return list;
     }
 
 }

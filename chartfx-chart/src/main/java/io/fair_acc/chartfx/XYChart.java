@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -298,26 +299,13 @@ public class XYChart extends Chart {
         while (change.next()) {
             change.getRemoved().forEach(axis -> {
                 AssertUtils.notNull("to be removed axis is null", axis);
-                // TODO:
-                //  check if axis is associated with an existing renderer, if yes
-                //  -&gt; throw an exception
-                if (axis instanceof Node) {
-                    axesAndCanvasPane.remove((Node) axis);
-                }
+                // TODO: throw an exception if axis is associated with an existing renderer?
             });
 
             change.getAddedSubList().forEach(axis -> {
                 // check if axis is associated with an existing renderer,
                 // if yes -&gt; throw an exception
                 AssertUtils.notNull("to be added axis is null", axis);
-
-                final Side side = axis.getSide();
-                if (side == null) {
-                    throw new InvalidParameterException("axis '" + axis.getName() + "' has 'null' as side being set");
-                }
-                if (axis instanceof Node) {
-                    axesAndCanvasPane.addSide(side, (Node) axis);
-                }
             });
         }
 
@@ -418,52 +406,50 @@ public class XYChart extends Chart {
         if (dataSets == null || dataSets.isEmpty()) {
             return;
         }
-        final boolean oldAutoState = axis.autoNotification().getAndSet(false);
-        final double oldMin = axis.getAutoRange().getMin();
-        final double oldMax = axis.getAutoRange().getMax();
-        final double oldLength = axis.getLength();
 
-        final boolean isHorizontal = axis.getSide().isHorizontal();
+        final boolean oldAutoState = axis.autoNotification().getAndSet(false);
         final Side side = axis.getSide();
-        axis.getAutoRange().clear();
+        final boolean isHorizontal = side.isHorizontal();
+
+        // Determine the range of all datasets for this axis
+        final AxisRange dsRange = new AxisRange();
+        dsRange.clear();
         dataSets.stream().filter(DataSet::isVisible).forEach(dataset -> dataset.lock().readLockGuard(() -> {
             if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
                 if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
                     dataset.recomputeLimits(DataSet.DIM_Z);
                 }
-                axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
-                axis.getAutoRange().add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
+                dsRange.add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
+                dsRange.add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
             } else {
                 final int nDim = isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y;
                 if (!dataset.getAxisDescription(nDim).isDefined()) {
                     dataset.recomputeLimits(nDim);
                 }
-                axis.getAutoRange().add(dataset.getAxisDescription(nDim).getMin());
-                axis.getAutoRange().add(dataset.getAxisDescription(nDim).getMax());
+                dsRange.add(dataset.getAxisDescription(nDim).getMin());
+                dsRange.add(dataset.getAxisDescription(nDim).getMax());
             }
         }));
 
-        // handling of numeric axis and auto-range or auto-grow setting only
-        if (!axis.isAutoRanging() && !axis.isAutoGrowRanging()) {
-            if (oldMin != axis.getMin() || oldMax != axis.getMax() || oldLength != axis.getLength()) {
-                axis.requestAxisLayout();
-            }
-            axis.autoNotification().set(oldAutoState);
-            return;
-        }
-
+        // Update the auto range
+        final boolean changed;
         if (axis.isAutoGrowRanging()) {
-            axis.getAutoRange().add(oldMin);
-            axis.getAutoRange().add(oldMax);
+            changed = axis.getAutoRange().add(dsRange);
+        } else {
+            changed = axis.getAutoRange().set(dsRange);
         }
 
-        axis.getAutoRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
-        axis.getUserRange().setAxisLength(axis.getLength() == 0 ? 1 : axis.getLength(), side);
-        axis.invalidateRange(null);
-
-        if (oldMin != axis.getMin() || oldMax != axis.getMax() || oldLength != axis.getLength()) {
+        // Trigger a redraw
+        if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
+            axis.invalidateRange();
             axis.requestAxisLayout();
         }
+
+        // TODO: is this used for anything? can it be removed?
+        double axisLength = axis.getLength() == 0 ? 1 : axis.getLength();
+        axis.getAutoRange().setAxisLength(axisLength, side);
+        axis.getUserRange().setAxisLength(axisLength, side);
+
         axis.autoNotification().set(oldAutoState);
     }
 }

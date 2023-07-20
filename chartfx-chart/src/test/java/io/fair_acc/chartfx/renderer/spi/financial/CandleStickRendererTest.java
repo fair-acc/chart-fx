@@ -133,7 +133,7 @@ public class CandleStickRendererTest {
         assertFalse(candleStickRenderer.isPaintVolume());
     }
 
-    @Test
+    @TestFx
     public void noXyChartInstance() {
         assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null));
     }

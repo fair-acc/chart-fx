@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx;
 
+import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -676,7 +677,7 @@ public abstract class Chart extends Region implements Observable {
         return toolBarPinned.get();
     }
 
-    private final PostLayoutHook redrawCanvasAction = new PostLayoutHook(this, this::redrawCanvas);
+    private final PostLayoutHook drawPhase = new PostLayoutHook(this, this::drawChart);
 
     @Override
     public void layoutChildren() {
@@ -700,7 +701,7 @@ public abstract class Chart extends Region implements Observable {
         doLayout();
 
         // request re-layout of canvas
-        redrawCanvasAction.runPostLayout();
+        drawPhase.runPostLayout();
 
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
 
@@ -874,20 +875,45 @@ public abstract class Chart extends Region implements Observable {
      */
     protected void axesChangedLocal(final ListChangeListener.Change<? extends Axis> change) {
         while (change.next()) {
-            change.getRemoved().forEach(set -> {
-                AssertUtils.notNull("to be removed axis is null", set);
+            var children = getAxesAndCanvasPane().getChildren();
+            for (Axis axis : change.getRemoved()) {
                 // remove axis invalidation listener
-                set.removeListener(axisChangeListener);
-            });
-            for (final Axis set : change.getAddedSubList()) {
+                AssertUtils.notNull("to be removed axis is null", axis);
+                axis.removeListener(axisChangeListener);
+                removeAxisFromChildren(axis); // TODO: don't remove if it is contained in getAxes()
+            }
+            for (final Axis axis : change.getAddedSubList()) {
                 // check if axis is associated with an existing renderer,
                 // if yes -> throw an exception
-                AssertUtils.notNull("to be added axis is null", set);
-                set.addListener(axisChangeListener);
+                AssertUtils.notNull("to be added axis is null", axis);
+                axis.addListener(axisChangeListener);
+                addAxisToChildren(axis);
             }
         }
 
         requestLayout();
+    }
+
+    private boolean addAxisToChildren(Axis axis) {
+        final Side side = axis.getSide();
+        if (side == null) {
+            throw new InvalidParameterException("axis '" + axis.getName() + "' has 'null' as side being set");
+        }
+        var children = getAxesAndCanvasPane().getChildren();
+        if (axis instanceof Node && !children.contains(axis)) {
+            getAxesAndCanvasPane().addSide(side, (Node) axis);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean removeAxisFromChildren(Axis axis) {
+        var children = getAxesAndCanvasPane().getChildren();
+        if (axis instanceof Node) {
+            children.remove((Node) axis);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -992,6 +1018,13 @@ public abstract class Chart extends Region implements Observable {
         updatePluginsArea();
     }
 
+    protected void drawChart() {
+        for (Axis axis : axesList) {
+            axis.drawAxis();
+        }
+        redrawCanvas();
+    }
+
     /**
      * (re-)draw canvas (if necessary). This is supposed to be implemented in derived classes
      */
@@ -1025,12 +1058,16 @@ public abstract class Chart extends Region implements Observable {
                 renderer.getDatasets().addListener(datasetChangeListener);
                 // add listeners to all datasets already in the renderer
                 renderer.getDatasets().forEach(set -> set.addListener(dataSetDataListener));
+                renderer.getAxes().addListener(axesChangeListenerLocal);
+                renderer.getAxes().forEach(this::addAxisToChildren);
             });
 
             // handle removed renderer
             change.getRemoved().forEach(renderer -> {
                 renderer.getDatasets().removeListener(datasetChangeListener);
                 renderer.getDatasets().forEach(set -> set.removeListener(dataSetDataListener));
+                renderer.getAxes().removeListener(axesChangeListenerLocal);
+                renderer.getAxes().forEach(this::removeAxisFromChildren);
             });
         }
         // reset change to allow derived classes to add additional listeners to renderer changes

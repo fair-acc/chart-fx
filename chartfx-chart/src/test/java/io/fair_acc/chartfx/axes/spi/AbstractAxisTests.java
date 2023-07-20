@@ -12,10 +12,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import org.junit.jupiter.api.Assertions;
@@ -72,8 +74,7 @@ class AbstractAxisTests {
 
         Assertions.assertDoesNotThrow(() -> axis.computeTickMarks(autoRange, false));
 
-        List<Number> numberList = Collections.unmodifiableList(axis.calculateMajorTickValues(DEFAULT_AXIS_LENGTH, autoRange));
-        axis.invalidateRange(new ArrayList<>(numberList));
+        axis.invalidateRange();
     }
 
     @Test
@@ -213,6 +214,70 @@ class AbstractAxisTests {
         axis.getTickMarks().setAll(majorTickMarks);
     }
 
+    @Test
+    public void tickMarkLabelAlignment() {
+        var axis = new EmptyAbstractAxis();
+        var style = axis.getTickLabelStyle();
+
+        // No rotation
+        axis.setTickLabelRotation(0);
+        axis.setSide(Side.TOP);
+        assertEquals(TextAlignment.CENTER, style.getTextAlignment());
+        assertEquals(VPos.BOTTOM, style.getTextOrigin());
+
+        axis.setSide(Side.BOTTOM);
+        assertEquals(TextAlignment.CENTER, style.getTextAlignment());
+        assertEquals(VPos.TOP, style.getTextOrigin());
+
+        axis.setSide(Side.LEFT);
+        assertEquals(TextAlignment.RIGHT, style.getTextAlignment());
+        assertEquals(VPos.CENTER, style.getTextOrigin());
+
+        axis.setSide(Side.RIGHT);
+        assertEquals(TextAlignment.LEFT, style.getTextAlignment());
+        assertEquals(VPos.CENTER, style.getTextOrigin());
+
+        // 90 deg
+        axis.setTickLabelRotation(90);
+        axis.setSide(Side.TOP);
+        assertEquals(TextAlignment.LEFT, style.getTextAlignment());
+        assertEquals(VPos.CENTER, style.getTextOrigin());
+
+        axis.setSide(Side.BOTTOM);
+        assertEquals(TextAlignment.LEFT, style.getTextAlignment());
+        assertEquals(VPos.CENTER, style.getTextOrigin());
+
+        axis.setSide(Side.LEFT);
+        assertEquals(TextAlignment.CENTER, style.getTextAlignment());
+        assertEquals(VPos.BOTTOM, style.getTextOrigin());
+
+        axis.setSide(Side.RIGHT);
+        assertEquals(TextAlignment.CENTER, style.getTextAlignment());
+        assertEquals(VPos.TOP, style.getTextOrigin());
+
+
+        // special non 'n x 90 degree' rotation cases for top/bottom
+        axis.setTickLabelRotation(45);
+
+        axis.setSide(Side.TOP);
+        assertEquals(TextAlignment.LEFT, style.getTextAlignment());
+        assertEquals(VPos.BOTTOM, style.getTextOrigin());
+
+        axis.setSide(Side.BOTTOM);
+        assertEquals(TextAlignment.LEFT, style.getTextAlignment());
+        assertEquals(VPos.TOP, style.getTextOrigin());
+
+        // should be equal to 90 degree case
+        axis.setSide(Side.LEFT);
+        assertEquals(TextAlignment.RIGHT, style.getTextAlignment());
+        assertEquals(VPos.CENTER, style.getTextOrigin());
+
+        axis.setSide(Side.RIGHT);
+        assertEquals(TextAlignment.LEFT, style.getTextAlignment());
+        assertEquals(VPos.CENTER, style.getTextOrigin());
+
+    }
+
     @Start
     public void start(Stage stage) {
         assertDoesNotThrow(DefaultLegend::new);
@@ -267,7 +332,7 @@ class AbstractAxisTests {
         }
 
         @Override
-        protected List<Double> calculateMajorTickValues(final double length, final AxisRange axisRange) {
+        protected List<Double> calculateMajorTickValues(final AxisRange axisRange) {
             final List<Double> majorTicks = new ArrayList<>();
             final double range = Math.abs(axisRange.getMax() - axisRange.getMin());
             final double min = Math.min(getMin(), getMax());
