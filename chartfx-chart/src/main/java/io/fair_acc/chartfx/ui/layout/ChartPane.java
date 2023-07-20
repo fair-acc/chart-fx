@@ -148,7 +148,7 @@ public class ChartPane extends Pane {
         int i;
 
         // (1) Approximate axis height to improve the label overlap estimate
-        final double guessedContentHeight = height - estimateHeightOfAllHorizontalAxes();
+        final double guessedContentHeight = snapSizeY(height - estimateHeightOfAllHorizontalAxes());
 
         // (2) Determine width of all vertical parts. The labels are generated
         // for the approximate height, so the overlap may not be perfect, but it's
@@ -162,17 +162,17 @@ public class ChartPane extends Pane {
             if (location instanceof Side) {
                 switch ((Side) location) {
                     case LEFT:
-                        prefSize = getPrefWidth(child, guessedContentHeight);
+                        prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
                         cachedPrefSize.set(i, prefSize);
                         leftWidth += prefSize;
                         break;
                     case RIGHT:
-                        prefSize = getPrefWidth(child, guessedContentHeight);
+                        prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
                         cachedPrefSize.set(i, prefSize);
                         rightWidth += prefSize;
                         break;
                     case CENTER_VER:
-                        prefSize = getPrefWidth(child, guessedContentHeight);
+                        prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
                         cachedPrefSize.set(i, prefSize);
                         break;
                 }
@@ -192,17 +192,17 @@ public class ChartPane extends Pane {
             if (location instanceof Side) {
                 switch ((Side) location) {
                     case TOP:
-                        prefSize = getPrefHeight(child, contentWidth);
+                        prefSize = snapSizeY(getPrefHeight(child, contentWidth));
                         cachedPrefSize.set(i, prefSize);
                         topHeight += prefSize;
                         break;
                     case BOTTOM:
-                        prefSize = getPrefHeight(child, contentWidth);
+                        prefSize = snapSizeY(getPrefHeight(child, contentWidth));
                         cachedPrefSize.set(i, prefSize);
                         bottomHeight += prefSize;
                         break;
                     case CENTER_HOR:
-                        prefSize = getPrefHeight(child, contentWidth);
+                        prefSize = snapSizeY(getPrefHeight(child, contentWidth));
                         cachedPrefSize.set(i, prefSize);
                         break;
                 }
