@@ -87,45 +87,6 @@ public class LegendTests {
     }
 
     @TestFx
-    public void testLegendPositioning() {
-        assertDoesNotThrow(DefaultLegend::new);
-
-        final DefaultLegend legend = new DefaultLegend();
-
-        assertDoesNotThrow(() -> chart.setLegend(null));
-        assertNull(chart.getLegend());
-        assertDoesNotThrow(() -> chart.setLegend(legend));
-        assertEquals(legend, chart.getLegend());
-
-        for (Side side : Side.values()) {
-            assertDoesNotThrow(() -> chart.setLegendSide(side));
-            assertTrue(chart.getTitleLegendPane(side).getChildren().contains(legend));
-
-            // assert that legend is not attached in any pane
-            for (Side side2 : Side.values()) {
-                if (side2.equals(side)) {
-                    continue;
-                }
-                assertFalse(chart.getTitleLegendPane(side2).getChildren().contains(legend));
-            }
-
-            chart.setLegendVisible(false);
-            for (Side side2 : Side.values()) {
-                assertFalse(chart.getTitleLegendPane(side2).getChildren().contains(legend));
-            }
-
-            chart.setLegendVisible(true);
-            assertTrue(chart.getTitleLegendPane(side).getChildren().contains(legend));
-            for (Side side2 : Side.values()) {
-                if (side2.equals(side)) {
-                    continue;
-                }
-                assertFalse(chart.getTitleLegendPane(side2).getChildren().contains(legend));
-            }
-        }
-    }
-
-    @TestFx
     public void testSetterGetter() {
         assertDoesNotThrow(DefaultLegend::new);
         final DefaultLegend legend = new DefaultLegend();

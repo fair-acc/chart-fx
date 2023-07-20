@@ -2,6 +2,7 @@ package io.fair_acc.chartfx;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import io.fair_acc.chartfx.utils.FXUtils;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
@@ -22,8 +23,8 @@ public class ChartTest {
     private TestChart chart;
 
     @BeforeEach
-    public void setup() {
-        chart = new TestChart();
+    public void setup() throws Exception {
+        chart = FXUtils.runAndWait(TestChart::new);
     }
 
     @TestFx

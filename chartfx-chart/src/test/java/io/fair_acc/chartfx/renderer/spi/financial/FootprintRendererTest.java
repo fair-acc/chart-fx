@@ -169,7 +169,7 @@ public class FootprintRendererTest {
         assertFalse(renderer.isPaintPullbackColumn());
     }
 
-    @Test
+    @TestFx
     public void noXyChartInstance() {
         assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null));
     }
