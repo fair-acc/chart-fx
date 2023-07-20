@@ -98,13 +98,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             updateAxisLabelAlignment();
             updateTickLabelAlignment();
         });
-        tickLabelRotationProperty().addListener((obs, old, value) -> updateTickLabelAlignment());
+        tickLabelRotationProperty().addListener((ch, o, n) -> updateTickLabelAlignment());
 
         // TODO: remove?
         invertAxisProperty().addListener((ch, o, n) -> Platform.runLater(this::forceRedraw));
 
         VBox.setVgrow(this, Priority.ALWAYS);
         HBox.setHgrow(this, Priority.ALWAYS);
+
+        // Disconnect the length from the layout so we can make it user settable
+        lengthProperty().unbind();
+        lengthProperty().addListener((ch, o, n) -> updateAxisContents());
     }
 
     protected AbstractAxis(final double lowerBound, final double upperBound) {
@@ -132,14 +136,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return;
         }
 
-        // Always update tick marks so the grid renderer can access them
-        updateMinorTickMarks();
-        final ObservableList<TickMark> majorTicks = getTickMarks();
-        final ObservableList<TickMark> minorTicks = getMinorTickMarks();
-        updateTickMarkPositions(majorTicks);
-        updateTickMarkPositions(minorTicks);
-        updateCachedVariables();
-
         // Nothing shown -> no need to draw anything
         if (!isVisible()) {
             return;
@@ -149,6 +145,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
         if (isTickMarkVisible()) {
+            final var majorTicks = getTickMarks();
+            final var minorTicks = getMinorTickMarks();
 
             // Ignore minor ticks if there isn't enough space
             if (isMinorTickVisible() && getMinorTickLength() > 0) {
@@ -193,8 +191,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     @Override
     public void forceRedraw() {
-        invalidateCaches();
-        invalidate();
+        updateAxisContents(); // TODO: needed?
+        requestAxisLayout();
     }
 
     public AxisLabelFormatter getAxisLabelFormatter() {
@@ -406,6 +404,26 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         gc.clearRect(0, 0, width, height);
     }
 
+    private void setLength(double length) {
+        lengthProperty().set(length);
+    }
+
+    /**
+     * Updates the tick marks based on the current axis length
+     */
+    protected void updateAxisContents() {
+        final double length = getLength();
+        if (!Double.isFinite(length)) {
+            return;
+        }
+        setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(length) : getUserTickUnit());
+        updateMajorTickMarks(getRange());
+        updateMinorTickMarks();
+        updateCachedVariables();
+        updateTickMarkPositions(getTickMarks());
+        updateTickMarkPositions(getMinorTickMarks());
+    }
+
     /**
      * Computes the preferred height of this axis for the given width. If axis orientation is horizontal, it takes into
      * account the tick mark length, tick label gap and label height.
@@ -449,15 +467,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return computeMinSize();
         }
 
-        // TODO: would caching be useful? what would be a valid condition?
-        /*if (!isNeedsLayout() && Double.isFinite(cachedPrefLength)) {
-            return cachedPrefLength;
-        }*/
-
-        // Always update tick marks so e.g. the grid renderer can use them even if not displayed
-        // TODO: is this using node dimensions?
-        setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(axisLength) : getUserTickUnit());
-        updateMajorTickMarks(getRange());
+        // Set the axis length, so we can compute ticks with correctly placed
+        // labels to determine the overlap. The initial estimate is usually
+        // correct, so later changes happen very rarely, e.g., at a point where
+        // y axes labels switch to shifting lines.
+        setLength(axisLength);
 
         boolean isHorizontal = getSide().isHorizontal();
         scaleFont = 1.0;
@@ -489,14 +503,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                     shiftLabels = true;
                     break;
                 case SHIFT_ALT:
-                    shiftLabels = isLabelOverlapAtLength(axisLength);
+                    shiftLabels = isTickLabelsOverlap(getTickMarks(), 0, 1);
                     break;
             }
 
         }
 
         // Size of the axis label w/ units
-        updateAxisLabelAndUnit(); // TODO: make sure this is properly updated/invalidated via change listeners
         final double axisLabelSize = getAxisLabelSize();
 
         // Remove gaps between empty space
@@ -583,26 +596,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return 0;
     }
 
-    /**
-     * Determines whether the current labels would overlap at the given length.
-     * Can be called before the layout size is known.
-     * <p>
-     * TODO:
-     *   This should be based on actual display position to support
-     *   non-linear axes and non-uniform labels, but this will require
-     *   more refactoring as 'getDisplayPosition()' uses the node size,
-     *   and changing that will trigger a new layout.
-     *
-     * @param axisLength desired axis length
-     * @return true if labels will overlap at the given length
-     */
-    protected boolean isLabelOverlapAtLength(double axisLength) {
-        // '+1' tick label more because first and last tick are half outside axis length
-        double maxLabelLength = getSide().isHorizontal() ? maxLabelWidth : maxLabelHeight;
-        double projectedTotalLength = (getTickMarks().size() + 1) * (maxLabelLength + getTickLabelSpacing());
-        return projectedTotalLength > axisLength;
-    }
-
     private void enforceOverlapPolicy(List<TickMark> tickMarks) {
         // Default to all visible
         for (TickMark tickMark : tickMarks) {
@@ -666,12 +659,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected void updateMajorTickMarks(AxisRange range) {
         // TODO: cache if the range and tick units have not changed?
         var newTickValues = calculateMajorTickValues(range);
-        if(newTickValues.equals(getTickMarkValues())) {
-            return; // no need to update the tick mark labels
+        var oldTickValues = getTickMarkValues();
+        if (newTickValues.equals(oldTickValues) || newTickValues.size() < 2) {
+            return; // no need to redo labels, just reposition the ticks
         }
 
-        // TODO: old code only updated on >=2 ticks?
-        getTickMarkValues().setAll(newTickValues);
+        // TODO: why did the previous code only update when there are > 2 ticks? That would cause a mismatch
+        oldTickValues.setAll(newTickValues);
 
         // Update labels
         var formatter = getAxisLabelFormatter();
@@ -900,20 +894,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             canvasPadY = getAxisPadding();
         }
 
-        // full-size the canvas. The axis gets drawn from the Chart
+        // Full-size the canvas. The axis gets drawn from the Chart
         // to guarantee ordering (e.g. ticks are available before the grid)
         canvas.resizeRelocate(-canvasPadX, -canvasPadY, getWidth() + 2 * canvasPadX, getHeight() + 2 * canvasPadY);
-        needsToBeDrawn = true;
-    }
 
-    private boolean needsToBeDrawn = true;
+        //  Layout only gets called on actual size changes. Most of the time the length set
+        //  during the prefSize phase is already correct, so this rarely triggers a recompute.
+        setLength(super.getLength());
+    }
 
     @Override
     public void drawAxis() {
-        // Try using the cached content
-        if (!needsToBeDrawn) return;
-        needsToBeDrawn = false;
-
         // clear outdated canvas content
         final var gc = canvas.getGraphicsContext2D();
         clearAxisCanvas(gc, canvas.getWidth(), canvas.getHeight());
