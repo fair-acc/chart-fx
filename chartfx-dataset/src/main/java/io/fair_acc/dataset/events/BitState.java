@@ -121,12 +121,28 @@ public class BitState implements StateListener {
         return state;
     }
 
+    public int clear(IntSupplier bit0) {
+        return clear(bit0.getAsInt());
+    }
+
+    public int clear(IntSupplier bit0, IntSupplier bit1) {
+        return clear(bit0.getAsInt() | bit1.getAsInt());
+    }
+
+    public int clear(IntSupplier bit0, IntSupplier bit1, IntSupplier... bits) {
+        return clear(bit0.getAsInt() | bit1.getAsInt() | mask(bits));
+    }
+
     public BitState addChangeListener(IntSupplier bit, StateListener listener) {
         return addChangeListener(bit.getAsInt(), listener);
     }
 
     public BitState addChangeListener(int filter, StateListener listener) {
         return addChangeListener(new FilteredListener(filter, listener));
+    }
+
+    public BitState addInvalidateListener(IntSupplier bit, StateListener listener) {
+        return addInvalidateListener(bit.getAsInt(), listener);
     }
 
     public BitState addInvalidateListener(int filter, StateListener listener) {

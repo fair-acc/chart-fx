@@ -129,10 +129,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             updateTickLabelAlignment();
         });
 
-
-        // Disconnect the length from the layout to make it user settable
-        lengthProperty().unbind();
-
         // Send out events to be backwards compatible with old event system
         final AxisChangeEvent axisTransformEvent = new AxisRangeChangeEvent(this);
         final AxisChangeEvent axisLabelEvent = new AxisNameChangeEvent(this);
@@ -168,23 +164,20 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     public abstract double computePreferredTickUnit(final double axisLength);
 
+    public double computePreferredTickUnit(AxisRange range) {
+        // TODO: remove the older general one
+        return computePreferredTickUnit(range.axisLength);
+    }
+
     @Override
     public void drawAxis(final GraphicsContext gc, final double axisWidth, final double axisHeight) {
         if ((gc == null) || (getSide() == null)) {
             return;
         }
 
-        // Always update transform and ticks so they can be used in the grid
-        updateContent();
-
-        // Nothing shown -> no need to draw anything
-        if (!isVisible()) {
-            return;
-        }
-
         drawAxisPre();
 
-        final double axisLength = getSide().isHorizontal() ? axisWidth : axisHeight;
+        final double axisLength = getLength();
         if (isTickMarkVisible()) {
             final var majorTicks = getTickMarks();
             final var minorTicks = getMinorTickMarks();
@@ -210,6 +203,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
         drawAxisLine(gc, axisLength, axisWidth, axisHeight);
         drawAxisPost();
+
     }
 
     /**
@@ -324,35 +318,34 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * range, caches, etc.
      */
     protected void updateContent() {
-        final double length = getLength();
+        final double length = Math.max(1, getLength());
         if (!Double.isFinite(length) || state.isClean()) {
             return;
         }
-        isUpdatingContent = true;
 
-        if(debug(String.format("min: %f, max: %f", getMin(), getMax()))) {
-            System.out.println();
+        // Update range & scale
+        final AxisRange range;
+        if (isAutoGrowRanging() || isAutoRanging()) {
+            range = autoRange(length); // derived axes may potentially pad and round limits
+        } else {
+            range = getUserRange();
         }
 
-        // Update range & scale // TODO: some initialization broke when adding events
-        AxisRange range = autoRange(getLength()); // derived axes may potentially pad and round limits
-        range.setAxisLength(length == 0 ? 1 : length, getSide());
-        set(range.getMin(), range.getMax());
-        setScale(calculateNewScale(getLength(), range.getMin(), range.getMax()));
+        range.axisLength = length;
+        range.scale = calculateNewScale(length, range.getMin(), range.getMax());
+        range.tickUnit =/* (!isAutoRanging() && !isAutoRanging()) ? getUserTickUnit() :*/ computePreferredTickUnit(range); // TODO: does not work in zoom
+
+        // Scale the units // TODO: actually scale
+        double unitScale = computeUnitScale(range);
+        setUnitScaling(unitScale);
 
         // Displayed label & units
         if (state.isDirty(ChartBits.AxisLabelText)) {
-            updateAxisLabelAndUnit(); // can this set dirty on the axis transform?
+            updateAxisLabel();
         }
-
-        // Tick units
-        double mTickUnit = getUserTickUnit();
-        if (isAutoRanging() || isAutoGrowRanging() || true /* TODO: does not work in zoom */) {
-            mTickUnit = computePreferredTickUnit(length);
-        }
-        setTickUnit(range.tickUnit = mTickUnit);
 
         // Update cache to have axis transforms
+        setDisplayedRange(range);
         updateCachedVariables();
 
         // Tick marks
@@ -361,13 +354,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         updateTickMarkPositions(getTickMarks());
         updateTickMarkPositions(getMinorTickMarks());
 
-        postUpdateContent();
-
-    }
-
-    protected void postUpdateContent() {
-        state.clear();
-        isUpdatingContent = false;
     }
 
     /**
@@ -467,23 +453,16 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return new scale to fit the range from lower bound to upper bound in the given display length
      */
     protected double calculateNewScale(final double length, final double lowerBound, final double upperBound) {
-        double newScale;
-        final var side = getSide();
-        final double diff = upperBound - lowerBound;
-        if (side.isVertical()) {
-            newScale = diff == 0 ? -length : -(length / diff);
-        } else { // HORIZONTAL
-            newScale = (upperBound - lowerBound) == 0 ? length : length / diff;
+        final double range = upperBound - lowerBound;
+        if(range == 0 || length == 0) {
+            return -1.0;
         }
-        return newScale == 0 ? -1.0 : newScale;
+        final double scale = length / range;
+        return isInvertedAxis ? -scale : scale;
     }
 
     protected void clearAxisCanvas(final GraphicsContext gc, final double width, final double height) {
         gc.clearRect(0, 0, width, height);
-    }
-
-    private void setLength(double length) {
-        lengthProperty().set(length);
     }
 
     /**
@@ -963,13 +942,20 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // to guarantee ordering (e.g. ticks are available before the grid)
         canvas.resizeRelocate(-canvasPadX, -canvasPadY, getWidth() + 2 * canvasPadX, getHeight() + 2 * canvasPadY);
 
-        //  Layout only gets called on actual size changes. Most of the time the length set
-        //  during the prefSize phase is already correct, so this rarely triggers a recompute.
-        setLength(super.getLength());
+        //  Layout only gets called on actual size changes. The length already gets set during
+        //  the prefSize phase, so this is more of a sanity check.
+        setLength(getSide().isHorizontal() ? getWidth() : getHeight());
     }
 
     @Override
     public void drawAxis() {
+        if (state.isClean()) {
+            return;
+        }
+
+        // update labels, tick marks etc.
+        updateContent();
+
         // clear outdated canvas content
         final var gc = canvas.getGraphicsContext2D();
         clearAxisCanvas(gc, canvas.getWidth(), canvas.getHeight());
@@ -981,6 +967,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         } finally {
             gc.translate(-canvasPadX, -canvasPadY);
         }
+        state.clear();
 
     }
 

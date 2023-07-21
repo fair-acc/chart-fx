@@ -159,6 +159,18 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         return computeTickUnit(rawTickUnit);
     }
 
+    @Override
+    public double computePreferredTickUnit(AxisRange range) {
+        final double labelSize = getTickLabelFont().getSize() * 2;
+        final int numOfFittingLabels = (int) Math.floor(range.axisLength / labelSize);
+        final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMajorTickLabelCount()), 2);
+        double rawTickUnit = (range.getMax() - range.getMin()) / numOfTickMarks;
+        if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
+            rawTickUnit = 1e-3; // TODO: remove this hack (eventually) ;-)
+        }
+        return computeTickUnit(rawTickUnit);
+    }
+
     /**
      * When {@code true} zero is always included in the visible range. This only has effect if
      * {@link #autoRangingProperty() auto-ranging} is on.
