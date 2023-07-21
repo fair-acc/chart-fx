@@ -1,9 +1,12 @@
 package io.fair_acc.sample.chart;
 
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.ui.geometry.Side;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -33,24 +36,18 @@ public class AxisRangeScalingSample extends ChartSample {
 
     @Override
     public Node getChartPanel(final Stage primaryStage) {
-        final VBox root = new VBox();
-        root.setAlignment(Pos.CENTER);
-
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("standard axis label w/o unit", 0, 100, 1);
         VBox.setMargin(xAxis1, new Insets(20, 10, 20, 10));
-        root.getChildren().add(xAxis1);
 
         final DefaultNumericAxis xAxis2 = new DefaultNumericAxis("axis label", 0, 100, 1);
         VBox.setMargin(xAxis2, new Insets(20, 10, 20, 10));
         xAxis2.setUnit("m");
-        root.getChildren().add(xAxis2);
 
         final DefaultNumericAxis xAxis3 = new DefaultNumericAxis("current", 0, 100, 1);
         VBox.setMargin(xAxis3, new Insets(20, 10, 20, 10));
         xAxis3.setNodeOrientation(NodeOrientation.RIGHT_TO_LEFT);
         xAxis3.setUnit("A");
         xAxis3.getAxisLabel().setFill(Color.RED.darker());
-        root.getChildren().add(xAxis3);
 
         // to force unit scaling to '1000' 'k' suffix
         // N.B. tick unit is being overwritten by scaling
@@ -62,28 +59,24 @@ public class AxisRangeScalingSample extends ChartSample {
         xAxis4.setUnit("A");
         xAxis4.getAxisLabel().setFont(Font.font("Times", 25));
         xAxis4.getAxisLabel().setFill(Color.RED.darker());
-        root.getChildren().add(xAxis4);
 
         // to force unit scaling to '1e-3' '\mu' suffix
         final DefaultNumericAxis xAxis5 = new DefaultNumericAxis("small voltage", 0, 10e-6, 1e-6);
         VBox.setMargin(xAxis5, new Insets(20, 10, 20, 10));
         xAxis5.setUnitScaling(MetricPrefix.MICRO);
         xAxis5.setUnit("V");
-        root.getChildren().add(xAxis5);
 
         // to force unit scaling to '1e-9' 'n' suffix
         final DefaultNumericAxis xAxis6 = new DefaultNumericAxis("tiny voltage", 0, 11e-9, 1e-9);
         VBox.setMargin(xAxis6, new Insets(20, 10, 20, 10));
         xAxis6.setUnitScaling(MetricPrefix.NANO);
         xAxis6.setUnit("V");
-        root.getChildren().add(xAxis6);
 
         // example for scaling with non metric prefix
         final DefaultNumericAxis xAxis7 = new DefaultNumericAxis("non-metric scaling voltage variable", 0, 25e-6, 1e-6);
         VBox.setMargin(xAxis7, new Insets(20, 10, 20, 10));
         xAxis7.setUnitScaling(2.5e-6);
         xAxis7.setUnit("V");
-        root.getChildren().add(xAxis7);
 
         // example for scaling with non metric prefix and w/o unit
         final DefaultNumericAxis xAxis8 = new DefaultNumericAxis("non-metric scaling voltage variable w/o unit", 0,
@@ -92,7 +85,6 @@ public class AxisRangeScalingSample extends ChartSample {
         xAxis8.setUnitScaling(2.5e-6);
         // or alternatively:
         // xAxis7.setUnit(null);
-        root.getChildren().add(xAxis8);
 
         // example for dynamic scaling with metric prefix and unit
         final DefaultNumericAxis xAxis9 = new DefaultNumericAxis("dynamic Axis", -1e-6 * 0, 0.001, 1);
@@ -101,9 +93,15 @@ public class AxisRangeScalingSample extends ChartSample {
         xAxis9.setAutoUnitScaling(true);
         xAxis9.setMinorTickCount(10);
         xAxis9.setAutoRangeRounding(true);
-        root.getChildren().add(xAxis9);
         final Label xAxis9Text = new Label();
-        root.getChildren().add(xAxis9Text);
+
+        // TODO: axes as standalone elements don't get drawn, so we add them to a dummy chart
+        Chart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
+        Arrays.asList(xAxis1, xAxis2, xAxis3,
+                xAxis4, xAxis5, xAxis6, xAxis7, xAxis8, xAxis9).forEach(axis -> {
+            axis.setSide(Side.BOTTOM);
+            chart.getAxes().add(axis);
+        });
 
         final Timer timer = new Timer("sample-update-timer", true);
         final TimerTask task = new TimerTask() {
@@ -131,7 +129,7 @@ public class AxisRangeScalingSample extends ChartSample {
         };
         timer.scheduleAtFixedRate(task, 0, TimeUnit.SECONDS.toMillis(2));
 
-        return root;
+        return chart;
     }
 
     @Override

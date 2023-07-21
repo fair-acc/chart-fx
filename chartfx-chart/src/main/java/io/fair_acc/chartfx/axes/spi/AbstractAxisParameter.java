@@ -209,13 +209,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     protected final transient StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0, this::requestAxisLayout);
 
-    {
-        // TODO: remove and use the style directly?
-        tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
-        tickLabelStyle.fontProperty().bindBidirectional(tickLabelFont);
-        tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
-    }
-
     /**
      * true if minor tick marks should be displayed
      */
@@ -416,6 +409,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             invokeListener(new AxisChangeEvent(this));
         });
 
+        // TODO: remove and use styles directly?
+        tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
+        tickLabelStyle.fontProperty().bindBidirectional(tickLabelFont);
+        tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
         axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
 
         // Provide a binding for the axis length
@@ -1346,7 +1343,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         } else {
             getAxisLabel().setText(axisPrimaryLabel + " [" + axisPrefix + localAxisUnit + "]");
         }
-        //invalidate(); // TODO: needed?
+        invalidate(); // listeners already trigger request a layout
     }
 
     protected void updateScaleAndUnitPrefix() {

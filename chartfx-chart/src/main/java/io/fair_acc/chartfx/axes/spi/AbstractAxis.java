@@ -17,7 +17,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
@@ -108,7 +107,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // Disconnect the length from the layout so we can make it user settable
         lengthProperty().unbind();
-        lengthProperty().addListener((ch, o, n) -> updateAxisContents());
+        lengthProperty().addListener((ch, o, n) -> invalidate());
     }
 
     protected AbstractAxis(final double lowerBound, final double upperBound) {
@@ -136,6 +135,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return;
         }
 
+        updateAxisContents();
+
         // Nothing shown -> no need to draw anything
         if (!isVisible()) {
             return;
@@ -159,7 +160,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
             // draw major tick-mark over minor tick-marks so that the visible (long) line
             // along the axis with the style of the major-tick is visible
-            enforceOverlapPolicy(majorTickMarks);
+            applyOverlapPolicy(majorTickMarks);
             drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
             drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
 
@@ -191,8 +192,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     @Override
     public void forceRedraw() {
-        updateAxisContents(); // TODO: needed?
-        requestAxisLayout();
+        invalidate();
     }
 
     public AxisLabelFormatter getAxisLabelFormatter() {
@@ -290,6 +290,38 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     @Override
     public boolean isValueOnAxis(final double value) {
         return Double.isFinite(value) && (value >= getMin()) && (value <= getMax());
+    }
+
+    /**
+     * Updates the tick marks based on the current axis length
+     * TODO: based on old recomputeTickMarks(), some of it may not be necessary
+     */
+    protected void updateAxisContents() {
+        final double length = getLength();
+        if (!Double.isFinite(length) || isValid()) {
+            return;
+        }
+
+        // Range
+        var newAxisRange = getRange();
+        if (getRange().getMin() != newAxisRange.getMin() || getRange().getMax() != newAxisRange.getMax()) {
+            set(newAxisRange.getMin(), newAxisRange.getMax());
+        }
+
+        // Tick units
+        double mTickUnit = getUserTickUnit();
+        if (isAutoRanging() || isAutoGrowRanging() || true /* TODO: zoom never changes scale */){
+            mTickUnit = computePreferredTickUnit(length);
+        }
+        setTickUnit(newAxisRange.tickUnit = mTickUnit);
+        updateCachedVariables();
+
+        // Tick marks
+        updateMajorTickMarks(newAxisRange);
+        updateMinorTickMarks();
+        updateTickMarkPositions(getTickMarks());
+        updateTickMarkPositions(getMinorTickMarks());
+        valid.set(true);
     }
 
     /**
@@ -409,22 +441,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
-     * Updates the tick marks based on the current axis length
-     */
-    protected void updateAxisContents() {
-        final double length = getLength();
-        if (!Double.isFinite(length)) {
-            return;
-        }
-        setTickUnit(isAutoRanging() || isAutoGrowRanging() ? computePreferredTickUnit(length) : getUserTickUnit());
-        updateMajorTickMarks(getRange());
-        updateMinorTickMarks();
-        updateCachedVariables();
-        updateTickMarkPositions(getTickMarks());
-        updateTickMarkPositions(getMinorTickMarks());
-    }
-
-    /**
      * Computes the preferred height of this axis for the given width. If axis orientation is horizontal, it takes into
      * account the tick mark length, tick label gap and label height.
      *
@@ -472,6 +488,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // correct, so later changes happen very rarely, e.g., at a point where
         // y axes labels switch to shifting lines.
         setLength(axisLength);
+        updateAxisContents();
 
         boolean isHorizontal = getSide().isHorizontal();
         scaleFont = 1.0;
@@ -596,7 +613,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return 0;
     }
 
-    private void enforceOverlapPolicy(List<TickMark> tickMarks) {
+    private void applyOverlapPolicy(List<TickMark> tickMarks) {
         // Default to all visible
         for (TickMark tickMark : tickMarks) {
             tickMark.setVisible(true);

@@ -694,7 +694,7 @@ public abstract class Chart extends Region implements Observable {
         layoutOngoing = true;
 
         // update axes range first because this may change the overall layout
-        updateAxisRange();
+        updateAxisRange(); // TODO: should be done in a pre-layout hook
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
 
         // update chart parent according to possible size changes
