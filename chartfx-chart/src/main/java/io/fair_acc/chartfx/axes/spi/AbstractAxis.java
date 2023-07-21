@@ -6,6 +6,9 @@ import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.StateListener;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -89,6 +92,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             canvas.setCacheHint(CacheHint.QUALITY);
         }
         getChildren().add(canvas);
+
+        dirty.addChangeListener(BitState.mask(ChartBits.Layout), (source, bits) -> {
+            super.requestLayout();
+        });
 
         // set default axis title/label alignment
         updateTickLabelAlignment();
@@ -321,6 +328,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         updateMinorTickMarks();
         updateTickMarkPositions(getTickMarks());
         updateTickMarkPositions(getMinorTickMarks());
+        dirty.clear();
         valid.set(true);
     }
 
@@ -346,7 +354,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void requestAxisLayout() {
-        super.requestLayout();
+        dirty.set(ChartBits.Layout);
     }
 
     public void setAxisLabelFormatter(final AxisLabelFormatter value) {

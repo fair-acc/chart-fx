@@ -10,6 +10,8 @@ import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
@@ -42,6 +44,10 @@ import io.fair_acc.dataset.utils.NoDuplicatesList;
  * @author rstein
  */
 public abstract class AbstractAxisParameter extends Pane implements Axis {
+    protected final BitState dirty = new BitState(this);
+    protected final ChangeListener<Number> changeLayoutListener = dirty.onPropChange(ChartBits.Layout)::set;
+    protected final Runnable changeLayoutAction = dirty.onAction(ChartBits.Layout);
+
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<AbstractAxisParameter> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
     protected static final int MAX_TICK_COUNT = 20;
@@ -56,7 +62,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
 
-    private final transient StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, this::requestAxisLayout);
+    private final transient StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, changeLayoutAction);
 
     /**
      * Nodes used for css-type styling. Not used for actual drawing. Used as a storage container for the settings
@@ -72,10 +78,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     {
         StyleUtil.addStyles(this, "axis");
         getChildren().addAll(axisLabel, tickLabelStyle, majorTickStyle, minorTickStyle);
-        majorTickStyle.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
-        minorTickStyle.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
-        tickLabelStyle.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
-        axisLabel.changeCounterProperty().addListener((obs, old, value) -> requestAxisLayout());
+        majorTickStyle.changeCounterProperty().addListener(changeLayoutListener);
+        minorTickStyle.changeCounterProperty().addListener(changeLayoutListener);
+        tickLabelStyle.changeCounterProperty().addListener(changeLayoutListener);
+        axisLabel.changeCounterProperty().addListener(changeLayoutListener);
     }
 
     protected final transient BooleanProperty valid = new SimpleBooleanProperty(this, "valid", false);
@@ -118,22 +124,22 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The relative alignment (N.B. clamped to [0.0,1.0]) of the axis if drawn on top of the main canvas (N.B. side == CENTER_HOR or CENTER_VER
      */
-    private final transient StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), this::requestAxisLayout);
+    private final transient StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), changeLayoutAction);
 
     /**
      * axis label alignment
      */
-    private final transient StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class), this::requestAxisLayout);
+    private final transient StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class), changeLayoutAction);
 
     /**
      * The axis label
      */
-    private final transient StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "", this::requestAxisLayout);
+    private final transient StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "", changeLayoutAction);
 
     /**
      * true if tick marks should be displayed
      */
-    private final transient StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", true, this::requestAxisLayout);
+    private final transient StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", true, changeLayoutAction);
 
     /**
      * true if tick mark labels should be displayed
@@ -147,22 +153,22 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The length of tick mark lines
      */ 
-    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0, changeLayoutAction);
 
     /**
      * The length of tick mark lines
      */
-    private final transient StyleableDoubleProperty tickLength = CSS.createDoubleProperty(this, "tickLength", 8.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty tickLength = CSS.createDoubleProperty(this, "tickLength", 8.0, changeLayoutAction);
 
     /**
      * This is true when the axis determines its range from the data automatically
      */
-    private final transient StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", true, this::requestAxisLayout);
+    private final transient StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", true, changeLayoutAction);
 
     /**
      * The font for all tick labels
      */
-    private final transient StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, this::requestAxisLayout);
+    private final transient StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, changeLayoutAction);
 
     /**
      * The fill for all tick labels
@@ -172,32 +178,32 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The gap between tick marks and the canvas area
      */
-    private final transient StyleableDoubleProperty tickMarkGap = CSS.createDoubleProperty(this, "tickMarkGap", 0.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty tickMarkGap = CSS.createDoubleProperty(this, "tickMarkGap", 0.0, changeLayoutAction);
 
     /**
      * The gap between tick labels and the tick mark lines
      */
-    private final transient StyleableDoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", 3.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", 3.0, changeLayoutAction);
 
     /**
      * The minimum gap between tick labels
      */
-    private final transient StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", 3.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", 3.0, changeLayoutAction);
 
     /**
      * The gap between tick labels and the axis label
      */
-    private final transient StyleableDoubleProperty axisLabelGap = CSS.createDoubleProperty(this, "axisLabelGap", 3.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty axisLabelGap = CSS.createDoubleProperty(this, "axisLabelGap", 3.0, changeLayoutAction);
 
     /**
      * The animation duration in MS
      */
-    private final transient StyleableIntegerProperty animationDuration = CSS.createIntegerProperty(this, "animationDuration", 250, this::requestAxisLayout);
+    private final transient StyleableIntegerProperty animationDuration = CSS.createIntegerProperty(this, "animationDuration", 250, changeLayoutAction);
 
     /**
      * The maximum number of ticks
      */
-    private final transient StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", MAX_TICK_COUNT, this::requestAxisLayout);
+    private final transient StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", MAX_TICK_COUNT, changeLayoutAction);
 
     /**
      * When true any changes to the axis and its range will be animated.
@@ -207,12 +213,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * Rotation in degrees of tick mark labels from their normal horizontal.
      */
-    protected final transient StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0, this::requestAxisLayout);
+    protected final transient StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0, changeLayoutAction);
 
     /**
      * true if minor tick marks should be displayed
      */
-    private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, this::requestAxisLayout);
+    private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, changeLayoutAction);
 
     /**
      * The scale factor from data units to visual units
@@ -278,16 +284,16 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The length of minor tick mark lines. Set to 0 to not display minor tick marks.
      */
-    private final transient StyleableDoubleProperty minorTickLength = CSS.createDoubleProperty(this, "minorTickLength", 5.0, this::requestAxisLayout);
+    private final transient StyleableDoubleProperty minorTickLength = CSS.createDoubleProperty(this, "minorTickLength", 5.0, changeLayoutAction);
 
     /**
      * The number of minor tick divisions to be displayed between each major tick mark. The number of actual minor tick
      * marks will be one less than this. N.B. number of divisions, minor tick mark is not drawn if minorTickMark ==
      * majorTickMark
      */
-    private final transient StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, this::requestAxisLayout);
+    private final transient StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, changeLayoutAction);
 
-    private final transient StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, this::requestAxisLayout);
+    private final transient StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, changeLayoutAction);
 
     protected boolean isInvertedAxis = false; // internal use (for performance reason)
     private final transient BooleanProperty invertAxis = new SimpleBooleanProperty(this, "invertAxis", false) {
@@ -314,7 +320,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, this::requestAxisLayout);
+    private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, changeLayoutAction);
 
     private final transient DoubleProperty autoRangePadding = new SimpleDoubleProperty(0);
 
