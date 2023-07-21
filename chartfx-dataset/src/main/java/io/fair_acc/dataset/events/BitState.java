@@ -14,7 +14,7 @@ public class BitState implements StateListener {
     }
 
     public Runnable onAction(int bits) {
-        return () -> set(bits);
+        return () -> setDirty(bits);
     }
 
     public OnChangeSetter onPropChange(IntSupplier bit0, IntSupplier... more) {
@@ -22,7 +22,7 @@ public class BitState implements StateListener {
     }
 
     public OnChangeSetter onPropChange(int bits) {
-        return (obs, o, v) -> set(bits);
+        return (obs, o, v) -> setDirty(bits);
     }
 
     public OnInvalidateSetter onPropInvalidate(IntSupplier bit0, IntSupplier... more) {
@@ -30,7 +30,7 @@ public class BitState implements StateListener {
     }
 
     public OnInvalidateSetter onPropInvalidate(int bits) {
-        return obs -> set(bits);
+        return obs -> setDirty(bits);
     }
 
     public static int mask(IntSupplier[] bits){
@@ -49,7 +49,7 @@ public class BitState implements StateListener {
         return mask;
     }
 
-    public void set(int bits) {
+    public void setDirty(int bits) {
         final int filtered = bits & filter;
         final int delta = (state ^ filtered) & filtered;
         if (delta != 0) {
@@ -61,11 +61,11 @@ public class BitState implements StateListener {
 
     @Override
     public void accept(BitState source, int bits) {
-        set(bits);
+        setDirty(bits);
     }
 
-    public void set(IntSupplier bit0, IntSupplier... bits) {
-        set(mask(bit0, bits));
+    public void setDirty(IntSupplier bit0, IntSupplier... bits) {
+        setDirty(mask(bit0, bits));
     }
 
     public boolean isDirty() {
@@ -73,11 +73,43 @@ public class BitState implements StateListener {
     }
 
     public boolean isDirty(int mask) {
-        return (state & mask) == 0;
+        return (state & mask) != 0;
     }
 
-    public boolean isDirty(IntSupplier bit0, IntSupplier... bits) {
-        return isDirty(mask(bit0, bits));
+    public boolean isDirty(IntSupplier bit0) {
+        return isDirty(bit0.getAsInt());
+    }
+
+    public boolean isDirty(IntSupplier bit0, IntSupplier bit1) {
+        return isDirty(bit0.getAsInt() | bit1.getAsInt());
+    }
+
+    public boolean isDirty(IntSupplier bit0, IntSupplier bit1, IntSupplier... bits) {
+        return isDirty(bit0.getAsInt() | bit1.getAsInt() | mask(bits));
+    }
+
+    public boolean isClean() {
+        return state == 0;
+    }
+
+    public boolean isClean(int mask) {
+        return (state & mask) != 0;
+    }
+
+    public boolean isClean(IntSupplier bit0) {
+        return isClean(bit0.getAsInt());
+    }
+
+    public boolean isClean(IntSupplier bit0, IntSupplier bit1) {
+        return isClean(bit0.getAsInt() | bit1.getAsInt());
+    }
+
+    public boolean isClean(IntSupplier bit0, IntSupplier bit1, IntSupplier... bits) {
+        return isClean(bit0.getAsInt() | bit1.getAsInt() | mask(bits));
+    }
+
+    public int getBits() {
+        return state;
     }
 
     public void clear() {
@@ -87,6 +119,10 @@ public class BitState implements StateListener {
     public int clear(final int mask) {
         state &= ~mask;
         return state;
+    }
+
+    public BitState addChangeListener(IntSupplier bit, StateListener listener) {
+        return addChangeListener(bit.getAsInt(), listener);
     }
 
     public BitState addChangeListener(int filter, StateListener listener) {
@@ -180,13 +216,26 @@ public class BitState implements StateListener {
         return source;
     }
 
-    public BitState(Object source) {
-        this(source, NO_FILTER);
+    public static BitState initClean(Object source) {
+        return initClean(source, NO_FILTER);
     }
 
-    public BitState(Object source, int filter) {
+    public static BitState initDirty(Object source) {
+        return initDirty(source, NO_FILTER);
+    }
+
+    public static BitState initClean(Object source, int filter) {
+        return new BitState(source, filter, 0);
+    }
+
+    public static BitState initDirty(Object source, int filter) {
+        return new BitState(source, filter, filter);
+    }
+
+    protected BitState(Object source, int filter, int initial) {
         this.source = source;
         this.filter = filter;
+        this.state = initial;
     }
 
     @Override

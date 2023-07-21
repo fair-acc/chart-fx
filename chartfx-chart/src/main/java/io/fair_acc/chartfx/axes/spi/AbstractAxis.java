@@ -6,9 +6,9 @@ import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.event.AxisNameChangeEvent;
+import io.fair_acc.dataset.event.AxisRangeChangeEvent;
 import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.events.StateListener;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -83,6 +83,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected AbstractAxis() {
         super();
+        // Can we remove these? Axes without a chart don't work anymore.
+        VBox.setVgrow(this, Priority.ALWAYS);
+        HBox.setHgrow(this, Priority.ALWAYS);
+
+        // Canvas settings
         setMouseTransparent(false);
         setPickOnBounds(true);
         canvas.setMouseTransparent(false);
@@ -93,7 +98,23 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
         getChildren().add(canvas);
 
-        dirty.addChangeListener(BitState.mask(ChartBits.Layout), (source, bits) -> {
+        // We can ignore the layout if labels can only move linearly along
+        // the axis length. This happens e.g. for an X-axis that displays
+        // moving time with the default policy.
+        state.addChangeListener(ChartBits.AxisTransform, (source, bits) -> {
+            if (!isTickMarkVisible() || !isTickLabelsVisible()) {
+                return;
+            }
+            final int rot = Math.abs(((int) getTickLabelRotation()) % 360);
+            if (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT || getSide() == null
+                    || (getSide().isHorizontal() && !(rot == 0 || rot == 180))
+                    || (getSide().isVertical() && !(rot == 90 || rot == 270))) {
+                state.setDirty(ChartBits.AxisLayout);
+            }
+        });
+
+        // Forward axis layouts to the JavaFX layout bit
+        state.addChangeListener(ChartBits.AxisLayout, (source, bits) -> {
             super.requestLayout();
         });
 
@@ -104,17 +125,28 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             updateAxisLabelAlignment();
             updateTickLabelAlignment();
         });
-        tickLabelRotationProperty().addListener((ch, o, n) -> updateTickLabelAlignment());
+        tickLabelRotationProperty().addListener((ch, o, n) -> {
+            updateTickLabelAlignment();
+        });
 
-        // TODO: remove?
-        invertAxisProperty().addListener((ch, o, n) -> Platform.runLater(this::forceRedraw));
 
-        VBox.setVgrow(this, Priority.ALWAYS);
-        HBox.setHgrow(this, Priority.ALWAYS);
-
-        // Disconnect the length from the layout so we can make it user settable
+        // Disconnect the length from the layout to make it user settable
         lengthProperty().unbind();
-        lengthProperty().addListener((ch, o, n) -> invalidate());
+
+        // Send out events to be backwards compatible with old event system
+        final AxisChangeEvent axisTransformEvent = new AxisRangeChangeEvent(this);
+        final AxisChangeEvent axisLabelEvent = new AxisNameChangeEvent(this);
+        final AxisChangeEvent otherChangeEvent = new AxisChangeEvent(this);
+        state.addChangeListener((source, bits) -> {
+            if (ChartBits.AxisTransform.isSet(bits)) {
+                invokeListener(axisTransformEvent, false);
+            } else if (ChartBits.AxisLabelText.isSet(bits)) {
+                invokeListener(axisLabelEvent, false);
+            } else {
+                invokeListener(otherChangeEvent, false);
+            }
+        });
+
     }
 
     protected AbstractAxis(final double lowerBound, final double upperBound) {
@@ -142,7 +174,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return;
         }
 
-        updateAxisContents();
+        // Always update transform and ticks so they can be used in the grid
+        updateContent();
 
         // Nothing shown -> no need to draw anything
         if (!isVisible()) {
@@ -199,7 +232,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     @Override
     public void forceRedraw() {
-        invalidate();
+        layoutChangedAction.run();
     }
 
     public AxisLabelFormatter getAxisLabelFormatter() {
@@ -267,20 +300,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void invalidateRange() {
-        final boolean oldState = autoNotification().getAndSet(false);
-        final AxisRange autoRange = autoRange(getLength()); // derived axes may potentially pad and round limits
-        if (set(autoRange.getMin(), autoRange.getMax())) {
-            getAutoRange().setAxisLength(getLength() == 0 ? 1 : getLength(), getSide());
-            //setScale(getAutoRange().getScale());
-            setScale(calculateNewScale(getLength(), autoRange.getMin(), autoRange.getMax()));
-            updateAxisLabelAndUnit();
-            // update cache in derived classes
-            updateCachedVariables();
-            invalidate();
-        }
-
-        autoNotification().set(oldState);
-        invokeListener(new AxisChangeEvent(this));
+        axisTransformChanged.run();
     }
 
     public boolean isLabelOverlapping() {
@@ -300,36 +320,54 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
-     * Updates the tick marks based on the current axis length
-     * TODO: based on old recomputeTickMarks(), some of it may not be necessary
+     * Updates the contents for this axis, e.g., tick labels, spacing
+     * range, caches, etc.
      */
-    protected void updateAxisContents() {
+    protected void updateContent() {
         final double length = getLength();
-        if (!Double.isFinite(length) || isValid()) {
+        if (!Double.isFinite(length) || state.isClean()) {
             return;
         }
+        isUpdatingContent = true;
 
-        // Range
-        var newAxisRange = getRange();
-        if (getRange().getMin() != newAxisRange.getMin() || getRange().getMax() != newAxisRange.getMax()) {
-            set(newAxisRange.getMin(), newAxisRange.getMax());
+        if(debug(String.format("min: %f, max: %f", getMin(), getMax()))) {
+            System.out.println();
+        }
+
+        // Update range & scale // TODO: some initialization broke when adding events
+        AxisRange range = autoRange(getLength()); // derived axes may potentially pad and round limits
+        range.setAxisLength(length == 0 ? 1 : length, getSide());
+        set(range.getMin(), range.getMax());
+        setScale(calculateNewScale(getLength(), range.getMin(), range.getMax()));
+
+        // Displayed label & units
+        if (state.isDirty(ChartBits.AxisLabelText)) {
+            updateAxisLabelAndUnit(); // can this set dirty on the axis transform?
         }
 
         // Tick units
         double mTickUnit = getUserTickUnit();
-        if (isAutoRanging() || isAutoGrowRanging() || true /* TODO: zoom never changes scale */){
+        if (isAutoRanging() || isAutoGrowRanging() || true /* TODO: does not work in zoom */) {
             mTickUnit = computePreferredTickUnit(length);
         }
-        setTickUnit(newAxisRange.tickUnit = mTickUnit);
+        setTickUnit(range.tickUnit = mTickUnit);
+
+        // Update cache to have axis transforms
         updateCachedVariables();
 
         // Tick marks
-        updateMajorTickMarks(newAxisRange);
+        updateMajorTickMarks(range);
         updateMinorTickMarks();
         updateTickMarkPositions(getTickMarks());
         updateTickMarkPositions(getMinorTickMarks());
-        dirty.clear();
-        valid.set(true);
+
+        postUpdateContent();
+
+    }
+
+    protected void postUpdateContent() {
+        state.clear();
+        isUpdatingContent = false;
     }
 
     /**
@@ -354,7 +392,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void requestAxisLayout() {
-        dirty.set(ChartBits.Layout);
+        state.setDirty(ChartBits.AxisLayout);
     }
 
     public void setAxisLabelFormatter(final AxisLabelFormatter value) {
@@ -393,9 +431,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return Range information, this is implementation dependent
      */
     protected AxisRange autoRange(final double length) {
-        // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 charts horizontally
+        // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 chars horizontally
         if (isAutoRanging() || isAutoGrowRanging()) {
-            // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 charts horizontally
+            // guess a sensible starting size for label size, that is approx 2 lines vertically or 2 chars horizontally
             final double labelSize = getTickLabelFont().getSize() * 1.2; // N.B. was '2' in earlier implementations
             return autoRange(getAutoRange().getMin(), getAutoRange().getMax(), length, labelSize);
         }
@@ -496,7 +534,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // correct, so later changes happen very rarely, e.g., at a point where
         // y axes labels switch to shifting lines.
         setLength(axisLength);
-        updateAxisContents();
+        updateContent();
 
         boolean isHorizontal = getSide().isHorizontal();
         scaleFont = 1.0;
@@ -682,26 +720,28 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     protected void updateMajorTickMarks(AxisRange range) {
-        // TODO: cache if the range and tick units have not changed?
         var newTickValues = calculateMajorTickValues(range);
         var oldTickValues = getTickMarkValues();
-        if (newTickValues.equals(oldTickValues) || newTickValues.size() < 2) {
+        if(newTickValues.size() < 2) {
+            return; // TODO: why did the previous code only update when there are > 2 ticks?
+        }else if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickFormatter)) {
             return; // no need to redo labels, just reposition the ticks
         }
 
-        // TODO: why did the previous code only update when there are > 2 ticks? That would cause a mismatch
-        oldTickValues.setAll(newTickValues);
-
         // Update labels
-        var formatter = getAxisLabelFormatter();
-        formatter.updateFormatter(newTickValues, getUnitScaling());
+        if (isTickLabelsVisible()) {
+            getAxisLabelFormatter().updateFormatter(newTickValues, getUnitScaling());
+        }
 
         // Update the existing mark objects
         List<TickMark> marks = FXUtils.sizedList(getTickMarks(), newTickValues.size(), () -> new TickMark(getTickLabelStyle()));
         int i = 0;
         for (var tick : newTickValues) {
-            marks.get(i++).setValue(tick, getTickMarkLabel(tick));
+            String label = isTickLabelsVisible() ? getTickMarkLabel(tick) : "";
+            marks.get(i++).setValue(tick, label);
         }
+
+        oldTickValues.setAll(newTickValues);
         tickMarksUpdated();
 
     }
