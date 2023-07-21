@@ -324,6 +324,10 @@ public final class FXUtils {
         };
     }
 
+    public static ReadOnlyDoubleWrapper createReadOnlyDoubleWrapper(Object bean, String name, double initial) {
+        return new ReadOnlyDoubleWrapper(bean, name, initial);
+    }
+
     public static <T> ObjectProperty<T> createObjectProperty(Object bean, String name, T initial, Runnable onChange) {
         return new SimpleObjectProperty<T>(bean, name, initial) {
             @Override

@@ -13,7 +13,6 @@ import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -156,7 +155,19 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * This is true when the axis determines its range from the data automatically
      */
-    private final transient StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", true, axisTransformChanged);
+    private final transient StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", true, () -> {
+        if (isAutoRanging()) {
+            setAutoGrowRanging(false);
+        }
+        axisTransformChanged.run();
+    });
+
+    private final transient StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, () -> {
+        if (isAutoGrowRanging()) {
+            setAutoRanging(false);
+        }
+        axisTransformChanged.run();
+    });
 
     /**
      * The font for all tick labels
@@ -216,22 +227,42 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The scale factor from data units to visual units
      */
-    private final transient ReadOnlyDoubleWrapper scale = FXUtils.createReadOnlyDoubleWrapper(this, "scale", 1, axisTransformChanged);
+    private final transient ReadOnlyDoubleWrapper scale = FXUtils.createReadOnlyDoubleWrapper(this, "scale", 1);
 
     /**
      * The axis length in pixels
      */
-    private final transient DoubleProperty length = FXUtils.createDoubleProperty(this, "length", Double.NaN, axisTransformChanged) ;
+    private final transient ReadOnlyDoubleWrapper length = FXUtils.createReadOnlyDoubleWrapper(this, "length", Double.NaN, axisTransformChanged) ;
+
+    private boolean settingDisplayRange = false;
 
     /**
      * The value for the upper bound of this axis, ie max value. This is automatically set if auto ranging is on.
      */
-    protected final transient DoubleProperty maxProp = FXUtils.createDoubleProperty(this, "upperBound", DEFAULT_MAX_RANGE, axisTransformChanged);
+    protected final transient ReadOnlyDoubleWrapper maxProp = new ReadOnlyDoubleWrapper(this, "upperBound", DEFAULT_MAX_RANGE) {
+        @Override
+        public void set(final double newValue) {
+            if (settingDisplayRange) {
+                super.set(newValue);
+            } else {
+                setMax(newValue);
+            }
+        }
+    };
 
     /**
      * The value for the lower bound of this axis, ie min value. This is automatically set if auto ranging is on.
      */
-    protected final transient DoubleProperty minProp = FXUtils.createDoubleProperty(this, "lowerBound", DEFAULT_MIN_RANGE, axisTransformChanged);
+    protected final transient ReadOnlyDoubleWrapper minProp = new ReadOnlyDoubleWrapper(this, "lowerBound", DEFAULT_MIN_RANGE) {
+        @Override
+        public void set(final double newValue) {
+            if (settingDisplayRange) {
+                super.set(newValue);
+            } else {
+                setMin(newValue);
+            }
+        }
+    };
 
     protected double cachedOffset; // for caching
 
@@ -251,8 +282,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * majorTickMark
      */
     private final transient StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, layoutChangedAction);
-
-    private final transient StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, layoutChangedAction);
 
     protected boolean isInvertedAxis = false; // internal use (for performance reason)
     private final transient BooleanProperty invertAxis = FXUtils.createBooleanProperty(this, "invertAxis", isInvertedAxis, ()->{
@@ -303,57 +332,18 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * system-set tick units for getting the currently displayed units
      */
-    protected final transient DoubleProperty tickUnit = FXUtils.createDoubleProperty(this, "tickUnit", Double.NaN, axisTransformChanged);
-
-    protected boolean isUpdatingContent = false;
+    protected final transient ReadOnlyDoubleWrapper tickUnit = FXUtils.createReadOnlyDoubleWrapper(this, "tickUnit", Double.NaN);
 
     /**
      * Create a auto-ranging AbstractAxisParameter
      */
     public AbstractAxisParameter() {
         super();
-        autoRangingProperty().addListener((ch, o, enabled) -> {
-            // disable auto grow if auto range is enabled
-            if (enabled) {
-                setAutoGrowRanging(false);
-            }
-        });
-
-        autoGrowRangingProperty().addListener((ch, o, enabled) -> {
-            // disable auto grow if auto range is enabled
-            if (enabled) {
-                setAutoRanging(false);
-            }
-        });
-
-        // bind limits to user-specified axis range
-        // userRange.set
-        final ChangeListener<? super Number> userLimitChangeListener = (ch, o, n) -> {
-            // Disable auto ranging if range was set manually
-            if (!isUpdatingContent) {
-                getUserRange().set(getMin(), getMax());
-                setAutoRanging(false);
-                setAutoGrowRanging(false);
-            }
-        };
-        minProperty().addListener(userLimitChangeListener);
-        maxProperty().addListener(userLimitChangeListener);
-
         // TODO: remove and use styles directly?
         tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
         tickLabelStyle.fontProperty().bindBidirectional(tickLabelFont);
         tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
         axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
-
-        // Provide an initial binding for the axis length
-        var layoutLength = Bindings.createDoubleBinding(() -> {
-            if (getSide() == null) {
-                return Double.NaN;
-            }
-            return getSide().isHorizontal() ? getWidth() : getHeight();
-        }, sideProperty(), widthProperty(), heightProperty());
-        length.bind(layoutLength);
-
     }
 
     @Override
@@ -559,10 +549,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public double getLength() {
         return lengthProperty().get();
-    }
-
-    protected DoubleProperty lengthProperty() {
-        return length;
     }
 
     // JavaFx Properties
@@ -851,11 +837,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return maxMajorTickLabelCount;
     }
 
-    @Override
-    public DoubleProperty maxProperty() {
-        return maxProp;
-    }
-
     public IntegerProperty minorTickCountProperty() {
         return minorTickCount;
     }
@@ -868,9 +849,32 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return minorTickVisible;
     }
 
+    /**
+     * The value between each major tick mark in data units. This is automatically set if we are auto-ranging.
+     *
+     * @return tickUnit property
+     */
+    @Override
+    public ReadOnlyDoubleProperty tickUnitProperty() {
+        return tickUnit.getReadOnlyProperty();
+    }
+
     @Override
     public DoubleProperty minProperty() {
         return minProp;
+    }
+
+    @Override
+    public DoubleProperty maxProperty() {
+        return maxProp;
+    }
+
+    public ReadOnlyDoubleProperty scaleProperty() {
+        return scale.getReadOnlyProperty();
+    }
+
+    public ReadOnlyDoubleProperty lengthProperty() {
+        return length.getReadOnlyProperty();
     }
 
     @Override
@@ -880,10 +884,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public ObjectProperty<AxisLabelOverlapPolicy> overlapPolicyProperty() {
         return overlapPolicy;
-    }
-
-    public ReadOnlyDoubleProperty scaleProperty() {
-        return scale.getReadOnlyProperty();
     }
 
     @Override
@@ -990,22 +990,61 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         axisPaddingProperty().set(value);
     }
 
-    @Override
-    public boolean setMax(final double value) {
-        final double oldvalue = maxProperty().get();
-        maxProperty().set(value);
-        return oldvalue != value;
+    /**
+     * Sets the value of the {@link #tickUnitProperty()}.
+     *
+     * @param unit major tick unit
+     */
+    protected void setTickUnit(final double unit) {
+        if(getUserTickUnit() != unit) {
+            setUserTickUnit(unit);
+        }
+        setAutoRanging(false);
+        setAutoGrowRanging(false);
     }
 
-    public void setMaxMajorTickLabelCount(final int value) {
-        this.maxMajorTickLabelCountProperty().set(value);
+    @Override
+    public void setUserTickUnit(final double unit) {
+        userTickUnit.set(unit);
+    }
+
+    @Override
+    public boolean setMax(final double value) {
+        boolean changed = getUserRange().setMax(value);
+        if (changed) {
+            axisTransformChanged.run();
+        }
+        setAutoRanging(false);
+        setAutoGrowRanging(false);
+        return changed;
     }
 
     @Override
     public boolean setMin(final double value) {
-        final double oldvalue = minProperty().get();
-        minProperty().set(value);
-        return oldvalue != value;
+        boolean changed = getUserRange().setMin(value);
+        if (changed) {
+            axisTransformChanged.run();
+        }
+        setAutoRanging(false);
+        setAutoGrowRanging(false);
+        return changed;
+    }
+
+    protected void setLength(final double axisLength) {
+        this.length.set(axisLength);
+    }
+
+    protected void setDisplayedRange(AxisRange range) {
+        settingDisplayRange = true;
+        minProp.set(range.getMin());
+        maxProp.set(range.getMax());
+        tickUnit.set(range.getTickUnit());
+        scale.set(range.getScale());
+        settingDisplayRange = false;
+    }
+
+    public void setMaxMajorTickLabelCount(final int value) {
+        this.maxMajorTickLabelCountProperty().set(value);
     }
 
     public void setMinorTickCount(final int value) {
@@ -1075,20 +1114,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     /**
-     * Sets the value of the {@link #tickUnitProperty()}.
-     *
-     * @param unit major tick unit
-     */
-    protected void setTickUnit(final double unit) {
-        tickUnit.set(unit);
-    }
-
-    @Override
-    public void setUserTickUnit(final double unit) {
-        userTickUnit.set(unit);
-    }
-
-    /**
      * This is {@code true} when the axis labels and data point should be plotted according to some time-axis definition
      *
      * @param value {@code true} if axis shall be drawn with time-axis labels
@@ -1108,7 +1133,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         if (!Double.isFinite(value) || (value == 0)) {
             throw new IllegalArgumentException("provided number is not finite and/or zero: " + value);
         }
-        setTickUnit(value);
         unitScalingProperty().set(value);
     }
 
@@ -1160,16 +1184,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public BooleanProperty tickMarkVisibleProperty() {
         return tickMarkVisible;
-    }
-
-    /**
-     * The value between each major tick mark in data units. This is automatically set if we are auto-ranging.
-     *
-     * @return tickUnit property
-     */
-    @Override
-    public ReadOnlyDoubleProperty tickUnitProperty() {
-        return tickUnit;
     }
 
     @Override
@@ -1226,38 +1240,37 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         setScale(newScale == 0 ? -1.0 : newScale);
     }
 
-    protected void updateAxisLabelAndUnit() {
+    protected void updateAxisLabel() {
         final String axisPrimaryLabel = getName();
-        String localAxisUnit = getUnit();
-        final boolean isAutoScaling = isAutoUnitScaling();
-        if (isAutoScaling) {
-            updateScaleAndUnitPrefix();
+        String unitString = getUnit();
+
+        // Is it correct that we scale even if there is no unit?
+        final String scalePrefix = MetricPrefix.getShortPrefix(getUnitScaling());
+        if ((unitString == null || unitString.isBlank()) && !scalePrefix.isBlank()) {
+            unitString = "";
         }
 
-        final String axisPrefix = MetricPrefix.getShortPrefix(getUnitScaling());
-        if ((localAxisUnit == null || localAxisUnit.isBlank()) && !axisPrefix.isBlank()) {
-            localAxisUnit = "";
-        }
-
-        if (localAxisUnit == null) {
+        if (unitString == null) {
             getAxisLabel().setText(axisPrimaryLabel);
         } else {
-            getAxisLabel().setText(axisPrimaryLabel + " [" + axisPrefix + localAxisUnit + "]");
+            getAxisLabel().setText(axisPrimaryLabel + " [" + scalePrefix + unitString + "]");
         }
     }
 
-    protected void updateScaleAndUnitPrefix() {
-        final double range = Math.abs(getMax() - getMin());
-        final double logRange = Math.log10(range);
-        final double power3Upper = 3.0 * Math.ceil(logRange / 3.0);
-        final double power3Lower = 3.0 * Math.floor(logRange / 3.0);
-        final double a = Math.min(power3Upper, power3Lower);
-        final double power = Math.pow(10, a);
+    protected double computeUnitScale(AxisRange axisRange) {
         final double oldPower = getUnitScaling();
-        if ((power != oldPower) && (power != 0) && (Double.isFinite(power))) {
-            this.setUnitScaling(power);
+        if (isAutoUnitScaling()) {
+            final double range = Math.abs(axisRange.getLength());
+            final double logRange = Math.log10(range);
+            final double power3Upper = 3.0 * Math.ceil(logRange / 3.0);
+            final double power3Lower = 3.0 * Math.floor(logRange / 3.0);
+            final double a = Math.min(power3Upper, power3Lower);
+            final double power = Math.pow(10, a);
+            if ((power != oldPower) && (power != 0) && (Double.isFinite(power))) {
+                return power;
+            }
         }
-        setTickUnit(range / getMinorTickCount());
+        return oldPower;
     }
 
     ReadOnlyDoubleWrapper scalePropertyImpl() {
