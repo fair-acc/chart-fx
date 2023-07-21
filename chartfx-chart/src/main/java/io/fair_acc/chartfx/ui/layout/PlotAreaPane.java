@@ -6,10 +6,9 @@ import javafx.scene.layout.Pane;
 
 /**
  * Similar to AnchorPane where every node is
- * anchored to full size. Non
+ * anchored to full size.
  *
- * @author Florian Enner
- * @since 22 Jun 2023
+ * @author ennerf
  */
 public class PlotAreaPane extends Pane {
 

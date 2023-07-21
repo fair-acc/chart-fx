@@ -380,7 +380,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             final double valueLogOffset = axisTransform.forward(value) - cache.lowerBoundLog;
 
             if (cache.isVerticalAxis) {
-                return cache.axisHeight - valueLogOffset * cache.logScaleLengthInv;
+                return cache.axisLength - valueLogOffset * cache.logScaleLengthInv;
             }
             return valueLogOffset * cache.logScaleLengthInv;
         }
@@ -393,10 +393,10 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private double getValueForDisplayImpl(final double displayPosition) {
         if (isLogAxis) {
             if (cache.isVerticalAxis) {
-                final double height = cache.axisHeight;
-                return axisTransform.backward(cache.lowerBoundLog + (height - displayPosition) / height * cache.logScaleLength);
+                final double length = cache.axisLength;
+                return axisTransform.backward(cache.lowerBoundLog + (length - displayPosition) / length * cache.logScaleLength);
             }
-            return axisTransform.backward(cache.lowerBoundLog + displayPosition / cache.axisWidth * cache.logScaleLength);
+            return axisTransform.backward(cache.lowerBoundLog + displayPosition / cache.axisLength * cache.logScaleLength);
         }
 
         return cache.localCurrentLowerBound + (displayPosition - cache.localOffset) / cache.localScale;
@@ -600,12 +600,10 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         protected double logScaleLength;
         protected double logScaleLengthInv;
         protected boolean isVerticalAxis;
-        protected double axisWidth;
-        protected double axisHeight;
+        protected double axisLength;
 
         private void updateCachedAxisVariables() {
-            axisWidth = getWidth();
-            axisHeight = getHeight();
+            axisLength = getLength();
             localCurrentLowerBound = DefaultNumericAxis.super.getMin();
             localCurrentUpperBound = DefaultNumericAxis.super.getMax();
 
@@ -624,11 +622,8 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                 isVerticalAxis = getSide().isVertical();
             }
 
-            if (isVerticalAxis) {
-                logScaleLengthInv = axisHeight / logScaleLength;
-            } else {
-                logScaleLengthInv = axisWidth / logScaleLength;
-            }
+            logScaleLengthInv = axisLength / logScaleLength;
+            offset = axisLength;
 
             offset = isVerticalAxis ? getHeight() : getWidth();
         }

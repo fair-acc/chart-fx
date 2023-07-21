@@ -5,6 +5,7 @@ import java.util.List;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener.Change;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -12,9 +13,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import org.scenicview.ScenicView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -79,7 +82,10 @@ public class ChartAnatomySample extends Application {
             }
         };
         VBox.setVgrow(chart, Priority.ALWAYS);
-        chart.getAxes().addAll(xAxis1, yAxis1);
+        chart.getAxes().addAll(
+                xAxis1, xAxis2, xAxis3,
+                yAxis1, yAxis2, yAxis3, yAxis4);
+
         chart.setTitle("<Title> Hello World Chart </Title>");
         // chart.setToolBarSide(Side.LEFT);
         // chart.setToolBarSide(Side.BOTTOM);
@@ -91,46 +97,34 @@ public class ChartAnatomySample extends Application {
             chart.getToolBar().getChildren().add(toolBarButton);
         }
 
-        chart.getAxesAndCanvasPane().getChildren().addAll(
-                xAxis1, xAxis2, xAxis3,
-                yAxis1, yAxis2, yAxis3, yAxis4
-        );
+        Color cornerCol = Color.color(0.5, 0.5, 0.5, 0.5);
+        Color horCol = Color.color(0.0, 0.5, 0.5, 0.5);
+        Color verCol = Color.color(0.0, 1.0, 0.5, 0.5);
 
-        chart.getTitleLegendPane(Side.LEFT).getChildren().add(new MyLabel("Title/Legend - left", true));
-        chart.getTitleLegendPane(Side.RIGHT).getChildren().add(new MyLabel("Title/Legend - right", true));
-        chart.getTitleLegendPane(Side.TOP).getChildren().add(new MyLabel("Title/Legend - top"));
-        chart.getTitleLegendPane(Side.BOTTOM).getChildren().add(new MyLabel("Title/Legend - bottom"));
+        chart.getMeasurementPane()
+                .addSide(Side.LEFT, new LabelPane("ParBox - left", true, verCol.darker()))
+                .addSide(Side.RIGHT, new LabelPane("ParBox - right", true, verCol.darker()))
+                .addSide(Side.TOP, new LabelPane("ParBox - top", horCol.darker()))
+                .addSide(Side.BOTTOM, new LabelPane("ParBox - bottom", horCol.darker()));
 
-        chart.getAxesCornerPane(Corner.BOTTOM_LEFT).getChildren().add(new MyLabel("(BL)"));
-        chart.getAxesCornerPane(Corner.BOTTOM_RIGHT).getChildren().add(new MyLabel("(BR)"));
-        chart.getAxesCornerPane(Corner.TOP_LEFT).getChildren().add(new MyLabel("(TL)"));
-        chart.getAxesCornerPane(Corner.TOP_RIGHT).getChildren().add(new MyLabel("(TR)"));
+        chart.getTitleLegendPane()
+                .addSide(Side.LEFT, new LabelPane("Title/Legend - left", true, verCol.brighter()))
+                .addSide(Side.RIGHT, new LabelPane("Title/Legend - right", true, verCol.brighter()))
+                .addSide(Side.TOP, new LabelPane("Title/Legend - top", horCol.brighter()))
+                .addSide(Side.BOTTOM, new LabelPane("Title/Legend - bottom", horCol.brighter()));
 
-        for (final Corner corner : Corner.values()) {
-            chart.getAxesCornerPane(corner).setStyle("-fx-background-color: rgba(125, 125, 125, 0.5);");
-            chart.getTitleLegendCornerPane(corner).setStyle("-fx-background-color: rgba(175, 175, 175, 0.5);");
-        }
+        chart.getTitleLegendPane()
+                .addCorner(Corner.BOTTOM_LEFT, new LabelPane("(BL)", cornerCol.darker()))
+                .addCorner(Corner.BOTTOM_RIGHT, new LabelPane("(BR)", cornerCol.darker()))
+                .addCorner(Corner.TOP_LEFT, new LabelPane("(TL)", cornerCol.darker()))
+                .addCorner(Corner.TOP_RIGHT, new LabelPane("(TR)", cornerCol.darker()));
 
-        for (final Side side : Side.values()) {
-            if (side.isHorizontal()) {
-                chart.getTitleLegendPane(side).setStyle("-fx-background-color: rgba(0, 125, 125, 0.5);");
-            } else {
-                chart.getTitleLegendPane(side).setStyle("-fx-background-color: rgba(0, 255, 125, 0.5);");
-
-            }
-        }
-
-        for (final Side side : Side.values()) {
-            StackPane pane = new StackPane();
-            pane.setStyle(side.isHorizontal()
-                    ? "-fx-background-color: rgba(125, 125, 125, 0.5);"
-                    : "-fx-background-color: rgba(125, 255, 125, 0.5);");
-            pane.getChildren().add(new MyLabel("ParBox - " + side)); // NOPMD
-            chart.getMeasurementPane().addSide(side, pane);
-            if (side.isCenter()) {
-                pane.toBack();
-            }
-        }
+        cornerCol = cornerCol.darker();
+        chart.getAxesAndCanvasPane()
+                .addCorner(Corner.BOTTOM_LEFT, new LabelPane("(BL)", cornerCol.brighter()))
+                .addCorner(Corner.BOTTOM_RIGHT, new LabelPane("(BR)", cornerCol.brighter()))
+                .addCorner(Corner.TOP_LEFT, new LabelPane("(TL)", cornerCol.brighter()))
+                .addCorner(Corner.TOP_RIGHT, new LabelPane("(TR)", cornerCol.brighter()));
 
         chart.getCanvas().setMouseTransparent(false);
         chart.getCanvas().setOnMouseClicked(mevt -> LOGGER.atInfo().log("clicked on canvas"));
@@ -154,20 +148,21 @@ public class ChartAnatomySample extends Application {
         Application.launch(args);
     }
 
-    private static class MyLabel extends Label {
-        public MyLabel(final String label) {
-            super(label);
-            VBox.setVgrow(this, Priority.ALWAYS);
-            HBox.setHgrow(this, Priority.ALWAYS);
-            setAlignment(Pos.CENTER);
-            setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
+    private static class LabelPane extends StackPane {
+        public LabelPane(final String text, Color bg) {
+            label = new Label(text);
+            getChildren().add(label);
+            setBackground(new Background(new BackgroundFill(bg, CornerRadii.EMPTY, Insets.EMPTY)));
         }
 
-        public MyLabel(final String label, boolean rotate) {
-            this(label);
+        public LabelPane(final String text, boolean rotate, Color bg) {
+            this(text, bg);
             if (rotate) {
-                setRotate(90);
+                label.setRotate(90);
             }
         }
+
+        final Label label;
+
     }
 }

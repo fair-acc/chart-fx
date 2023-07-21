@@ -16,8 +16,7 @@ import javafx.scene.Scene;
  * because it (as far as I understand) forces a pulse to happen
  * even if nothing needs to be drawn.
  *
- * @author Florian Enner
- * @since 23 Jun 2023
+ * @author ennerf
  */
 public class PostLayoutHook {
 
