@@ -12,7 +12,10 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import io.fair_acc.chartfx.axes.spi.AbstractAxisParameter;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.application.Platform;
+import javafx.beans.property.*;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 
@@ -281,5 +284,58 @@ public final class FXUtils {
         }
         return list;
     }
+
+    public static BooleanProperty createBooleanProperty(Object bean, String name, boolean initial, Runnable onChange) {
+        return new SimpleBooleanProperty(bean, name, initial) {
+            @Override
+            public void set(final boolean newValue) {
+                final boolean oldValue = get();
+                if (oldValue != newValue) {
+                    super.set(newValue);
+                    onChange.run();
+                }
+            }
+        };
+    }
+
+    public static DoubleProperty createDoubleProperty(Object bean, String name, double initial, Runnable onChange) {
+        return new SimpleDoubleProperty(bean, name, initial) {
+            @Override
+            public void set(final double newValue) {
+                final double oldValue = get();
+                if (oldValue != newValue) {
+                    super.set(newValue);
+                    onChange.run();
+                }
+            }
+        };
+    }
+
+    public static ReadOnlyDoubleWrapper createReadOnlyDoubleWrapper(Object bean, String name, double initial, Runnable onChange) {
+        return new ReadOnlyDoubleWrapper(bean, name, initial) {
+            @Override
+            public void set(final double newValue) {
+                final double oldValue = get();
+                if (oldValue != newValue) {
+                    super.set(newValue);
+                    onChange.run();
+                }
+            }
+        };
+    }
+
+    public static <T> ObjectProperty<T> createObjectProperty(Object bean, String name, T initial, Runnable onChange) {
+        return new SimpleObjectProperty<T>(bean, name, initial) {
+            @Override
+            public void set(final T newValue) {
+                final T oldValue = getValue();
+                if (oldValue != newValue) {
+                    super.set(newValue);
+                    onChange.run();
+                }
+            }
+        };
+    }
+
 
 }

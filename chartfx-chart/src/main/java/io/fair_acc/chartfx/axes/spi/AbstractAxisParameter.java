@@ -10,6 +10,7 @@ import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
+import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.binding.Bindings;
@@ -44,9 +45,12 @@ import io.fair_acc.dataset.utils.NoDuplicatesList;
  * @author rstein
  */
 public abstract class AbstractAxisParameter extends Pane implements Axis {
-    protected final BitState dirty = new BitState(this);
-    protected final ChangeListener<Number> changeLayoutListener = dirty.onPropChange(ChartBits.Layout)::set;
-    protected final Runnable changeLayoutAction = dirty.onAction(ChartBits.Layout);
+    protected final BitState state = BitState.initDirty(this);
+    protected final Runnable layoutChangedAction = state.onAction(ChartBits.AxisLayout);
+    protected final Runnable axisTransformChanged = state.onAction(ChartBits.AxisTransform);
+    protected final Runnable axisNameChangedAction = state.onAction(ChartBits.AxisLayout, ChartBits.AxisLabelText);
+    protected final ChangeListener<Number> layoutChangedListener = state.onPropChange(ChartBits.AxisLayout)::set;
+    protected final ChangeListener<Number> axisTransformChangedListener = state.onPropChange(ChartBits.AxisTransform)::set;
 
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<AbstractAxisParameter> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
@@ -62,7 +66,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
 
-    private final transient StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, changeLayoutAction);
+    private final transient StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1, layoutChangedAction);
 
     /**
      * Nodes used for css-type styling. Not used for actual drawing. Used as a storage container for the settings
@@ -78,20 +82,13 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     {
         StyleUtil.addStyles(this, "axis");
         getChildren().addAll(axisLabel, tickLabelStyle, majorTickStyle, minorTickStyle);
-        majorTickStyle.changeCounterProperty().addListener(changeLayoutListener);
-        minorTickStyle.changeCounterProperty().addListener(changeLayoutListener);
-        tickLabelStyle.changeCounterProperty().addListener(changeLayoutListener);
-        axisLabel.changeCounterProperty().addListener(changeLayoutListener);
+        majorTickStyle.changeCounterProperty().addListener(layoutChangedListener);
+        minorTickStyle.changeCounterProperty().addListener(state.onPropChange(ChartBits.AxisCanvas)::set);
+        tickLabelStyle.changeCounterProperty().addListener(layoutChangedListener);
+        axisLabel.changeCounterProperty().addListener(layoutChangedListener);
     }
 
-    protected final transient BooleanProperty valid = new SimpleBooleanProperty(this, "valid", false);
-    {
-        valid.addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                requestLayout();
-            }
-        });
-    }
+    // TODO: replace with primitive DoubleArrayList and specialized TickMarkList
     protected final transient ObservableList<Double> majorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
     protected final transient ObservableList<Double> minorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
     protected final transient ObservableList<TickMark> majorTickMarks = FXCollections.observableArrayList();
@@ -113,62 +110,58 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     private final transient StyleableObjectProperty<Side> side = CSS.createEnumPropertyWithPseudoclasses(this, "side", Side.BOTTOM, false, Side.class, null, () -> {
         ChartPane.setSide(this, getSide());
-        invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
+        state.setDirty(ChartBits.AxisLayout);
     });
 
     /**
      * The side of the plot which this axis is being drawn on
      */
-    private final transient StyleableObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = CSS.createObjectProperty(this, "overlapPolicy", AxisLabelOverlapPolicy.SKIP_ALT, StyleConverter.getEnumConverter(AxisLabelOverlapPolicy.class), () -> invokeListener(new AxisChangeEvent(AbstractAxisParameter.this)));
+    private final transient StyleableObjectProperty<AxisLabelOverlapPolicy> overlapPolicy = CSS.createObjectProperty(this, "overlapPolicy", AxisLabelOverlapPolicy.SKIP_ALT, StyleConverter.getEnumConverter(AxisLabelOverlapPolicy.class), layoutChangedAction);
 
     /**
      * The relative alignment (N.B. clamped to [0.0,1.0]) of the axis if drawn on top of the main canvas (N.B. side == CENTER_HOR or CENTER_VER
      */
-    private final transient StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), changeLayoutAction);
+    private final transient StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)), layoutChangedAction);
 
     /**
      * axis label alignment
      */
-    private final transient StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class), changeLayoutAction);
+    private final transient StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class), layoutChangedAction);
 
     /**
      * The axis label
      */
-    private final transient StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "", changeLayoutAction);
+    private final transient StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "", axisNameChangedAction);
 
     /**
      * true if tick marks should be displayed
      */
-    private final transient StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", true, changeLayoutAction);
+    private final transient StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", true, layoutChangedAction);
 
     /**
      * true if tick mark labels should be displayed
      */
-    private final transient StyleableBooleanProperty tickLabelsVisible = CSS.createBooleanProperty(this, "tickLabelsVisible", true, () -> {
-        getTickMarks().forEach(tick -> tick.setVisible(AbstractAxisParameter.this.tickLabelsVisible.get()));
-        invalidate();
-        invokeListener(new AxisChangeEvent(this));
-    });
+    private final transient StyleableBooleanProperty tickLabelsVisible = CSS.createBooleanProperty(this, "tickLabelsVisible", true, layoutChangedAction);
 
     /**
      * The length of tick mark lines
      */ 
-    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0, changeLayoutAction);
+    private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0, layoutChangedAction);
 
     /**
      * The length of tick mark lines
      */
-    private final transient StyleableDoubleProperty tickLength = CSS.createDoubleProperty(this, "tickLength", 8.0, changeLayoutAction);
+    private final transient StyleableDoubleProperty tickLength = CSS.createDoubleProperty(this, "tickLength", 8.0, layoutChangedAction);
 
     /**
      * This is true when the axis determines its range from the data automatically
      */
-    private final transient StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", true, changeLayoutAction);
+    private final transient StyleableBooleanProperty autoRanging = CSS.createBooleanProperty(this, "autoRanging", true, axisTransformChanged);
 
     /**
      * The font for all tick labels
      */
-    private final transient StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, changeLayoutAction);
+    private final transient StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null, layoutChangedAction);
 
     /**
      * The fill for all tick labels
@@ -178,32 +171,32 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The gap between tick marks and the canvas area
      */
-    private final transient StyleableDoubleProperty tickMarkGap = CSS.createDoubleProperty(this, "tickMarkGap", 0.0, changeLayoutAction);
+    private final transient StyleableDoubleProperty tickMarkGap = CSS.createDoubleProperty(this, "tickMarkGap", 0.0, layoutChangedAction);
 
     /**
      * The gap between tick labels and the tick mark lines
      */
-    private final transient StyleableDoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", 3.0, changeLayoutAction);
+    private final transient StyleableDoubleProperty tickLabelGap = CSS.createDoubleProperty(this, "tickLabelGap", 3.0, layoutChangedAction);
 
     /**
      * The minimum gap between tick labels
      */
-    private final transient StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", 3.0, changeLayoutAction);
+    private final transient StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", 3.0, axisTransformChanged);
 
     /**
      * The gap between tick labels and the axis label
      */
-    private final transient StyleableDoubleProperty axisLabelGap = CSS.createDoubleProperty(this, "axisLabelGap", 3.0, changeLayoutAction);
+    private final transient StyleableDoubleProperty axisLabelGap = CSS.createDoubleProperty(this, "axisLabelGap", 3.0, layoutChangedAction);
 
     /**
      * The animation duration in MS
      */
-    private final transient StyleableIntegerProperty animationDuration = CSS.createIntegerProperty(this, "animationDuration", 250, changeLayoutAction);
+    private final transient StyleableIntegerProperty animationDuration = CSS.createIntegerProperty(this, "animationDuration", 250, layoutChangedAction);
 
     /**
      * The maximum number of ticks
      */
-    private final transient StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", MAX_TICK_COUNT, changeLayoutAction);
+    private final transient StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", MAX_TICK_COUNT, axisTransformChanged);
 
     /**
      * When true any changes to the axis and its range will be animated.
@@ -213,146 +206,89 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * Rotation in degrees of tick mark labels from their normal horizontal.
      */
-    protected final transient StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0, changeLayoutAction);
+    protected final transient StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0, layoutChangedAction);
 
     /**
      * true if minor tick marks should be displayed
      */
-    private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, changeLayoutAction);
+    private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, axisTransformChanged);
 
     /**
      * The scale factor from data units to visual units
      */
-    private final transient ReadOnlyDoubleWrapper scale = new ReadOnlyDoubleWrapper(this, "scale", 1);
+    private final transient ReadOnlyDoubleWrapper scale = FXUtils.createReadOnlyDoubleWrapper(this, "scale", 1, axisTransformChanged);
 
     /**
      * The axis length in pixels
      */
-    private final transient DoubleProperty length = new SimpleDoubleProperty(Double.NaN);
+    private final transient DoubleProperty length = FXUtils.createDoubleProperty(this, "length", Double.NaN, axisTransformChanged) ;
 
     /**
      * The value for the upper bound of this axis, ie max value. This is automatically set if auto ranging is on.
      */
-    protected final transient DoubleProperty maxProp = new SimpleDoubleProperty(this, "upperBound", DEFAULT_MAX_RANGE) {
-        @Override
-        public void set(final double newValue) {
-            final double oldValue = get();
-            if (oldValue != newValue) {
-                super.set(newValue);
-                invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-            }
-        }
-    };
+    protected final transient DoubleProperty maxProp = FXUtils.createDoubleProperty(this, "upperBound", DEFAULT_MAX_RANGE, axisTransformChanged);
 
     /**
      * The value for the lower bound of this axis, ie min value. This is automatically set if auto ranging is on.
      */
-    protected final transient DoubleProperty minProp = new SimpleDoubleProperty(this, "lowerBound", DEFAULT_MIN_RANGE) {
-        @Override
-        public void set(final double newValue) {
-            final double oldValue = get();
-            if (oldValue != newValue) {
-                super.set(newValue);
-                invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-            }
-        }
-    };
+    protected final transient DoubleProperty minProp = FXUtils.createDoubleProperty(this, "lowerBound", DEFAULT_MIN_RANGE, axisTransformChanged);
 
     protected double cachedOffset; // for caching
 
     /**
      * StringConverter used to format tick mark labels. If null a default will be used
      */
-    private final transient ObjectProperty<StringConverter<Number>> tickLabelFormatter = new ObjectPropertyBase<>(null) {
-        @Override
-        public Object getBean() {
-            return AbstractAxisParameter.this;
-        }
-
-        @Override
-        public String getName() {
-            return "tickLabelFormatter";
-        }
-
-        @Override
-        protected void invalidated() {
-            invalidate();
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
+    private final transient ObjectProperty<StringConverter<Number>> tickLabelFormatter = FXUtils.createObjectProperty(this, "tickLabelFormatter", null, state.onAction(ChartBits.AxisTransform, ChartBits.AxisTickFormatter));
 
     /**
      * The length of minor tick mark lines. Set to 0 to not display minor tick marks.
      */
-    private final transient StyleableDoubleProperty minorTickLength = CSS.createDoubleProperty(this, "minorTickLength", 5.0, changeLayoutAction);
+    private final transient StyleableDoubleProperty minorTickLength = CSS.createDoubleProperty(this, "minorTickLength", 5.0, layoutChangedAction);
 
     /**
      * The number of minor tick divisions to be displayed between each major tick mark. The number of actual minor tick
      * marks will be one less than this. N.B. number of divisions, minor tick mark is not drawn if minorTickMark ==
      * majorTickMark
      */
-    private final transient StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, changeLayoutAction);
+    private final transient StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, layoutChangedAction);
 
-    private final transient StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, changeLayoutAction);
+    private final transient StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, layoutChangedAction);
 
     protected boolean isInvertedAxis = false; // internal use (for performance reason)
-    private final transient BooleanProperty invertAxis = new SimpleBooleanProperty(this, "invertAxis", false) {
-        @Override
-        protected void invalidated() {
-            isInvertedAxis = get();
-            invalidate();
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
-
-    protected boolean isTimeAxis = false; // internal use (for performance reasons)
-    private final transient BooleanProperty timeAxis = new SimpleBooleanProperty(this, "timeAxis", false) {
-        @Override
-        protected void invalidated() {
-            isTimeAxis = get();
-            if (isTimeAxis) {
-                setMinorTickCount(0);
-            } else {
-                setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
-            }
-            invalidate();
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
-
-    private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, changeLayoutAction);
-
-    private final transient DoubleProperty autoRangePadding = new SimpleDoubleProperty(0);
-
-    /**
-     * The axis unit label
-     */
-    private final transient StyleableStringProperty axisUnit = CSS.createStringProperty(this, "axisUnit", "", () -> {
-        updateAxisLabelAndUnit();
-        requestAxisLayout();
+    private final transient BooleanProperty invertAxis = FXUtils.createBooleanProperty(this, "invertAxis", isInvertedAxis, ()->{
+        isInvertedAxis = invertAxisProperty().get();
+        layoutChangedAction.run();
     });
 
-    /**
-     * The axis unit label
-     */
-    private final transient BooleanProperty autoUnitScaling = new SimpleBooleanProperty(this, "autoUnitScaling", false) {
-        @Override
-        protected void invalidated() {
-            updateAxisLabelAndUnit();
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
+    protected boolean isTimeAxis = false; // internal use (for performance reasons)
+    private final transient BooleanProperty timeAxis = FXUtils.createBooleanProperty(this, "timeAxis", isTimeAxis, ()->{
+        isTimeAxis = timeAxisProperty().get();
+        if (isTimeAxis) {
+            setMinorTickCount(0);
+        } else {
+            setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
         }
-    };
+        layoutChangedAction.run();
+    });
+
+    private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, axisTransformChanged);
+
+    private final transient DoubleProperty autoRangePadding = FXUtils.createDoubleProperty(this, "autoRangePadding", 0, axisTransformChanged);
 
     /**
      * The axis unit label
      */
-    private final transient DoubleProperty unitScaling = new SimpleDoubleProperty(this, "unitScaling", 1.0) {
-        @Override
-        protected void invalidated() {
-            updateAxisLabelAndUnit();
-            invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
-        }
-    };
+    private final transient StyleableStringProperty axisUnit = CSS.createStringProperty(this, "axisUnit", "", axisNameChangedAction);
+
+    /**
+     * The axis unit label
+     */
+    private final transient BooleanProperty autoUnitScaling = FXUtils.createBooleanProperty(this, "autoUnitScaling", false, axisNameChangedAction);
+
+    /**
+     * The axis unit label
+     */
+    private final transient DoubleProperty unitScaling = FXUtils.createDoubleProperty(this, "unitScaling", 1.0, axisNameChangedAction);
 
     /**
      * user-set tick units when doing auto-ranging
@@ -361,59 +297,47 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         if (isAutoRanging() || isAutoGrowRanging()) {
             return;
         }
-        invalidate();
-        invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
+        axisNameChangedAction.run();
     });
 
     /**
      * system-set tick units for getting the currently displayed units
      */
-    protected final transient DoubleProperty tickUnit = new SimpleDoubleProperty(Double.NaN);
+    protected final transient DoubleProperty tickUnit = FXUtils.createDoubleProperty(this, "tickUnit", Double.NaN, axisTransformChanged);
 
-    protected final transient ChangeListener<? super Number> scaleChangeListener = (ch, o, n) -> {
-        final double axisLength = getLength(); // [pixel]
-        final double lowerBound = getMin();
-        final double upperBound = getMax();
-        if (!Double.isFinite(axisLength) || !Double.isFinite(lowerBound) || !Double.isFinite(upperBound)) {
-            return;
-        }
-
-        double newScale;
-        final double diff = upperBound - lowerBound;
-        if (getSide().isVertical()) {
-            newScale = diff == 0 ? -axisLength : -(axisLength / diff);
-            cachedOffset = axisLength;
-        } else { // HORIZONTAL
-            newScale = diff == 0 ? axisLength : axisLength / diff;
-            cachedOffset = 0;
-        }
-
-        setScale(newScale == 0 ? -1.0 : newScale);
-    };
+    protected boolean isUpdatingContent = false;
 
     /**
      * Create a auto-ranging AbstractAxisParameter
      */
     public AbstractAxisParameter() {
         super();
-        autoRangingProperty().addListener(ch -> {
+        autoRangingProperty().addListener((ch, o, enabled) -> {
             // disable auto grow if auto range is enabled
-            if (isAutoRanging()) {
+            if (enabled) {
                 setAutoGrowRanging(false);
             }
         });
 
-        autoGrowRangingProperty().addListener(ch -> {
+        autoGrowRangingProperty().addListener((ch, o, enabled) -> {
             // disable auto grow if auto range is enabled
-            if (isAutoGrowRanging()) {
+            if (enabled) {
                 setAutoRanging(false);
             }
         });
 
-        nameProperty().addListener(e -> {
-            updateAxisLabelAndUnit();
-            invokeListener(new AxisChangeEvent(this));
-        });
+        // bind limits to user-specified axis range
+        // userRange.set
+        final ChangeListener<? super Number> userLimitChangeListener = (ch, o, n) -> {
+            // Disable auto ranging if range was set manually
+            if (!isUpdatingContent) {
+                getUserRange().set(getMin(), getMax());
+                setAutoRanging(false);
+                setAutoGrowRanging(false);
+            }
+        };
+        minProperty().addListener(userLimitChangeListener);
+        maxProperty().addListener(userLimitChangeListener);
 
         // TODO: remove and use styles directly?
         tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
@@ -421,7 +345,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
         axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
 
-        // Provide a binding for the axis length
+        // Provide an initial binding for the axis length
         var layoutLength = Bindings.createDoubleBinding(() -> {
             if (getSide() == null) {
                 return Double.NaN;
@@ -430,26 +354,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }, sideProperty(), widthProperty(), heightProperty());
         length.bind(layoutLength);
 
-        // bind limits to user-specified axis range
-        // userRange.set
-        final ChangeListener<? super Number> userLimitChangeListener = (ch, o, n) -> {
-            getUserRange().set(getMin(), getMax());
-            // axis range has been set manually -&gt; disable auto-ranging
-            // TODO: enable once the new scheme checks out
-            // setAutoRanging(false)
-            // setAutoGrowRanging(false)
-
-            if (!isAutoRanging() && !isAutoGrowRanging()) {
-                invokeListener(new AxisChangeEvent(this));
-            }
-            invalidate();
-        };
-        minProperty().addListener(userLimitChangeListener);
-        maxProperty().addListener(userLimitChangeListener);
-
-        minProperty().addListener(scaleChangeListener);
-        maxProperty().addListener(scaleChangeListener);
-        lengthProperty().addListener(scaleChangeListener);
     }
 
     @Override
@@ -824,15 +728,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     /**
-     * Mark the current axis invalid, this will cause anything that depends on the axis range or physical size to be
-     * recalculated on the next
-     * layout iteration.
-     */
-    public void invalidate() {
-        validProperty().set(false);
-    }
-
-    /**
      * This is {@code true} when the axis labels and data point order should be inverted
      *
      * @param value {@code true} if axis shall be inverted (i.e. drawn from 'max-&gt;min', rather than the normal
@@ -949,7 +844,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * @return true if current axis range and physical size calculations are valid
      */
     public boolean isValid() {
-        return validProperty().get();
+        return state.isClean();
     }
 
     public IntegerProperty maxMajorTickLabelCountProperty() {
@@ -993,16 +888,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean set(final double min, final double max) {
-        final double oldMin = minProp.get();
-        final double oldMax = maxProp.get();
-        final boolean oldState = autoNotification().getAndSet(false);
-        minProp.set(min);
-        maxProp.set(max);
-        autoNotification().set(oldState);
-        final boolean changed = (oldMin != min) || (oldMax != max);
-        if (changed) {
-            invalidate();
-            invokeListener(new AxisChangeEvent(this));
+        boolean changed = false;
+        if (min != minProp.get()) {
+            minProp.set(min);
+            changed = true;
+        }
+        if (max != maxProp.get()) {
+            maxProp.set(max);
+            changed = true;
         }
         return changed;
     }
@@ -1010,7 +903,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public boolean set(final String axisName, final String... axisUnit) {
         boolean changed = false;
-        final boolean oldState = autoNotification().getAndSet(false);
         if (!equalString(axisName, getName())) {
             setName(axisName);
             changed = true;
@@ -1019,23 +911,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             setUnit(axisUnit[0]);
             changed = true;
         }
-        autoNotification().set(oldState);
-        if (changed) {
-            invokeListener(new AxisChangeEvent(this));
-        }
         return changed;
     }
 
     @Override
     public boolean set(final String axisName, final String axisUnit, final double rangeMin, final double rangeMax) {
-        final boolean oldState = autoNotification().getAndSet(false);
-        boolean changed = this.set(axisName, axisUnit);
-        changed |= this.set(rangeMin, rangeMax);
-        autoNotification().set(oldState);
-        if (changed) {
-            invokeListener(new AxisChangeEvent(this));
-        }
-        return changed;
+        return set(axisName, axisUnit) | set(rangeMin, rangeMax); // note: single '|' to avoid skipping right part
     }
 
     /**
@@ -1062,13 +943,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     @Override
     public void setAutoGrowRanging(final boolean state) {
-        // TODO: setter should probably be dumb and state changes should happen in property's invalidate
-        if (state) {
-            setAutoRanging(false);
-            invalidate();
-            requestAxisLayout();
-        }
-        autoGrowRangingProperty().set(state);
+        autoRangingProperty().set(state);
     }
 
     /**
@@ -1331,6 +1206,26 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         scalePropertyImpl().set(scale);
     }
 
+    // TODO: remove?
+    protected void updateScale() {
+        final double length = getLength(); // [pixel]
+        final double range = getMax() - getMin();
+        if (!Double.isFinite(range)) {
+            return;
+        }
+
+        double newScale;
+        if (getSide().isVertical()) {
+            newScale = range == 0 ? -length : -(length / range);
+            cachedOffset = length;
+        } else { // HORIZONTAL
+            newScale = range == 0 ? length : length / range;
+            cachedOffset = 0;
+        }
+
+        setScale(newScale == 0 ? -1.0 : newScale);
+    }
+
     protected void updateAxisLabelAndUnit() {
         final String axisPrimaryLabel = getName();
         String localAxisUnit = getUnit();
@@ -1349,7 +1244,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         } else {
             getAxisLabel().setText(axisPrimaryLabel + " [" + axisPrefix + localAxisUnit + "]");
         }
-        invalidate(); // listeners already trigger request a layout
     }
 
     protected void updateScaleAndUnitPrefix() {
@@ -1366,17 +1260,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         setTickUnit(range / getMinorTickCount());
     }
 
-    /**
-     * valid flag property.
-     * This will cause anything that depends on the axis range or physical size to be recalculated on the next layout
-     * iteration.
-     *
-     * @return the validProperty()
-     */
-    protected BooleanProperty validProperty() {
-        return valid;
-    }
-
     ReadOnlyDoubleWrapper scalePropertyImpl() {
         return scale;
     }
@@ -1391,4 +1274,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected static boolean equalString(final String str1, final String str2) {
         return Objects.equals(str1, str2);
     }
+
+    @Deprecated
+    protected void invalidate() {
+        requestAxisLayout();
+    }
+
 }

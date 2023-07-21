@@ -6,18 +6,20 @@ import java.util.function.IntSupplier;
  * @author ennerf
  */
 public enum ChartBits implements IntSupplier {
-    Layout,
-    Canvas,
-    AxisSide,
-    AxisRangeChanged;
-
-    public int getBit() {
-        return bit;
-    }
+    AxisCanvas,
+    AxisLayout,
+    AxisTransform,
+    AxisTickLocation,
+    AxisTickFormatter,
+    AxisLabelText;
 
     @Override
     public int getAsInt() {
-        return getBit();
+        return bit;
+    }
+
+    public boolean isSet(int mask) {
+        return (bit & mask) != 0;
     }
 
     final int bit = 1 << ordinal();

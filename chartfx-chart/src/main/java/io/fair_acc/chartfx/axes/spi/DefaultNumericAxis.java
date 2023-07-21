@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import io.fair_acc.chartfx.utils.FXUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -47,54 +48,36 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private transient AxisTransform axisTransform = linearTransform;
     protected boolean isUpdating;
 
-    private final transient BooleanProperty forceZeroInRange = new SimpleBooleanProperty(this, "forceZeroInRange", false) {
-        @Override
-        protected void invalidated() {
-            if (isAutoRanging() || isAutoGrowRanging()) {
-                invalidate();
-                requestAxisLayout();
-            }
-        }
-    };
+    private final transient BooleanProperty forceZeroInRange = FXUtils.createBooleanProperty(this, "forceZeroInRange", false, axisTransformChanged);
 
     protected boolean isLogAxis = false; // internal use (for performance reason
 
-    private final transient BooleanProperty logAxis = new SimpleBooleanProperty(this, "logAxis", isLogAxis) {
-        @Override
-        protected void invalidated() {
-            isLogAxis = get();
-
-            if (isLogAxis) {
-                if (DefaultNumericAxis.this.isTimeAxis()) {
-                    axisTransform = logTimeTransform;
-                    setMinorTickCount(0);
-                } else {
-                    axisTransform = logTransform;
-                    setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
-                }
-                if (getMin() <= 0) {
-                    isUpdating = true;
-                    setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
-                    isUpdating = false;
-                }
-
-                invalidate();
-                requestLayout();
+    private final transient BooleanProperty logAxis = FXUtils.createBooleanProperty(this, "logAxis", isLogAxis, () -> {
+        isLogAxis = isLogAxis();
+        if (isLogAxis) {
+            if (DefaultNumericAxis.this.isTimeAxis()) {
+                axisTransform = logTimeTransform;
+                setMinorTickCount(0);
             } else {
-                axisTransform = linearTransform;
-                if (DefaultNumericAxis.this.isTimeAxis()) {
-                    setMinorTickCount(0);
-                } else {
-                    setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
-                }
+                axisTransform = logTransform;
+                setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
             }
-
-            if (isAutoRanging() || isAutoGrowRanging()) {
-                invalidate();
+            if (getMin() <= 0) {
+                isUpdating = true;
+                setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+                isUpdating = false;
             }
-            requestAxisLayout();
+        } else {
+            axisTransform = linearTransform;
+            if (DefaultNumericAxis.this.isTimeAxis()) {
+                setMinorTickCount(0);
+            } else {
+                setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
+            }
         }
-    };
+
+        axisTransformChanged.run();
+    });
 
     /**
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
@@ -342,8 +325,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      */
     public void setLogarithmBase(final double value) {
         logarithmBaseProperty().set(value);
-        invalidate();
-        requestAxisLayout();
+        axisTransformChanged.run();
     }
 
     /**
