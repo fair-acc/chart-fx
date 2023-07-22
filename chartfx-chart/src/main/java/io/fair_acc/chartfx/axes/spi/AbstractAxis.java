@@ -101,7 +101,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // We can ignore the layout if labels can only move linearly along
         // the axis length. This happens e.g. for an X-axis that displays
         // moving time with the default policy.
-        state.addChangeListener(ChartBits.AxisTransform, (source, bits) -> {
+        state.addChangeListener(ChartBits.AxisRange, (source, bits) -> {
             if (!isTickMarkVisible() || !isTickLabelsVisible()) {
                 return;
             }
@@ -134,7 +134,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final AxisChangeEvent axisLabelEvent = new AxisNameChangeEvent(this);
         final AxisChangeEvent otherChangeEvent = new AxisChangeEvent(this);
         state.addChangeListener((source, bits) -> {
-            if (ChartBits.AxisTransform.isSet(bits)) {
+            if (ChartBits.AxisRange.isSet(bits)) {
                 invokeListener(axisTransformEvent, false);
             } else if (ChartBits.AxisLabelText.isSet(bits)) {
                 invokeListener(axisLabelEvent, false);
@@ -294,7 +294,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     @Override
     public void invalidateRange() {
-        axisTransformChanged.run();
+        axisRangeChanged.run();
     }
 
     public boolean isLabelOverlapping() {
@@ -317,9 +317,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * Updates the contents for this axis, e.g., tick labels, spacing
      * range, caches, etc.
      */
-    protected void updateContent() {
+    protected void updateAxisRange() {
         final double length = getLength();
-        if (!Double.isFinite(length) || length <= 0 || state.isClean(ChartBits.AxisTransform, ChartBits.AxisTickFormatter)) {
+        if (!Double.isFinite(length) || length <= 0 || state.isClean(ChartBits.AxisRange)) {
             return;
         }
 
@@ -508,14 +508,20 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return computeMinSize();
         }
 
-        // Set the axis length, so we can compute ticks with correctly placed
-        // labels to determine the overlap. The initial estimate is usually
-        // correct, so later changes happen very rarely, e.g., at a point where
-        // y axes labels switch to shifting lines.
+        // Set the axis length to determine the actual ticks. We can
+        // cache the existing layout if nothing has changed.
+        final boolean isHorizontal = getSide().isHorizontal();
         setLength(axisLength);
-        updateContent();
+        if (state.isClean(ChartBits.AxisLayout)) {
+            return isHorizontal ? getWidth() : getHeight();
+        }
 
-        boolean isHorizontal = getSide().isHorizontal();
+        // Compute the ticks with correctly placed labels to determine the
+        // overlap. The initial estimate is usually correct, so later changes
+        // happen very rarely, e.g., at a point where y axes labels switch to
+        // shifting lines.
+        updateAxisRange();
+
         scaleFont = 1.0;
         maxLabelHeight = 0;
         maxLabelWidth = 0;
@@ -955,7 +961,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // update labels, tick marks etc.
-        updateContent();
+        updateAxisRange();
 
         // redraw outdated canvas
         if (state.isDirty(ChartBits.AxisCanvas)) {
