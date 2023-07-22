@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.axes.spi;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -160,12 +161,12 @@ class AbstractAxisTests {
 
         axis.setSide(Side.BOTTOM);
         assertEquals(+1.0, axis.calculateNewScale(10, -5.0, +5.0));
-        assertEquals(+17, axis.computePrefHeight(100), 2);
+        assertEquals(+25, axis.computePrefHeight(100), 2);
         assertEquals(+150.0, axis.computePrefWidth(-1));
         axis.setSide(Side.LEFT);
         assertEquals(-1.0, axis.calculateNewScale(10, -5.0, +5.0));
         assertEquals(+150, axis.computePrefHeight(-1));
-        assertEquals(+15, axis.computePrefWidth(100), 2);
+        assertEquals(+22, axis.computePrefWidth(100), 2);
 
         assertDoesNotThrow(axis::clear);
         assertDoesNotThrow(axis::forceRedraw);
@@ -192,6 +193,8 @@ class AbstractAxisTests {
                 throw new IllegalStateException("majorTickMarks " + tm + " is invisible");
             }
         }));
+        assertArrayEquals(new double[]{-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0},
+                majorTickMarks.stream().mapToDouble(TickMark::getValue).toArray());
 
         final List<TickMark> minorTickMarks = axis.computeTickMarks(autoRange, false);
         assertNotNull(minorTickMarks);
@@ -201,17 +204,20 @@ class AbstractAxisTests {
                 throw new IllegalStateException("minorTickMarks " + tm + " is invisible");
             }
         }));
+        assertArrayEquals(new double[]{-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0},
+                majorTickMarks.stream().mapToDouble(TickMark::getValue).toArray());
 
         axis.invertAxis(true);
-        majorTickMarks.clear();
-        majorTickMarks.addAll(axis.computeTickMarks(autoRange, true));
+        axis.computeTickMarks(autoRange, true);
         assertEquals(10, majorTickMarks.size());
         assertDoesNotThrow(() -> majorTickMarks.forEach(tm -> {
             if (!tm.isVisible()) {
                 throw new IllegalStateException("tm " + tm + " is invisible");
             }
         }));
-        axis.getTickMarks().setAll(majorTickMarks);
+        assertArrayEquals(new double[]{-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0},
+                majorTickMarks.stream().mapToDouble(TickMark::getValue).toArray());
+
     }
 
     @Test

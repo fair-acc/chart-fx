@@ -662,7 +662,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     }
 
-    @Deprecated // TODO: update tests
+    @Deprecated // for testing purposes
     List<TickMark> computeTickMarks(AxisRange range, boolean major) {
         if (major) {
             updateMajorTickMarks(range);
