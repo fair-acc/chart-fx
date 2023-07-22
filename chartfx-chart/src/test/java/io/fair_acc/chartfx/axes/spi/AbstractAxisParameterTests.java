@@ -77,8 +77,6 @@ class AbstractAxisParameterTests {
             state.clear(ChartBits.AxisLabelText);
         });
         axis.updateDisplayRange = true;
-        axis.minProp.addListener(state.onPropChange(ChartBits.AxisCanvas)::set);
-        axis.maxProp.addListener(state.onPropChange(ChartBits.AxisCanvas)::set);
 
         assertTrue(state.isDirty());
         state.clear();

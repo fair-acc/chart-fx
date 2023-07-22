@@ -224,11 +224,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
     }
 
-    @Override
-    public void forceRedraw() {
-        layoutChangedAction.run();
-    }
-
     public AxisLabelFormatter getAxisLabelFormatter() {
         return axisFormatter.get();
     }
@@ -278,23 +273,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return Double.NaN;
         }
         return getDisplayPosition(0.0);
-    }
-
-    public void invalidateCaches() {
-        getTickMarkValues().clear();
-        getMinorTickMarkValues().clear();
-        getTickMarks().clear();
-        getMinorTickMarks().clear();
-    }
-
-    /**
-     * Called when data has changed and the range may not be valid anymore. This is only called by the chart if
-     * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
-     * happen on next layout pass.
-     */
-    @Override
-    public void invalidateRange() {
-        axisRangeChanged.run();
     }
 
     public boolean isLabelOverlapping() {
@@ -368,17 +346,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return autoRange(getLength());
         }
         return getUserRange();
-    }
-
-    /**
-     * Request that the axis is laid out in the next layout pass. This replaces requestLayout() as it has been
-     * overridden to do nothing so that changes to children's bounds etc do not cause a layout. This was done as a
-     * optimisation as the Axis knows the exact minimal set of changes that really need layout to be updated. So we only
-     * want to request layout then, not on any child change.
-     */
-    @Override
-    public void requestAxisLayout() {
-        state.setDirty(ChartBits.AxisLayout);
     }
 
     public void setAxisLabelFormatter(final AxisLabelFormatter value) {
@@ -951,7 +918,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         //  Layout only gets called on actual size changes. The length already gets set during
         //  the prefSize phase, so this is more of a sanity check.
         setLength(getSide().isHorizontal() ? getWidth() : getHeight());
-        state.setDirty(ChartBits.AxisCanvas);
+        invalidateCanvas.run();
     }
 
     @Override
@@ -1195,6 +1162,42 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     protected static double snap(final double coordinate) {
         return Math.round(coordinate) + 0.5; // center of a pixel, so 1px lines render exact. TODO: depend on line width?
+    }
+
+    /*
+     * ******************************************************
+     * Update methods for backwards compatibility
+     * ******************************************************
+     */
+
+    /**
+     * Request that the axis is laid out in the next layout pass. This replaces requestLayout() as it has been
+     * overridden to do nothing so that changes to children's bounds etc do not cause a layout. This was done as a
+     * optimisation as the Axis knows the exact minimal set of changes that really need layout to be updated. So we only
+     * want to request layout then, not on any child change.
+     */
+    @Override
+    public void requestAxisLayout() {
+        invalidateLayout.run();
+    }
+
+    protected void invalidate() {
+        invalidateLayout.run();
+    }
+
+    @Override
+    public void forceRedraw() {
+        invalidateLayout.run();
+    }
+
+    /**
+     * Called when data has changed and the range may not be valid anymore. This is only called by the chart if
+     * isAutoRanging() returns true. If we are auto ranging it will cause layout to be requested and auto ranging to
+     * happen on next layout pass.
+     */
+    @Override
+    public void invalidateRange() {
+        invalidateAxisRange.run();
     }
 
 }

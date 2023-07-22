@@ -1,5 +1,7 @@
 package io.fair_acc.chartfx.utils;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.*;
 
 import java.util.Objects;
@@ -82,4 +84,38 @@ public class PropUtil {
             }
         };
     }
+
+    /**
+     * subscribes to property changes without boxing values
+     */
+    public static void addChangeListener(Runnable action, ReadOnlyDoubleProperty... conditions){
+        for (var condition : conditions) {
+            condition.addListener(new InvalidationListener() {
+                double prev = condition.get();
+                @Override
+                public void invalidated(Observable observable) {
+                    if(prev != condition.get()) {
+                        prev = condition.get();
+                        action.run();
+                    }
+                }
+            });
+        }
+    }
+
+    public static void addChangeListener(Runnable action, ReadOnlyLongProperty... conditions){
+        for (var condition : conditions) {
+            condition.addListener(new InvalidationListener() {
+                long prev = condition.get();
+                @Override
+                public void invalidated(Observable observable) {
+                    if(prev != condition.get()) {
+                        prev = condition.get();
+                        action.run();
+                    }
+                }
+            });
+        }
+    }
+
 }
