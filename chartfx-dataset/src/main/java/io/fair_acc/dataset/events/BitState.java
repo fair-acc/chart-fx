@@ -2,6 +2,7 @@ package io.fair_acc.dataset.events;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 /**
@@ -212,6 +213,68 @@ public class BitState implements StateListener {
         return false;
     }
 
+    public static boolean isSet(int mask, int bit) {
+        return (bit & mask) != 0;
+    }
+
+    public static int clear(int mask, int bit) {
+        return mask & ~bit;
+    }
+
+    public static StateListener createDebugPrinter(IntSupplier... bits) {
+        return createDebugPrinter(false, bits);
+    }
+
+    public static StateListener createDebugPrinter(boolean showStackTrace, IntSupplier... bits) {
+        return createDebugPrinter(showStackTrace, System.out::println, bits);
+    }
+
+    public static StateListener createDebugPrinter(boolean showStackTrace, Consumer<String> log, IntSupplier... bits) {
+        StringBuilder builder = new StringBuilder();
+        return (source, mask) -> {
+            builder.setLength(0);
+            builder.append(source.getSource()).append(": ");
+            appendBitStrings(builder, mask, bits);
+            if (showStackTrace) {
+                appendStackTrace(builder, 6, 15); // offset to account for internal methods
+            }
+            log.accept(builder.toString());
+        };
+    }
+
+    public static StringBuilder appendBitStrings(StringBuilder builder, int mask, IntSupplier... bits) {
+        if (mask == 0) {
+            return builder.append("clean");
+        }
+        int knownBits = 0;
+        builder.append("dirty[");
+        for (IntSupplier name : bits) {
+            int bit = name.getAsInt();
+            if (isSet(mask, bit)) {
+                builder.append(name).append(", ");
+                knownBits |= bit;
+            }
+        }
+        if (clear(mask, knownBits) != 0) {
+            builder.append("UNKNOWN, ");
+        }
+        builder.setLength(builder.length() - 2);
+        return builder.append("]");
+    }
+
+    public static StringBuilder appendStackTrace(StringBuilder builder, int from, int to) {
+        var stack = Thread.currentThread().getStackTrace();
+        for (int i = from; i < Math.min(stack.length, to); i++) {
+            var elem = stack[i];
+            builder.append("\n   [").append(i).append("] ")
+                    .append(elem.getClassName()).append(".").append(elem.getMethodName())
+                    .append("(")
+                    .append(elem.getFileName()).append(":").append(elem.getLineNumber())
+                    .append(")");
+        }
+        return builder;
+    }
+
     private static class FilteredListener implements StateListener {
 
         private FilteredListener(int filter, StateListener listener) {
@@ -222,7 +285,7 @@ public class BitState implements StateListener {
         @Override
         public void accept(BitState source, int bits) {
             final int filteredBits = filter & bits;
-            if(filteredBits != 0){
+            if (filteredBits != 0) {
                 listener.accept(source, filteredBits);
             }
         }
