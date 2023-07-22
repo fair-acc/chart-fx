@@ -550,6 +550,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
     @Override
     protected void updateCachedVariables() {
+        super.updateCachedVariables();
         if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return;
         }

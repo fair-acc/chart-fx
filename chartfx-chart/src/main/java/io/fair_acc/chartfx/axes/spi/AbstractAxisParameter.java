@@ -347,6 +347,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     protected void updateCachedVariables() { // NOPMD by rstein function can but does not have to be overwritten
         // called once new axis parameters have been established
+        cachedOffset = getSide().isHorizontal() ? 0 : getLength();
     }
 
     @Override
