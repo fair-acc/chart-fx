@@ -37,7 +37,7 @@ public class DataSetAverageSample extends AbstractDemoApplication {
         chart.getYAxis(1).setAutoRanging(false);
         chart.getYAxis().maxProperty().bindBidirectional(chart.getYAxis(1).maxProperty());
         chart.getYAxis().minProperty().bindBidirectional(chart.getYAxis(1).minProperty());
-        chart.getYAxis().userTickUnitProperty().bindBidirectional(chart.getYAxis(1).userTickUnitProperty()); // TODO: used tickUnitProperty. Make sure it still works.
+        chart.getYAxis().tickUnitProperty().bindBidirectional(chart.getYAxis(1).tickUnitProperty());
 
         LimitedQueue<DataSet> lastDataSets = new LimitedQueue<>(N_GRAPHS);
         for (int i = 0; i < 20 * N_GRAPHS; i++) {

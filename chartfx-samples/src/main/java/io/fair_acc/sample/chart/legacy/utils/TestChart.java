@@ -86,8 +86,7 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
         chart.getDatasets().setAll(testFunction);
         xAxis.setMax(nSamples - 1.0);
         xAxis.setMin(0);
-        xAxis.setAutoRanging(false);
-        xAxis.setUserTickUnit(nSamples / 20.0);
+        xAxis.setTickUnit(nSamples / 20.0);
         updateDataSet();
     }
 

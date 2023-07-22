@@ -310,8 +310,7 @@ public class EditAxis extends ChartPlugin {
 
             if (axis instanceof AbstractAxis) {
                 // ((AbstractAxis) axis).recomputeTickMarks();
-                ((AbstractAxis) axis).setAutoRanging(false); // TODO: this used to set internal units. Is this ok?
-                axis.setUserTickUnit(((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
+                axis.setTickUnit(((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
             }
         }
 
@@ -426,8 +425,7 @@ public class EditAxis extends ChartPlugin {
 
                     if (axis instanceof AbstractAxis) {
                         // ((AbstractAxis) axis).recomputeTickMarks();
-                        ((AbstractAxis) axis).setAutoRanging(false); // TODO: this used to set internal units. Is this ok?
-                        axis.setUserTickUnit(((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
+                        axis.setTickUnit(((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("recompute axis tick unit to {}",
                                     ((AbstractAxis) axis).computePreferredTickUnit(axis.getLength()));
