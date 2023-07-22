@@ -9,7 +9,6 @@ public enum ChartBits implements IntSupplier {
     AxisCanvas,
     AxisLayout,
     AxisTransform,
-    AxisTickLocation,
     AxisTickFormatter,
     AxisLabelText;
 
