@@ -93,7 +93,7 @@ public class BitState implements StateListener {
     }
 
     public boolean isClean(int mask) {
-        return (state & mask) != 0;
+        return (state & mask) == 0;
     }
 
     public boolean isClean(IntSupplier bit0) {

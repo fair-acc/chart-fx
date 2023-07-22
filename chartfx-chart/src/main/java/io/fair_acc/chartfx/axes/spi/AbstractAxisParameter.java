@@ -45,9 +45,9 @@ import io.fair_acc.dataset.utils.NoDuplicatesList;
  */
 public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected final BitState state = BitState.initDirty(this);
-    protected final Runnable layoutChangedAction = state.onAction(ChartBits.AxisLayout);
+    protected final Runnable layoutChangedAction = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas);
     protected final Runnable axisTransformChanged = state.onAction(ChartBits.AxisTransform);
-    protected final Runnable axisNameChangedAction = state.onAction(ChartBits.AxisLayout, ChartBits.AxisLabelText);
+    protected final Runnable axisNameChangedAction = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas, ChartBits.AxisLabelText);
     protected final ChangeListener<Number> layoutChangedListener = state.onPropChange(ChartBits.AxisLayout)::set;
     protected final ChangeListener<Number> axisTransformChangedListener = state.onPropChange(ChartBits.AxisTransform)::set;
 

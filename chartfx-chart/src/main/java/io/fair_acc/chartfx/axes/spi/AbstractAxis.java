@@ -318,8 +318,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * range, caches, etc.
      */
     protected void updateContent() {
-        final double length = Math.max(1, getLength());
-        if (!Double.isFinite(length) || state.isClean()) {
+        final double length = getLength();
+        if (!Double.isFinite(length) || length <= 0 || state.isClean(ChartBits.AxisTransform, ChartBits.AxisTickFormatter)) {
             return;
         }
 
@@ -945,6 +945,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         //  Layout only gets called on actual size changes. The length already gets set during
         //  the prefSize phase, so this is more of a sanity check.
         setLength(getSide().isHorizontal() ? getWidth() : getHeight());
+        state.setDirty(ChartBits.AxisCanvas);
     }
 
     @Override
@@ -956,17 +957,20 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // update labels, tick marks etc.
         updateContent();
 
-        // clear outdated canvas content
-        final var gc = canvas.getGraphicsContext2D();
-        clearAxisCanvas(gc, canvas.getWidth(), canvas.getHeight());
-
-        // the canvas has extra padding, so move in a bit
-        try {
-            gc.translate(canvasPadX, canvasPadY);
-            drawAxis(gc, getWidth(), getHeight());
-        } finally {
-            gc.translate(-canvasPadX, -canvasPadY);
+        // redraw outdated canvas
+        if (state.isDirty(ChartBits.AxisCanvas)) {
+            final var gc = canvas.getGraphicsContext2D();
+            clearAxisCanvas(gc, canvas.getWidth(), canvas.getHeight());
+            try {
+                // the canvas has extra padding, so move in a bit
+                gc.translate(canvasPadX, canvasPadY);
+                drawAxis(gc, getWidth(), getHeight());
+            } finally {
+                gc.translate(-canvasPadX, -canvasPadY);
+            }
         }
+
+        // everything is updated
         state.clear();
 
     }
