@@ -14,7 +14,7 @@ import java.util.Objects;
 public class PropUtil {
 
     public static boolean set(DoubleProperty prop, double value) {
-        if (prop.get() == value) {
+        if (isEqual(prop.get(), value)) {
             return false;
         }
         prop.set(value);
@@ -46,8 +46,7 @@ public class PropUtil {
         return new SimpleDoubleProperty(bean, name, initial) {
             @Override
             public void set(final double newValue) {
-                final double oldValue = get();
-                if (oldValue != newValue) {
+                if (!isEqual(get(), newValue)) {
                     super.set(newValue);
                     onChange.run();
                 }
@@ -59,8 +58,7 @@ public class PropUtil {
         return new ReadOnlyDoubleWrapper(bean, name, initial) {
             @Override
             public void set(final double newValue) {
-                final double oldValue = get();
-                if (oldValue != newValue) {
+                if (!isEqual(get(), newValue)) {
                     super.set(newValue);
                     onChange.run();
                 }
@@ -77,7 +75,7 @@ public class PropUtil {
             @Override
             public void set(final T newValue) {
                 final T oldValue = getValue();
-                if (oldValue != newValue) {
+                if (!Objects.equals(oldValue, newValue)) {
                     super.set(newValue);
                     onChange.run();
                 }
@@ -94,7 +92,7 @@ public class PropUtil {
                 double prev = condition.get();
                 @Override
                 public void invalidated(Observable observable) {
-                    if(prev != condition.get()) {
+                    if (!isEqual(prev, condition.get())) {
                         prev = condition.get();
                         action.run();
                     }
@@ -116,6 +114,10 @@ public class PropUtil {
                 }
             });
         }
+    }
+
+    private static boolean isEqual(double a, double b) {
+        return Double.doubleToLongBits(a) == Double.doubleToLongBits(b); // supports NaN
     }
 
 }

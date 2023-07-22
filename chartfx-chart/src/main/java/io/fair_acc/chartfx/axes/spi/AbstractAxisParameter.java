@@ -301,7 +301,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient DoubleProperty unitScaling = PropUtil.createDoubleProperty(this, "unitScaling", 1.0, invalidateAxisName);
 
     /**
-     * The tick units, i.e., the spacing between the ticks in real units
+     * The tick units (spacing between the ticks in real units)
      */
     protected final transient StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", DEFAULT_TICK_UNIT, () -> {
         ((isAutoRanging() || isAutoGrowRanging()) ? invalidateAxisRange : invalidateCanvas).run();
@@ -978,18 +978,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         this.length.set(axisLength);
     }
 
-    protected void setDisplayedRange(AxisRange range) {
-        setDisplayedRange(range.getMin(), range.getMax(), range.getAxisLength(), range.getScale(), range.getTickUnit());
-    }
-
-    protected void setDisplayedRange(double min, double max, double axisLength, double scale, double unit) {
-        setMin(min);
-        setMax(max);
-        setLength(axisLength);
-        setScale(scale);
-        setTickUnit(unit);
-    }
-
     public void setMaxMajorTickLabelCount(final int value) {
         this.maxMajorTickLabelCountProperty().set(value);
     }
@@ -1182,41 +1170,46 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         setScale(newScale == 0 ? -1.0 : newScale);
     }
 
-    protected void updateAxisLabel() {
-        final String axisPrimaryLabel = getName();
-        String unitString = getUnit();
-
-        // Is it correct that we scale even if there is no unit?
-        final String scalePrefix = MetricPrefix.getShortPrefix(getUnitScaling());
-        if ((unitString == null || unitString.isBlank()) && !scalePrefix.isBlank()) {
-            unitString = "";
-        }
-
-        if (unitString == null) {
-            getAxisLabel().setText(axisPrimaryLabel);
-        } else {
-            getAxisLabel().setText(axisPrimaryLabel + " [" + scalePrefix + unitString + "]");
-        }
-    }
-
     public BitState getBitState() {
         return state;
     }
 
-    protected double computeUnitScale(AxisRange axisRange) {
-        final double oldPower = getUnitScaling();
-        if (isAutoUnitScaling()) {
-            final double range = Math.abs(axisRange.getLength());
-            final double logRange = Math.log10(range);
-            final double power3Upper = 3.0 * Math.ceil(logRange / 3.0);
-            final double power3Lower = 3.0 * Math.floor(logRange / 3.0);
-            final double a = Math.min(power3Upper, power3Lower);
-            final double power = Math.pow(10, a);
-            if ((power != oldPower) && (power != 0) && (Double.isFinite(power))) {
-                return power;
-            }
+    protected void updateAxisLabelAndUnit() {
+        final String axisPrimaryLabel = getName();
+        String localAxisUnit = getUnit();
+        final boolean isAutoScaling = isAutoUnitScaling();
+        if (isAutoScaling) {
+            updateScaleAndUnitPrefix();
         }
-        return oldPower;
+
+        if (!state.isDirty(ChartBits.AxisLabelText)) {
+            return;
+        }
+
+        final String axisPrefix = MetricPrefix.getShortPrefix(getUnitScaling());
+        if ((localAxisUnit == null || localAxisUnit.isBlank()) && !axisPrefix.isBlank()) {
+            localAxisUnit = "";
+        }
+
+        if (localAxisUnit == null) {
+            getAxisLabel().setText(axisPrimaryLabel);
+        } else {
+            getAxisLabel().setText(axisPrimaryLabel + " [" + axisPrefix + localAxisUnit + "]");
+        }
+    }
+
+    protected void updateScaleAndUnitPrefix() {
+        final double range = Math.abs(getMax() - getMin());
+        final double logRange = Math.log10(range);
+        final double power3Upper = 3.0 * Math.ceil(logRange / 3.0);
+        final double power3Lower = 3.0 * Math.floor(logRange / 3.0);
+        final double a = Math.min(power3Upper, power3Lower);
+        final double power = Math.pow(10, a);
+        final double oldPower = getUnitScaling();
+        if ((power != oldPower) && (power != 0) && (Double.isFinite(power))) {
+            this.setUnitScaling(power);
+        }
+        setTickUnit(range / getMinorTickCount());
     }
 
     ReadOnlyDoubleWrapper scalePropertyImpl() {

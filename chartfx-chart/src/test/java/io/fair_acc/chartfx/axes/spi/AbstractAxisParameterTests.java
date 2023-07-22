@@ -84,7 +84,7 @@ class AbstractAxisParameterTests {
         var state = axis.getBitState();
         state.addChangeListener(ChartBits.AxisLabelText, (src, bits) -> {
             axis.updateScale();
-            axis.updateAxisLabel();
+            axis.updateAxisLabelAndUnit();
             state.clear(ChartBits.AxisLabelText);
         });
 

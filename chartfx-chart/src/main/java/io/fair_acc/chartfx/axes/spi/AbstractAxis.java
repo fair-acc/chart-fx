@@ -164,11 +164,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      */
     public abstract double computePreferredTickUnit(final double axisLength);
 
-    public double computePreferredTickUnit(AxisRange range) {
-        // TODO: remove the older general one
-        return computePreferredTickUnit(range.axisLength);
-    }
-
     @Override
     public void drawAxis(final GraphicsContext gc, final double axisWidth, final double axisHeight) {
         if ((gc == null) || (getSide() == null)) {
@@ -301,29 +296,15 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return;
         }
 
-        // Update range & scale
-        final AxisRange range;
-        if (isAutoGrowRanging() || isAutoRanging()) {
-            range = autoRange(length); // derived axes may potentially pad and round limits
-        } else {
-            range = getUserRange();
-        }
+        // Update range & scale TODO: what is already set? the original implementation updates in many different ways
+        AxisRange range = getRange();
+        set(range.getMin(), range.getMax());
+        setScale(range.scale = calculateNewScale(length, getMin(), getMax()));
+        setTickUnit(range.tickUnit = computePreferredTickUnit(length));
 
-        range.axisLength = length;
-        range.scale = calculateNewScale(length, range.getMin(), range.getMax());
-        range.tickUnit =/* (!isAutoRanging() && !isAutoRanging()) ? getUserTickUnit() :*/ computePreferredTickUnit(range); // TODO: does not work in zoom
-
-        // Scale the units // TODO: actually scale
-        double unitScale = computeUnitScale(range);
-        setUnitScaling(unitScale);
-
-        // Displayed label & units
-        if (state.isDirty(ChartBits.AxisLabelText)) {
-            updateAxisLabel();
-        }
+        updateAxisLabelAndUnit();
 
         // Update cache to have axis transforms
-        setDisplayedRange(range);
         updateCachedVariables();
 
         // Tick marks
@@ -943,6 +924,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             } finally {
                 gc.translate(-canvasPadX, -canvasPadY);
             }
+
         }
 
         // everything is updated
