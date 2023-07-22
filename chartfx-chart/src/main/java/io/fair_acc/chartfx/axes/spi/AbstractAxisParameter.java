@@ -10,7 +10,7 @@ import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
-import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.*;
@@ -227,12 +227,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The scale factor from data units to visual units
      */
-    private final transient ReadOnlyDoubleWrapper scale = FXUtils.createReadOnlyDoubleWrapper(this, "scale", 1);
+    private final transient ReadOnlyDoubleWrapper scale = PropUtil.createReadOnlyDoubleWrapper(this, "scale", 1);
 
     /**
      * The axis length in pixels
      */
-    private final transient ReadOnlyDoubleWrapper length = FXUtils.createReadOnlyDoubleWrapper(this, "length", Double.NaN, axisTransformChanged) ;
+    private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN, state.onAction(ChartBits.AxisTransform, ChartBits.AxisCanvas)) ;
 
     private boolean settingDisplayRange = false;
 
@@ -269,7 +269,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * StringConverter used to format tick mark labels. If null a default will be used
      */
-    private final transient ObjectProperty<StringConverter<Number>> tickLabelFormatter = FXUtils.createObjectProperty(this, "tickLabelFormatter", null, state.onAction(ChartBits.AxisTransform, ChartBits.AxisTickFormatter));
+    private final transient ObjectProperty<StringConverter<Number>> tickLabelFormatter = PropUtil.createObjectProperty(this, "tickLabelFormatter", null, state.onAction(ChartBits.AxisTransform, ChartBits.AxisTickFormatter));
 
     /**
      * The length of minor tick mark lines. Set to 0 to not display minor tick marks.
@@ -284,13 +284,13 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10, layoutChangedAction);
 
     protected boolean isInvertedAxis = false; // internal use (for performance reason)
-    private final transient BooleanProperty invertAxis = FXUtils.createBooleanProperty(this, "invertAxis", isInvertedAxis, ()->{
+    private final transient BooleanProperty invertAxis = PropUtil.createBooleanProperty(this, "invertAxis", isInvertedAxis, ()->{
         isInvertedAxis = invertAxisProperty().get();
         layoutChangedAction.run();
     });
 
     protected boolean isTimeAxis = false; // internal use (for performance reasons)
-    private final transient BooleanProperty timeAxis = FXUtils.createBooleanProperty(this, "timeAxis", isTimeAxis, ()->{
+    private final transient BooleanProperty timeAxis = PropUtil.createBooleanProperty(this, "timeAxis", isTimeAxis, ()->{
         isTimeAxis = timeAxisProperty().get();
         if (isTimeAxis) {
             setMinorTickCount(0);
@@ -302,7 +302,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, axisTransformChanged);
 
-    private final transient DoubleProperty autoRangePadding = FXUtils.createDoubleProperty(this, "autoRangePadding", 0, axisTransformChanged);
+    private final transient DoubleProperty autoRangePadding = PropUtil.createDoubleProperty(this, "autoRangePadding", 0, axisTransformChanged);
 
     /**
      * The axis unit label
@@ -312,12 +312,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The axis unit label
      */
-    private final transient BooleanProperty autoUnitScaling = FXUtils.createBooleanProperty(this, "autoUnitScaling", false, axisNameChangedAction);
+    private final transient BooleanProperty autoUnitScaling = PropUtil.createBooleanProperty(this, "autoUnitScaling", false, axisNameChangedAction);
 
     /**
      * The axis unit label
      */
-    private final transient DoubleProperty unitScaling = FXUtils.createDoubleProperty(this, "unitScaling", 1.0, axisNameChangedAction);
+    private final transient DoubleProperty unitScaling = PropUtil.createDoubleProperty(this, "unitScaling", 1.0, axisNameChangedAction);
 
     /**
      * user-set tick units when doing auto-ranging
@@ -332,7 +332,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * system-set tick units for getting the currently displayed units
      */
-    protected final transient ReadOnlyDoubleWrapper tickUnit = FXUtils.createReadOnlyDoubleWrapper(this, "tickUnit", Double.NaN);
+    protected final transient ReadOnlyDoubleWrapper tickUnit = PropUtil.createReadOnlyDoubleWrapper(this, "tickUnit", Double.NaN);
 
     /**
      * Create a auto-ranging AbstractAxisParameter
@@ -888,28 +888,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean set(final double min, final double max) {
-        boolean changed = false;
-        if (min != minProp.get()) {
-            minProp.set(min);
-            changed = true;
-        }
-        if (max != maxProp.get()) {
-            maxProp.set(max);
-            changed = true;
-        }
-        return changed;
+        return PropUtil.set(minProp, min) | PropUtil.set(maxProp, max);
     }
 
     @Override
     public boolean set(final String axisName, final String... axisUnit) {
-        boolean changed = false;
-        if (!equalString(axisName, getName())) {
-            setName(axisName);
-            changed = true;
-        }
-        if ((axisUnit != null) && (axisUnit.length > 0) && !equalString(axisUnit[0], getUnit())) {
-            setUnit(axisUnit[0]);
-            changed = true;
+        boolean changed = PropUtil.set(nameProperty(), axisName);
+        if (axisUnit.length > 0) {
+            changed |= PropUtil.set(unitProperty(), axisUnit[0]);
         }
         return changed;
     }
@@ -1036,10 +1022,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     protected void setDisplayedRange(AxisRange range) {
         settingDisplayRange = true;
-        minProp.set(range.getMin());
-        maxProp.set(range.getMax());
-        tickUnit.set(range.getTickUnit());
-        scale.set(range.getScale());
+        if (PropUtil.set(minProp, range.getMin())
+                | PropUtil.set(maxProp, range.getMax())
+                | PropUtil.set(tickUnit, range.getTickUnit())
+                | PropUtil.set(scale, range.getScale())) {
+            state.setDirty(ChartBits.AxisCanvas);
+        }
         settingDisplayRange = false;
     }
 
