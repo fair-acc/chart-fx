@@ -3,6 +3,10 @@ package io.fair_acc.chartfx.utils;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableDoubleValue;
+import javafx.beans.value.ObservableIntegerValue;
+import javafx.beans.value.ObservableValue;
 
 import java.util.Objects;
 
@@ -29,26 +33,30 @@ public class PropUtil {
         return true;
     }
 
-    public static BooleanProperty createBooleanProperty(Object bean, String name, boolean initial, Runnable onChange) {
+    public static BooleanProperty createBooleanProperty(Object bean, String name, boolean initial, Runnable... onChange) {
         return new SimpleBooleanProperty(bean, name, initial) {
             @Override
             public void set(final boolean newValue) {
                 final boolean oldValue = get();
                 if (oldValue != newValue) {
                     super.set(newValue);
-                    onChange.run();
+                    for (Runnable action : onChange) {
+                        action.run();
+                    }
                 }
             }
         };
     }
 
-    public static DoubleProperty createDoubleProperty(Object bean, String name, double initial, Runnable onChange) {
+    public static DoubleProperty createDoubleProperty(Object bean, String name, double initial, Runnable... onChange) {
         return new SimpleDoubleProperty(bean, name, initial) {
             @Override
             public void set(final double newValue) {
                 if (!isEqual(get(), newValue)) {
                     super.set(newValue);
-                    onChange.run();
+                    for (Runnable action : onChange) {
+                        action.run();
+                    }
                 }
             }
         };
@@ -70,49 +78,65 @@ public class PropUtil {
         return new ReadOnlyDoubleWrapper(bean, name, initial);
     }
 
-    public static <T> ObjectProperty<T> createObjectProperty(Object bean, String name, T initial, Runnable onChange) {
+    public static <T> ObjectProperty<T> createObjectProperty(Object bean, String name, T initial) {
         return new SimpleObjectProperty<T>(bean, name, initial) {
             @Override
             public void set(final T newValue) {
                 final T oldValue = getValue();
                 if (!Objects.equals(oldValue, newValue)) {
                     super.set(newValue);
-                    onChange.run();
                 }
             }
         };
     }
 
     /**
-     * subscribes to property changes without boxing values
+     * subscribes to property changes without requiring value boxing
      */
-    public static void addChangeListener(Runnable action, ReadOnlyDoubleProperty... conditions){
+    public static void runOnChange(Runnable action, ObservableValue<?>... conditions){
         for (var condition : conditions) {
-            condition.addListener(new InvalidationListener() {
-                double prev = condition.get();
-                @Override
-                public void invalidated(Observable observable) {
-                    if (!isEqual(prev, condition.get())) {
-                        prev = condition.get();
-                        action.run();
-                    }
-                }
-            });
-        }
-    }
+            if (condition instanceof ObservableDoubleValue) {
+                var obs = (ObservableDoubleValue) condition;
+                condition.addListener(new InvalidationListener() {
+                    double prev = obs.get();
 
-    public static void addChangeListener(Runnable action, ReadOnlyLongProperty... conditions){
-        for (var condition : conditions) {
-            condition.addListener(new InvalidationListener() {
-                long prev = condition.get();
-                @Override
-                public void invalidated(Observable observable) {
-                    if(prev != condition.get()) {
-                        prev = condition.get();
-                        action.run();
+                    @Override
+                    public void invalidated(Observable observable) {
+                        if (!isEqual(prev, obs.get())) {
+                            prev = obs.get();
+                            action.run();
+                        }
                     }
-                }
-            });
+                });
+            } else if (condition instanceof ObservableBooleanValue) {
+                var obs = (ObservableBooleanValue) condition;
+                condition.addListener(new InvalidationListener() {
+                    boolean prev = obs.get();
+
+                    @Override
+                    public void invalidated(Observable observable) {
+                        if (prev == obs.get()) {
+                            prev = obs.get();
+                            action.run();
+                        }
+                    }
+                });
+            } else if (condition instanceof ObservableIntegerValue) {
+                var obs = (ObservableIntegerValue) condition;
+                condition.addListener(new InvalidationListener() {
+                    int prev = obs.get();
+
+                    @Override
+                    public void invalidated(Observable observable) {
+                        if (prev == obs.get()) {
+                            prev = obs.get();
+                            action.run();
+                        }
+                    }
+                });
+            } else {
+                condition.addListener((observable, oldValue, newValue) -> action.run());
+            }
         }
     }
 

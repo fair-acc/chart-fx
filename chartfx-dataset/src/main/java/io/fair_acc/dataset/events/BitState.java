@@ -229,6 +229,10 @@ public class BitState implements StateListener {
         return createDebugPrinter(showStackTrace, System.out::println, bits);
     }
 
+    public String getAsString(IntSupplier... bits) {
+        return appendBitStrings(new StringBuilder(), state, bits).toString();
+    }
+
     public static StateListener createDebugPrinter(boolean showStackTrace, Consumer<String> log, IntSupplier... bits) {
         StringBuilder builder = new StringBuilder();
         return (source, mask) -> {
