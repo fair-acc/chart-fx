@@ -112,6 +112,10 @@ public class BitState implements StateListener {
         return state;
     }
 
+    public void getBits(StateListener action) {
+        action.accept(this, state);
+    }
+
     public void clear() {
         state = 0;
     }
