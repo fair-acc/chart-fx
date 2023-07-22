@@ -28,7 +28,18 @@ class AbstractAxisParameterTests {
     @Test
     void testAutoGetterSetters() {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
-        axis.set(0.0, 10.0);
+
+        assertEquals(-1, axis.getMin());
+        assertEquals(+1, axis.getMax());
+        assertEquals(Double.NaN, axis.getUserRange().getMin());
+        assertEquals(Double.NaN, axis.getUserRange().getMax());
+
+        axis.set(0.1, 10.0);
+
+        assertEquals(0.1, axis.getMin());
+        assertEquals(10, axis.getMax());
+        assertEquals(0.1, axis.getUserRange().getMin());
+        assertEquals(10, axis.getUserRange().getMax());
 
         assertNull(axis.getRange());
 
@@ -76,7 +87,6 @@ class AbstractAxisParameterTests {
             axis.updateAxisLabel();
             state.clear(ChartBits.AxisLabelText);
         });
-        axis.updateDisplayRange = true;
 
         assertTrue(state.isDirty());
         state.clear();
