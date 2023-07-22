@@ -47,7 +47,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private transient AxisTransform axisTransform = linearTransform;
     protected boolean isUpdating;
 
-    private final transient BooleanProperty forceZeroInRange = PropUtil.createBooleanProperty(this, "forceZeroInRange", false, axisRangeChanged);
+    private final transient BooleanProperty forceZeroInRange = PropUtil.createBooleanProperty(this, "forceZeroInRange", false, invalidateAxisRange);
 
     protected boolean isLogAxis = false; // internal use (for performance reason
 
@@ -75,7 +75,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             }
         }
 
-        axisRangeChanged.run();
+        invalidateAxisRange.run();
     });
 
     /**
@@ -336,7 +336,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      */
     public void setLogarithmBase(final double value) {
         logarithmBaseProperty().set(value);
-        axisRangeChanged.run();
+        invalidateAxisRange.run();
     }
 
     /**
