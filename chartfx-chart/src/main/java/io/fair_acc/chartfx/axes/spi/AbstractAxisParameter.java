@@ -348,21 +348,13 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     };
 
-    /**
-     * user-set tick units when doing auto-ranging
-     */
-    protected final transient StyleableDoubleProperty userTickUnit = CSS.createDoubleProperty(this, "userTickUnit", DEFAULT_TICK_UNIT, () -> {
+    protected final transient StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", DEFAULT_TICK_UNIT, () -> {
         if (isAutoRanging() || isAutoGrowRanging()) {
             return;
         }
         invalidate();
         invokeListener(new AxisChangeEvent(AbstractAxisParameter.this));
     });
-
-    /**
-     * system-set tick units for getting the currently displayed units
-     */
-    protected final transient DoubleProperty tickUnit = new SimpleDoubleProperty(Double.NaN);
 
     protected final transient ChangeListener<? super Number> scaleChangeListener = (ch, o, n) -> {
         final double axisLength = getLength(); // [pixel]
@@ -798,11 +790,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public double getUserTickUnit() {
-        return userTickUnitProperty().get();
-    }
-
-    @Override
     public String getUnit() {
         return unitProperty().get();
     }
@@ -1198,13 +1185,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      *
      * @param unit major tick unit
      */
-    protected void setTickUnit(final double unit) {
-        tickUnit.set(unit);
-    }
-
     @Override
-    public void setUserTickUnit(final double unit) {
-        userTickUnit.set(unit);
+    public void setTickUnit(final double unit) {
+        tickUnitProperty().set(unit);
     }
 
     /**
@@ -1287,13 +1270,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * @return tickUnit property
      */
     @Override
-    public ReadOnlyDoubleProperty tickUnitProperty() {
+    public DoubleProperty tickUnitProperty() {
         return tickUnit;
-    }
-
-    @Override
-    public DoubleProperty userTickUnitProperty() {
-        return userTickUnit;
     }
 
     /**

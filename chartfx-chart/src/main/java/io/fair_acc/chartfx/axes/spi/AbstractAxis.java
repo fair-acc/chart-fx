@@ -309,7 +309,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // Tick units
-        double mTickUnit = getUserTickUnit();
+        double mTickUnit = getTickUnit();
         if (isAutoRanging() || isAutoGrowRanging() || true /* TODO: zoom never changes scale */){
             mTickUnit = computePreferredTickUnit(length);
         }
