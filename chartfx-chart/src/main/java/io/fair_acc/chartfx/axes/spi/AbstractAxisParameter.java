@@ -228,42 +228,22 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The scale factor from data units to visual units
      */
-    private final transient ReadOnlyDoubleWrapper scale = PropUtil.createReadOnlyDoubleWrapper(this, "scale", 1);
+    private final transient ReadOnlyDoubleWrapper scale = PropUtil.createReadOnlyDoubleWrapper(this, "scale", 1, invalidateCanvas);
 
     /**
      * The axis length in pixels
      */
     private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN, invalidateAxisRange) ;
 
-    boolean updateDisplayRange = false;
-
     /**
      * The value for the upper bound of this axis, ie max value. This is automatically set if auto ranging is on.
      */
-    protected final transient ReadOnlyDoubleWrapper maxProp = new ReadOnlyDoubleWrapper(this, "upperBound", DEFAULT_MAX_RANGE) {
-        @Override
-        public void set(final double newValue) {
-            if (updateDisplayRange) {
-                super.set(newValue);
-            } else {
-                setMax(newValue);
-            }
-        }
-    };
+    protected final transient ReadOnlyDoubleWrapper maxProp = PropUtil.createReadOnlyDoubleWrapper(this, "upperBound", DEFAULT_MAX_RANGE, invalidateCanvas);
 
     /**
      * The value for the lower bound of this axis, ie min value. This is automatically set if auto ranging is on.
      */
-    protected final transient ReadOnlyDoubleWrapper minProp = new ReadOnlyDoubleWrapper(this, "lowerBound", DEFAULT_MIN_RANGE) {
-        @Override
-        public void set(final double newValue) {
-            if (updateDisplayRange) {
-                super.set(newValue);
-            } else {
-                setMin(newValue);
-            }
-        }
-    };
+    protected final transient ReadOnlyDoubleWrapper minProp = PropUtil.createReadOnlyDoubleWrapper(this, "lowerBound", DEFAULT_MIN_RANGE, invalidateCanvas);
 
     protected double cachedOffset; // for caching
 
@@ -333,7 +313,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * system-set tick units for getting the currently displayed units
      */
-    protected final transient ReadOnlyDoubleWrapper tickUnit = PropUtil.createReadOnlyDoubleWrapper(this, "tickUnit", Double.NaN);
+    protected final transient ReadOnlyDoubleWrapper tickUnit = PropUtil.createReadOnlyDoubleWrapper(this, "tickUnit", Double.NaN, invalidateCanvas);
 
     /**
      * Create a auto-ranging AbstractAxisParameter
@@ -346,8 +326,15 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
         axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
 
-        // Anything that changes the visible range also changes the Canvas
-        PropUtil.addChangeListener(invalidateCanvas, minProp, maxProp, length, scale, tickUnit);
+        // We need to keep the user range in sync with what is being displayed, and also
+        // react in case users set the range via set(min, max). Note that this will not
+        // trigger if the properties are set during layout because the value would either
+        // be auto-ranging or be set to the same value as the user range.
+        PropUtil.addChangeListener(() -> {
+            if (getUserRange().set(getMin(), getMax()) && !isAutoGrowRanging() && !isAutoRanging()) {
+                invalidateAxisRange.run();
+            }
+        }, minProp, maxProp);
     }
 
     @Override
@@ -933,7 +920,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     @Override
     public void setAutoGrowRanging(final boolean state) {
-        autoRangingProperty().set(state);
+        autoGrowRangingProperty().set(state);
     }
 
     /**
@@ -986,15 +973,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * @param unit major tick unit
      */
     protected void setTickUnit(final double unit) {
-        if (updateDisplayRange) {
-            PropUtil.set(tickUnit, unit);
-            return;
-        }
-        if (getUserTickUnit() != unit) {
-            setUserTickUnit(unit);
-        }
-        setAutoRanging(false);
-        setAutoGrowRanging(false);
+        tickUnit.set(unit);
     }
 
     @Override
@@ -1004,30 +983,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean setMax(final double value) {
-        if (updateDisplayRange) {
-            return PropUtil.set(maxProp, value);
-        }
-        boolean changed = getUserRange().setMax(value);
-        if (changed) {
-            invalidateAxisRange.run();
-        }
-        setAutoRanging(false);
-        setAutoGrowRanging(false);
-        return changed;
+        return PropUtil.set(maxProp, value);
     }
 
     @Override
     public boolean setMin(final double value) {
-        if (updateDisplayRange) {
-            return PropUtil.set(minProp, value);
-        }
-        boolean changed = getUserRange().setMin(value);
-        if (changed) {
-            invalidateAxisRange.run();
-        }
-        setAutoRanging(false);
-        setAutoGrowRanging(false);
-        return changed;
+        return PropUtil.set(minProp, value);
     }
 
     protected void setLength(final double axisLength) {
@@ -1039,13 +1000,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     protected void setDisplayedRange(double min, double max, double axisLength, double scale, double unit) {
-        updateDisplayRange = true;
-        PropUtil.set(this.minProp, min);
-        PropUtil.set(this.maxProp, max);
-        PropUtil.set(this.length, axisLength);
-        PropUtil.set(this.scale, scale);
-        PropUtil.set(this.tickUnit, unit);
-        updateDisplayRange = false;
+        setMin(min);
+        setMax(max);
+        setLength(axisLength);
+        setScale(scale);
+        setTickUnit(unit);
     }
 
     public void setMaxMajorTickLabelCount(final int value) {
