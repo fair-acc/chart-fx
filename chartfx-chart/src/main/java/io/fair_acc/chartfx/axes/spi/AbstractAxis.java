@@ -420,12 +420,14 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return new scale to fit the range from lower bound to upper bound in the given display length
      */
     protected double calculateNewScale(final double length, final double lowerBound, final double upperBound) {
+        if (length == 0) return -1.0;
         final double range = upperBound - lowerBound;
-        if(range == 0 || length == 0) {
-            return -1.0;
+        final double scale = (range == 0) ? length : length / range;
+        if (getSide().isVertical()) {
+            return isInvertedAxis ? scale : -scale;
+        } else {
+            return isInvertedAxis ? -scale : scale;
         }
-        final double scale = length / range;
-        return isInvertedAxis ? -scale : scale;
     }
 
     protected void clearAxisCanvas(final GraphicsContext gc, final double width, final double height) {
