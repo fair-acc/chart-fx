@@ -113,11 +113,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             }
         });
 
-        // Forward axis layouts to the JavaFX layout bit
-        state.addChangeListener(ChartBits.AxisLayout, (source, bits) -> {
-            super.requestLayout();
-        });
-
         // set default axis title/label alignment
         updateTickLabelAlignment();
         updateAxisLabelAlignment();
@@ -290,13 +285,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * Updates the contents for this axis, e.g., tick labels, spacing
      * range, caches, etc.
      */
-    protected void updateAxisRange() {
-        final double length = getLength();
-        if (!Double.isFinite(length) || length <= 0 || state.isClean(ChartBits.AxisRange)) {
+    protected void updateAxisRange(double length) {
+        if (length == getLength() && state.isClean(ChartBits.AxisRange)) {
             return;
         }
 
         // Update range & scale TODO: what is already set? the original implementation updates in many different ways
+        setLength(length);
         AxisRange range = getRange();
         set(range.getMin(), range.getMax());
         setScale(range.scale = calculateNewScale(length, getMin(), getMax()));
@@ -458,11 +453,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return computeMinSize();
         }
 
-        // Set the axis length to determine the actual ticks. We can
-        // cache the existing layout if nothing has changed.
+        // We can cache the existing layout if nothing has changed.
         final boolean isHorizontal = getSide().isHorizontal();
-        setLength(axisLength);
-        if (state.isClean(ChartBits.AxisLayout)) {
+        if (getLength() == axisLength && state.isClean(ChartBits.AxisLayout)) {
             return isHorizontal ? getWidth() : getHeight();
         }
 
@@ -470,7 +463,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // overlap. The initial estimate is usually correct, so later changes
         // happen very rarely, e.g., at a point where y axes labels switch to
         // shifting lines.
-        updateAxisRange();
+        updateAxisRange(axisLength);
 
         scaleFont = 1.0;
         maxLabelHeight = 0;
@@ -911,7 +904,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // update labels, tick marks etc.
-        updateAxisRange();
+        updateAxisRange(getLength());
 
         // redraw outdated canvas
         if (state.isDirty(ChartBits.AxisCanvas)) {
