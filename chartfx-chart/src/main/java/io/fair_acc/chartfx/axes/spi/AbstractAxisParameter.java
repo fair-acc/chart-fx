@@ -232,9 +232,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The axis length in pixels
      */
-    private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN, state.onAction(ChartBits.AxisRange, ChartBits.AxisCanvas)) ;
+    private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN, axisRangeChanged) ;
 
-    private boolean settingDisplayRange = false;
+    boolean updateDisplayRange = false;
 
     /**
      * The value for the upper bound of this axis, ie max value. This is automatically set if auto ranging is on.
@@ -242,7 +242,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected final transient ReadOnlyDoubleWrapper maxProp = new ReadOnlyDoubleWrapper(this, "upperBound", DEFAULT_MAX_RANGE) {
         @Override
         public void set(final double newValue) {
-            if (settingDisplayRange) {
+            if (updateDisplayRange) {
                 super.set(newValue);
             } else {
                 setMax(newValue);
@@ -256,7 +256,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected final transient ReadOnlyDoubleWrapper minProp = new ReadOnlyDoubleWrapper(this, "lowerBound", DEFAULT_MIN_RANGE) {
         @Override
         public void set(final double newValue) {
-            if (settingDisplayRange) {
+            if (updateDisplayRange) {
                 super.set(newValue);
             } else {
                 setMin(newValue);
@@ -888,7 +888,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean set(final double min, final double max) {
-        return PropUtil.set(minProp, min) | PropUtil.set(maxProp, max);
+        return setMin(min) | setMax(max);
     }
 
     @Override
@@ -982,7 +982,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * @param unit major tick unit
      */
     protected void setTickUnit(final double unit) {
-        if(getUserTickUnit() != unit) {
+        if (updateDisplayRange) {
+            PropUtil.set(tickUnit, unit);
+            return;
+        }
+        if (getUserTickUnit() != unit) {
             setUserTickUnit(unit);
         }
         setAutoRanging(false);
@@ -996,6 +1000,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean setMax(final double value) {
+        if (updateDisplayRange) {
+            return PropUtil.set(maxProp, value);
+        }
         boolean changed = getUserRange().setMax(value);
         if (changed) {
             axisRangeChanged.run();
@@ -1007,6 +1014,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean setMin(final double value) {
+        if (updateDisplayRange) {
+            return PropUtil.set(minProp, value);
+        }
         boolean changed = getUserRange().setMin(value);
         if (changed) {
             axisRangeChanged.run();
@@ -1021,14 +1031,19 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     protected void setDisplayedRange(AxisRange range) {
-        settingDisplayRange = true;
-        if (PropUtil.set(minProp, range.getMin())
-                | PropUtil.set(maxProp, range.getMax())
-                | PropUtil.set(tickUnit, range.getTickUnit())
-                | PropUtil.set(scale, range.getScale())) {
+        setDisplayedRange(range.getMin(), range.getMax(), range.getAxisLength(), range.getScale(), range.getTickUnit());
+    }
+
+    protected void setDisplayedRange(double min, double max, double axisLength, double scale, double unit) {
+        updateDisplayRange = true;
+        if (PropUtil.set(this.minProp, min)
+                | PropUtil.set(this.maxProp, max)
+                | PropUtil.set(this.length, axisLength)
+                | PropUtil.set(this.scale, scale)
+                | PropUtil.set(this.tickUnit, unit)) {
             state.setDirty(ChartBits.AxisCanvas);
         }
-        settingDisplayRange = false;
+        updateDisplayRange = false;
     }
 
     public void setMaxMajorTickLabelCount(final int value) {
@@ -1245,6 +1260,10 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         }
     }
 
+    public BitState getBitState() {
+        return state;
+    }
+
     protected double computeUnitScale(AxisRange axisRange) {
         final double oldPower = getUnitScaling();
         if (isAutoUnitScaling()) {
@@ -1278,7 +1297,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Deprecated
     protected void invalidate() {
-        requestAxisLayout();
+        state.setDirty(ChartBits.AxisLayout);
     }
 
 }
