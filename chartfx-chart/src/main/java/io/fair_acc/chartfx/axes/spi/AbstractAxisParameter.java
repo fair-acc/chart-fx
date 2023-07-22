@@ -44,12 +44,12 @@ import io.fair_acc.dataset.utils.NoDuplicatesList;
  * @author rstein
  */
 public abstract class AbstractAxisParameter extends Pane implements Axis {
-    protected final BitState state = BitState.initDirty(this);
+    protected final BitState state = BitState.initDirty(this, ChartBits.AxisMask);
     protected final Runnable layoutChangedAction = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas);
-    protected final Runnable axisTransformChanged = state.onAction(ChartBits.AxisTransform);
+    protected final Runnable axisRangeChanged = state.onAction(ChartBits.AxisRange);
     protected final Runnable axisNameChangedAction = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas, ChartBits.AxisLabelText);
     protected final ChangeListener<Number> layoutChangedListener = state.onPropChange(ChartBits.AxisLayout)::set;
-    protected final ChangeListener<Number> axisTransformChangedListener = state.onPropChange(ChartBits.AxisTransform)::set;
+    protected final ChangeListener<Number> axisTransformChangedListener = state.onPropChange(ChartBits.AxisRange)::set;
 
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<AbstractAxisParameter> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
@@ -159,14 +159,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         if (isAutoRanging()) {
             setAutoGrowRanging(false);
         }
-        axisTransformChanged.run();
+        axisRangeChanged.run();
     });
 
     private final transient StyleableBooleanProperty autoGrowRanging = CSS.createBooleanProperty(this, "autoGrowRanging", false, () -> {
         if (isAutoGrowRanging()) {
             setAutoRanging(false);
         }
-        axisTransformChanged.run();
+        axisRangeChanged.run();
     });
 
     /**
@@ -192,7 +192,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The minimum gap between tick labels
      */
-    private final transient StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", 3.0, axisTransformChanged);
+    private final transient StyleableDoubleProperty tickLabelSpacing = CSS.createDoubleProperty(this, "tickLabelSpacing", 3.0, axisRangeChanged);
 
     /**
      * The gap between tick labels and the axis label
@@ -207,7 +207,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The maximum number of ticks
      */
-    private final transient StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", MAX_TICK_COUNT, axisTransformChanged);
+    private final transient StyleableIntegerProperty maxMajorTickLabelCount = CSS.createIntegerProperty(this, "maxMajorTickLabelCount", MAX_TICK_COUNT, axisRangeChanged);
 
     /**
      * When true any changes to the axis and its range will be animated.
@@ -222,7 +222,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * true if minor tick marks should be displayed
      */
-    private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, axisTransformChanged);
+    private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true, axisRangeChanged);
 
     /**
      * The scale factor from data units to visual units
@@ -232,7 +232,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The axis length in pixels
      */
-    private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN, state.onAction(ChartBits.AxisTransform, ChartBits.AxisCanvas)) ;
+    private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN, state.onAction(ChartBits.AxisRange, ChartBits.AxisCanvas)) ;
 
     private boolean settingDisplayRange = false;
 
@@ -269,7 +269,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * StringConverter used to format tick mark labels. If null a default will be used
      */
-    private final transient ObjectProperty<StringConverter<Number>> tickLabelFormatter = PropUtil.createObjectProperty(this, "tickLabelFormatter", null, state.onAction(ChartBits.AxisTransform, ChartBits.AxisTickFormatter));
+    private final transient ObjectProperty<StringConverter<Number>> tickLabelFormatter = PropUtil.createObjectProperty(this, "tickLabelFormatter", null, state.onAction(ChartBits.AxisRange, ChartBits.AxisTickFormatter));
 
     /**
      * The length of minor tick mark lines. Set to 0 to not display minor tick marks.
@@ -300,9 +300,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         layoutChangedAction.run();
     });
 
-    private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, axisTransformChanged);
+    private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false, axisRangeChanged);
 
-    private final transient DoubleProperty autoRangePadding = PropUtil.createDoubleProperty(this, "autoRangePadding", 0, axisTransformChanged);
+    private final transient DoubleProperty autoRangePadding = PropUtil.createDoubleProperty(this, "autoRangePadding", 0, axisRangeChanged);
 
     /**
      * The axis unit label
@@ -998,7 +998,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     public boolean setMax(final double value) {
         boolean changed = getUserRange().setMax(value);
         if (changed) {
-            axisTransformChanged.run();
+            axisRangeChanged.run();
         }
         setAutoRanging(false);
         setAutoGrowRanging(false);
@@ -1009,7 +1009,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     public boolean setMin(final double value) {
         boolean changed = getUserRange().setMin(value);
         if (changed) {
-            axisTransformChanged.run();
+            axisRangeChanged.run();
         }
         setAutoRanging(false);
         setAutoGrowRanging(false);

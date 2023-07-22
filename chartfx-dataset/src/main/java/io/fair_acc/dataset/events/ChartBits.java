@@ -6,11 +6,15 @@ import java.util.function.IntSupplier;
  * @author ennerf
  */
 public enum ChartBits implements IntSupplier {
-    AxisCanvas,
-    AxisLayout,
-    AxisTransform,
-    AxisTickFormatter,
-    AxisLabelText;
+    AxisLayout, // size needs to be evaluated (e.g. labels may be larger)
+    AxisCanvas, // needs to be drawn
+    AxisRange, // anything related to min/max, tick marks, etc.
+    AxisTickFormatter, // tick label formatting
+    AxisLabelText; // display name or units
+
+    private static final ChartBits[] knownBits = ChartBits.values();
+    public static final int KnownMask = BitState.mask(knownBits);
+    public static final int AxisMask = BitState.mask(AxisLayout, AxisCanvas, AxisRange, AxisTickFormatter, AxisLabelText);
 
     @Override
     public int getAsInt() {
@@ -50,8 +54,5 @@ public enum ChartBits implements IntSupplier {
     }
 
     final int bit = 1 << ordinal();
-
-    private static final ChartBits[] knownBits = ChartBits.values();
-    public static final int ANY = BitState.mask(knownBits);
 
 }
