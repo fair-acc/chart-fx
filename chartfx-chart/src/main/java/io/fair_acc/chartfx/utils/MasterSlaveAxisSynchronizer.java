@@ -31,7 +31,7 @@ public class MasterSlaveAxisSynchronizer {
     public void add(AbstractAxis axis) {
         slaves.add(axis);
         axis.setAutoRanging(false);
-        axis.userTickUnitProperty().bind(master.tickUnitProperty());
+        axis.tickUnitProperty().bind(master.tickUnitProperty());
     }
 
     private void lowerBoundChanged(double value) {
@@ -46,7 +46,7 @@ public class MasterSlaveAxisSynchronizer {
 
     public void remove(AbstractAxis axis) {
         slaves.remove(axis);
-        axis.userTickUnitProperty().unbind();
+        axis.tickUnitProperty().unbind();
         axis.setAutoRanging(true);
     }
 

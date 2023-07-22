@@ -69,7 +69,7 @@ public class AxisSynchronizer {
                     axis.setMin(value);
                     axis.setAutoRanging(false);
                 }
-                axis.setUserTickUnit(tickUnit);
+                axis.setTickUnit(tickUnit);
             }
             updating = false;
         }
@@ -102,7 +102,7 @@ public class AxisSynchronizer {
                     axis.setAutoRanging(false);
                     axis.setMax(value);
                 }
-                axis.setUserTickUnit(tickUnit);
+                axis.setTickUnit(tickUnit);
             }
             updating = false;
         }
