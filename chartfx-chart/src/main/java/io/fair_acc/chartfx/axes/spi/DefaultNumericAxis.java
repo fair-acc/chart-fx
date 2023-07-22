@@ -5,10 +5,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.chart.NumberAxis;
 
 import org.slf4j.Logger;
@@ -48,11 +47,11 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     private transient AxisTransform axisTransform = linearTransform;
     protected boolean isUpdating;
 
-    private final transient BooleanProperty forceZeroInRange = FXUtils.createBooleanProperty(this, "forceZeroInRange", false, axisTransformChanged);
+    private final transient BooleanProperty forceZeroInRange = PropUtil.createBooleanProperty(this, "forceZeroInRange", false, axisTransformChanged);
 
     protected boolean isLogAxis = false; // internal use (for performance reason
 
-    private final transient BooleanProperty logAxis = FXUtils.createBooleanProperty(this, "logAxis", isLogAxis, () -> {
+    private final transient BooleanProperty logAxis = PropUtil.createBooleanProperty(this, "logAxis", isLogAxis, () -> {
         isLogAxis = isLogAxis();
         if (isLogAxis) {
             if (DefaultNumericAxis.this.isTimeAxis()) {
