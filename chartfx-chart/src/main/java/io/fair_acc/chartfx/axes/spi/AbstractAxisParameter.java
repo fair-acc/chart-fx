@@ -301,19 +301,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient DoubleProperty unitScaling = PropUtil.createDoubleProperty(this, "unitScaling", 1.0, invalidateAxisName);
 
     /**
-     * user-set tick units when doing auto-ranging
+     * The tick units, i.e., the spacing between the ticks in real units
      */
-    protected final transient StyleableDoubleProperty userTickUnit = CSS.createDoubleProperty(this, "userTickUnit", DEFAULT_TICK_UNIT, () -> {
-        if (isAutoRanging() || isAutoGrowRanging()) {
-            return;
-        }
-        invalidateAxisName.run();
+    protected final transient StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", DEFAULT_TICK_UNIT, () -> {
+        ((isAutoRanging() || isAutoGrowRanging()) ? invalidateAxisRange : invalidateCanvas).run();
     });
-
-    /**
-     * system-set tick units for getting the currently displayed units
-     */
-    protected final transient ReadOnlyDoubleWrapper tickUnit = PropUtil.createReadOnlyDoubleWrapper(this, "tickUnit", Double.NaN, invalidateCanvas);
 
     /**
      * Create a auto-ranging AbstractAxisParameter
@@ -686,11 +678,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     @Override
-    public double getUserTickUnit() {
-        return userTickUnitProperty().get();
-    }
-
-    @Override
     public String getUnit() {
         return unitProperty().get();
     }
@@ -847,8 +834,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * @return tickUnit property
      */
     @Override
-    public ReadOnlyDoubleProperty tickUnitProperty() {
-        return tickUnit.getReadOnlyProperty();
+    public DoubleProperty tickUnitProperty() {
+        return tickUnit;
     }
 
     @Override
@@ -973,13 +960,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      *
      * @param unit major tick unit
      */
-    protected void setTickUnit(final double unit) {
+    public void setTickUnit(final double unit) {
         tickUnit.set(unit);
-    }
-
-    @Override
-    public void setUserTickUnit(final double unit) {
-        userTickUnit.set(unit);
     }
 
     @Override
@@ -1149,11 +1131,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public BooleanProperty tickMarkVisibleProperty() {
         return tickMarkVisible;
-    }
-
-    @Override
-    public DoubleProperty userTickUnitProperty() {
-        return userTickUnit;
     }
 
     /**
