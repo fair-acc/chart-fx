@@ -43,6 +43,131 @@ import io.fair_acc.dataset.utils.NoDuplicatesList;
  * @author rstein
  */
 public abstract class AbstractAxisParameter extends Pane implements Axis {
+
+    /**
+     * Create a auto-ranging AbstractAxisParameter
+     */
+    public AbstractAxisParameter() {
+        super();
+        // Styles changes that can be removed after moving the styling to sub-nodes
+        tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
+        tickLabelStyle.fontProperty().bindBidirectional(tickLabelFont);
+        tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
+        axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
+
+        axisPadding.addListener(state.onPropChange(ChartBits.AxisLayout)::set);
+
+        // Properties that may be relevant to the layout and must always at least redraw the canvas
+        PropUtil.runOnChange(invalidateLayout = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas),
+                // distance to main line
+                side,
+                axisPadding,
+                tickMarkGap,
+
+                // tick marks
+                tickMarkVisible,
+                tickLength,
+                majorTickStyle.changeCounterProperty(),
+
+                // tick labels
+                tickLabelsVisible,
+                tickLabelGap,
+                tickLabelRotation,
+                overlapPolicy,
+                tickLabelStyle.changeCounterProperty(),
+                tickLabelFont, // already in style
+
+                // axis label
+                axisLabelGap,
+                axisLabel.changeCounterProperty(),
+
+                // not really relevant?
+                animationDuration,
+                dimIndex
+        );
+        state.addChangeListener(ChartBits.AxisLayout, (src, bits) -> requestLayout()); // forward to JavaFX
+
+        // Properties that change the placement of ticks
+        // We can ignore the layout if labels can only move linearly along
+        // the axis length. This happens e.g. for an X-axis that displays
+        // moving time with the default policy.
+        PropUtil.runOnChange(invalidateAxisRange = () -> {
+                    state.setDirty(ChartBits.AxisRange);
+                    if (!isTickMarkVisible() || !isTickLabelsVisible()) {
+                        return;
+                    }
+                    final int rot = Math.abs(((int) getTickLabelRotation()) % 360);
+                    if (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT || getSide() == null
+                            || (getSide().isHorizontal() && !(rot == 0 || rot == 180))
+                            || (getSide().isVertical() && !(rot == 90 || rot == 270))) {
+                        state.setDirty(ChartBits.AxisLayout);
+                    }
+                },
+                // tick placement
+                autoRanging,
+                autoGrowRanging,
+                autoRangeRounding,
+                autoRangePadding,
+
+                // tick labels
+                tickLabelSpacing,
+                maxMajorTickLabelCount,
+                invertAxis
+        );
+
+        // Properties that require a redraw of the canvas but won't affect the placement of ticks
+        PropUtil.runOnChange(invalidateCanvas = state.onAction(ChartBits.AxisCanvas),
+                // minor ticks
+                minorTickVisible,
+                minorTickStyle.changeCounterProperty(), // not used for layout calculation
+                minorTickCount,
+                minorTickLength,
+
+                // item placement
+                axisCenterPosition,
+                axisLabelTextAlignment,
+
+                // the main properties of what the axis currently shows.
+                // Used for internal computation, so we don't want them to
+                // trigger more.
+                minProp,
+                maxProp,
+                length,
+                scale,
+                tickUnit
+        );
+
+        // Properties that change the text of the labels without changing the position, e.g., unit scaling
+        PropUtil.runOnChange(invalidateAxisLabel = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisLabelText),
+                axisName,
+                unitScaling,
+                autoUnitScaling,
+                axisUnit
+        );
+        PropUtil.runOnChange(invalidateTickLabels = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisTickLabelText),
+                tickLabelFormatter,
+                unitScaling,
+                autoUnitScaling,
+                timeAxis // may change the size of the rendered labels?
+        );
+
+        // We need to keep the user range in sync with what is being displayed, and also
+        // react in case users set the range via set(min, max). Note that this will not
+        // trigger if the properties are set during layout because the value would either
+        // be auto-ranging or be set to the same value as the user range.
+        PropUtil.runOnChange(() -> {
+            if (getUserRange().set(getMin(), getMax()) && !isAutoGrowRanging() && !isAutoRanging()) {
+                invalidateAxisRange.run();
+            }
+        }, minProp, maxProp);
+        PropUtil.runOnChange(() -> {
+            if (isAutoRanging() || isAutoGrowRanging()) {
+                invalidateAxisRange.run();
+            } // TODO: don't reset during a set?
+        }, tickUnit);
+
+    }
+
     protected final BitState state = BitState.initDirty(this, ChartBits.AxisMask);
     protected final Runnable invalidateLayout;
     protected final Runnable invalidateAxisRange;
@@ -292,131 +417,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * The tick units (spacing between the ticks in real units)
      */
     protected final transient StyleableDoubleProperty tickUnit = CSS.createDoubleProperty(this, "tickUnit", DEFAULT_TICK_UNIT);
-
-    /**
-     * Create a auto-ranging AbstractAxisParameter
-     */
-    public AbstractAxisParameter() {
-        super();
-        // TODO: remove and use styles directly?
-        tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
-        tickLabelStyle.fontProperty().bindBidirectional(tickLabelFont);
-        tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
-        axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
-
-        // Properties that may be relevant to the layout and must always at least redraw the canvas
-        PropUtil.runOnChange(invalidateLayout = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas),
-                // distance to main line
-                side,
-                axisPadding,
-                tickMarkGap,
-
-                // tick marks
-                tickMarkVisible,
-                tickLength,
-                majorTickStyle.changeCounterProperty(),
-
-                // tick labels
-                tickLabelsVisible,
-                tickLabelGap,
-                tickLabelRotation,
-                overlapPolicy,
-                tickLabelStyle.changeCounterProperty(),
-                tickLabelFont, // already in style
-
-                // axis label
-                axisLabelGap,
-                axisLabel.changeCounterProperty(),
-
-                // not really relevant?
-                animationDuration,
-                dimIndex
-        );
-
-        // Forward axis layout requests to the JavaFX layout bit
-        state.addChangeListener(ChartBits.AxisLayout, (source, bits) -> {
-            super.requestLayout();
-        });
-
-        // Properties that change the placement of ticks
-        // We can ignore the layout if labels can only move linearly along
-        // the axis length. This happens e.g. for an X-axis that displays
-        // moving time with the default policy.
-        PropUtil.runOnChange(invalidateAxisRange = () -> {
-                    state.setDirty(ChartBits.AxisRange);
-                    if (!isTickMarkVisible() || !isTickLabelsVisible()) {
-                        return;
-                    }
-                    final int rot = Math.abs(((int) getTickLabelRotation()) % 360);
-                    if (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT || getSide() == null
-                            || (getSide().isHorizontal() && !(rot == 0 || rot == 180))
-                            || (getSide().isVertical() && !(rot == 90 || rot == 270))) {
-                        state.setDirty(ChartBits.AxisLayout);
-                    }
-                },
-                // tick placement
-                autoRanging,
-                autoGrowRanging,
-                autoRangeRounding,
-                autoRangePadding,
-
-                // tick labels
-                tickLabelSpacing,
-                maxMajorTickLabelCount,
-                invertAxis
-        );
-
-        // Properties that require a redraw of the canvas but won't affect the placement of ticks
-        PropUtil.runOnChange(invalidateCanvas = state.onAction(ChartBits.AxisCanvas),
-                // minor ticks
-                minorTickVisible,
-                minorTickStyle.changeCounterProperty(), // not used for layout calculation
-                minorTickCount,
-                minorTickLength,
-
-                // item placement
-                axisCenterPosition,
-                axisLabelTextAlignment,
-
-                // the main properties of what the axis currently shows.
-                // Used for internal computation, so we don't want them to
-                // trigger more.
-                minProp,
-                maxProp,
-                length,
-                scale,
-                tickUnit
-        );
-
-        PropUtil.runOnChange(invalidateAxisLabel = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisLabelText),
-                axisName,
-                unitScaling,
-                autoUnitScaling,
-                axisUnit
-        );
-        PropUtil.runOnChange(invalidateTickLabels = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisTickLabelText),
-                tickLabelFormatter,
-                unitScaling,
-                autoUnitScaling,
-                timeAxis // may change the size of the rendered labels?
-        );
-
-        // We need to keep the user range in sync with what is being displayed, and also
-        // react in case users set the range via set(min, max). Note that this will not
-        // trigger if the properties are set during layout because the value would either
-        // be auto-ranging or be set to the same value as the user range.
-        PropUtil.runOnChange(() -> {
-            if (getUserRange().set(getMin(), getMax()) && !isAutoGrowRanging() && !isAutoRanging()) {
-                invalidateAxisRange.run();
-            }
-        }, minProp, maxProp);
-        PropUtil.runOnChange(() -> {
-            if (isAutoRanging() || isAutoGrowRanging()) {
-                invalidateAxisRange.run();
-            } // TODO: don't reset during a set?
-        }, tickUnit);
-
-    }
 
     @Override
     public String getUserAgentStylesheet() {

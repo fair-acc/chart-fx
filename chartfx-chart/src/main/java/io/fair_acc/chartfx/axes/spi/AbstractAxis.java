@@ -99,21 +99,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
         getChildren().add(canvas);
 
-        // We can ignore the layout if labels can only move linearly along
-        // the axis length. This happens e.g. for an X-axis that displays
-        // moving time with the default policy.
-        state.addChangeListener(ChartBits.AxisRange, (source, bits) -> {
-            if (!isTickMarkVisible() || !isTickLabelsVisible()) {
-                return;
-            }
-            final int rot = Math.abs(((int) getTickLabelRotation()) % 360);
-            if (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT || getSide() == null
-                    || (getSide().isHorizontal() && !(rot == 0 || rot == 180))
-                    || (getSide().isVertical() && !(rot == 90 || rot == 270))) {
-                state.setDirty(ChartBits.AxisLayout);
-            }
-        });
-
         // set default axis title/label alignment
         updateTickLabelAlignment();
         updateAxisLabelAlignment();
