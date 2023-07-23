@@ -456,7 +456,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // We can cache the existing layout if nothing has changed.
         final boolean isHorizontal = getSide().isHorizontal();
         if (getLength() == axisLength && state.isClean(ChartBits.AxisLayout)) {
-            return isHorizontal ? getWidth() : getHeight();
+            return isHorizontal ? getHeight() : getWidth(); // secondary dimension
         }
 
         // Compute the ticks with correctly placed labels to determine the
