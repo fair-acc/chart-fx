@@ -154,7 +154,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         drawAxisPre();
 
         final double axisLength = getLength();
-        if (isTickMarkVisible()) {
+        if (isTickLabelRendered()) {
             final var majorTicks = getTickMarks();
             final var minorTicks = getMinorTickMarks();
 
@@ -467,7 +467,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // Optional tick mark labels
         double tickLabelSize = 0;
-        if (isTickMarkVisible() && isTickLabelsVisible()) {
+        if (isTickLabelRendered()) {
 
             // Figure out maximum sizes
             for (TickMark tickMark : getTickMarks()) {
@@ -576,6 +576,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 return getTickLabelGap();
         }
         return 0;
+    }
+
+    private boolean isTickLabelRendered() {
+        return isTickMarkVisible() && isTickLabelsVisible() && Double.isFinite(getMin()) && Double.isFinite(getMax());
     }
 
     private void applyOverlapPolicy(List<TickMark> tickMarks) {
