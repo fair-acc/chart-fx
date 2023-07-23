@@ -6,6 +6,7 @@ import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.event.AxisNameChangeEvent;
 import io.fair_acc.dataset.event.AxisRangeChangeEvent;
 import io.fair_acc.dataset.events.ChartBits;
@@ -193,7 +194,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
         drawAxisLine(gc, axisLength, axisWidth, axisHeight);
         drawAxisPost();
-
     }
 
     /**
@@ -285,29 +285,35 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * Updates the contents for this axis, e.g., tick labels, spacing
      * range, caches, etc.
      */
+    protected void updateDirtyContent(double length) {
+        updateAxisRange(length);
+        updateAxisLabel();
+    }
+
     protected void updateAxisRange(double length) {
-        if (length == getLength() && state.isClean(ChartBits.AxisRange)) {
+        if(state.isClean(ChartBits.AxisRange, ChartBits.AxisTickLabelText) && length == getLength()) {
             return;
         }
 
-        // Update range & scale TODO: what is already set? the original implementation updates in many different ways
+        // Update the new axis range
         setLength(length);
         AxisRange range = getRange();
         set(range.getMin(), range.getMax());
         setScale(range.scale = calculateNewScale(length, getMin(), getMax()));
         setTickUnit(range.tickUnit = computePreferredTickUnit(length));
+        range.axisLength = length;
 
-        updateAxisLabelAndUnit();
+        // Auto-scale metric units
+        updateScaleAndUnitPrefix();
 
-        // Update cache to have axis transforms
+        // Update the cache to the new range
         updateCachedVariables();
 
-        // Tick marks
+        // Compute new tick marks and locations
         updateMajorTickMarks(range);
         updateMinorTickMarks();
         updateTickMarkPositions(getTickMarks());
         updateTickMarkPositions(getMinorTickMarks());
-
     }
 
     /**
@@ -463,7 +469,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // overlap. The initial estimate is usually correct, so later changes
         // happen very rarely, e.g., at a point where y axes labels switch to
         // shifting lines.
-        updateAxisRange(axisLength);
+        updateDirtyContent(axisLength);
 
         scaleFont = 1.0;
         maxLabelHeight = 0;
@@ -567,7 +573,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     private double getAxisLabelSize() {
         final Text axisLabel = getAxisLabel();
-        if (axisLabel.getText() != null && !axisLabel.getText().isBlank()) {
+        if (!PropUtil.isNullOrEmpty(axisLabel.getText())) {
             var bounds = axisLabel.getBoundsInParent();
             return getSide().isHorizontal() ? bounds.getHeight() : bounds.getWidth();
         }
@@ -652,7 +658,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         var oldTickValues = getTickMarkValues();
         if(newTickValues.size() < 2) {
             return; // TODO: why did the previous code only update when there are > 2 ticks?
-        }else if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickFormatter)) {
+        }else if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickLabelText)) {
             return; // no need to redo labels, just reposition the ticks
         }
 
@@ -904,7 +910,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // update labels, tick marks etc.
-        updateAxisRange(getLength());
+        updateDirtyContent(getLength());
 
         // redraw outdated canvas
         if (state.isDirty(ChartBits.AxisCanvas)) {
@@ -917,7 +923,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             } finally {
                 gc.translate(-canvasPadX, -canvasPadY);
             }
-
         }
 
         // everything is updated
@@ -1098,7 +1103,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final TextStyle label) {
-        if (label.getText() == null || label.getText().isBlank()) {
+        if (PropUtil.isNullOrEmpty(label.getText())) {
             return;
         }
 
@@ -1111,7 +1116,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
                                             final double scaleFont, final TickMark tickMark) {
-        if (tickMark.getText() == null || tickMark.getText().isBlank()) {
+        if (PropUtil.isNullOrEmpty(tickMark.getText())) {
             return;
         }
 
