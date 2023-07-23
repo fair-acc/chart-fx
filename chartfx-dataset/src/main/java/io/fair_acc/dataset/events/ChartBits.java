@@ -15,10 +15,15 @@ public enum ChartBits implements IntSupplier {
     public static final int KnownMask = BitState.mask(ChartBits.values());
     public static final int AxisMask = BitState.mask(AxisLayout, AxisCanvas, AxisRange, AxisTickFormatter, AxisLabelText);
 
-    public static StateListener printStackTrace(){
+    public static StateListener printer() {
+        return PRINTER;
+    }
+
+    public static StateListener printerWithStackTrace() {
         return STACK_TRACE_PRINTER;
     }
 
+    private static final StateListener PRINTER = BitState.createDebugPrinter(false, values());
     private static final StateListener STACK_TRACE_PRINTER = BitState.createDebugPrinter(true, values());
 
     @Override
