@@ -222,28 +222,40 @@ public class BitState implements StateListener {
     }
 
     public static StateListener createDebugPrinter(IntSupplier... bits) {
-        return createDebugPrinter(false, bits);
+        return createDebugPrinter(System.out::println, bits);
     }
 
-    public static StateListener createDebugPrinter(boolean showStackTrace, IntSupplier... bits) {
-        return createDebugPrinter(showStackTrace, System.out::println, bits);
+    public static StateListener createDebugPrinterWithStackTrace(IntSupplier... bits) {
+        return createDebugPrinterWithStackTrace(System.out::println, bits);
     }
 
-    public String getAsString(IntSupplier... bits) {
-        return appendBitStrings(new StringBuilder(), state, bits).toString();
+    public static StateListener createDebugPrinter(Consumer<String> log, IntSupplier... bits) {
+        return createDebugPrinter(false, 0, 0, log, bits);
     }
 
-    public static StateListener createDebugPrinter(boolean showStackTrace, Consumer<String> log, IntSupplier... bits) {
+    public static StateListener createDebugPrinterWithStackTrace(int maxStackIx, IntSupplier... bits) {
+        return createDebugPrinter(true, DEFAULT_MIN_STACK_TRACE, maxStackIx, System.out::println, bits);
+    }
+
+    public static StateListener createDebugPrinterWithStackTrace(Consumer<String> log, IntSupplier... bits) {
+        return createDebugPrinter(true, DEFAULT_MIN_STACK_TRACE, DEFAULT_MAX_STACK_TRACE, log, bits);
+    }
+
+    public static StateListener createDebugPrinter(boolean showStackTrace, int minStackIx, int maxStackIx, Consumer<String> log, IntSupplier... bits) {
         StringBuilder builder = new StringBuilder();
         return (source, mask) -> {
             builder.setLength(0);
             builder.append(source.getSource()).append(": ");
             appendBitStrings(builder, mask, bits);
             if (showStackTrace) {
-                appendStackTrace(builder, 6, 15); // offset to account for internal methods
+                appendStackTrace(builder, minStackIx, maxStackIx); // offset to account for internal methods
             }
             log.accept(builder.toString());
         };
+    }
+
+    public String getAsString(IntSupplier... bits) {
+        return appendBitStrings(new StringBuilder(), state, bits).toString();
     }
 
     public static StringBuilder appendBitStrings(StringBuilder builder, int mask, IntSupplier... bits) {
@@ -278,6 +290,10 @@ public class BitState implements StateListener {
         }
         return builder;
     }
+
+    // Default to hide stack trace lines that are inside the printer. Keep updated.
+    private static final int DEFAULT_MIN_STACK_TRACE = 6;
+    private static final int DEFAULT_MAX_STACK_TRACE = 20;
 
     private static class FilteredListener implements StateListener {
 

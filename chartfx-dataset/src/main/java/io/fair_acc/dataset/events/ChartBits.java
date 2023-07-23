@@ -12,7 +12,8 @@ public enum ChartBits implements IntSupplier {
     AxisTickLabelText, // the tick label display w/ unit scaling
     AxisLabelText; // display name or units
 
-    public static final int KnownMask = BitState.mask(ChartBits.values());
+    private static final ChartBits[] AllBits = ChartBits.values();
+    public static final int KnownMask = BitState.mask(AllBits);
     public static final int AxisMask = BitState.mask(AxisLayout, AxisCanvas, AxisRange, AxisTickLabelText, AxisLabelText);
 
     public static StateListener printer() {
@@ -23,8 +24,8 @@ public enum ChartBits implements IntSupplier {
         return STACK_TRACE_PRINTER;
     }
 
-    private static final StateListener PRINTER = BitState.createDebugPrinter(false, values());
-    private static final StateListener STACK_TRACE_PRINTER = BitState.createDebugPrinter(true, values());
+    private static final StateListener PRINTER = BitState.createDebugPrinter(AllBits);
+    private static final StateListener STACK_TRACE_PRINTER = BitState.createDebugPrinterWithStackTrace(AllBits);
 
     @Override
     public int getAsInt() {
