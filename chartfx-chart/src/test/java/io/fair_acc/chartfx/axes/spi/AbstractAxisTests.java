@@ -190,6 +190,59 @@ class AbstractAxisTests {
     }
 
     @Test
+    void calculateNewScale() {
+        AbstractAxis axis = new EmptyAbstractAxis(-5.0, 5.0);
+
+        axis.setSide(Side.BOTTOM);
+        assertEquals(1, axis.calculateNewScale(4, -2, 2));
+        assertEquals(-1, axis.calculateNewScale(0, -2, +2));
+        assertEquals(-2, axis.calculateNewScale(-20, -5, 5));
+        assertEquals(1, axis.calculateNewScale(4, -2, +2));
+        assertEquals(1, axis.calculateNewScale(1, +2, +2));
+        assertEquals(Double.NaN, axis.calculateNewScale(Double.NaN, -2, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, Double.NaN, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, -2, Double.NaN));
+        assertEquals(-1, axis.calculateNewScale(1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+        assertEquals(-1, axis.calculateNewScale(1, -2, Double.POSITIVE_INFINITY));
+        assertEquals(-1, axis.calculateNewScale(1, Double.NEGATIVE_INFINITY, +2));
+
+        axis.setSide(Side.LEFT);
+        assertEquals(-1, axis.calculateNewScale(4, -2, 2));
+        assertEquals(-1, axis.calculateNewScale(0, -2, +2));
+        assertEquals(2, axis.calculateNewScale(-20, -5, 5));
+        assertEquals(-1, axis.calculateNewScale(4, -2, +2));
+        assertEquals(-1, axis.calculateNewScale(1, +2, +2));
+        assertEquals(Double.NaN, axis.calculateNewScale(Double.NaN, -2, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, Double.NaN, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, -2, Double.NaN));
+        assertEquals(-1, axis.calculateNewScale(1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+
+        axis.setSide(Side.TOP);
+        axis.invertAxis(true);
+        assertEquals(1, axis.calculateNewScale(4, -2, 2));
+        assertEquals(-1, axis.calculateNewScale(0, -2, +2));
+        assertEquals(-2, axis.calculateNewScale(-20, -5, 5));
+        assertEquals(1, axis.calculateNewScale(4, -2, +2));
+        assertEquals(1, axis.calculateNewScale(1, +2, +2));
+        assertEquals(Double.NaN, axis.calculateNewScale(Double.NaN, -2, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, Double.NaN, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, -2, Double.NaN));
+        assertEquals(-1, axis.calculateNewScale(1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+
+        axis.setSide(Side.RIGHT);
+        axis.invertAxis(true);
+        assertEquals(-1, axis.calculateNewScale(4, -2, 2));
+        assertEquals(-1, axis.calculateNewScale(0, -2, +2));
+        assertEquals(2, axis.calculateNewScale(-20, -5, 5));
+        assertEquals(-1, axis.calculateNewScale(4, -2, +2));
+        assertEquals(-1, axis.calculateNewScale(1, +2, +2));
+        assertEquals(Double.NaN, axis.calculateNewScale(Double.NaN, -2, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, Double.NaN, 2));
+        assertEquals(Double.NaN, axis.calculateNewScale(1, -2, Double.NaN));
+        assertEquals(-1, axis.calculateNewScale(1, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+    }
+
+    @Test
     void testTickMarks() {
         AbstractAxis axis = new EmptyAbstractAxis(-5.0, 5.0);
         final AxisRange autoRange = axis.autoRange(DEFAULT_AXIS_LENGTH);
