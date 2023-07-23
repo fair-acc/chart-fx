@@ -46,9 +46,9 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected final BitState state = BitState.initDirty(this, ChartBits.AxisMask);
     protected final Runnable invalidateLayout;
     protected final Runnable invalidateAxisRange;
-    protected final Runnable invalidateTickFormatter;
     protected final Runnable invalidateCanvas;
-    protected final Runnable invalidateAxisName;
+    protected final Runnable invalidateTickLabels;
+    protected final Runnable invalidateAxisLabel;
 
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<AbstractAxisParameter> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
@@ -388,14 +388,16 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                 tickUnit
         );
 
-        PropUtil.runOnChange(invalidateAxisName = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisLabelText),
+        PropUtil.runOnChange(invalidateAxisLabel = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisLabelText),
                 axisName,
                 unitScaling,
                 autoUnitScaling,
                 axisUnit
         );
-        PropUtil.runOnChange(invalidateTickFormatter = state.onAction(ChartBits.AxisRange, ChartBits.AxisTickFormatter),
+        PropUtil.runOnChange(invalidateTickLabels = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisTickLabelText),
                 tickLabelFormatter,
+                unitScaling,
+                autoUnitScaling,
                 timeAxis // may change the size of the rendered labels?
         );
 
@@ -1261,31 +1263,26 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return state;
     }
 
-    protected void updateAxisLabelAndUnit() {
-        final String axisPrimaryLabel = getName();
-        String localAxisUnit = getUnit();
-        final boolean isAutoScaling = isAutoUnitScaling();
-        if (isAutoScaling) {
-            updateScaleAndUnitPrefix();
-        }
-
-        if (!state.isDirty(ChartBits.AxisLabelText)) {
+    protected void updateAxisLabel() {
+        if (state.isClean(ChartBits.AxisLabelText)) {
             return;
         }
+        String unit = getUnit();
+        String prefix = MetricPrefix.getShortPrefix(getUnitScaling());
 
-        final String axisPrefix = MetricPrefix.getShortPrefix(getUnitScaling());
-        if ((localAxisUnit == null || localAxisUnit.isBlank()) && !axisPrefix.isBlank()) {
-            localAxisUnit = "";
-        }
-
-        if (localAxisUnit == null) {
-            getAxisLabel().setText(axisPrimaryLabel);
+        if (unit == null && PropUtil.isNullOrEmpty(prefix)) {
+            getAxisLabel().setText(getName());
         } else {
-            getAxisLabel().setText(axisPrimaryLabel + " [" + axisPrefix + localAxisUnit + "]");
+            unit = (unit == null) ? "" : unit;
+            prefix = (prefix == null) ? "" : prefix;
+            getAxisLabel().setText(getName() + " [" + prefix + unit + "]");
         }
     }
 
     protected void updateScaleAndUnitPrefix() {
+        if (isAutoUnitScaling()) {
+            return;
+        }
         final double range = Math.abs(getMax() - getMin());
         final double logRange = Math.log10(range);
         final double power3Upper = 3.0 * Math.ceil(logRange / 3.0);

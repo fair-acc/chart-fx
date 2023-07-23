@@ -3,10 +3,7 @@ package io.fair_acc.chartfx.utils;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableBooleanValue;
-import javafx.beans.value.ObservableDoubleValue;
-import javafx.beans.value.ObservableIntegerValue;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.value.*;
 
 import java.util.Objects;
 
@@ -34,60 +31,35 @@ public class PropUtil {
     }
 
     public static BooleanProperty createBooleanProperty(Object bean, String name, boolean initial, Runnable... onChange) {
-        return new SimpleBooleanProperty(bean, name, initial) {
-            @Override
-            public void set(final boolean newValue) {
-                final boolean oldValue = get();
-                if (oldValue != newValue) {
-                    super.set(newValue);
-                    for (Runnable action : onChange) {
-                        action.run();
-                    }
-                }
-            }
-        };
+        var prop = new SimpleBooleanProperty(bean, name, initial);
+        for (Runnable action : onChange) {
+            runOnChange(action, prop);
+        }
+        return prop;
     }
 
     public static DoubleProperty createDoubleProperty(Object bean, String name, double initial, Runnable... onChange) {
-        return new SimpleDoubleProperty(bean, name, initial) {
-            @Override
-            public void set(final double newValue) {
-                if (!isEqual(get(), newValue)) {
-                    super.set(newValue);
-                    for (Runnable action : onChange) {
-                        action.run();
-                    }
-                }
-            }
-        };
+        var prop = new SimpleDoubleProperty(bean, name, initial);
+        for (Runnable action : onChange) {
+            runOnChange(action, prop);
+        }
+        return prop;
     }
 
-    public static ReadOnlyDoubleWrapper createReadOnlyDoubleWrapper(Object bean, String name, double initial, Runnable onChange) {
-        return new ReadOnlyDoubleWrapper(bean, name, initial) {
-            @Override
-            public void set(final double newValue) {
-                if (!isEqual(get(), newValue)) {
-                    super.set(newValue);
-                    onChange.run();
-                }
-            }
-        };
+    public static ReadOnlyDoubleWrapper createReadOnlyDoubleWrapper(Object bean, String name, double initial, Runnable... onChange) {
+        var prop = new ReadOnlyDoubleWrapper(bean, name, initial);
+        for (Runnable action : onChange) {
+            runOnChange(action, prop);
+        }
+        return prop;
     }
 
-    public static ReadOnlyDoubleWrapper createReadOnlyDoubleWrapper(Object bean, String name, double initial) {
-        return new ReadOnlyDoubleWrapper(bean, name, initial);
-    }
-
-    public static <T> ObjectProperty<T> createObjectProperty(Object bean, String name, T initial) {
-        return new SimpleObjectProperty<T>(bean, name, initial) {
-            @Override
-            public void set(final T newValue) {
-                final T oldValue = getValue();
-                if (!Objects.equals(oldValue, newValue)) {
-                    super.set(newValue);
-                }
-            }
-        };
+    public static <T> ObjectProperty<T> createObjectProperty(Object bean, String name, T initial, Runnable... onChange) {
+        var prop = new SimpleObjectProperty<>(bean, name, initial);
+        for (Runnable action : onChange) {
+            runOnChange(action, prop);
+        }
+        return prop;
     }
 
     /**
@@ -134,14 +106,34 @@ public class PropUtil {
                         }
                     }
                 });
+            } else if (condition instanceof ObservableLongValue) {
+                var obs = (ObservableLongValue) condition;
+                condition.addListener(new InvalidationListener() {
+                    long prev = obs.get();
+
+                    @Override
+                    public void invalidated(Observable observable) {
+                        if (prev == obs.get()) {
+                            prev = obs.get();
+                            action.run();
+                        }
+                    }
+                });
             } else {
                 condition.addListener((observable, oldValue, newValue) -> action.run());
             }
         }
     }
 
-    private static boolean isEqual(double a, double b) {
+    public static boolean isEqual(double a, double b) {
         return Double.doubleToLongBits(a) == Double.doubleToLongBits(b); // supports NaN
+    }
+
+    public static boolean isNullOrEmpty(String string){
+        return string == null || string.isBlank();
+    }
+
+    private PropUtil() {
     }
 
 }

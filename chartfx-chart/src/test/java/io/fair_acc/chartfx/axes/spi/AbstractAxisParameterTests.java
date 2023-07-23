@@ -84,7 +84,7 @@ class AbstractAxisParameterTests {
         var state = axis.getBitState();
         state.addChangeListener(ChartBits.AxisLabelText, (src, bits) -> {
             axis.updateScale();
-            axis.updateAxisLabelAndUnit();
+            axis.updateAxisLabel();
             state.clear(ChartBits.AxisLabelText);
         });
 
@@ -166,20 +166,16 @@ class AbstractAxisParameterTests {
         axis.setScale(2.0);
         assertEquals(2.0, axis.getScale());
 
-        // TODO: behavior changed. Do we still need these tests?
-        /*assertEquals(Side.BOTTOM, axis.getSide());
+        assertEquals(Side.BOTTOM, axis.getSide());
         for (Side side : Side.values()) {
             axis.setSide(side);
             assertEquals(side, axis.getSide());
-            if (side.isHorizontal()) {
-                assertEquals(axis.getWidth(), axis.getLength());
-            } else {
-                assertEquals(axis.getHeight(), axis.getLength());
-            }
+            assertTrue(state.isDirty(ChartBits.AxisLayout));
+            state.clear(ChartBits.AxisLayout);
         }
         axis.setSide(null);
         assertEquals(Double.NaN, axis.getLength());
-        axis.setSide(Side.LEFT);*/
+        axis.setSide(Side.LEFT);
 
         assertFalse(axis.isTimeAxis());
         axis.setTimeAxis(true);
