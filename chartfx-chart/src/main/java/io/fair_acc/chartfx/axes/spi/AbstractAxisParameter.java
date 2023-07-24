@@ -956,7 +956,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean set(final double min, final double max) {
-        return setMin(min) | setMax(max);
+        return PropUtil.set(minProp, min) | PropUtil.set(maxProp, max);
     }
 
     @Override

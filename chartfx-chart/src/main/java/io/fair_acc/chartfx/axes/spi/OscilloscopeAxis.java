@@ -375,6 +375,7 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
 
     @Override
     protected void updateCachedVariables() {
+        super.updateCachedVariables();
         if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return;
         }
@@ -418,15 +419,11 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
         protected double upperBoundLog;
         protected double lowerBoundLog;
         protected double logScaleLength;
-        protected double logScaleLengthInv;
-        protected boolean isVerticalAxis;
-        protected double axisWidth;
-        protected double axisHeight;
+        protected double axisLength;
         protected double offset;
 
         private void updateCachedAxisVariables() {
-            axisWidth = getWidth();
-            axisHeight = getHeight();
+            axisLength = getLength();
             localCurrentLowerBound = getMin();
             localCurrentUpperBound = getMax();
 
@@ -434,24 +431,11 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
             lowerBoundLog = axisTransform.forward(getMin());
             logScaleLength = upperBoundLog - lowerBoundLog;
 
-            logScaleLengthInv = 1.0 / logScaleLength;
-
             localScale = scaleProperty().get();
             final double zero = OscilloscopeAxis.super.getDisplayPosition(0);
             localOffset = zero + localCurrentLowerBound * localScale;
             localOffset2 = localOffset - cache.localCurrentLowerBound * cache.localScale;
-
-            if (getSide() != null) {
-                isVerticalAxis = getSide().isVertical();
-            }
-
-            if (isVerticalAxis) {
-                logScaleLengthInv = axisHeight / logScaleLength;
-            } else {
-                logScaleLengthInv = axisWidth / logScaleLength;
-            }
-
-            offset = isVerticalAxis ? getHeight() : getWidth();
+            offset = axisLength;
         }
     }
 
