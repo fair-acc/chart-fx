@@ -87,7 +87,7 @@ public class PropUtil {
 
                     @Override
                     public void invalidated(Observable observable) {
-                        if (prev == obs.get()) {
+                        if (prev != obs.get()) {
                             prev = obs.get();
                             action.run();
                         }
@@ -100,7 +100,7 @@ public class PropUtil {
 
                     @Override
                     public void invalidated(Observable observable) {
-                        if (prev == obs.get()) {
+                        if (prev != obs.get()) {
                             prev = obs.get();
                             action.run();
                         }
@@ -113,7 +113,7 @@ public class PropUtil {
 
                     @Override
                     public void invalidated(Observable observable) {
-                        if (prev == obs.get()) {
+                        if (prev != obs.get()) {
                             prev = obs.get();
                             action.run();
                         }

@@ -1280,7 +1280,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     }
 
     protected void updateScaleAndUnitPrefix() {
-        if (isAutoUnitScaling()) {
+        if (!isAutoUnitScaling()) {
             return;
         }
         final double range = Math.abs(getMax() - getMin());
