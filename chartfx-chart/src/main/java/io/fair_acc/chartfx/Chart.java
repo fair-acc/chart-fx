@@ -1058,16 +1058,18 @@ public abstract class Chart extends Region implements Observable {
                 renderer.getDatasets().addListener(datasetChangeListener);
                 // add listeners to all datasets already in the renderer
                 renderer.getDatasets().forEach(set -> set.addListener(dataSetDataListener));
-                renderer.getAxes().addListener(axesChangeListenerLocal);
-                renderer.getAxes().forEach(this::addAxisToChildren);
+
+                // TODO: how should it handle renderer axes? this can add automatically-generated axes that aren't wanted
+//                renderer.getAxes().addListener(axesChangeListenerLocal);
+//                renderer.getAxes().forEach(this::addAxisToChildren);
             });
 
             // handle removed renderer
             change.getRemoved().forEach(renderer -> {
                 renderer.getDatasets().removeListener(datasetChangeListener);
                 renderer.getDatasets().forEach(set -> set.removeListener(dataSetDataListener));
-                renderer.getAxes().removeListener(axesChangeListenerLocal);
-                renderer.getAxes().forEach(this::removeAxisFromChildren);
+//                renderer.getAxes().removeListener(axesChangeListenerLocal);
+//                renderer.getAxes().forEach(this::removeAxisFromChildren);
             });
         }
         // reset change to allow derived classes to add additional listeners to renderer changes
