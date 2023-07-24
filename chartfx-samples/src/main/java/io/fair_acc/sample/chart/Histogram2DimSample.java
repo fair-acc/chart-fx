@@ -94,7 +94,7 @@ public class Histogram2DimSample extends ChartSample {
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x-Axis y-Projection");
         xAxis1.setLogAxis(false);
-        yAxis1.setAnimated(false);
+        xAxis1.setAnimated(false);
         xAxis1.setAutoRangeRounding(true);
         xAxis1.setAutoRangePadding(2.0);
         xAxis1.setAutoRanging(true);
