@@ -2,13 +2,14 @@ package io.fair_acc.dataset.events;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 /**
  * @author ennerf
  */
-public class BitState implements StateListener {
+public abstract class BitState implements StateListener {
 
     public Runnable onAction(IntSupplier bit0, IntSupplier... more) {
         return onAction(mask(bit0, more));
@@ -50,16 +51,6 @@ public class BitState implements StateListener {
         return mask;
     }
 
-    public void setDirty(int bits) {
-        final int filtered = bits & filter;
-        final int delta = (state ^ filtered) & filtered;
-        if (delta != 0) {
-            state |= filtered;
-            notifyListeners(changeListeners, delta);
-        }
-        notifyListeners(invalidateListeners, bits);
-    }
-
     @Override
     public void accept(BitState source, int bits) {
         setDirty(bits);
@@ -70,11 +61,11 @@ public class BitState implements StateListener {
     }
 
     public boolean isDirty() {
-        return state != 0;
+        return getBits() != 0;
     }
 
     public boolean isDirty(int mask) {
-        return (state & mask) != 0;
+        return (getBits() & mask) != 0;
     }
 
     public boolean isDirty(IntSupplier bit0) {
@@ -90,11 +81,11 @@ public class BitState implements StateListener {
     }
 
     public boolean isClean() {
-        return state == 0;
+        return getBits() == 0;
     }
 
     public boolean isClean(int mask) {
-        return (state & mask) == 0;
+        return (getBits() & mask) == 0;
     }
 
     public boolean isClean(IntSupplier bit0) {
@@ -109,22 +100,34 @@ public class BitState implements StateListener {
         return isClean(bit0.getAsInt() | bit1.getAsInt() | mask(bits));
     }
 
-    public int getBits() {
-        return state;
+    public void getBits(StateListener action) {
+        action.accept(this, getBits());
     }
 
-    public void getBits(StateListener action) {
-        action.accept(this, state);
+    public abstract int getBits();
+
+    public void setDirty(int bits) {
+        final int filtered = bits & filter;
+        final int delta = setDirtyAndGetDelta(filtered);
+        if (delta != 0) {
+            notifyListeners(changeListeners, delta);
+        }
+        notifyListeners(invalidateListeners, bits);
     }
+
+    /**
+     * @return the delta that switched from 0 to 1. returns 0 if nothing was changed.
+     */
+    protected abstract int setDirtyAndGetDelta(int bits);
 
     public void clear() {
-        state = 0;
+       clear(ALL_BITS);
     }
 
-    public int clear(final int mask) {
-        state &= ~mask;
-        return state;
-    }
+    /**
+     * @return the state after clearing the specified bits
+     */
+    public abstract int clear(int bits);
 
     public int clear(IntSupplier bit0) {
         return clear(bit0.getAsInt());
@@ -255,7 +258,7 @@ public class BitState implements StateListener {
     }
 
     public String getAsString(IntSupplier... bits) {
-        return appendBitStrings(new StringBuilder(), state, bits).toString();
+        return appendBitStrings(new StringBuilder(), getBits(), bits).toString();
     }
 
     public static StringBuilder appendBitStrings(StringBuilder builder, int mask, IntSupplier... bits) {
@@ -320,25 +323,107 @@ public class BitState implements StateListener {
     }
 
     public static BitState initClean(Object source) {
-        return initClean(source, NO_FILTER);
+        return initClean(source, ALL_BITS);
     }
 
     public static BitState initDirty(Object source) {
-        return initDirty(source, NO_FILTER);
+        return initDirty(source, ALL_BITS);
     }
 
     public static BitState initClean(Object source, int filter) {
-        return new BitState(source, filter, 0);
+        return new SingleThreadedBitState(source, filter, 0);
     }
 
     public static BitState initDirty(Object source, int filter) {
-        return new BitState(source, filter, filter);
+        return new SingleThreadedBitState(source, filter, filter);
     }
 
-    protected BitState(Object source, int filter, int initial) {
+    public static BitState initCleanMultiThreaded(Object source, int filter) {
+        return new MultiThreadedBitState(source, filter, 0);
+    }
+
+    public static BitState initDirtyMultiThreaded(Object source, int filter) {
+        return new MultiThreadedBitState(source, filter, filter);
+    }
+
+    /**
+     * An single-threaded implementation that should only be modified by a single thread
+     */
+    protected static class SingleThreadedBitState extends BitState {
+
+        protected SingleThreadedBitState(Object source, int filter, int initial) {
+            super(source, filter);
+            state = initial;
+        }
+
+        protected int setDirtyAndGetDelta(int bits) {
+            int delta =  (state ^ bits) & bits;
+            state |= bits;
+            return delta;
+        }
+
+        @Override
+        public int clear(final int bits) {
+            state &= ~bits;
+            return state;
+        }
+
+        @Override
+        public int getBits() {
+            return state;
+        }
+
+        int state;
+
+    }
+
+    /**
+     * An implementation that can be written to by multiple threads. The change
+     * events are sent on the same thread that sent the original request.
+     */
+    protected static class MultiThreadedBitState extends BitState {
+
+        protected MultiThreadedBitState(Object source, int filter, int initial) {
+            super(source, filter);
+            state.set(initial);
+        }
+
+        @Override
+        public int setDirtyAndGetDelta(int bits) {
+            // Spin until we succeeded in setting the value
+            // or there are no remaining bits to be set.
+            while (true) {
+                final int oldState = getBits();
+                final int newState = oldState | bits;
+                final int delta = (oldState ^ newState);
+                if (delta == 0 || state.compareAndSet(oldState, oldState | bits)) {
+                    return delta;
+                }
+            }
+        }
+
+        @Override
+        public int clear(int bits) {
+            while (true) {
+                final int current = getBits();
+                final int newState = current & ~bits;
+                if (state.compareAndSet(current, newState)) {
+                    return newState;
+                }
+            }
+        }
+
+        @Override
+        public int getBits() {
+            return state.get();
+        }
+
+        private final AtomicInteger state = new AtomicInteger();
+    }
+
+    protected BitState(Object source, int filter) {
         this.source = source;
         this.filter = filter;
-        this.state = initial;
     }
 
     @Override
@@ -346,10 +431,9 @@ public class BitState implements StateListener {
         return "bits(" + String.valueOf(source) + ")";
     }
 
-    int state;
     final Object source;
     final int filter;
-    public static final int NO_FILTER = ~0;
+    public static final int ALL_BITS = ~0;
 
     List<StateListener> changeListeners;
     List<StateListener> invalidateListeners = null;
