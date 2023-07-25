@@ -10,17 +10,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableListBase;
 import javafx.geometry.Insets;
@@ -46,14 +44,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.EditConstraints;
 import io.fair_acc.dataset.EditableDataSet;
-import io.fair_acc.dataset.event.EventListener;
-import io.fair_acc.dataset.event.UpdateEvent;
 
 /**
  * Displays the all visible data sets inside a table on demand. Implements copy-paste functionality into system
@@ -235,7 +229,7 @@ public class TableViewer extends ChartPlugin {
             switchTableView.setGraphic(isTablePresent ? tableView : graphView);
             getChart().getPlotForeground().setMouseTransparent(isTablePresent);
             table.setMouseTransparent(isTablePresent);
-            dsModel.datasetsChanged(null);
+            dsModel.runPreLayout();
         });
 
         buttonBar.getChildren().addAll(separator, switchTableView, copyToClipBoard, saveTableView);
@@ -282,23 +276,11 @@ public class TableViewer extends ChartPlugin {
         protected static final double DEFAULT_COL_WIDTH = 150;
         private int nRows;
         private final ObservableList<TableColumn<DataSetsRow, ?>> columns = FXCollections.observableArrayList();
-
-        private long lastColumnUpdate = 0;
-        private final AtomicBoolean columnUpdateScheduled = new AtomicBoolean(false);
-
-        private final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
-        private final InvalidationListener datasetChangeListener = this::datasetsChanged;
-        private final EventListener dataSetDataUpdateListener = (UpdateEvent evt) -> FXUtils.runFX(() -> this.datasetsChanged(null));
-        private TimerTask timerTask;
+        private boolean forceNextUpdate = false;
 
         public DataSetsModel() {
             super();
             columns.add(new RowIndexHeaderTableColumn());
-            table.visibleProperty().addListener((prop, oldVal, newVal) -> {
-                if (Boolean.TRUE.equals(newVal)) {
-                    datasetsChanged(null);
-                }
-            });
         }
 
         @Override
@@ -306,57 +288,46 @@ public class TableViewer extends ChartPlugin {
             return "TableModel";
         }
 
-        public void datasetsChanged(@SuppressWarnings("unused") Observable obs) { // unused parameter is needed for listener interface
-            if (getChart() == null) { // the plugin was removed from the chart
+        public void runPreLayout() {
+            final var chart = getChart();
+            if (chart == null) { // the plugin was removed from the chart
                 return;
             }
             if (!table.isVisible()) {
                 return;
             }
-            long now = System.currentTimeMillis();
-            if (now - lastColumnUpdate > refreshRate.get()) {
-                List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted(Comparator.comparing(DataSet::getName)).collect(Collectors.toList());
-                int nRowsNew = 0;
-                for (int i = 0; i < columns.size() - 1 || i < columnsUpdated.size(); i++) {
-                    if (i > MAX_DATASETS_IN_TABLE) {
-                        LOGGER.atWarn().addArgument(columnsUpdated.size()).log("Limiting number of DataSets shown in Table, chart has {} DataSets.");
-                        break;
-                    }
-                    if (i < columnsUpdated.size()) {
-                        if (i >= columns.size() - 1) {
-                            columns.add(new DataSetTableColumns());
-                        }
-                        DataSet ds = columnsUpdated.get(i);
-                        ds.removeListener(dataSetDataUpdateListener);
-                        ds.addListener(dataSetDataUpdateListener);
-                        ((DataSetTableColumns) columns.get(i + 1)).update(ds);
-                        nRowsNew = Math.max(nRowsNew, ds.getDataCount());
-                    } else {
-                        ((DataSetTableColumns) columns.get(i + 1)).update(null);
-                    }
-                }
-                lastColumnUpdate = now;
-                if (nRows != nRowsNew) {
-                    // Workaround, let the selection model realize, that the number of cols has changed
-                    // in the process the selection is lost
-                    nRows = nRowsNew;
-                    table.setItems(null);
-                    table.setItems(dsModel);
-                } else {
-                    table.refresh();
-                }
-            } else {
-                if (columnUpdateScheduled.compareAndExchange(false, true)) {
-                    timerTask = new TimerTask() {
-                        @Override
-                        public void run() {
-                            columnUpdateScheduled.set(false);
-                            FXUtils.runFX(() -> datasetsChanged(null));
-                        }
-                    };
-                    timer.schedule(timerTask, refreshRate.get());
-                }
+            if (!forceNextUpdate && chart.getBitState().isClean(ChartBits.DataSetMask)) {
+                return;
             }
+            forceNextUpdate = false;
+
+            // TODO: what are the update conditions? We can filter by name, ds changes, etc.
+
+            // Cap at max size
+            List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted(Comparator.comparing(DataSet::getName)).collect(Collectors.toList());
+            if(columnsUpdated.size() > MAX_DATASETS_IN_TABLE) {
+                LOGGER.atWarn().addArgument(columnsUpdated.size()).log("Limiting number of DataSets shown in Table, chart has {} DataSets.");
+            }
+            var cols = FXUtils.sizedList(columns, Math.min(columnsUpdated.size(), MAX_DATASETS_IN_TABLE), DataSetTableColumns::new);
+
+            // Update the datasets
+            int i = 0, nRowsNew = 0;
+            for (DataSet ds : columnsUpdated) {
+                var col = (DataSetTableColumns) cols.get(i++);
+                col.update(ds);
+                nRowsNew = Math.max(nRowsNew, ds.getDataCount());
+            }
+
+            if (nRows != nRowsNew) {
+                // Workaround, let the selection model realize, that the number of cols has changed
+                // in the process the selection is lost
+                nRows = nRowsNew;
+                table.setItems(null);
+                table.setItems(dsModel);
+            } else {
+                table.refresh();
+            }
+
         }
 
         /**
@@ -364,27 +335,10 @@ public class TableViewer extends ChartPlugin {
          * @param newChart The new chart the plugin is operating on
          */
         public void chartChanged(final Chart oldChart, final Chart newChart) {
-            if (oldChart != null) {
-                if (timerTask != null) {
-                    timerTask.cancel();
-                }
-                // de-register data set listeners
-                oldChart.getDatasets().removeListener(datasetChangeListener);
-                oldChart.getDatasets().forEach(dataSet -> dataSet.removeListener(dataSetDataUpdateListener));
-                oldChart.getRenderers().removeListener(rendererChangeListener);
-                if (newChart != null) {
-                    newChart.getRenderers()
-                            .forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-                }
-            }
             if (newChart != null) {
-                // register data set listeners
-                newChart.getDatasets().addListener(datasetChangeListener);
-                newChart.getDatasets().forEach(dataSet -> dataSet.addListener(dataSetDataUpdateListener));
-                newChart.getRenderers().addListener(rendererChangeListener);
-                newChart.getRenderers().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
-                datasetsChanged(null);
+                runPreLayout();
             }
+            forceNextUpdate = true;
         }
 
         @Override
@@ -505,27 +459,6 @@ public class TableViewer extends ChartPlugin {
         @Override
         public boolean isEmpty() {
             return (nRows >= 0);
-        }
-
-        protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
-            boolean dataSetChanges = false;
-            while (change.next()) {
-                // handle added renderer
-                change.getAddedSubList().forEach(renderer -> renderer.getDatasets().addListener(datasetChangeListener));
-                if (!change.getAddedSubList().isEmpty()) {
-                    dataSetChanges = true;
-                }
-
-                // handle removed renderer
-                change.getRemoved().forEach(renderer -> renderer.getDatasets().removeListener(datasetChangeListener));
-                if (!change.getRemoved().isEmpty()) {
-                    dataSetChanges = true;
-                }
-            }
-
-            if (dataSetChanges) {
-                datasetsChanged(null);
-            }
         }
 
         @Override
@@ -677,7 +610,7 @@ public class TableViewer extends ChartPlugin {
         }
 
         /**
-         * Columns for a DataSet. Manages the the nested subcolumns for the actual data and handles updates of the
+         * Columns for a DataSet. Manages the nested subcolumns for the actual data and handles updates of the
          * DataSet.
          * 
          * @author akrimm

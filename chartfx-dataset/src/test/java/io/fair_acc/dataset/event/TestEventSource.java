@@ -19,7 +19,7 @@ public class TestEventSource implements EventSource {
     }
 
     @Override
-    public List<EventListener> updateEventListener() {
+    public List<EventListener> getBitState() {
         return eventListener;
     }
 }

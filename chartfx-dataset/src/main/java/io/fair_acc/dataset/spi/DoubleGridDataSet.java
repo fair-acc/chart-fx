@@ -7,6 +7,7 @@ import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet3D;
 import io.fair_acc.dataset.GridDataSet;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.MultiArrayDouble;
 
 /**
@@ -192,7 +193,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
                 values[i - shape.length] = MultiArrayDouble.wrap(copy ? vals[i - shape.length].clone() : vals[i - shape.length], 0, containerShape);
             }
         });
-        fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     @Override
@@ -244,8 +245,8 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
             }
         }));
 
-        fireInvalidated(new UpdatedDataEvent(this));
-        return this;
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -258,7 +259,8 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
      */
     public GridDataSet set(int dimIndex, int[] indices, double value) {
         lock().writeLockGuard(() -> values[dimIndex - shape.length].set(indices, value));
-        return fireInvalidated(new UpdatedDataEvent(this, "set x_" + dimIndex + Arrays.toString(indices) + " = " + value));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     public void clearData() {

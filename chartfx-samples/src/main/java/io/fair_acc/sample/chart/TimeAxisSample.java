@@ -25,7 +25,6 @@ public class TimeAxisSample extends ChartSample {
     private static void generateData(final DefaultErrorDataSet dataSet) {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
-        dataSet.autoNotification().set(false);
         dataSet.clearData();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
                 // to check
@@ -39,9 +38,7 @@ public class TimeAxisSample extends ChartSample {
             final double ey = 10;
             dataSet.add(t, y, ex, ey);
         }
-        dataSet.autoNotification().set(true);
 
-        Platform.runLater(() -> dataSet.fireInvalidated(null));
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 

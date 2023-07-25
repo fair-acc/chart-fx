@@ -7,9 +7,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
+import io.fair_acc.dataset.events.BitState;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -78,8 +78,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     public static final int DEFAULT_SMALL_AXIS = 6; // [orders of magnitude], e.g. '4' <-> [1,10000]
     protected final DecimalFormat formatterSmall = new DecimalFormat(FORMAT_SMALL_SCALE);
     protected final DecimalFormat formatterLarge = new DecimalFormat(FORMAT_LARGE_SCALE);
-    private final AtomicBoolean autoNotify = new AtomicBoolean(true);
-    private final List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
     private final CheckedValueField valueField = new CheckedValueField();
     private final StringProperty title = new SimpleStringProperty(this, "title", null);
     private final ObjectProperty<DataSet> dataSet = new SimpleObjectProperty<>(this, "dataSet", null);
@@ -132,7 +130,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         while (change.next()) {
             change.getRemoved().forEach(oldIndicator -> oldIndicator.removeListener(sliderChanged));
 
-            change.getAddedSubList().stream().filter(newIndicator -> !newIndicator.updateEventListener().contains(sliderChanged)).forEach(newIndicator -> newIndicator.addListener(sliderChanged));
+            change.getAddedSubList().stream().filter(newIndicator -> !newIndicator.getBitState().contains(sliderChanged)).forEach(newIndicator -> newIndicator.addListener(sliderChanged));
         }
     };
 
@@ -182,11 +180,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         dataSetChangeListener.changed(dataSet, null, null);
 
         getMeasurementPlugin().getDataView().getVisibleChildren().add(dataViewWindow);
-    }
-
-    @Override
-    public AtomicBoolean autoNotification() {
-        return autoNotify;
     }
 
     public ObjectProperty<DataSet> dataSetProperty() {
@@ -267,9 +260,14 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         return title;
     }
 
+    @Deprecated
+    private void invokeListener(Object event, boolean parallel) {
+        // TODO: figure out what all this does
+    }
+
     @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
+    public BitState getBitState() {
+        return null; // TODO: refactor class
     }
 
     public DoubleProperty valueProperty() {
@@ -341,7 +339,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             return;
         }
         final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator) p).collect(Collectors.toList());
-        allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.updateEventListener().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
+        allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.getBitState().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
     }
 
     protected void updateSlider() {
@@ -378,7 +376,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             getMeasurementPlugin().getChart().getPlugins().add(sliderIndicator);
         }
 
-        if (!sliderIndicator.updateEventListener().contains(sliderChanged)) {
+        if (!sliderIndicator.getBitState().contains(sliderChanged)) {
             sliderIndicator.addListener(sliderChanged);
         }
 

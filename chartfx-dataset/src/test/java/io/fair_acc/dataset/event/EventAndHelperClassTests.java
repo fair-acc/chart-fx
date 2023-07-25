@@ -23,7 +23,7 @@ public class EventAndHelperClassTests {
         }
 
         @Override
-        public List<EventListener> updateEventListener() {
+        public List<EventListener> getBitState() {
             return null;
         }
     };
@@ -31,7 +31,7 @@ public class EventAndHelperClassTests {
     @Test
     public void testEventSource() {
         assertNull(testEventSource.autoNotification());
-        assertNull(testEventSource.updateEventListener());
+        assertNull(testEventSource.getBitState());
     }
 
     @DisplayName("UpdateEvent class constructors")

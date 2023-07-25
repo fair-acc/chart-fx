@@ -63,8 +63,6 @@ public class OscilloscopeAxisSample extends ChartSample {
         // N.B. '+1' to check for resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
-            rollingBufferBeamIntensity.autoNotification().set(false);
-            rollingBufferDipoleCurrent.autoNotification().set(false);
             for (int n = RollingBufferSample.N_SAMPLES; n > 0; n--) {
                 final double t = now - n * RollingBufferSample.UPDATE_PERIOD / 1000.0;
                 final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
@@ -73,17 +71,13 @@ public class OscilloscopeAxisSample extends ChartSample {
                 rollingBufferDipoleCurrent.add(t, y, ey, ey);
                 rollingBufferBeamIntensity.add(t, y2, ey, ey);
             }
-            rollingBufferBeamIntensity.autoNotification().set(true);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
         } else {
-            rollingBufferDipoleCurrent.autoNotification().set(false);
             final double t = now;
             final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
             final double y2 = AXIS_CENTRE_VALUE + 100 * Math.cos(2.0 * Math.PI * 0.01 * t) * RollingBufferSample.rampFunctionBeamIntensity(t);
             final double ey = 1;
             rollingBufferDipoleCurrent.add(t, y, ey, ey);
             rollingBufferBeamIntensity.add(t, y2, ey, ey);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
         }
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }

@@ -10,6 +10,7 @@ import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
 import io.fair_acc.chartfx.ui.utils.LayoutHook;
+import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.animation.Animation;
@@ -55,7 +56,6 @@ import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.EventListener;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
@@ -71,11 +71,17 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * @author original conceptual design by Oracle (2010, 2014)
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
-public abstract class Chart extends Region implements Observable {
+public abstract class Chart extends Region implements EventSource {
     private final LayoutHook layoutHooks = LayoutHook.newPreAndPostHook(this, this::runPreLayout, this::runPostLayout);
-    protected final BitState state = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
-            .addChangeListener(ChartBits.KnownMask, FXUtils.runOnFxThread((src, bits) -> layoutHooks.registerOnce())) // for now trigger on everything
-            .addChangeListener(ChartBits.ChartCanvas, FXUtils.runOnFxThread((src, bits) -> fireInvalidated()));  // for compatibility
+
+    // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
+    // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
+    protected final BitState state = BitState.initClean(this, BitState.ALL_BITS)
+            .addChangeListener(ChartBits.KnownMask, (src, bits) -> layoutHooks.registerOnce())
+            .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout());
+    protected final BitState dataSetState = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
+            .addChangeListener(FXUtils.runOnFxThread(state)); // forward to fx state on JavaFX thread
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
@@ -111,8 +117,6 @@ public abstract class Chart extends Region implements Observable {
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
-    protected final List<InvalidationListener> listeners = new ArrayList<>();
-    protected final BooleanProperty autoNotification = new SimpleBooleanProperty(this, "autoNotification", true);
     private final ObservableList<Renderer> renderers = FXCollections.observableArrayList();
     {
         getRenderers().addListener(this::rendererChanged);
@@ -190,7 +194,6 @@ public abstract class Chart extends Region implements Observable {
     protected final ListChangeListener<Axis> axesChangeListenerLocal = this::axesChangedLocal;
     protected final ListChangeListener<Axis> axesChangeListener = this::axesChanged;
     protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
-    protected final EventListener dataSetDataListener = obs -> FXUtils.runFX(this::dataSetInvalidated);
     protected final ListChangeListener<ChartPlugin> pluginsChangedListener = this::pluginsChanged;
     protected final ChangeListener<? super Window> windowPropertyListener = (ch1, oldWindow, newWindow) -> {
         if (oldWindow != null) {
@@ -438,14 +441,13 @@ public abstract class Chart extends Region implements Observable {
     }
 
     @Override
-    public String getUserAgentStylesheet() {
-        return CHART_CSS;
+    public BitState getBitState() {
+        return state;
     }
 
     @Override
-    public void addListener(final InvalidationListener listener) {
-        Objects.requireNonNull(listener, "InvalidationListener must not be null");
-        listeners.add(listener);
+    public String getUserAgentStylesheet() {
+        return CHART_CSS;
     }
 
     /**
@@ -459,31 +461,6 @@ public abstract class Chart extends Region implements Observable {
 
     public final BooleanProperty animatedProperty() {
         return animated;
-    }
-
-    public BooleanProperty autoNotificationProperty() {
-        return autoNotification;
-    }
-
-    /**
-     * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
-     *
-     * @return itself (fluent design)
-     */
-    public Chart fireInvalidated() {
-        synchronized (autoNotification) {
-            if (!isAutoNotification() || listeners.isEmpty()) {
-                return this;
-            }
-        }
-
-        if (Platform.isFxApplicationThread()) {
-            executeFireInvalidated();
-        } else {
-            Platform.runLater(this::executeFireInvalidated);
-        }
-
-        return this;
     }
 
     /**
@@ -659,10 +636,6 @@ public abstract class Chart extends Region implements Observable {
         return animated.get();
     }
 
-    public boolean isAutoNotification() {
-        return autoNotification.get();
-    }
-
     public final boolean isLegendVisible() {
         return legendVisible.getValue();
     }
@@ -679,6 +652,10 @@ public abstract class Chart extends Region implements Observable {
     }
 
     protected void runPreLayout() {
+        if (state.isDirty(ChartBits.ChartLegend)) {
+            updateLegend(getDatasets(), getRenderers());
+        }
+
         final long start = ProcessingProfiler.getTimeStamp();
         updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
@@ -699,7 +676,7 @@ public abstract class Chart extends Region implements Observable {
         layoutPluginsChildren();
 
         // Make sure things will get redrawn
-        state.setDirty(ChartBits.ChartCanvas);
+        fireInvalidated(ChartBits.ChartCanvas);
     }
 
     protected void runPostLayout() {
@@ -710,7 +687,20 @@ public abstract class Chart extends Region implements Observable {
         }
         redrawCanvas();
         state.clear();
+        forEachDataSet(ds -> ds.getBitState().clear());
+        // TODO: plugins etc., do locking
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
+    }
+
+    private void forEachDataSet(Consumer<DataSet> action) {
+        for (DataSet dataset : datasets) {
+            action.accept(dataset);
+        }
+        for (Renderer renderer : renderers) {
+            for (DataSet dataset : renderer.getDatasets()) {
+                action.accept(dataset);
+            }
+        }
     }
 
     public final ObjectProperty<Legend> legendProperty() {
@@ -725,31 +715,8 @@ public abstract class Chart extends Region implements Observable {
         return legendVisible;
     }
 
-    @Override
-    public void removeListener(final InvalidationListener listener) {
-        listeners.remove(listener);
-    }
-
-    @Override
-    public void requestLayout() {
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            // normal debugDepth = 1 but for more verbose logging (e.g. recursion) use > 10
-            for (int debugDepth = 1; debugDepth < 2; debugDepth++) {
-                LOGGER.atDebug().addArgument(debugDepth).addArgument(ProcessingProfiler.getCallingClassMethod(debugDepth)).log("chart requestLayout() - called by {}: {}");
-            }
-            LOGGER.atDebug().addArgument("[..]").log("chart requestLayout() - called by {}");
-        }
-        state.setDirty(ChartBits.ChartLayout);
-        FXUtils.assertJavaFxThread();
-        super.requestLayout();
-    }
-
     public final void setAnimated(final boolean value) {
         animated.set(value);
-    }
-
-    public void setAutoNotification(final boolean flag) {
-        autoNotification.set(flag);
     }
 
     public final void setLegend(final Legend value) {
@@ -911,35 +878,16 @@ public abstract class Chart extends Region implements Observable {
     }
 
     protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
-        boolean dataSetChanges = false;
         FXUtils.assertJavaFxThread();
         while (change.next()) {
             for (final DataSet set : change.getRemoved()) {
-                // remove Legend listeners from removed datasets
-                set.updateEventListener().removeIf(l -> l instanceof DefaultLegend.DatasetVisibilityListener);
-
-                set.removeListener(dataSetDataListener);
-                dataSetChanges = true;
+                set.removeListener(dataSetState);
             }
-
             for (final DataSet set : change.getAddedSubList()) {
-                set.addListener(dataSetDataListener);
-                dataSetChanges = true;
+                set.addListener(dataSetState);
             }
         }
-
-        if (dataSetChanges) {
-            if (DEBUG && LOGGER.isDebugEnabled()) {
-                LOGGER.debug("chart datasetsChanged(Change) - has dataset changes");
-            }
-            // updateAxisRange();
-            updateLegend(getDatasets(), getRenderers());
-            requestLayout();
-        }
-    }
-
-    protected void executeFireInvalidated() {
-        new ArrayList<>(listeners).forEach(listener -> listener.invalidated(this));
+        fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartLegend);
     }
 
     /**
@@ -1013,19 +961,21 @@ public abstract class Chart extends Region implements Observable {
                 // update legend and recalculateLayout on datasetChange
                 renderer.getDatasets().addListener(datasetChangeListener);
                 // add listeners to all datasets already in the renderer
-                renderer.getDatasets().forEach(set -> set.addListener(dataSetDataListener));
+                renderer.getDatasets().forEach(set -> set.addListener(dataSetState));
 
                 // TODO: how should it handle renderer axes? this can add automatically-generated axes that aren't wanted
 //                renderer.getAxes().addListener(axesChangeListenerLocal);
 //                renderer.getAxes().forEach(this::addAxisToChildren);
+                fireInvalidated(ChartBits.ChartRenderers, ChartBits.ChartDataSets);
             });
 
             // handle removed renderer
             change.getRemoved().forEach(renderer -> {
                 renderer.getDatasets().removeListener(datasetChangeListener);
-                renderer.getDatasets().forEach(set -> set.removeListener(dataSetDataListener));
+                renderer.getDatasets().forEach(set -> set.removeListener(dataSetState));
 //                renderer.getAxes().removeListener(axesChangeListenerLocal);
 //                renderer.getAxes().forEach(this::removeAxisFromChildren);
+                fireInvalidated(ChartBits.ChartRenderers, ChartBits.ChartDataSets);
             });
         }
         // reset change to allow derived classes to add additional listeners to renderer changes

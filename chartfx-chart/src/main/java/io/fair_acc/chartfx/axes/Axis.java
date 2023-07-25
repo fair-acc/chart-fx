@@ -204,20 +204,6 @@ public interface Axis extends AxisDescription {
     BooleanProperty invertAxisProperty();
 
     /**
-     * invoke object within update listener list
-     *
-     * @param updateEvent the event the listeners are notified with
-     * @param executeParallel {@code true} execute event listener via parallel executor service
-     */
-    @Override
-    default void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
-        // implemented for forwarding purposes
-        AxisDescription.super.invokeListener(updateEvent, executeParallel);
-    }
-
-    public BitState getBitState();
-
-    /**
      * This is true when the axis determines its range from the data automatically and grows it if necessary
      *
      * @return true if axis shall be updated to the optimal data range

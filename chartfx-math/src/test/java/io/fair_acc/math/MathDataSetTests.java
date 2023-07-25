@@ -178,9 +178,9 @@ public class MathDataSetTests {
         assertEquals(4, counter1.get());
         assertEquals(4, counter2.get());
 
-        assertEquals(1, rawDataSetRef.updateEventListener().size());
+        assertEquals(1, rawDataSetRef.getBitState().size());
         identityDataSet.deregisterListener();
-        assertEquals(0, rawDataSetRef.updateEventListener().size());
+        assertEquals(0, rawDataSetRef.getBitState().size());
         rawDataSetRef.invokeListener(new UpdatedDataEvent(rawDataSetRef, "OK reference", false));
         assertEquals(4, counter1.get());
         assertEquals(4, counter2.get());

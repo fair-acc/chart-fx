@@ -2,13 +2,12 @@ package io.fair_acc.dataset.spi;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AxisChangeEvent;
-import io.fair_acc.dataset.event.EventListener;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.dataset.utils.AssertUtils;
 import org.slf4j.Logger;
@@ -67,11 +66,6 @@ public class TransposedDataSet implements DataSet {
         this.nDims = permutation.length;
         this.permutation = Arrays.copyOf(permutation, this.dataSet.getDimension());
         this.transposed = false;
-    }
-
-    @Override
-    public AtomicBoolean autoNotification() {
-        return dataSet.autoNotification();
     }
 
     @Override
@@ -177,7 +171,7 @@ public class TransposedDataSet implements DataSet {
                 LOGGER.atDebug().addArgument(this.permutation).log("applied permutation: {}");
             }
         });
-        this.invokeListener(new AxisChangeEvent(this, "Permutation changed", -1));
+        fireInvalidated(ChartBits.DataSetPermutation);
     }
 
     @Override
@@ -214,12 +208,12 @@ public class TransposedDataSet implements DataSet {
                 this.transposed = transposed;
             }
         });
-        this.invokeListener(new AxisChangeEvent(this, "(Un)transposed", -1));
+        fireInvalidated(ChartBits.DataSetPermutation);
     }
 
     @Override
-    public List<EventListener> updateEventListener() {
-        return dataSet.updateEventListener();
+    public BitState getBitState() {
+        return dataSet.getBitState();
     }
 
     public static TransposedDataSet permute(DataSet dataSet, int[] permutation) {
@@ -272,7 +266,7 @@ public class TransposedDataSet implements DataSet {
                 }
                 super.setPermutation(permutation);
             });
-            this.invokeListener(new AxisChangeEvent(this, "Permutation changed", -1));
+            fireInvalidated(ChartBits.DataSetPermutation);
         }
 
         @Override

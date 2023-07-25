@@ -36,7 +36,7 @@ class ErrorTestDataSetTest {
         Assertions.assertEquals(5, dsUnderTest.getIndex(DataSet.DIM_X, 6.5));
         assertNotNull(dsUnderTest.lock());
         assertNotNull(dsUnderTest.autoNotification());
-        assertNotNull(dsUnderTest.updateEventListener());
+        assertNotNull(dsUnderTest.getBitState());
         assertNull(dsUnderTest.getDataLabel(5));
         assertNull(dsUnderTest.getStyle(5));
         assertNull(dsUnderTest.getStyle());

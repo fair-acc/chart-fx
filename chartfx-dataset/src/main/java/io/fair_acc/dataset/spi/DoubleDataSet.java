@@ -4,6 +4,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.RemovedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
@@ -112,7 +113,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getAxisDescription(DIM_X).add(x);
             getAxisDescription(DIM_Y).add(y);
         });
-        return fireInvalidated(new UpdatedDataEvent(this, "add"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -138,7 +140,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getAxisDescription(DIM_Y).add(yValuesNew);
         });
 
-        return fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -185,7 +188,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getAxisDescription(DIM_X).add(x);
             getAxisDescription(DIM_Y).add(y);
         });
-        return fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -211,7 +215,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getDataLabelMap().shiftKeys(indexAt, xValues.size());
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
         });
-        return fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -229,7 +234,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override
@@ -301,7 +307,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             // invalidate ranges
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new RemovedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -315,7 +322,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             xValues.size(size);
             yValues.size(size);
         });
-        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -335,7 +343,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             copyDataLabelsAndStyles(other, copy);
             copyAxisDescription(other);
         }));
-        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -412,7 +421,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             // invalidate ranges
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -448,7 +458,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             // invalidate ranges
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new UpdatedDataEvent(this, "set - single"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     public DoubleDataSet set(final int index, final double[] x, final double[] y) {
@@ -462,7 +473,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             // invalidate ranges
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new UpdatedDataEvent(this, "set - via arrays"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -476,6 +488,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             xValues.trim(0);
             yValues.trim(0);
         });
-        return fireInvalidated(new UpdatedDataEvent(this, "increaseCapacity()"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 }

@@ -353,7 +353,6 @@ public class XYChart extends Chart {
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - pre");
         }
-        setAutoNotification(false);
         FXUtils.assertJavaFxThread();
         final long now = System.nanoTime();
         final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCanvasUpdate);
@@ -396,7 +395,6 @@ public class XYChart extends Chart {
         if (gridRenderer.isDrawOnTop()) {
             gridRenderer.render(gc, this, 0, null);
         }
-        setAutoNotification(true);
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - done");
         }
@@ -407,7 +405,6 @@ public class XYChart extends Chart {
             return;
         }
 
-        final boolean oldAutoState = axis.autoNotification().getAndSet(false);
         final Side side = axis.getSide();
         final boolean isHorizontal = side.isHorizontal();
 
@@ -450,6 +447,5 @@ public class XYChart extends Chart {
         axis.getAutoRange().setAxisLength(axisLength, side);
         axis.getUserRange().setAxisLength(axisLength, side);
 
-        axis.autoNotification().set(oldAutoState);
     }
 }

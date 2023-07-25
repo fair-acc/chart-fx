@@ -4,11 +4,9 @@
 
 package io.fair_acc.chartfx.plugins;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Cursor;
@@ -17,9 +15,7 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 
 import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.dataset.event.EventListener;
 import io.fair_acc.dataset.event.EventSource;
-import io.fair_acc.dataset.event.UpdateEvent;
 
 /**
  * Plugin indicating a specific X or Y value as a line drawn on the plot area, with an optional {@link #textProperty()
@@ -38,8 +34,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     protected static final String STYLE_CLASS_LINE = "value-indicator-line";
     protected static final String STYLE_CLASS_MARKER = "value-indicator-marker";
     protected static double triangleHalfWidth = 5.0;
-    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
-    private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
+    private final transient BitState state = BitState.initDirty(this);
     private boolean autoRemove = false;
 
     /**
@@ -108,13 +103,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         // applied and we can calculate label's
         // width and height
         getChartChildren().addAll(line, label);
-        this.value.addListener(
-                (ch, o, n) -> invokeListener(new UpdateEvent(this, "value changed to " + n + " for axis " + axis)));
-    }
-
-    @Override
-    public AtomicBoolean autoNotification() {
-        return autoNotification;
+        PropUtil.runOnChange(state.onAction(ChartBits.ChartPluginState), this.value);
     }
 
     /**
@@ -299,8 +288,8 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     }
 
     @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
+    public BitState getBitState() {
+        return state;
     }
 
     private void updateMouseListener(final boolean state) {

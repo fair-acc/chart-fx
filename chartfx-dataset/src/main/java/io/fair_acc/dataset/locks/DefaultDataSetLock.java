@@ -56,7 +56,6 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     private final AtomicLong writerLockedByThreadId = new AtomicLong(-1L);
     private final AtomicInteger readerCount = new AtomicInteger(0);
     private final AtomicInteger writerCount = new AtomicInteger(0);
-    private final transient AtomicBoolean autoNotifyState = new AtomicBoolean(true);
     private final transient D dataSet;
 
     /**
@@ -215,7 +214,6 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             // acquired lock
             writerLockedByThreadId.set(callingThreadId);
             lastWriteStamp.set(stamp);
-            autoNotifyState.set(dataSet.autoNotification().getAndSet(false));
         }
         // we acquired a new lock or are already owner of a previously acquired lock
         writerCount.incrementAndGet();
@@ -225,11 +223,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     @Override
     public D writeLockGuard(final Runnable writing) { // NOPMD -- runnable not used in a thread context
         writeLock();
-        final boolean oldAutoNotificationState = dataSet.autoNotification().getAndSet(false);
         try {
             writing.run();
         } finally {
-            dataSet.autoNotification().set(oldAutoNotificationState);
             writeUnLock();
         }
         return dataSet;
@@ -238,13 +234,10 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     @Override
     public <R> R writeLockGuard(final Supplier<R> writing) {
         writeLock();
-        final boolean oldAutoNotificationState = dataSet.autoNotification().getAndSet(false);
-
         R result;
         try {
             result = writing.get();
         } finally {
-            dataSet.autoNotification().set(oldAutoNotificationState);
             writeUnLock();
         }
         return result;
@@ -259,7 +252,6 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             }
 
             // restore present auto-notify state
-            dataSet.autoNotification().set(autoNotifyState.get());
             writerLockedByThreadId.set(-1L);
             stampedLock.unlockWrite(lastWriteStamp.getAndSet(-1L));
         }

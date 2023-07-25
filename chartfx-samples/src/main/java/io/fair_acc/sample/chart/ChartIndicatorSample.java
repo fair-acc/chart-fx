@@ -67,9 +67,6 @@ public class ChartIndicatorSample extends ChartSample {
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1' to check for resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
-            rollingBufferBeamIntensity.autoNotification().set(false);
-            rollingBufferDipoleCurrent.autoNotification().set(false);
-            rollingSine.autoNotification().set(false);
             for (int n = ChartIndicatorSample.N_SAMPLES; n > 0; n--) {
                 final double t = now - n * ChartIndicatorSample.UPDATE_PERIOD / 1000.0;
                 final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(t);
@@ -81,11 +78,7 @@ public class ChartIndicatorSample extends ChartSample {
                 rollingSine.add(t + 1 + ChartIndicatorSample.UPDATE_PERIOD / 1000.0 * RandomDataGenerator.random(),
                         y * 0.8, ey, ey);
             }
-            rollingBufferBeamIntensity.autoNotification().set(true);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
-            rollingSine.autoNotification().set(true);
         } else {
-            rollingBufferDipoleCurrent.autoNotification().set(false);
             final double y = 25 * ChartIndicatorSample.rampFunctionDipoleCurrent(now);
             final double y2 = 100 * ChartIndicatorSample.rampFunctionBeamIntensity(now);
             final double ey = 1;
@@ -93,7 +86,6 @@ public class ChartIndicatorSample extends ChartSample {
             rollingBufferBeamIntensity.add(now, y2, ey, ey);
             final double val = 1500 + 1000.0 * Math.sin(Math.PI * 2 * 0.1 * now);
             rollingSine.add(now + 1, val, ey, ey);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
         }
 
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");

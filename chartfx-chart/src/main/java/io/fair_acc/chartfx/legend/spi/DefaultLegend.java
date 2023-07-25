@@ -1,9 +1,12 @@
 package io.fair_acc.chartfx.legend.spi;
 
+import java.lang.ref.PhantomReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.StateListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -116,25 +119,10 @@ public class DefaultLegend extends FlowPane implements Legend {
         var item = new LegendItem(series.getName(), symbol);
         item.setOnMouseClicked(event -> series.setVisible(!series.isVisible()));
         item.pseudoClassStateChanged(disabledClass, !series.isVisible());
-        series.addListener(new DatasetVisibilityListener(item, series));
+        series.getBitState().addInvalidateListener(ChartBits.DataSetVisibility, (obj, bits) -> {
+            item.pseudoClassStateChanged(disabledClass, !series.isVisible()); // TODO: do we need to unregister? It did not before.
+        });
         return item;
-    }
-
-    public static class DatasetVisibilityListener implements EventListener {
-        private LegendItem item;
-        private DataSet series;
-
-        public DatasetVisibilityListener(final LegendItem item, final DataSet series) {
-            this.item = item;
-            this.series = series;
-        }
-
-        @Override
-        public void handle(final UpdateEvent evt) {
-            if (evt instanceof UpdatedMetaDataEvent) {
-                item.pseudoClassStateChanged(disabledClass, !series.isVisible());
-            }
-        }
     }
 
     @Override

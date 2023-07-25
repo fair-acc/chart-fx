@@ -6,6 +6,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * TODO: Change to ErrorDataSet and calculate standard deviation.
@@ -68,7 +69,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
         }
         dataset.recomputeLimits(DIM_X);
         dataset.recomputeLimits(DIM_Y);
-        fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     /**
@@ -228,6 +229,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
                 recomputeLimits(dim);
             }
         }));
-        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 }

@@ -11,12 +11,28 @@ public enum ChartBits implements IntSupplier {
     AxisRange, // anything related to min/max, tick marks, etc.
     AxisTickLabelText, // the tick label display w/ unit scaling
     AxisLabelText, // display name or units
+    AxisDescriptionRange,
+    AxisDescriptionName,
+
     ChartLayout,
-    ChartCanvas;
+    ChartCanvas,
+    ChartAxes,
+    ChartRenderers,
+    ChartDataSets,
+    ChartLegend,
+    ChartPlugins,
+    ChartPluginState,
+    DataSetVisibility,
+    DataSetData,
+    DataSetRange,
+    DataSetMetaData,
+    DataSetPermutation,
+    DataViewWindow; // TODO: WindowMinimisedEvent/WindowMaximisedEvent/... necessary?
 
     private static final ChartBits[] AllBits = ChartBits.values();
     public static final int KnownMask = BitState.mask(AllBits);
     public static final int AxisMask = BitState.mask(AxisLayout, AxisCanvas, AxisRange, AxisTickLabelText, AxisLabelText);
+    public static final int DataSetMask = BitState.mask(ChartDataSets, DataSetVisibility, DataSetData, DataSetRange, DataSetMetaData, DataSetPermutation);
 
     public static StateListener printer() {
         return PRINTER;

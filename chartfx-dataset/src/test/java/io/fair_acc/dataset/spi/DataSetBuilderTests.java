@@ -309,7 +309,7 @@ class DataSetBuilderTests {
         }
 
         @Override
-        public List<EventListener> updateEventListener() {
+        public List<EventListener> getBitState() {
             return Collections.emptyList();
         }
 

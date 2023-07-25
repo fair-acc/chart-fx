@@ -4,6 +4,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * @author braeun
@@ -34,7 +35,7 @@ public class RollingDataSet extends FragmentedDataSet {
         lastLength = set.getAxisDescription(DIM_X).getMax();
         // invalidate ranges
         getAxisDescriptions().forEach(AxisDescription::clear);
-        fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     /**
@@ -73,7 +74,7 @@ public class RollingDataSet extends FragmentedDataSet {
                     this.getValues(DIM_X)[i] += value;
                 }
             });
-            fireInvalidated(new UpdatedDataEvent(this));
+            fireInvalidated(ChartBits.DataSetData);
         }
     }
 }

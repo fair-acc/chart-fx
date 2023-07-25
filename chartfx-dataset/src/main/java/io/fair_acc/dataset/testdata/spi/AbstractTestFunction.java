@@ -1,7 +1,7 @@
 package io.fair_acc.dataset.testdata.spi;
 
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.AbstractErrorDataSet;
 import io.fair_acc.dataset.testdata.TestDataSet;
 
@@ -68,7 +68,8 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
             recomputeLimits(DIM_X);
             recomputeLimits(DIM_Y);
         });
-        return fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override

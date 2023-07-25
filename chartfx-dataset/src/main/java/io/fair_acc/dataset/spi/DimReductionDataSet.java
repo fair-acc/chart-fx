@@ -6,6 +6,7 @@ import io.fair_acc.dataset.event.UpdateEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetMetaData;
 import io.fair_acc.dataset.GridDataSet;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * Reduces 3D data to 2D DataSet either via slicing, min, mean, max or integration
@@ -92,10 +93,8 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
                 return;
             }
             // recompute min/max indices based on actual new value range
-            final boolean oldValue = source.autoNotification().getAndSet(false);
             minIndex = source.getGridIndex(dimIndex == DIM_X ? DIM_Y : DIM_X, minValue);
             maxIndex = source.getGridIndex(dimIndex == DIM_X ? DIM_Y : DIM_X, maxValue);
-            source.autoNotification().set(oldValue);
 
             switch (reductionOption) {
             case MIN:
@@ -117,7 +116,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
             }
         }));
 
-        this.fireInvalidated(new AddedDataEvent(this, "updated " + DimReductionDataSet.class.getSimpleName() + " name = " + this.getName()));
+        this.fireInvalidated(ChartBits.DataSetData);
     }
 
     public void setMaxValue(final double val) {

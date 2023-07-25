@@ -57,10 +57,6 @@ public class RollingBufferSample extends ChartSample {
         // N.B. '+1' to check for resolution
 
         if (rollingBufferBeamIntensity.getDataCount() == 0) {
-            // suppress auto notification since we plan to add multiple data points
-            // N.B. this is for illustration of the 'setAutoNotification(..)' functionality
-            // one may use also the add(double[], double[], ...) method instead
-            boolean oldState = rollingBufferBeamIntensity.autoNotification().getAndSet(false);
             for (int n = RollingBufferSample.N_SAMPLES; n >= 0; --n) {
                 final double t = now - n * RollingBufferSample.UPDATE_PERIOD / 1000.0;
                 final double y = 100 * RollingBufferSample.rampFunctionBeamIntensity(t);
@@ -68,9 +64,6 @@ public class RollingBufferSample extends ChartSample {
                 rollingBufferBeamIntensity.add(t, y, ey, ey);
                 // N.B. update events suppressed by 'setAutoNotification(false)' above
             }
-            rollingBufferBeamIntensity.autoNotification().set(oldState);
-            // need to issue a separate update notification
-            rollingBufferBeamIntensity.fireInvalidated(new AddedDataEvent(rollingBufferBeamIntensity));
         } else {
             final double t = now;
             final double y2 = 100 * RollingBufferSample.rampFunctionBeamIntensity(t);
@@ -90,20 +83,12 @@ public class RollingBufferSample extends ChartSample {
                                                                     // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
-            // suppress auto notification since we plan to add multiple data points
-            // N.B. this is for illustration of the 'setAutoNotification(..)' functionality
-            // one may use also the add(double[], double[], ...) method instead
-            boolean oldState = rollingBufferDipoleCurrent.autoNotification().getAndSet(false);
             for (int n = RollingBufferSample.N_SAMPLES; n >= 0; --n) {
                 final double t = now - n * RollingBufferSample.UPDATE_PERIOD / 1000.0;
                 final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
                 final double ey = 1;
                 rollingBufferDipoleCurrent.add(t, y, ey, ey);
-                // N.B. update events suppressed by 'setAutoNotification(false)' above
             }
-            rollingBufferDipoleCurrent.autoNotification().set(oldState);
-            // need to issue a separate update notification
-            rollingBufferDipoleCurrent.fireInvalidated(new AddedDataEvent(rollingBufferDipoleCurrent));
         } else {
             final double t = now;
             final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);

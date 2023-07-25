@@ -42,14 +42,7 @@ public class LogAxisSample extends ChartSample {
         final DoubleDataSet dataSet3 = new DoubleDataSet("data set #2");
         chart.getDatasets().addAll(dataSet1, dataSet2, dataSet3);
 
-        // classic way of adding data points
-        // N.B. in a life-update context every new points triggers a chart
-        // repaint. This can be suppressed by adding/setting full arrays and/or
-        // by selecting dataSet1.setAutoNotification(false/true) for the data
-        // sets (or chart) concerned to suppress this repaint.
-        dataSet1.autoNotification().set(false);
-        dataSet2.autoNotification().set(false);
-        dataSet3.autoNotification().set(false);
+        // adding data points
         for (int n = 0; n < N_SAMPLES; n++) {
             final double x = n + 1.0;
             double y = 0.01 * (n + 1);
@@ -58,10 +51,6 @@ public class LogAxisSample extends ChartSample {
             dataSet2.add(x, Math.pow(2, y));
             dataSet3.add(x, Math.exp(y));
         }
-        dataSet1.autoNotification().set(true);
-        dataSet2.autoNotification().set(true);
-        dataSet3.autoNotification().set(true);
-
         return root;
     }
 

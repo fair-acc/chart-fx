@@ -7,6 +7,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.RemovedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.DoublePointError;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.LimitedQueue;
@@ -106,8 +107,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             // remove old fields if necessary
             expire(x);
         });
-        fireInvalidated(new AddedDataEvent(this));
-
+        fireInvalidated(ChartBits.DataSetData);
         return this;
     }
 
@@ -151,7 +151,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
                 this.add(xValues[i], yValues[i], yErrorsNeg[i], yErrorsPos[i]);
             }
         });
-        fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
         return this;
     }
 
@@ -181,7 +181,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             return toRemoveList.size();
         });
         if (dataPointsToRemove != 0) {
-            fireInvalidated(new RemovedDataEvent(this, "expired data"));
+            fireInvalidated(ChartBits.DataSetData);
         }
         return dataPointsToRemove;
     }
@@ -235,7 +235,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public void reset() {
         data.clear();
-        fireInvalidated(new RemovedDataEvent(this, "reset"));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     /**
@@ -281,6 +281,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             copyDataLabelsAndStyles(other, copy);
             copyAxisDescription(other);
         }));
-        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 }
