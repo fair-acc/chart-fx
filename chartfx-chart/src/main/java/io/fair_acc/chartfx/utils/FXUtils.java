@@ -12,6 +12,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import io.fair_acc.dataset.events.StateListener;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -280,6 +281,18 @@ public final class FXUtils {
             delta++;
         }
         return list;
+    }
+
+    public static StateListener runOnFxThread(StateListener listener) {
+        return (src, bits) -> {
+            if (Platform.isFxApplicationThread()) {
+                listener.accept(src, bits);
+            } else {
+                Platform.runLater(() -> {
+                    listener.accept(src, bits);
+                });
+            }
+        };
     }
 
 }

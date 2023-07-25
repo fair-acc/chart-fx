@@ -9,7 +9,9 @@ import java.util.stream.Collectors;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
-import io.fair_acc.chartfx.ui.utils.PostLayoutHook;
+import io.fair_acc.chartfx.ui.utils.LayoutHook;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -70,6 +72,10 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
 public abstract class Chart extends Region implements Observable {
+    private final LayoutHook layoutHooks = LayoutHook.newPreAndPostHook(this, this::runPreLayout, this::runPostLayout);
+    protected final BitState state = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
+            .addChangeListener(ChartBits.KnownMask, FXUtils.runOnFxThread((src, bits) -> layoutHooks.registerOnce())) // for now trigger on everything
+            .addChangeListener(ChartBits.ChartCanvas, FXUtils.runOnFxThread((src, bits) -> fireInvalidated()));  // for compatibility
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
@@ -100,7 +106,6 @@ public abstract class Chart extends Region implements Observable {
     // isCanvasChangeRequested is a recursion guard to update canvas only once
     protected boolean isCanvasChangeRequested;
     // layoutOngoing is a recursion guard to update canvas only once
-    protected boolean layoutOngoing;
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final Map<ChartPlugin, Group> pluginGroups = new ConcurrentHashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
@@ -112,9 +117,6 @@ public abstract class Chart extends Region implements Observable {
     {
         getRenderers().addListener(this::rendererChanged);
     }
-
-
-    protected boolean isAxesUpdate;
 
     // Inner canvas for the drawn content
     protected final ResizableCanvas canvas = new ResizableCanvas();
@@ -185,7 +187,6 @@ public abstract class Chart extends Region implements Observable {
         getChildren().add(menuPane);
     }
 
-    private final EventListener axisChangeListener = obs -> FXUtils.runFX(() -> axesInvalidated(obs));
     protected final ListChangeListener<Axis> axesChangeListenerLocal = this::axesChangedLocal;
     protected final ListChangeListener<Axis> axesChangeListener = this::axesChanged;
     protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
@@ -677,50 +678,15 @@ public abstract class Chart extends Region implements Observable {
         return toolBarPinned.get();
     }
 
-    private final PostLayoutHook drawPhase = new PostLayoutHook(this, this::drawChart);
+    protected void runPreLayout() {
+        final long start = ProcessingProfiler.getTimeStamp();
+        updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
+        ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
+    }
 
     @Override
     public void layoutChildren() {
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart layoutChildren() - pre");
-        }
-        if (layoutOngoing) {
-            return;
-        }
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart layoutChildren() - execute");
-        }
-        final long start = ProcessingProfiler.getTimeStamp();
-        layoutOngoing = true;
-
-        // update axes range first because this may change the overall layout
-        updateAxisRange(); // TODO: should be done in a pre-layout hook
-        ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
-
-        // update chart parent according to possible size changes
-        doLayout();
-
-        // request re-layout of canvas
-        drawPhase.runPostLayout();
-
-        ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
-
-        // request re-layout of plugins
-        layoutPluginsChildren();
-        ProcessingProfiler.getTimeDiff(start, "layoutPluginsChildren()");
-
-        ProcessingProfiler.getTimeDiff(start, "end");
-
-        layoutOngoing = false;
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart layoutChildren() - done");
-        }
-        fireInvalidated();
-    }
-
-    private void doLayout() {
-        // Do layout w/ existing hierarchy
-        // Account for margin and border insets
+        // Size all nodes to full size. Account for margin and border insets.
         final double x = snappedLeftInset();
         final double y = snappedTopInset();
         final double w = snapSizeX(getWidth()) - x - snappedRightInset();
@@ -728,6 +694,23 @@ public abstract class Chart extends Region implements Observable {
         for (Node child : getChildren()) {
             child.resizeRelocate(x, y, w, h);
         }
+
+        // request re-layout of plugins
+        layoutPluginsChildren();
+
+        // Make sure things will get redrawn
+        state.setDirty(ChartBits.ChartCanvas);
+    }
+
+    protected void runPostLayout() {
+        // Update the actual Canvas content
+        final long start = ProcessingProfiler.getTimeStamp();
+        for (Axis axis : axesList) {
+            axis.drawAxis();
+        }
+        redrawCanvas();
+        state.clear();
+        ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
     }
 
     public final ObjectProperty<Legend> legendProperty() {
@@ -756,7 +739,7 @@ public abstract class Chart extends Region implements Observable {
             }
             LOGGER.atDebug().addArgument("[..]").log("chart requestLayout() - called by {}");
         }
-
+        state.setDirty(ChartBits.ChartLayout);
         FXUtils.assertJavaFxThread();
         super.requestLayout();
     }
@@ -879,14 +862,14 @@ public abstract class Chart extends Region implements Observable {
             for (Axis axis : change.getRemoved()) {
                 // remove axis invalidation listener
                 AssertUtils.notNull("to be removed axis is null", axis);
-                axis.removeListener(axisChangeListener);
+                axis.getBitState().removeChangeListener(state);
                 removeAxisFromChildren(axis); // TODO: don't remove if it is contained in getAxes()
             }
             for (final Axis axis : change.getAddedSubList()) {
                 // check if axis is associated with an existing renderer,
                 // if yes -> throw an exception
                 AssertUtils.notNull("to be added axis is null", axis);
-                axis.addListener(axisChangeListener);
+                axis.getBitState().addChangeListener(state);
                 addAxisToChildren(axis);
             }
         }
@@ -914,26 +897,6 @@ public abstract class Chart extends Region implements Observable {
             return true;
         }
         return false;
-    }
-
-    /**
-     * function called whenever a axis has been invalidated (e.g. range change or parameter plotting changes). Typically
-     * calls 'requestLayout()' but can be overwritten in derived classes.
-     *
-     * @param axisObj the calling axis object
-     */
-    protected void axesInvalidated(final Object axisObj) {
-        if (!(axisObj instanceof Axis) || layoutOngoing || isAxesUpdate) {
-            return;
-        }
-        FXUtils.assertJavaFxThread();
-        isAxesUpdate = true;
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart axesInvalidated() - called by (1) {}", ProcessingProfiler.getCallingClassMethod(1));
-            LOGGER.debug("chart axesInvalidated() - called by (3) {}", ProcessingProfiler.getCallingClassMethod(3));
-        }
-        requestLayout();
-        isAxesUpdate = false;
     }
 
     protected void dataSetInvalidated() {
@@ -1016,13 +979,6 @@ public abstract class Chart extends Region implements Observable {
             change.getAddedSubList().forEach(this::pluginAdded);
         }
         updatePluginsArea();
-    }
-
-    protected void drawChart() {
-        for (Axis axis : axesList) {
-            axis.drawAxis();
-        }
-        redrawCanvas();
     }
 
     /**

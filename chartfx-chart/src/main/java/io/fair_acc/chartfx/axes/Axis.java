@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.axes;
 
 import java.util.List;
 
+import io.fair_acc.dataset.events.BitState;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -213,6 +214,8 @@ public interface Axis extends AxisDescription {
         // implemented for forwarding purposes
         AxisDescription.super.invokeListener(updateEvent, executeParallel);
     }
+
+    public BitState getBitState();
 
     /**
      * This is true when the axis determines its range from the data automatically and grows it if necessary

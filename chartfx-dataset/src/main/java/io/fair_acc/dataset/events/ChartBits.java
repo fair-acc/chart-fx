@@ -10,7 +10,9 @@ public enum ChartBits implements IntSupplier {
     AxisCanvas, // needs to be drawn
     AxisRange, // anything related to min/max, tick marks, etc.
     AxisTickLabelText, // the tick label display w/ unit scaling
-    AxisLabelText; // display name or units
+    AxisLabelText, // display name or units
+    ChartLayout,
+    ChartCanvas;
 
     private static final ChartBits[] AllBits = ChartBits.values();
     public static final int KnownMask = BitState.mask(AllBits);
