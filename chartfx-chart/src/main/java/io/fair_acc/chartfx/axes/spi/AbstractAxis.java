@@ -283,6 +283,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // Update the new axis range
         setLength(length);
         AxisRange range = getRange();
+
+        // Avoid NaNs getting into the system (TODO: happened due to bad interactions w/ event system. Still needed?)
+        if (!Double.isFinite(range.getMin()) || !Double.isFinite(range.getMax())) {
+            set(Double.NaN, Double.NaN);
+            setScale(0.1);
+            setTickUnit(0.1);
+            updateCachedVariables();
+            return;
+        }
+
+        // Set a real finite range
         set(range.getMin(), range.getMax());
         setScale(range.scale = calculateNewScale(length, getMin(), getMax()));
         setTickUnit(range.tickUnit = computePreferredTickUnit(length));
@@ -887,9 +898,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // to guarantee ordering (e.g. ticks are available before the grid)
         canvas.resizeRelocate(-canvasPadX, -canvasPadY, getWidth() + 2 * canvasPadX, getHeight() + 2 * canvasPadY);
 
-        //  Layout only gets called on actual size changes. The length already gets set during
-        //  the prefSize phase, so this is more of a sanity check.
-        setLength(getSide().isHorizontal() ? getWidth() : getHeight());
+        // Only called on actual size changes, so definitely redraw
         invalidateCanvas.run();
     }
 
