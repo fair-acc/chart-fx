@@ -190,7 +190,7 @@ class SimpleMeasurementsTests {
 
             assertNotNull(field.getDataSet(), "DataSet is null for type = " + type);
 
-            field.getValueIndicators().forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(1, indicator.updateEventListener().size(), "error for type = " + type));
+            field.getValueIndicators().forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(1, indicator.getBitState().size(), "error for type = " + type));
             final int nXIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof XValueIndicator).count();
             assertEquals(type.isVerticalMeasurement() ? type.getRequiredSelectors() : 0, nXIndicators, "error for type = " + type);
             final int nYIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof YValueIndicator).count();
@@ -219,7 +219,7 @@ class SimpleMeasurementsTests {
             final List<AbstractSingleValueIndicator> tmp = new ArrayList<>(field.getValueIndicators());
             FXUtils.runAndWait(field::removeAction);
 
-            tmp.forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(0, indicator.updateEventListener().size()));
+            tmp.forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(0, indicator.getBitState().size()));
 
             // Assert that there are no Indicators left after removing the measurement
             assertEquals(0, chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).count(), "error for type = " + type);

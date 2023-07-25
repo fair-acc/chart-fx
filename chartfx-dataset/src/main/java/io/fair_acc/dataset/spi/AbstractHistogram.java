@@ -5,6 +5,7 @@ import static io.fair_acc.dataset.spi.AbstractHistogram.HistogramOuterBounds.BIN
 import java.util.Arrays;
 
 import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.Histogram;
@@ -150,7 +151,7 @@ public abstract class AbstractHistogram extends AbstractDataSet<AbstractHistogra
             data[bin] = data[bin] + w;
             getAxisDescription(this.getDimension() - 1).add(data[bin]);
         });
-        fireInvalidated(new UpdatedDataEvent(this, "addBinContent()"));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     @Override

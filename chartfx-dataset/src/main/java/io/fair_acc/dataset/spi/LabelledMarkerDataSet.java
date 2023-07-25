@@ -16,6 +16,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.RemovedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.DoublePoint;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
@@ -51,8 +52,8 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
             dataLabels.add(marker.getLabel());
             dataStyles.add(marker.getStyle());
         });
-        fireInvalidated(new AddedDataEvent(this));
-        return this;
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -66,7 +67,8 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new RemovedDataEvent(this, "clear"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override
@@ -148,7 +150,8 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new RemovedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -166,8 +169,8 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
             dataLabels.set(index, marker.getLabel());
             dataStyles.set(index, marker.getStyle());
         });
-        fireInvalidated(new UpdatedDataEvent(this));
-        return this;
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -203,8 +206,8 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
                 dataStyles.add(marker.getStyle());
             }
         });
-        fireInvalidated(new UpdatedDataEvent(this, "fill"));
-        return this;
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override

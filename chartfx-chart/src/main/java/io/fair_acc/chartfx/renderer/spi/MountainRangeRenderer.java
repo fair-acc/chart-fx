@@ -316,7 +316,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public List<EventListener> updateEventListener() {
+        public List<EventListener> getBitState() {
             return updateListener;
         }
     }

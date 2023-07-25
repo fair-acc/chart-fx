@@ -54,8 +54,6 @@ public class RollingBufferSortedTreeSample extends ChartSample {
                                                                     // resolution
 
         if (rollingBufferDipoleCurrent.getDataCount() == 0) {
-            rollingBufferBeamIntensity.autoNotification().set(false);
-            rollingBufferDipoleCurrent.autoNotification().set(false);
             for (int n = RollingBufferSample.N_SAMPLES; n > 0; n--) {
                 final double t = now - n * RollingBufferSample.UPDATE_PERIOD / 1000.0;
                 final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(t);
@@ -64,16 +62,12 @@ public class RollingBufferSortedTreeSample extends ChartSample {
                 rollingBufferDipoleCurrent.add(t, y, ey, ey);
                 rollingBufferBeamIntensity.add(t, y2, ey, ey);
             }
-            rollingBufferBeamIntensity.autoNotification().set(true);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
         } else {
-            rollingBufferDipoleCurrent.autoNotification().set(false);
             final double y = 25 * RollingBufferSample.rampFunctionDipoleCurrent(now);
             final double y2 = 100 * RollingBufferSample.rampFunctionBeamIntensity(now);
             final double ey = 1;
             rollingBufferDipoleCurrent.add(now, y, ey, ey);
             rollingBufferBeamIntensity.add(now, y2, ey, ey);
-            rollingBufferDipoleCurrent.autoNotification().set(true);
         }
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }

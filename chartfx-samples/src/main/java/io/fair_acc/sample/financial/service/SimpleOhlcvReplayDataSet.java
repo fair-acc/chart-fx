@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -96,11 +97,9 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
 
                         consolidation = OhlcvTimeframeConsolidation.createConsolidation(period, tt, addons);
 
-                        autoNotification().set(false);
                         setData(ohlcv);
                         // try first tick in the fill part
                         tick();
-                        autoNotification().set(true);
 
                     } catch (TickDataFinishedException e) {
                         LOGGER.info(e.getMessage());
@@ -205,7 +204,7 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
             while (running.get()) {
                 try {
                     tick();
-                    fireInvalidated(new AddedDataEvent(SimpleOhlcvReplayDataSet.this, "tick"));
+                    fireInvalidated(ChartBits.DataSetData);
                     // pause simple support
                     while (paused.get()) {
                         synchronized (pauseSemaphore) {

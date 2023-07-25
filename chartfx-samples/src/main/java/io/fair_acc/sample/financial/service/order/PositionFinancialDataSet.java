@@ -4,6 +4,7 @@ import static io.fair_acc.sample.financial.service.StandardTradePlanAttributes.P
 
 import java.util.*;
 
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.sample.financial.service.execution.ExecutionPlatformListener;
 import io.fair_acc.sample.financial.service.execution.OrderEvent;
 import org.slf4j.Logger;
@@ -179,7 +180,7 @@ public class PositionFinancialDataSet extends AbstractDataSet<PositionFinancialD
         // update internal memories
         Order order = event.getOrder();
         includePosition(order.isExitOrder() ? order.getExitOfPosition() : order.getEntryOfPosition(), false);
-        fireInvalidated(new AddedDataEvent(PositionFinancialDataSet.this, "filled-order"));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     @Override

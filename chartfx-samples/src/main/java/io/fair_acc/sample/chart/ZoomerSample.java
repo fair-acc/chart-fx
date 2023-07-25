@@ -107,14 +107,7 @@ public class ZoomerSample extends ChartSample {
                     dataSet.getDataLabelMap().put(n, "special outlier");
                 }
             }
-
-            dataSet.autoNotification().set(true);
         });
-        // need to issue a separate update notification
-        // N.B. for performance reasons we let only 'dataSet' fire an event, since we modified both
-        // dataSetNoErrors will be updated alongside dataSet.
-        dataSet.fireInvalidated(new AddedDataEvent(dataSet));
-
         return dataSet;
     }
 

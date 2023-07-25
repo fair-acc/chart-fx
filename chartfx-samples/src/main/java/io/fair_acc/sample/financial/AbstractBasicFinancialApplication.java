@@ -330,10 +330,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
         IOhlcv ohlcv = new SimpleOhlcvDailyParser().getContinuousOHLCV(data);
-
-        dataSet.autoNotification().set(false);
         dataSet.setData(ohlcv);
-        dataSet.autoNotification().set(true);
 
         DescriptiveStatistics stats = new DescriptiveStatistics(24);
         for (IOhlcvItem ohlcvItem : ohlcv) {
@@ -341,8 +338,6 @@ public abstract class AbstractBasicFinancialApplication extends Application {
             stats.addValue(ohlcvItem.getClose());
             indiSet.add(timestamp, stats.getMean());
         }
-
-        Platform.runLater(() -> dataSet.fireInvalidated(null));
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 

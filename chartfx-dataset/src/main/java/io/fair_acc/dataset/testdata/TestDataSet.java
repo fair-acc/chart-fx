@@ -10,13 +10,6 @@ import io.fair_acc.dataset.event.UpdateEvent;
  * @param <D> generics for fluent design
  */
 public interface TestDataSet<D extends TestDataSet<D>> extends DataSet2D {
-    /**
-     * notify listener with given event that the data set has changed
-     * 
-     * @param evt the modification event
-     * @return itself (fluent design)
-     */
-    D fireInvalidated(UpdateEvent evt);
 
     /**
      * generate test data set

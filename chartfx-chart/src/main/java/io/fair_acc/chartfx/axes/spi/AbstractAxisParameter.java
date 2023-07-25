@@ -186,9 +186,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     // == majorTickMark
     protected static final int DEFAULT_MINOR_TICK_COUNT = 10;
 
-    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
-    private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
-
     private final transient StyleableIntegerProperty dimIndex = CSS.createIntegerProperty(this, "dimIndex", -1);
 
     /**
@@ -433,35 +430,28 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean add(final double value) {
-        if (this.contains(value)) {
+        if (!Double.isFinite(value)) {
             return false;
         }
-        boolean changed = false;
-        final boolean oldState = autoNotification().getAndSet(false);
-        if (value > this.getMax()) {
-            this.setMax(value);
-            changed = true;
+        if ((value > getMin()) && (value < getMax())) {
+            return false;
         }
-        if (value < this.getMin()) {
-            this.setMin(value);
-            changed = true;
+        if (value < getMin()) {
+            setMin(value);
         }
-        autoNotification().set(oldState);
-        if (changed) {
-            invokeListener(new AxisChangeEvent(this));
+        if (value > getMax()) {
+            setMax(value);
         }
-        return changed;
+        state.setDirty(ChartBits.AxisRange);
+        return true;
     }
 
     @Override
     public boolean add(final double[] values, final int length) {
         boolean changed = false;
-        final boolean oldState = autoNotification().getAndSet(false);
         for (int i = 0; i < length; i++) {
             changed |= add(values[i]);
         }
-        autoNotification().set(oldState);
-        invokeListener(new AxisChangeEvent(this));
         return changed;
     }
 
@@ -481,11 +471,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public BooleanProperty autoGrowRangingProperty() {
         return autoGrowRanging;
-    }
-
-    @Override
-    public AtomicBoolean autoNotification() {
-        return autoNotification;
     }
 
     /**
@@ -539,11 +524,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean clear() {
-        final boolean oldState = autoNotification().getAndSet(false);
         minProp.set(DEFAULT_MIN_RANGE);
         maxProp.set(DEFAULT_MAX_RANGE);
-        autoNotification().set(oldState);
-        invokeListener(new AxisChangeEvent(this));
         return false;
     }
 
@@ -551,8 +533,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     public boolean contains(final double value) {
         return Double.isFinite(value) && (value >= getMin()) && (value <= getMax());
     }
-
-    public abstract void fireInvalidated();
 
     /**
      * @return value of the {@link #animationDurationProperty} property
@@ -800,24 +780,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public BooleanProperty invertAxisProperty() {
         return invertAxis;
-    }
-
-    /**
-     * invoke object within update listener list
-     *
-     * @param updateEvent the event the listeners are notified with
-     * @param executeParallel {@code true} execute event listener via parallel executor service
-     */
-    @Override
-    public void invokeListener(final UpdateEvent updateEvent, final boolean executeParallel) {
-        synchronized (autoNotification()) {
-            if (!autoNotification().get()) {
-                // avoids duplicate update events
-                return;
-            }
-        }
-        requestAxisLayout();
-        Axis.super.invokeListener(updateEvent, executeParallel);
     }
 
     /**
@@ -1228,11 +1190,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public DoubleProperty unitScalingProperty() {
         return unitScaling;
-    }
-
-    @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
     }
 
     protected void setScale(final double scale) {

@@ -109,21 +109,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         tickLabelRotationProperty().addListener((ch, o, n) -> {
             updateTickLabelAlignment();
         });
-
-        // Send out events to be backwards compatible with old event system
-        final AxisChangeEvent axisTransformEvent = new AxisRangeChangeEvent(this);
-        final AxisChangeEvent axisLabelEvent = new AxisNameChangeEvent(this);
-        final AxisChangeEvent otherChangeEvent = new AxisChangeEvent(this);
-        state.addChangeListener((source, bits) -> {
-            if (ChartBits.AxisRange.isSet(bits)) {
-                invokeListener(axisTransformEvent, false);
-            } else if (ChartBits.AxisLabelText.isSet(bits)) {
-                invokeListener(axisLabelEvent, false);
-            } else {
-                invokeListener(otherChangeEvent, false);
-            }
-        });
-
     }
 
     protected AbstractAxis(final double lowerBound, final double upperBound) {
@@ -179,24 +164,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         drawAxisLabel(gc, axisWidth, axisHeight, getAxisLabel(), getTickLength());
         drawAxisLine(gc, axisLength, axisWidth, axisHeight);
         drawAxisPost();
-    }
-
-    /**
-     * Notifies listeners that the data has been invalidated. If the data is added to the chart, it triggers repaint.
-     */
-    @Override
-    public void fireInvalidated() {
-        synchronized (autoNotification()) {
-            if (!autoNotification().get() || updateEventListener().isEmpty()) {
-                return;
-            }
-        }
-
-        if (Platform.isFxApplicationThread()) {
-            this.invokeListener(new AxisChangeEvent(this), false);
-        } else {
-            Platform.runLater(() -> this.invokeListener(new AxisChangeEvent(this), false));
-        }
     }
 
     public AxisLabelFormatter getAxisLabelFormatter() {

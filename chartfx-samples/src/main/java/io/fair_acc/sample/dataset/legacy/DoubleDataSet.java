@@ -6,6 +6,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.RemovedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
@@ -165,7 +166,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             recomputeLimits(DIM_X);
             recomputeLimits(DIM_Y);
         });
-        return fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -236,7 +238,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getAxisDescription(DIM_X).add(x);
             getAxisDescription(DIM_Y).add(y);
         });
-        return fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -254,8 +257,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-
-        return fireInvalidated(new RemovedDataEvent(this, "clearData()"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override
@@ -332,7 +335,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new RemovedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -362,7 +366,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             this.set(other.getXValues(), other.getYValues(), true);
         }));
-        return fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -419,8 +424,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             recomputeLimits(DIM_X);
             recomputeLimits(DIM_Y);
         });
-
-        return fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override
@@ -432,7 +437,8 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        return fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override

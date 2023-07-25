@@ -4,6 +4,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.RemovedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.CircularBuffer;
 import io.fair_acc.dataset.utils.DoubleCircularBuffer;
@@ -94,7 +95,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             getAxisDescription(DIM_Y).clear();
         });
 
-        return fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     /**
@@ -155,7 +157,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             getAxisDescription(DIM_Y).clear();
         });
 
-        return fireInvalidated(new AddedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override
@@ -224,7 +227,8 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
 
-        return fireInvalidated(new RemovedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 
     @Override
@@ -246,6 +250,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
             copyDataLabelsAndStyles(other, copy);
             copyAxisDescription(other);
         }));
-        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 }

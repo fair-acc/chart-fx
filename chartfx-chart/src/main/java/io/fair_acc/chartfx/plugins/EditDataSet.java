@@ -968,9 +968,10 @@ public class EditDataSet extends TableViewer {
             setOnMouseDragOver(dragOver);
             // this.setOnMouseExited(dragOver);
 
-            xAxis.addListener(evt -> FXUtils.runFX(() -> this.setCenterX(getX())));
-            yAxis.addListener(evt -> FXUtils.runFX(() -> this.setCenterY(getY())));
-            dataSet.addListener(e -> FXUtils.runFX(this::update));
+            // TODO: what are these?
+//            xAxis.addListener(evt -> FXUtils.runFX(() -> this.setCenterX(getX())));
+//            yAxis.addListener(evt -> FXUtils.runFX(() -> this.setCenterY(getY())));
+//            dataSet.addListener(e -> FXUtils.runFX(this::update));
         }
 
         public void applyDrag(final double deltaX, final double deltaY) {

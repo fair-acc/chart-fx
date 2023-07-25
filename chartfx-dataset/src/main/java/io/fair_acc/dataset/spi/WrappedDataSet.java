@@ -7,6 +7,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.EventListener;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * A data set implementation which wraps another data set.
@@ -16,7 +17,6 @@ import io.fair_acc.dataset.DataSet;
 public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements DataSet {
     private static final long serialVersionUID = -2324840899629186284L;
     private DataSet dataset;
-    private final transient EventListener listener = s -> datasetInvalidated();
 
     /**
      * @param name data set name
@@ -28,7 +28,7 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
     private void datasetInvalidated() {
         // invalidate ranges
         getAxisDescriptions().forEach(AxisDescription::clear);
-        fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     @Override
@@ -78,18 +78,19 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
      */
     public void setDataset(final DataSet dataset) {
         if (this.dataset != null) {
-            this.dataset.removeListener(listener);
+            this.dataset.removeListener(this);
         }
         this.dataset = dataset;
         if (this.dataset != null) {
-            this.dataset.addListener(listener);
+            this.dataset.addListener(this);
         }
-        fireInvalidated(new UpdatedDataEvent(this));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
         lock().writeLockGuard(() -> other.lock().writeLockGuard(() -> this.setDataset(other)));
-        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 }

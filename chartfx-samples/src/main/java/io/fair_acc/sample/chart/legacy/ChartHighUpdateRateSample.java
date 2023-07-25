@@ -22,13 +22,10 @@ public class ChartHighUpdateRateSample extends RollingBufferSample {
     @Override
     public BorderPane initComponents() {
         BorderPane pane = super.initComponents();
-        rollingBufferDipoleCurrent.autoNotification().set(true);
-        rollingBufferBeamIntensity.autoNotification().set(true);
         Toolkit.getToolkit().addSceneTkPulseListener(() -> {
             counter = (counter + 1) % 100;
             if (counter == 0) {
-                System.err.println("pulse auto dipole = " + rollingBufferDipoleCurrent.autoNotification().get()
-                        + " auto beam " + rollingBufferBeamIntensity.autoNotification().get());
+                System.err.println("pulse auto dipole, "+ " auto beam ");
             }
         });
 

@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -261,7 +262,7 @@ public class TSpectrumSample extends Application {
     }
 
     private void triggerDataSetUpdate() {
-        demoDataSet.invokeListener(new UpdatedDataEvent(demoDataSet, "GUI related update"));
+        demoDataSet.fireInvalidated(ChartBits.DataSetData);
     }
 
     protected static DoubleDataSet generateDemoSineWaveData(final int nData) {

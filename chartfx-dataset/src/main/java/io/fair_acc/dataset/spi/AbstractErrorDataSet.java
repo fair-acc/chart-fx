@@ -37,12 +37,6 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
         this.errorType = errorTypes;
     }
 
-    @Override
-    public D fireInvalidated(final UpdateEvent event) {
-        super.fireInvalidated(event);
-        return getThis();
-    }
-
     /**
      * return the DataSetError.ErrorType of the dataset
      *
@@ -57,11 +51,6 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
     @SuppressWarnings("unchecked")
     protected D getThis() {
         return (D) this;
-    }
-
-    @Override
-    public DataSetLock<D> lock() {
-        return (DataSetLock<D>) super.lock();
     }
 
     /**

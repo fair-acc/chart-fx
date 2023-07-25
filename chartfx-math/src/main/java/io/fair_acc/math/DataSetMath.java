@@ -1135,14 +1135,12 @@ public final class DataSetMath { // NOPMD - nomen est omen
             xMaxLocal = xMax;
         }
 
-        final boolean oldState = function.autoNotification().getAndSet(false);
         for (var i = 0; i < nLength; i++) {
             final double x = function.get(DIM_X, i);
             if (x >= xMinLocal && x <= xMaxLocal) {
                 function.set(i, x, value);
             }
         }
-        function.autoNotification().set(oldState);
 
         return function;
     }

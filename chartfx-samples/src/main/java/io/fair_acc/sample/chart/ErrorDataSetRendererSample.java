@@ -154,12 +154,6 @@ public class ErrorDataSetRendererSample extends ChartSample {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
         dataSet.lock().writeLockGuard(() -> dataSetNoErrors.lock().writeLockGuard(() -> {
-            // suppress auto notification since we plan to add multiple data points
-            // N.B. this is for illustration of the 'setAutoNotification(..)' functionality
-            // one may use also the add(double[], double[], ...) method instead
-            dataSet.autoNotification().set(false);
-            dataSetNoErrors.autoNotification().set(false);
-
             dataSet.clearData();
             dataSetNoErrors.clearData();
             double oldY = 0;
@@ -171,22 +165,13 @@ public class ErrorDataSetRendererSample extends ChartSample {
                 final double ey = 10;
                 dataSet.add(n, y, ex, ey);
                 dataSetNoErrors.add(n, y + 20);
-                // N.B. update events suppressed by 'setAutoNotification(false)' above
 
                 if (n == 500000) { // NOPMD this point is really special ;-)
                     dataSet.getDataLabelMap().put(n, "special outlier");
                     dataSetNoErrors.getDataLabelMap().put(n, "special outlier");
                 }
             }
-
-            dataSet.autoNotification().set(true);
-            dataSetNoErrors.autoNotification().set(true);
         }));
-        // need to issue a separate update notification
-        // N.B. for performance reasons we let only 'dataSet' fire an event, since we modified both
-        // dataSetNoErrors will be updated alongside dataSet.
-        dataSet.fireInvalidated(new AddedDataEvent(dataSet));
-        // disabled on purpose -- dataSetNoErrors.fireInvalidated(new AddedDataEvent(dataSet)) --
 
         ProcessingProfiler.getTimeDiff(startTime, "generating data DataSet");
     }

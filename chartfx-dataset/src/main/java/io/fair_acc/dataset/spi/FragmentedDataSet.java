@@ -8,6 +8,7 @@ import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * @author braeun
@@ -38,7 +39,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
             getAxisDescription(DIM_Y).add(set.getAxisDescription(DIM_Y).getMax());
             getAxisDescription(DIM_Y).add(set.getAxisDescription(DIM_Y).getMin());
         });
-        fireInvalidated(new AddedDataEvent(this, "added data set"));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     /**
@@ -63,7 +64,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
         lock().writeLockGuard(() -> {
             dataCount = 0;
             list.clear();
-            fireInvalidated(new UpdatedDataEvent(this, "clear()"));
+            fireInvalidated(ChartBits.DataSetData);
         });
     }
 
@@ -133,6 +134,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
             copyDataLabelsAndStyles(other, copy);
             copyAxisDescription(other);
         }));
-        return fireInvalidated(new UpdatedDataEvent(this, "set(DataSet, boolean=" + copy + ")"));
+        fireInvalidated(ChartBits.DataSetData);
+        return getThis();
     }
 }

@@ -12,6 +12,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
+import io.fair_acc.dataset.events.ChartBits;
 import org.jtransforms.fft.FloatFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -341,7 +342,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
                     circIndex = (circIndex + frameSize) % (frameSize * frameCount);
                 });
 
-                fireInvalidated(new AddedDataEvent(TestDataSetSource.this, "new frame"));
+                fireInvalidated(ChartBits.DataSetData);
             }
         };
     }

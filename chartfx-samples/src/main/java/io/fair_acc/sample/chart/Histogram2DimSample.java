@@ -38,8 +38,6 @@ public class Histogram2DimSample extends ChartSample {
 
     private void fillData() {
         counter++;
-        histogram1.autoNotification().set(false);
-        histogram2.autoNotification().set(false);
         final double angle = Math.PI / 4;
         for (int i = 0; i < Histogram2DimSample.UPDATE_N_SAMPLES; i++) {
             final double x0 = rnd.nextGaussian() * 0.5 + 5.0;
@@ -51,10 +49,6 @@ public class Histogram2DimSample extends ChartSample {
             histogram1.fill(x0, y0);
             histogram2.fill(x1 + 14.0, x2 + 20.0);
         }
-        histogram1.autoNotification().set(true);
-        histogram2.autoNotification().set(true);
-        histogram1.fireInvalidated(null);
-        histogram2.fireInvalidated(null);
 
         if (counter % 500 == 0) {
             // reset distribution every now and then
