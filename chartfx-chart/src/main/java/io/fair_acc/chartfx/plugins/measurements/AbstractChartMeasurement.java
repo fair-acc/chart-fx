@@ -92,7 +92,6 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     protected int lastLayoutRow;
     protected final int requiredNumberOfIndicators;
     protected final int requiredNumberOfDataSets;
-    private final EventListener sliderChanged = new EventRateLimiter(this, DEFAULT_UPDATE_RATE_LIMIT);
     protected final GridPane gridPane = new GridPane();
     private final ParameterMeasurements plugin;
     private final String measurementName;

@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import io.fair_acc.dataset.event.UpdatedMetaDataEvent;
+import io.fair_acc.dataset.events.ChartBits;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -61,8 +62,8 @@ class GenericDataSetTests {
     void testVisibility(final Class<DataSet> clazz) throws AssertionError {
         DataSet dataSet = getDefaultTestDataSet(clazz, DEFAULT_DATASET_NAME1, DEFAULT_COUNT_MAX + 2);
         final AtomicBoolean visibilityChanged = new AtomicBoolean(false);
-        dataSet.addListener(event -> {
-            if (event instanceof UpdatedMetaDataEvent && event.getMessage().equals("changed visibility")) {
+        dataSet.getBitState().addInvalidateListener((src, bits) -> {
+            if (ChartBits.DataSetVisibility.isSet(bits)) {
                 visibilityChanged.set(true);
             }
         });

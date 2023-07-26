@@ -1,6 +1,7 @@
 package io.fair_acc.dataset.event;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 import io.fair_acc.dataset.events.BitState;
@@ -31,6 +32,11 @@ public interface EventSource extends StateListener {
         Objects.requireNonNull(listener, "UpdateListener must not be null");
         getBitState().addChangeListener(listener);
         getBitState().getBits(listener); // initialize to the current state
+    }
+
+    @Deprecated // for backwards compatibility with tests
+    default void addListener(Consumer<Object> listener) {
+        getBitState().addInvalidateListener((src, bits) -> listener.accept(new InvalidatedEvent((EventSource) src)));
     }
 
     /**

@@ -13,7 +13,7 @@ import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.GridDataSet;
-import io.fair_acc.dataset.event.EventListener;
+import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.locks.DataSetLock;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -225,12 +225,7 @@ class DataSetBuilderTests {
      */
     private static class MinimalDataSet implements DataSet {
         private static final long serialVersionUID = 1L;
-        private final AtomicBoolean autoNotify = new AtomicBoolean();
-
-        @Override
-        public AtomicBoolean autoNotification() {
-            return autoNotify;
-        }
+        private BitState state = BitState.initDirty(this);
 
         @Override
         public double get(int dimIndex, int index) {
@@ -309,8 +304,8 @@ class DataSetBuilderTests {
         }
 
         @Override
-        public List<EventListener> getBitState() {
-            return Collections.emptyList();
+        public BitState getBitState() {
+            return state;
         }
 
         @Override
