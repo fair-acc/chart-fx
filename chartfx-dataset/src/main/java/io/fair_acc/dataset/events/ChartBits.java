@@ -28,7 +28,8 @@ public enum ChartBits implements IntSupplier {
     DataSetName,
     DataSetMetaData,
     DataSetPermutation,
-    DataViewWindow; // TODO: WindowMinimisedEvent/WindowMaximisedEvent/... necessary?
+    DataViewWindow, // TODO: WindowMinimisedEvent/WindowMaximisedEvent/... necessary?
+    DataSetMeasurement;
 
     private static final ChartBits[] AllBits = ChartBits.values();
     public static final int KnownMask = BitState.mask(AllBits);
