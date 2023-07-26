@@ -1,12 +1,9 @@
 package io.fair_acc.sample.chart;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.StateListener;
 import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
@@ -77,17 +74,13 @@ public class DataViewerSample extends ChartSample {
 
     private static final int NUM_OF_POINTS = 20;
 
-    private final EventListener dataWindowEventListener = evt -> {
-        if (evt instanceof WindowUpdateEvent) {
-            final WindowUpdateEvent wEvt = (WindowUpdateEvent) evt;
-            LOGGER.atInfo().addArgument(wEvt).addArgument(wEvt.getType()).log("received window update event {} of type {}");
-        } else {
-            LOGGER.atInfo().addArgument(evt).addArgument(evt.getMessage()).log("received generic window update event {} with message {}");
+    private final StateListener dataWindowEventListener = (srcState, bits) -> {
+        if (!ChartBits.DataViewWindow.isSet(bits)) {
+            return;
         }
-
-        if (evt instanceof WindowClosedEvent) {
-            LOGGER.atInfo().addArgument(evt.getSource()).log("window {} closed");
-        }
+        srcState.clear(ChartBits.DataViewWindow); // clear manually to keep example simple
+        var viewWindow = (DataViewWindow) srcState.getSource();
+        LOGGER.atInfo().addArgument(viewWindow.getWindowState()).log("received window update event for new state {}");
     };
 
     @Override
@@ -173,10 +166,6 @@ public class DataViewerSample extends ChartSample {
         }
 
         newDataViewerPane.addListener(dataWindowEventListener);
-        newDataViewerPane.addListener(windowEvent -> {
-            // print window state explicitly
-            LOGGER.atInfo().addArgument(newDataViewerPane.getName()).addArgument(newDataViewerPane.getWindowState()).log("explicit '{}' window state is {}");
-        });
         newDataViewerPane.closedProperty().addListener((ch, o, n) -> {
             LOGGER.atInfo().log("newDataViewerPane Window '" + newDataViewerPane.getName()
                                 + "' has been closed - performing clean-up actions");
