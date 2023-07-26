@@ -257,7 +257,7 @@ public class WaterfallPerformanceSample extends ChartSample {
         dataSetDimension.setText(
                 dataSet.getShape(DataSet.DIM_X) + " x " + dataSet.getShape(DataSet.DIM_Y) + " data points");
 
-        dataSet.addListener(evt -> {
+        dataSet.addListener((src, bits) -> {
             final int dimX = dataSet.getShape(DataSet.DIM_X);
             final int dimY = dataSet.getShape(DataSet.DIM_Y);
             Platform.runLater(() -> {

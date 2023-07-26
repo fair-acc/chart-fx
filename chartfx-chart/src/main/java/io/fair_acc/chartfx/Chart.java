@@ -687,6 +687,7 @@ public abstract class Chart extends Region implements EventSource {
         }
         redrawCanvas();
         state.clear();
+        dataSetState.clear();
         forEachDataSet(ds -> ds.getBitState().clear());
         // TODO: plugins etc., do locking
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
