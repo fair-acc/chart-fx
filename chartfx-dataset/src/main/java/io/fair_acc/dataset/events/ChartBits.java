@@ -25,6 +25,7 @@ public enum ChartBits implements IntSupplier {
     DataSetVisibility,
     DataSetData,
     DataSetRange,
+    DataSetName,
     DataSetMetaData,
     DataSetPermutation,
     DataViewWindow; // TODO: WindowMinimisedEvent/WindowMaximisedEvent/... necessary?
