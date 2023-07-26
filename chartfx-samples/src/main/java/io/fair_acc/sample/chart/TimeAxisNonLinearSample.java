@@ -69,7 +69,7 @@ public class TimeAxisNonLinearSample extends ChartSample {
                 dataSet.add(now - (dataSet.getMaxLength()), Double.NaN, 0., 0.); // first point for long-term history
                 dataSet.add(now, 100 * Math.cos(2.0 * Math.PI * now), 0., 0.);
             }
-        }, 1000, 40);
+        }, 0, 40);
 
         long startTime = ProcessingProfiler.getTimeStamp();
         chart.getDatasets().add(dataSet);
@@ -86,10 +86,10 @@ public class TimeAxisNonLinearSample extends ChartSample {
 
         final var xValueIndicator = new XValueIndicator(xAxis1, xAxis1.getWidth() * xAxis1.getThreshold(), "long-short");
         xValueIndicator.setEditable(false);
-        dataSet.addListener(evt -> {
+        dataSet.getBitState().addInvalidateListener(FXUtils.runOnFxThread((src, bits) -> {
             final var locator = xAxis1.getValueForDisplay(xAxis1.getThreshold() * xAxis1.getWidth());
-            FXUtils.runFX(() -> xValueIndicator.setValue(locator));
-        });
+            xValueIndicator.setValue(locator);
+        }));
         chart.getPlugins().add(xValueIndicator);
 
         final var spWeight = new Slider(0.0, 1.0, xAxis1.getWeight());
@@ -105,6 +105,7 @@ public class TimeAxisNonLinearSample extends ChartSample {
         ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
 
         final var diagChart = new XYChart();
+        diagChart.setMaxHeight(300);
         diagChart.getPlugins().addAll(new Zoomer(), new EditAxis(), new DataPointTooltip());
         final var function = new DoubleDataSet("function");
         final var inverse = new DoubleDataSet("inverse");

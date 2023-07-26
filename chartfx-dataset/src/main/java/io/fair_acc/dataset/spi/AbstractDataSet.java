@@ -507,6 +507,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
      */
     public D setName(final String name) {
         this.name = name;
+        fireInvalidated(ChartBits.DataSetName);
         return getThis();
     }
 

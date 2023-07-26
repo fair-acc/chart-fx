@@ -2,6 +2,7 @@ package io.fair_acc.sample.math;
 
 import java.util.Random;
 
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.application.Application;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ObservableValue;
@@ -50,6 +51,8 @@ import io.fair_acc.math.spectra.wavelet.ContinuousWavelet;
  * TODO:
  * - add nonzero imaginary part to sample data?
  * - move computations out of javaFX application thread
+ *
+ * TODO: example was not tested after event refactoring (ennerf)
  * 
  * @author akrimm
  */
@@ -106,7 +109,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         chart3.getRenderers().add(new MetaDataRenderer(chart3));
         chart3.getDatasets().add(rawData);
 
-        rawData.addListener(evt -> stft(rawData, stftData));
+        rawData.addListener((src, bits) -> stft(rawData, stftData));
         // Short Time Fourier Transform chart
         chart1 = new XYChart();
         final ContourDataSetRenderer contourChartRenderer1 = new ContourDataSetRenderer();
@@ -131,7 +134,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         chart1.getPlugins().add(new EditAxis());
         chart1.getDatasets().add(TransposedDataSet.transpose(stftData, true));
 
-        rawData.addListener(evt -> wavelet(rawData, waveletData));
+        rawData.addListener((src, bits) -> wavelet(rawData, waveletData));
         // Wavelet Transform Chart
         chart2 = new XYChart();
         final ContourDataSetRenderer contourChartRenderer2 = new ContourDataSetRenderer();
@@ -217,7 +220,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
             outputData.clearData();
             outputData.clearMetaInfo().getErrorList().add(e.getMessage());
         }
-        outputData.invokeListener();
+        outputData.fireInvalidated(ChartBits.DataSetData);
     }
 
     private Node stftSettingsPane() {
@@ -310,7 +313,7 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
         } catch (Exception e) {
             ((DataSetMetaData) outputData).getErrorList().add(e.getMessage());
         }
-        outputData.invokeListener();
+        outputData.fireInvalidated(ChartBits.DataSetData);
     }
 
     private Node waveletSettingsPane() {
