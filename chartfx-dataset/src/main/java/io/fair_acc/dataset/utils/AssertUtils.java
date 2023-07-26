@@ -385,9 +385,10 @@ public final class AssertUtils {
      * @param name name to be included in exception message.
      * @param obj object to be checked
      */
-    public static <T> void notNull(final String name, final T obj) {
+    public static <T> T notNull(final String name, final T obj) {
         if (obj == null) {
             throw new IllegalArgumentException("The " + name + " must be non-null!");
         }
+        return obj;
     }
 }

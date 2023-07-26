@@ -66,6 +66,14 @@ public interface EventSource extends StateListener {
         getBitState().setDirty(bit0.getAsInt() | bit1.getAsInt());
     }
 
+    default void fireInvalidated(IntSupplier bit0, IntSupplier bit1, IntSupplier bit2) {
+        getBitState().setDirty(bit0.getAsInt() | bit1.getAsInt() | bit2.getAsInt());
+    }
+
+    default void fireInvalidated(IntSupplier bit0, IntSupplier bit1, IntSupplier bit2, IntSupplier bit3) {
+        getBitState().setDirty(bit0.getAsInt() | bit1.getAsInt() | bit2.getAsInt()| bit3.getAsInt());
+    }
+
     /**
      * @return list containing all update event listener (needs to be provided by implementing class)
      */

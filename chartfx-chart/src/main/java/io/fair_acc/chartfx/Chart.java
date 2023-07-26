@@ -76,7 +76,7 @@ public abstract class Chart extends Region implements EventSource {
 
     // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
     // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
-    protected final BitState state = BitState.initClean(this, BitState.ALL_BITS)
+    protected final BitState state = BitState.initDirty(this, BitState.ALL_BITS)
             .addChangeListener(ChartBits.KnownMask, (src, bits) -> layoutHooks.registerOnce())
             .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout());
     protected final BitState dataSetState = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
@@ -104,10 +104,7 @@ public abstract class Chart extends Region implements EventSource {
     /**
      * When true the chart will display a legend if the chart implementation supports a legend.
      */
-    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", true, () -> {
-        updateLegend(getDatasets(), getRenderers());
-        requestLayout();
-    });
+    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", true, state.onAction(ChartBits.ChartLegend));
 
     // isCanvasChangeRequested is a recursion guard to update canvas only once
     protected boolean isCanvasChangeRequested;
@@ -218,6 +215,7 @@ public abstract class Chart extends Region implements EventSource {
             showing.set(false);
             return;
         }
+        layoutHooks.registerOnce();
 
         // add listener
         newScene.windowProperty().addListener(windowPropertyListener);
@@ -256,7 +254,7 @@ public abstract class Chart extends Region implements EventSource {
                 AssertUtils.notNull("Side must not be null", newVal);
                 ChartPane.setSide(titleLabel, newVal);
                 return newVal;
-            }, this::requestLayout);
+            }, state.onAction(ChartBits.ChartLayout));
 
     /**
      * The side of the chart where the legend should be displayed default value Side.BOTTOM
@@ -273,7 +271,7 @@ public abstract class Chart extends Region implements EventSource {
                 legend.setVertical(newVal.isVertical());
 
                 return newVal;
-            }, this::requestLayout);
+            }, state.onAction(ChartBits.ChartLayout));
 
     /**
      * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
@@ -652,7 +650,7 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     protected void runPreLayout() {
-        if (state.isDirty(ChartBits.ChartLegend)) {
+        if (state.isDirty(ChartBits.ChartLegend, ChartBits.ChartDataSets, ChartBits.ChartRenderers)) {
             updateLegend(getDatasets(), getRenderers());
         }
 
@@ -888,7 +886,7 @@ public abstract class Chart extends Region implements EventSource {
                 set.addListener(dataSetState);
             }
         }
-        fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartLegend);
+        fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartDataSets, ChartBits.ChartLegend);
     }
 
     /**
@@ -967,7 +965,6 @@ public abstract class Chart extends Region implements EventSource {
                 // TODO: how should it handle renderer axes? this can add automatically-generated axes that aren't wanted
 //                renderer.getAxes().addListener(axesChangeListenerLocal);
 //                renderer.getAxes().forEach(this::addAxisToChildren);
-                fireInvalidated(ChartBits.ChartRenderers, ChartBits.ChartDataSets);
             });
 
             // handle removed renderer
@@ -976,14 +973,12 @@ public abstract class Chart extends Region implements EventSource {
                 renderer.getDatasets().forEach(set -> set.removeListener(dataSetState));
 //                renderer.getAxes().removeListener(axesChangeListenerLocal);
 //                renderer.getAxes().forEach(this::removeAxisFromChildren);
-                fireInvalidated(ChartBits.ChartRenderers, ChartBits.ChartDataSets);
             });
         }
         // reset change to allow derived classes to add additional listeners to renderer changes
         change.reset();
+        fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartRenderers, ChartBits.ChartLegend);
 
-        requestLayout();
-        updateLegend(getDatasets(), getRenderers());
     }
 
     /**
