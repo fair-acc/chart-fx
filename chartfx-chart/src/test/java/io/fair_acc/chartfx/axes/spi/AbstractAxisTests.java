@@ -179,14 +179,6 @@ class AbstractAxisTests {
 
         assertDoesNotThrow(axis::clear);
         assertDoesNotThrow(axis::forceRedraw);
-        final AtomicInteger counter = new AtomicInteger();
-        assertDoesNotThrow(axis::fireInvalidated);
-        assertDoesNotThrow(() -> FXUtils.runAndWait(axis::fireInvalidated));
-        assertEquals(0, counter.get());
-        axis.addListener(evt -> counter.incrementAndGet());
-        assertDoesNotThrow(axis::fireInvalidated);
-        assertDoesNotThrow(() -> FXUtils.runAndWait(axis::fireInvalidated));
-        assertEquals(2, counter.get());
     }
 
     @Test

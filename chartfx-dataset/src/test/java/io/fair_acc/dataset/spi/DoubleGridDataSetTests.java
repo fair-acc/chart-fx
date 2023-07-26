@@ -180,12 +180,8 @@ class DoubleGridDataSetTests {
         double[] data = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
         DoubleGridDataSet dataset = new DoubleGridDataSet("testGridDataSet", false, new double[][] { { 0.1, 0.2 }, { 1.1, 2.2, 3.3 }, { -0.5, 0.5 } }, data);
 
-        final List<UpdateEvent> events = Collections.synchronizedList(new ArrayList<>(20));
-        dataset.addListener(events::add);
         dataset.set(3, new int[] { 1, 2, 1 }, 23.0);
         assertEquals(23.0, dataset.get(3, 1, 2, 1));
-        assertSame(dataset, events.get(0).getSource());
-        assertEquals("set x_3[1, 2, 1] = 23.0", events.get(0).getMessage());
         assertEquals(1, dataset.getValue(3, 0.1, 1.1, -0.5));
         assertEquals(6.5, dataset.getValue(3, 0.15, 2.2, 0));
         assertEquals(Double.NaN, dataset.getValue(3, -1, 2.2, 0));
