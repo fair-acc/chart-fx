@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.ui.utils;
 
+import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 
@@ -40,11 +41,11 @@ public class LayoutHook {
 
     private LayoutHook(Node node, Runnable preLayoutAction, Runnable postLayoutAction) {
         this.node = node;
-        this.preLayoutAction = preLayoutAction;
-        this.postLayoutAction = postLayoutAction;
+        this.preLayoutAction = AssertUtils.notNull("preLayoutAction", preLayoutAction);
+        this.postLayoutAction = AssertUtils.notNull("preLayoutAction", postLayoutAction);
     }
 
-    public void registerOnce() {
+    public LayoutHook registerOnce() {
         // Scene has changed -> remove the old one first
         if (registeredScene != null && registeredScene != node.getScene()) {
             unregister();
@@ -52,27 +53,40 @@ public class LayoutHook {
         // Register only if we haven't already registered
         if (registeredScene == null && node.getScene() != null) {
             registeredScene = node.getScene();
-            registeredScene.addPreLayoutPulseListener(preLayoutAction);
-            registeredScene.addPostLayoutPulseListener(postLayoutAndRemove);
+            registeredScene.addPreLayoutPulseListener(preLayoutAndAdd);
         }
+        return this;
+    }
+
+    private void runPreLayoutAndAdd() {
+        // Called before proper initialization
+        if (preLayoutAction == null) {
+            return;
+        }
+        // We don't want to be in a position where the post layout listener
+        // runs by itself, so we don't register until we made sure that the
+        // pre-layout action ran before.
+        preLayoutAction.run();
+        registeredScene.addPostLayoutPulseListener(postLayoutAndRemove);
+    }
+
+    private void runPostLayoutAndRemove() {
+        postLayoutAction.run();
+        unregister();
     }
 
     private void unregister() {
-        registeredScene.removePreLayoutPulseListener(preLayoutAction);
+        registeredScene.removePreLayoutPulseListener(preLayoutAndAdd);
         registeredScene.removePostLayoutPulseListener(postLayoutAndRemove);
         registeredScene = null;
-    }
-
-    private void runPostlayoutAndRemove() {
-        postLayoutAction.run();
-        unregister();
     }
 
     final Node node;
     final Runnable preLayoutAction;
     final Runnable postLayoutAction;
 
-    final Runnable postLayoutAndRemove = this::runPostlayoutAndRemove;
+    final Runnable preLayoutAndAdd = this::runPreLayoutAndAdd;
+    final Runnable postLayoutAndRemove = this::runPostLayoutAndRemove;
     Scene registeredScene = null;
 
 }
