@@ -19,6 +19,7 @@ import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -240,8 +241,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         FXUtils.runFX(() -> getValueField().setValue(val));
 
         if (event != null) {
-            // republish updateEvent
-            invokeListener(event);
+            fireInvalidated(ChartBits.DataSetMeasurement);
         }
     }
 
@@ -935,7 +935,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
             chart.getPlugins().add(new TableViewer());
 
             final Scene scene = new Scene(chart, 640, 480);
-            renderer.getDatasets().get(0).addListener(titleListener);
+            // TODO: renderer.getDatasets().get(0).addListener(titleListener);
             setScene(scene);
             FXUtils.runFX(this::show);
 
@@ -946,9 +946,9 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
             });
 
             setOnCloseRequest(evt -> {
-                chart.getRenderers().remove(renderer);
+                // TODO: chart.getRenderers().remove(renderer);
                 chart.getAxes().clear();
-                renderer.getDatasets().get(0).removeListener(titleListener);
+                // TODO: renderer.getDatasets().get(0).removeListener(titleListener);
                 xAxis.setSide(Side.TOP);
                 yAxis.setSide(Side.RIGHT);
                 graphDetached.set(false);

@@ -68,6 +68,7 @@ import impl.org.controlsfx.skin.DecorationPane;
  */
 public abstract class AbstractChartMeasurement implements EventListener, EventSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChartMeasurement.class);
+    private final BitState state = BitState.initDirty(this);
     private static final int MIN_DRAG_BORDER_WIDTH = 30;
     protected static final double DEFAULT_MIN = Double.NEGATIVE_INFINITY;
     protected static final double DEFAULT_MAX = Double.POSITIVE_INFINITY;
@@ -128,9 +129,9 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
     };
     private final ListChangeListener<? super AbstractSingleValueIndicator> valueIndicatorsUserChangeListener = (final Change<? extends AbstractSingleValueIndicator> change) -> {
         while (change.next()) {
-            change.getRemoved().forEach(oldIndicator -> oldIndicator.removeListener(sliderChanged));
+           //TODO: change.getRemoved().forEach(oldIndicator -> oldIndicator.removeListener(sliderChanged));
 
-            change.getAddedSubList().stream().filter(newIndicator -> !newIndicator.getBitState().contains(sliderChanged)).forEach(newIndicator -> newIndicator.addListener(sliderChanged));
+            //TODO: change.getAddedSubList().stream().filter(newIndicator -> !newIndicator.getBitState().contains(sliderChanged)).forEach(newIndicator -> newIndicator.addListener(sliderChanged));
         }
     };
 
@@ -260,14 +261,9 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         return title;
     }
 
-    @Deprecated
-    private void invokeListener(Object event, boolean parallel) {
-        // TODO: figure out what all this does
-    }
-
     @Override
     public BitState getBitState() {
-        return null; // TODO: refactor class
+        return state;
     }
 
     public DoubleProperty valueProperty() {
@@ -328,7 +324,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
         }
         final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator) p).collect(Collectors.toList());
         allIndicators.forEach((final AbstractSingleValueIndicator indicator) -> {
-            indicator.removeListener(sliderChanged);
+            //TODO: indicator.removeListener(sliderChanged);
             getValueIndicatorsUser().remove(indicator);
         });
     }
@@ -339,7 +335,7 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             return;
         }
         final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator) p).collect(Collectors.toList());
-        allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.getBitState().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
+        //TODO: allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.getBitState().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
     }
 
     protected void updateSlider() {
@@ -376,9 +372,9 @@ public abstract class AbstractChartMeasurement implements EventListener, EventSo
             getMeasurementPlugin().getChart().getPlugins().add(sliderIndicator);
         }
 
-        if (!sliderIndicator.getBitState().contains(sliderChanged)) {
-            sliderIndicator.addListener(sliderChanged);
-        }
+        //TODO: if (!sliderIndicator.getBitState().contains(sliderChanged)) {
+        //TODO:     sliderIndicator.addListener(sliderChanged);
+        //TODO: }
 
         return sliderIndicator;
     }

@@ -215,7 +215,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
 
         if (event != null) {
             // republish updateEvent
-            invokeListener(event);
+            // TODO:   invokeListener(event);
         }
     }
 
