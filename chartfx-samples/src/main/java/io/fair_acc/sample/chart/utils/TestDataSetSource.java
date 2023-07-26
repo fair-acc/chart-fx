@@ -110,6 +110,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
     public void fillTestData() {
         lock().writeLockGuard(
                 () -> synth.decode(history[2].elements(), frameSize, updatePeriod, samplingRate, N_SYNTHESISER_BITS));
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     @Override
@@ -165,6 +166,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
 
     public void reset() {
         synth.reset();
+        fireInvalidated(ChartBits.DataSetData);
     }
 
     public void setFrameCount(int frameCount) {
@@ -365,6 +367,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
         ArrayUtils.fillArray(history[DIM_Z].elements(), 0.0f);
         synth.setBufferLength(2 * frameSize);
         lineBuffer = new DoubleCircularBuffer(2 * frameSize);
+        fireInvalidated(ChartBits.DataSetData);
 
         if (taskDataUpdate != null) {
             start();

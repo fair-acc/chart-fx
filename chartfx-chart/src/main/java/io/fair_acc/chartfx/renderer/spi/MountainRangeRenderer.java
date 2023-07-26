@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
 
+import io.fair_acc.dataset.events.BitState;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
@@ -169,13 +169,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     private class Demux3dTo2dDataSet implements DataSet {
         private static final long serialVersionUID = 3914728138839091421L;
         private final transient DataSetLock<DataSet> localLock = new DefaultDataSetLock<>(this);
-        private final transient AtomicBoolean autoNotify = new AtomicBoolean(true);
         private final GridDataSet dataSet;
         private final int yIndex;
         private final double zMin;
         private final double zMax;
         private final double yShift;
-        private final transient List<EventListener> updateListener = new ArrayList<>();
         private final transient List<AxisDescription> axesDescriptions = new ArrayList<>(Arrays.asList( //
                 new DefaultAxisDescription(DIM_X, "x-Axis", "a.u."), //
                 new DefaultAxisDescription(DIM_Y, "y-Axis", "a.u.")));
@@ -187,11 +185,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             this.zMin = zMin;
             this.zMax = zMax;
             yShift = dataSet.getShape(DIM_Y) > 0 ? mountainRangeExtra * dataSet.getAxisDescription(DIM_Z).getMax() * yIndex / dataSet.getShape(DIM_Y) : 0;
-        }
-
-        @Override
-        public AtomicBoolean autoNotification() {
-            return autoNotify;
         }
 
         @Override
@@ -273,11 +266,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public boolean isAutoNotification() {
-            return autoNotify.get();
-        }
-
-        @Override
         public DataSetLock<DataSet> lock() {
             // empty implementation since the superordinate DataSet3D lock is being held/protecting this data set
             return localLock;
@@ -316,8 +304,8 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
-        public List<EventListener> getBitState() {
-            return updateListener;
+        public BitState getBitState() {
+            throw new AssertionError("Mountain range ds wrapper keeps no state");
         }
     }
 }
