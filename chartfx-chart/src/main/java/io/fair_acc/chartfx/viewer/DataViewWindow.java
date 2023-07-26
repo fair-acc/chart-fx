@@ -1,12 +1,11 @@
 package io.fair_acc.chartfx.viewer;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.DefaultProperty;
 import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
@@ -54,7 +53,6 @@ import io.fair_acc.chartfx.viewer.event.WindowMinimisedEvent;
 import io.fair_acc.chartfx.viewer.event.WindowMinimisingEvent;
 import io.fair_acc.chartfx.viewer.event.WindowRestoredEvent;
 import io.fair_acc.chartfx.viewer.event.WindowRestoringEvent;
-import io.fair_acc.dataset.event.EventListener;
 import io.fair_acc.dataset.event.EventSource;
 
 /**
@@ -66,6 +64,7 @@ import io.fair_acc.dataset.event.EventSource;
 @DefaultProperty(value = "content")
 public class DataViewWindow extends BorderPane implements EventSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataViewWindow.class);
+    private final BitState state = BitState.initDirty(this);
     private static final int MIN_DRAG_BORDER_WIDTH = 20;
     private static final String WINDOW_CSS = "DataViewer.css";
     private static final String CSS_WINDOW = "window";
@@ -78,11 +77,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     private static final String CSS_TITLE_LABEL = "window-titlelabel";
 
     // needed for EventSource listener interface
-    protected transient boolean parallelListeners = false;
-    private final transient AtomicBoolean autoNotification = new AtomicBoolean(true);
     private final transient AtomicBoolean updatingStage = new AtomicBoolean(false);
-    private final transient List<EventListener> updateListeners = Collections.synchronizedList(new LinkedList<>());
-
     private final StringProperty name = new SimpleStringProperty(this, "name", "");
     private final HBox leftButtons = new HBox();
     private final Label titleLabel = new Label();
@@ -126,22 +121,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
             }
 
             super.set(state);
+            fireInvalidated(ChartBits.DataViewWindow);
 
-            switch (state) {
-            case WINDOW_MINIMISED:
-                invokeListener(new WindowMinimisedEvent(DataViewWindow.this), parallelListeners);
-                break;
-            case WINDOW_MAXIMISED:
-                invokeListener(new WindowMaximisedEvent(DataViewWindow.this), parallelListeners);
-                break;
-            case WINDOW_RESTORED:
-                invokeListener(new WindowRestoredEvent(DataViewWindow.this), parallelListeners);
-                break;
-            case WINDOW_CLOSED:
-                invokeListener(new WindowClosedEvent(DataViewWindow.this), parallelListeners);
-                break;
-            default:
-            }
         }
     };
 
@@ -174,13 +155,13 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
         updatingStage.set(true);
         if (this.isMaximised()) {
-            invokeListener(new WindowRestoringEvent(this), parallelListeners);
+            fireInvalidated(ChartBits.DataViewWindow);
         } else {
             // either minimised, normal (and/or detached) state
             if (isMinimised()) {
-                invokeListener(new WindowRestoringEvent(this), parallelListeners);
+                fireInvalidated(ChartBits.DataViewWindow);
             } else {
-                invokeListener(new WindowMaximisingEvent(this), parallelListeners);
+                fireInvalidated(ChartBits.DataViewWindow);
             }
         }
         if (dialog.isShowing()) {
@@ -192,7 +173,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
         if (getParentView().getMinimisedChildren().contains(this)) {
             // this DataViewWindow is minimised
-            invokeListener(new WindowRestoringEvent(this), parallelListeners);
+            fireInvalidated(ChartBits.DataViewWindow);
             getParentView().getMinimisedChildren().remove(this);
             setMinimised(false);
             getParentView().getVisibleChildren().add(this);
@@ -225,7 +206,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
         updatingStage.set(true);
 
-        invokeListener(new WindowMinimisingEvent(this), parallelListeners);
+        fireInvalidated(ChartBits.DataViewWindow);
         if (dialog.isShowing()) {
             dialog.hide();
             maximizeRestoreButton.getStyleClass().setAll(CSS_WINDOW_MAXIMIZE_ICON);
@@ -252,7 +233,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             return;
         }
         updatingStage.set(true);
-        invokeListener(new WindowClosingEvent(this), parallelListeners);
+        fireInvalidated(ChartBits.DataViewWindow);
 
         // asked to remove pane
         getParentView().getMinimisedChildren().remove(this);
@@ -382,11 +363,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         if (!getRightIcons().contains(button)) {
             this.getRightIcons().add(button);
         }
-    }
-
-    @Override
-    public AtomicBoolean autoNotification() {
-        return autoNotification;
     }
 
     public BooleanProperty closedProperty() {
@@ -636,8 +612,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
     }
 
     @Override
-    public List<EventListener> updateEventListener() {
-        return updateListeners;
+    public BitState getBitState() {
+        return state;
     }
 
     public ObjectProperty<WindowDecoration> windowDecorationProperty() {
@@ -780,7 +756,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
 
         public void hide(final DataViewWindow dataViewWindow) {
-            dataViewWindow.invokeListener(new WindowRestoringEvent(dataViewWindow), dataViewWindow.parallelListeners);
             titleProperty().unbind();
             scene.setRoot(new StackPane());
 
@@ -788,7 +763,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
             dataViewWindow.getParentView().getUndockedChildren().remove(dataViewWindow);
             dataViewWindow.getParentView().getVisibleChildren().add(dataViewWindow);
 
-            dataViewWindow.invokeListener(new WindowRestoredEvent(dataViewWindow), dataViewWindow.parallelListeners);
+            dataViewWindow.fireInvalidated(ChartBits.DataViewWindow);
         }
 
         public boolean isMaximised() {
@@ -836,7 +811,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
                 setY(mouseEvent.getScreenY());
             }
 
-            dataViewWindow.invokeListener(new WindowDetachingEvent(dataViewWindow), dataViewWindow.parallelListeners);
+            dataViewWindow.fireInvalidated(ChartBits.DataViewWindow);
 
             posX = getX();
             posY = getY();
@@ -870,7 +845,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
             dataViewWindow.setWindowState(WindowState.WINDOW_RESTORED);
             dataViewWindow.setDetached(true);
-            dataViewWindow.invokeListener(new WindowDetachedEvent(dataViewWindow), dataViewWindow.parallelListeners);
+            dataViewWindow.fireInvalidated(ChartBits.DataViewWindow);
         }
 
         private String getName() {
