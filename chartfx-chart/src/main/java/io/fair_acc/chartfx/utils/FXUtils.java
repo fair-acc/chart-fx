@@ -1,9 +1,6 @@
 package io.fair_acc.chartfx.utils;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -14,9 +11,14 @@ import java.util.function.Supplier;
 
 import io.fair_acc.dataset.events.StateListener;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 
+import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -293,6 +295,33 @@ public final class FXUtils {
                 });
             }
         };
+    }
+
+    public static ObservableBooleanValue getShowingBinding(Node node) {
+        BooleanProperty showing = new SimpleBooleanProperty();
+        Runnable update = () -> showing.set(Optional.ofNullable(node.getScene())
+                        .flatMap(scene -> Optional.ofNullable(scene.getWindow()))
+                        .map(Window::isShowing)
+                        .orElse(false));
+        update.run(); // initial value
+
+        ChangeListener<Boolean> onShowingChange = (obs, old, value) -> {
+            update.run();
+        };
+
+        ChangeListener<Window> onWindowChange = (obs, old, value) -> {
+            if(old != null) old.showingProperty().removeListener(onShowingChange);
+            if(value != null) value.showingProperty().addListener(onShowingChange);
+            update.run();
+        };
+
+        node.sceneProperty().addListener((obs, old, value) -> {
+            if(old != null) old.windowProperty().removeListener(onWindowChange);
+            if(value != null) value.windowProperty().addListener(onWindowChange);
+            update.run();
+        });
+
+        return showing;
     }
 
 }
