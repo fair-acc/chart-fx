@@ -78,7 +78,14 @@ public abstract class Chart extends Region implements EventSource {
     protected final BitState state = BitState.initDirty(this, BitState.ALL_BITS)
             .addChangeListener(ChartBits.KnownMask, (src, bits) -> layoutHooks.registerOnce())
             .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout());
-    protected final StateListener dataSetListener = FXUtils.runOnFxThread(state); // datasets can be updated from different threads
+
+    // DataSets are the only part that can potentially get updated from different threads, so we use a separate
+    // state object that can handle multithreaded updates. The state always represents the current aggregate state
+    // of all datasets, but the JavaFX change listener may not forward the dirty bits to the chart until the next frame.
+    // This creates a race condition where delta bits that are already cleared in the datasets may end up dirtying the
+    // chart and trigger an unnecessary redraw. To avoid this issue we ignore the delta and pass the current state.
+    protected final BitState dataSetState = BitState.initDirty(this, BitState.ALL_BITS)
+            .addChangeListener(FXUtils.runOnFxThread((src, deltaBits) -> state.setDirty(src.getBits())));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
@@ -104,9 +111,6 @@ public abstract class Chart extends Region implements EventSource {
      */
     private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", true, state.onAction(ChartBits.ChartLegend));
 
-    // isCanvasChangeRequested is a recursion guard to update canvas only once
-    protected boolean isCanvasChangeRequested;
-    // layoutOngoing is a recursion guard to update canvas only once
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final Map<ChartPlugin, Group> pluginGroups = new ConcurrentHashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
@@ -346,14 +350,6 @@ public abstract class Chart extends Region implements EventSource {
                 // workaround needed so that pane within pane does not trigger
                 // recursions w.r.t. repainting
                 getCanvasForeground().resize(width, height);
-            }
-
-            if (!isCanvasChangeRequested) {
-                isCanvasChangeRequested = true;
-                Platform.runLater(() -> {
-                    this.layoutChildren();
-                    isCanvasChangeRequested = false;
-                });
             }
         };
         canvas.widthProperty().addListener(canvasSizeChangeListener);
@@ -643,6 +639,7 @@ public abstract class Chart extends Region implements EventSource {
             axis.drawAxis();
         }
         redrawCanvas();
+        dataSetState.clear();
         state.clear();
         for (var ds : lockedDataSets) {
             ds.getBitState().clear(); // technically a 'write'
@@ -830,10 +827,10 @@ public abstract class Chart extends Region implements EventSource {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
             for (final DataSet set : change.getRemoved()) {
-                set.removeListener(dataSetListener);
+                set.removeListener(dataSetState);
             }
             for (final DataSet set : change.getAddedSubList()) {
-                set.addListener(dataSetListener);
+                set.addListener(dataSetState);
             }
         }
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartDataSets, ChartBits.ChartLegend);
@@ -910,7 +907,7 @@ public abstract class Chart extends Region implements EventSource {
             // handle added renderer
             for (Renderer renderer : change.getAddedSubList()) {
                 for (DataSet dataset : renderer.getDatasets()) {
-                    dataset.addListener(dataSetListener);
+                    dataset.addListener(dataSetState);
                 }
                 renderer.getDatasets().addListener(datasetChangeListener);
             }
@@ -918,7 +915,7 @@ public abstract class Chart extends Region implements EventSource {
             // handle removed renderer
             for (Renderer renderer : change.getRemoved()) {
                 for (DataSet dataset : renderer.getDatasets()) {
-                    dataset.removeListener(dataSetListener);
+                    dataset.removeListener(dataSetState);
                 }
                 renderer.getDatasets().removeListener(datasetChangeListener);
             }
