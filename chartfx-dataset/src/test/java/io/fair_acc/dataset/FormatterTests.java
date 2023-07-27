@@ -8,12 +8,20 @@ import static io.fair_acc.dataset.DefaultNumberFormatter.FormatMode;
 import static io.fair_acc.dataset.DefaultNumberFormatter.SignConvention;
 
 import java.text.ParsePosition;
+import java.util.Locale;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class FormatterTests {
+
+    @BeforeAll
+    public static void setDefaultLocale() {
+        Locale.setDefault(Locale.US);
+    }
+
     @Test
     void basicTests() {
         Formatter<Number> testFormatter = new Formatter<>() {
