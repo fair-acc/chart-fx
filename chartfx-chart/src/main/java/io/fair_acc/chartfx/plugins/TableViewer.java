@@ -313,9 +313,10 @@ public class TableViewer extends ChartPlugin {
             // Update the datasets
             int i = 0, nRowsNew = 0;
             for (DataSet ds : columnsUpdated) {
-                var col = (DataSetTableColumns) cols.get(i++);
-                col.update(ds);
-                nRowsNew = Math.max(nRowsNew, ds.getDataCount());
+                if (cols instanceof DataSetTableColumns) {
+                    ((DataSetTableColumns) cols.get(i++)).update(ds);
+                    nRowsNew = Math.max(nRowsNew, ds.getDataCount());
+                }
             }
 
             if (nRows != nRowsNew) {
