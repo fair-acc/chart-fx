@@ -478,29 +478,19 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
         for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
             final DataSet dataSet = localDataSetList.get(dataSetIndex);
-            if (!dataSet.isVisible() || !(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2) {
+            if (!dataSet.isVisible() || !(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2 || dataSet.getDataCount() == 0) {
                 continue; // DataSet not applicable to ContourChartRenderer
             }
 
-            final boolean result = dataSet.lock().readLockGuard(() -> {
-                long stop = ProcessingProfiler.getTimeDiff(mid, "dataSet.lock()");
+            long stop = ProcessingProfiler.getTimeDiff(mid, "dataSet.lock()");
+            localCache = new ContourDataSetCache(xyChart, this, dataSet); // NOPMD
+            ProcessingProfiler.getTimeDiff(stop, "updateCachedVariables");
 
-                if (dataSet.getDataCount() == 0) {
-                    return false;
-                }
-
-                localCache = new ContourDataSetCache(xyChart, this, dataSet); // NOPMD
-                ProcessingProfiler.getTimeDiff(stop, "updateCachedVariables");
-                return true;
-            });
-
-            if (result) {
-                layoutZAxis(getZAxis());
-                // data reduction algorithm here
-                paintCanvas(gc);
-                drawnDataSet.add(dataSet);
-                localCache.releaseCachedVariables();
-            }
+            layoutZAxis(getZAxis());
+            // data reduction algorithm here
+            paintCanvas(gc);
+            drawnDataSet.add(dataSet);
+            localCache.releaseCachedVariables();
 
             ProcessingProfiler.getTimeDiff(mid, "finished drawing");
 
