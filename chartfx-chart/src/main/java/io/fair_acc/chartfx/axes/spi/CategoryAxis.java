@@ -168,23 +168,20 @@ public final class CategoryAxis extends DefaultNumericAxis {
         }
 
         final List<String> newCategoryList = new ArrayList<>();
-        final boolean result = dataSet.lock().readLockGuard(() -> {
-            boolean zeroDataLabels = true;
-            for (int i = 0; i < dataSet.getDataCount(); i++) {
-                final String dataLabel = dataSet.getDataLabel(i);
-                String sanitizedLabel;
-                if (dataLabel == null) {
-                    sanitizedLabel = "unknown category";
-                } else {
-                    sanitizedLabel = dataLabel;
-                    zeroDataLabels = false;
-                }
-                newCategoryList.add(sanitizedLabel);
+        boolean zeroDataLabels = true;
+        for (int i = 0; i < dataSet.getDataCount(); i++) {
+            final String dataLabel = dataSet.getDataLabel(i);
+            String sanitizedLabel;
+            if (dataLabel == null) {
+                sanitizedLabel = "unknown category";
+            } else {
+                sanitizedLabel = dataLabel;
+                zeroDataLabels = false;
             }
-            return zeroDataLabels;
-        });
+            newCategoryList.add(sanitizedLabel);
+        }
 
-        if (!result) {
+        if (!zeroDataLabels) {
             setCategories(newCategoryList);
             forceAxisCategories = false;
         }

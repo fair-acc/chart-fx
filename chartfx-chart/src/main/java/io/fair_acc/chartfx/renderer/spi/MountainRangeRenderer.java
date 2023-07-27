@@ -97,30 +97,28 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                 continue;
             }
 
-            dataSet.lock().readLockGuardOptimistic(() -> {
-                xWeakIndexMap.clear();
-                yWeakIndexMap.clear();
-                mountainRangeExtra = getMountainRangeOffset();
+            xWeakIndexMap.clear();
+            yWeakIndexMap.clear();
+            mountainRangeExtra = getMountainRangeOffset();
 
-                final double max = zRangeMax * (1.0 + mountainRangeExtra);
-                final boolean autoRange = yAxis.isAutoRanging();
-                if (autoRange && (zRangeMin != yAxis.getMin() || max != yAxis.getMax())) {
-                    yAxis.setAutoRanging(false);
-                    yAxis.setMin(zRangeMin);
-                    yAxis.setMax(max);
-                    yAxis.setTickUnit(Math.abs(max - zRangeMin) / 10.0);
-                    yAxis.forceRedraw();
-                }
-                yAxis.setAutoRanging(autoRange);
+            final double max = zRangeMax * (1.0 + mountainRangeExtra);
+            final boolean autoRange = yAxis.isAutoRanging();
+            if (autoRange && (zRangeMin != yAxis.getMin() || max != yAxis.getMax())) {
+                yAxis.setAutoRanging(false);
+                yAxis.setMin(zRangeMin);
+                yAxis.setMax(max);
+                yAxis.setTickUnit(Math.abs(max - zRangeMin) / 10.0);
+                yAxis.forceRedraw();
+            }
+            yAxis.setAutoRanging(autoRange);
 
-                final int yCountMax = ((GridDataSet) dataSet).getShape(DIM_Y);
-                checkAndRecreateRenderer(yCountMax);
+            final int yCountMax = ((GridDataSet) dataSet).getShape(DIM_Y);
+            checkAndRecreateRenderer(yCountMax);
 
-                for (int index = yCountMax - 1; index >= 0; index--) {
-                    renderers.get(index).getDatasets().setAll(new Demux3dTo2dDataSet((GridDataSet) dataSet, index, zRangeMin, max)); // NOPMD -- new necessary here
-                    renderers.get(index).render(gc, chart, 0, empty);
-                }
-            });
+            for (int index = yCountMax - 1; index >= 0; index--) {
+                renderers.get(index).getDatasets().setAll(new Demux3dTo2dDataSet((GridDataSet) dataSet, index, zRangeMin, max)); // NOPMD -- new necessary here
+                renderers.get(index).render(gc, chart, 0, empty);
+            }
         }
 
         ProcessingProfiler.getTimeDiff(start);

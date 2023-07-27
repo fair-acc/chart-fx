@@ -133,31 +133,28 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         // verify that allDataSets are sorted
         for (int i = 0; i < localDataSetList.size(); i++) {
             DataSet dataSet = localDataSetList.get(i);
-            final int index = i;
-            dataSet.lock().readLockGuardOptimistic(() -> {
-                if (!(dataSet instanceof Histogram) && isAutoSorting() && (!isDataSetSorted(dataSet, DIM_X) && !isDataSetSorted(dataSet, DIM_Y))) {
-                    // replace DataSet with sorted variety
-                    // do not need to do this for Histograms as they are always sorted by design
-                    LimitedIndexedTreeDataSet newDataSet = new LimitedIndexedTreeDataSet(dataSet.getName(), Integer.MAX_VALUE);
-                    newDataSet.setVisible(dataSet.isVisible());
-                    newDataSet.set(dataSet);
-                    localDataSetList.set(index, newDataSet);
-                }
+            if (!(dataSet instanceof Histogram) && isAutoSorting() && (!isDataSetSorted(dataSet, DIM_X) && !isDataSetSorted(dataSet, DIM_Y))) {
+                // replace DataSet with sorted variety
+                // do not need to do this for Histograms as they are always sorted by design
+                LimitedIndexedTreeDataSet newDataSet = new LimitedIndexedTreeDataSet(dataSet.getName(), Integer.MAX_VALUE);
+                newDataSet.setVisible(dataSet.isVisible());
+                newDataSet.set(dataSet);
+                localDataSetList.set(i, newDataSet);
+            }
 
-                if (index != 0) {
-                    return;
-                }
-                // update categories for the first (index == '0') indexed data set
-                if (xAxis instanceof CategoryAxis) {
-                    final CategoryAxis axis = (CategoryAxis) xAxis;
-                    axis.updateCategories(dataSet);
-                }
+            if (i != 0) {
+                continue;
+            }
+            // update categories for the first (index == '0') indexed data set
+            if (xAxis instanceof CategoryAxis) {
+                final CategoryAxis axis = (CategoryAxis) xAxis;
+                axis.updateCategories(dataSet);
+            }
 
-                if (yAxis instanceof CategoryAxis) {
-                    final CategoryAxis axis = (CategoryAxis) yAxis;
-                    axis.updateCategories(dataSet);
-                }
-            });
+            if (yAxis instanceof CategoryAxis) {
+                final CategoryAxis axis = (CategoryAxis) yAxis;
+                axis.updateCategories(dataSet);
+            }
         }
 
         drawHistograms(gc, localDataSetList, xAxis, yAxis, dataSetOffset);
@@ -287,42 +284,29 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     }
 
     protected void drawHistograms(final GraphicsContext gc, final List<DataSet> dataSets, final Axis xAxis, final Axis yAxis, final int dataSetOffset) {
-        final ArrayDeque<DataSet> lockQueue = new ArrayDeque<>(dataSets.size());
-        try {
-            dataSets.forEach(ds -> {
-                lockQueue.push(ds);
-                ds.lock().readLock();
-            });
-
-            switch (getPolyLineStyle()) {
-            case NONE:
-                return;
-            case AREA:
-                drawPolyLineLine(gc, dataSets, xAxis, yAxis, dataSetOffset, true);
-                break;
-            case ZERO_ORDER_HOLDER:
-            case STAIR_CASE:
-                drawPolyLineStairCase(gc, dataSets, xAxis, yAxis, dataSetOffset, false);
-                break;
-            case HISTOGRAM:
-                drawPolyLineHistogram(gc, dataSets, xAxis, yAxis, dataSetOffset, false);
-                break;
-            case HISTOGRAM_FILLED:
-                drawPolyLineHistogram(gc, dataSets, xAxis, yAxis, dataSetOffset, true);
-                break;
-            case BEZIER_CURVE:
-                drawPolyLineHistogramBezier(gc, dataSets, xAxis, yAxis, dataSetOffset, true);
-                break;
-            case NORMAL:
-            default:
-                drawPolyLineLine(gc, dataSets, xAxis, yAxis, dataSetOffset, false);
-                break;
-            }
-        } finally {
-            // unlock in reverse order
-            while (!lockQueue.isEmpty()) {
-                lockQueue.pop().lock().readUnLock();
-            }
+        switch (getPolyLineStyle()) {
+        case NONE:
+            return;
+        case AREA:
+            drawPolyLineLine(gc, dataSets, xAxis, yAxis, dataSetOffset, true);
+            break;
+        case ZERO_ORDER_HOLDER:
+        case STAIR_CASE:
+            drawPolyLineStairCase(gc, dataSets, xAxis, yAxis, dataSetOffset, false);
+            break;
+        case HISTOGRAM:
+            drawPolyLineHistogram(gc, dataSets, xAxis, yAxis, dataSetOffset, false);
+            break;
+        case HISTOGRAM_FILLED:
+            drawPolyLineHistogram(gc, dataSets, xAxis, yAxis, dataSetOffset, true);
+            break;
+        case BEZIER_CURVE:
+            drawPolyLineHistogramBezier(gc, dataSets, xAxis, yAxis, dataSetOffset, true);
+            break;
+        case NORMAL:
+        default:
+            drawPolyLineLine(gc, dataSets, xAxis, yAxis, dataSetOffset, false);
+            break;
         }
     }
 

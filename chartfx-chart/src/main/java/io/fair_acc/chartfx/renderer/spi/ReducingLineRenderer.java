@@ -82,81 +82,79 @@ public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLine
                 continue;
             }
             final int lindex = index;
-            ds.lock().readLockGuardOptimistic(() -> {
-                // update categories in case of category axes for the first
-                // (index == '0') indexed data set
-                if (lindex == 0) {
-                    if (xyChart.getXAxis() instanceof CategoryAxis) {
-                        final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
-                        axis.updateCategories(ds);
-                    }
-
-                    if (xyChart.getYAxis() instanceof CategoryAxis) {
-                        final CategoryAxis axis = (CategoryAxis) xyChart.getYAxis();
-                        axis.updateCategories(ds);
-                    }
+            // update categories in case of category axes for the first
+            // (index == '0') indexed data set
+            if (lindex == 0) {
+                if (xyChart.getXAxis() instanceof CategoryAxis) {
+                    final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
+                    axis.updateCategories(ds);
                 }
 
-                gc.save();
-                DefaultRenderColorScheme.setLineScheme(gc, ds.getStyle(), lindex);
-                DefaultRenderColorScheme.setGraphicsContextAttributes(gc, ds.getStyle());
-                if (ds.getDataCount() > 0) {
-                    final int indexMin = Math.max(0, ds.getIndex(DIM_X, xmin));
-                    final int indexMax = Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount());
-                    final int n = Math.abs(indexMax - indexMin);
-                    final int d = n / maxPoints;
-                    if (d <= 1) {
-                        int i = ds.getIndex(DIM_X, xmin);
-                        if (i < 0) {
-                            i = 0;
-                        }
-                        double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                        double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                        i++;
-                        for (; i < Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount()); i++) {
-                            final double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                            final double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                if (xyChart.getYAxis() instanceof CategoryAxis) {
+                    final CategoryAxis axis = (CategoryAxis) xyChart.getYAxis();
+                    axis.updateCategories(ds);
+                }
+            }
+
+            gc.save();
+            DefaultRenderColorScheme.setLineScheme(gc, ds.getStyle(), lindex);
+            DefaultRenderColorScheme.setGraphicsContextAttributes(gc, ds.getStyle());
+            if (ds.getDataCount() > 0) {
+                final int indexMin = Math.max(0, ds.getIndex(DIM_X, xmin));
+                final int indexMax = Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount());
+                final int n = Math.abs(indexMax - indexMin);
+                final int d = n / maxPoints;
+                if (d <= 1) {
+                    int i = ds.getIndex(DIM_X, xmin);
+                    if (i < 0) {
+                        i = 0;
+                    }
+                    double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                    double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                    i++;
+                    for (; i < Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount()); i++) {
+                        final double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                        final double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                        gc.strokeLine(x0, y0, x1, y1);
+                        x0 = x1;
+                        y0 = y1;
+                    }
+                } else {
+                    int i = ds.getIndex(DIM_X, xmin);
+                    if (i < 0) {
+                        i = 0;
+                    }
+                    double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                    double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                    i++;
+                    double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                    double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                    double delta = Math.abs(y1 - y0);
+                    i++;
+                    int j = d - 2;
+                    for (; i < Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount()); i++) {
+                        if (j > 0) {
+                            final double x2 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                            final double y2 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                            if (Math.abs(y2 - y0) > delta) {
+                                x1 = x2;
+                                y1 = y2;
+                                delta = Math.abs(y2 - y0);
+                            }
+                            j--;
+                        } else {
                             gc.strokeLine(x0, y0, x1, y1);
                             x0 = x1;
                             y0 = y1;
-                        }
-                    } else {
-                        int i = ds.getIndex(DIM_X, xmin);
-                        if (i < 0) {
-                            i = 0;
-                        }
-                        double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                        double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                        i++;
-                        double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                        double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                        double delta = Math.abs(y1 - y0);
-                        i++;
-                        int j = d - 2;
-                        for (; i < Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount()); i++) {
-                            if (j > 0) {
-                                final double x2 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                                final double y2 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                                if (Math.abs(y2 - y0) > delta) {
-                                    x1 = x2;
-                                    y1 = y2;
-                                    delta = Math.abs(y2 - y0);
-                                }
-                                j--;
-                            } else {
-                                gc.strokeLine(x0, y0, x1, y1);
-                                x0 = x1;
-                                y0 = y1;
-                                x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                                y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                                delta = Math.abs(y1 - y0);
-                                j = d - 1;
-                            }
+                            x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                            y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                            delta = Math.abs(y1 - y0);
+                            j = d - 1;
                         }
                     }
                 }
-                gc.restore();
-            });
+            }
+            gc.restore();
             index++;
         }
         ProcessingProfiler.getTimeDiff(start);

@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.security.InvalidParameterException;
 import java.util.*;
+import java.util.function.Supplier;
 
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
@@ -179,17 +180,17 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             if (dataSetIndex == 0) {
                 if (getFirstAxis(Orientation.HORIZONTAL) instanceof CategoryAxis) {
                     final CategoryAxis axis = (CategoryAxis) getFirstAxis(Orientation.HORIZONTAL);
-                    dataSet.lock().readLockGuard(() -> axis.updateCategories(dataSet));
+                    axis.updateCategories(dataSet);
                 }
 
                 if (getFirstAxis(Orientation.VERTICAL) instanceof CategoryAxis) {
                     final CategoryAxis axis = (CategoryAxis) getFirstAxis(Orientation.VERTICAL);
-                    dataSet.lock().readLockGuard(() -> axis.updateCategories(dataSet));
+                    axis.updateCategories(dataSet);
                 }
             }
 
             // check for potentially reduced data range we are supposed to plot
-            final Optional<CachedDataPoints> cachedPoints = dataSet.lock().readLockGuard(() -> {
+            Supplier<Optional<CachedDataPoints>> cachedPoints = () -> {
                 int indexMin;
                 int indexMax; /* indexMax is excluded in the drawing */
                 if (isAssumeSortedData()) {
@@ -230,9 +231,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
                 }
                 return Optional.of(localCachedPoints);
-            });
+            };
 
-            cachedPoints.ifPresent(value -> {
+            cachedPoints.get().ifPresent(value -> {
                 // invoke data reduction algorithm
                 value.reduce(rendererDataReducerProperty().get(), isReducePoints(),
                         getMinRequiredReductionSize());

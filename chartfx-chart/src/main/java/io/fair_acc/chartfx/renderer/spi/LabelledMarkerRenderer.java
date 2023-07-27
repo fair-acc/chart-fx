@@ -256,28 +256,26 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
             if (!dataSet.isVisible()) {
                 continue;
             }
-            dataSet.lock().readLockGuard(() -> {
-                // check for potentially reduced data range we are supposed to plot
-                final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
-                final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
-                        dataSet.getDataCount());
+            // check for potentially reduced data range we are supposed to plot
+            final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
+            final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
+                    dataSet.getDataCount());
 
-                // return if zero length data set
-                if (indexMax - indexMin <= 0) {
-                    return;
-                }
+            // return if zero length data set
+            if (indexMax - indexMin <= 0) {
+                continue;
+            }
 
-                drawnDataSet.add(dataSet);
-                if (isHorizontalMarker()) {
-                    // draw horizontal marker
-                    drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-                }
+            drawnDataSet.add(dataSet);
+            if (isHorizontalMarker()) {
+                // draw horizontal marker
+                drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
+            }
 
-                if (isVerticalMarker()) {
-                    // draw vertical marker
-                    drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-                }
-            });
+            if (isVerticalMarker()) {
+                // draw vertical marker
+                drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
+            }
 
         } // end of 'dataSetIndex' loop
 
