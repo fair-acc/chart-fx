@@ -93,9 +93,11 @@ public abstract class Chart extends Region implements EventSource {
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = Boolean.getBoolean("chartfx.debug"); // for more verbose debugging
 
-    protected BooleanBinding showingBinding;
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
-    protected final ChangeListener<? super Boolean> showingListener = (ch2, o, n) -> showing.set(n);
+    {
+        showing.bind(FXUtils.getShowingBinding(this));
+    }
+
     /**
      * When true any data changes will be animated.
      */
@@ -165,39 +167,12 @@ public abstract class Chart extends Region implements EventSource {
     protected final ListChangeListener<Axis> axesChangeListener = this::axesChanged;
     protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
     protected final ListChangeListener<ChartPlugin> pluginsChangedListener = this::pluginsChanged;
-    protected final ChangeListener<? super Window> windowPropertyListener = (ch1, oldWindow, newWindow) -> {
-        if (oldWindow != null) {
-            oldWindow.showingProperty().removeListener(showingListener);
-        }
-        if (newWindow == null) {
-            showing.set(false);
-            return;
-        }
-        newWindow.showingProperty().addListener(showingListener);
-    };
-    private final ChangeListener<? super Scene> scenePropertyListener = (ch, oldScene, newScene) -> {
-        if (oldScene == newScene) {
-            return;
-        }
-        if (oldScene != null) {
-            // remove listener
-            oldScene.windowProperty().removeListener(windowPropertyListener);
-        }
 
-        if (newScene == null) {
-            showing.set(false);
-            return;
-        }
-        layoutHooks.registerOnce();
-
-        // add listener
-        newScene.windowProperty().addListener(windowPropertyListener);
-    };
     {
         getDatasets().addListener(datasetChangeListener);
         getAxes().addListener(axesChangeListener);
-        // update listener to propagate axes changes to chart changes
         getAxes().addListener(axesChangeListenerLocal);
+        showing.addListener((obs, old, showing) -> layoutHooks.registerOnce());
     }
 
     protected final Label titleLabel = new Label();
@@ -302,7 +277,7 @@ public abstract class Chart extends Region implements EventSource {
                     break;
                 }
                 return (newVal);
-            }, this::requestLayout);
+            });
 
     /**
      * Creates a new default Chart instance.
@@ -399,8 +374,6 @@ public abstract class Chart extends Region implements EventSource {
         titleLabel.getStyleClass().add("chart-title");
         getStyleClass().add("chart");
         axesAndCanvasPane.getStyleClass().add("chart-content");
-
-        registerShowingListener(); // NOPMD - unlikely but allowed override
     }
 
     @Override
@@ -883,22 +856,6 @@ public abstract class Chart extends Region implements EventSource {
     // -------------- LISTENER HANDLING
     // ------------------------------------------------------------------------------
 
-    protected void registerShowingListener() {
-        sceneProperty().addListener(scenePropertyListener);
-
-        showing.addListener((ch, o, n) -> {
-            if (Boolean.TRUE.equals(n)) {
-                // requestLayout();
-
-                // alt implementation in case of start-up issues
-                final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e -> requestLayout());
-
-                final Timeline timeline = new Timeline(kf1);
-                Platform.runLater(timeline::play);
-            }
-        });
-    }
-
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
@@ -948,7 +905,7 @@ public abstract class Chart extends Region implements EventSource {
     protected void updatePluginsArea() {
         var pluginChildren = plugins.stream().map(pluginGroups::get).collect(Collectors.toList());
         pluginsArea.getChildren().setAll(pluginChildren);
-        requestLayout();
+        fireInvalidated(ChartBits.ChartPlugins);
     }
 
     /**
