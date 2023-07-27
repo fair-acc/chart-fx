@@ -53,19 +53,26 @@ public class LayoutHook {
     }
 
     public LayoutHook registerOnce() {
-        // Called before proper initialization
+        // Potentially called before proper initialization
         if (preLayoutAction == null || postLayoutAndRemove == null) {
             return this;
         }
 
+        // Already registered or null, so nothing to do
+        var scene = node.getScene();
+        if (scene == registeredScene) {
+            return this;
+        }
+
         // Scene has changed -> remove the old one first
-        if (registeredScene != null && registeredScene != node.getScene()) {
+        if (registeredScene != null) {
             unregister();
         }
-        // Register only if we haven't already registered
-        if (registeredScene == null && node.getScene() != null) {
-            registeredScene = node.getScene();
-            registeredScene.addPreLayoutPulseListener(preLayoutAndAdd);
+
+        // Register only if the scene is valid
+        if (scene != null) {
+            scene.addPreLayoutPulseListener(preLayoutAndAdd);
+            registeredScene = scene;
         }
         return this;
     }
@@ -85,6 +92,9 @@ public class LayoutHook {
     }
 
     private void unregister() {
+        if (registeredScene == null) {
+            return;
+        }
         registeredScene.removePreLayoutPulseListener(preLayoutAndAdd);
         registeredScene.removePostLayoutPulseListener(postLayoutAndRemove);
         registeredScene = null;

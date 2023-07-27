@@ -181,6 +181,9 @@ public abstract class BitState implements StateListener {
         return removeListener(invalidateListeners, listener);
     }
 
+    /**
+     * @return true if the last occurrence of the listener was removed
+     */
     private static boolean removeListener(List<StateListener> list,  StateListener listener) {
         if (list == null) {
             return false;
@@ -189,13 +192,10 @@ public abstract class BitState implements StateListener {
         for (int i = list.size() - 1; i >= 0; i--) {
             if (isEqual(list.get(i), listener)) {
                 list.remove(i);
-                removed++;
+                return true;
             }
         }
-        if (removed > 1) {
-            throw new IllegalStateException("Can't remove targets that have been added more than once");
-        }
-        return removed == 1;
+        return false;
     }
 
     private void notifyListeners(List<StateListener> list, int delta) {
