@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -258,26 +259,17 @@ public class XYChart extends Chart {
             return;
         }
 
-        // lock datasets to prevent writes while updating the axes
-        ObservableList<DataSet> dataSets = this.getAllDatasets();
-        // check that all registered data sets have proper ranges defined
-        dataSets.parallelStream()
-                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined()).forEach(axisDescription -> dataset.lock().writeLockGuard(() -> dataset.recomputeLimits(axisDescription.getDimIndex()))));
+        // Check that all registered data sets have proper ranges defined. The datasets
+        // are already locked, so we can use parallel stream without extra synchronization.
+        getAllDatasets().stream()
+                .filter(DataSet::isVisible)
+                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
+                        .filter(axisD -> !axisD.isDefined())
+                        .forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
 
-        final ArrayDeque<DataSet> lockQueue = new ArrayDeque<>(dataSets);
-        recursiveLockGuard(lockQueue, () -> getAxes().forEach(chartAxis -> {
-            final List<DataSet> dataSetForAxis = getDataSetForAxis(chartAxis);
-            updateNumericAxis(chartAxis, dataSetForAxis);
-            // chartAxis.requestAxisLayout()
-        }));
-    }
+        // Update each of the axes
+        getAxes().forEach(chartAxis -> updateNumericAxis(chartAxis, getDataSetForAxis(chartAxis)));
 
-    protected void recursiveLockGuard(final Deque<DataSet> queue, final Runnable runnable) { // NOPMD
-        if (queue.isEmpty()) {
-            runnable.run();
-        } else {
-            queue.pop().lock().readLockGuard(() -> recursiveLockGuard(queue, runnable));
-        }
     }
 
     /**
@@ -416,7 +408,7 @@ public class XYChart extends Chart {
         // Determine the range of all datasets for this axis
         final AxisRange dsRange = new AxisRange();
         dsRange.clear();
-        dataSets.stream().filter(DataSet::isVisible).forEach(dataset -> dataset.lock().readLockGuard(() -> {
+        dataSets.stream().filter(DataSet::isVisible).forEach(dataset -> {
             if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
                 if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
                     dataset.recomputeLimits(DataSet.DIM_Z);
@@ -431,7 +423,7 @@ public class XYChart extends Chart {
                 dsRange.add(dataset.getAxisDescription(nDim).getMin());
                 dsRange.add(dataset.getAxisDescription(nDim).getMax());
             }
-        }));
+        });
 
         // Update the auto range
         final boolean changed;

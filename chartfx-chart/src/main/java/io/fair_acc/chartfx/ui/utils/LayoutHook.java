@@ -45,6 +45,13 @@ public class LayoutHook {
         this.postLayoutAction = AssertUtils.notNull("preLayoutAction", postLayoutAction);
     }
 
+    /**
+     * @return true if the pre layout hook was executed this cycle. Meant to be called during the layout phase.
+     */
+    public boolean hasRunPreLayout() {
+        return hasRunPreLayout;
+    }
+
     public LayoutHook registerOnce() {
         // Scene has changed -> remove the old one first
         if (registeredScene != null && registeredScene != node.getScene()) {
@@ -66,6 +73,7 @@ public class LayoutHook {
         // We don't want to be in a position where the post layout listener
         // runs by itself, so we don't register until we made sure that the
         // pre-layout action ran before.
+        hasRunPreLayout = true;
         preLayoutAction.run();
         registeredScene.addPostLayoutPulseListener(postLayoutAndRemove);
     }
@@ -79,11 +87,13 @@ public class LayoutHook {
         registeredScene.removePreLayoutPulseListener(preLayoutAndAdd);
         registeredScene.removePostLayoutPulseListener(postLayoutAndRemove);
         registeredScene = null;
+        hasRunPreLayout = false;
     }
 
     final Node node;
     final Runnable preLayoutAction;
     final Runnable postLayoutAction;
+    boolean hasRunPreLayout = false;
 
     final Runnable preLayoutAndAdd = this::runPreLayoutAndAdd;
     final Runnable postLayoutAndRemove = this::runPostLayoutAndRemove;

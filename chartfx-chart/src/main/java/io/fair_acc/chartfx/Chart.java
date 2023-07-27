@@ -601,6 +601,8 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     protected void runPreLayout() {
+        forEachDataSet(ds -> lockedDataSets.add(ds.lock().readLock()));
+
         if (state.isDirty(ChartBits.ChartLegend, ChartBits.ChartDataSets, ChartBits.ChartRenderers)) {
             updateLegend(getDatasets(), getRenderers());
         }
@@ -609,6 +611,8 @@ public abstract class Chart extends Region implements EventSource {
         updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
     }
+
+    private List<DataSet> lockedDataSets = new ArrayList<>();
 
     @Override
     public void layoutChildren() {
@@ -622,7 +626,11 @@ public abstract class Chart extends Region implements EventSource {
         }
 
         // request re-layout of plugins
-        layoutPluginsChildren(); // TODO: what if the datasets were not locked properly?
+        // TODO:
+        //  * what if the datasets were not locked beforehand?
+        //  * layoutChildren only gets called on actual changes, so could we guarantee execution if we skip it?
+        //  * maybe they need to call their own readLock? But that would also result in outdated axes. Is this even needed?
+        layoutPluginsChildren();
 
         // Make sure things will get redrawn
         fireInvalidated(ChartBits.ChartCanvas);
@@ -636,7 +644,12 @@ public abstract class Chart extends Region implements EventSource {
         }
         redrawCanvas();
         state.clear();
-        forEachDataSet(ds -> ds.getBitState().clear());
+        for (var ds : lockedDataSets) {
+            ds.getBitState().clear(); // technically a 'write'
+            ds.lock().readUnLock();
+        }
+        lockedDataSets.clear();
+
         // TODO: plugins etc., do locking
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
     }
