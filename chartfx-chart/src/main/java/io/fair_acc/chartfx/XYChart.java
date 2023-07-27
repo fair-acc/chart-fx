@@ -59,8 +59,6 @@ public class XYChart extends Chart {
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
     private final GridRenderer gridRenderer = new GridRenderer();
     protected final ChangeListener<? super Boolean> gridLineVisibilitychange = (ob, o, n) -> requestLayout();
-    private long lastCanvasUpdate;
-    private boolean callCanvasUpdateLater;
 
     /**
      * Construct a new XYChart with the given axes.
@@ -346,52 +344,46 @@ public class XYChart extends Chart {
     }
 
     @Override
+    protected void runPreLayout() {
+        for (Renderer renderer : getRenderers()) {
+            // check for and add required axes
+            checkRendererForRequiredAxes(renderer);
+        }
+        super.runPreLayout();
+    }
+
+    @Override
     protected void redrawCanvas() {
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - pre");
         }
         FXUtils.assertJavaFxThread();
         final long now = System.nanoTime();
-        final double diffMillisSinceLastUpdate = TimeUnit.NANOSECONDS.toMillis(now - lastCanvasUpdate);
-        if (diffMillisSinceLastUpdate < XYChart.BURST_LIMIT_MS) {
-            if (!callCanvasUpdateLater) {
-                callCanvasUpdateLater = true;
-                // repaint 20 ms later in case this was just a burst operation
-                final KeyFrame kf1 = new KeyFrame(Duration.millis(20), e -> requestLayout());
-
-                final Timeline timeline = new Timeline(kf1);
-                Platform.runLater(timeline::play);
-            }
-
-            return;
-        }
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - executing");
             LOGGER.debug("   xychart redrawCanvas() - canvas size = {}", String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
         }
 
-        lastCanvasUpdate = now;
-        callCanvasUpdateLater = false;
-
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
+        // Bottom grid
         if (!gridRenderer.isDrawOnTop()) {
             gridRenderer.render(gc, this, 0, null);
         }
 
+        // Data
         int dataSetOffset = 0;
         for (final Renderer renderer : getRenderers()) {
-            // check for and add required axes
-            checkRendererForRequiredAxes(renderer);
-
             final List<DataSet> drawnDataSets = renderer.render(gc, this, dataSetOffset, getDatasets());
             dataSetOffset += drawnDataSets == null ? 0 : drawnDataSets.size();
         }
 
+        // Top grid
         if (gridRenderer.isDrawOnTop()) {
             gridRenderer.render(gc, this, 0, null);
         }
+
         if (DEBUG && LOGGER.isDebugEnabled()) {
             LOGGER.debug("   xychart redrawCanvas() - done");
         }
