@@ -436,7 +436,6 @@ public class XYChart extends Chart {
         // Trigger a redraw
         if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
             axis.invalidateRange();
-            axis.requestAxisLayout();
         }
 
         // TODO: is this used for anything? can it be removed?

@@ -53,6 +53,11 @@ public class LayoutHook {
     }
 
     public LayoutHook registerOnce() {
+        // Called before proper initialization
+        if (preLayoutAction == null || postLayoutAndRemove == null) {
+            return this;
+        }
+
         // Scene has changed -> remove the old one first
         if (registeredScene != null && registeredScene != node.getScene()) {
             unregister();
@@ -66,10 +71,6 @@ public class LayoutHook {
     }
 
     private void runPreLayoutAndAdd() {
-        // Called before proper initialization
-        if (preLayoutAction == null) {
-            return;
-        }
         // We don't want to be in a position where the post layout listener
         // runs by itself, so we don't register until we made sure that the
         // pre-layout action ran before.
