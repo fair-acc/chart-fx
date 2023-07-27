@@ -172,7 +172,11 @@ public abstract class Chart extends Region implements EventSource {
         getDatasets().addListener(datasetChangeListener);
         getAxes().addListener(axesChangeListener);
         getAxes().addListener(axesChangeListenerLocal);
-        showing.addListener((obs, old, showing) -> layoutHooks.registerOnce());
+        showing.addListener((obs, old, showing) -> {
+            if (showing) {
+                layoutHooks.registerOnce();
+            }
+        });
     }
 
     protected final Label titleLabel = new Label();

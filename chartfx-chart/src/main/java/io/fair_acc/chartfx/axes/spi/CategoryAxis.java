@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
@@ -64,19 +66,12 @@ public final class CategoryAxis extends DefaultNumericAxis {
     public CategoryAxis(final String axisLabel) {
         super(axisLabel);
         this.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
-        minProperty().addListener((ch, old, val) -> {
-            final double range = Math.abs(val.doubleValue() - CategoryAxis.this.getMax());
-            final double rangeInt = (int) range;
-            final double scale = 0.5 / rangeInt;
+        PropUtil.runOnChange(() -> {
+            final double range = Math.abs(getMax() - getMin());
+            final double scale = 0.5 / ((int) range);
             autoRangePaddingProperty().set(scale);
-        });
+        }, minProperty(), maxProperty());
 
-        maxProperty().addListener((ch, old, val) -> {
-            final double range = Math.abs(CategoryAxis.this.getMin() - val.doubleValue());
-            final double rangeInt = (int) range;
-            final double scale = 0.5 / rangeInt;
-            autoRangePaddingProperty().set(scale);
-        });
     }
 
     /**
@@ -152,8 +147,6 @@ public final class CategoryAxis extends DefaultNumericAxis {
             }
         });
         categories.set(categoryList);
-
-        requestAxisLayout();
     }
 
     /**

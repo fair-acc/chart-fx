@@ -251,15 +251,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         setLength(length);
         AxisRange range = getRange();
 
-        // Avoid NaNs getting into the system (TODO: happened due to bad interactions w/ event system. Still needed?)
-        if (!Double.isFinite(range.getMin()) || !Double.isFinite(range.getMax())) {
-            set(Double.NaN, Double.NaN);
-            setScale(0.1);
-            setTickUnit(0.1);
-            updateCachedVariables();
-            return;
-        }
-
         // Set a real finite range
         set(range.getMin(), range.getMax());
         setScale(range.scale = calculateNewScale(length, getMin(), getMax()));
@@ -626,7 +617,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         var oldTickValues = getTickMarkValues();
         if(newTickValues.size() < 2) {
             return; // TODO: why did the previous code only update when there are > 2 ticks?
-        }else if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickLabelText)) {
+        } else if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickLabelText)) {
             return; // no need to redo labels, just reposition the ticks
         }
 
