@@ -120,7 +120,12 @@ public class XYChart extends Chart {
 
         allDataSets.clear();
         allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer)).forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
+        for (Renderer renderer : getRenderers()) {
+            if(renderer instanceof LabelledMarkerRenderer){
+                continue;
+            }
+            allDataSets.addAll(renderer.getDatasets());
+        }
 
         return allDataSets;
     }

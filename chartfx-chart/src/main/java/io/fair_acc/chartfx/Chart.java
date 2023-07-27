@@ -13,12 +13,12 @@ import io.fair_acc.chartfx.ui.utils.LayoutHook;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.StateListener;
+import io.fair_acc.dataset.locks.DataSetLock;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
@@ -52,7 +52,6 @@ import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
-import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
@@ -79,8 +78,7 @@ public abstract class Chart extends Region implements EventSource {
     protected final BitState state = BitState.initDirty(this, BitState.ALL_BITS)
             .addChangeListener(ChartBits.KnownMask, (src, bits) -> layoutHooks.registerOnce())
             .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout());
-    protected final BitState dataSetState = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
-            .addChangeListener(FXUtils.runOnFxThread(state)); // forward to fx state on JavaFX thread
+    protected final StateListener dataSetListener = FXUtils.runOnFxThread(state); // datasets can be updated from different threads
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
@@ -138,35 +136,6 @@ public abstract class Chart extends Region implements EventSource {
     protected final HiddenSidesPane menuPane = new HiddenSidesPane();
     protected final ToolBarFlowPane toolBar = new ToolBarFlowPane(this);
     protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
-
-    // ========================================= Optional elements for backwards compatibility
-    // Chart used to always add all elements, even if unused. For backwards compatibility
-    // we can instantiate items on demand, but many of them can probably be removed in the future.
-    // TODO: remove after refactoring
-    private final Map<Corner, StackPane> axesCornerMap = new ConcurrentHashMap<>(4);
-    private final Map<Side, Pane> axesMap = new ConcurrentHashMap<>(4);
-    private final Map<Corner, StackPane> titleLegendCornerMap = new ConcurrentHashMap<>(4);
-    private final Map<Side, Pane> titleLegendMap = new ConcurrentHashMap<>(4);
-
-    private static StackPane getCornerPane(Corner corner, ChartPane parent, Map<Corner, StackPane> map) {
-        return map.computeIfAbsent(corner, key -> {
-            var node = new StackPane(); // NOPMD - default init
-            parent.addCorner(key, node);
-            return node;
-        });
-    }
-
-    private static Pane getSidePane(Side side, ChartPane parent, Map<Side, Pane> map, Consumer<Pane> onCenter) {
-        return map.computeIfAbsent(side, key -> {
-            var node = key.isVertical() ? new ChartHBox() : new ChartVBox(); // NOPMD - default init
-            parent.addSide(key, node);
-            if (key == Side.CENTER_HOR || key == Side.CENTER_VER) {
-                onCenter.accept(node);
-            }
-            return node;
-        });
-    }
-    // =========================================
 
     {
         // Build hierarchy
@@ -484,15 +453,6 @@ public abstract class Chart extends Region implements EventSource {
         return axesAndCanvasPane;
     }
 
-    public final StackPane getAxesCornerPane(final Corner corner) {
-        return getCornerPane(corner, axesAndCanvasPane, axesCornerMap);
-    }
-
-    @Deprecated // use ChartPane::setSide property
-    public final Pane getAxesPane(final Side side) {
-        return getSidePane(side, axesAndCanvasPane, axesMap, center -> center.setMouseTransparent(true));
-    }
-
     /**
      * @return the actual canvas the data is being drawn upon
      */
@@ -596,17 +556,8 @@ public abstract class Chart extends Region implements EventSource {
         return title.get();
     }
 
-    public final StackPane getTitleLegendCornerPane(final Corner corner) {
-        return getCornerPane(corner, titleLegendPane, titleLegendCornerMap);
-    }
-
     public final ChartPane getTitleLegendPane() {
         return titleLegendPane;
-    }
-
-    @Deprecated // use ChartPane::setSide property
-    public final Pane getTitleLegendPane(final Side side) {
-        return getSidePane(side, titleLegendPane, titleLegendMap, Node::toBack); // don't draw over chart area
     }
 
     public final Side getTitleSide() {
@@ -671,7 +622,7 @@ public abstract class Chart extends Region implements EventSource {
         }
 
         // request re-layout of plugins
-        layoutPluginsChildren();
+        layoutPluginsChildren(); // TODO: what if the datasets were not locked properly?
 
         // Make sure things will get redrawn
         fireInvalidated(ChartBits.ChartCanvas);
@@ -685,7 +636,6 @@ public abstract class Chart extends Region implements EventSource {
         }
         redrawCanvas();
         state.clear();
-        dataSetState.clear();
         forEachDataSet(ds -> ds.getBitState().clear());
         // TODO: plugins etc., do locking
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
@@ -824,23 +774,21 @@ public abstract class Chart extends Region implements EventSource {
      */
     protected void axesChangedLocal(final ListChangeListener.Change<? extends Axis> change) {
         while (change.next()) {
-            var children = getAxesAndCanvasPane().getChildren();
             for (Axis axis : change.getRemoved()) {
                 // remove axis invalidation listener
                 AssertUtils.notNull("to be removed axis is null", axis);
-                axis.getBitState().removeChangeListener(state);
+                axis.removeListener(state);
                 removeAxisFromChildren(axis); // TODO: don't remove if it is contained in getAxes()
             }
             for (final Axis axis : change.getAddedSubList()) {
                 // check if axis is associated with an existing renderer,
                 // if yes -> throw an exception
                 AssertUtils.notNull("to be added axis is null", axis);
-                axis.getBitState().addChangeListener(state);
+                axis.addListener(state);
                 addAxisToChildren(axis);
             }
         }
-
-        requestLayout();
+        fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartAxes);
     }
 
     private boolean addAxisToChildren(Axis axis) {
@@ -865,25 +813,14 @@ public abstract class Chart extends Region implements EventSource {
         return false;
     }
 
-    protected void dataSetInvalidated() {
-        // DataSet has notified and invalidate
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("chart dataSetDataListener change notified");
-        }
-        FXUtils.assertJavaFxThread();
-        // updateAxisRange();
-        // TODO: check why the following does not always forces a layoutChildren
-        requestLayout();
-    }
-
     protected void datasetsChanged(final ListChangeListener.Change<? extends DataSet> change) {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
             for (final DataSet set : change.getRemoved()) {
-                set.removeListener(dataSetState);
+                set.removeListener(dataSetListener);
             }
             for (final DataSet set : change.getAddedSubList()) {
-                set.addListener(dataSetState);
+                set.addListener(dataSetListener);
             }
         }
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartDataSets, ChartBits.ChartLegend);
@@ -955,25 +892,24 @@ public abstract class Chart extends Region implements EventSource {
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
-            // handle added renderer
-            change.getAddedSubList().forEach(renderer -> {
-                // update legend and recalculateLayout on datasetChange
-                renderer.getDatasets().addListener(datasetChangeListener);
-                // add listeners to all datasets already in the renderer
-                renderer.getDatasets().forEach(set -> set.addListener(dataSetState));
+            // TODO: how to work with renderer axes that are not in the SceneGraph? The length would never get set.
 
-                // TODO: how should it handle renderer axes? this can add automatically-generated axes that aren't wanted
-//                renderer.getAxes().addListener(axesChangeListenerLocal);
-//                renderer.getAxes().forEach(this::addAxisToChildren);
-            });
+            // handle added renderer
+            for (Renderer renderer : change.getAddedSubList()) {
+                for (DataSet dataset : renderer.getDatasets()) {
+                    dataset.addListener(dataSetListener);
+                }
+                renderer.getDatasets().addListener(datasetChangeListener);
+            }
 
             // handle removed renderer
-            change.getRemoved().forEach(renderer -> {
+            for (Renderer renderer : change.getRemoved()) {
+                for (DataSet dataset : renderer.getDatasets()) {
+                    dataset.removeListener(dataSetListener);
+                }
                 renderer.getDatasets().removeListener(datasetChangeListener);
-                renderer.getDatasets().forEach(set -> set.removeListener(dataSetState));
-//                renderer.getAxes().removeListener(axesChangeListenerLocal);
-//                renderer.getAxes().forEach(this::removeAxisFromChildren);
-            });
+            }
+
         }
         // reset change to allow derived classes to add additional listeners to renderer changes
         change.reset();
@@ -1000,7 +936,8 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     protected void updatePluginsArea() {
-        pluginsArea.getChildren().setAll(plugins.stream().map(pluginGroups::get).collect(Collectors.toList()));
+        var pluginChildren = plugins.stream().map(pluginGroups::get).collect(Collectors.toList());
+        pluginsArea.getChildren().setAll(pluginChildren);
         requestLayout();
     }
 
