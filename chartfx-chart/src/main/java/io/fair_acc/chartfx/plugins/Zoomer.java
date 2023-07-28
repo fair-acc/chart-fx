@@ -1,10 +1,10 @@
 package io.fair_acc.chartfx.plugins;
 
 import java.util.ArrayDeque;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
 import javafx.animation.KeyFrame;
@@ -749,7 +749,7 @@ public class Zoomer extends ChartPlugin {
     }
 
     private Map<Axis, ZoomState> getZoomDataWindows() {
-        ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
+        Map<Axis, ZoomState> axisStateMap = new HashMap<>();
         if (getChart() == null) {
             return axisStateMap;
         }
@@ -979,7 +979,7 @@ public class Zoomer extends ChartPlugin {
         if (getChart() == null) {
             return;
         }
-        ConcurrentHashMap<Axis, ZoomState> axisStateMap = new ConcurrentHashMap<>();
+        Map<Axis, ZoomState> axisStateMap = new HashMap<>();
         for (Axis axis : getChart().getAxes()) {
             switch (getAxisMode()) {
             case X:

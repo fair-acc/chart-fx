@@ -10,7 +10,7 @@ public final class CachedDaemonThreadFactory implements ThreadFactory {
     private static final ThreadFactory DEFAULT_FACTORY = Executors.defaultThreadFactory();
     private static final CachedDaemonThreadFactory SELF = new CachedDaemonThreadFactory();
     private static final ExecutorService COMMON_POOL = Executors.newFixedThreadPool(2 * MAX_THREADS, SELF);
-    private static final AtomicInteger TREAD_COUNTER = new AtomicInteger();
+    private static final AtomicInteger THREAD_COUNTER = new AtomicInteger();
 
     private CachedDaemonThreadFactory() {
         // helper class
@@ -19,8 +19,8 @@ public final class CachedDaemonThreadFactory implements ThreadFactory {
     @Override
     public Thread newThread(Runnable r) {
         Thread thread = DEFAULT_FACTORY.newThread(r);
-        TREAD_COUNTER.incrementAndGet();
-        thread.setName("daemonised_chartfx_thread_#" + TREAD_COUNTER.intValue());
+        THREAD_COUNTER.incrementAndGet();
+        thread.setName("daemonised_chartfx_thread_#" + THREAD_COUNTER.intValue());
         thread.setDaemon(true);
         return thread;
     }

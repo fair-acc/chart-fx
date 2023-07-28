@@ -2,7 +2,6 @@ package io.fair_acc.chartfx;
 
 import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -114,7 +113,7 @@ public abstract class Chart extends Region implements EventSource {
     private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", true, state.onAction(ChartBits.ChartLegend));
 
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
-    private final Map<ChartPlugin, Group> pluginGroups = new ConcurrentHashMap<>();
+    private final Map<ChartPlugin, Group> pluginGroups = new HashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
