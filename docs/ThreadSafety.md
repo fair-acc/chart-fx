@@ -1,4 +1,4 @@
-# Thread-Safety and Concurrency in ChartFX
+# Thread-Safety and Concurrency in ChartFX (outdated)
 
 Large data sets are typically -- or better 'should be' -- primarily updated in separate data-acquisition or processing threads in order not to block or overload JavaFX's main rendering thread.
 The `[DataSet](chartfx-dataset/src/main/java/io/fair_acc/dataset/DataSet.java)` interface thus deploys for this purpose a Read-Write-Lock pair (interface: `[DataSetLock](master/chartfx-dataset/src/main/java/io/fair_acc/dataset/locks/DataSetLock.java)`) that facilitates the thread-safety of the UI and non-UI parts of the ChartFx library.
