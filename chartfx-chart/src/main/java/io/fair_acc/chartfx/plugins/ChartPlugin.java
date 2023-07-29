@@ -187,9 +187,23 @@ public abstract class ChartPlugin {
     }
 
     /**
+     * Optional method that allows plug-in make layout changes after axes and dataset limits are known
+     */
+    public void runPreLayout() { // #NOPMD
+        // empty by default
+    }
+
+    /**
      * Optional method that allows the plug-in to react in case the size of the chart that it belongs to has changed.
      */
     public void layoutChildren() { // #NOPMD
+        // empty by default
+    }
+
+    /**
+     * Optional method that allows plug-in render something after axes and charts have been rendered
+     */
+    public void runPostLayout() { // #NOPMD
         // empty by default
     }
 
