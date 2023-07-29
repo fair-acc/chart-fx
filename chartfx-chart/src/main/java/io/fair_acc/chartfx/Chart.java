@@ -582,6 +582,15 @@ public abstract class Chart extends Region implements EventSource {
         final long start = ProcessingProfiler.getTimeStamp();
         updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
+
+        for (Renderer renderer : renderers) {
+            renderer.runPreLayout();
+        }
+
+        for (ChartPlugin plugin : plugins) {
+            plugin.runPreLayout();
+        }
+
     }
 
     private List<DataSet> lockedDataSets = new ArrayList<>();
@@ -615,6 +624,10 @@ public abstract class Chart extends Region implements EventSource {
             axis.drawAxis();
         }
         redrawCanvas();
+        for (ChartPlugin plugin : plugins) {
+            plugin.runPostLayout();
+        }
+
         dataSetState.clear();
         state.clear();
         for (var ds : lockedDataSets) {

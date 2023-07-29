@@ -37,6 +37,13 @@ public interface Renderer {
     ObservableList<DataSet> getDatasetsCopy();
 
     /**
+     * Optional method that allows the renderer make layout changes after axes and dataset limits are known
+     */
+    default void runPreLayout() { // #NOPMD
+        // empty by default
+    }
+
+    /**
      *
      * @param gc the Canvas' GraphicsContext the renderer should draw upon
      * @param chart the corresponding chart

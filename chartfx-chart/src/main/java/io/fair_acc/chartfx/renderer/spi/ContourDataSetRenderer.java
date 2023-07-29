@@ -453,6 +453,11 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
     }
 
     @Override
+    public void runPreLayout() {
+        layoutZAxis(getZAxis());
+    }
+
+    @Override
     public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
                                 final ObservableList<DataSet> datasets) {
         final long start = ProcessingProfiler.getTimeStamp();
@@ -486,7 +491,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             localCache = new ContourDataSetCache(xyChart, this, dataSet); // NOPMD
             ProcessingProfiler.getTimeDiff(stop, "updateCachedVariables");
 
-            layoutZAxis(getZAxis());
             // data reduction algorithm here
             paintCanvas(gc);
             drawnDataSet.add(dataSet);
