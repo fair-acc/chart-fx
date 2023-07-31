@@ -9,10 +9,12 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+import javafx.stage.Stage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +25,6 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.testdata.spi.GaussFunction;
 import io.fair_acc.math.DataSetMath;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
 
 /**
@@ -31,7 +32,7 @@ import io.fair_acc.sample.math.utils.DemoChart;
  *
  * @author rstein
  */
-public class PeakWidthSample extends AbstractDemoApplication {
+public class PeakWidthSample extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(PeakWidthSample.class);
     private static final String FILE_NAME = "./LongSchottkySIS18.dat";
     private static final String MEAS_STROKE_COLOUR = "strokeColor=lightGray";
@@ -48,7 +49,7 @@ public class PeakWidthSample extends AbstractDemoApplication {
     private final DemoChart chart2 = new DemoChart();
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         final List<DataSet> rawData = readDemoData();
         final List<DataSet> linearData = rawData.stream().map(DataSetMath::inversedbFunction).collect(Collectors.toList());
         linearData.forEach(ds -> ds.setStyle(MEAS_STROKE_COLOUR));

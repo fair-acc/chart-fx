@@ -10,11 +10,14 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 
+import fxsampler.SampleBase;
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.financial.service.consolidate.OhlcvConsolidationAddon;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.FlowPane;
@@ -62,7 +65,7 @@ import io.fair_acc.sample.financial.service.period.IntradayPeriod;
  *
  * @author afischer
  */
-public abstract class AbstractBasicFinancialApplication extends Application {
+public abstract class AbstractBasicFinancialApplication extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractBasicFinancialApplication.class);
 
     protected int prefChartWidth = 640; // 1024
@@ -91,42 +94,42 @@ public abstract class AbstractBasicFinancialApplication extends Application {
 
     private boolean timerActivated = false;
 
-    @Override
-    public void start(final Stage primaryStage) {
-        ProcessingProfiler.setVerboseOutputState(true);
-        ProcessingProfiler.setLoggerOutputState(true);
-        ProcessingProfiler.setDebugState(false);
+    //@Override
+    //public void start(final Stage primaryStage) {
+    //    ProcessingProfiler.setVerboseOutputState(true);
+    //    ProcessingProfiler.setLoggerOutputState(true);
+    //    ProcessingProfiler.setDebugState(false);
 
-        long startTime = ProcessingProfiler.getTimeStamp();
-        ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
-        startTime = ProcessingProfiler.getTimeStamp();
+    //    long startTime = ProcessingProfiler.getTimeStamp();
+    //    ProcessingProfiler.getTimeDiff(startTime, "adding data to chart");
+    //    startTime = ProcessingProfiler.getTimeStamp();
 
-        configureApp();
-        Scene scene = prepareScene();
-        ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
+    //    configureApp();
+    //    Scene scene = prepareScene();
+    //    ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
 
-        startTime = ProcessingProfiler.getTimeStamp();
-        primaryStage.setTitle(this.getClass().getSimpleName());
-        primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(this::closeDemo);
-        primaryStage.show();
-        ProcessingProfiler.getTimeDiff(startTime, "for showing");
+    //    startTime = ProcessingProfiler.getTimeStamp();
+    //    primaryStage.setTitle(this.getClass().getSimpleName());
+    //    primaryStage.setScene(scene);
+    //    primaryStage.setOnCloseRequest(this::closeDemo);
+    //    primaryStage.show();
+    //    ProcessingProfiler.getTimeDiff(startTime, "for showing");
 
-        // ensure correct state after restart demo
-        stopTimer();
-    }
+    //    // ensure correct state after restart demo
+    //    stopTimer();
+    //}
 
     protected void configureApp() {
         // configure shared variables for application sample tests
     }
 
-    protected void closeDemo(final WindowEvent evt) {
-        if (evt.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST) && LOGGER.isInfoEnabled()) {
-            LOGGER.atInfo().log("requested demo to shut down");
-        }
-        stopTimer();
-        Platform.exit();
-    }
+    //protected void closeDemo(final WindowEvent evt) {
+    //    if (evt.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST) && LOGGER.isInfoEnabled()) {
+    //        LOGGER.atInfo().log("requested demo to shut down");
+    //    }
+    //    stopTimer();
+    //    Platform.exit();
+    //}
 
     protected ToolBar getTestToolBar(Chart chart, AbstractFinancialRenderer<?> renderer, boolean replaySupport) {
         ToolBar testVariableToolBar = new ToolBar();
@@ -176,14 +179,14 @@ public abstract class AbstractBasicFinancialApplication extends Application {
      *
      * @return prepared scene for sample app
      */
-    protected Scene prepareScene() {
+    public Node getChartPanel(Stage stage) {
         // show all default financial color schemes
         final FlowPane root = new FlowPane();
         root.setAlignment(Pos.CENTER);
         Chart[] charts = Arrays.stream(getDefaultColorSchemes()).map(this::getDefaultFinancialTestChart).toArray(Chart[] ::new);
         root.getChildren().addAll(charts);
 
-        return new Scene(root, prefSceneWidth, prefSceneHeight);
+        return root;
     }
 
     /**

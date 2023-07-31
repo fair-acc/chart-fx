@@ -4,10 +4,13 @@ import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.functions.GaussianFunction;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
 import javafx.application.Application;
 import javafx.scene.Node;
+import javafx.stage.Stage;
+
+import java.util.Random;
 
 /**
  * Sample to illustrate low-pass and median filtering of a data set
@@ -15,12 +18,13 @@ import javafx.scene.Node;
  * @author rstein
  *
  */
-public class DataSetFilterSample extends AbstractDemoApplication {
+public class DataSetFilterSample extends ChartSample {
+    protected static final Random RANDOM = new Random(System.currentTimeMillis());
     private static final int N_SAMPLES = 1000;
     private static final double FILTER_BW = 0.2;
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
 
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(false);

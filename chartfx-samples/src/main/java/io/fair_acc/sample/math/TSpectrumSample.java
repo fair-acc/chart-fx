@@ -5,11 +5,9 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
-import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -35,6 +33,7 @@ import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.utils.DoublePoint;
 import io.fair_acc.math.ArrayMath;
@@ -44,11 +43,12 @@ import io.fair_acc.math.spectra.TSpectrum;
 import io.fair_acc.math.spectra.TSpectrum.Direction;
 import io.fair_acc.math.spectra.TSpectrum.FilterOrder;
 import io.fair_acc.math.spectra.TSpectrum.SmoothWindow;
+import io.fair_acc.sample.chart.ChartSample;
 
 /**
  * @author rstein
  */
-public class TSpectrumSample extends Application {
+public class TSpectrumSample extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(TSpectrumSample.class);
     private static final String SOURCE1 = "./BBQSpectra.dat";
     private static final String SOURCE2 = "./rawDataCPS2.dat";
@@ -189,7 +189,7 @@ public class TSpectrumSample extends Application {
     }
 
     @Override
-    public void start(final Stage primaryStage) {
+    public Node getChartPanel(Stage stage) {
         Chart chart = getChart();
         final BorderPane root = new BorderPane(chart);
         root.setTop(getTopToolBar());
@@ -253,11 +253,7 @@ public class TSpectrumSample extends Application {
         // normalisedBg.setStyle("strokeColor=#CECECE");
         // backgroundRenderer.getDatasets().addAll(normalisedBg);
 
-        final Scene scene = new Scene(root, 1600, 600);
-        primaryStage.setTitle(getClass().getSimpleName());
-        primaryStage.setScene(scene);
-        primaryStage.show();
-        primaryStage.setOnCloseRequest(evt -> Platform.exit());
+        return root;
     }
 
     private void triggerDataSetUpdate() {

@@ -5,12 +5,15 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.functions.TrigCosineFunction;
 import io.fair_acc.math.functions.TrigSineFunction;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.Apodization;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+
+import java.util.Random;
 
 /**
  * example illustrating the Fast-Fourier transform and math operations directly on DataSet
@@ -21,12 +24,13 @@ import javafx.scene.layout.VBox;
  * 
  * @author rstein
  */
-public class DataSetSpectrumSample extends AbstractDemoApplication {
+public class DataSetSpectrumSample extends ChartSample {
+    protected static final Random RANDOM = new Random(System.currentTimeMillis());
     private static final int N_SAMPLES = 200;
     private static boolean unequalSampling;
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
 
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(false);

@@ -3,11 +3,14 @@ package io.fair_acc.sample.math;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Random;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +20,6 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.math.Math;
 import io.fair_acc.math.matrix.MatrixD;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.EEMD;
 
@@ -26,7 +28,8 @@ import io.fair_acc.math.spectra.EEMD;
  * 
  * @author rstein TODO: some fixes in EMD necessary
  */
-public class EMDSample extends AbstractDemoApplication {
+public class EMDSample extends ChartSample {
+    protected static final Random RANDOM = new Random(System.currentTimeMillis());
     private static final Logger LOGGER = LoggerFactory.getLogger(EMDSample.class);
     private static final int MAX_POINTS = 1024;
     private static final boolean LOAD_EXAMPLE_DATA = true;
@@ -87,7 +90,7 @@ public class EMDSample extends AbstractDemoApplication {
     }
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         initData();
 
         final DemoChart chart1 = new DemoChart();

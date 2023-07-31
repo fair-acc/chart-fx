@@ -7,18 +7,19 @@ import io.fair_acc.math.filter.iir.Bessel;
 import io.fair_acc.math.filter.iir.Butterworth;
 import io.fair_acc.math.filter.iir.ChebyshevI;
 import io.fair_acc.math.filter.iir.ChebyshevII;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
 
 /**
  * Sample to illustrate IIR-based Butterworth and Chebychev filters
  * 
  * @author rstein
  */
-public class IIRFrequencyFilterSample extends AbstractDemoApplication {
+public class IIRFrequencyFilterSample extends ChartSample {
     private static final String LOW_PASS = "Low-Pass";
     private static final String BAND_STOP = "Band-Stop";
     private static final String BAND_PASS = "Band-Pass";
@@ -32,26 +33,24 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
     private static final double ALLOWED_OUT_OF_BAND_RIPPLE_DB = 20;
     private final DataSet2D demoDataSet = generateDemoDataSet();
 
-    public IIRFrequencyFilterSample() {
-        super(2 * DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGTH);
-    }
-
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         FlowPane flowPane = new FlowPane();
 
-        flowPane.getChildren().add(getDemoChartButterworth());
+        var width = stage.getWidth() / 2;
 
-        flowPane.getChildren().add(getDemoChartBessel());
+        flowPane.getChildren().add(getDemoChartButterworth(width));
 
-        flowPane.getChildren().add(getDemoChartChebychevI());
+        flowPane.getChildren().add(getDemoChartBessel(width));
 
-        flowPane.getChildren().add(getDemoChartChebychevII());
+        flowPane.getChildren().add(getDemoChartChebychevI(width));
+
+        flowPane.getChildren().add(getDemoChartChebychevII(width));
 
         return flowPane;
     }
 
-    private DemoChart getDemoChart(final String title) {
+    private DemoChart getDemoChart(final String title, double width) {
         final DemoChart defaultChart = new DemoChart();
         defaultChart.setTitle(title);
         defaultChart.getXAxis().setName("frequency");
@@ -61,11 +60,11 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         defaultChart.getYAxis().setAutoRanging(false);
         defaultChart.getYAxis().setMin(-35.0);
         defaultChart.getYAxis().setMax(+5.0);
-        defaultChart.setPrefSize(DEFAULT_SCENE_WIDTH, 400);
+        defaultChart.setPrefSize(width, 400);
         return defaultChart;
     }
 
-    private DemoChart getDemoChartBessel() {
+    private DemoChart getDemoChartBessel(double width) {
         final String filterType = "Bessel - " + "(" + ORDER + "th-order)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
@@ -94,7 +93,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
             bandStop.add(x, iirBandStop.filter(y));
         }
 
-        DemoChart chart = getDemoChart(filterType);
+        DemoChart chart = getDemoChart(filterType, width);
         chart.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(lowPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(highPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(bandPass),
@@ -102,7 +101,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         return chart;
     }
 
-    private DemoChart getDemoChartButterworth() {
+    private DemoChart getDemoChartButterworth(double width) {
         final String filterType = "Butterworth - " + "(" + ORDER + "th-order)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
@@ -131,7 +130,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
             bandStop.add(x, iirBandStop.filter(y));
         }
 
-        DemoChart chart = getDemoChart(filterType);
+        DemoChart chart = getDemoChart(filterType, width);
         chart.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(lowPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(highPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(bandPass),
@@ -139,7 +138,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         return chart;
     }
 
-    private DemoChart getDemoChartChebychevI() {
+    private DemoChart getDemoChartChebychevI(double width) {
         final String filterType = "ChebyshevI - " + "(" + ORDER + "th-order, " + ALLOWED_IN_BAND_RIPPLE_DB
                 + " dB ripple)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
@@ -171,7 +170,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
             bandStop.add(x, iirBandStop.filter(y));
         }
 
-        DemoChart chart = getDemoChart(filterType);
+        DemoChart chart = getDemoChart(filterType, width);
         chart.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(lowPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(highPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(bandPass),
@@ -179,7 +178,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
         return chart;
     }
 
-    private DemoChart getDemoChartChebychevII() {
+    private DemoChart getDemoChartChebychevII(double width) {
         final String filterType = "ChebyshevII - " + "(" + ORDER + "th-order, " + ALLOWED_OUT_OF_BAND_RIPPLE_DB
                 + " dB ripple)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
@@ -211,7 +210,7 @@ public class IIRFrequencyFilterSample extends AbstractDemoApplication {
             bandStop.add(x, iirBandStop.filter(y));
         }
 
-        DemoChart chart = getDemoChart(filterType);
+        DemoChart chart = getDemoChart(filterType, width);
         chart.getRenderer(0).getDatasets().addAll(DataSetMath.normalisedMagnitudeSpectrumDecibel(lowPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(highPass),
                 DataSetMath.normalisedMagnitudeSpectrumDecibel(bandPass),

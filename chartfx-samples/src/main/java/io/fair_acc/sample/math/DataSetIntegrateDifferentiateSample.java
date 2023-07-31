@@ -1,5 +1,6 @@
 package io.fair_acc.sample.math;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 
@@ -8,19 +9,22 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.functions.GaussianFunction;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
+import javafx.stage.Stage;
+
+import java.util.Random;
 
 /**
  * Sample to illustrate integral and differentiation of data sets low-pass filter
  * 
  * @author rstein
  */
-public class DataSetIntegrateDifferentiateSample extends AbstractDemoApplication {
+public class DataSetIntegrateDifferentiateSample extends ChartSample {
+    protected static final Random RANDOM = new Random(System.currentTimeMillis());
     private static final int N_SAMPLES = 100;
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(false);
         chart.getRenderer(0).setErrorType(ErrorStyle.ERRORSURFACE);
