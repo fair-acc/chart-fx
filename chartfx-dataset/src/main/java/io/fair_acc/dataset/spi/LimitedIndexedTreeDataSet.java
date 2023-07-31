@@ -5,9 +5,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.trees.IndexedNavigableSet;
@@ -99,7 +96,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             getAxisDescription(DIM_Y).add(y + ey);
             expire();
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -149,7 +146,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             }
             expire();
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -193,7 +190,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             data.clear();
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
@@ -341,7 +338,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             getAxisDescription(DIM_X).setMax(Double.NaN);
             getAxisDescription(DIM_Y).setMax(Double.NaN);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
@@ -367,7 +364,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
             // invalidate ranges
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 

@@ -3,9 +3,6 @@ package io.fair_acc.sample.dataset.legacy;
 import java.util.Arrays;
 
 import io.fair_acc.dataset.*;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.spi.AbstractErrorDataSet;
@@ -163,7 +160,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getAxisDescription(DIM_Y).add(y - yErrorNeg);
             getAxisDescription(DIM_Y).add(y + yErrorPos);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -219,7 +216,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             recomputeLimits(DIM_X);
             recomputeLimits(DIM_Y);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -246,7 +243,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
             getAxisDescription(DIM_X).clear();
             getAxisDescription(DIM_Y).clear();
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
@@ -332,7 +329,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 

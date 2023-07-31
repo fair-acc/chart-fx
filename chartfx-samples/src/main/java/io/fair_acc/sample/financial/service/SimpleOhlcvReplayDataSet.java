@@ -18,7 +18,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;

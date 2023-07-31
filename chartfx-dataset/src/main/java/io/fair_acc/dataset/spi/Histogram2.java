@@ -8,7 +8,6 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetMetaData;
 import io.fair_acc.dataset.Histogram1D;
 import io.fair_acc.dataset.Histogram2D;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 

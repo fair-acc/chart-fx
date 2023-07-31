@@ -35,7 +35,6 @@ import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.utils.DoublePoint;
 import io.fair_acc.math.ArrayMath;

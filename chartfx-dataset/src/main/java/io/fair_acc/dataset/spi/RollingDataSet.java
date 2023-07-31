@@ -1,8 +1,6 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.events.ChartBits;
 
@@ -35,7 +33,7 @@ public class RollingDataSet extends FragmentedDataSet {
         lastLength = set.getAxisDescription(DIM_X).getMax();
         // invalidate ranges
         getAxisDescriptions().forEach(AxisDescription::clear);
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
     }
 
     /**

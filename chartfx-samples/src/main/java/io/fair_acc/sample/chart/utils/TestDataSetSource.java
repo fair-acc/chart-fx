@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
-import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.utils.ByteArrayCache;
 import io.fair_acc.dataset.utils.DoubleCircularBuffer;
@@ -110,7 +109,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
     public void fillTestData() {
         lock().writeLockGuard(
                 () -> synth.decode(history[2].elements(), frameSize, updatePeriod, samplingRate, N_SYNTHESISER_BITS));
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
     }
 
     @Override
@@ -166,7 +165,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
 
     public void reset() {
         synth.reset();
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
     }
 
     public void setFrameCount(int frameCount) {

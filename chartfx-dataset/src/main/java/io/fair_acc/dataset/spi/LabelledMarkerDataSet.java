@@ -13,9 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.DoublePoint;
 import io.fair_acc.dataset.utils.AssertUtils;
@@ -52,7 +49,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
             dataLabels.add(marker.getLabel());
             dataStyles.add(marker.getStyle());
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -67,7 +64,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
@@ -150,7 +147,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
