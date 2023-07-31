@@ -66,7 +66,6 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
      */
     @Override
     public Node getChartPanel(Stage stage) {
-        String priceFormat = "%1.1f";
         // simulate market orders list
         List<SimMktOrder> orders = new ArrayList<>();
         orders.add(new SimMktOrder("2016/07/29 14:06", 3));
@@ -95,7 +94,7 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         if (ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
             SimpleOhlcvReplayDataSet replayDataSet = ((SimpleOhlcvReplayDataSet) ohlcvDataSet);
             // close prices visualization
-            final YWatchValueIndicator closeIndicator = new YWatchValueIndicator(yAxis, priceFormat);
+            final YWatchValueIndicator closeIndicator = new YWatchValueIndicator(yAxis);
             closeIndicator.setPreventOcclusion(true);
             closeIndicator.setId("price");
             closeIndicator.setLineVisible(false);
@@ -135,8 +134,8 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         }
 
         // manual levels
-        chart.getPlugins().add(new YWatchValueIndicator(yAxis, priceFormat, 4727.5));
-        chart.getPlugins().add(new YWatchValueIndicator(yAxis, priceFormat, 4715.0));
+        chart.getPlugins().add(new YWatchValueIndicator(yAxis, 4727.5));
+        chart.getPlugins().add(new YWatchValueIndicator(yAxis, 4715.0));
 
         // simple S/R ranges
         chart.getPlugins().add(createRsLevel(yAxis, 4710, 4711, "Daily Support"));
