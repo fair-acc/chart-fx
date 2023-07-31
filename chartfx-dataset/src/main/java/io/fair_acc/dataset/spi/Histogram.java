@@ -7,8 +7,6 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.DataSetMetaData;
 import io.fair_acc.dataset.Histogram1D;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 
@@ -100,7 +98,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
             addBinContent(bin, w);
             return bin;
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return retVal;
     }
 
@@ -111,7 +109,7 @@ public class Histogram extends AbstractHistogram implements Histogram1D, DataSet
                 this.fill(x[i], w[i]);
             }
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
     }
 
     @Override

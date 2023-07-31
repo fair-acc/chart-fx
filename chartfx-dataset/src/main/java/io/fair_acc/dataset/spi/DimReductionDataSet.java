@@ -116,7 +116,7 @@ public class DimReductionDataSet extends DoubleDataSet implements EventListener 
             }
         }));
 
-        this.fireInvalidated(ChartBits.DataSetData);
+        this.fireInvalidated(ChartBits.DataSetDataAdded);
     }
 
     public void setMaxValue(final double val) {

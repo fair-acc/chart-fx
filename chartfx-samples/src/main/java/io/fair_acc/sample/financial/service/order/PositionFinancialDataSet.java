@@ -180,7 +180,7 @@ public class PositionFinancialDataSet extends AbstractDataSet<PositionFinancialD
         // update internal memories
         Order order = event.getOrder();
         includePosition(order.isExitOrder() ? order.getExitOfPosition() : order.getEntryOfPosition(), false);
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
     }
 
     @Override

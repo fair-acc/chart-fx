@@ -3,7 +3,6 @@ package io.fair_acc.dataset.spi;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet3D;
 import io.fair_acc.dataset.GridDataSet;

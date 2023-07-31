@@ -1,9 +1,6 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
@@ -130,7 +127,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
                 addDataLabel(this.values[0].size() - 1, label);
             }
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -154,7 +151,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             }
         });
 
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -192,7 +189,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             getDataLabelMap().addValueAndShiftKeys(indexAt, this.values[0].size(), label);
             getDataStyleMap().shiftKeys(indexAt, this.values[0].size());
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -220,7 +217,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             getDataLabelMap().shiftKeys(indexAt, this.values[0].size());
             getDataStyleMap().shiftKeys(indexAt, this.values[0].size());
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -240,7 +237,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
@@ -314,7 +311,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
             // -> fireInvalidated calls computeLimits for autoNotification
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 

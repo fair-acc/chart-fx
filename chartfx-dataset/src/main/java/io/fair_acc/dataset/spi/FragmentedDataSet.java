@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.events.ChartBits;
@@ -39,7 +37,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
             getAxisDescription(DIM_Y).add(set.getAxisDescription(DIM_Y).getMax());
             getAxisDescription(DIM_Y).add(set.getAxisDescription(DIM_Y).getMin());
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
     }
 
     /**
@@ -64,7 +62,7 @@ public class FragmentedDataSet extends AbstractDataSet<FragmentedDataSet> implem
         lock().writeLockGuard(() -> {
             dataCount = 0;
             list.clear();
-            fireInvalidated(ChartBits.DataSetData);
+            fireInvalidated(ChartBits.DataSetDataRemoved);
         });
     }
 

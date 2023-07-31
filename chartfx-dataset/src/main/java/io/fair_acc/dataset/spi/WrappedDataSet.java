@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.EventListener;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.events.ChartBits;
 

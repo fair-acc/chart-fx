@@ -3,9 +3,6 @@ package io.fair_acc.sample.dataset.legacy;
 import java.util.Arrays;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
@@ -166,7 +163,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             recomputeLimits(DIM_X);
             recomputeLimits(DIM_Y);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -238,7 +235,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
             getAxisDescription(DIM_X).add(x);
             getAxisDescription(DIM_Y).add(y);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -257,7 +254,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
@@ -335,7 +332,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 

@@ -43,6 +43,11 @@ public abstract class BitState implements StateListener {
         return mask;
     }
 
+    public static IntSupplier maskSupplier(IntSupplier bit0, IntSupplier... more) {
+        int mask = mask(bit0, more);
+        return () -> mask;
+    }
+
     public static int mask(IntSupplier bit0, IntSupplier... more) {
         int mask = bit0.getAsInt();
         for (var bit : more) {
@@ -296,7 +301,7 @@ public abstract class BitState implements StateListener {
 
     // Default to hide stack trace lines that are inside the printer. Keep updated.
     private static final int DEFAULT_MIN_STACK_TRACE = 6;
-    private static final int DEFAULT_MAX_STACK_TRACE = 20;
+    private static final int DEFAULT_MAX_STACK_TRACE = 25;
 
     private static class FilteredListener implements StateListener {
 

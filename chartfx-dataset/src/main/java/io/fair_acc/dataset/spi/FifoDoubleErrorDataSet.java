@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.DoublePointError;
 import io.fair_acc.dataset.utils.AssertUtils;
@@ -107,7 +104,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             // remove old fields if necessary
             expire(x);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return this;
     }
 
@@ -151,7 +148,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
                 this.add(xValues[i], yValues[i], yErrorsNeg[i], yErrorsPos[i]);
             }
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return this;
     }
 
@@ -181,7 +178,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
             return toRemoveList.size();
         });
         if (dataPointsToRemove != 0) {
-            fireInvalidated(ChartBits.DataSetData);
+            fireInvalidated(ChartBits.DataSetDataRemoved);
         }
         return dataPointsToRemove;
     }
@@ -235,7 +232,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
      */
     public void reset() {
         data.clear();
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
     }
 
     /**

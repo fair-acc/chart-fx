@@ -1,9 +1,6 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.MathUtils;
 import io.fair_acc.dataset.utils.AssertUtils;
@@ -115,7 +112,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
             getAxisDescription(DIM_X).add(x);
             getAxisDescription(DIM_Y).add(y);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -145,7 +142,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
                 getAxisDescription(DIM_Y).add(v);
             }
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -193,7 +190,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
             getAxisDescription(DIM_X).add(x);
             getAxisDescription(DIM_Y).add(y);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -223,7 +220,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
             getDataLabelMap().shiftKeys(indexAt, xValues.size());
             getDataStyleMap().shiftKeys(indexAt, xValues.size());
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
         return getThis();
     }
 
@@ -242,7 +239,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
 
             getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 
@@ -311,7 +308,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
             // -> fireInvalidated calls computeLimits for autoNotification
             this.getAxisDescriptions().forEach(AxisDescription::clear);
         });
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataRemoved);
         return getThis();
     }
 

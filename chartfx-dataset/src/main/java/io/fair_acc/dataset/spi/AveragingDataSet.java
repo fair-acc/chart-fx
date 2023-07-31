@@ -3,8 +3,6 @@ package io.fair_acc.dataset.spi;
 import java.util.ArrayDeque;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.events.ChartBits;
 
@@ -69,7 +67,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
         }
         dataset.recomputeLimits(DIM_X);
         dataset.recomputeLimits(DIM_Y);
-        fireInvalidated(ChartBits.DataSetData);
+        fireInvalidated(ChartBits.DataSetDataAdded);
     }
 
     /**
