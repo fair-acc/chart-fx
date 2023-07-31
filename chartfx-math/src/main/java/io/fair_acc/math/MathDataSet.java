@@ -9,12 +9,8 @@ import java.util.stream.Collectors;
 
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.EventRateLimiter;
 import io.fair_acc.dataset.event.EventRateLimiter.UpdateStrategy;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdateEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
+import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 
@@ -29,6 +25,7 @@ public class MathDataSet extends DoubleErrorDataSet {
     private static final long serialVersionUID = -4978160822533565009L;
     private static final long DEFAULT_UPDATE_LIMIT = 40;
     private final transient List<DataSet> sourceDataSets;
+    private final transient BitState dataSourceState = BitState.initDirtyMultiThreaded(this, ChartBits.DataSetMask);
     private final transient DataSetFunction dataSetFunction;
     private final transient DataSetsFunction dataSetsFunction;
     private final transient DataSetValueFunction dataSetValueFunction;
@@ -132,15 +129,19 @@ public class MathDataSet extends DoubleErrorDataSet {
             // the 'DataSetFunction' interface
         }
 
-        // TODO: when should the updates happen? Should this be multithreaded? on invalidate or change?
-        getBitState().addInvalidateListener(ChartBits.DataSetData, (obj, bits) -> update());
+        // TODO: the updates currently get computed on the change listener thread. When should this happen concurrently?
+        // TODO: maybe trigger the update from the chart preLayout?
+        dataSourceState.addChangeListener((obj, bits) -> update());
 
         // exceptionally call handler during DataSet creation
         registerListener(); // NOPMD
+
+        // call handler for initial constructor update
+        update();
     }
 
     public final void deregisterListener() {
-        sourceDataSets.forEach(srcDataSet -> srcDataSet.removeListener(this));
+        sourceDataSets.forEach(srcDataSet -> srcDataSet.getBitState().removeInvalidateListener(dataSourceState));
     }
 
     public final List<DataSet> getSourceDataSets() {
@@ -148,7 +149,7 @@ public class MathDataSet extends DoubleErrorDataSet {
     }
 
     public final void registerListener() {
-        sourceDataSets.forEach(srcDataSet -> srcDataSet.addListener(this));
+        sourceDataSets.forEach(srcDataSet -> srcDataSet.getBitState().addInvalidateListener(dataSourceState));
     }
 
     private void handleDataSetValueFunctionInterface() {
@@ -183,6 +184,10 @@ public class MathDataSet extends DoubleErrorDataSet {
 
     protected void update() {
         this.lock().writeLockGuard(() -> {
+            if (dataSourceState.isClean()) {
+                return;
+            }
+            dataSourceState.clear();
             if (dataSetFunction != null) {
                 set(dataSetFunction.transform(sourceDataSets.get(0)));
             } else if (dataSetsFunction != null) {
@@ -195,8 +200,8 @@ public class MathDataSet extends DoubleErrorDataSet {
             }
 
             this.setName(getCompositeDataSetName(transformName, sourceDataSets.toArray(new DataSet[0])));
+            // Note: the data bit is already invalidated at the storing data set level
         });
-        fireInvalidated(ChartBits.DataSetData);
     }
 
     protected static String getCompositeDataSetName(final String transformName, final DataSet... sources) {
