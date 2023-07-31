@@ -1,8 +1,10 @@
 package io.fair_acc.sample.math;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,15 +14,17 @@ import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.math.MathBase;
 import io.fair_acc.math.fitter.NonLinearRegressionFitter;
 import io.fair_acc.math.functions.AbstractFunction1D;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
+
+import java.util.Random;
 
 /**
  * example illustrating fitting of a Gaussian Distribution
  * 
  * @author rstein
  */
-public class GaussianFitSample extends AbstractDemoApplication {
+public class GaussianFitSample extends ChartSample {
+    protected static final Random RANDOM = new Random(System.currentTimeMillis());
     private static final Logger LOGGER = LoggerFactory.getLogger(GaussianFitSample.class);
     private static final int MAX_POINTS = 101;
     private DataSet fmodel;
@@ -28,7 +32,7 @@ public class GaussianFitSample extends AbstractDemoApplication {
     private DataSet fdataFitted;
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         initData();
 
         final DemoChart chart = new DemoChart();

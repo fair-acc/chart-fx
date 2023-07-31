@@ -3,6 +3,7 @@ package io.fair_acc.sample.financial;
 import java.util.Calendar;
 
 import javafx.application.Application;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -18,6 +19,7 @@ import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeKey;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
+import javafx.stage.Stage;
 
 /**
  * Advanced configuration of Candlestick renderer. Support for PaintBars and extension points.
@@ -31,7 +33,7 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
      * Prepare charts to the root.
      */
     @Override
-    protected Scene prepareScene() {
+    public Node getChartPanel(Stage stage) {
         timeRange = "2020/06/24 0:00-2020/11/12 0:00";
 
         final var chart = getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND);
@@ -44,7 +46,7 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
         VBox.setVgrow(chart, Priority.SOMETIMES);
         root.getChildren().addAll(testVariableToolBar, chart);
 
-        return new Scene(root, prefSceneWidth, prefSceneHeight);
+        return root;
     }
 
     protected void prepareRenderers(XYChart chart, OhlcvDataSet ohlcvDataSet, DefaultDataSet indiSet) {

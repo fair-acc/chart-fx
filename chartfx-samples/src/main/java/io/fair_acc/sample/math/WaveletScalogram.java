@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+import javafx.stage.Stage;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +23,6 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.math.Math;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.SpectrumTools;
 import io.fair_acc.math.spectra.wavelet.ContinuousWavelet;
@@ -31,7 +32,7 @@ import io.fair_acc.math.spectra.wavelet.ContinuousWavelet;
  *
  * @author rstein
  */
-public class WaveletScalogram extends AbstractDemoApplication {
+public class WaveletScalogram extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaveletScalogram.class);
     private static final int MAX_POINTS = 1024;
     public static final boolean LOAD_EXAMPLE_DATA = true;
@@ -118,7 +119,7 @@ public class WaveletScalogram extends AbstractDemoApplication {
     }
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         final DemoChart chart1 = new DemoChart();
         chart1.getXAxis().setName("time");
         chart1.getXAxis().setUnit("turns");

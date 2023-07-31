@@ -6,10 +6,12 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +21,6 @@ import io.fair_acc.math.ArrayMath;
 import io.fair_acc.math.Math;
 import io.fair_acc.math.MathBase;
 import io.fair_acc.math.functions.RandomWalkFunction;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.wavelet.CDFWavelet;
 import io.fair_acc.math.spectra.wavelet.FastWaveletTransform;
@@ -29,7 +30,7 @@ import io.fair_acc.math.spectra.wavelet.FastWaveletTransform;
  *
  * @author rstein
  */
-public class WaveletDenoising extends AbstractDemoApplication {
+public class WaveletDenoising extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaveletDenoising.class);
     private static final int MAX_POINTS = 512;
     private static final boolean LOAD_EXAMPLE_DATA = false;
@@ -41,7 +42,7 @@ public class WaveletDenoising extends AbstractDemoApplication {
     private DataSet fspectraFit;
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         initData();
 
         final DemoChart chart1 = new DemoChart();

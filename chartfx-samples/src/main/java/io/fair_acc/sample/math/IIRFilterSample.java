@@ -5,10 +5,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.ZipInputStream;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +18,6 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.filter.iir.Butterworth;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
 
 /**
@@ -26,7 +27,7 @@ import io.fair_acc.sample.math.utils.DemoChart;
  *
  * @author rstein
  */
-public class IIRFilterSample extends AbstractDemoApplication {
+public class IIRFilterSample extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(IIRFilterSample.class);
     private static final int ORDER = 32; // Order of filters
 
@@ -43,7 +44,7 @@ public class IIRFilterSample extends AbstractDemoApplication {
     private DataSet fspectra2;
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         initData();
         final DemoChart chart1 = new DemoChart();
         chart1.getXAxis().setName("time");

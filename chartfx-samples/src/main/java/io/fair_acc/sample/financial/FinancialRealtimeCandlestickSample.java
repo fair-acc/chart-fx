@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javafx.geometry.HPos;
-import javafx.scene.Scene;
+import javafx.scene.Node;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
@@ -37,6 +37,7 @@ import io.fair_acc.sample.financial.service.order.PositionFinancialDataSet;
 import io.fair_acc.sample.financial.service.period.IntradayPeriod;
 import io.fair_acc.sample.financial.service.plan.MktOrderListTradePlan;
 import io.fair_acc.sample.financial.service.plan.MktOrderListTradePlan.SimMktOrder;
+import javafx.stage.Stage;
 
 /**
  * Tick OHLC/V realtime processing. Demonstration of re-sample data to 2M timeframe.
@@ -63,7 +64,8 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
     /**
      * Prepare charts to the root.
      */
-    protected Scene prepareScene() {
+    @Override
+    public Node getChartPanel(Stage stage) {
         String priceFormat = "%1.1f";
         // simulate market orders list
         List<SimMktOrder> orders = new ArrayList<>();
@@ -147,7 +149,7 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         VBox.setVgrow(chart, Priority.SOMETIMES);
         root.getChildren().addAll(testVariableToolBar, chart);
 
-        return new Scene(root, prefSceneWidth, prefSceneHeight);
+        return root;
     }
 
     protected YRangeIndicator createRsLevel(Axis yAxis, double lowerBound, double upperBound, String description) {

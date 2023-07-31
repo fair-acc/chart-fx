@@ -2,10 +2,12 @@ package io.fair_acc.sample.math;
 
 import java.util.Arrays;
 
+import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 
+import javafx.stage.Stage;
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +16,6 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.math.Math;
 import io.fair_acc.math.TRandom;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.SpectrumTools;
 import io.fair_acc.math.spectra.dtft.DiscreteTimeFourierTransform;
@@ -26,7 +27,7 @@ import io.fair_acc.math.spectra.lomb.LombPeriodogram;
  *
  * @author rstein
  */
-public class FourierSample extends AbstractDemoApplication {
+public class FourierSample extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(FourierSample.class);
     private static final int MAX_POINTS = 512;
     private DataSet fraw;
@@ -48,7 +49,7 @@ public class FourierSample extends AbstractDemoApplication {
     }
 
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         initData();
         final DemoChart chart1 = new DemoChart();
         chart1.getXAxis().setName("time");

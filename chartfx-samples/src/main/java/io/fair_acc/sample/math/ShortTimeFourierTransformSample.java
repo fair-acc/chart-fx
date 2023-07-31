@@ -2,7 +2,6 @@ package io.fair_acc.sample.math;
 
 import java.util.Random;
 
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.application.Application;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ObservableValue;
@@ -18,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,16 +35,17 @@ import io.fair_acc.chartfx.utils.AxisSynchronizer;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetMetaData;
 import io.fair_acc.dataset.GridDataSet;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.DataSetBuilder;
 import io.fair_acc.dataset.spi.DoubleGridDataSet;
 import io.fair_acc.dataset.spi.MultiDimDoubleDataSet;
 import io.fair_acc.dataset.spi.TransposedDataSet;
 import io.fair_acc.math.MathBase;
-import io.fair_acc.sample.math.utils.AbstractDemoApplication;
 import io.fair_acc.math.spectra.Apodization;
 import io.fair_acc.math.spectra.ShortTimeFourierTransform;
 import io.fair_acc.math.spectra.ShortTimeFourierTransform.Padding;
 import io.fair_acc.math.spectra.wavelet.ContinuousWavelet;
+import io.fair_acc.sample.chart.ChartSample;
 
 /**
  * Example illustrating the Short-time Fourier Transform
@@ -56,7 +57,7 @@ import io.fair_acc.math.spectra.wavelet.ContinuousWavelet;
  * 
  * @author akrimm
  */
-public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
+public class ShortTimeFourierTransformSample extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(ShortTimeFourierTransformSample.class);
     protected XYChart chart1;
     protected XYChart chart2;
@@ -91,15 +92,8 @@ public class ShortTimeFourierTransformSample extends AbstractDemoApplication {
     private final DoubleGridDataSet stftData = new DataSetBuilder("ShortTimeFourierTransform").setDimension(3).setInitalCapacity(0).build(DoubleGridDataSet.class);
     private final DoubleGridDataSet waveletData = new DataSetBuilder("WaveletTransform").setDimension(3).setInitalCapacity(0).build(DoubleGridDataSet.class);
 
-    /**
-     * Override default constructor to increase window size
-     */
-    public ShortTimeFourierTransformSample() {
-        super(1200, 800);
-    }
-
     @Override
-    public Node getContent() {
+    public Node getChartPanel(Stage stage) {
         // rawData chart
         chart3 = new XYChart();
         chart3.getXAxis().setAutoUnitScaling(true);
