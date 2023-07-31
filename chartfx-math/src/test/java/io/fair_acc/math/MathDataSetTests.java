@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.fair_acc.dataset.events.ChartBits;
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.dataset.DataSet;
@@ -138,65 +139,43 @@ public class MathDataSetTests {
             System.arraycopy(input, 0, output, 0, length);
         }, -1, null, rawDataSetRef);
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
-        identityDataSet.addListener(evt -> counter2.incrementAndGet());
+        identityDataSet.getBitState().addInvalidateListener(ChartBits.DataSetData,
+                (src, bits) -> counter2.incrementAndGet());
 
         // has been initialised once during construction
         assertEquals(1, counter1.get());
         assertEquals(0, counter2.get());
         counter1.set(0);
 
-        // null does not invoke update
-        rawDataSetRef.invokeListener(null, false);
-        assertEquals(0, counter1.get());
-        assertEquals(0, counter2.get());
-
-        // null does not invoke update
-        rawDataSetRef.invokeListener(new UpdateEvent(rawDataSetRef, "wrong event"), false);
-        assertEquals(0, counter1.get());
-        assertEquals(0, counter2.get());
-
-        // null does not invoke update
-        rawDataSetRef.invokeListener(new UpdateEvent(identityDataSet, "wrong reference", false));
+        // wrong event does not invoke update
+        rawDataSetRef.fireInvalidated(ChartBits.ChartLegend);
         assertEquals(0, counter1.get());
         assertEquals(0, counter2.get());
 
         // AddedDataEvent does invoke update
-        rawDataSetRef.invokeListener(new AddedDataEvent(rawDataSetRef, "OK reference", false));
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetDataAdded);
         assertEquals(1, counter1.get());
         assertEquals(1, counter2.get());
 
         // RemovedDataEvent does invoke update
-        rawDataSetRef.invokeListener(new RemovedDataEvent(rawDataSetRef, "OK reference", false));
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetDataRemoved);
         assertEquals(2, counter1.get());
         assertEquals(2, counter2.get());
-        rawDataSetRef.invokeListener(new RemovedDataEvent(identityDataSet, "wrong reference", false));
+
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetDataRemoved);
         assertEquals(3, counter1.get());
         assertEquals(3, counter2.get());
 
         // UpdatedDataEvent does invoke update
-        rawDataSetRef.invokeListener(new UpdatedDataEvent(rawDataSetRef, "OK reference", false));
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
         assertEquals(4, counter1.get());
         assertEquals(4, counter2.get());
 
-        assertEquals(1, rawDataSetRef.getBitState().size());
-        identityDataSet.deregisterListener();
-        assertEquals(0, rawDataSetRef.getBitState().size());
-        rawDataSetRef.invokeListener(new UpdatedDataEvent(rawDataSetRef, "OK reference", false));
-        assertEquals(4, counter1.get());
-        assertEquals(4, counter2.get());
-
-        identityDataSet.registerListener();
-        rawDataSetRef.invokeListener(new UpdatedDataEvent(rawDataSetRef, "OK reference", false));
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetDataAdded);
         assertEquals(5, counter1.get());
         assertEquals(5, counter2.get());
+        assertEquals(5, counter2.get());
 
-        assertEquals(1, identityDataSet.getSourceDataSets().size());
-        identityDataSet.getSourceDataSets().clear();
-        assertEquals(0, identityDataSet.getSourceDataSets().size());
-
-        rawDataSetRef.invokeListener(new UpdatedDataEvent(rawDataSetRef, "OK reference", false));
-        assertEquals(5, counter1.get());
-        assertEquals(6, counter2.get());
     }
 
     protected static DoubleDataSet generateSineWaveData(final int nData) {
