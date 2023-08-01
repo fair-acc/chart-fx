@@ -265,10 +265,10 @@ public class ChartPane extends Pane {
                         xOffsetRight += prefSize;
                         break;
                     case CENTER_HOR:
-                        resizeRelocate(child, xContent, yContent + contentHeight / 2 - prefSize / 2, contentWidth, prefSize);
+                        resizeRelocate(child, xContent, snapSizeY(yContent + contentHeight / 2 - prefSize / 2), contentWidth, prefSize);
                         break;
                     case CENTER_VER:
-                        resizeRelocate(child, xContent + contentWidth / 2 - prefSize / 2, yContent, prefSize, contentHeight);
+                        resizeRelocate(child, snapSizeX(xContent + contentWidth / 2 - prefSize / 2), yContent, prefSize, contentHeight);
                         break;
                 }
             }

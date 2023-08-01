@@ -82,8 +82,9 @@ public class ChartAnatomySample extends Application {
         };
         VBox.setVgrow(chart, Priority.ALWAYS);
         chart.getAxes().addAll(
-                xAxis1, xAxis2, xAxis3,
-                yAxis1, yAxis2, yAxis3, yAxis4);
+                xAxis1, xAxis2, // horizontal
+                yAxis1, yAxis2, yAxis3, // vertical
+                xAxis3, yAxis4); // center
 
         chart.setTitle("<Title> Hello World Chart </Title>");
         // chart.setToolBarSide(Side.LEFT);
