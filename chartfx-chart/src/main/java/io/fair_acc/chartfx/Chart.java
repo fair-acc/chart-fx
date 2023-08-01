@@ -83,7 +83,7 @@ public abstract class Chart extends Region implements EventSource {
     // of all datasets, but the JavaFX change listener may not forward the dirty bits to the chart until the next frame.
     // This creates a race condition where delta bits that are already cleared in the datasets may end up dirtying the
     // chart and trigger an unnecessary redraw. To avoid this issue we ignore the delta and pass the current state.
-    protected final BitState dataSetState = BitState.initDirty(this, BitState.ALL_BITS)
+    protected final BitState dataSetState = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
             .addChangeListener(FXUtils.runOnFxThread((src, deltaBits) -> state.setDirty(src.getBits())));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);

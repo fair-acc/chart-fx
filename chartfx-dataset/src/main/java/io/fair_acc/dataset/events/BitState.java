@@ -1,6 +1,7 @@
 package io.fair_acc.dataset.events;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -193,7 +194,6 @@ public abstract class BitState implements StateListener {
         if (list == null) {
             return false;
         }
-        int removed = 0;
         for (int i = list.size() - 1; i >= 0; i--) {
             if (isEqual(list.get(i), listener)) {
                 list.remove(i);
@@ -429,6 +429,16 @@ public abstract class BitState implements StateListener {
     protected BitState(Object source, int filter) {
         this.source = source;
         this.filter = filter;
+    }
+
+    @Deprecated // for backwards compatibility
+    public List<StateListener> getChangeListeners() {
+        return changeListeners == null ? Collections.emptyList() : changeListeners;
+    }
+
+    @Deprecated // for backwards compatibility
+    public List<StateListener> getInvalidationListeners() {
+        return invalidateListeners == null ? Collections.emptyList() : invalidateListeners;
     }
 
     @Override
