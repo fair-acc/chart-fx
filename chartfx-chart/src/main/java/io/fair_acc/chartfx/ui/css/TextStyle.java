@@ -30,6 +30,10 @@ public class TextStyle extends Text {
         rotateProperty().addListener(onChange);
     }
 
+    /**
+     * Copies all style parameters except for rotate
+     * @param gc target context
+     */
     public void copyStyleTo(GraphicsContext gc) {
         gc.setFont(getFont());
         gc.setFill(getFill());
@@ -38,7 +42,7 @@ public class TextStyle extends Text {
         gc.setTextBaseline(getTextOrigin());
         gc.setLineWidth(getStrokeWidth());
         gc.setGlobalAlpha(getOpacity());
-        gc.rotate(getRotate());
+        // gc.rotate(getRotate()); // could cause issues with translation
     }
 
     public long getChangeCounter() {

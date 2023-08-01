@@ -770,9 +770,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double evenCoord = getCanvasCoordinate(axisWidth, axisHeight, evenLabelsOffset);
         final double oddCoord = getCanvasCoordinate(axisWidth, axisHeight, oddLabelsOffset);
 
+        // use the same style for all tick marks
+        gc.save();
+        getTickLabelStyle().copyStyleTo(gc);
+
         // draw the labels
         final boolean isHorizontal = getSide().isHorizontal();
-        boolean isEven = false; // TODO: check why the flag/counter used to be based on the first tick value
+        boolean isEven = false;
+        if (shiftLabels) {
+            // We don't want the first label to flip rows when shifting, so we base it off the tick value
+            isEven = ((int) tickMarks.get(0).getValue()) % 2 == 0;
+        }
         for (TickMark tickMark : tickMarks) {
             isEven = !isEven;
 
@@ -790,6 +798,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             }
 
         }
+
+        gc.restore();
 
     }
 
@@ -1063,6 +1073,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         gc.save();
         gc.translate(x, y);
+        if (label.getRotate() != 0) {
+            gc.rotate(label.getRotate());
+        }
         label.copyStyleTo(gc);
         gc.fillText(label.getText(), 0, 0);
         gc.restore();
@@ -1076,7 +1089,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         gc.save();
         gc.translate(x, y); // translate before applying any rotation
-        tickMark.getStyle().copyStyleTo(gc);
+
+        if (tickMark.getRotation() != 0) {
+            gc.rotate(tickMark.getRotation());
+        }
 
         if (scaleFont != 1.0) {
             gc.scale(scaleFont, scaleFont);

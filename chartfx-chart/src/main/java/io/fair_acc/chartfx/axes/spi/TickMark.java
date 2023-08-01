@@ -139,14 +139,8 @@ public class TickMark {
         this.tickPosition = tickPosition;
     }
 
-    @Deprecated // for testing purposes
-    double getRotation() {
+    public double getRotation() {
         return style.getRotate();
-    }
-
-    @Deprecated // for testing purposes
-    void setRotation(double rotation) {
-        style.setRotate(rotation);
     }
 
     @Deprecated
