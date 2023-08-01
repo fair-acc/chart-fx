@@ -52,6 +52,10 @@ public class LayoutHook {
         return hasRunPreLayout;
     }
 
+    public boolean isRegistered() {
+        return registeredScene != null;
+    }
+
     public LayoutHook registerOnce() {
         // Potentially called before proper initialization
         if (preLayoutAction == null || postLayoutAndRemove == null) {
@@ -65,7 +69,7 @@ public class LayoutHook {
         }
 
         // Scene has changed -> remove the old one first
-        if (registeredScene != null) {
+        if (isRegistered()) {
             unregister();
         }
 
@@ -77,7 +81,29 @@ public class LayoutHook {
         return this;
     }
 
-    private void runPreLayoutAndAdd() {
+    /**
+     * Registers the post-layout hook and executes the pre-layout hook if
+     * it has not already been executed during this pulse.
+     * <p>
+     * Generally this should be called by the pulse by registering
+     * registerOnce(), but when registering during the CSS or layout
+     * this method may be called manually to get it executed within
+     * the same pulse.
+     */
+    public void runPreLayoutAndAdd() {
+        // Already ran
+        if (hasRunPreLayout()) {
+            return;
+        }
+
+        // Needs a registration
+        if (!isRegistered()) {
+            if (node.getScene() == null) {
+                return;
+            }
+            registerOnce();
+        }
+
         // We don't want to be in a position where the post layout listener
         // runs by itself, so we don't register until we made sure that the
         // pre-layout action ran before.
@@ -92,7 +118,7 @@ public class LayoutHook {
     }
 
     private void unregister() {
-        if (registeredScene == null) {
+        if (!isRegistered()) {
             return;
         }
         registeredScene.removePreLayoutPulseListener(preLayoutAndAdd);

@@ -268,6 +268,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         updateMinorTickMarks();
         updateTickMarkPositions(getTickMarks());
         updateTickMarkPositions(getMinorTickMarks());
+
+        state.clear(ChartBits.AxisRange, ChartBits.AxisTickLabelText);
     }
 
     /**
