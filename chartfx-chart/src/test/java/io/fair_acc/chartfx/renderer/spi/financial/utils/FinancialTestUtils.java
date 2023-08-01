@@ -93,7 +93,6 @@ public class FinancialTestUtils {
     public static void generateCosData(final DefaultErrorDataSet dataSet) {
         final long startTime = ProcessingProfiler.getTimeStamp();
 
-        dataSet.autoNotification().set(false);
         dataSet.clearData();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
         for (int n = 0; n < N_SAMPLES; n++) {
@@ -104,9 +103,6 @@ public class FinancialTestUtils {
             final double ey = 10;
             dataSet.add(t, y, ex, ey);
         }
-        dataSet.autoNotification().set(true);
-
-        Platform.runLater(() -> dataSet.fireInvalidated(null));
         ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
 

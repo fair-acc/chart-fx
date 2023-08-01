@@ -353,11 +353,6 @@ class AbstractAxisParameterTests {
         }
 
         @Override
-        public void fireInvalidated() {
-            // deliberately not implemented
-        }
-
-        @Override
         public void forceRedraw() {
             // deliberately not implemented
         }
