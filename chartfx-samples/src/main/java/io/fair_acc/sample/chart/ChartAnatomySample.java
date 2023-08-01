@@ -36,9 +36,6 @@ public class ChartAnatomySample extends Application {
 
     @Override
     public void start(final Stage primaryStage) {
-        final VBox root = new VBox();
-        root.setAlignment(Pos.CENTER);
-
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("x-Axis1", 0, 100, 1);
         final DefaultNumericAxis xAxis2 = new DefaultNumericAxis("x-Axis2", 0, 100, 1);
         final DefaultNumericAxis xAxis3 = new DefaultNumericAxis("x-Axis3", -50, +50, 10);
@@ -80,7 +77,7 @@ public class ChartAnatomySample extends Application {
                 // TODO Auto-generated method stub
             }
         };
-        VBox.setVgrow(chart, Priority.ALWAYS);
+
         chart.getAxes().addAll(
                 xAxis1, xAxis2, // horizontal
                 yAxis1, yAxis2, yAxis3, // vertical
@@ -132,9 +129,7 @@ public class ChartAnatomySample extends Application {
         chart.getCanvas().addEventHandler(MouseEvent.MOUSE_CLICKED,
                 mevt -> LOGGER.atInfo().log("clicked on canvas - alt implementation"));
 
-        root.getChildren().add(chart);
-
-        final Scene scene = new Scene(root, 1000, 600);
+        final Scene scene = new Scene(chart, 1000, 600);
         primaryStage.setTitle(this.getClass().getSimpleName());
         primaryStage.setScene(scene);
         primaryStage.setOnCloseRequest(evt -> Platform.exit());
