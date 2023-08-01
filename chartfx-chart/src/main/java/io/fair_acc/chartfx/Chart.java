@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
@@ -148,7 +149,7 @@ public abstract class Chart extends Region implements EventSource {
         //           > canvas foreground
         //           > plugins
         //         > plot background/foreground
-        plotArea.setContent(new PlotAreaPane(getCanvas(), getCanvasForeground(), pluginsArea));
+        plotArea.setContent(StyleUtil.addStyles(new PlotAreaPane(getCanvas(), getCanvasForeground(), pluginsArea), "chart-plot-area"));
         axesAndCanvasPane.addCenter(getPlotBackground(), getPlotArea(), getPlotForeground());
         titleLegendPane.addCenter(axesAndCanvasPane);
         measurementPane.addCenter(titleLegendPane);
@@ -297,11 +298,6 @@ public abstract class Chart extends Region implements EventSource {
         }
 
         menuPane.setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
-        setMinSize(0, 0);
-        setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-        setMaxSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-        setPadding(Insets.EMPTY);
-
         plotBackground.toBack();
         plotForeGround.toFront();
         plotForeGround.setMouseTransparent(true);

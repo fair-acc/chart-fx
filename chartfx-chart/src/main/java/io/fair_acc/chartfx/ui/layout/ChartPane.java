@@ -134,6 +134,60 @@ public class ChartPane extends Pane {
     }
 
     @Override
+    protected double computeMinWidth(double height) {
+        double verticalSum = 0;
+        double maxHorizontalWidth = 0;
+        for (Node child : getChildren()) {
+            if (!child.isManaged()) continue;
+            Object location = getLocation(child);
+            if (location == null) {
+                maxHorizontalWidth = Math.max(maxHorizontalWidth, child.minWidth(height));
+            } else if (location instanceof Side) {
+                switch ((Side) location) {
+                    case CENTER_HOR:
+                    case CENTER_VER:
+                    case TOP:
+                    case BOTTOM:
+                        maxHorizontalWidth = Math.max(maxHorizontalWidth, child.minWidth(height));
+                        break;
+                    case LEFT:
+                    case RIGHT:
+                        verticalSum += child.minWidth(height);
+                        break;
+                }
+            }
+        }
+        return verticalSum + maxHorizontalWidth;
+    }
+
+    @Override
+    protected double computeMinHeight(double width) {
+        double horizontalSum = 0;
+        double maxVerticalHeight = 0;
+        for (Node child : getChildren()) {
+            if (!child.isManaged()) continue;
+            Object location = getLocation(child);
+            if (location == null) {
+                maxVerticalHeight = Math.max(maxVerticalHeight, child.minHeight(width));
+            } else if (location instanceof Side) {
+                switch ((Side) location) {
+                    case CENTER_HOR:
+                    case CENTER_VER:
+                    case LEFT:
+                    case RIGHT:
+                        maxVerticalHeight = Math.max(maxVerticalHeight, child.minHeight(width));
+                        break;
+                    case TOP:
+                    case BOTTOM:
+                        horizontalSum += child.minHeight(width);
+                        break;
+                }
+            }
+        }
+        return horizontalSum + maxVerticalHeight;
+    }
+
+    @Override
     protected void layoutChildren() {
         // Account for margin and border insets
         final double xLeft = snappedLeftInset();
