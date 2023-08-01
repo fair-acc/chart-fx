@@ -381,7 +381,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final var side = getSide();
         if ((side == null) || side.isVertical()) {
             // default axis size for uninitalised axis
-            return 150;
+            return Math.max(getAxisLabel().getBoundsInParent().getHeight(), 150);
         }
         return computePrefSize(width);
     }
@@ -397,7 +397,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final var side = getSide();
         if ((side == null) || side.isHorizontal()) {
             // default axis size for uninitalised axis
-            return 150;
+            return Math.max(getAxisLabel().getBoundsInParent().getWidth(), 150);
         }
         return computePrefSize(height);
     }
