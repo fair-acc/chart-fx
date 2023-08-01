@@ -3,12 +3,13 @@ package io.fair_acc.chartfx.renderer.spi;
 import static io.fair_acc.dataset.DataSet.DIM_X;
 import static io.fair_acc.dataset.DataSet.DIM_Y;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -59,6 +60,11 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     public HistogramRenderer() {
         super();
         setPolyLineStyle(LineStyle.HISTOGRAM_FILLED);
+        PropUtil.runOnChange(this::invalidateCanvas,
+                animate,
+                autoSorting,
+                roundedCorner,
+                roundedCornerRadius);
     }
 
     public BooleanProperty animateProperty() {
@@ -169,12 +175,12 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         return localDataSetList;
     }
 
-    public void requestLayout() {
+    public void invalidateCanvas() {
         final Chart chart = getChart();
         if (chart == null) {
             return;
         }
-        chart.requestLayout();
+        chart.fireInvalidated(ChartBits.ChartCanvas);
     }
 
     public BooleanProperty roundedCornerProperty() {
@@ -692,7 +698,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
                 // scheme 2
                 final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, dataSet.getDataCount() + 1.0));
                 if (val != null && val < dataSet.getDataCount() + 1.0) {
-                    HistogramRenderer.this.requestLayout();
+                    invalidateCanvas();
                 }
             }
         }

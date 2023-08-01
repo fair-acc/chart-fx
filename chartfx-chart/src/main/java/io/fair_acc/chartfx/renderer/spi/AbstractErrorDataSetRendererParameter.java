@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.util.Objects;
 
+import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -62,6 +63,26 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public AbstractErrorDataSetRendererParameter() {
         super();
+        PropUtil.runOnChange(this::invalidateCanvas,
+                errorStyle,
+                rendererDataReducer,
+                dashSize,
+                markerSize,
+                drawMarker,
+                polyLineStyle,
+                drawChartDataSets,
+                drawBars,
+                shiftBar,
+                shiftBarOffset,
+                dynamicBarWidth,
+                barWidthPercentage,
+                barWidth,
+                intensityFading,
+                drawBubbles,
+                allowNaNs);
+    }
+
+    protected void invalidateCanvas() {
     }
 
     /**

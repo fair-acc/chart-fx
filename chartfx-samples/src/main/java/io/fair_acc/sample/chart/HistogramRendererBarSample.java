@@ -242,51 +242,34 @@ public class HistogramRendererBarSample extends ChartSample {
                 if (n != LineStyle.NONE) {
                     drawBars.setSelected(false);
                 }
-                histogramRenderer.requestLayout();
             });
             drawBars.selectedProperty().addListener((ch, old, selected) -> {
                 histogramRenderer.setDrawBars(selected);
                 if (Boolean.TRUE.equals(selected)) {
                     lineStyle.getSelectionModel().select(LineStyle.NONE);
                 }
-                histogramRenderer.requestLayout();
             });
 
             final CheckBox dynBarWidthEnable = new CheckBox();
             dynBarWidthEnable.setSelected(histogramRenderer.isDynamicBarWidth());
-            dynBarWidthEnable.selectedProperty().addListener((ch, old, selected) -> {
-                histogramRenderer.setDynamicBarWidth(selected);
-                histogramRenderer.requestLayout();
-            });
+            dynBarWidthEnable.selectedProperty().addListener((ch, old, selected) -> histogramRenderer.setDynamicBarWidth(selected));
             this.addToParameterPane("   Dyn. Bar Width: ", dynBarWidthEnable);
 
             final Spinner<Number> dynBarWidth = new Spinner<>(0, 100, histogramRenderer.getBarWidthPercentage(), 10);
-            dynBarWidth.valueProperty().addListener((ch, old, value) -> {
-                histogramRenderer.setBarWidthPercentage(value.intValue());
-                histogramRenderer.requestLayout();
-            });
+            dynBarWidth.valueProperty().addListener((ch, old, value) -> histogramRenderer.setBarWidthPercentage(value.intValue()));
             this.addToParameterPane("   Dyn. Bar Width: ", dynBarWidth);
 
             final Spinner<Number> barWidth = new Spinner<>(0, 100, histogramRenderer.getBarWidth());
-            barWidth.valueProperty().addListener((ch, old, value) -> {
-                histogramRenderer.setBarWidth(value.intValue());
-                histogramRenderer.requestLayout();
-            });
+            barWidth.valueProperty().addListener((ch, old, value) -> histogramRenderer.setBarWidth(value.intValue()));
             this.addToParameterPane("   Abs. Bar Width: ", barWidth);
 
             final CheckBox shiftBar = new CheckBox();
             shiftBar.setSelected(histogramRenderer.isShiftBar());
-            shiftBar.selectedProperty().addListener((ch, old, selected) -> {
-                histogramRenderer.setShiftBar(selected);
-                histogramRenderer.requestLayout();
-            });
+            shiftBar.selectedProperty().addListener((ch, old, selected) -> histogramRenderer.setShiftBar(selected));
             this.addToParameterPane("   Shift Bar (mult. data sets): ", shiftBar);
 
             final Spinner<Number> shiftBarOffset = new Spinner<>(0, 100, histogramRenderer.getShiftBarOffset());
-            shiftBarOffset.valueProperty().addListener((ch, old, value) -> {
-                histogramRenderer.setshiftBarOffset(value.intValue());
-                histogramRenderer.requestLayout();
-            });
+            shiftBarOffset.valueProperty().addListener((ch, old, value) ->  histogramRenderer.setshiftBarOffset(value.intValue()));
             this.addToParameterPane("   Shift Bar Offset (mult. DS): ", shiftBarOffset);
         }
 
