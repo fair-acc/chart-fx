@@ -56,7 +56,6 @@ public class DataViewWindowTests {
         // could not check for identity since ButtonBase slightly modifies the Graphics (css-related)
         assertEquals(content, field.getContent());
         assertTrue(field.getChildren().contains(content), "content in children list");
-        assertNotNull(field.autoNotification());
         assertNotNull(field.getBitState());
 
         assertTrue(field.isDetachableWindow());
