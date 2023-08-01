@@ -360,11 +360,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final double scale = (range == 0) ? length : length / range;
         if (scale == 0) {
             return -1; // covers inf range input
-        } else if (getSide().isVertical()) {
-            return isInvertedAxis ? scale : -scale;
-        } else {
-            return isInvertedAxis ? -scale : scale;
         }
+        return getSide().isVertical() ? -scale : scale;
     }
 
     protected void clearAxisCanvas(final GraphicsContext gc, final double width, final double height) {
