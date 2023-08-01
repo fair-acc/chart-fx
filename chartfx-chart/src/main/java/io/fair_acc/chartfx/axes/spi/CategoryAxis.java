@@ -68,6 +68,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
         this.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
         PropUtil.runOnChange(() -> {
             final double range = Math.abs(getMax() - getMin());
+            if (!Double.isFinite(range)) return;
             final double scale = 0.5 / ((int) range);
             autoRangePaddingProperty().set(scale);
         }, minProperty(), maxProperty());
