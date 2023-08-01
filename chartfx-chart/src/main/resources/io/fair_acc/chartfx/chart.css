@@ -12,6 +12,10 @@
   -fx-axis-label-alignment: center;
 }
 
+.chart-content {
+  -fx-padding: 0px;
+}
+
 .chart-crosshair-path {
   -fx-stroke-width: 1;
 }

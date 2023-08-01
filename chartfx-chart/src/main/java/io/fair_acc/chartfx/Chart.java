@@ -169,7 +169,7 @@ public abstract class Chart extends Region implements EventSource {
             // Render for the new scene. Note that the scene reference gets
             // set in the CSS phase, so by the time we can register it would
             // already be too late. Waiting for the layout phase wouldn't
-            // let us change the scene graph, so the only option we have is
+            // let us change the scene graph, so the best option we have is
             // run the pre layout hook manually during CSS.
             layoutHooks.runPreLayoutAndAdd();
         });
