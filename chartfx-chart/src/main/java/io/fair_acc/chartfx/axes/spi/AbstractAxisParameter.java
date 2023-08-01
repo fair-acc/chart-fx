@@ -1233,6 +1233,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             prefix = (prefix == null) ? "" : prefix;
             getAxisLabel().setText(getName() + " [" + prefix + unit + "]");
         }
+        state.clear(ChartBits.AxisLabelText);
     }
 
     protected void updateScaleAndUnitPrefix() {

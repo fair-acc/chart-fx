@@ -12,14 +12,10 @@ import io.fair_acc.chartfx.ui.utils.LayoutHook;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.events.StateListener;
-import io.fair_acc.dataset.locks.DataSetLock;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -30,13 +26,11 @@ import javafx.geometry.*;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
-import javafx.stage.Window;
 import javafx.util.Duration;
 
 import org.slf4j.Logger;
@@ -171,10 +165,13 @@ public abstract class Chart extends Region implements EventSource {
         getDatasets().addListener(datasetChangeListener);
         getAxes().addListener(axesChangeListener);
         getAxes().addListener(axesChangeListenerLocal);
-        showing.addListener((obs, old, showing) -> {
-            if (showing) {
-                layoutHooks.registerOnce();
-            }
+        sceneProperty().addListener((observable, oldValue, newValue) -> {
+            // Render for the new scene. Note that the scene reference gets
+            // set in the CSS phase, so by the time we can register it would
+            // already be too late. Waiting for the layout phase wouldn't
+            // let us change the scene graph, so the only option we have is
+            // run the pre layout hook manually during CSS.
+            layoutHooks.runPreLayoutAndAdd();
         });
     }
 
@@ -607,11 +604,17 @@ public abstract class Chart extends Region implements EventSource {
         }
 
         // request re-layout of plugins
-        // TODO:
-        //  * what if the datasets were not locked beforehand?
-        //  * layoutChildren only gets called on actual changes, so could we guarantee execution if we skip it?
-        //  * maybe they need to call their own readLock? But that would also result in outdated axes. Is this even needed?
-        layoutPluginsChildren();
+        if(layoutHooks.hasRunPreLayout()) {
+            // datasets are locked, so we can add plugins
+            layoutPluginsChildren();
+        } else {
+            // There are some rare corner cases, e.g., computing
+            // the pref size of the scene, that call for a layout
+            // without calling the hooks. The plugins may rely
+            // on datasets being locked, so we try again next
+            // pulse to be safe.
+            Platform.runLater(this::requestLayout);
+        }
 
         // Make sure things will get redrawn
         fireInvalidated(ChartBits.ChartCanvas);
@@ -624,10 +627,17 @@ public abstract class Chart extends Region implements EventSource {
             axis.drawAxis();
         }
         redrawCanvas();
-        for (ChartPlugin plugin : plugins) {
-            plugin.runPostLayout();
+        for (var renderer : getRenderers()) {
+            if (renderer instanceof EventSource) {
+                ((EventSource) renderer).getBitState().clear();
+            }
         }
-
+        for (var plugin : plugins) {
+            plugin.runPostLayout();
+            if (plugin instanceof EventSource) {
+                ((EventSource) plugin).getBitState().clear();
+            }
+        }
         dataSetState.clear();
         state.clear();
         for (var ds : lockedDataSets) {
