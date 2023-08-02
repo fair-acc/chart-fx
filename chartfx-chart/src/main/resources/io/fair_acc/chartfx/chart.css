@@ -13,16 +13,13 @@
 }
 
 .chart, .chart-content, .chart-plot-area {
-  /* pref size = computed */
-  -fx-pref-height: -1;
-  -fx-pref-width: -1;
-
-  /* min/max = reasonable */
+  /* use a reasonable min and full-screen max */
   -fx-min-height: 100px;
   -fx-min-width: 100px;
   -fx-max-width: 4096px;
   -fx-max-height: 4096px;
 
+  /* no padding by default */
   -fx-padding: 0px;
 }
 
