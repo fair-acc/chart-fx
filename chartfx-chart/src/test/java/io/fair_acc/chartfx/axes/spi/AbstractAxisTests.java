@@ -390,25 +390,22 @@ class AbstractAxisTests {
         }
 
         @Override
-        protected void calculateMajorTickValues(final AxisRange axisRange, DoubleArrayList tickValues) {
-            final List<Double> majorTicks = new ArrayList<>();
+        protected void calculateMajorTickValues(final AxisRange axisRange, DoubleArrayList majorTicks) {
             final double range = Math.abs(axisRange.getMax() - axisRange.getMin());
             final double min = Math.min(getMin(), getMax());
             for (int i = 0; i < 10; i++) {
                 majorTicks.add(min + i * range / 10.0);
             }
-            return majorTicks;
+            return;
         }
 
         @Override
-        protected void calculateMinorTickValues(DoubleArrayList tickValues) {
-            final List<Double> minorTicks = new ArrayList<>();
+        protected void calculateMinorTickValues(DoubleArrayList minorTicks) {
             final double range = Math.abs(getMax() - getMin());
             final double min = Math.min(getMin(), getMax());
             for (int i = 0; i < 100; i++) {
                 minorTicks.add(min + i * range / 100.0);
             }
-            return minorTicks;
         }
 
         @Override
