@@ -36,11 +36,16 @@ public class TextStyle extends Text {
      */
     public void copyStyleTo(GraphicsContext gc) {
         gc.setFont(getFont());
-        gc.setFill(getFill());
-        gc.setStroke(getStroke());
         gc.setTextAlign(getTextAlignment());
         gc.setTextBaseline(getTextOrigin());
+
+        gc.setFill(getFill());
+
+        gc.setStroke(getStroke());
+        gc.setLineCap(getStrokeLineCap());
+        gc.setLineJoin(getStrokeLineJoin());
         gc.setLineWidth(getStrokeWidth());
+
         gc.setGlobalAlpha(getOpacity());
         // gc.rotate(getRotate()); // could cause issues with translation
     }
