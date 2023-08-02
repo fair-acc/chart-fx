@@ -12,6 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import io.fair_acc.dataset.event.UpdatedMetaDataEvent;
+import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -93,8 +94,12 @@ class GenericDataSetTests {
             testDataSetError.recomputeLimits(plane);
         }
 
+
         final AtomicInteger notifyCounter = new AtomicInteger();
-        dataSet.addListener(evt -> notifyCounter.getAndIncrement());
+        final int bit = BitState.mask(ChartBits.DataSetDataAdded);
+        dataSet.getBitState().addChangeListener(bit, (src, bits) -> notifyCounter.getAndIncrement());
+
+        dataSet.getBitState().clear(bit);
         assertDoesNotThrow(() -> dataSet.set(testDataSet));
         assertSameDataRanges(testDataSet, dataSet);
         dataSet.recomputeLimits(DIM_X);
@@ -102,10 +107,13 @@ class GenericDataSetTests {
         assertSameDataRanges(testDataSet, dataSet);
 
         assertEquals(1, notifyCounter.get());
+        dataSet.getBitState().clear(bit);
         assertDoesNotThrow(() -> dataSet.set(testDataSet, true));
         assertEquals(2, notifyCounter.get());
+        dataSet.getBitState().clear(bit);
         assertDoesNotThrow(() -> dataSet.set(testDataSet, false));
         assertEquals(3, notifyCounter.get());
+        dataSet.getBitState().clear(bit);
 
         notifyCounter.set(0);
         assertDoesNotThrow(() -> dataSet.set(testDataSetError));
@@ -115,10 +123,13 @@ class GenericDataSetTests {
         assertSameDataRanges(testDataSetError, dataSet);
 
         assertEquals(1, notifyCounter.get());
+        dataSet.getBitState().clear(bit);
         assertDoesNotThrow(() -> dataSet.set(testDataSetError, true));
         assertEquals(2, notifyCounter.get());
+        dataSet.getBitState().clear(bit);
         assertDoesNotThrow(() -> dataSet.set(testDataSetError, false));
         assertEquals(3, notifyCounter.get());
+        dataSet.getBitState().clear(bit);
     }
 
     public static void assertSameDataRanges(final DataSet reference, final DataSet test) throws AssertionError {

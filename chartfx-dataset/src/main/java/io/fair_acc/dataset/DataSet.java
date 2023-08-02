@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
 
 /**
@@ -112,6 +113,21 @@ public interface DataSet extends EventSource, Serializable {
      * @param <D> generics (fluent design)
      */
     <D extends DataSet> DataSetLock<D> lock();
+
+    /**
+     * recomputes the limits of all dimensions
+     *
+     * @return this
+     */
+    default DataSet recomputeLimits() {
+        if (getBitState().isDirty(ChartBits.DataSetData, ChartBits.DataSetRange)) {
+            for (int i = 0; i < getDimension(); i++) {
+                recomputeLimits(i);
+            }
+            getBitState().clear(ChartBits.DataSetData, ChartBits.DataSetRange);
+        }
+        return this;
+    };
 
     /**
      * @param dimIndex the dimension to recompute the range for (-1 for all dimensions)

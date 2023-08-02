@@ -119,7 +119,7 @@ class MultiDimDoubleDataSetTests {
         DoubleDataSet doubleDataSet = new DoubleDataSet("doubleTest", new double[] { 1, 2, 3, 4 },
                 new double[] { 10, 20, 30, 40 }, 4, false);
         MultiDimDoubleDataSet multiDimFromDoubleDataSet = new MultiDimDoubleDataSet(doubleDataSet);
-        assertEquals(doubleDataSet, multiDimFromDoubleDataSet);
+        assertEquals(doubleDataSet.recomputeLimits(), multiDimFromDoubleDataSet.recomputeLimits());
         assertEquals(multiDimFromDoubleDataSet, doubleDataSet);
     }
 

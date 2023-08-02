@@ -28,11 +28,11 @@ public class DoubleDataSetTests extends EditableDataSetTests {
         checkAddPoints(firstDataSet, 0); // w/o errors
 
         final DoubleDataSet secondDataSetA = new DoubleDataSet("test", testCoordinate[0], testCoordinate[1], n, true);
-        assertEquals(firstDataSet, secondDataSetA, "DoubleDataSet(via arrays, deep copy) constructor");
+        assertEquals(firstDataSet.recomputeLimits(), secondDataSetA.recomputeLimits(), "DoubleDataSet(via arrays, deep copy) constructor");
 
         final DoubleDataSet secondDataSetB = new DoubleDataSet("test", Arrays.copyOf(testCoordinate[0], n),
                 Arrays.copyOf(testCoordinate[1], n), n, false);
-        assertEquals(firstDataSet, secondDataSetB, "DoubleDataSet(via arrays, no deep copy) constructor");
+        assertEquals(firstDataSet.recomputeLimits(), secondDataSetB.recomputeLimits(), "DoubleDataSet(via arrays, no deep copy) constructor");
 
         checkAddPoints(firstDataSet, 1); // X, Y, and label
 
@@ -50,7 +50,7 @@ public class DoubleDataSetTests extends EditableDataSetTests {
 
         firstDataSet.addDataStyle(0, "color: red");
         final DoubleDataSet thirdDataSet = new DoubleDataSet(firstDataSet);
-        assertEquals(firstDataSet, thirdDataSet, "DoubleDataSet(DataSet2D) constructor");
+        assertEquals(firstDataSet.recomputeLimits(), thirdDataSet.recomputeLimits(), "DoubleDataSet(DataSet2D) constructor");
 
         assertNotEquals(0, firstDataSet.getDataCount(), "pre-check clear method");
         firstDataSet.clearData();

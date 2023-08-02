@@ -29,12 +29,12 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
 
         final DoubleErrorDataSet secondDataSetA = new DoubleErrorDataSet("test", testCoordinate[0], testCoordinate[1],
                 testEYZERO, testEYZERO, n, true);
-        assertEquals(firstDataSet, secondDataSetA, "DoubleErrorDataSet(via arrays, deep copy) constructor");
+        assertEquals(firstDataSet.recomputeLimits(), secondDataSetA.recomputeLimits(), "DoubleErrorDataSet(via arrays, deep copy) constructor");
 
         final DoubleErrorDataSet secondDataSetB = new DoubleErrorDataSet("test", Arrays.copyOf(testCoordinate[0], n),
                 Arrays.copyOf(testCoordinate[1], n), Arrays.copyOf(testEYZERO, n), Arrays.copyOf(testEYZERO, n), n,
                 false);
-        assertEquals(firstDataSet, secondDataSetB, "DoubleErrorDataSet(via arrays, no deep copy) constructor");
+        assertEquals(firstDataSet.recomputeLimits(), secondDataSetB.recomputeLimits(), "DoubleErrorDataSet(via arrays, no deep copy) constructor");
 
         checkAddPoints(firstDataSet, 1); // with errors but w/o label and style
 

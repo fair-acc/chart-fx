@@ -34,11 +34,6 @@ public interface EventSource extends StateListener {
         getBitState().getBits(listener); // initialize to the current state
     }
 
-    @Deprecated // for backwards compatibility with tests
-    default void addListener(Consumer<Object> listener) {
-        getBitState().addInvalidateListener((src, bits) -> listener.accept(new InvalidatedEvent((EventSource) src)));
-    }
-
     /**
      * Removes the given listener from the list of listeners, that are notified whenever the value of the
      * {@code UpdateSource} becomes invalid.
