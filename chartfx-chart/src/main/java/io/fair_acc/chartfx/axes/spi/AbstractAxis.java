@@ -614,9 +614,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected void updateMajorTickMarks(AxisRange range) {
         var newTickValues = calculateMajorTickValues(range);
         var oldTickValues = getTickMarkValues();
-        if(newTickValues.size() < 2) {
-            return; // TODO: why did the previous code only update when there are > 2 ticks?
-        } else if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickLabelText)) {
+        if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickLabelText)) {
             return; // no need to redo labels, just reposition the ticks
         }
 
