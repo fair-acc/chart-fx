@@ -2,7 +2,6 @@ package io.fair_acc.chartfx.ui.utils;
 
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 
@@ -61,6 +60,17 @@ public class LayoutHook {
             // run the pre layout hook manually during CSS.
             if (newValue != null) {
                 runPreLayoutAndAdd();
+            }
+
+            // Also register scene size triggers to catch any manual resizing before
+            // the pulse begins.
+            if (oldValue != null) {
+                oldValue.widthProperty().removeListener(windowResizeListener);
+                oldValue.heightProperty().removeListener(windowResizeListener);
+            }
+            if (newValue != null) {
+                newValue.widthProperty().addListener(windowResizeListener);
+                newValue.heightProperty().addListener(windowResizeListener);
             }
         });
     }
@@ -149,6 +159,7 @@ public class LayoutHook {
 
     final Runnable preLayoutAndAdd = this::runPreLayoutAndAdd;
     final Runnable postLayoutAndRemove = this::runPostLayoutAndRemove;
+    final ChangeListener<Number> windowResizeListener = (obs, old, size) -> registerOnce();
     Scene registeredScene = null;
 
 }
