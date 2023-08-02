@@ -119,12 +119,12 @@ public class DefaultLegend extends FlowPane implements Legend {
         var item = new LegendItem(series.getName(), symbol);
         item.setOnMouseClicked(event -> series.setVisible(!series.isVisible()));
         Runnable updateCss = () -> item.pseudoClassStateChanged(disabledClass, !series.isVisible());
-        updateCss.run();
         StateListener listener = (obj, bits) -> updateCss.run();
         item.sceneProperty().addListener((obs, oldScene, scene) -> {
             if (scene == null) {
                 series.getBitState().removeInvalidateListener(listener);
             } else if (oldScene == null) {
+                updateCss.run(); // changing pseudo class in CSS does not trigger another pulse
                 series.getBitState().addInvalidateListener(ChartBits.DataSetVisibility, listener);
             }
         });
