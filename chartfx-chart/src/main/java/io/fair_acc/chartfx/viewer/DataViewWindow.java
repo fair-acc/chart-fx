@@ -154,16 +154,8 @@ public class DataViewWindow extends BorderPane implements EventSource {
         }
 
         updatingStage.set(true);
-        if (this.isMaximised()) {
-            fireInvalidated(ChartBits.DataViewWindow);
-        } else {
-            // either minimised, normal (and/or detached) state
-            if (isMinimised()) {
-                fireInvalidated(ChartBits.DataViewWindow);
-            } else {
-                fireInvalidated(ChartBits.DataViewWindow);
-            }
-        }
+        fireInvalidated(ChartBits.DataViewWindow);
+
         if (dialog.isShowing()) {
             // enlarge to maximum screen size
             dialog.maximizeRestore(this);
