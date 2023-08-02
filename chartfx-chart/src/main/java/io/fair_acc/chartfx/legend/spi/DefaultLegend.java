@@ -118,9 +118,15 @@ public class DefaultLegend extends FlowPane implements Legend {
         final Canvas symbol = renderer.drawLegendSymbol(series, seriesIndex, SYMBOL_WIDTH, SYMBOL_HEIGHT);
         var item = new LegendItem(series.getName(), symbol);
         item.setOnMouseClicked(event -> series.setVisible(!series.isVisible()));
-        item.pseudoClassStateChanged(disabledClass, !series.isVisible());
-        series.getBitState().addInvalidateListener(ChartBits.DataSetVisibility, (obj, bits) -> {
-            item.pseudoClassStateChanged(disabledClass, !series.isVisible()); // TODO: do we need to unregister? It did not before.
+        Runnable updateCss = () -> item.pseudoClassStateChanged(disabledClass, !series.isVisible());
+        updateCss.run();
+        StateListener listener = (obj, bits) -> updateCss.run();
+        item.sceneProperty().addListener((obs, oldScene, scene) -> {
+            if (scene == null) {
+                series.getBitState().removeInvalidateListener(listener);
+            } else if (oldScene == null) {
+                series.getBitState().addInvalidateListener(ChartBits.DataSetVisibility, listener);
+            }
         });
         return item;
     }
