@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.fair_acc.chartfx.axes.spi.format.DefaultTickUnitSupplier;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.chartfx.axes.LogAxisType;
@@ -177,7 +178,11 @@ public class OscilloscopeAxisTests {
         assertNotNull(axis.getAxisTransform());
 
         // TODO: make proper sanity checks
-        assertNotNull(axis.calculateMajorTickValues(axis.getRange(), ));
-        assertNotNull(axis.calculateMinorTickValues());
+        var ticks = new DoubleArrayList();
+        axis.calculateMajorTickValues(axis.getRange(), ticks);
+        assertEquals(21, ticks.size());
+        ticks.clear();
+        axis.calculateMinorTickValues(ticks);
+        assertEquals(90, ticks.size());
     }
 }

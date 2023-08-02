@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.slf4j.Logger;
@@ -73,8 +74,9 @@ public class DefaultNumericAxisTests {
 
         assertFalse(axis.isLogAxis());
         assertEquals(LogAxisType.LINEAR_SCALE, axis.getLogAxisType());
+        DoubleArrayList tickValues = new DoubleArrayList();
         axis.setLogAxis(true);
-        axis.calculateMinorTickValues();
+        axis.calculateMinorTickValues(tickValues);
         assertTrue(axis.isLogAxis());
         assertEquals(LogAxisType.LOG10_SCALE, axis.getLogAxisType());
         axis.setMin(0.1);
@@ -88,6 +90,7 @@ public class DefaultNumericAxisTests {
         axis.setLogAxis(false);
         assertFalse(axis.isLogAxis());
         axis.updateCachedVariables();
-        axis.calculateMinorTickValues();
+        tickValues.clear();
+        axis.calculateMinorTickValues(tickValues);
     }
 }
