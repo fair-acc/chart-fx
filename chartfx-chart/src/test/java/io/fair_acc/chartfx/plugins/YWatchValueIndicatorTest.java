@@ -75,7 +75,7 @@ class YWatchValueIndicatorTest {
     @TestFx
     void setMarkerValue() {
         valueWatchIndicatorTested.setMarkerValue(35.15);
-        assertEquals("35", valueWatchIndicatorTested.getText());
+        assertTrue(valueWatchIndicatorTested.getText().matches("35[\\.,]15")); // US or German locale
         assertEquals(35.15, valueWatchIndicatorTested.getValue(), 1e-2);
     }
 
