@@ -1,6 +1,8 @@
 package io.fair_acc.chartfx.ui.utils;
 
 import io.fair_acc.dataset.utils.AssertUtils;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 
@@ -43,6 +45,24 @@ public class LayoutHook {
         this.node = node;
         this.preLayoutAction = AssertUtils.notNull("preLayoutAction", preLayoutAction);
         this.postLayoutAction = AssertUtils.notNull("preLayoutAction", postLayoutAction);
+        node.sceneProperty().addListener((observable, oldValue, newValue) -> {
+            // Make sure we leave the old scene in a consistent state
+            if (isRegistered()) {
+                if (hasRunPreLayout) {
+                   postLayoutAction.run();
+                }
+                unregister();
+            }
+
+            // Register when the scene changes. Note that the scene reference gets
+            // set in the CSS phase, so by the time we can register it would
+            // already be too late. Waiting for the layout phase wouldn't
+            // let us change the scene graph, so the best option we have is
+            // run the pre layout hook manually during CSS.
+            if (newValue != null) {
+                runPreLayoutAndAdd();
+            }
+        });
     }
 
     /**
@@ -57,11 +77,6 @@ public class LayoutHook {
     }
 
     public LayoutHook registerOnce() {
-        // Potentially called before proper initialization
-        if (preLayoutAction == null || postLayoutAndRemove == null) {
-            return this;
-        }
-
         // Already registered or null, so nothing to do
         var scene = node.getScene();
         if (scene == registeredScene) {
@@ -90,7 +105,7 @@ public class LayoutHook {
      * this method may be called manually to get it executed within
      * the same pulse.
      */
-    public void runPreLayoutAndAdd() {
+    private void runPreLayoutAndAdd() {
         // Already ran
         if (hasRunPreLayout()) {
             return;

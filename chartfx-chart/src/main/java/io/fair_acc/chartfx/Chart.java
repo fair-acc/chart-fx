@@ -166,14 +166,6 @@ public abstract class Chart extends Region implements EventSource {
         getDatasets().addListener(datasetChangeListener);
         getAxes().addListener(axesChangeListener);
         getAxes().addListener(axesChangeListenerLocal);
-        sceneProperty().addListener((observable, oldValue, newValue) -> {
-            // Render for the new scene. Note that the scene reference gets
-            // set in the CSS phase, so by the time we can register it would
-            // already be too late. Waiting for the layout phase wouldn't
-            // let us change the scene graph, so the best option we have is
-            // run the pre layout hook manually during CSS.
-            layoutHooks.runPreLayoutAndAdd();
-        });
     }
 
     protected final Label titleLabel = new Label();
