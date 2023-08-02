@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -330,32 +331,30 @@ public class LogarithmicAxis extends AbstractAxis {
     }
 
     @Override
-    protected List<Double> calculateMajorTickValues(final AxisRange range) {
+    protected void calculateMajorTickValues(final AxisRange range, DoubleArrayList tickValues) {
         if (range == null) {
             throw new InvalidParameterException("range is null");
         }
 
-        final List<Double> tickValues = new ArrayList<>();
         if (range.getLowerBound() >= range.getUpperBound()) {
-            return Collections.singletonList(range.getLowerBound());
+            tickValues.add(range.getLowerBound());
+            return;
         }
         double exp = Math.ceil(log(range.getLowerBound()));
         for (double tickValue = pow(exp); tickValue <= range.getUpperBound(); tickValue = pow(++exp)) {
             tickValues.add(tickValue);
         }
-        return tickValues;
     }
 
     // -------------- STYLESHEET HANDLING
     // ------------------------------------------------------------------------------
 
     @Override
-    protected List<Double> calculateMinorTickValues() {
+    protected void calculateMinorTickValues(DoubleArrayList minorTickMarks) {
         if (getMinorTickCount() <= 0) {
-            return Collections.emptyList();
+            return;
         }
 
-        final List<Double> minorTickMarks = new ArrayList<>();
         final double lowerBound = getMin();
         final double upperBound = getMax();
 
@@ -370,7 +369,6 @@ public class LogarithmicAxis extends AbstractAxis {
             }
         }
 
-        return minorTickMarks;
     }
 
     @Override

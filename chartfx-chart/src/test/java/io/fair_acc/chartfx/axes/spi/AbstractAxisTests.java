@@ -8,11 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -36,7 +35,6 @@ import io.fair_acc.chartfx.axes.LogAxisType;
 import io.fair_acc.chartfx.axes.spi.transforms.DefaultAxisTransform;
 import io.fair_acc.chartfx.legend.spi.DefaultLegend;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.chartfx.utils.FXUtils;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(JavaFXInterceptorUtils.SelectiveJavaFxInterceptor.class)
@@ -392,7 +390,7 @@ class AbstractAxisTests {
         }
 
         @Override
-        protected List<Double> calculateMajorTickValues(final AxisRange axisRange) {
+        protected void calculateMajorTickValues(final AxisRange axisRange, DoubleArrayList tickValues) {
             final List<Double> majorTicks = new ArrayList<>();
             final double range = Math.abs(axisRange.getMax() - axisRange.getMin());
             final double min = Math.min(getMin(), getMax());
@@ -403,7 +401,7 @@ class AbstractAxisTests {
         }
 
         @Override
-        protected List<Double> calculateMinorTickValues() {
+        protected void calculateMinorTickValues(DoubleArrayList tickValues) {
             final List<Double> minorTicks = new ArrayList<>();
             final double range = Math.abs(getMax() - getMin());
             final double min = Math.min(getMin(), getMax());

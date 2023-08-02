@@ -7,10 +7,8 @@ import io.fair_acc.chartfx.ui.css.PathStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.event.AxisNameChangeEvent;
-import io.fair_acc.dataset.event.AxisRangeChangeEvent;
 import io.fair_acc.dataset.events.ChartBits;
-import javafx.application.Platform;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -31,7 +29,6 @@ import io.fair_acc.chartfx.axes.spi.format.DefaultFormatter;
 import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.ui.ResizableCanvas;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.dataset.event.AxisChangeEvent;
 
 /**
  * @author rstein
@@ -336,18 +333,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     /**
      * Calculate a list of all the data values for each tick mark in range
      *
-     * @param range A range object returned from autoRange()
-     * @return A list of tick marks that fit along the axis if it was the given length
+     * @param range      A range object returned from autoRange()
+     * @param tickValues An empty list where the ticks shall be stored
      */
-    protected abstract List<Double> calculateMajorTickValues(AxisRange range);
+    protected abstract void calculateMajorTickValues(AxisRange range, DoubleArrayList tickValues);
 
     /**
      * Calculate a list of the data values for every minor tick mark
      *
-     * @return List of data values where to draw minor tick marks
+     * @param tickValues An empty list where the ticks shall be stored
      */
-
-    protected abstract List<Double> calculateMinorTickValues();
+    protected abstract void calculateMinorTickValues(DoubleArrayList tickValues);
 
     /**
      * Calculate a new scale for this axis. This should not effect any state(properties) of this axis.
@@ -611,8 +607,15 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
     }
 
+    private final transient DoubleArrayList newTickValues = new DoubleArrayList();
+
     protected void updateMajorTickMarks(AxisRange range) {
-        var newTickValues = calculateMajorTickValues(range);
+        // Compute new tick marks
+        newTickValues.clear();
+        newTickValues.ensureCapacity(getMaxMajorTickLabelCount());
+        calculateMajorTickValues(range, newTickValues);
+
+        // Check if anything changed
         var oldTickValues = getTickMarkValues();
         if (newTickValues.equals(oldTickValues) && state.isClean(ChartBits.AxisTickLabelText)) {
             return; // no need to redo labels, just reposition the ticks
@@ -626,28 +629,35 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // Update the existing mark objects
         List<TickMark> marks = FXUtils.sizedList(getTickMarks(), newTickValues.size(), () -> new TickMark(getTickLabelStyle()));
         int i = 0;
-        for (var tick : newTickValues) {
-            String label = isTickLabelsVisible() ? getTickMarkLabel(tick) : "";
-            marks.get(i++).setValue(tick, label);
+        for (var mark : marks) {
+            var tick = newTickValues.getDouble(i++);
+            mark.setValue(tick, isTickLabelsVisible() ? getTickMarkLabel(tick) : "");
         }
 
         oldTickValues.setAll(newTickValues);
         tickMarksUpdated();
-
     }
 
     protected void updateMinorTickMarks() {
-        var newTickValues = calculateMinorTickValues();
-        if (newTickValues.equals(getMinorTickMarkValues())) {
+        // Compute new tick marks
+        newTickValues.clear();
+        newTickValues.ensureCapacity(getMaxMajorTickLabelCount() * getMinorTickCount());
+        calculateMinorTickValues(newTickValues);
+
+        // Check if anything changed
+        var oldTickValues = getMinorTickMarkValues();
+        if (newTickValues.equals(oldTickValues)) {
             return;
         }
-        getMinorTickMarkValues().setAll(newTickValues);
 
+        // Update
         List<TickMark> marks = FXUtils.sizedList(getMinorTickMarks(), newTickValues.size(), () -> new TickMark(getTickLabelStyle()));
         int i = 0;
-        for (var tick : newTickValues) {
-            marks.get(i++).setValue(tick, "");
+        for (var mark : marks) {
+            mark.setValue(newTickValues.getDouble(i++), "");
         }
+
+        oldTickValues.setAll(newTickValues);
         tickMarksUpdated();
     }
 

@@ -177,7 +177,7 @@ public class OscilloscopeAxisTests {
         assertNotNull(axis.getAxisTransform());
 
         // TODO: make proper sanity checks
-        assertNotNull(axis.calculateMajorTickValues(axis.getRange()));
+        assertNotNull(axis.calculateMajorTickValues(axis.getRange(), ));
         assertNotNull(axis.calculateMinorTickValues());
     }
 }

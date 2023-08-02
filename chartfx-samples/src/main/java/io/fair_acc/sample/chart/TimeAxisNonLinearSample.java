@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -192,7 +193,7 @@ public class TimeAxisNonLinearSample extends ChartSample {
         }
 
         @Override
-        protected List<Double> calculateMajorTickValues(final AxisRange axisRange) {
+        protected void calculateMajorTickValues(final AxisRange axisRange, DoubleArrayList tickValues) {
             // TODO:
             //  axisLength used to be passed in, but the ticks should be computed before the length is available.
             //  this example is the only one that depends on the length, but there is already a dependency on
@@ -200,10 +201,10 @@ public class TimeAxisNonLinearSample extends ChartSample {
             //  probably be refactored to work on the range directly.
             final double axisLength = getWidth();
             final int nTicks = getMaxMajorTickLabelCount();
-            final List<Double> tickValues = new ArrayList<>(nTicks);
+            tickValues.ensureCapacity(nTicks);
 
             final double nTicksHalf1 = nTicks * getThreshold();
-            final var lower = new ArrayList<Double>((int) nTicksHalf1);
+            final var lower = new DoubleArrayList((int) nTicksHalf1);
             final double min = getValueForDisplay(0.01 * axisLength);
             lower.add(min);
             tickValues.add(min);
@@ -216,7 +217,7 @@ public class TimeAxisNonLinearSample extends ChartSample {
             }
 
             final double nTicksHalf2 = nTicks * (1.0 - getThreshold());
-            final var upper = new ArrayList<Double>((int) nTicksHalf2);
+            final var upper = new DoubleArrayList((int) nTicksHalf2);
             final double atThreshold = getValueForDisplay(getThreshold() * axisLength);
             tickValues.add(atThreshold); // fixed limit at threshold boundary
             upper.add(atThreshold);
@@ -231,7 +232,6 @@ public class TimeAxisNonLinearSample extends ChartSample {
             }
             upperFormat.updateFormatter(upper, 1.0);
 
-            return tickValues;
         }
 
         @Override

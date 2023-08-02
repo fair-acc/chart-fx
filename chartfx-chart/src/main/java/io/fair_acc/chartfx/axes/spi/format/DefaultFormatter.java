@@ -4,6 +4,7 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
 import io.fair_acc.chartfx.utils.NumberFormatterImpl;
 import io.fair_acc.chartfx.utils.Schubfach;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.util.StringConverter;
 
 import java.util.ArrayList;
@@ -96,10 +97,10 @@ public class DefaultFormatter extends AbstractFormatter {
 
     @Override
     protected void rangeUpdated() {
-        if (majorTickMarksCopy != null && majorTickMarksCopy.size() > 0) {
+        if (majorTickMarks.size() > 0) {
             final boolean prevForm = formatter.isExponentialForm();
             final int prevDecimals = formatter.getDecimalPlaces();
-            configureFormatter(getRange(), majorTickMarksCopy);
+            configureFormatter(getRange(), majorTickMarks);
 
             // Clear the cache if the formatting changed
             if (formatter.isExponentialForm() != prevForm || formatter.getDecimalPlaces() != prevDecimals) {
@@ -119,7 +120,7 @@ public class DefaultFormatter extends AbstractFormatter {
         return minExp < -3 || maxExp > 4;
     }
 
-    void configureFormatter(double range, List<Double> tickMarks) {
+    void configureFormatter(double range, DoubleArrayList tickMarks) {
         // Prepare enough cacheable objects
         final int n = tickMarks.size();
         while (decompositions.size() < n) {
@@ -128,7 +129,7 @@ public class DefaultFormatter extends AbstractFormatter {
 
         // Decompose the double values into significand and exponents
         for (int i = 0; i < n; i++) {
-            double value = tickMarks.get(i) / unitScaling;
+            double value = tickMarks.getDouble(i) / unitScaling;
             if (Math.abs(value) < 1E-14 && range > 1E-12) {
                 // treat rounding errors around zero as zero
                 // TODO:

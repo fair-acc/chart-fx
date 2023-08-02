@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
@@ -207,8 +207,8 @@ public final class CategoryAxis extends DefaultNumericAxis {
     }
 
     @Override
-    protected List<Double> calculateMinorTickValues() {
-        return Collections.emptyList();
+    protected void calculateMinorTickValues(DoubleArrayList tickValues) {
+        // categories have no minor ticks
     }
 
     @Override

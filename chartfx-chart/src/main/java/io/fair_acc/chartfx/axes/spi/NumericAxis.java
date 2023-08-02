@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.*;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
@@ -461,25 +462,23 @@ public final class NumericAxis extends AbstractAxis {
     }
 
     @Override
-    protected List<Double> calculateMajorTickValues(final AxisRange range) {
+    protected void calculateMajorTickValues(final AxisRange range, DoubleArrayList tickValues) {
         if (range.getLowerBound() == range.getUpperBound() || range.getTickUnit() <= 0) {
-            return Collections.singletonList(range.getLowerBound());
+            tickValues.add(range.getLowerBound());
+            return;
         }
-        final List<Double> tickValues = new ArrayList<>();
         final double firstTick = NumericAxis.computeFistMajorTick(range.getLowerBound(), range.getTickUnit());
         for (double major = firstTick; major <= range.getUpperBound(); major += range.getTickUnit()) {
             tickValues.add(major);
         }
-        return tickValues;
     }
 
     @Override
-    protected List<Double> calculateMinorTickValues() {
+    protected void calculateMinorTickValues(DoubleArrayList minorTickMarks) {
         if (getMinorTickCount() == 0 || getTickUnit() == 0) {
-            return Collections.emptyList();
+            return;
         }
 
-        final List<Double> minorTickMarks = new ArrayList<>();
         final double lowerBound = getMin();
         final double upperBound = getMax();
         final double majorUnit = getTickUnit();
@@ -495,7 +494,6 @@ public final class NumericAxis extends AbstractAxis {
                 }
             }
         }
-        return minorTickMarks;
     }
 
     @Override

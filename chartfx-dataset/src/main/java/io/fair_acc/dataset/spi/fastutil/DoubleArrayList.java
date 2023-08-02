@@ -60,6 +60,20 @@ public class DoubleArrayList implements RandomAccess, Cloneable, java.io.Seriali
      */
     protected int size;
 
+    /**
+     * Manually added method that sets the contents of this list to
+     * be the same as the source.
+     * @param source desired content
+     */
+    public void setAll(DoubleArrayList source) {
+        final int size = source.size();
+        clear();
+        ensureCapacity(size);
+        for (int i = 0; i < size; i++) {
+            add(source.getDouble(i));
+        }
+    }
+
     public void forEach(DoubleConsumer consumer) {
         for (int i = 0; i < size; i++) {
             consumer.accept(a[i]);

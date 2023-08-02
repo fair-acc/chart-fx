@@ -1,7 +1,5 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 
@@ -12,6 +10,7 @@ import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -29,10 +28,6 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.dataset.event.AxisChangeEvent;
-import io.fair_acc.dataset.event.EventListener;
-import io.fair_acc.dataset.event.UpdateEvent;
-import io.fair_acc.dataset.utils.NoDuplicatesList;
 
 /**
  * Class containing the properties, getters and setters for the AbstractNumericAxis class
@@ -203,9 +198,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         getChildren().addAll(axisLabel, tickLabelStyle, majorTickStyle, minorTickStyle);
     }
 
-    // TODO: replace with primitive DoubleArrayList and specialized TickMarkList
-    protected final transient ObservableList<Double> majorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
-    protected final transient ObservableList<Double> minorTickMarkValues = FXCollections.observableArrayList(new NoDuplicatesList<>());
+    protected final transient DoubleArrayList majorTickMarkValues = new DoubleArrayList();
+    protected final transient DoubleArrayList minorTickMarkValues = new DoubleArrayList();
     protected final transient ObservableList<TickMark> majorTickMarks = FXCollections.observableArrayList();
     protected final transient ObservableList<TickMark> minorTickMarks = FXCollections.observableArrayList();
 
@@ -646,7 +640,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * @return observable list containing of each minor TickMark values on this axis
      */
-    public ObservableList<Double> getMinorTickMarkValues() {
+    public DoubleArrayList getMinorTickMarkValues() {
         return minorTickMarkValues;
     }
 
@@ -731,7 +725,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * @return observable list containing of each major TickMark values on this axis
      */
-    public ObservableList<Double> getTickMarkValues() {
+    public DoubleArrayList getTickMarkValues() {
         return majorTickMarkValues;
     }
 
