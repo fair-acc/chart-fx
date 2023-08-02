@@ -5,6 +5,7 @@ import java.util.List;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelFormatter;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -19,7 +20,7 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
     private final ObjectProperty<TickUnitSupplier> tickUnitSupplier = new SimpleObjectProperty<>(this,
             "tickUnitSupplier", AbstractFormatter.DEFAULT_TICK_UNIT_SUPPLIER);
     protected FormatterLabelCache labelCache = new FormatterLabelCache();
-    protected List<Double> majorTickMarksCopy;
+    protected final DoubleArrayList majorTickMarks = new DoubleArrayList();
     protected double unitScaling;
     protected double rangeMin;
     protected double rangeMax;
@@ -107,14 +108,14 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
     }
 
     @Override
-    public void updateFormatter(final List<Double> newMajorTickMarks, final double unitScaling) {
-        majorTickMarksCopy = newMajorTickMarks;
+    public void updateFormatter(final DoubleArrayList newMajorTickMarks, final double unitScaling) {
+        this.majorTickMarks.setAll(newMajorTickMarks);;
         this.unitScaling = unitScaling;
 
         this.rangeMin = +Double.MAX_VALUE;
         this.rangeMax = -Double.MAX_VALUE;
-        for (Number num : majorTickMarksCopy) {
-            double val = num.doubleValue();
+        for (int i = 0; i < majorTickMarks.size(); i++) {
+            final double val = majorTickMarks.getDouble(i);
             if (Double.isFinite(val)) {
                 this.rangeMin = Math.min(this.rangeMin, val);
                 this.rangeMax = Math.max(this.rangeMax, val);

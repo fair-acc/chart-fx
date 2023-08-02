@@ -1,8 +1,7 @@
 package io.fair_acc.chartfx.axes;
 
-import java.util.List;
-
 import io.fair_acc.chartfx.axes.spi.format.DefaultTickUnitSupplier;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.ObjectProperty;
 
 /**
@@ -61,6 +60,6 @@ public interface AxisLabelFormatter {
      * @param newMajorTickMarks for which the labels should be computed
      * @param unitScaling scaling applied to the raw data set units
      */
-    void updateFormatter(List<Double> newMajorTickMarks, double unitScaling);
+    void updateFormatter(DoubleArrayList newMajorTickMarks, double unitScaling);
 
 }

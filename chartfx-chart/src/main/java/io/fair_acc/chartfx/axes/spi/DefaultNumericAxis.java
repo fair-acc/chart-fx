@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.scene.chart.NumberAxis;
@@ -406,24 +407,23 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     }
 
     @Override
-    protected List<Double> calculateMajorTickValues(final AxisRange axisRange) {
-        final List<Double> tickValues = new ArrayList<>(getMaxMajorTickLabelCount());
+    protected void calculateMajorTickValues(final AxisRange axisRange, DoubleArrayList tickValues) {
         if (isLogAxis) {
             if (axisRange.getLowerBound() >= axisRange.getUpperBound()) {
-                return Arrays.asList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
+                tickValues.add(axisRange.getLowerBound());
+                return;
             }
             double exp = Math.ceil(axisTransform.forward(axisRange.getLowerBound()));
-            for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange
-                                                                                      .getUpperBound();
+            for (double tickValue = axisTransform.backward(exp); tickValue <= axisRange.getUpperBound();
                     tickValue = axisTransform.backward(++exp)) {
                 tickValues.add(tickValue);
             }
-
-            return tickValues;
+            return;
         }
 
         if (axisRange.getLowerBound() == axisRange.getUpperBound() || axisRange.getTickUnit() <= 0) {
-            return Arrays.asList(axisRange.getLowerBound()); // NOPMD NOSONAR -- cannot use singletonList since list needs to remain modifiable
+            tickValues.add(axisRange.getLowerBound());
+            return;
         }
 
         final double firstTick = DefaultNumericAxis.computeFistMajorTick(axisRange.getLowerBound(),
@@ -432,8 +432,9 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.atDebug().log("major ticks numerically not resolvable");
             }
-            return tickValues;
+            return;
         }
+
         final int maxTickCount = getMaxMajorTickLabelCount();
         for (double major = firstTick; (major <= axisRange.getUpperBound() && tickValues.size() <= maxTickCount); major += axisRange.getTickUnit()) {
             if (tickValues.size() > getMaxMajorTickLabelCount()) {
@@ -441,16 +442,14 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             }
             tickValues.add(major);
         }
-        return tickValues;
     }
 
     @Override
-    protected List<Double> calculateMinorTickValues() {
+    protected void calculateMinorTickValues(DoubleArrayList newMinorTickMarks) {
         if (getMinorTickCount() <= 0 || getTickUnit() <= 0) {
-            return Collections.emptyList();
+            return;
         }
 
-        final List<Double> newMinorTickMarks = new ArrayList<>();
         final double lowerBound = getMin();
         final double upperBound = getMax();
         final double majorUnit = getTickUnit();
@@ -496,7 +495,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                 majorTickCount++;
             }
         }
-        return newMinorTickMarks;
+        return;
     }
 
     @Override
