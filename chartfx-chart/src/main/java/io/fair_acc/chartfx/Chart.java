@@ -578,8 +578,6 @@ public abstract class Chart extends Region implements EventSource {
 
     }
 
-    private List<DataSet> lockedDataSets = new ArrayList<>();
-
     @Override
     public void layoutChildren() {
         // Size all nodes to full size. Account for margin and border insets.
@@ -609,6 +607,10 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     protected void runPostLayout() {
+        // Make sure that renderer axes that are not part of
+        // the chart still produce an accurate axis transform.
+        updateStandaloneRendererAxes();
+
         // Update the actual Canvas content
         final long start = ProcessingProfiler.getTimeStamp();
         for (Axis axis : axesList) {
@@ -638,6 +640,29 @@ public abstract class Chart extends Region implements EventSource {
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
     }
 
+    /**
+     * Update axes that are not part of the SceneGraph and that would
+     * otherwise not have a size. We could alternatively add renderer
+     * axes to the chart, but that would not match previous behavior,
+     * and it is probably a good idea to require it to be explicit.
+     */
+    private void updateStandaloneRendererAxes() {
+        for (Renderer renderer : getRenderers()) {
+            for (Axis axis : renderer.getAxes()) {
+                if (axis instanceof AbstractAxis) {
+                    var axisNode = (AbstractAxis) axis;
+                    if (axisNode.getParent() == null) {
+                        if (axis.getSide().isHorizontal()) {
+                            axisNode.prefWidth(plotArea.getHeight());
+                        } else {
+                            axisNode.prefHeight(plotArea.getWidth());
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     private void forEachDataSet(Consumer<DataSet> action) {
         for (DataSet dataset : datasets) {
             action.accept(dataset);
@@ -648,6 +673,8 @@ public abstract class Chart extends Region implements EventSource {
             }
         }
     }
+
+    private final List<DataSet> lockedDataSets = new ArrayList<>();
 
     public final ObjectProperty<Legend> legendProperty() {
         return legend;
@@ -775,7 +802,7 @@ public abstract class Chart extends Region implements EventSource {
                 // remove axis invalidation listener
                 AssertUtils.notNull("to be removed axis is null", axis);
                 axis.removeListener(state);
-                removeAxisFromChildren(axis); // TODO: don't remove if it is contained in getAxes()
+                removeAxisFromChildren(axis);
             }
             for (final Axis axis : change.getAddedSubList()) {
                 // check if axis is associated with an existing renderer,
