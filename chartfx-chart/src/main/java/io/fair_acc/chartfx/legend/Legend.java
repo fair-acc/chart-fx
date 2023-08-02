@@ -21,7 +21,8 @@ public interface Legend {
      * @param renderers corresponding renderers
      */
     default void updateLegend(List<DataSet> dataSets, List<Renderer> renderers) {
-        updateLegend(dataSets, renderers, false);
+        // TODO: we currently force an update because the diff checker could link the visibility clicks to the wrong ds
+        updateLegend(dataSets, renderers, true);
     }
 
     /**
