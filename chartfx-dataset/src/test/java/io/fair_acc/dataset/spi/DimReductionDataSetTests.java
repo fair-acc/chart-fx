@@ -264,10 +264,8 @@ public class DimReductionDataSetTests {
         Assertions.assertEquals(DimReductionDataSet.Option.SLICE, sliceDataSetX.getReductionOption(), "reduction option");
 
         nEvent.set(0);
-        sliceDataSetX.addListener(evt -> {
-            if (evt instanceof AddedDataEvent) {
-                nEvent.incrementAndGet();
-            }
+        sliceDataSetX.getBitState().addInvalidateListener(ChartBits.DataSetDataAdded, (src, bits) -> {
+            nEvent.incrementAndGet();
         });
         testData.fireInvalidated(ChartBits.DataSetData);
         Awaitility.await().atMost(1, TimeUnit.SECONDS).alias("DataSet3D event propagated").until(() -> nEvent.get() == 1);

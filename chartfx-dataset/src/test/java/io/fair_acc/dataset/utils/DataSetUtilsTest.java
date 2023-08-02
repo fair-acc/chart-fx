@@ -255,6 +255,7 @@ class DataSetUtilsTest {
                                         .setMetaInfoMap(Map.of("metaInt", "1337", "metaString", "testMetaInfo", "metaDouble", "1.337", "metaEng", "1.33e-7", "acqStamp",
                                                 Long.toString(acqStamp)))
                                         .build();
+        dataSet.recomputeLimits();
         assertEquals("file.bin.gz", DataSetUtils.getFileName(dataSet, "file.bin.gz"));
         assertEquals("file_metaDataFieldMissing.bin.gz", DataSetUtils.getFileName(dataSet, "file_{}.bin.gz"));
         assertEquals("dsName", DataSetUtils.getFileName(dataSet, "{dataSetName}"));
