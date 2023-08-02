@@ -8,8 +8,12 @@
 }
 
 .axis-label {
-  -fx-stroke: rgb(255, 0, 0);
   -fx-axis-label-alignment: center;
+  -fx-stroke: transparent;
+}
+
+.axis-tick-label {
+  -fx-stroke: transparent;
 }
 
 .chart, .chart-content, .chart-plot-area {

@@ -1,6 +1,7 @@
 package io.fair_acc.chartfx.axes.spi;
 
 import java.util.List;
+import java.util.Objects;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.ui.css.PathStyle;
@@ -19,6 +20,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
@@ -1088,6 +1090,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
         label.copyStyleTo(gc);
         gc.fillText(label.getText(), 0, 0);
+
+        if (!Objects.equals(gc.getStroke(), Color.TRANSPARENT)) {
+            gc.strokeText(label.getText(), 0, 0);
+        }
+
         gc.restore();
     }
 
@@ -1110,10 +1117,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         gc.fillText(tickMark.getText(), 0, 0);
 
-        // TODO: support strokes for outlined labels?
-        // if (!Objects.equals(style.getStroke(), Color.TRANSPARENT) && !Objects.equals(style.getStroke(), style.getFill())) {
-        //     gc.strokeText(tickMark.getText(), 0, 0);
-        // }
+        if (!Objects.equals(gc.getStroke(), Color.TRANSPARENT)) {
+            gc.strokeText(tickMark.getText(), 0, 0);
+        }
 
         gc.restore();
     }
