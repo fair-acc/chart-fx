@@ -17,9 +17,15 @@
 }
 
 .chart, .chart-content, .chart-plot-area {
-  /* use a reasonable min and full-screen max */
+  /*
+   Set some reasonable default sizes so users
+   can override them via CSS and JavaFX panes
+   won't flicker (usually +/- 1px) or act odd.
+   */
   -fx-min-height: 100px;
   -fx-min-width: 100px;
+  -fx-pref-height: 500px;
+  -fx-pref-width: 500px;
   -fx-max-width: 4096px;
   -fx-max-height: 4096px;
 
