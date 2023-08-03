@@ -589,21 +589,23 @@ public abstract class Chart extends Region implements EventSource {
             child.resizeRelocate(x, y, w, h);
         }
 
-        // request re-layout of plugins
-        if(layoutHooks.hasRunPreLayout()) {
-            // datasets are locked, so we can add plugins
+        // Note: size changes should maybe trigger a redraw, but this
+        // creates problems with the HiddenSidesPane because for some
+        // reason the size fluctuates a few pixels during animations.
+        // Commenting this out prevents unnecessary redraws, and it
+        // looks like actual size changes still trigger subsequent
+        // events through other components (e.g. axes).
+        // fireInvalidated(ChartBits.ChartCanvas);
+
+        // Note: there are some rare corner cases, e.g., computing
+        // the pref size of the scene (and the HiddenSidesPane),
+        // that call for a layout without calling the hooks. The
+        // plugins may rely on datasets being locked, so we skip
+        // the update to be safe.
+        if (layoutHooks.hasRunPreLayout()) {
             layoutPluginsChildren();
-        } else {
-            // There are some rare corner cases, e.g., computing
-            // the pref size of the scene, that call for a layout
-            // without calling the hooks. The plugins may rely
-            // on datasets being locked, so we try again next
-            // pulse to be safe.
-            Platform.runLater(this::requestLayout);
         }
 
-        // Make sure things will get redrawn
-        fireInvalidated(ChartBits.ChartCanvas);
     }
 
     protected void runPostLayout() {
