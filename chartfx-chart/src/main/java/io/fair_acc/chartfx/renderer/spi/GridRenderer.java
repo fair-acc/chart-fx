@@ -3,24 +3,18 @@ package io.fair_acc.chartfx.renderer.spi;
 import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
+import io.fair_acc.chartfx.ui.css.LineStyle;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.SetChangeListener;
-import javafx.css.CssMetaData;
 import javafx.css.PseudoClass;
-import javafx.css.Styleable;
 import javafx.geometry.VPos;
-import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Scene;
+import javafx.scene.Parent;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Pane;
-import javafx.scene.shape.Line;
 import javafx.scene.text.TextAlignment;
 
 import io.fair_acc.chartfx.Chart;
@@ -33,9 +27,8 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 
 @SuppressWarnings("PMD.GodClass")
-public class GridRenderer extends Pane implements Renderer {
+public class GridRenderer extends Parent implements Renderer {
     private static final double DEG_TO_RAD = Math.PI / 180.0;
-    private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final String STYLE_CLASS_GRID_RENDERER = "grid-renderer";
     private static final String STYLE_CLASS_MAJOR_GRID_LINE = "chart-major-grid-lines";
     private static final String STYLE_CLASS_MAJOR_GRID_LINE_H = "chart-major-horizontal-lines";
@@ -44,78 +37,43 @@ public class GridRenderer extends Pane implements Renderer {
     private static final String STYLE_CLASS_MINOR_GRID_LINE_H = "chart-minor-horizontal-lines";
     private static final String STYLE_CLASS_MINOR_GRID_LINE_V = "chart-minor-vertical-lines";
     private static final String STYLE_CLASS_GRID_ON_TOP = "chart-grid-line-on-top";
-    private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("withMinor");
+    private static final PseudoClass WITH_MINOR_PSEUDO_CLASS = PseudoClass.getPseudoClass("withMinor");
 
     private static final double[] DEFAULT_GRID_DASH_PATTERM = { 4.5, 2.5 };
-    // protected final BooleanProperty drawGridOnTop = new
-    // SimpleStyleableBooleanProperty(StyleableProperties.GRID_ON_TOP,
-    // this, "drawGridOnTop", true);
-    private final Line horMajorGridStyleNode;
-    private final Line verMajorGridStyleNode;
-    private final Line horMinorGridStyleNode;
-    private final Line verMinorGridStyleNode;
-    private final Line drawGridOnTopNode;
-    private final Group gridStyleNodes = new Group();
+
+    private final LineStyle horMajorGridStyleNode = new LineStyle(false,
+            STYLE_CLASS_MAJOR_GRID_LINE,
+            STYLE_CLASS_MAJOR_GRID_LINE_H);
+    private final LineStyle verMajorGridStyleNode = new LineStyle(false,
+            STYLE_CLASS_MAJOR_GRID_LINE,
+            STYLE_CLASS_MAJOR_GRID_LINE_V
+    );
+    private final LineStyle horMinorGridStyleNode = new LineStyle(false,
+            STYLE_CLASS_MINOR_GRID_LINE,
+            STYLE_CLASS_MINOR_GRID_LINE_H
+    );
+    private final LineStyle verMinorGridStyleNode = new LineStyle(false,
+            STYLE_CLASS_MINOR_GRID_LINE,
+            STYLE_CLASS_MINOR_GRID_LINE_V
+    );
+    private final LineStyle drawGridOnTopNode = new LineStyle(false,
+            STYLE_CLASS_GRID_ON_TOP
+    );
+
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
 
     public GridRenderer() {
         super();
-
-        getStyleClass().setAll(GridRenderer.STYLE_CLASS_GRID_RENDERER);
-        horMajorGridStyleNode = new Line();
-        horMajorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MAJOR_GRID_LINE);
-        horMajorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MAJOR_GRID_LINE_H);
-
-        verMajorGridStyleNode = new Line();
-        verMajorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MAJOR_GRID_LINE);
-        verMajorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MAJOR_GRID_LINE_V);
-
-        horMinorGridStyleNode = new Line();
-        horMinorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MINOR_GRID_LINE);
-        horMinorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MINOR_GRID_LINE_H);
-        horMinorGridStyleNode.setVisible(false);
-
-        verMinorGridStyleNode = new Line();
-        verMinorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MINOR_GRID_LINE);
-        verMinorGridStyleNode.getStyleClass().add(GridRenderer.STYLE_CLASS_MINOR_GRID_LINE_V);
-        verMinorGridStyleNode.setVisible(false);
-
-        drawGridOnTopNode = new Line();
-        drawGridOnTopNode.getStyleClass().add(GridRenderer.STYLE_CLASS_GRID_ON_TOP);
-        drawGridOnTopNode.getStyleClass().add(GridRenderer.STYLE_CLASS_GRID_ON_TOP);
-        drawGridOnTopNode.setVisible(true);
-
-        gridStyleNodes.getChildren().addAll(horMajorGridStyleNode, verMajorGridStyleNode, horMinorGridStyleNode,
-                verMinorGridStyleNode, drawGridOnTopNode);
-
-        getChildren().add(gridStyleNodes);
-        final Scene scene = new Scene(this);
-        scene.getStylesheets().add(GridRenderer.CHART_CSS);
-        gridStyleNodes.applyCss();
-        final SetChangeListener<? super PseudoClass> listener = evt -> gridStyleNodes.applyCss();
-        horMajorGridStyleNode.getPseudoClassStates().addListener(listener);
-        verMajorGridStyleNode.getPseudoClassStates().addListener(listener);
-        horMinorGridStyleNode.getPseudoClassStates().addListener(listener);
-        verMinorGridStyleNode.getPseudoClassStates().addListener(listener);
-        drawGridOnTopNode.getPseudoClassStates().addListener(listener);
-
-        ChangeListener<? super Boolean> change = (ob, o, n) -> {
-            horMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
-                    horMinorGridStyleNode.isVisible());
-            verMajorGridStyleNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
-                    verMinorGridStyleNode.isVisible());
-            drawGridOnTopNode.pseudoClassStateChanged(GridRenderer.SELECTED_PSEUDO_CLASS,
-                    drawGridOnTopNode.isVisible());
-        };
-
-        horizontalGridLinesVisibleProperty().addListener(change);
-        verticalGridLinesVisibleProperty().addListener(change);
-        drawOnTopProperty().addListener(change);
-    }
-
-    @Override
-    public String getUserAgentStylesheet() {
-        return GridRenderer.CHART_CSS;
+        StyleUtil.hiddenStyleNode(this, STYLE_CLASS_GRID_RENDERER);
+        getChildren().addAll(
+                horMajorGridStyleNode,
+                verMajorGridStyleNode,
+                horMinorGridStyleNode,
+                verMinorGridStyleNode,
+                drawGridOnTopNode
+        );
+        StyleUtil.applyPseudoClass(horMajorGridStyleNode, GridRenderer.WITH_MINOR_PSEUDO_CLASS, horMinorGridStyleNode.visibleProperty());
+        StyleUtil.applyPseudoClass(verMajorGridStyleNode, GridRenderer.WITH_MINOR_PSEUDO_CLASS, verMinorGridStyleNode.visibleProperty());
     }
 
     protected void drawEuclideanGrid(final GraphicsContext gc, XYChart xyChart) {
@@ -333,11 +291,6 @@ public class GridRenderer extends Pane implements Renderer {
     }
 
     @Override
-    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
-        return GridRenderer.getClassCssMetaData();
-    }
-
-    @Override
     public ObservableList<DataSet> getDatasets() {
         return null;
     }
@@ -352,7 +305,7 @@ public class GridRenderer extends Pane implements Renderer {
      *
      * @return the Line node to be styled
      */
-    public Line getHorizontalMajorGrid() {
+    public LineStyle getHorizontalMajorGrid() {
         return horMajorGridStyleNode;
     }
 
@@ -361,7 +314,7 @@ public class GridRenderer extends Pane implements Renderer {
      *
      * @return the Line node to be styled
      */
-    public Line getHorizontalMinorGrid() {
+    public LineStyle getHorizontalMinorGrid() {
         return horMinorGridStyleNode;
     }
 
@@ -370,7 +323,7 @@ public class GridRenderer extends Pane implements Renderer {
      *
      * @return the Line node to be styled
      */
-    public Line getVerticalMajorGrid() {
+    public LineStyle getVerticalMajorGrid() {
         return verMajorGridStyleNode;
     }
 
@@ -379,7 +332,7 @@ public class GridRenderer extends Pane implements Renderer {
      *
      * @return the Line node to be styled
      */
-    public Line getVerticalMinorGrid() {
+    public LineStyle getVerticalMinorGrid() {
         return verMinorGridStyleNode;
     }
 
@@ -470,14 +423,10 @@ public class GridRenderer extends Pane implements Renderer {
         return verMinorGridStyleNode.visibleProperty();
     }
 
-    protected static void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final Line style) {
-        gc.setStroke(style.getStroke());
-        gc.setLineWidth(style.getStrokeWidth());
+    protected static void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final LineStyle style) {
+        style.copyStyleTo(gc);
         if (style.getStrokeDashArray() == null || style.getStrokeDashArray().isEmpty()) {
             gc.setLineDashes(DEFAULT_GRID_DASH_PATTERM);
-        } else {
-            final double[] dashes = style.getStrokeDashArray().stream().mapToDouble(d -> d).toArray();
-            gc.setLineDashes(dashes);
         }
     }
 

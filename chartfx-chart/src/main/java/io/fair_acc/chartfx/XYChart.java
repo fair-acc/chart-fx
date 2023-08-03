@@ -1,31 +1,22 @@
 package io.fair_acc.chartfx;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.ChartBits;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.util.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +49,6 @@ public class XYChart extends Chart {
     protected final BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
     private final GridRenderer gridRenderer = new GridRenderer();
-    protected final ChangeListener<? super Boolean> gridLineVisibilitychange = (ob, o, n) -> requestLayout();
 
     /**
      * Construct a new XYChart with the given axes.
@@ -96,11 +86,18 @@ public class XYChart extends Chart {
             getAxes().add(axis);
         }
 
-        gridRenderer.horizontalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
-        gridRenderer.verticalGridLinesVisibleProperty().addListener(gridLineVisibilitychange);
-        gridRenderer.getHorizontalMinorGrid().visibleProperty().addListener(gridLineVisibilitychange);
-        gridRenderer.getVerticalMinorGrid().visibleProperty().addListener(gridLineVisibilitychange);
-        gridRenderer.drawOnTopProperty().addListener(gridLineVisibilitychange);
+        getChildren().add(0, gridRenderer);
+        PropUtil.runOnChange(getBitState().onAction(ChartBits.ChartCanvas),
+                gridRenderer.horizontalGridLinesVisibleProperty(),
+                gridRenderer.verticalGridLinesVisibleProperty(),
+                gridRenderer.getHorizontalMinorGrid().visibleProperty(),
+                gridRenderer.getVerticalMinorGrid().visibleProperty(),
+                gridRenderer.drawOnTopProperty(),
+                gridRenderer.getHorizontalMajorGrid().changeCounterProperty(),
+                gridRenderer.getVerticalMajorGrid().changeCounterProperty(),
+                gridRenderer.getHorizontalMinorGrid().changeCounterProperty(),
+                gridRenderer.getVerticalMinorGrid().changeCounterProperty()
+        );
 
         this.setAnimated(false);
         getRenderers().addListener(this::rendererChanged);

@@ -140,17 +140,21 @@
   -fx-stroke: derive(-fx-background, -10%);
   -fx-stroke-dash-array: 4.5, 2.5;
   -fx-stroke-width: 0.5;
-  -fx-grid-on-top: true;
+  visibility: visible;
 }
 
-.chart-major-grid-lines:withminor {
+.chart-major-grid-lines:withMinor {
   -fx-stroke: derive(-fx-background, -20%);
 }
 
 .chart-minor-grid-lines {
   -fx-stroke: derive(-fx-background, -5%);
   -fx-stroke-width: 0.5;
-  visibility: inherit;
+  visibility: hidden;
+}
+
+.chart-grid-line-on-top {
+  visibility: visible; /* 'visible' for front, 'hidden' for back */
 }
 
 .chart-major-vertical-lines .chart-major-grid-lines {
