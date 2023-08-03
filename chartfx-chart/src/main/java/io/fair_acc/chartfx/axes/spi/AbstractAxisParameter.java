@@ -3,7 +3,7 @@ package io.fair_acc.chartfx.axes.spi;
 import java.util.List;
 import java.util.Objects;
 
-import io.fair_acc.chartfx.ui.css.PathStyle;
+import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
@@ -189,10 +189,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * Note that we can use the tick label style as a temporary node for getting the font metrics w/ the correct style.
      * Unmanaged nodes do not trigger a re-layout of the parent, but invisible text still computes valid font metrics.
      */
-    private final transient PathStyle majorTickStyle = new PathStyle("axis-tick-mark");
-    private final transient PathStyle minorTickStyle =new PathStyle( "axis-minor-tick-mark");
+    private final transient LineStyle majorTickStyle = new LineStyle("axis-tick-mark");
+    private final transient LineStyle minorTickStyle = new LineStyle("axis-minor-tick-mark");
     private final transient TextStyle tickLabelStyle = new TextStyle("axis-tick-label");
     private final transient TextStyle axisLabel = new TextStyle("axis-label");
+
     {
         StyleUtil.addStyles(this, "axis");
         getChildren().addAll(axisLabel, tickLabelStyle, majorTickStyle, minorTickStyle);
@@ -602,7 +603,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * @return the majorTickStyle for custom user-code based styling
      */
-    public PathStyle getMajorTickStyle() {
+    public LineStyle getMajorTickStyle() {
         return majorTickStyle;
     }
 
@@ -647,7 +648,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * @return the minorTickStyle for custom user-code based styling
      */
-    public PathStyle getMinorTickStyle() {
+    public LineStyle getMinorTickStyle() {
         return minorTickStyle;
     }
 

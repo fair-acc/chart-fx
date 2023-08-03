@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
-import io.fair_acc.chartfx.ui.css.PathStyle;
+import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.chartfx.utils.PropUtil;
@@ -817,7 +817,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected void drawTickMarks(final GraphicsContext gc, final double axisLength, final double axisWidth,
             final double axisHeight, final ObservableList<TickMark> tickMarks, final double tickLength,
-            final PathStyle tickStyle) {
+            final LineStyle tickStyle) {
         if (tickLength <= 0) {
             return;
         }

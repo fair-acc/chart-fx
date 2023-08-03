@@ -4,8 +4,11 @@ import javafx.beans.property.LongProperty;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.shape.Line;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.Shape;
 
 /**
  * An invisible node that lets users change styles
@@ -16,19 +19,24 @@ import javafx.scene.shape.Path;
  *
  * @author ennerf
  */
-public class PathStyle extends Path {
+public class LineStyle extends Line {
 
-    public PathStyle(String... styles) {
-        StyleUtil.hiddenStyleNode(this, styles);
-        strokeProperty().addListener(onChange);
-        fillProperty().addListener(onChange);
-        strokeWidthProperty().addListener(onChange);
+    public LineStyle(String... styles) {
+       this(true, styles);
+    }
+
+    public LineStyle(boolean hide, String... styles) {
+        StyleUtil.addStyles(this, styles);
+        setManaged(false);
+        // It looks like a manual set will overwrite any CSS styling
+        if (hide) {
+            setVisible(false);
+        }
+        StyleUtil.registerShapeListener(this, StyleUtil.incrementOnChange(changeCounter));
     }
 
     public void copyStyleTo(GraphicsContext gc) {
-        gc.setStroke(getStroke());
-        gc.setFill(getFill());
-        gc.setLineWidth(getStrokeWidth());
+        StyleUtil.copyShapeStyle(this, gc);
     }
 
     public long getChangeCounter() {
@@ -40,6 +48,5 @@ public class PathStyle extends Path {
     }
 
     LongProperty changeCounter = new SimpleLongProperty(0);
-    ChangeListener<Object> onChange = (obs, old, value) -> changeCounter.set(changeCounter.get());
 
 }

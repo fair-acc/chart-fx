@@ -20,14 +20,7 @@ public class TextStyle extends Text {
 
     public TextStyle(String... styles) {
         StyleUtil.hiddenStyleNode(this, styles);
-        fontProperty().addListener(onChange);
-        fillProperty().addListener(onChange);
-        strokeProperty().addListener(onChange);
-        textAlignmentProperty().addListener(onChange);
-        textOriginProperty().addListener(onChange);
-        strokeWidthProperty().addListener(onChange);
-        opacityProperty().addListener(onChange);
-        rotateProperty().addListener(onChange);
+        StyleUtil.registerTextListener(this, StyleUtil.incrementOnChange(changeCounter));
     }
 
     /**
@@ -35,19 +28,7 @@ public class TextStyle extends Text {
      * @param gc target context
      */
     public void copyStyleTo(GraphicsContext gc) {
-        gc.setFont(getFont());
-        gc.setTextAlign(getTextAlignment());
-        gc.setTextBaseline(getTextOrigin());
-
-        gc.setFill(getFill());
-
-        gc.setStroke(getStroke());
-        gc.setLineCap(getStrokeLineCap());
-        gc.setLineJoin(getStrokeLineJoin());
-        gc.setLineWidth(getStrokeWidth());
-
-        gc.setGlobalAlpha(getOpacity());
-        // gc.rotate(getRotate()); // could cause issues with translation
+        StyleUtil.copyTextStyle(this, gc);
     }
 
     public long getChangeCounter() {
@@ -59,6 +40,5 @@ public class TextStyle extends Text {
     }
 
     LongProperty changeCounter = new SimpleLongProperty(0);
-    ChangeListener<Object> onChange = (obs, old, value) -> changeCounter.set(changeCounter.get());
 
 }

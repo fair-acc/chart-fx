@@ -557,12 +557,16 @@ public abstract class Chart extends Region implements EventSource {
         return toolBarPinned.get();
     }
 
-    protected void runPreLayout() {
-        forEachDataSet(ds -> lockedDataSets.add(ds.lock().readLock()));
-
-        if (state.isDirty(ChartBits.ChartLegend, ChartBits.ChartDataSets, ChartBits.ChartRenderers)) {
+    protected void updateLegend() {
+        if (state.isDirty(ChartBits.ChartLegend)) {
             updateLegend(getDatasets(), getRenderers());
         }
+        state.clear(ChartBits.ChartLegend);
+    }
+
+    protected void runPreLayout() {
+        forEachDataSet(ds -> lockedDataSets.add(ds.lock().readLock()));
+        updateLegend();
 
         final long start = ProcessingProfiler.getTimeStamp();
         updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
@@ -619,27 +623,39 @@ public abstract class Chart extends Region implements EventSource {
             axis.drawAxis();
         }
         redrawCanvas();
+        for (Renderer renderer : renderers) {
+            renderer.runPostLayout();
+        }
+        for (var plugin : plugins) {
+            plugin.runPostLayout();
+        }
+        clearStates();
+
+        // TODO: plugins etc., do locking
+        ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
+    }
+
+    protected void clearStates() {
         for (var renderer : getRenderers()) {
             if (renderer instanceof EventSource) {
                 ((EventSource) renderer).getBitState().clear();
             }
         }
+
         for (var plugin : plugins) {
-            plugin.runPostLayout();
             if (plugin instanceof EventSource) {
                 ((EventSource) plugin).getBitState().clear();
             }
         }
+
         dataSetState.clear();
         state.clear();
+
         for (var ds : lockedDataSets) {
             ds.getBitState().clear(); // technically a 'write'
             ds.lock().readUnLock();
         }
         lockedDataSets.clear();
-
-        // TODO: plugins etc., do locking
-        ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
     }
 
     /**

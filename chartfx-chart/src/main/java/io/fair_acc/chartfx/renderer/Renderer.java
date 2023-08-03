@@ -43,6 +43,10 @@ public interface Renderer {
         // empty by default
     }
 
+    default void runPostLayout() { // #NOPMD
+        // empty by default
+    }
+
     /**
      *
      * @param gc the Canvas' GraphicsContext the renderer should draw upon
