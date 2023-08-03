@@ -226,7 +226,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * Updates the contents for this axis, e.g., tick labels, spacing
      * range, caches, etc.
      */
-    protected void updateDirtyContent(double length) {
+    public void updateDirtyContent(double length) {
         updateAxisRange(length);
         updateAxisLabel();
     }

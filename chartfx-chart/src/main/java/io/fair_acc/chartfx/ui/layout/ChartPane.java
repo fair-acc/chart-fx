@@ -237,7 +237,7 @@ public class ChartPane extends Pane {
             }
             i++;
         }
-        final double contentWidth = snapSizeX(width - leftWidth - rightWidth);
+        double contentWidth = snapSizeX(width - leftWidth - rightWidth);
 
         // (3) Determine the height of all horizontal parts. The labels are generated
         // for the actual width, so the placement should be correct.
@@ -267,7 +267,37 @@ public class ChartPane extends Pane {
             }
             i++;
         }
-        final double contentHeight = snapSizeY(height - topHeight - bottomHeight);
+        double contentHeight = snapSizeY(height - topHeight - bottomHeight);
+
+        // Proof of concept for "axis equal" that keeps the unit to pixel ratio the
+        // same between the first x and y axes. This makes a square look square. Due
+        // to rounding the resulting scale is not exactly the same, but very close.
+        // It might make sense to add layout-plugins for this?
+        boolean axisEqual = true;
+        if (axisEqual) {
+            var xAxis = getChildren().stream()
+                    .filter(Node::isManaged)
+                    .filter(child -> getLocation(child) == Side.BOTTOM && child instanceof AbstractAxis)
+                    .map(child -> (AbstractAxis) child)
+                    .findFirst()
+                    .orElse(null);
+            var yAxis = getChildren().stream()
+                    .filter(Node::isManaged)
+                    .filter(child -> getLocation(child) == Side.LEFT && child instanceof AbstractAxis)
+                    .map(child -> (AbstractAxis) child)
+                    .findFirst()
+                    .orElse(null);
+            if (xAxis != null && yAxis != null) {
+                var ratio = Math.abs(xAxis.getScale() / yAxis.getScale());
+                if (ratio > 1) {
+                    contentWidth = Math.max(10, snapSizeX(contentWidth / ratio));
+                    xAxis.updateDirtyContent(contentWidth);
+                } else {
+                    contentHeight = Math.max(10, snapSizeY(contentHeight * ratio));
+                    yAxis.updateDirtyContent(contentHeight);
+                }
+            }
+        }
 
         // Layout all center content
         final var xContent = xLeft + leftWidth;
