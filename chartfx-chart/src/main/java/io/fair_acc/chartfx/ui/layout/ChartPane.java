@@ -233,7 +233,7 @@ public class ChartPane extends Pane {
             }
             i++;
         }
-        final double contentWidth = width - leftWidth - rightWidth;
+        final double contentWidth = snapSizeX(width - leftWidth - rightWidth);
 
         // (3) Determine the height of all horizontal parts. The labels are generated
         // for the actual width, so the placement should be correct.
@@ -263,7 +263,7 @@ public class ChartPane extends Pane {
             }
             i++;
         }
-        final double contentHeight = height - topHeight - bottomHeight;
+        final double contentHeight = snapSizeY(height - topHeight - bottomHeight);
 
         // Layout all center content
         final var xContent = xLeft + leftWidth;

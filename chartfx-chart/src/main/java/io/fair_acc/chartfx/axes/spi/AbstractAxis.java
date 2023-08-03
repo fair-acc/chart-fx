@@ -242,7 +242,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     protected void updateAxisRange(double length) {
-        if(state.isClean(ChartBits.AxisRange, ChartBits.AxisTickLabelText) && length == getLength()) {
+        if (state.isClean(ChartBits.AxisRange, ChartBits.AxisTickLabelText) && length == getLength()) {
             return;
         }
 
@@ -874,6 +874,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // Full-size the canvas. The axis gets drawn from the Chart
         // to guarantee ordering (e.g. ticks are available before the grid)
         canvas.resizeRelocate(-canvasPadX, -canvasPadY, getWidth() + 2 * canvasPadX, getHeight() + 2 * canvasPadY);
+
+        // Update actual displayed length in case the layout container decides
+        // to not provide the preferred size that was requested. Most of the time
+        // this is already correct, but it can differ due to e.g. rounding or if they
+        // are inside a non-custom container.
+        var length = getSide().isHorizontal() ? getWidth() : getHeight();
+        updateDirtyContent(length);
 
         // Only called on actual size changes, so definitely redraw
         invalidateCanvas.run();
