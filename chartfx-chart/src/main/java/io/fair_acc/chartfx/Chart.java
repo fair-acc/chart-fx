@@ -557,6 +557,20 @@ public abstract class Chart extends Region implements EventSource {
         return toolBarPinned.get();
     }
 
+    /**
+     * Explicit layout request for backwards compatibility.
+     * <p>
+     * TODO:
+     *   Explicit calls are used in e.g. examples to trigger redraws after the
+     *   property to a renderer changed. We should probably get rid of these
+     *   calls and listen to renderer/plugin changes directly.
+     */
+    @Override
+    public void requestLayout() {
+        fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartCanvas);
+        super.requestLayout();
+    }
+
     protected void updateLegend() {
         if (state.isDirty(ChartBits.ChartLegend)) {
             updateLegend(getDatasets(), getRenderers());
