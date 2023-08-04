@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import io.fair_acc.chartfx.ui.css.LineStyle;
+import io.fair_acc.chartfx.ui.css.StyleGroup;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
@@ -39,39 +40,18 @@ public class GridRenderer extends Parent implements Renderer {
     private static final String STYLE_CLASS_GRID_ON_TOP = "chart-grid-line-on-top";
     private static final PseudoClass WITH_MINOR_PSEUDO_CLASS = PseudoClass.getPseudoClass("withMinor");
 
-    private static final double[] DEFAULT_GRID_DASH_PATTERM = { 4.5, 2.5 };
-
-    private final LineStyle horMajorGridStyleNode = new LineStyle(false,
-            STYLE_CLASS_MAJOR_GRID_LINE,
-            STYLE_CLASS_MAJOR_GRID_LINE_H);
-    private final LineStyle verMajorGridStyleNode = new LineStyle(false,
-            STYLE_CLASS_MAJOR_GRID_LINE,
-            STYLE_CLASS_MAJOR_GRID_LINE_V
-    );
-    private final LineStyle horMinorGridStyleNode = new LineStyle(false,
-            STYLE_CLASS_MINOR_GRID_LINE,
-            STYLE_CLASS_MINOR_GRID_LINE_H
-    );
-    private final LineStyle verMinorGridStyleNode = new LineStyle(false,
-            STYLE_CLASS_MINOR_GRID_LINE,
-            STYLE_CLASS_MINOR_GRID_LINE_V
-    );
-    private final LineStyle drawGridOnTopNode = new LineStyle(false,
-            STYLE_CLASS_GRID_ON_TOP
-    );
+    private final StyleGroup styles = new StyleGroup(getChildren());
+    private final LineStyle horMajorGridStyleNode = styles.newLineStyle(STYLE_CLASS_MAJOR_GRID_LINE, STYLE_CLASS_MAJOR_GRID_LINE_H);
+    private final LineStyle verMajorGridStyleNode = styles.newLineStyle(STYLE_CLASS_MAJOR_GRID_LINE, STYLE_CLASS_MAJOR_GRID_LINE_V);
+    private final LineStyle horMinorGridStyleNode = styles.newLineStyle(STYLE_CLASS_MINOR_GRID_LINE, STYLE_CLASS_MINOR_GRID_LINE_H);
+    private final LineStyle verMinorGridStyleNode = styles.newLineStyle(STYLE_CLASS_MINOR_GRID_LINE, STYLE_CLASS_MINOR_GRID_LINE_V);
+    private final LineStyle drawGridOnTopNode = styles.newLineStyle(STYLE_CLASS_GRID_ON_TOP);
 
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
 
     public GridRenderer() {
         super();
         StyleUtil.hiddenStyleNode(this, STYLE_CLASS_GRID_RENDERER);
-        getChildren().addAll(
-                horMajorGridStyleNode,
-                verMajorGridStyleNode,
-                horMinorGridStyleNode,
-                verMinorGridStyleNode,
-                drawGridOnTopNode
-        );
         StyleUtil.applyPseudoClass(horMajorGridStyleNode, GridRenderer.WITH_MINOR_PSEUDO_CLASS, horMinorGridStyleNode.visibleProperty());
         StyleUtil.applyPseudoClass(verMajorGridStyleNode, GridRenderer.WITH_MINOR_PSEUDO_CLASS, verMinorGridStyleNode.visibleProperty());
     }
@@ -425,9 +405,6 @@ public class GridRenderer extends Parent implements Renderer {
 
     protected static void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final LineStyle style) {
         style.copyStyleTo(gc);
-        if (style.getStrokeDashArray() == null || style.getStrokeDashArray().isEmpty()) {
-            gc.setLineDashes(DEFAULT_GRID_DASH_PATTERM);
-        }
     }
 
     private static double snap(final double value) {

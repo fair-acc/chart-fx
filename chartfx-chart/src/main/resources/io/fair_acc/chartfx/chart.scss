@@ -144,41 +144,51 @@ $null: NULL; // lowercase gets removed from Sass, but uppercase seems to also be
   -fx-fill: #416ef468;
 }
 
-.chart-major-grid-lines {
-  -fx-stroke: derive(-fx-background, -10%);
-  -fx-stroke-dash-array: 4.5, 2.5;
-  -fx-stroke-width: 0.5;
-  visibility: visible;
-}
+.grid-renderer {
 
-.chart-major-grid-lines:withMinor {
-  -fx-stroke: derive(-fx-background, -20%);
-}
+  $DEFAULT_GRID_DASH_PATTERN: 4.5, 2.5;
+  $DEFAULT_LINE_WIDTH: 0.5;
 
-.chart-minor-grid-lines {
-  -fx-stroke: derive(-fx-background, -5%);
-  -fx-stroke-width: 0.5;
-  visibility: hidden;
-}
+  .chart-major-grid-lines {
+    -fx-stroke: derive(-fx-background, -10%);
+    -fx-stroke-dash-array: $DEFAULT_GRID_DASH_PATTERN;
+    -fx-stroke-width: $DEFAULT_LINE_WIDTH;
+    visibility: visible;
 
-.chart-grid-line-on-top {
-  visibility: visible; /* 'visible' for front, 'hidden' for back */
-}
+    // less subtle if we also show the minor grid lines
+    &:withMinor {
+      -fx-stroke: derive(-fx-background, -20%);
+    }
 
-.chart-major-vertical-lines .chart-major-grid-lines {
-  /* use this to override v-specific settings */
-}
+  }
 
-.chart-major-horizontal-grid-lines .chart-major-grid-lines {
-  /* use this to override h-specific settings */
-}
+  .chart-minor-grid-lines {
+    -fx-stroke: derive(-fx-background, -5%);
+    -fx-stroke-dash-array: $DEFAULT_GRID_DASH_PATTERN;
+    -fx-stroke-width: $DEFAULT_LINE_WIDTH;
+    visibility: hidden;
+  }
 
-.chart-minor-vertical-grid-lines .chart-minor-grid-lines {
-  /* use this to override v-specific settings */
-}
+  .chart-grid-line-on-top {
+    visibility: visible; /* 'visible' for front, 'hidden' for back */
+  }
 
-.chart-minor-horizontal-grid-lines .chart-minor-grid-lines {
-  /* use this to override h-specific settings */
+  .chart-major-vertical-lines .chart-major-grid-lines {
+    /* use this to override v-specific settings */
+  }
+
+  .chart-major-horizontal-grid-lines .chart-major-grid-lines {
+    /* use this to override h-specific settings */
+  }
+
+  .chart-minor-vertical-grid-lines .chart-minor-grid-lines {
+    /* use this to override v-specific settings */
+  }
+
+  .chart-minor-horizontal-grid-lines .chart-minor-grid-lines {
+    /* use this to override h-specific settings */
+  }
+
 }
 
 .chart-alternative-column-fill {
