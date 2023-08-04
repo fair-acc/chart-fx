@@ -1,4 +1,4 @@
-$null: NULL; // lowercase gets removed from Sass, but uppercase seems to also be interpreted as null
+$null: NULL; // lowercase gets removed from Sass. Maybe replace after generation?
 
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
@@ -7,15 +7,6 @@ $null: NULL; // lowercase gets removed from Sass, but uppercase seems to also be
   -fx-font-size: 12;
   -fx-font-weight: bold;
   -fx-text-alignment: center;
-}
-
-.axis-label {
-  -fx-axis-label-alignment: center;
-  -fx-stroke: transparent;
-}
-
-.axis-tick-label {
-  -fx-stroke: transparent;
 }
 
 .chart, .chart-content, .chart-plot-area {
@@ -142,6 +133,38 @@ $null: NULL; // lowercase gets removed from Sass, but uppercase seems to also be
 .range-indicator-rect {
   -fx-stroke: transparent;
   -fx-fill: #416ef468;
+}
+
+.axis {
+
+  // TODO: were any of these custom properties tested to work?
+  overlapPolicy: SKIP_ALT;
+  axisCenterPosition: 0.5;
+
+  .axis-label, .axis-tick-label {
+    visibility: visible;
+    -fx-font-family: 'System';
+    -fx-font-smoothing-type: gray; // gray | lcd
+    -fx-stroke: transparent;
+    -fx-fill: black;
+    -fx-text-alignment: CENTER;
+    -fx-rotate: 0;
+  }
+
+  .axis-label {
+    -fx-font-size: 12px;
+  }
+
+  .axis-tick-label {
+    -fx-font-size: 10px;
+  }
+
+  .axis-tick-mark, .axis-minor-tick-mark {
+    visibility: visible;
+    -fx-stroke: #c3c3c3ff;
+    -fx-stroke-width: 1.0;
+  }
+
 }
 
 .grid-renderer {
