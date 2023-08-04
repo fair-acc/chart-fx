@@ -1,3 +1,5 @@
+$null: NULL; // lowercase gets removed from Sass, but uppercase seems to also be interpreted as null
+
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
   -fx-border-color: black;
@@ -28,6 +30,7 @@
   -fx-pref-width: 500px;
   -fx-max-width: 4096px;
   -fx-max-height: 4096px;
+
   /* no padding by default */
   -fx-padding: 0px;
 }
@@ -78,7 +81,7 @@
 
 .chart-series-line {
   -fx-stroke-width: 1px;
-  -fx-effect: NULL;
+  -fx-effect: $null;
 }
 
 .value-indicator-label {
@@ -133,12 +136,12 @@
 .value-watch-indicator-marker {
   -fx-stroke-width: 0.5;
   -fx-stroke: black;
-  -fx-fill: #416ef4;
+  -fx-fill: #416ef4ff;
 }
 
 .range-indicator-rect {
   -fx-stroke: transparent;
-  -fx-fill: rgba(65, 110, 244, 0.4078431373);
+  -fx-fill: #416ef468;
 }
 
 .chart-major-grid-lines {
@@ -179,13 +182,13 @@
 }
 
 .chart-alternative-column-fill {
-  -fx-fill: NULL;
-  -fx-stroke: NULL;
+  -fx-fill: $null;
+  -fx-stroke: $null;
 }
 
 .chart-alternative-row-fill {
-  -fx-fill: NULL;
-  -fx-stroke: NULL;
+  -fx-fill: $null;
+  -fx-stroke: $null;
 }
 
 .chart-vertical-zero-line,

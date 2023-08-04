@@ -13,6 +13,9 @@
     <name>chartfx-chart</name>
     <properties>
         <project.moduleName>io.fair-acc.chartfx</project.moduleName>
+        <sass.version>1.64.2</sass.version>
+        <scss.inputDir>${project.basedir}/src/main/resources/io/fair_acc/chartfx/</scss.inputDir>
+        <css.outputDir>${scss.inputDir}</css.outputDir>
     </properties>
 
     <description>This charting library ${project.artifactId}- is an extension
@@ -93,5 +96,32 @@
             <version>2.1.0</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin> <!-- Converts Sass files to CSS -->
+                <groupId>us.hebi.sass</groupId>
+                <artifactId>sass-cli-maven-plugin</artifactId>
+                <version>1.0.3</version>
+                <configuration>
+                    <sassVersion>${sass.version}</sassVersion>
+                    <args>
+                        <arg>${scss.inputDir}:${css.outputDir}</arg>
+                        <arg>--no-source-map</arg>
+                    </args>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>sass-exec</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
 
