@@ -1,8 +1,11 @@
 package io.fair_acc.chartfx.ui.css;
 
+import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.chartfx.utils.PropUtil;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.LongProperty;
+import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.css.PseudoClass;
@@ -10,6 +13,8 @@ import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
+
+import java.util.List;
 
 /**
  * Utility class for styleable nodes
@@ -21,9 +26,24 @@ public class StyleUtil {
     private StyleUtil() {
     }
 
+    public interface ChangeCounter {
+        default long getChangeCounter() {
+            return changeCounterProperty().get();
+        }
+
+        ReadOnlyLongProperty changeCounterProperty();
+    }
+
     public static <NODE extends Node> NODE hiddenStyleNode(NODE node, String... styles) {
-        hide(node);
+        styleNode(node, styles);
+        node.setVisible(false); // don't let CSS modify visibility
+        return node;
+    }
+
+    public static <NODE extends Node> NODE styleNode(NODE node, String... styles) {
+        // Note: we can't modify visibility, otherwise it can't be set via CSS anymore
         addStyles(node, styles);
+        node.setManaged(false);
         return node;
     }
 
@@ -66,10 +86,7 @@ public class StyleUtil {
         // style.isSmooth(); // no equivalent
         gc.setStroke(style.getStroke());
         // style.getStrokeType(); // no equivalent
-        if (style.getStrokeDashArray() != null && !style.getStrokeDashArray().isEmpty()) {
-            double[] dashes = style.getStrokeDashArray().stream().mapToDouble(Double::doubleValue).toArray();
-            gc.setLineDashes(dashes);
-        }
+        gc.setLineDashes(toLineDashArray(style.getStrokeDashArray()));
         gc.setLineDashOffset(style.getStrokeDashOffset());
         gc.setLineCap(style.getStrokeLineCap());
         gc.setLineJoin(style.getStrokeLineJoin());
@@ -112,5 +129,23 @@ public class StyleUtil {
     static ChangeListener<Object> incrementOnChange(LongProperty counter) {
         return (obs, old, value) -> counter.set(counter.get() + 1);
     }
+
+    private static double[] toLineDashArray(List<Double> numbers) {
+        if (numbers == null || numbers.isEmpty()) {
+            return null;
+        }
+        FXUtils.assertJavaFxThread();
+        double[] array = cachedDashArray;
+        if (array.length != numbers.size()) {
+            array = new double[numbers.size()];
+        }
+        int i = 0;
+        for (Double number : numbers) {
+            array[i++] = number.doubleValue();
+        }
+        return cachedDashArray = array;
+    }
+    // small and only called from JavaFX thread, so we can cache statically
+    private static double[] cachedDashArray = new double[2];
 
 }

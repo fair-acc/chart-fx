@@ -3,12 +3,8 @@ package io.fair_acc.chartfx.ui.css;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Line;
-import javafx.scene.shape.Path;
-import javafx.scene.shape.Shape;
 
 /**
  * An invisible node that lets users change styles
@@ -19,19 +15,10 @@ import javafx.scene.shape.Shape;
  *
  * @author ennerf
  */
-public class LineStyle extends Line {
+public class LineStyle extends Line implements StyleUtil.ChangeCounter {
 
     public LineStyle(String... styles) {
-       this(true, styles);
-    }
-
-    public LineStyle(boolean hide, String... styles) {
-        StyleUtil.addStyles(this, styles);
-        setManaged(false);
-        // It looks like a manual set will overwrite any CSS styling
-        if (hide) {
-            setVisible(false);
-        }
+        StyleUtil.styleNode(this, styles);
         StyleUtil.registerShapeListener(this, StyleUtil.incrementOnChange(changeCounter));
     }
 
@@ -39,14 +26,10 @@ public class LineStyle extends Line {
         StyleUtil.copyShapeStyle(this, gc);
     }
 
-    public long getChangeCounter() {
-        return changeCounter.get();
-    }
-
     public ReadOnlyLongProperty changeCounterProperty() {
         return changeCounter;
     }
 
-    LongProperty changeCounter = new SimpleLongProperty(0);
+    private final LongProperty changeCounter = new SimpleLongProperty(0);
 
 }

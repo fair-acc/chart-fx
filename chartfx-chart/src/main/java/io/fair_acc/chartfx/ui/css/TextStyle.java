@@ -16,7 +16,7 @@ import javafx.scene.text.Text;
  *
  * @author ennerf
  */
-public class TextStyle extends Text {
+public class TextStyle extends Text implements StyleUtil.ChangeCounter {
 
     public TextStyle(String... styles) {
         StyleUtil.hiddenStyleNode(this, styles);
@@ -31,14 +31,10 @@ public class TextStyle extends Text {
         StyleUtil.copyTextStyle(this, gc);
     }
 
-    public long getChangeCounter() {
-        return changeCounter.get();
-    }
-
     public ReadOnlyLongProperty changeCounterProperty() {
         return changeCounter;
     }
 
-    LongProperty changeCounter = new SimpleLongProperty(0);
+    private final LongProperty changeCounter = new SimpleLongProperty(0);
 
 }

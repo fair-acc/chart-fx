@@ -997,33 +997,4 @@ public abstract class Chart extends Region implements EventSource {
         return group;
     }
 
-    protected static class ChartHBox extends HBox {
-        public ChartHBox(Node... nodes) {
-            super();
-            setAlignment(Pos.CENTER);
-            setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-            getChildren().addAll(nodes);
-            visibleProperty().addListener((obs, o, n) -> getChildren().forEach(node -> node.setVisible(n)));
-        }
-
-        public ChartHBox(final boolean fill) {
-            this();
-            setFillHeight(fill);
-        }
-    }
-
-    protected static class ChartVBox extends VBox {
-        public ChartVBox(Node... nodes) {
-            super();
-            setAlignment(Pos.CENTER);
-            setPrefSize(Region.USE_COMPUTED_SIZE, Region.USE_COMPUTED_SIZE);
-            getChildren().addAll(nodes);
-            visibleProperty().addListener((obs, o, n) -> getChildren().forEach(node -> node.setVisible(n)));
-        }
-
-        public ChartVBox(final boolean fill) {
-            this();
-            setFillWidth(fill);
-        }
-    }
 }

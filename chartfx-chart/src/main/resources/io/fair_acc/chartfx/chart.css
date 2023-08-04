@@ -141,40 +141,34 @@
   -fx-fill: rgba(65, 110, 244, 0.4078431373);
 }
 
-.chart-major-grid-lines {
+.grid-renderer .chart-major-grid-lines {
   -fx-stroke: derive(-fx-background, -10%);
   -fx-stroke-dash-array: 4.5, 2.5;
   -fx-stroke-width: 0.5;
   visibility: visible;
 }
-
-.chart-major-grid-lines:withMinor {
+.grid-renderer .chart-major-grid-lines:withMinor {
   -fx-stroke: derive(-fx-background, -20%);
 }
-
-.chart-minor-grid-lines {
+.grid-renderer .chart-minor-grid-lines {
   -fx-stroke: derive(-fx-background, -5%);
+  -fx-stroke-dash-array: 4.5, 2.5;
   -fx-stroke-width: 0.5;
   visibility: hidden;
 }
-
-.chart-grid-line-on-top {
+.grid-renderer .chart-grid-line-on-top {
   visibility: visible; /* 'visible' for front, 'hidden' for back */
 }
-
-.chart-major-vertical-lines .chart-major-grid-lines {
+.grid-renderer .chart-major-vertical-lines .chart-major-grid-lines {
   /* use this to override v-specific settings */
 }
-
-.chart-major-horizontal-grid-lines .chart-major-grid-lines {
+.grid-renderer .chart-major-horizontal-grid-lines .chart-major-grid-lines {
   /* use this to override h-specific settings */
 }
-
-.chart-minor-vertical-grid-lines .chart-minor-grid-lines {
+.grid-renderer .chart-minor-vertical-grid-lines .chart-minor-grid-lines {
   /* use this to override v-specific settings */
 }
-
-.chart-minor-horizontal-grid-lines .chart-minor-grid-lines {
+.grid-renderer .chart-minor-horizontal-grid-lines .chart-minor-grid-lines {
   /* use this to override h-specific settings */
 }
 

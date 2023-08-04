@@ -88,16 +88,10 @@ public class XYChart extends Chart {
 
         getChildren().add(0, gridRenderer);
         PropUtil.runOnChange(getBitState().onAction(ChartBits.ChartCanvas),
-                gridRenderer.horizontalGridLinesVisibleProperty(),
-                gridRenderer.verticalGridLinesVisibleProperty(),
-                gridRenderer.getHorizontalMinorGrid().visibleProperty(),
-                gridRenderer.getVerticalMinorGrid().visibleProperty(),
-                gridRenderer.drawOnTopProperty(),
                 gridRenderer.getHorizontalMajorGrid().changeCounterProperty(),
-                gridRenderer.getVerticalMajorGrid().changeCounterProperty(),
                 gridRenderer.getHorizontalMinorGrid().changeCounterProperty(),
-                gridRenderer.getVerticalMinorGrid().changeCounterProperty()
-        );
+                gridRenderer.getVerticalMajorGrid().changeCounterProperty(),
+                gridRenderer.getVerticalMinorGrid().changeCounterProperty());
 
         this.setAnimated(false);
         getRenderers().addListener(this::rendererChanged);
