@@ -7,15 +7,6 @@
   -fx-text-alignment: center;
 }
 
-.axis-label {
-  -fx-axis-label-alignment: center;
-  -fx-stroke: transparent;
-}
-
-.axis-tick-label {
-  -fx-stroke: transparent;
-}
-
 .chart, .chart-content, .chart-plot-area {
   /*
    Set some reasonable default sizes so users
@@ -139,6 +130,31 @@
 .range-indicator-rect {
   -fx-stroke: transparent;
   -fx-fill: rgba(65, 110, 244, 0.4078431373);
+}
+
+.axis {
+  overlapPolicy: SKIP_ALT;
+  axisCenterPosition: 0.5;
+}
+.axis .axis-label, .axis .axis-tick-label {
+  visibility: visible;
+  -fx-font-family: "System";
+  -fx-font-smoothing-type: gray;
+  -fx-stroke: transparent;
+  -fx-fill: black;
+  -fx-text-alignment: CENTER;
+  -fx-rotate: 0;
+}
+.axis .axis-label {
+  -fx-font-size: 12px;
+}
+.axis .axis-tick-label {
+  -fx-font-size: 10px;
+}
+.axis .axis-tick-mark, .axis .axis-minor-tick-mark {
+  visibility: visible;
+  -fx-stroke: #c3c3c3;
+  -fx-stroke-width: 1;
 }
 
 .grid-renderer .chart-major-grid-lines {

@@ -40,6 +40,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final double MIN_TICK_GAP = 1.0;
     private final transient Canvas canvas = new ResizableCanvas();
+    private boolean drawAxisLabel;
     private boolean shiftLabels;
     protected boolean labelOverlap;
     protected double scaleFont = 1.0;
@@ -426,6 +427,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         scaleFont = 1.0;
         maxLabelHeight = 0;
         maxLabelWidth = 0;
+        drawAxisLabel = false;
         shiftLabels = false;
         labelOverlap = false;
 
@@ -460,6 +462,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // Size of the axis label w/ units
         final double axisLabelSize = getAxisLabelSize();
+        drawAxisLabel = axisLabelSize > 0;
 
         // Remove gaps between empty space
         final double tickLabelGap = tickLabelSize <= 0 ? 0 : getTickLabelGap();
@@ -525,7 +528,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     private double getAxisLabelSize() {
         final Text axisLabel = getAxisLabel();
-        if (!PropUtil.isNullOrEmpty(axisLabel.getText())) {
+        if (axisLabel.isVisible() && !PropUtil.isNullOrEmpty(axisLabel.getText())) {
             var bounds = axisLabel.getBoundsInParent();
             return getSide().isHorizontal() ? bounds.getHeight() : bounds.getWidth();
         }
@@ -684,6 +687,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected void drawAxisLabel(final GraphicsContext gc, final double axisWidth, final double axisHeight,
                                  final TextStyle axisLabel, final double tickLength) {
+
+        if (!drawAxisLabel) {
+            return;
+        }
 
         // relative positioning of the label based on the text alignment
         // TODO: why tickLabelGap instead of axisLabelGap?

@@ -3,9 +3,7 @@ package io.fair_acc.chartfx.axes.spi;
 import java.util.List;
 import java.util.Objects;
 
-import io.fair_acc.chartfx.ui.css.LineStyle;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
-import io.fair_acc.chartfx.ui.css.TextStyle;
+import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.BitState;
@@ -26,7 +24,6 @@ import javafx.util.StringConverter;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
-import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.geometry.Side;
 
 /**
@@ -43,13 +40,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      */
     public AbstractAxisParameter() {
         super();
-        // Styles changes that can be removed after moving the styling to sub-nodes
-        tickLabelStyle.rotateProperty().bindBidirectional(tickLabelRotation);
-        tickLabelStyle.fontProperty().bindBidirectional(tickLabelFont);
-        tickLabelStyle.fillProperty().bindBidirectional(tickLabelFill);
-        axisLabel.textAlignmentProperty().bindBidirectional(axisLabelTextAlignmentProperty()); // NOPMD
-
-        axisPadding.addListener(state.onPropChange(ChartBits.AxisLayout)::set);
 
         // Properties that may be relevant to the layout and must always at least redraw the canvas
         PropUtil.runOnChange(invalidateLayout = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas),
@@ -189,15 +179,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * Note that we can use the tick label style as a temporary node for getting the font metrics w/ the correct style.
      * Unmanaged nodes do not trigger a re-layout of the parent, but invisible text still computes valid font metrics.
      */
-    private final transient LineStyle majorTickStyle = new LineStyle("axis-tick-mark");
-    private final transient LineStyle minorTickStyle = new LineStyle("axis-minor-tick-mark");
-    private final transient TextStyle tickLabelStyle = new TextStyle("axis-tick-label");
-    private final transient TextStyle axisLabel = new TextStyle("axis-label");
-
-    {
-        StyleUtil.addStyles(this, "axis");
-        getChildren().addAll(axisLabel, tickLabelStyle, majorTickStyle, minorTickStyle);
-    }
+    private final StyleGroup styles = new StyleGroup(this, "axis");
+    private final transient LineStyle majorTickStyle = styles.newLineStyle("axis-tick-mark");
+    private final transient LineStyle minorTickStyle =  styles.newLineStyle("axis-minor-tick-mark");
+    private final transient TextStyle tickLabelStyle =  styles.newTextStyle("axis-tick-label");
+    private final transient TextStyle axisLabel =  styles.newTextStyle("axis-label");
 
     protected final transient DoubleArrayList majorTickMarkValues = new DoubleArrayList();
     protected final transient DoubleArrayList minorTickMarkValues = new DoubleArrayList();
@@ -234,7 +220,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * axis label alignment
      */
-    private final transient StyleableObjectProperty<TextAlignment> axisLabelTextAlignment = CSS.createObjectProperty(this, "axisLabelTextAlignment", TextAlignment.CENTER, StyleConverter.getEnumConverter(TextAlignment.class));
+    private final transient ObjectProperty<TextAlignment> axisLabelTextAlignment = axisLabel.textAlignmentProperty();
 
     /**
      * The axis label
@@ -244,7 +230,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * true if tick marks should be displayed
      */
-    private final transient StyleableBooleanProperty tickMarkVisible = CSS.createBooleanProperty(this, "tickMarkVisible", true);
+    private final transient BooleanProperty tickMarkVisible = majorTickStyle.visibleProperty();
 
     /**
      * true if tick mark labels should be displayed
@@ -279,12 +265,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The font for all tick labels
      */
-    private final transient StyleableObjectProperty<Font> tickLabelFont = CSS.createObjectProperty(this, "tickLabelFont", Font.font("System", 8), false, StyleConverter.getFontConverter(), null);
+    private final transient ObjectProperty<Font> tickLabelFont = tickLabelStyle.fontProperty();
 
     /**
      * The fill for all tick labels
      */
-    private final transient StyleableObjectProperty<Paint> tickLabelFill = CSS.createObjectProperty(this, "tickLabelFill", Color.BLACK, StyleConverter.getPaintConverter());
+    private final transient ObjectProperty<Paint> tickLabelFill = tickLabelStyle.fillProperty();
 
     /**
      * The gap between tick marks and the canvas area
@@ -324,12 +310,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * Rotation in degrees of tick mark labels from their normal horizontal.
      */
-    protected final transient StyleableDoubleProperty tickLabelRotation = CSS.createDoubleProperty(this, "tickLabelRotation", 0.0);
+    protected final transient DoubleProperty tickLabelRotation = tickLabelStyle.rotateProperty();
 
     /**
      * true if minor tick marks should be displayed
      */
-    private final transient StyleableBooleanProperty minorTickVisible = CSS.createBooleanProperty(this, "minorTickVisible", true);
+    private final transient BooleanProperty minorTickVisible = minorTickStyle.visibleProperty();
 
     /**
      * The scale factor from data units to visual units
