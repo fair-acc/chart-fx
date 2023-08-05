@@ -32,7 +32,7 @@ public class StyleGroup extends Group {
         StyleUtil.hiddenStyleNode(this);
         setAutoSizeChildren(false);
         relocate(0, 0);
-        children.add(0, this);
+        children.add(this);
     }
 
     public LineStyle newLineStyle(String... styles) {

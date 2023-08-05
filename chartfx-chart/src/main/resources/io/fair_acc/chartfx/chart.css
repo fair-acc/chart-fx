@@ -133,8 +133,21 @@
 }
 
 .axis {
-  overlapPolicy: SKIP_ALT;
-  axisCenterPosition: 0.5;
+  -fx-border-width: 0px;
+  -fx-auto-ranging: true;
+  -fx-auto-grow-ranging: false;
+  -fx-auto-range-rounding: false;
+  -fx-axis-center-position: 0.5;
+  -fx-overlap-policy: SKIP_ALT;
+  -fx-axis-padding: 15px;
+  -fx-tick-label-spacing: 3px;
+  -fx-max-major-tick-label-count: 20;
+  -fx-minor-tick-count: 10;
+  -fx-tick-mark-gap: 0px;
+  -fx-tick-length: 8px;
+  -fx-minor-tick-length: 5px;
+  -fx-tick-label-gap: 3px;
+  -fx-axis-label-gap: 3px;
 }
 .axis .axis-label, .axis .axis-tick-label {
   visibility: visible;
@@ -142,13 +155,20 @@
   -fx-font-smoothing-type: gray;
   -fx-stroke: transparent;
   -fx-fill: black;
-  -fx-text-alignment: CENTER;
   -fx-rotate: 0;
 }
+.axis:left .axis-label, .axis:right .axis-label, .axis:center-ver .axis-label {
+  -fx-rotate: -90;
+}
+.axis:center-ver .axis-label, .axis:center-hor .axis-label {
+  -fx-text-alignment: RIGHT;
+}
 .axis .axis-label {
+  -fx-text-alignment: CENTER;
   -fx-font-size: 12px;
 }
 .axis .axis-tick-label {
+  -fx-text-alignment: NULL;
   -fx-font-size: 10px;
 }
 .axis .axis-tick-mark, .axis .axis-minor-tick-mark {

@@ -1,4 +1,4 @@
-$null: NULL; // lowercase gets removed from Sass. Maybe replace after generation?
+$null: NULL; // null gets removed from Sass. Maybe replace after generation?
 
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
@@ -135,11 +135,51 @@ $null: NULL; // lowercase gets removed from Sass. Maybe replace after generation
   -fx-fill: #416ef468;
 }
 
+// Full Pane hierarchy
+.chart {
+  .chart-measurement-pane {
+    .chart-title-pane, .chart-legend-pane {
+      .chart-content {
+        .axis {
+        }
+        .chart-plot-background {
+        }
+        .chart-plot-content {
+          .chart-plot-area {
+          }
+        }
+        .chart-plot-foreground {
+        }
+      }
+    }
+  }
+  .grid-renderer {
+  }
+}
+
 .axis {
 
-  // TODO: were any of these custom properties tested to work?
-  overlapPolicy: SKIP_ALT;
-  axisCenterPosition: 0.5;
+  -fx-border-width: 0px;
+
+  // Determining data range
+  -fx-auto-ranging: true; // always updates to the range of the data
+  -fx-auto-grow-ranging: false; // range updates, but won't shrink
+  -fx-auto-range-rounding: false; // rounds range up
+
+  // Tick spacing (along the width on horizontal axes)
+  -fx-axis-center-position: 0.5; // only for centered axes: relative position of the center line
+  -fx-overlap-policy: SKIP_ALT; // DO_NOTHING, SKIP_ALT, NARROW_FONT, SHIFT_ALT, FORCED_SHIFT_ALT
+  -fx-axis-padding: 15px; // overdraw area to the sides of the axis
+  -fx-tick-label-spacing: 3px; // min spacing between two tick labels
+  -fx-max-major-tick-label-count: 20;
+  -fx-minor-tick-count: 10;
+
+  // Axis size (maps to height on horizontal axes)
+  -fx-tick-mark-gap: 0px; // gap between canvas and axis line
+  -fx-tick-length: 8px; // length of tick mark lines
+  -fx-minor-tick-length: 5px; // length of minor tick mark lines
+  -fx-tick-label-gap: 3px; // gap between tick marks and labels
+  -fx-axis-label-gap: 3px; // gap between tick labels and axis label
 
   .axis-label, .axis-tick-label {
     visibility: visible;
@@ -147,17 +187,31 @@ $null: NULL; // lowercase gets removed from Sass. Maybe replace after generation
     -fx-font-smoothing-type: gray; // gray | lcd
     -fx-stroke: transparent;
     -fx-fill: black;
-    -fx-text-alignment: CENTER;
     -fx-rotate: 0;
   }
 
+  &:left, &:right, &:center-ver {
+    .axis-label {
+      -fx-rotate: -90;
+    }
+  }
+
+  &:center-ver, &:center-hor {
+    .axis-label {
+      -fx-text-alignment: RIGHT;
+    }
+  }
+
   .axis-label {
+    -fx-text-alignment: CENTER;
     -fx-font-size: 12px;
   }
 
   .axis-tick-label {
+    -fx-text-alignment: $null;
     -fx-font-size: 10px;
   }
+
 
   .axis-tick-mark, .axis-minor-tick-mark {
     visibility: visible;

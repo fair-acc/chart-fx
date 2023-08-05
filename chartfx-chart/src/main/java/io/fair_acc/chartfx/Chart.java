@@ -123,14 +123,14 @@ public abstract class Chart extends Region implements EventSource {
     protected final Group pluginsArea = Chart.createChildGroup();
 
     // Area where plots get drawn
-    protected final Pane plotBackground = new Pane();
-    protected final HiddenSidesPane plotArea = new HiddenSidesPane();
-    protected final Pane plotForeGround = new Pane();
+    protected final Pane plotBackground = StyleUtil.addStyles(new Pane(), "chart-plot-background");
+    protected final HiddenSidesPane plotArea = StyleUtil.addStyles(new HiddenSidesPane(), "chart-plot-content");
+    protected final Pane plotForeGround = StyleUtil.addStyles(new Pane(), "chart-plot-foreground");
 
     // Outer chart elements
-    protected final ChartPane measurementPane = new ChartPane();
-    protected final ChartPane titleLegendPane = new ChartPane();
-    protected final ChartPane axesAndCanvasPane = new ChartPane();
+    protected final ChartPane measurementPane = StyleUtil.addStyles(new ChartPane(), "chart-measurement-pane");
+    protected final ChartPane titleLegendPane = StyleUtil.addStyles(new ChartPane(),"chart-title-pane", "chart-legend-pane");
+    protected final ChartPane axesAndCanvasPane = StyleUtil.addStyles(new ChartPane(), "chart-content");
 
     // Outer area with hidden toolbars
     protected final HiddenSidesPane menuPane = new HiddenSidesPane();
@@ -149,8 +149,10 @@ public abstract class Chart extends Region implements EventSource {
         //           > canvas foreground
         //           > plugins
         //         > plot background/foreground
-        plotArea.setContent(StyleUtil.addStyles(new PlotAreaPane(getCanvas(), getCanvasForeground(), pluginsArea), "chart-plot-area"));
-        axesAndCanvasPane.addCenter(getPlotBackground(), getPlotArea(), getPlotForeground());
+        StyleUtil.addStyles(this, "chart");
+        var canvasPane = StyleUtil.addStyles(new PlotAreaPane(canvas, canvasForeground, pluginsArea), "chart-plot-area");
+        plotArea.setContent(canvasPane);
+        axesAndCanvasPane.addCenter(plotBackground, plotArea, plotForeGround);
         titleLegendPane.addCenter(axesAndCanvasPane);
         measurementPane.addCenter(titleLegendPane);
         menuPane.setContent(measurementPane);
@@ -168,7 +170,7 @@ public abstract class Chart extends Region implements EventSource {
         getAxes().addListener(axesChangeListenerLocal);
     }
 
-    protected final Label titleLabel = new Label();
+    protected final Label titleLabel = StyleUtil.addStyles(new Label(), "chart-title");
 
     protected final StringProperty title = new StringPropertyBase() {
         @Override
@@ -323,10 +325,6 @@ public abstract class Chart extends Region implements EventSource {
         getCanvasForeground().toFront();
         pluginsArea.toFront();
 
-        plotArea.getStyleClass().setAll("plot-content");
-
-        plotBackground.getStyleClass().setAll("chart-plot-background");
-
         if (!canvas.isCache()) {
             canvas.setCache(true);
             canvas.setCacheHint(CacheHint.QUALITY);
@@ -357,11 +355,6 @@ public abstract class Chart extends Region implements EventSource {
             getLegend().getNode().setVisible(visible);
             getLegend().getNode().setManaged(visible);
         });
-
-        // set CSS stuff
-        titleLabel.getStyleClass().add("chart-title");
-        getStyleClass().add("chart");
-        axesAndCanvasPane.getStyleClass().add("chart-content");
     }
 
     @Override
