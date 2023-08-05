@@ -86,7 +86,7 @@ public class XYChart extends Chart {
             getAxes().add(axis);
         }
 
-        getChildren().add(0, gridRenderer);
+        getChildren().add(gridRenderer);
         PropUtil.runOnChange(getBitState().onAction(ChartBits.ChartCanvas),
                 gridRenderer.getHorizontalMajorGrid().changeCounterProperty(),
                 gridRenderer.getHorizontalMinorGrid().changeCounterProperty(),

@@ -235,7 +235,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * true if tick mark labels should be displayed
      */
-    private final transient StyleableBooleanProperty tickLabelsVisible = CSS.createBooleanProperty(this, "tickLabelsVisible", true);
+    private final transient BooleanProperty tickLabelsVisible = tickLabelStyle.visibleProperty();
 
     /**
      * The length of tick mark lines
