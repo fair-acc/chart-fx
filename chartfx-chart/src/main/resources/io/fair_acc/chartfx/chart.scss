@@ -1,4 +1,4 @@
-$null: NULL; // null gets removed from Sass. Maybe replace after generation?
+$null: null; // null gets removed from Sass. Maybe create a placeholder and replace after generation?
 
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
@@ -7,23 +7,6 @@ $null: NULL; // null gets removed from Sass. Maybe replace after generation?
   -fx-font-size: 12;
   -fx-font-weight: bold;
   -fx-text-alignment: center;
-}
-
-.chart, .chart-content, .chart-plot-area {
-  /*
-   Set some reasonable default sizes so users
-   can override them via CSS and JavaFX panes
-   won't flicker (usually +/- 1px) or act odd.
-   */
-  -fx-min-height: 100px;
-  -fx-min-width: 100px;
-  -fx-pref-height: 500px;
-  -fx-pref-width: 500px;
-  -fx-max-width: 4096px;
-  -fx-max-height: 4096px;
-
-  /* no padding by default */
-  -fx-padding: 0px;
 }
 
 .chart-crosshair-path {
@@ -135,12 +118,20 @@ $null: NULL; // null gets removed from Sass. Maybe replace after generation?
   -fx-fill: #416ef468;
 }
 
-// Full Pane hierarchy
+// Full Chart hierarchy for reference
 .chart {
   .chart-measurement-pane {
     .chart-title-pane, .chart-legend-pane {
       .chart-content {
         .axis {
+          .axis-tick-mark {
+          }
+          .axis-minor-tick-mark {
+          }
+          .axis-label {
+          }
+          .axis-tick-label {
+          }
         }
         .chart-plot-background {
         }
@@ -153,8 +144,28 @@ $null: NULL; // null gets removed from Sass. Maybe replace after generation?
       }
     }
   }
+
   .grid-renderer {
+    .chart-major-grid-lines {
+    }
+    .chart-minor-grid-lines {
+    }
   }
+}
+
+/*
+ Set some reasonable default sizes so users
+ can override them via CSS and JavaFX panes
+ won't flicker (usually +/- 1px) or act odd.
+ */
+.chart, .chart-content, .chart-plot-area {
+  -fx-padding: 0px;
+  -fx-min-width: 100px;
+  -fx-min-height: 100px;
+  -fx-pref-width: 600px;
+  -fx-pref-height: 450px;
+  -fx-max-height: 4096px;
+  -fx-max-width: 4096px;
 }
 
 // XY Chart styles
@@ -174,7 +185,7 @@ $null: NULL; // null gets removed from Sass. Maybe replace after generation?
   // Determining data range
   -fx-auto-ranging: true; // always updates to the range of the data
   -fx-auto-grow-ranging: false; // range updates, but won't shrink
-  -fx-auto-range-rounding: false; // rounds range up
+  -fx-auto-range-rounding: false; // auto range w/ rounding
 
   // Tick spacing (along the width on horizontal axes)
   -fx-axis-center-position: 0.5; // only for centered axes: relative position of the center line
@@ -221,7 +232,6 @@ $null: NULL; // null gets removed from Sass. Maybe replace after generation?
     -fx-text-alignment: $null;
     -fx-font-size: 10px;
   }
-
 
   .axis-tick-mark, .axis-minor-tick-mark {
     visibility: visible;

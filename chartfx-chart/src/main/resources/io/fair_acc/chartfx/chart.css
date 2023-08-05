@@ -7,22 +7,6 @@
   -fx-text-alignment: center;
 }
 
-.chart, .chart-content, .chart-plot-area {
-  /*
-   Set some reasonable default sizes so users
-   can override them via CSS and JavaFX panes
-   won't flicker (usually +/- 1px) or act odd.
-   */
-  -fx-min-height: 100px;
-  -fx-min-width: 100px;
-  -fx-pref-height: 500px;
-  -fx-pref-width: 500px;
-  -fx-max-width: 4096px;
-  -fx-max-height: 4096px;
-  /* no padding by default */
-  -fx-padding: 0px;
-}
-
 .chart-crosshair-path {
   -fx-stroke-width: 1;
 }
@@ -69,7 +53,6 @@
 
 .chart-series-line {
   -fx-stroke-width: 1px;
-  -fx-effect: NULL;
 }
 
 .value-indicator-label {
@@ -132,6 +115,21 @@
   -fx-fill: rgba(65, 110, 244, 0.4078431373);
 }
 
+/*
+ Set some reasonable default sizes so users
+ can override them via CSS and JavaFX panes
+ won't flicker (usually +/- 1px) or act odd.
+ */
+.chart, .chart-content, .chart-plot-area {
+  -fx-padding: 0px;
+  -fx-min-width: 100px;
+  -fx-min-height: 100px;
+  -fx-pref-width: 600px;
+  -fx-pref-height: 450px;
+  -fx-max-height: 4096px;
+  -fx-max-width: 4096px;
+}
+
 .chart {
   -fx-title-side: TOP;
   -fx-tool-bar-side: TOP;
@@ -175,7 +173,6 @@
   -fx-font-size: 12px;
 }
 .axis .axis-tick-label {
-  -fx-text-alignment: NULL;
   -fx-font-size: 10px;
 }
 .axis .axis-tick-mark, .axis .axis-minor-tick-mark {
@@ -213,16 +210,6 @@
 }
 .grid-renderer .chart-minor-horizontal-grid-lines .chart-minor-grid-lines {
   /* use this to override h-specific settings */
-}
-
-.chart-alternative-column-fill {
-  -fx-fill: NULL;
-  -fx-stroke: NULL;
-}
-
-.chart-alternative-row-fill {
-  -fx-fill: NULL;
-  -fx-stroke: NULL;
 }
 
 .chart-vertical-zero-line,
