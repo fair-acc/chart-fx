@@ -123,7 +123,7 @@ public class ErrorDataSetRendererTests {
         final String referenceImage = getReferenceImageFileName();
         FXUtils.runAndWait(() -> renderer.getDatasets().setAll(getTestDataSet()));
         FXUtils.runAndWait(() -> chart.getLegend().updateLegend(renderer.getDatasets(), Collections.singletonList(renderer), true));
-        FXUtils.runAndWait(() -> chart.requestLayout());
+        FXUtils.runAndWait(() -> chart.invalidate());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));
 
         FXUtils.runAndWait(() -> testImage = chart.snapshot(null, null));
@@ -140,7 +140,7 @@ public class ErrorDataSetRendererTests {
             }
         }
 
-        FXUtils.runAndWait(() -> chart.requestLayout());
+        FXUtils.runAndWait(() -> chart.invalidate());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));
 
         FXUtils.runAndWait(() -> testImage = chart.snapshot(null, null));

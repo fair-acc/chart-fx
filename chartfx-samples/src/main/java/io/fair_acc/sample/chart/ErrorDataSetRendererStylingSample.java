@@ -116,7 +116,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         Platform.runLater(() -> {
             chart.getRenderers().get(0).getDatasets().setAll(dataSetsWithNaN);
-            chart.requestLayout();
+            chart.invalidate();
         });
         startTime = ProcessingProfiler.getTimeDiff(startTime, "adding data into DataSet");
     }
@@ -126,63 +126,63 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         final CheckBox animated = new CheckBox();
         animated.selectedProperty().bindBidirectional(axis.animatedProperty());
-        animated.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        animated.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Amimated: ", animated);
 
         final CheckBox autoranging = new CheckBox();
         autoranging.selectedProperty().bindBidirectional(axis.autoRangingProperty());
-        autoranging.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        autoranging.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Auto-Ranging: ", autoranging);
 
         final CheckBox autogrowranging = new CheckBox();
         autogrowranging.selectedProperty().bindBidirectional(axis.autoGrowRangingProperty());
-        autogrowranging.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        autogrowranging.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Auto-Grow-Ranging: ", autogrowranging);
 
         final Spinner<Number> upperRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
         upperRange.valueProperty().addListener((ch, old, value) -> {
             axis.setMax(value.doubleValue());
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Upper Bound): ", upperRange);
 
         final Spinner<Number> lowerRange = new Spinner<>(-N_MAX_SAMPLES, +N_MAX_SAMPLES, axis.getMin(), 0.1);
         lowerRange.valueProperty().addListener((ch, old, value) -> {
             axis.setMin(value.doubleValue());
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Lower Bound): ", lowerRange);
 
         final CheckBox autoRangeRounding = new CheckBox();
         autoRangeRounding.selectedProperty().bindBidirectional(axis.autoRangeRoundingProperty());
-        autoRangeRounding.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        autoRangeRounding.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Auto-Range-Rounding: ", autoRangeRounding);
 
         final Spinner<Double> autoRangePadding = new Spinner<>(0, 100.0, axis.getAutoRangePadding(), 0.05);
         autoRangePadding.valueProperty().addListener((ch, old, value) -> {
             axis.setAutoRangePadding(value);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   auto-range padding): ", autoRangePadding);
 
         final CheckBox logAxis = new CheckBox();
         logAxis.selectedProperty().bindBidirectional(axis.logAxisProperty());
-        logAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        logAxis.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Log-Axis: ", logAxis);
 
         final CheckBox timeAxis = new CheckBox();
         timeAxis.selectedProperty().bindBidirectional(axis.timeAxisProperty());
-        timeAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        timeAxis.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Time-Axis: ", timeAxis);
 
         final CheckBox invertAxis = new CheckBox();
         invertAxis.selectedProperty().bindBidirectional(axis.invertAxisProperty());
-        invertAxis.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        invertAxis.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Invert-Axis: ", invertAxis);
 
         final CheckBox autoUnit = new CheckBox();
         autoUnit.selectedProperty().bindBidirectional(axis.autoUnitScalingProperty());
-        autoUnit.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        autoUnit.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Auto Unit: ", autoUnit);
 
         pane.addToParameterPane(" ", null);
@@ -278,7 +278,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         polyLineSelect.setValue(LineStyle.NORMAL);
         polyLineSelect.valueProperty().addListener((ch, old, selection) -> {
             errorRenderer.setPolyLineStyle(selection);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("PolyLine Style: ", polyLineSelect);
 
@@ -287,7 +287,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         errorStyleSelect.setValue(errorRenderer.getErrorType());
         errorStyleSelect.valueProperty().addListener((ch, old, selection) -> {
             errorRenderer.setErrorType(selection);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("Error-Bar Style: ", errorStyleSelect);
 
@@ -297,7 +297,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         drawMarker.setSelected(errorRenderer.isDrawMarker());
         drawMarker.selectedProperty().addListener((ch, old, selected) -> {
             errorRenderer.setDrawMarker(selected);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("Draw Markers: ", drawMarker);
 
@@ -305,7 +305,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         markerSize.isEditable();
         markerSize.valueProperty().addListener((ch, old, value) -> {
             errorRenderer.setMarkerSize(value.intValue());
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Marker Size: ", markerSize);
 
@@ -314,7 +314,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         markerStyle.setValue((DefaultMarker) errorRenderer.getMarker());
         markerStyle.valueProperty().addListener((ch, old, selection) -> {
             errorRenderer.setMarker(selection);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Marker Style: ", markerStyle);
 
@@ -322,7 +322,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         dashSize.isEditable();
         dashSize.valueProperty().addListener((ch, old, value) -> {
             errorRenderer.setDashSize(value.intValue());
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("Cap Dash Size: ", dashSize);
 
@@ -332,7 +332,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
         drawBars.setSelected(errorRenderer.isDrawBars());
         drawBars.selectedProperty().addListener((ch, old, selected) -> {
             errorRenderer.setDrawBars(selected);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("Draw Bars: ", drawBars);
 
@@ -340,21 +340,21 @@ public class ErrorDataSetRendererStylingSample extends Application {
         dynBarWidthEnable.setSelected(errorRenderer.isDynamicBarWidth());
         dynBarWidthEnable.selectedProperty().addListener((ch, old, selected) -> {
             errorRenderer.setDynamicBarWidth(selected);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Dyn. Bar Width: ", dynBarWidthEnable);
 
         final Spinner<Number> dynBarWidth = new Spinner<>(0, 100, errorRenderer.getBarWidthPercentage(), 10);
         dynBarWidth.valueProperty().addListener((ch, old, value) -> {
             errorRenderer.setBarWidthPercentage(value.intValue());
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Dyn. Bar Width: ", dynBarWidth);
 
         final Spinner<Number> barWidth = new Spinner<>(0, 100, errorRenderer.getBarWidth());
         barWidth.valueProperty().addListener((ch, old, value) -> {
             errorRenderer.setBarWidth(value.intValue());
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Abs. Bar Width: ", barWidth);
 
@@ -362,14 +362,14 @@ public class ErrorDataSetRendererStylingSample extends Application {
         shiftBar.setSelected(errorRenderer.isShiftBar());
         shiftBar.selectedProperty().addListener((ch, old, selected) -> {
             errorRenderer.setShiftBar(selected);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Shift Bar (mult. data sets): ", shiftBar);
 
         final Spinner<Number> shiftBarOffset = new Spinner<>(0, 100, errorRenderer.getShiftBarOffset());
         shiftBarOffset.valueProperty().addListener((ch, old, value) -> {
             errorRenderer.setshiftBarOffset(value.intValue());
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("   Shift Bar Offset (mult. DS): ", shiftBarOffset);
 
@@ -377,38 +377,38 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         final CheckBox pointReduction = new CheckBox();
         pointReduction.selectedProperty().bindBidirectional(errorRenderer.pointReductionProperty());
-        pointReduction.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        pointReduction.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Point Reduction: ", pointReduction);
 
         final DefaultDataReducer dataReducer = (DefaultDataReducer) errorRenderer.getRendererDataReducer();
         final Spinner<Number> reductionMinSize = new Spinner<>(0, 1000, errorRenderer.getMinRequiredReductionSize());
         reductionMinSize.setEditable(true);
         errorRenderer.minRequiredReductionSizeProperty().bind(reductionMinSize.valueProperty());
-        reductionMinSize.valueProperty().addListener((ch, old, value) -> chart.requestLayout());
+        reductionMinSize.valueProperty().addListener((ch, old, value) -> chart.invalidate());
         pane.addToParameterPane("   Min Req. Samples: ", reductionMinSize);
 
         final Spinner<Number> reductionDashSize = new Spinner<>(0, 100, dataReducer.getMinPointPixelDistance());
         dataReducer.minPointPixelDistanceProperty().bind(reductionDashSize.valueProperty());
-        reductionDashSize.valueProperty().addListener((ch, old, value) -> chart.requestLayout());
+        reductionDashSize.valueProperty().addListener((ch, old, value) -> chart.invalidate());
         pane.addToParameterPane("   Red. Min Distance: ", reductionDashSize);
 
         pane.addToParameterPane(" ", null);
         final CheckBox assumeSorted = new CheckBox();
         assumeSorted.selectedProperty().bindBidirectional(errorRenderer.assumeSortedDataProperty());
-        assumeSorted.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        assumeSorted.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("Assume sorted data: ", assumeSorted);
 
         pane.addToParameterPane(" ", null);
         final CheckBox cacheParallel = new CheckBox();
         cacheParallel.selectedProperty().bindBidirectional(errorRenderer.parallelImplementationProperty());
-        cacheParallel.selectedProperty().addListener((ch, old, selected) -> chart.requestLayout());
+        cacheParallel.selectedProperty().addListener((ch, old, selected) -> chart.invalidate());
         pane.addToParameterPane("   Point cache parallel: ", cacheParallel);
 
         final CheckBox allowNaNs = new CheckBox();
         allowNaNs.setSelected(errorRenderer.isallowNaNs());
         allowNaNs.selectedProperty().addListener((ch, old, selected) -> {
             errorRenderer.setAllowNaNs(selected);
-            chart.requestLayout();
+            chart.invalidate();
         });
         pane.addToParameterPane("Allow NaN: ", allowNaNs);
 

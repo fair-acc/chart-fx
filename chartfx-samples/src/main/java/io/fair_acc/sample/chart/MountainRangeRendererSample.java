@@ -61,7 +61,7 @@ public class MountainRangeRendererSample extends ChartSample {
             if (n.equals(o)) {
                 return;
             }
-            chart.requestLayout();
+            chart.invalidate();
         });
 
         return new BorderPane(chart, new ToolBar(new Label(""), mountainRangeOffset), null, null, null);

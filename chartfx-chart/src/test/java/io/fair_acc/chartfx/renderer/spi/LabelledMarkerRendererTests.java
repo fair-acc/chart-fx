@@ -84,7 +84,7 @@ public class LabelledMarkerRendererTests {
     @Test
     public void defaultTests() throws Exception {
         FXUtils.runAndWait(() -> chart.getDatasets().add(getTestDataSet()));
-        FXUtils.runAndWait(() -> chart.requestLayout());
+        FXUtils.runAndWait(() -> chart.invalidate());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));
 
         FXUtils.runAndWait(() -> testImage = chart.snapshot(null, null));
@@ -103,7 +103,7 @@ public class LabelledMarkerRendererTests {
 
         FXUtils.runAndWait(() -> renderer.enableHorizontalMarker(true));
         assertTrue(renderer.isHorizontalMarker());
-        FXUtils.runAndWait(() -> chart.requestLayout());
+        FXUtils.runAndWait(() -> chart.invalidate());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));
 
         FXUtils.runAndWait(() -> testImage = chart.snapshot(null, null));

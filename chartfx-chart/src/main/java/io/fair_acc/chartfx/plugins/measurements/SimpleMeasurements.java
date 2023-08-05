@@ -241,7 +241,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
     @Override
     protected void removeAction() {
         super.removeAction();
-        getMeasurementPlugin().getChart().requestLayout();
+        getMeasurementPlugin().getChart().invalidate();
     }
 
     public enum MeasurementCategory {

@@ -28,7 +28,6 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.AxisMode;
@@ -140,7 +139,7 @@ public abstract class AbstractBasicFinancialApplication extends Application {
                     ((Zoomer) plugin).setAxisMode(selection ? AxisMode.X : AxisMode.XY);
                 }
             }
-            chart.requestLayout();
+            chart.invalidate();
         });
 
         Button periodicTimer = null;

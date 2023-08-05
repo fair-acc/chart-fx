@@ -79,7 +79,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                 animationDuration,
                 dimIndex
         );
-        state.addChangeListener(ChartBits.AxisLayout, (src, bits) -> requestLayout()); // forward to JavaFX
+        state.addChangeListener(ChartBits.AxisLayout, (src, bits) -> super.requestLayout()); // forward to JavaFX
 
         // Properties that change the placement of ticks
         // We can ignore the layout if labels can only move linearly along

@@ -97,7 +97,7 @@ class YWatchValueIndicatorTest {
             assertFalse(valueWatchIndicatorTested.isPreventOcclusion());
             valueWatchIndicatorTested.setPreventOcclusion(true);
             assertTrue(valueWatchIndicatorTested.isPreventOcclusion());
-            chart.requestLayout();
+            chart.invalidate();
         });
         robot.interrupt(1);
         robot.interact(() -> {

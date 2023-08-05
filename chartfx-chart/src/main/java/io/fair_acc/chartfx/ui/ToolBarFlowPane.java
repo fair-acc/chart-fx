@@ -127,7 +127,7 @@ public class ToolBarFlowPane extends FlowPane {
                 chart.getMenuPane().setPinnedSide(null);
                 this.setBackground(new Background(new BackgroundFill(defaultColour, CornerRadii.EMPTY, Insets.EMPTY)));
             }
-            chart.requestLayout();
+            chart.invalidate();
         });
     }
 

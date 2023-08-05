@@ -558,17 +558,17 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     /**
-     * Explicit layout request for backwards compatibility.
+     * Explicit invalidation call for backwards compatibility that
+     * replaced all sample calls to requestLayout().
      * <p>
-     * TODO:
-     *   Explicit calls are used in e.g. examples to trigger redraws after the
-     *   property to a renderer changed. We should probably get rid of these
-     *   calls and listen to renderer/plugin changes directly.
+     * requestLayout() shouldn't trigger an event because it would
+     * cause many unnecessary redraws whenever a hidden node gets
+     * animated into the chart (HiddenSidesPaneSkin::112).
+     * <p>
+     * TODO: get rid of this after updating the samples
      */
-    @Override
-    public void requestLayout() {
+    public void invalidate() {
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartCanvas);
-        super.requestLayout();
     }
 
     protected void updateLegend() {
