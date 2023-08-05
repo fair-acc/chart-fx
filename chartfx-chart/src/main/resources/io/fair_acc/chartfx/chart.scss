@@ -157,6 +157,16 @@ $null: NULL; // null gets removed from Sass. Maybe replace after generation?
   }
 }
 
+// XY Chart styles
+.chart {
+  // TODO: they don't seem to work and maybe we should create panes with a side property? deprecate these?
+  -fx-title-side: TOP;
+  -fx-tool-bar-side: TOP;
+  -fx-legend-side: BOTTOM;
+  -fx-legend-visibility: true;
+}
+
+// Axis styles
 .axis {
 
   -fx-border-width: 0px;

@@ -132,6 +132,13 @@
   -fx-fill: rgba(65, 110, 244, 0.4078431373);
 }
 
+.chart {
+  -fx-title-side: TOP;
+  -fx-tool-bar-side: TOP;
+  -fx-legend-side: BOTTOM;
+  -fx-legend-visibility: true;
+}
+
 .axis {
   -fx-border-width: 0px;
   -fx-auto-ranging: true;
