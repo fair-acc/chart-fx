@@ -136,7 +136,7 @@ public class HistogramSample extends ChartSample {
             @Override
             public void run() {
                 fillData();
-                FXUtils.runFX(chart::requestLayout);
+                FXUtils.runFX(chart::invalidate);
             }
         }, HistogramSample.UPDATE_DELAY, HistogramSample.UPDATE_PERIOD);
 

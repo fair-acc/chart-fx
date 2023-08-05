@@ -150,7 +150,7 @@ public class OscilloscopeAxisSample extends ChartSample {
                     continue;
                 }
                 ((OscilloscopeAxis) axis).setAxisZeroPosition(zeroPosition);
-                chartOscilloscopeAxis.requestLayout();
+                chartOscilloscopeAxis.invalidate();
             }
         });
 
@@ -166,7 +166,7 @@ public class OscilloscopeAxisSample extends ChartSample {
                     ((OscilloscopeAxis) axis).getMinRange().clear();
                 }
                 axis.forceRedraw();
-                chartOscilloscopeAxis.requestLayout();
+                chartOscilloscopeAxis.invalidate();
             }
         });
 
@@ -182,7 +182,7 @@ public class OscilloscopeAxisSample extends ChartSample {
                     ((OscilloscopeAxis) axis).getMaxRange().clear();
                 }
                 axis.forceRedraw();
-                chartOscilloscopeAxis.requestLayout();
+                chartOscilloscopeAxis.invalidate();
             }
         });
 

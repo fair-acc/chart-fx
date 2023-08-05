@@ -89,7 +89,7 @@ public class ContourDataSetRendererTests {
         renderer.setContourType(contourType);
         final String contourTypeString = renderer.getContourType().toString();
         final String referenceImage = referenceFileName + contourTypeString + (altImplementation ? "_ALT" : "") + referenceFileExtension;
-        FXUtils.runAndWait(() -> chart.requestLayout());
+        FXUtils.runAndWait(() -> chart.invalidate());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));
 
         FXUtils.runAndWait(() -> testImage = chart.snapshot(null, null));
@@ -106,7 +106,7 @@ public class ContourDataSetRendererTests {
             }
         }
 
-        FXUtils.runAndWait(() -> chart.requestLayout());
+        FXUtils.runAndWait(() -> chart.invalidate());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));
 
         FXUtils.runAndWait(() -> testImage = chart.snapshot(null, null));

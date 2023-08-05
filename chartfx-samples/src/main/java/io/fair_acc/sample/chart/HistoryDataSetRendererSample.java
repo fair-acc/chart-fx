@@ -73,7 +73,7 @@ public class HistoryDataSetRendererSample extends ChartSample {
         }));
 
         Platform.runLater(() -> {
-            chart.requestLayout();
+            chart.invalidate();
             final ObservableList<Renderer> rendererList = chart.getRenderers();
             for (final Renderer rend : rendererList) {
                 if (rend instanceof HistoryDataSetRenderer) {
@@ -152,7 +152,7 @@ public class HistoryDataSetRendererSample extends ChartSample {
                     hr.clearHistory();
                 }
             }
-            chart.requestLayout();
+            chart.invalidate();
         });
 
         final Button startTimer = new Button("timer");

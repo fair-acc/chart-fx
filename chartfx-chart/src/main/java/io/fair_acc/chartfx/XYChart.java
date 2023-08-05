@@ -301,7 +301,7 @@ public class XYChart extends Chart {
             });
         }
 
-        requestLayout();
+        invalidate();
     }
 
     /**

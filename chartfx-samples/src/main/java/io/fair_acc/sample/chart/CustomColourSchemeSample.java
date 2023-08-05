@@ -3,7 +3,6 @@ package io.fair_acc.sample.chart;
 import java.util.Collections;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
@@ -64,7 +63,7 @@ public class CustomColourSchemeSample extends ChartSample {
                 DefaultRenderColorScheme.Palette.getValue(DefaultRenderColorScheme.strokeColorProperty().get()));
         strokeStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
             DefaultRenderColorScheme.strokeColorProperty().set(n.getPalette());
-            chart.requestLayout();
+            chart.invalidate();
             chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated stroke colour scheme to " + n.name());
         });
@@ -77,7 +76,7 @@ public class CustomColourSchemeSample extends ChartSample {
             DefaultRenderColorScheme.fillColorProperty().set(n.getPalette());
             DefaultRenderColorScheme.fillStylesProperty().clear();
             DefaultRenderColorScheme.fillStylesProperty().set(DefaultRenderColorScheme.getStandardFillStyle());
-            chart.requestLayout();
+            chart.invalidate();
             chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated fill colour scheme to " + n.name());
         });
@@ -87,7 +86,7 @@ public class CustomColourSchemeSample extends ChartSample {
         errorStyleCB.getSelectionModel().select(renderer.getErrorType());
         errorStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
             renderer.setErrorType(n);
-            chart.requestLayout();
+            chart.invalidate();
             LOGGER.atInfo().log("updated error style to " + n.name());
         });
 
@@ -102,7 +101,7 @@ public class CustomColourSchemeSample extends ChartSample {
             }
             DefaultRenderColorScheme.fillStylesProperty().clear();
             DefaultRenderColorScheme.fillStylesProperty().set(values);
-            chart.requestLayout();
+            chart.invalidate();
             chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated to custom filling scheme");
         });

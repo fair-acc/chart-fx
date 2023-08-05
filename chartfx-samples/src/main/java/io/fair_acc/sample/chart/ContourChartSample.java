@@ -113,13 +113,13 @@ public class ContourChartSample extends ChartSample {
         // contourRenderer.getDatasets().add(createTestData());
 
         slider1.valueProperty().bindBidirectional(contourRenderer.quantisationLevelsProperty());
-        slider1.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+        slider1.valueProperty().addListener((ch, o, n) -> chart.invalidate());
 
         slider2.valueProperty().bindBidirectional(contourRenderer.maxContourSegmentsProperty());
-        slider2.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+        slider2.valueProperty().addListener((ch, o, n) -> chart.invalidate());
 
         slider3.valueProperty().bindBidirectional(contourRenderer.minHexTileSizeProperty());
-        slider3.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+        slider3.valueProperty().addListener((ch, o, n) -> chart.invalidate());
 
         // chart.getZAxis().setAutoRanging(false);
         // chart.getZAxis().setUpperBound(1500);
@@ -221,24 +221,24 @@ public class ContourChartSample extends ChartSample {
         cb1.getItems().addAll(ContourType.values());
         cb1.setValue(renderer1.getContourType());
         cb1.valueProperty().bindBidirectional(renderer1.contourTypeProperty());
-        cb1.valueProperty().addListener((ch, old, selection) -> chartPane1.requestLayout());
+        cb1.valueProperty().addListener((ch, old, selection) -> chartPane1.invalidate());
 
         final ColormapComboBox colorGradient1 = new ColormapComboBox();
         colorGradient1.getItems().addAll(ColorGradient.colorGradients());
         colorGradient1.setValue(renderer1.getColorGradient());
         colorGradient1.valueProperty().bindBidirectional(renderer1.colorGradientProperty());
-        colorGradient1.valueProperty().addListener((ch, old, selection) -> chartPane1.requestLayout());
+        colorGradient1.valueProperty().addListener((ch, old, selection) -> chartPane1.invalidate());
 
         final ComboBox<ContourType> cb2 = new ComboBox<>();
         cb2.getItems().addAll(ContourType.values());
         cb2.setValue(renderer2.getContourType());
         cb2.valueProperty().bindBidirectional(renderer2.contourTypeProperty());
-        cb1.valueProperty().addListener((ch, old, selection) -> chartPane2.requestLayout());
+        cb1.valueProperty().addListener((ch, old, selection) -> chartPane2.invalidate());
 
         final ColormapComboBox colorGradient2 = new ColormapComboBox();
         colorGradient2.setValue(renderer2.getColorGradient());
         colorGradient2.valueProperty().bindBidirectional(renderer2.colorGradientProperty());
-        colorGradient2.valueProperty().addListener((ch, old, selection) -> chartPane2.requestLayout());
+        colorGradient2.valueProperty().addListener((ch, old, selection) -> chartPane2.invalidate());
 
         final HBox parameter = new HBox(new Label("Countour1: "), cb1, colorGradient1, new Label(" Countour2: "), cb2,
                 colorGradient2);

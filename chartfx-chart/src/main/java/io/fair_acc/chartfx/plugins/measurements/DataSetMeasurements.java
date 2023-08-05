@@ -300,7 +300,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         if (chart != null) {
             chart.getRenderers().remove(renderer);
             chart.getAxes().removeAll(renderer.getAxes());
-            chart.requestLayout();
+            chart.invalidate();
         }
     }
 

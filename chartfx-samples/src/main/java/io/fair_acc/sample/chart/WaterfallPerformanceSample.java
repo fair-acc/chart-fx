@@ -142,11 +142,11 @@ public class WaterfallPerformanceSample extends ChartSample {
         contourType.getItems().addAll(ContourType.values());
         contourType.setValue(renderer.getContourType());
         contourType.valueProperty().bindBidirectional(renderer.contourTypeProperty());
-        contourType.valueProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        contourType.valueProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         colorGradient.setValue(renderer.getColorGradient());
         colorGradient.valueProperty().bindBidirectional(renderer.colorGradientProperty());
-        colorGradient.valueProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        colorGradient.valueProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         nCountourLevelSlider.setShowTickLabels(true);
         nCountourLevelSlider.setShowTickMarks(true);
@@ -159,7 +159,7 @@ public class WaterfallPerformanceSample extends ChartSample {
         nContourLabel.setTooltip(new Tooltip("adjusts number of contour levels"));
         final HBox hBoxContourLevelSlider = new HBox(nContourLabel, nCountourLevelSlider);
         nCountourLevelSlider.valueProperty().bindBidirectional(renderer.quantisationLevelsProperty());
-        nCountourLevelSlider.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+        nCountourLevelSlider.valueProperty().addListener((ch, o, n) -> chart.invalidate());
 
         nSegmentSlider.setShowTickLabels(true);
         nSegmentSlider.setShowTickMarks(true);
@@ -169,7 +169,7 @@ public class WaterfallPerformanceSample extends ChartSample {
         HBox.setHgrow(nSegmentSlider, Priority.ALWAYS);
         final HBox hBoxSegmentSlider = new HBox(new Label("n segments :"), nSegmentSlider);
         nSegmentSlider.valueProperty().bindBidirectional(renderer.maxContourSegmentsProperty());
-        nSegmentSlider.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+        nSegmentSlider.valueProperty().addListener((ch, o, n) -> chart.invalidate());
 
         minHexSizeSlider.setShowTickLabels(true);
         minHexSizeSlider.setShowTickMarks(true);
@@ -179,24 +179,24 @@ public class WaterfallPerformanceSample extends ChartSample {
         HBox.setHgrow(minHexSizeSlider, Priority.ALWAYS);
         final HBox hBoxHexSizeSlider = new HBox(new Label("HexSize :"), minHexSizeSlider);
         minHexSizeSlider.valueProperty().bindBidirectional(renderer.minHexTileSizeProperty());
-        minHexSizeSlider.valueProperty().addListener((ch, o, n) -> chart.requestLayout());
+        minHexSizeSlider.valueProperty().addListener((ch, o, n) -> chart.invalidate());
 
         localRange.setSelected(renderer.computeLocalRange());
         localRange.setTooltip(new Tooltip("select for auto-adjusting the colour axis for the selected sub-range"));
         localRange.selectedProperty().bindBidirectional(renderer.computeLocalRangeProperty());
-        localRange.selectedProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        localRange.selectedProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         final ToolBar standardCountourParameters = new ToolBar(contourType, colorGradient, hBoxContourLevelSlider,
                 hBoxSegmentSlider, hBoxHexSizeSlider, localRange);
 
         dataReduction.setSelected(renderer.isReducePoints());
         dataReduction.selectedProperty().bindBidirectional(renderer.pointReductionProperty());
-        dataReduction.selectedProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        dataReduction.selectedProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         ChangeListener<Integer> reductionListener = (ch, o, n) -> {
             renderer.setReductionFactorX(reductionFactorX.getValue());
             renderer.setReductionFactorY(reductionFactorY.getValue());
-            chart.requestLayout();
+            chart.invalidate();
         };
 
         reductionFactorX.getValueFactory().setValue(renderer.getReductionFactorX());
@@ -214,19 +214,19 @@ public class WaterfallPerformanceSample extends ChartSample {
         reductionType.getItems().addAll(ReductionType.values());
         reductionType.setValue(renderer.getReductionType());
         reductionType.valueProperty().bindBidirectional(renderer.reductionTypeProperty());
-        reductionType.valueProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        reductionType.valueProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         smooth.setSelected(renderer.isSmooth());
         smooth.selectedProperty().bindBidirectional(renderer.smoothProperty());
-        smooth.selectedProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        smooth.selectedProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         altImplementation.setSelected(renderer.isAltImplementation());
         altImplementation.selectedProperty().bindBidirectional(renderer.altImplementationProperty());
-        altImplementation.selectedProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        altImplementation.selectedProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         parallelImplementation.setSelected(renderer.isParallelImplementation());
         parallelImplementation.selectedProperty().bindBidirectional(renderer.parallelImplementationProperty());
-        parallelImplementation.selectedProperty().addListener((ch, old, selection) -> chart.requestLayout());
+        parallelImplementation.selectedProperty().addListener((ch, old, selection) -> chart.invalidate());
 
         final ToolBar newCountourParameters = new ToolBar(dataReduction, hBoxReductionFactorSlider, reductionType,
                 smooth, altImplementation, parallelImplementation);

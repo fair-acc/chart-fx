@@ -139,7 +139,7 @@ public class Histogram2DimSample extends ChartSample {
             @Override
             public void run() {
                 fillData();
-                FXUtils.runFX(chart::requestLayout);
+                FXUtils.runFX(chart::invalidate);
             }
         }, Histogram2DimSample.UPDATE_DELAY, Histogram2DimSample.UPDATE_PERIOD);
         return root;
