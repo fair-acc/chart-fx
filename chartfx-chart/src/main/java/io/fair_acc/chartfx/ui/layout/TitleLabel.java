@@ -1,16 +1,13 @@
 package io.fair_acc.chartfx.ui.layout;
 
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.chartfx.utils.RotatedBounds;
-import javafx.beans.binding.Bindings;
+import io.fair_acc.chartfx.utils.RotatedRegion;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Region;
 
 import java.util.List;
 
@@ -44,27 +41,18 @@ public class TitleLabel extends Label {
     }
 
     @Override
-    protected double computePrefWidth(double length) {
-        return getRotate() == 0 ? super.computePrefWidth(length) :
-                bounds.setSize(super.computePrefWidth(length), super.computePrefHeight(length))
-                        .rotateCenter(getRotate())
-                        .getWidth();
+    protected double computePrefWidth(double height) {
+        return rotated.computePrefWidth(height);
     }
 
     @Override
-    protected double computePrefHeight(double length) {
-        return getRotate() == 0 ? super.computePrefHeight(length) :
-                bounds.setSize(super.computePrefWidth(length), super.computePrefHeight(length))
-                        .rotateCenter(getRotate())
-                        .getHeight();
+    protected double computePrefHeight(double width) {
+        return rotated.computePrefHeight(width);
     }
 
     @Override
     public void resizeRelocate(double x, double y, double width, double height) {
-        // We need to set the bounds rotated so that the label gets computed
-        // correctly without messing up text cutoff and word wrap etc.
-        bounds.setBounds(x, y, width, height).rotateCenter(getRotate());
-        super.resizeRelocate(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+        rotated.resizeRelocate(x, y, width, height);
     }
 
     public Side getSide() {
@@ -79,6 +67,9 @@ public class TitleLabel extends Label {
         this.side.set(side);
     }
 
-    private final RotatedBounds bounds = new RotatedBounds();
+    private final RotatedRegion rotated = new RotatedRegion(this,
+            super::computePrefWidth,
+            super::computePrefHeight,
+            super::resizeRelocate);
 
 }
