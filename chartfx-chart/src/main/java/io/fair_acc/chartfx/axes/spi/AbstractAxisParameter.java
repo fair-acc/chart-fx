@@ -204,8 +204,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * The side of the plot which this axis is being drawn on default axis orientation is BOTTOM, can be set latter to
      * another side
      */
-    private final transient StyleableObjectProperty<Side> side = CSS.createEnumPropertyWithPseudoclasses(this, "side", Side.BOTTOM, false, Side.class, null,
-            () -> ChartPane.setSide(this, getSide()));
+    private final transient StyleableObjectProperty<Side> side = CSS.createSideProperty(this, Side.BOTTOM);
 
     /**
      * The side of the plot which this axis is being drawn on

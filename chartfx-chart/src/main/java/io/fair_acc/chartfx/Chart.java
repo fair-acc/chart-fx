@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
@@ -29,7 +30,6 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Control;
-import javafx.scene.control.Label;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Paint;
 import javafx.util.Duration;
@@ -170,34 +170,7 @@ public abstract class Chart extends Region implements EventSource {
         getAxes().addListener(axesChangeListenerLocal);
     }
 
-    protected final Label titleLabel = StyleUtil.addStyles(new Label(), "chart-title");
-
-    protected final StringProperty title = new StringPropertyBase() {
-        @Override
-        public Object getBean() {
-            return Chart.this;
-        }
-
-        @Override
-        public String getName() {
-            return "title";
-        }
-
-        @Override
-        protected void invalidated() {
-            titleLabel.setText(get());
-        }
-    };
-
-    /**
-     * The side of the chart where the title is displayed default Side.TOP
-     */
-    private final StyleableObjectProperty<Side> titleSide = CSS.createObjectProperty(this, "titleSide", Side.TOP, false,
-            StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
-                AssertUtils.notNull("Side must not be null", newVal);
-                ChartPane.setSide(titleLabel, newVal);
-                return newVal;
-            }, state.onAction(ChartBits.ChartLayout));
+    protected final TitleLabel titleLabel = StyleUtil.addStyles(new TitleLabel(), "chart-title");
 
     /**
      * The side of the chart where the legend should be displayed default value Side.BOTTOM
@@ -346,7 +319,7 @@ public abstract class Chart extends Region implements EventSource {
         toolBar.registerListener();
         menuPane.setTop(getToolBar());
 
-        getTitleLegendPane().addSide(Side.TOP, titleLabel);
+        getTitleLegendPane().getChildren().add(titleLabel);
 
         legendVisibleProperty().addListener((ch, old, visible) -> {
             if (getLegend() == null) {
@@ -503,15 +476,15 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     public final String getTitle() {
-        return title.get();
+        return titleProperty().get();
+    }
+
+    public final TitleLabel getTitleLabel() {
+        return titleLabel;
     }
 
     public final ChartPane getTitleLegendPane() {
         return titleLegendPane;
-    }
-
-    public final Side getTitleSide() {
-        return titleSide.get();
     }
 
     public final FlowPane getToolBar() {
@@ -730,15 +703,7 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     public final void setTitle(final String value) {
-        title.set(value);
-    }
-
-    public final void setTitleSide(final Side value) {
-        titleSide.set(value);
-    }
-
-    public final void setTitlePaint(final Paint paint) {
-        titleLabel.setTextFill(paint);
+        titleProperty().set(value);
     }
 
     public Chart setToolBarPinned(boolean value) {
@@ -758,11 +723,7 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     public final StringProperty titleProperty() {
-        return title;
-    }
-
-    public final ObjectProperty<Side> titleSideProperty() {
-        return titleSide;
+        return titleLabel.textProperty();
     }
 
     public BooleanProperty toolBarPinnedProperty() {

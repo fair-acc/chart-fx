@@ -214,7 +214,7 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
             chart.getGridRenderer().getVerticalMajorGrid().setVisible(false);
             chart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
             chart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
-            chart.setTitlePaint(Color.WHITE);
+            chart.getTitleLabel().setTextFill(Color.WHITE);
             if (chart.getXAxis() instanceof AbstractAxisParameter) {
                 ((AbstractAxisParameter) chart.getXAxis()).setTickLabelFill(Color.WHITESMOKE);
             }
@@ -231,7 +231,7 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
             chart.getGridRenderer().getHorizontalMajorGrid().setVisible(true);
             chart.getGridRenderer().getHorizontalMinorGrid().setVisible(false);
             chart.getGridRenderer().getHorizontalMajorGrid().setStroke(Color.rgb(106, 106, 106));
-            chart.setTitlePaint(Color.WHITE);
+            chart.getTitleLabel().setTextFill(Color.WHITE);
             if (chart.getXAxis() instanceof AbstractAxisParameter) {
                 ((AbstractAxisParameter) chart.getXAxis()).setTickLabelFill(Color.rgb(194, 194, 194));
             }
