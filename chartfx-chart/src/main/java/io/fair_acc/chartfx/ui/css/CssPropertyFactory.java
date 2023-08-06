@@ -4,6 +4,9 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.function.*;
 
+import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.ui.layout.ChartPane;
+import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.Property;
 import javafx.css.*;
 import javafx.scene.Node;
@@ -284,6 +287,31 @@ public class CssPropertyFactory<S extends Styleable> {
      */
     public final StyleableStringProperty createStringProperty(S styleableBean, String propertyName, String initialValue, Runnable... invalidateActions) {
         return createStringProperty(styleableBean, propertyName, initialValue, true, null, invalidateActions);
+    }
+
+    /**
+     * Creates a non-null styleable side property that automatically updates the node's side in the chart. The
+     * field must be named "side".
+     *
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
+     * @param initialValue the initial value of the property. CSS may reset the property to this value.
+     * @param invalidateActions zero, one or two {@code Runnable}s (vararg) first one will be executed before and second one after invalidation
+     * @return a StyleableProperty created with initial value
+     */
+    public final StyleableObjectProperty<Side> createSideProperty(S styleableBean, Side initialValue, Runnable... invalidateActions) {
+        var converter = StyleConverter.getEnumConverter(Side.class);
+        BinaryOperator<Side> filter = (old, side) -> {
+            AssertUtils.notNull("Side must not be null", side);
+            var target = styleableBean.getStyleableNode();
+            if(target == null && styleableBean instanceof Node) {
+                target = (Node) styleableBean;
+            }
+            AssertUtils.notNull("Bean does not specify a styleable node", target);
+            ChartPane.setSide(target, side);
+            return side;
+        };
+        filter.apply(null, initialValue);
+        return createObjectProperty(styleableBean, "side", initialValue, false, converter, filter, invalidateActions);
     }
 
     /**

@@ -171,10 +171,30 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 // XY Chart styles
 .chart {
   // TODO: they don't seem to work and maybe we should create panes with a side property? deprecate these?
-  -fx-title-side: TOP;
   -fx-tool-bar-side: TOP;
   -fx-legend-side: BOTTOM;
   -fx-legend-visibility: true;
+
+  .chart-content {
+    // leave some top-axis overdraw-padding if there is no title
+    -fx-padding: 5 0 0 0px
+  }
+
+  .chart-title {
+    visibility: visible;
+    -fx-side: top;
+    -fx-rotate: 0;
+
+    &:left {
+      -fx-rotate: -90;
+    }
+
+    &:right {
+      -fx-rotate: 90;
+    }
+
+  }
+
 }
 
 // Axis styles

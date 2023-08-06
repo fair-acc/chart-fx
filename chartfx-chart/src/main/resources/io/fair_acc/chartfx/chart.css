@@ -131,10 +131,23 @@
 }
 
 .chart {
-  -fx-title-side: TOP;
   -fx-tool-bar-side: TOP;
   -fx-legend-side: BOTTOM;
   -fx-legend-visibility: true;
+}
+.chart .chart-content {
+  -fx-padding: 5 0 0 0px;
+}
+.chart .chart-title {
+  visibility: visible;
+  -fx-side: top;
+  -fx-rotate: 0;
+}
+.chart .chart-title:left {
+  -fx-rotate: -90;
+}
+.chart .chart-title:right {
+  -fx-rotate: 90;
 }
 
 .axis {

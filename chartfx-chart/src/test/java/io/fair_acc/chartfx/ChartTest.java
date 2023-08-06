@@ -29,14 +29,14 @@ public class ChartTest {
 
     @TestFx
     public void setTitlePaint() {
-        chart.setTitlePaint(Color.BLUE);
-        assertEquals(Color.BLUE, chart.getTitlePaint().getTextFill());
+        chart.getTitleLabel().setTextFill(Color.BLUE);
+        assertEquals(Color.BLUE, chart.getTitleLabel().getTextFill());
     }
 
     @TestFx
     public void setTitleSide() {
-        chart.setTitleSide(Side.RIGHT);
-        assertEquals(Side.RIGHT, chart.getTitleSide());
+        chart.getTitleLabel().setSide(Side.RIGHT);
+        assertEquals(Side.RIGHT, chart.getTitleLabel().getSide());
     }
 
     private static class TestChart extends Chart {
@@ -52,8 +52,5 @@ public class ChartTest {
         protected void redrawCanvas() {
         }
 
-        public Label getTitlePaint() {
-            return titleLabel;
-        }
     }
 }
