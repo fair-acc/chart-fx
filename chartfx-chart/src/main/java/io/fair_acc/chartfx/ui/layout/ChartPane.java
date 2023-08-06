@@ -5,6 +5,8 @@ import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
+import io.fair_acc.dataset.utils.AssertUtils;
+import javafx.css.PseudoClass;
 import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
@@ -46,6 +48,8 @@ public class ChartPane extends Pane {
     }
 
     public static void setSide(Node node, Side value) {
+        AssertUtils.notNull("Side must not be null", value);
+        value.applyPseudoClasses(node);
         FXUtils.setConstraint(node, CHART_ELEMENT, value);
     }
 

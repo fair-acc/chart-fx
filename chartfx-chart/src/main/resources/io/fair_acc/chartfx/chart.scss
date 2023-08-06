@@ -211,21 +211,17 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     -fx-rotate: 0;
   }
 
-  &:left, &:right, &:center-ver {
-    .axis-label {
-      -fx-rotate: -90;
-    }
-  }
-
-  &:center-ver, &:center-hor {
-    .axis-label {
-      -fx-text-alignment: RIGHT;
-    }
-  }
-
   .axis-label {
     -fx-text-alignment: CENTER;
     -fx-font-size: 12px;
+  }
+
+  &:center .axis-label {
+    -fx-text-alignment: RIGHT;
+  }
+
+  &:vertical .axis-label {
+    -fx-rotate: -90;
   }
 
   .axis-tick-label {

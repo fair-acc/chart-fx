@@ -162,15 +162,15 @@
   -fx-fill: black;
   -fx-rotate: 0;
 }
-.axis:left .axis-label, .axis:right .axis-label, .axis:center-ver .axis-label {
-  -fx-rotate: -90;
-}
-.axis:center-ver .axis-label, .axis:center-hor .axis-label {
-  -fx-text-alignment: RIGHT;
-}
 .axis .axis-label {
   -fx-text-alignment: CENTER;
   -fx-font-size: 12px;
+}
+.axis:center .axis-label {
+  -fx-text-alignment: RIGHT;
+}
+.axis:vertical .axis-label {
+  -fx-rotate: -90;
 }
 .axis .axis-tick-label {
   -fx-font-size: 10px;

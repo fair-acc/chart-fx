@@ -1,5 +1,8 @@
 package io.fair_acc.chartfx.ui.geometry;
 
+import javafx.css.PseudoClass;
+import javafx.scene.Node;
+
 /**
  * Re-implementation of JavaFX's {@code javafx.geometry.Side} implementation to also include centre axes.
  * 
@@ -57,4 +60,27 @@ public enum Side {
     public boolean isCenter() {
         return this == CENTER_VER || this == CENTER_HOR;
     }
+
+    public void applyPseudoClasses(Node node) {
+        node.pseudoClassStateChanged(CSS_TOP, this == TOP);
+        node.pseudoClassStateChanged(CSS_BOTTOM, this == BOTTOM);
+        node.pseudoClassStateChanged(CSS_LEFT, this == LEFT);
+        node.pseudoClassStateChanged(CSS_RIGHT, this == RIGHT);
+        node.pseudoClassStateChanged(CSS_CENTER_HOR, this == CENTER_HOR);
+        node.pseudoClassStateChanged(CSS_CENTER_VER, this == CENTER_VER);
+        node.pseudoClassStateChanged(CSS_HORIZONTAL, isHorizontal());
+        node.pseudoClassStateChanged(CSS_VERTICAL, isVertical());
+        node.pseudoClassStateChanged(CSS_CENTER, isCenter());
+    }
+
+    private static final PseudoClass CSS_TOP = PseudoClass.getPseudoClass("top");
+    private static final PseudoClass CSS_BOTTOM = PseudoClass.getPseudoClass("bottom");
+    private static final PseudoClass CSS_LEFT = PseudoClass.getPseudoClass("left");
+    private static final PseudoClass CSS_RIGHT = PseudoClass.getPseudoClass("right");
+    private static final PseudoClass CSS_CENTER_HOR = PseudoClass.getPseudoClass("center-hor");
+    private static final PseudoClass CSS_CENTER_VER = PseudoClass.getPseudoClass("center-ver");
+    private static final PseudoClass CSS_HORIZONTAL = PseudoClass.getPseudoClass("horizontal");
+    private static final PseudoClass CSS_VERTICAL = PseudoClass.getPseudoClass("vertical");
+    private static final PseudoClass CSS_CENTER = PseudoClass.getPseudoClass("center");
+
 }
