@@ -416,7 +416,7 @@ public class XYChart extends Chart {
 
         // Update the auto range
         final boolean changed;
-        if (axis.isAutoGrowRanging()) {
+        if (axis.isAutoGrowRanging() && axis.getAutoRange().isDefined()) {
             changed = axis.getAutoRange().add(dsRange);
         } else {
             changed = axis.getAutoRange().set(dsRange);
