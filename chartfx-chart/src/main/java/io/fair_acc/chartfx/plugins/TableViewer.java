@@ -161,6 +161,7 @@ public class TableViewer extends ChartPlugin {
      * Copies the (selected) table data to the clipboard in csv Format.
      */
     public void copySelectedToClipboard() {
+        dsModel.runPreLayout();
         final ClipboardContent content = new ClipboardContent();
         content.putString(dsModel.getSelectedData(table.getSelectionModel()));
         Clipboard.getSystemClipboard().setContent(content);
@@ -170,6 +171,7 @@ public class TableViewer extends ChartPlugin {
      * Show a FileChooser and export the (selected) Table Data to the choosen .csv File.
      */
     public void exportGridToCSV() {
+        dsModel.runPreLayout();
         final FileChooser chooser = new FileChooser();
         final File save = chooser.showSaveDialog(getChart().getScene().getWindow());
         if (save == null) {
@@ -251,10 +253,10 @@ public class TableViewer extends ChartPlugin {
         EYN(DIM_Y, "e_y", true, false),
         EYP(DIM_Y, "e_y", true, true);
 
-        int dimIdx;
-        String label;
-        boolean errorCol;
-        boolean positive;
+        final int dimIdx;
+        final String label;
+        final boolean errorCol;
+        final boolean positive;
 
         ColumnType(final int dimIdx, final String label, final boolean errorCol, final boolean positive) {
             this.dimIdx = dimIdx;
@@ -305,15 +307,15 @@ public class TableViewer extends ChartPlugin {
 
             // Cap at max size
             List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted(Comparator.comparing(DataSet::getName)).collect(Collectors.toList());
-            if(columnsUpdated.size() > MAX_DATASETS_IN_TABLE) {
+            if(columnsUpdated.size() >= MAX_DATASETS_IN_TABLE) {
                 LOGGER.atWarn().addArgument(columnsUpdated.size()).log("Limiting number of DataSets shown in Table, chart has {} DataSets.");
             }
-            var cols = FXUtils.sizedList(columns, Math.min(columnsUpdated.size(), MAX_DATASETS_IN_TABLE), DataSetTableColumns::new);
+            var cols = FXUtils.sizedList(columns, Math.min(columnsUpdated.size() + 1, MAX_DATASETS_IN_TABLE), DataSetTableColumns::new);
 
             // Update the datasets
-            int i = 0, nRowsNew = 0;
+            int i = 1, nRowsNew = 0;
             for (DataSet ds : columnsUpdated) {
-                if (cols instanceof DataSetTableColumns) {
+                if (cols.get(i) instanceof DataSetTableColumns) {
                     ((DataSetTableColumns) cols.get(i++)).update(ds);
                     nRowsNew = Math.max(nRowsNew, ds.getDataCount());
                 }
