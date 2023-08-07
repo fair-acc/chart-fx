@@ -9,6 +9,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.dataset.events.StateListener;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
@@ -16,6 +17,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 
 import javafx.stage.Window;
@@ -322,6 +324,21 @@ public final class FXUtils {
         });
 
         return showing;
+    }
+
+    /**
+     * @param node child
+     * @return the containing parent chart if there is one
+     */
+    public static Optional<Chart> tryGetChartParent(Node node) {
+        Parent parent = node.getParent();
+        while (parent != null) {
+            if (parent instanceof Chart) {
+                return Optional.of((Chart) parent);
+            }
+            parent = parent.getParent();
+        }
+        return Optional.empty();
     }
 
 }

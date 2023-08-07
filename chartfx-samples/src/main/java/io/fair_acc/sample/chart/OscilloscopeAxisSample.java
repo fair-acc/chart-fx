@@ -263,7 +263,7 @@ public class OscilloscopeAxisSample extends ChartSample {
 
         final XYChart chart = new XYChart(xAxis, yAxis1);
         chart.setTitle(defaultAxis ? "Chart with DefaultNumericAxis" : "Chart with OscilloscopeAxis");
-        chart.legendVisibleProperty().set(false);
+        chart.setLegendVisible(false);
         chart.getYAxis().setName(rollingBufferBeamIntensity.getName());
         final ErrorDataSetRenderer beamIntensityRenderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
         ((DefaultDataReducer) beamIntensityRenderer.getRendererDataReducer()).setMinPointPixelDistance(MIN_PIXEL_DISTANCE);

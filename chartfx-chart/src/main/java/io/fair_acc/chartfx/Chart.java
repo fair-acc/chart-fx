@@ -102,11 +102,6 @@ public abstract class Chart extends Region implements EventSource {
      */
     protected final ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
 
-    /**
-     * When true the chart will display a legend if the chart implementation supports a legend.
-     */
-    private final StyleableBooleanProperty legendVisible = CSS.createBooleanProperty(this, "legendVisible", true, state.onAction(ChartBits.ChartLegend));
-
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final Map<ChartPlugin, Group> pluginGroups = new HashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
@@ -173,30 +168,13 @@ public abstract class Chart extends Region implements EventSource {
     protected final TitleLabel titleLabel = StyleUtil.addStyles(new TitleLabel(), "chart-title");
 
     /**
-     * The side of the chart where the legend should be displayed default value Side.BOTTOM
-     */
-    private final StyleableObjectProperty<Side> legendSide = CSS.createObjectProperty(this, "legendSide", Side.BOTTOM, false,
-            StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
-                AssertUtils.notNull("Side must not be null", newVal);
-
-                final Legend legend = getLegend();
-                if (legend == null) {
-                    return newVal;
-                }
-                ChartPane.setSide(legend.getNode(), newVal);
-                legend.setVertical(newVal.isVertical());
-
-                return newVal;
-            }, state.onAction(ChartBits.ChartLayout));
-
-    /**
      * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
      * legend is wanted then this can be set to null
      */
     private final ObjectProperty<Legend> legend = new SimpleObjectProperty<>(this, "legend", new DefaultLegend()) {
         private Legend oldLegend = get();
         {
-            getTitleLegendPane().addSide(getLegendSide(), oldLegend.getNode());
+            getTitleLegendPane().addSide(oldLegend.getSide(), oldLegend.getNode());
         }
 
         @Override
@@ -208,12 +186,11 @@ public abstract class Chart extends Region implements EventSource {
             }
 
             if (newLegend != null) {
-                newLegend.getNode().setVisible(isLegendVisible());
-                getTitleLegendPane().addSide(getLegendSide(), newLegend.getNode());
+                getTitleLegendPane().addSide(newLegend.getSide(), newLegend.getNode());
             }
             super.set(newLegend);
             oldLegend = newLegend;
-            updateLegend(getDatasets(), getRenderers());
+            fireInvalidated(ChartBits.ChartLegend);
         }
     };
 
@@ -320,14 +297,6 @@ public abstract class Chart extends Region implements EventSource {
         menuPane.setTop(getToolBar());
 
         getTitleLegendPane().getChildren().add(titleLabel);
-
-        legendVisibleProperty().addListener((ch, old, visible) -> {
-            if (getLegend() == null) {
-                return;
-            }
-            getLegend().getNode().setVisible(visible);
-            getLegend().getNode().setManaged(visible);
-        });
     }
 
     @Override
@@ -435,10 +404,6 @@ public abstract class Chart extends Region implements EventSource {
         return legend.getValue();
     }
 
-    public final Side getLegendSide() {
-        return legendSide.get();
-    }
-
     public final ChartPane getMeasurementPane() {
         return measurementPane;
     }
@@ -506,10 +471,6 @@ public abstract class Chart extends Region implements EventSource {
      */
     public final boolean isAnimated() {
         return animated.get();
-    }
-
-    public final boolean isLegendVisible() {
-        return legendVisible.getValue();
     }
 
     /**
@@ -678,12 +639,9 @@ public abstract class Chart extends Region implements EventSource {
         return legend;
     }
 
-    public final ObjectProperty<Side> legendSideProperty() {
-        return legendSide;
-    }
-
+    @Deprecated // TODO: used in tests/examples. Should be replaced with getLegend().setVisible(value)?
     public final BooleanProperty legendVisibleProperty() {
-        return legendVisible;
+        return getLegend().getNode().visibleProperty();
     }
 
     public final void setAnimated(final boolean value) {
@@ -694,12 +652,8 @@ public abstract class Chart extends Region implements EventSource {
         legend.set(value);
     }
 
-    public final void setLegendSide(final Side value) {
-        legendSide.set(value);
-    }
-
     public final void setLegendVisible(final boolean value) {
-        legendVisible.set(value);
+        getLegend().getNode().setVisible(value);
     }
 
     public final void setTitle(final String value) {

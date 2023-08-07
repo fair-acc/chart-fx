@@ -1,20 +1,22 @@
 package io.fair_acc.chartfx.legend.spi;
 
-import java.lang.ref.PhantomReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.events.StateListener;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.css.PseudoClass;
+import javafx.css.*;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -28,9 +30,6 @@ import io.fair_acc.chartfx.legend.Legend;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.EventListener;
-import io.fair_acc.dataset.event.UpdateEvent;
-import io.fair_acc.dataset.event.UpdatedMetaDataEvent;
 
 /**
  * A chart legend that displays a list of items with symbols in a box
@@ -38,64 +37,33 @@ import io.fair_acc.dataset.event.UpdatedMetaDataEvent;
  * @author rstein
  */
 public class DefaultLegend extends FlowPane implements Legend {
-    // TODO: transform static integers to styleable property fields
-    private static final int GAP = 5;
-    private static final int SYMBOL_WIDTH = 20;
-    private static final int SYMBOL_HEIGHT = 20;
     private static final PseudoClass disabledClass = PseudoClass.getPseudoClass("disabled");
 
-    // -------------- PRIVATE FIELDS ------------------------------------------
-
-    private final ListChangeListener<LegendItem> itemsListener = c -> {
-        getChildren().setAll(getItems());
-        if (isVisible()) {
-            requestLayout();
-        }
-    };
-
     // -------------- PUBLIC PROPERTIES ----------------------------------------
-    /**
-     * The legend items should be laid out vertically in columns rather than horizontally in rows
-     */
-    private final BooleanProperty vertical = new SimpleBooleanProperty(this, "vertical", false) {
-        @Override
-        protected void invalidated() {
-            setOrientation(get() ? Orientation.VERTICAL : Orientation.HORIZONTAL);
-        }
-    };
+
+    StyleableObjectProperty<Side> side = CSS.createSideProperty(this, Side.BOTTOM);
+    StyleableDoubleProperty symbolWidth = CSS.createDoubleProperty(this, "symbolWidth", 20);
+    StyleableDoubleProperty symbolHeight = CSS.createDoubleProperty(this, "symbolHeight", 20);
 
     /**
      * The legend items to display in this legend
      */
-    private final ObjectProperty<ObservableList<LegendItem>> items = new SimpleObjectProperty<>(
-            this, "items") {
-        private ObservableList<LegendItem> oldItems = null;
-
-        @Override
-        protected void invalidated() {
-            if (oldItems != null) {
-                oldItems.removeListener(itemsListener);
-            }
-
-            final ObservableList<LegendItem> newItems = get();
-            if (newItems == null) {
-                getChildren().clear();
-            } else {
-                newItems.addListener(itemsListener);
-                getChildren().setAll(newItems);
-            }
-            oldItems = get();
-            if (isVisible()) {
-                requestLayout();
-            }
-        }
-    };
+    private final ObservableList<LegendItem> items = FXCollections.observableArrayList();
 
     public DefaultLegend() {
-        super(GAP, GAP);
-        setItems(FXCollections.observableArrayList());
         getStyleClass().setAll("chart-legend");
-        setAlignment(Pos.CENTER);
+        managedProperty().bind(visibleProperty().and(Bindings.size(items).isNotEqualTo(0)));
+        items.addListener((ListChangeListener<LegendItem>) c -> getChildren().setAll(items));
+        PropUtil.runOnChange(this::applyCss, sideProperty());
+
+        // TODO:
+        //  (1) The legend does not have a reference to the chart, so for now do a hack
+        //      and try to get it out of the hierarchy.
+        //  (2) The items are currently created with a fixed size before the styling phase,
+        //      so live-updates w/ CSSFX dont work properly without re-instantiating the chart.
+        PropUtil.runOnChange(() -> FXUtils.tryGetChartParent(this)
+                        .ifPresent(chart -> chart.fireInvalidated(ChartBits.ChartLegend)),
+                symbolHeight, symbolWidth);
     }
 
     @Override
@@ -111,11 +79,18 @@ public class DefaultLegend extends FlowPane implements Legend {
     }
 
     public final ObservableList<LegendItem> getItems() {
-        return items.get();
+        return items;
+    }
+
+    public final void setItems(List<LegendItem> items) {
+        // TODO: remove after changing unit tests
+        this.items.setAll(items);
     }
 
     public LegendItem getNewLegendItem(final Renderer renderer, final DataSet series, final int seriesIndex) {
-        final Canvas symbol = renderer.drawLegendSymbol(series, seriesIndex, SYMBOL_WIDTH, SYMBOL_HEIGHT);
+        final Canvas symbol = renderer.drawLegendSymbol(series, seriesIndex,
+                (int) Math.round(getSymbolWidth()),
+                (int) Math.round(getSymbolHeight()));
         var item = new LegendItem(series.getName(), symbol);
         item.setOnMouseClicked(event -> series.setVisible(!series.isVisible()));
         Runnable updateCss = () -> item.pseudoClassStateChanged(disabledClass, !series.isVisible());
@@ -143,15 +118,7 @@ public class DefaultLegend extends FlowPane implements Legend {
      */
     @Override
     public final boolean isVertical() {
-        return verticalProperty().get();
-    }
-
-    public final ObjectProperty<ObservableList<LegendItem>> itemsProperty() {
-        return items;
-    }
-
-    public final void setItems(final ObservableList<LegendItem> value) {
-        itemsProperty().set(value);
+        return getOrientation() == Orientation.VERTICAL;
     }
 
     /*
@@ -160,8 +127,8 @@ public class DefaultLegend extends FlowPane implements Legend {
      * @see io.fair_acc.chartfx.legend.Legend#setVertical(boolean)
      */
     @Override
-    public final void setVertical(final boolean value) {
-        verticalProperty().set(value);
+    public final void setVertical(final boolean vertical) {
+        setOrientation(vertical ? Orientation.VERTICAL : Orientation.HORIZONTAL);
     }
 
     /*
@@ -239,19 +206,60 @@ public class DefaultLegend extends FlowPane implements Legend {
         }
     }
 
-    public final BooleanProperty verticalProperty() {
-        return vertical;
+    public Side getSide() {
+        return side.get();
     }
+
+    public StyleableObjectProperty<Side> sideProperty() {
+        return side;
+    }
+
+    public void setSide(Side side) {
+        this.side.set(side);
+    }
+
+    public double getSymbolWidth() {
+        return symbolWidth.get();
+    }
+
+    public StyleableDoubleProperty symbolWidthProperty() {
+        return symbolWidth;
+    }
+
+    public void setSymbolWidth(double symbolWidth) {
+        this.symbolWidth.set(symbolWidth);
+    }
+
+    public double getSymbolHeight() {
+        return symbolHeight.get();
+    }
+
+    public StyleableDoubleProperty symbolHeightProperty() {
+        return symbolHeight;
+    }
+
+    public void setSymbolHeight(double symbolHeight) {
+        this.symbolHeight.set(symbolHeight);
+    }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return getClassCssMetaData();
+    }
+
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return CSS.getCssMetaData();
+    }
+
+    private static final CssPropertyFactory<DefaultLegend> CSS = new CssPropertyFactory<>(FlowPane.getClassCssMetaData());
 
     /**
      * A item to be displayed on a Legend
      */
     public static class LegendItem extends Label {
         public LegendItem(final String text, final Node symbol) {
+            StyleUtil.addStyles(this, "chart-legend-item");
             setText(text);
-            getStyleClass().add("chart-legend-item");
-            setAlignment(Pos.CENTER_LEFT);
-            setContentDisplay(ContentDisplay.LEFT);
             setSymbol(symbol);
         }
 
