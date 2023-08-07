@@ -194,6 +194,9 @@
   -fx-stroke-width: 1;
 }
 
+.grid-renderer {
+  -fx-draw-grid-on-top: true;
+}
 .grid-renderer .chart-major-grid-lines {
   -fx-stroke: derive(-fx-background, -10%);
   -fx-stroke-dash-array: 4.5, 2.5;
@@ -208,9 +211,6 @@
   -fx-stroke-dash-array: 4.5, 2.5;
   -fx-stroke-width: 0.5;
   visibility: hidden;
-}
-.grid-renderer .chart-grid-line-on-top {
-  visibility: visible; /* 'visible' for front, 'hidden' for back */
 }
 .grid-renderer .chart-major-vertical-lines .chart-major-grid-lines {
   /* use this to override v-specific settings */

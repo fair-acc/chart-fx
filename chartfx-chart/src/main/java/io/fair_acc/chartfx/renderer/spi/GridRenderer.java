@@ -4,13 +4,17 @@ import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
 
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.StyleGroup;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.CssMetaData;
 import javafx.css.PseudoClass;
+import javafx.css.Styleable;
+import javafx.css.StyleableBooleanProperty;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -45,7 +49,7 @@ public class GridRenderer extends Parent implements Renderer {
     private final LineStyle verMajorGridStyleNode = styles.newLineStyle(STYLE_CLASS_MAJOR_GRID_LINE, STYLE_CLASS_MAJOR_GRID_LINE_V);
     private final LineStyle horMinorGridStyleNode = styles.newLineStyle(STYLE_CLASS_MINOR_GRID_LINE, STYLE_CLASS_MINOR_GRID_LINE_H);
     private final LineStyle verMinorGridStyleNode = styles.newLineStyle(STYLE_CLASS_MINOR_GRID_LINE, STYLE_CLASS_MINOR_GRID_LINE_V);
-    private final LineStyle drawGridOnTopNode = styles.newLineStyle(STYLE_CLASS_GRID_ON_TOP);
+    private final StyleableBooleanProperty drawGridOnTop = CSS.createBooleanProperty(this, "drawGridOnTop", true);
 
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
 
@@ -121,7 +125,7 @@ public class GridRenderer extends Parent implements Renderer {
      * @return drawOnTop property
      */
     public final BooleanProperty drawOnTopProperty() {
-        return drawGridOnTopNode.visibleProperty();
+        return drawGridOnTop;
     }
 
     protected void drawPolarCircle(final GraphicsContext gc, final Axis yAxis, final double yRange,
@@ -340,7 +344,7 @@ public class GridRenderer extends Parent implements Renderer {
      * @return drawOnTop state
      */
     public final boolean isDrawOnTop() {
-        return drawGridOnTopNode.isVisible();
+        return drawOnTopProperty().get();
     }
 
     @Override
@@ -367,7 +371,7 @@ public class GridRenderer extends Parent implements Renderer {
      * @param state true: draw on top
      */
     public final void setDrawOnTop(boolean state) {
-        drawGridOnTopNode.setVisible(state);
+        drawOnTopProperty().set(state);
     }
 
     @Override
@@ -402,6 +406,17 @@ public class GridRenderer extends Parent implements Renderer {
     public final BooleanProperty verticalMinorGridLinesVisibleProperty() {
         return verMinorGridStyleNode.visibleProperty();
     }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return getClassCssMetaData();
+    }
+
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return CSS.getCssMetaData();
+    }
+
+    private static final CssPropertyFactory<GridRenderer> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
 
     protected static void applyGraphicsStyleFromLineStyle(final GraphicsContext gc, final LineStyle style) {
         style.copyStyleTo(gc);

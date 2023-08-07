@@ -261,6 +261,7 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 
   $DEFAULT_GRID_DASH_PATTERN: 4.5, 2.5;
   $DEFAULT_LINE_WIDTH: 0.5;
+  -fx-draw-grid-on-top: true;
 
   .chart-major-grid-lines {
     -fx-stroke: derive(-fx-background, -10%);
@@ -280,10 +281,6 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     -fx-stroke-dash-array: $DEFAULT_GRID_DASH_PATTERN;
     -fx-stroke-width: $DEFAULT_LINE_WIDTH;
     visibility: hidden;
-  }
-
-  .chart-grid-line-on-top {
-    visibility: visible; /* 'visible' for front, 'hidden' for back */
   }
 
   .chart-major-vertical-lines .chart-major-grid-lines {
