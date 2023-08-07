@@ -33,7 +33,7 @@ public class PaddedAutoGrowAxisSample extends ChartSample {
         yAxis.setAutoRangePadding(0.05);
         yAxis.setAutoRanging(false);
         yAxis.setAutoGrowRanging(true);
-        yAxis.set(0, 10);
+        yAxis.getAutoRange().set(0, 10);
 
         var ds = new CircularDoubleErrorDataSet("", 150);
         chart.getDatasets().addAll(ds);
@@ -43,8 +43,7 @@ public class PaddedAutoGrowAxisSample extends ChartSample {
                 try {
                     TimeUnit.MILLISECONDS.sleep(100);
                     FXUtils.runAndWait(() -> {
-                        yAxis.set(0, 10);
-                        yAxis.getAutoRange().clear();
+                        yAxis.getAutoRange().set(0, 10);
                     });
                     TimeUnit.MILLISECONDS.sleep(100);
                 } catch (Exception e) {
