@@ -122,6 +122,12 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 .chart {
   .chart-measurement-pane {
     .chart-title-pane, .chart-legend-pane {
+      .chart-title {
+      }
+      .chart-legend {
+        .chart-legend-item {
+        }
+      }
       .chart-content {
         .axis {
           .axis-tick-mark {
@@ -172,8 +178,6 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 .chart {
   // TODO: they don't seem to work and maybe we should create panes with a side property? deprecate these?
   -fx-tool-bar-side: TOP;
-  -fx-legend-side: BOTTOM;
-  -fx-legend-visibility: true;
 
   .chart-content {
     // leave some top-axis overdraw-padding if there is no title
@@ -191,6 +195,23 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 
     &:right {
       -fx-rotate: 90;
+    }
+
+  }
+
+  .chart-legend {
+    visibility: visible;
+    -fx-orientation: horizontal;
+    -fx-side: bottom;
+    -fx-vgap: 5px;
+    -fx-hgap: 5px;
+    -fx-alignment: center;
+    -fx-symbol-width: 20;
+    -fx-symbol-height: 20;
+
+    .chart-legend-item {
+      -fx-alignment: center-left;
+      -fx-content-display: left;
     }
 
   }

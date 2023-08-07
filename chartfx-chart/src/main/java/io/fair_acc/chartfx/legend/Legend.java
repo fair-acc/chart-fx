@@ -3,12 +3,17 @@ package io.fair_acc.chartfx.legend;
 import java.util.List;
 
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.DataSet;
 import javafx.scene.Node;
 
 public interface Legend {
 
     Node getNode();
+
+    Side getSide();
+
+    void setSide(Side side);
 
     boolean isVertical();
 

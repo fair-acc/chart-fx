@@ -91,7 +91,8 @@ public class XYChart extends Chart {
                 gridRenderer.getHorizontalMajorGrid().changeCounterProperty(),
                 gridRenderer.getHorizontalMinorGrid().changeCounterProperty(),
                 gridRenderer.getVerticalMajorGrid().changeCounterProperty(),
-                gridRenderer.getVerticalMinorGrid().changeCounterProperty());
+                gridRenderer.getVerticalMinorGrid().changeCounterProperty(),
+                gridRenderer.drawOnTopProperty());
 
         this.setAnimated(false);
         getRenderers().addListener(this::rendererChanged);

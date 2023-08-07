@@ -58,7 +58,7 @@ public class SimpleChartSample extends ChartSample {
 
         // TODO: fix legend layouting, for now works only for top and is not really nice
         chart.setLegendVisible(true);
-        chart.setLegendSide(Side.TOP);
+        chart.getLegend().setSide(Side.TOP);
 
         return new StackPane(chart);
     }

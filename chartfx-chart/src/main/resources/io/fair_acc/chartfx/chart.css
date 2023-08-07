@@ -132,8 +132,6 @@
 
 .chart {
   -fx-tool-bar-side: TOP;
-  -fx-legend-side: BOTTOM;
-  -fx-legend-visibility: true;
 }
 .chart .chart-content {
   -fx-padding: 5 0 0 0px;
@@ -148,6 +146,20 @@
 }
 .chart .chart-title:right {
   -fx-rotate: 90;
+}
+.chart .chart-legend {
+  visibility: visible;
+  -fx-orientation: horizontal;
+  -fx-side: bottom;
+  -fx-vgap: 5px;
+  -fx-hgap: 5px;
+  -fx-alignment: center;
+  -fx-symbol-width: 20;
+  -fx-symbol-height: 20;
+}
+.chart .chart-legend .chart-legend-item {
+  -fx-alignment: center-left;
+  -fx-content-display: left;
 }
 
 .axis {
