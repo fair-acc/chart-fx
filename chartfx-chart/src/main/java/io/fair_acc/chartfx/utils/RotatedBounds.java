@@ -1,7 +1,7 @@
 package io.fair_acc.chartfx.utils;
 
 /**
- * Utility class for rotating bounds
+ * Utility class for rotating bounding boxes.
  *
  * @author ennerf
  */
@@ -22,7 +22,7 @@ public class RotatedBounds {
     }
 
     /**
-     * Applies a 2D rotation around the center point.
+     * Applies a 2D rotation around the center point of the current bounding box.
      * See <a href="https://en.wikipedia.org/wiki/Rotation_matrix">Rotation Matrix</a>
      *
      * @param rotate angle in degrees
@@ -34,9 +34,11 @@ public class RotatedBounds {
             var cos = Math.abs(Math.cos(rot));
             var sin = Math.abs(Math.sin(rot));
 
+            // 2D rotation matrix applied to width/height
             var rotWidth = width * cos + height * sin;
             var rotHeight = width * sin + height * cos;
 
+            // Translate the origin to the new center position
             var rotX = x - (rotWidth - width) / 2;
             var rotY = y - (rotHeight - height) / 2;
 

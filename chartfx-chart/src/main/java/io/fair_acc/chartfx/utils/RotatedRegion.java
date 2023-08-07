@@ -7,6 +7,9 @@ import java.util.function.DoubleUnaryOperator;
 /**
  * Utility class for working with rotating regions/controls that are
  * inside layout containers that do not properly account for rotations.
+ * <p>
+ * Note: it currently works with our custom layout panes, but not
+ * with some built-in ones that do not call resizeRelocate.
  *
  * @author ennerf
  */
