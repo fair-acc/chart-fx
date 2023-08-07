@@ -5,6 +5,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
+import io.fair_acc.chartfx.XYChart;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -31,30 +32,27 @@ public class TimeAxisRangeSample extends ChartSample {
     @Override
     public Node getChartPanel(final Stage primaryStage) {
         final double now = System.currentTimeMillis() / 1000.0; // [s]
-        final VBox root = new VBox();
-        root.setAlignment(Pos.CENTER);
+        var root = new XYChart();
 
         final TimeAxis xAxis1 = new TimeAxis("standard time axis", now - 3600, now, 3600 / 12);
-        root.getChildren().add(xAxis1);
+        root.getAxes().add(xAxis1);
 
         final TimeAxis xAxis2 = new TimeAxis("inverted time axis", now - 3600, now, 3600 / 12);
         xAxis2.invertAxis(true);
-        root.getChildren().add(xAxis2);
+        root.getAxes().add(xAxis2);
 
         final double[] ranges = { 0.1, 1.0, 10.0, 30.0, 3600.0, 3600 * 24, 3600 * 24 * 31 * 3, 3600 * 24 * 31 * 60 };
         for (double range : ranges) {
             final TimeAxis axis = new TimeAxis("time axis - range = " + range + " s", now - range, now, range / 10); // NOPMD
-            root.getChildren().add(axis);
+            root.getAxes().add(axis);
         }
 
         // example for dynamic scaling with metric prefix and unit
         final TimeAxis xAxisDyn = new TimeAxis("dynamic time axis", now - 1e-3, now, 1);
-        xAxisDyn.setMinorTickCount(10);
+        xAxisDyn.setAutoRanging(false);
         xAxisDyn.setAutoRangeRounding(false);
-        root.getChildren().add(xAxisDyn);
-
-        final Label xAxis9Text = new Label();
-        root.getChildren().add(xAxis9Text);
+        xAxisDyn.setMinorTickCount(10);
+        root.getAxes().add(xAxisDyn);
 
         final Timer timer = new Timer("sample-update-timer", true);
         final TimerTask task = new TimerTask() {
@@ -70,12 +68,11 @@ public class TimeAxisRangeSample extends ChartSample {
                 }
                 Platform.runLater(() -> {
                     final double range = DefaultTimeTickUnitSupplier.TICK_UNIT_DEFAULTS[counter];
-                    xAxisDyn.minProperty().set(now - range);
+                    xAxisDyn.setMin(now - range);
                     final String text = "actual range [s]: " + String.format("%#.3f", range) + " ("
                                       + String.format("%#.1f", range / 3600 / 24) + " days)";
                     xAxisDyn.setTickUnit(range / 12);
-                    xAxisDyn.forceRedraw();
-                    xAxis9Text.setText(text);
+                    xAxisDyn.setName(text);
                 });
                 if (counter >= DefaultTimeTickUnitSupplier.TICK_UNIT_DEFAULTS.length - 1 || counter <= 0) {
                     directionUpwards = !directionUpwards;
