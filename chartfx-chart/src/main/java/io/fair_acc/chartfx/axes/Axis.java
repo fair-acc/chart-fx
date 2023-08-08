@@ -2,6 +2,8 @@ package io.fair_acc.chartfx.axes;
 
 import java.util.List;
 
+import io.fair_acc.chartfx.ui.css.LineStyle;
+import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.dataset.events.BitState;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -112,17 +114,27 @@ public interface Axis extends AxisDescription {
      */
     Side getSide();
 
-    /**
-     * @return the fill for all tick labels
-     */
-    Paint getTickLabelFill();
-
-    /**
-     * @return the font for all tick labels
-     */
-    Font getTickLabelFont();
-
     StringConverter<Number> getTickLabelFormatter();
+
+    /**
+     * @return the style for the axis label
+     */
+    TextStyle getAxisLabel();
+
+    /**
+     * @return the style for all tick labels
+     */
+    TextStyle getTickLabelStyle();
+
+    /**
+     * @return the style for all major tick marks
+     */
+    LineStyle getMajorTickStyle();
+
+    /**
+     * @return the style for all minor tick marks
+     */
+    LineStyle getMinorTickStyle();
 
     /**
      * @return the gap between the tick mark lines and the chart canvas

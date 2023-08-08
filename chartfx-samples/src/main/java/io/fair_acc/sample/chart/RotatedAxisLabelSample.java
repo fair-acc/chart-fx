@@ -45,7 +45,7 @@ public class RotatedAxisLabelSample extends ChartSample {
 
             final DefaultNumericAxis yAxis1 = getSynchedAxis(yAxis0, "y-axis (-90°, " + policy + ")");
             yAxis1.setSide(Side.LEFT);
-            yAxis1.setTickLabelRotation(-90);
+            yAxis1.getTickLabelStyle().setRotate(-90);
             yAxis1.setOverlapPolicy(policy);
 
             chart.getAxes().addAll(xAxis1, yAxis1);
@@ -58,7 +58,7 @@ public class RotatedAxisLabelSample extends ChartSample {
 
                 final DefaultNumericAxis yAxis2 = getSynchedAxis(yAxis0, "y-axis (-90°, " + policy + ") + extra label spacing");
                 yAxis2.setSide(Side.LEFT);
-                yAxis2.setTickLabelRotation(-90);
+                yAxis2.getTickLabelStyle().setRotate(-90);
                 yAxis2.setOverlapPolicy(policy);
                 yAxis2.setTickLabelSpacing(10);
 
@@ -69,13 +69,13 @@ public class RotatedAxisLabelSample extends ChartSample {
         final DefaultNumericAxis xAxis1 = getSynchedAxis(xAxis0, "x-axis (45°)");
         xAxis1.setSide(Side.BOTTOM);
         xAxis1.setOverlapPolicy(AxisLabelOverlapPolicy.DO_NOTHING);
-        xAxis1.setTickLabelRotation(45);
+        xAxis1.getTickLabelStyle().setRotate(45);
         xAxis1.setMaxMajorTickLabelCount(40);
 
         final DefaultNumericAxis xAxis2 = getSynchedAxis(xAxis0, "x-axis (90°)");
         xAxis2.setSide(Side.BOTTOM);
         xAxis2.setOverlapPolicy(AxisLabelOverlapPolicy.DO_NOTHING);
-        xAxis2.setTickLabelRotation(90);
+        xAxis2.getTickLabelStyle().setRotate(90);
         xAxis2.setMaxMajorTickLabelCount(40);
 
         chart.getAxes().addAll(xAxis1, xAxis2);
@@ -83,7 +83,7 @@ public class RotatedAxisLabelSample extends ChartSample {
         final DefaultNumericAxis yAxis1 = getSynchedAxis(yAxis0, "y-axis (-45°)");
         yAxis1.setSide(Side.LEFT);
         yAxis1.setOverlapPolicy(AxisLabelOverlapPolicy.DO_NOTHING);
-        yAxis1.setTickLabelRotation(-45);
+        yAxis1.getTickLabelStyle().setRotate(-45);
 
         chart.getAxes().addAll(yAxis1);
 
@@ -100,8 +100,7 @@ public class RotatedAxisLabelSample extends ChartSample {
         final DefaultNumericAxis axis = new DefaultNumericAxis(newAxisName);
         axis.minProperty().bind(orig.minProperty());
         axis.maxProperty().bind(orig.maxProperty());
-        axis.setTickLabelRotation(orig.getTickLabelRotation());
-
+        axis.getTickLabelStyle().setRotate(orig.getTickLabelStyle().getRotate());
         return axis;
     }
 

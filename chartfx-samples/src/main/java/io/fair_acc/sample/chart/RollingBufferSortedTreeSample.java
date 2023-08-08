@@ -146,7 +146,7 @@ public class RollingBufferSortedTreeSample extends ChartSample {
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("time");
         xAxis1.setAutoRangeRounding(false);
-        xAxis1.setTickLabelRotation(45);
+        xAxis1.getTickLabelStyle().setRotate(45);
         xAxis1.invertAxis(false);
         xAxis1.setTimeAxis(true);
         final DefaultNumericAxis yAxis1 = new DefaultNumericAxis("beam intensity", "ppp");

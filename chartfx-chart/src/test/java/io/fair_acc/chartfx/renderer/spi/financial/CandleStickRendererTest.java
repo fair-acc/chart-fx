@@ -86,7 +86,7 @@ public class CandleStickRendererTest {
     @TestFx
     public void categoryAxisTest() {
         final CategoryAxis xAxis = new CategoryAxis("time [iso]");
-        xAxis.setTickLabelRotation(90);
+        xAxis.getTickLabelStyle().setRotate(90);
         xAxis.setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
         ohlcvDataSet.setCategoryBased(true);
 

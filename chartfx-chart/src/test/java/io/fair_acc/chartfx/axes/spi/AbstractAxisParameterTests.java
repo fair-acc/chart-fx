@@ -231,11 +231,6 @@ class AbstractAxisParameterTests {
         assertEquals(0.2, axis.getAxisCenterPosition());
         axis.setAxisCenterPosition(0.5);
 
-        assertEquals(TextAlignment.CENTER, axis.getAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
-        axis.setAxisLabelTextAlignment(TextAlignment.LEFT);
-        assertEquals(TextAlignment.LEFT, axis.getAxisLabelTextAlignment()); //TODO: rename function w.r.t. setter
-        axis.setAxisLabelTextAlignment(TextAlignment.CENTER);
-
         axis.setAxisLabelGap(5);
         assertEquals(5, axis.getAxisLabelGap());
 
@@ -248,11 +243,11 @@ class AbstractAxisParameterTests {
         AbstractAxisParameter axis = new EmptyAbstractAxisParameter();
         axis.set(0.0, 10.0);
 
-        axis.setTickLabelFill(Color.RED);
-        assertEquals(Color.RED, axis.getTickLabelFill());
+        axis.getTickLabelStyle().setFill(Color.RED);
+        assertEquals(Color.RED, axis.getTickLabelStyle().getFill());
 
         final Font font = Font.font("System", 10);
-        axis.setTickLabelFont(font);
+        axis.getTickLabelStyle().setFont(font);
         assertEquals(font, axis.getTickLabelFont());
 
         StringConverter<Number> myConverter = new StringConverter<>() {
@@ -275,13 +270,13 @@ class AbstractAxisParameterTests {
         axis.setTickLabelSpacing(5);
         assertEquals(5, axis.getTickLabelSpacing());
 
-        axis.setTickLabelRotation(10);
+        axis.getTickLabelStyle().setRotate(10);
         assertEquals(10, axis.getTickLabelRotation());
 
         assertTrue(axis.isTickLabelsVisible());
-        axis.setTickLabelsVisible(false);
+        axis.getTickLabelStyle().setVisible(false);
         assertFalse(axis.isTickLabelsVisible());
-        axis.setTickLabelsVisible(true);
+        axis.getTickLabelStyle().setVisible(true);
     }
 
     @Test
@@ -316,17 +311,17 @@ class AbstractAxisParameterTests {
         assertEquals(20, axis.getMinorTickLength());
 
         assertTrue(axis.isMinorTickVisible());
-        axis.setMinorTickVisible(false);
+        axis.getMinorTickStyle().setVisible(false);
         assertFalse(axis.isMinorTickVisible());
-        axis.setMinorTickVisible(true);
+        axis.getMinorTickStyle().setVisible(true);
 
         axis.setTickLength(20);
         assertEquals(20, axis.getTickLength());
 
         assertTrue(axis.isTickMarkVisible());
-        axis.setTickMarkVisible(false);
+        axis.getMajorTickStyle().setVisible(false);
         assertFalse(axis.isTickMarkVisible());
-        axis.setTickMarkVisible(true);
+        axis.getMajorTickStyle().setVisible(true);
 
         assertNotNull(axis.getTickMarks());
         assertNotNull(axis.getTickMarkValues());

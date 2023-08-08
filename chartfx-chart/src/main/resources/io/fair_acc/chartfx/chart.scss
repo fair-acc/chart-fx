@@ -130,7 +130,7 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
       }
       .chart-content {
         .axis {
-          .axis-tick-mark {
+          .axis-major-tick-mark {
           }
           .axis-minor-tick-mark {
           }
@@ -228,6 +228,10 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   -fx-auto-grow-ranging: false; // range updates, but won't shrink
   -fx-auto-range-rounding: false; // auto range w/ rounding
 
+  -fx-auto-range-padding: 0;
+  -fx-auto-unit-scaling: false;
+  -fx-invert-axis: false;
+
   // Tick spacing (along the width on horizontal axes)
   -fx-axis-center-position: 0.5; // only for centered axes: relative position of the center line
   -fx-overlap-policy: SKIP_ALT; // DO_NOTHING, SKIP_ALT, NARROW_FONT, SHIFT_ALT, FORCED_SHIFT_ALT
@@ -266,11 +270,12 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   }
 
   .axis-tick-label {
+    -fx-fill: black;
     -fx-text-alignment: $null;
     -fx-font-size: 10px;
   }
 
-  .axis-tick-mark, .axis-minor-tick-mark {
+  .axis-major-tick-mark, .axis-minor-tick-mark {
     visibility: visible;
     -fx-stroke: #c3c3c3ff;
     -fx-stroke-width: 1.0;

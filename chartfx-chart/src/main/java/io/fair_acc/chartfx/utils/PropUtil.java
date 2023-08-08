@@ -62,6 +62,11 @@ public class PropUtil {
         return prop;
     }
 
+    public static void initAndRunOnChange(Runnable action, ObservableValue<?>... conditions) {
+        action.run();
+        runOnChange(action, conditions);
+    }
+
     /**
      * subscribes to property changes without requiring value boxing
      */
