@@ -108,7 +108,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
                     yAxis.setAutoRanging(false);
                     yAxis.setMin(zRangeMin);
                     yAxis.setMax(max);
-                    yAxis.setTickUnit(Math.abs(max - zRangeMin) / 10.0);
+                    yAxis.setUserTickUnit(Math.abs(max - zRangeMin) / 10.0);
                     yAxis.forceRedraw();
                 }
                 yAxis.setAutoRanging(autoRange);
