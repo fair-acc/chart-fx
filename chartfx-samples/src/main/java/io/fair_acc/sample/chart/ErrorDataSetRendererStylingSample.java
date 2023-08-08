@@ -195,7 +195,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         final CheckBox gridVisibleX = new CheckBox("");
         gridVisibleX.setSelected(true);
-        chart.horizontalGridLinesVisibleProperty().bindBidirectional(gridVisibleX.selectedProperty());
+        chart.getGridRenderer().getHorizontalMajorGrid().visibleProperty().bindBidirectional(gridVisibleX.selectedProperty());
         pane.addToParameterPane("Show X-Grid: ", gridVisibleX);
 
         final CheckBox gridVisibleXMinor = new CheckBox("");
@@ -205,7 +205,7 @@ public class ErrorDataSetRendererStylingSample extends Application {
 
         final CheckBox gridVisibleY = new CheckBox("");
         gridVisibleY.setSelected(true);
-        chart.verticalGridLinesVisibleProperty().bindBidirectional(gridVisibleY.selectedProperty());
+        chart.getGridRenderer().getVerticalMajorGrid().visibleProperty().bindBidirectional(gridVisibleY.selectedProperty());
         pane.addToParameterPane("Show Y-Grid: ", gridVisibleY);
 
         final CheckBox gridVisibleYMinor = new CheckBox("");
