@@ -162,39 +162,12 @@ public class XYChart extends Chart {
     }
 
     /**
-     * Indicates whether horizontal grid lines are visible or not.
-     *
-     * @return horizontalGridLinesVisible property
-     */
-    public final BooleanProperty horizontalGridLinesVisibleProperty() {
-        return gridRenderer.horizontalGridLinesVisibleProperty();
-    }
-
-    /**
-     * Indicates whether horizontal grid lines are visible.
-     *
-     * @return {@code true} if horizontal grid lines are visible else {@code false}.
-     */
-    public final boolean isHorizontalGridLinesVisible() {
-        return horizontalGridLinesVisibleProperty().get();
-    }
-
-    /**
      * whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
      *
      * @return true if renderer is plotting in polar coordinates
      */
     public final boolean isPolarPlot() {
         return polarPlotProperty().get();
-    }
-
-    /**
-     * Indicates whether vertical grid lines are visible.
-     *
-     * @return {@code true} if vertical grid lines are visible else {@code false}.
-     */
-    public final boolean isVerticalGridLinesVisible() {
-        return verticalGridLinesVisibleProperty().get();
     }
 
     /**
@@ -211,15 +184,6 @@ public class XYChart extends Chart {
     }
 
     /**
-     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
-     *
-     * @param value {@code true} to make vertical lines visible
-     */
-    public final void setHorizontalGridLinesVisible(final boolean value) {
-        horizontalGridLinesVisibleProperty().set(value);
-    }
-
-    /**
      * Sets whether renderer should use polar coordinates (x -&gt; interpreted as phi, y as radial coordinate)
      *
      * @param state true if renderer is parallelising sub-functionalities
@@ -232,15 +196,6 @@ public class XYChart extends Chart {
 
     public void setPolarStepSize(final PolarTickStep step) {
         polarStepSizeProperty().set(step);
-    }
-
-    /**
-     * Sets the value of the {@link #verticalGridLinesVisibleProperty()}.
-     *
-     * @param value {@code true} to make vertical lines visible
-     */
-    public final void setVerticalGridLinesVisible(final boolean value) {
-        verticalGridLinesVisibleProperty().set(value);
     }
 
     @Override
@@ -260,15 +215,6 @@ public class XYChart extends Chart {
         // Update each of the axes
         getAxes().forEach(chartAxis -> updateNumericAxis(chartAxis, getDataSetForAxis(chartAxis)));
 
-    }
-
-    /**
-     * Indicates whether vertical grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty verticalGridLinesVisibleProperty() {
-        return gridRenderer.verticalGridLinesVisibleProperty();
     }
 
     private boolean isDataEmpty() {

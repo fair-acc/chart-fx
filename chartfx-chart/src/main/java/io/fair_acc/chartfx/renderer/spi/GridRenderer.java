@@ -119,15 +119,6 @@ public class GridRenderer extends Parent implements Renderer {
         return null;
     }
 
-    /**
-     * Indicates whether grid lines should be drawn on top or beneath graphs
-     *
-     * @return drawOnTop property
-     */
-    public final BooleanProperty drawOnTopProperty() {
-        return drawGridOnTop;
-    }
-
     protected void drawPolarCircle(final GraphicsContext gc, final Axis yAxis, final double yRange,
             final double xCentre, final double yCentre, final double maxRadius) {
         if (!horMajorGridStyleNode.isVisible() && !horMinorGridStyleNode.isVisible()) {
@@ -321,21 +312,12 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     /**
-     * Indicates whether horizontal major grid lines are visible or not.
+     * Indicates whether grid lines should be drawn on top or beneath graphs
      *
-     * @return verticalGridLinesVisible property
+     * @param state true: draw on top
      */
-    public final BooleanProperty horizontalGridLinesVisibleProperty() {
-        return horMajorGridStyleNode.visibleProperty();
-    }
-
-    /**
-     * Indicates whether horizontal minor grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty horizontalMinorGridLinesVisibleProperty() {
-        return horMinorGridStyleNode.visibleProperty();
+    public final void setDrawOnTop(boolean state) {
+        drawOnTopProperty().set(state);
     }
 
     /**
@@ -345,6 +327,15 @@ public class GridRenderer extends Parent implements Renderer {
      */
     public final boolean isDrawOnTop() {
         return drawOnTopProperty().get();
+    }
+
+    /**
+     * Indicates whether grid lines should be drawn on top or beneath graphs
+     *
+     * @return drawOnTop property
+     */
+    public final BooleanProperty drawOnTopProperty() {
+        return drawGridOnTop;
     }
 
     @Override
@@ -365,15 +356,6 @@ public class GridRenderer extends Parent implements Renderer {
         return Collections.emptyList();
     }
 
-    /**
-     * Indicates whether grid lines should be drawn on top or beneath graphs
-     *
-     * @param state true: draw on top
-     */
-    public final void setDrawOnTop(boolean state) {
-        drawOnTopProperty().set(state);
-    }
-
     @Override
     public Renderer setShowInLegend(final boolean state) {
         return this;
@@ -387,24 +369,6 @@ public class GridRenderer extends Parent implements Renderer {
     @Override
     public BooleanProperty showInLegendProperty() {
         return null;
-    }
-
-    /**
-     * Indicates whether vertical major grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty verticalGridLinesVisibleProperty() {
-        return verMajorGridStyleNode.visibleProperty();
-    }
-
-    /**
-     * Indicates whether vertical minor grid lines are visible or not.
-     *
-     * @return verticalGridLinesVisible property
-     */
-    public final BooleanProperty verticalMinorGridLinesVisibleProperty() {
-        return verMinorGridStyleNode.visibleProperty();
     }
 
     @Override
