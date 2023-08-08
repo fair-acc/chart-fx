@@ -216,6 +216,17 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 
   }
 
+  .renderer {
+    // abstract renderer
+    -fx-show-in-legend: true;
+
+    // point reducing renderers
+    -fx-assume-sorted-data: true;
+    -fx-min-required-reduction-size: 5;
+    -fx-parallel-implementation: true;
+    -fx-point-reduction: true;
+  }
+
 }
 
 // Axis styles

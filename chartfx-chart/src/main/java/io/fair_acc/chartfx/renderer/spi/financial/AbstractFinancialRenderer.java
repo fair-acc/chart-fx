@@ -12,7 +12,7 @@ import javafx.scene.paint.Paint;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.renderer.spi.AbstractDataSetManagement;
+import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.PaintBarMarker;
 import io.fair_acc.dataset.DataSet;
@@ -30,7 +30,7 @@ import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
  * @author afischer
  */
 @SuppressWarnings({ "PMD.ExcessiveParameterList" })
-public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractDataSetManagement<R> implements Renderer {
+public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractRenderer<R> implements Renderer {
     protected PaintBarMarker paintBarMarker;
 
     private final BooleanProperty computeLocalYRange = new SimpleBooleanProperty(this, "computeLocalYRange", true);

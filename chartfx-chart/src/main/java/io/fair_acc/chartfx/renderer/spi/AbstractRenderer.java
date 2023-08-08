@@ -1,9 +1,16 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.events.ChartBits;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableBooleanProperty;
 import javafx.geometry.Orientation;
 
 import io.fair_acc.chartfx.XYChart;
@@ -15,16 +22,26 @@ import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
+import javafx.scene.Parent;
+
+import java.util.List;
+import java.util.function.IntSupplier;
 
 /**
  * @author rstein
  * @param <R> renderer generics
  */
-public abstract class AbstractDataSetManagement<R extends Renderer> implements Renderer {
-    private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
-    protected final BooleanProperty showInLegend = new SimpleBooleanProperty(this, "showInLegend", true);
+public abstract class AbstractRenderer<R extends Renderer> extends Parent implements Renderer {
 
+    protected final StyleableBooleanProperty showInLegend = CSS.createBooleanProperty(this, "showInLegend", true, this::invalidateCanvas);
+    private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
+    private final ObjectProperty<Chart> chart = new SimpleObjectProperty<>();
+
+    public AbstractRenderer() {
+        StyleUtil.addStyles(this, "renderer");
+        PropUtil.runOnChange(() -> fireInvalidated(ChartBits.ChartLegend), showInLegend);
+    }
 
     @Override
     public ObservableList<Axis> getAxes() {
@@ -102,6 +119,18 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
      */
     protected abstract R getThis();
 
+    public Chart getChart() {
+        return chart.get();
+    }
+
+    public ObjectProperty<Chart> chartProperty() {
+        return chart;
+    }
+
+    public void setChart(Chart chart) {
+        this.chart.set(chart);
+    }
+
     /**
      * Sets whether DataSets attached to this renderer shall be shown in the legend
      *
@@ -133,4 +162,37 @@ public abstract class AbstractDataSetManagement<R extends Renderer> implements R
     public final BooleanProperty showInLegendProperty() {
         return showInLegend;
     }
+
+    /**
+     * @param prop property that causes the canvas to invalidate
+     * @return property
+     * @param <T> any type of property
+     */
+    protected <T extends Property<?>> T registerCanvasProp(T prop){
+        PropUtil.runOnChange(this::invalidateCanvas, prop);
+        return prop;
+    }
+
+    protected void invalidateCanvas() {
+        fireInvalidated(ChartBits.ChartCanvas);
+    }
+
+    protected void fireInvalidated(IntSupplier bit) {
+        var chart = getChart();
+        if (chart != null) {
+           chart.fireInvalidated(bit);
+        }
+    }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return getClassCssMetaData();
+    }
+
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return CSS.getCssMetaData();
+    }
+
+    private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
+
 }

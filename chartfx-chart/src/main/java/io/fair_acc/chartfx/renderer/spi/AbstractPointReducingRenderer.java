@@ -1,25 +1,28 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
 
-public abstract class AbstractPointReductionManagment<R extends AbstractPointReductionManagment<R>>
-        extends AbstractDataSetManagement<R> {
-    private final ReadOnlyBooleanWrapper actualPointReduction = new ReadOnlyBooleanWrapper(this, "actualPointReduction",
-            true);
-    private final BooleanProperty assumeSortedData = new SimpleBooleanProperty(this, "assumeSortedData", true);
-    private final IntegerProperty minRequiredReductionSize = new SimpleIntegerProperty(this, "minRequiredReductionSize",
-            5);
-    private final BooleanProperty parallelImplementation = new SimpleBooleanProperty(this, "parallelImplementation",
-            true);
-    private final BooleanProperty pointReduction = new SimpleBooleanProperty(this, "pointReduction", true);
+import java.util.List;
 
-    public AbstractPointReductionManagment() {
+public abstract class AbstractPointReducingRenderer<R extends AbstractPointReducingRenderer<R>>
+        extends AbstractRenderer<R> {
+    private final ReadOnlyBooleanWrapper actualPointReduction = registerCanvasProp(new ReadOnlyBooleanWrapper(this, "actualPointReduction",
+            true));
+    private final BooleanProperty assumeSortedData = CSS.createBooleanProperty(this, "assumeSortedData", true);
+    private final IntegerProperty minRequiredReductionSize = registerCanvasProp(CSS.createIntegerProperty(this, "minRequiredReductionSize",
+            5));
+    private final BooleanProperty parallelImplementation = registerCanvasProp(CSS.createBooleanProperty(this, "parallelImplementation",
+            true));
+    private final BooleanProperty pointReduction = CSS.createBooleanProperty(this, "pointReduction", true);
+
+    public AbstractPointReducingRenderer() {
         super();
         actualPointReduction.bind(Bindings.and(pointReduction, assumeSortedData));
     }
@@ -155,4 +158,16 @@ public abstract class AbstractPointReductionManagment<R extends AbstractPointRed
         pointReduction.set(state);
         return getThis();
     }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return getClassCssMetaData();
+    }
+
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return CSS.getCssMetaData();
+    }
+
+    private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(AbstractRenderer.getClassCssMetaData());
+
 }
