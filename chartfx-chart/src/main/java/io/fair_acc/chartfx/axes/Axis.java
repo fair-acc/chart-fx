@@ -1,11 +1,6 @@
 package io.fair_acc.chartfx.axes;
 
-import java.util.List;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -149,6 +144,8 @@ public interface Axis extends AxisDescription {
     ObservableList<TickMark> getTickMarks();
 
     double getTickUnit();
+
+    double getUserTickUnit();
 
     /**
      * @return axis primary unit scaling
@@ -311,7 +308,7 @@ public interface Axis extends AxisDescription {
 
     void setSide(Side newSide);
 
-    void setTickUnit(double tickUnit);
+    void setUserTickUnit(double tickUnit);
 
     /**
      * This is {@code true} when the axis labels and data point should be plotted according to some time-axis definition
@@ -337,7 +334,9 @@ public interface Axis extends AxisDescription {
 
     ObjectProperty<Side> sideProperty();
 
-    DoubleProperty tickUnitProperty();
+    ReadOnlyDoubleProperty tickUnitProperty();
+
+    DoubleProperty userTickUnitProperty();
 
     /**
      * This is {@code true} when the axis labels and data point should be plotted according to some time-axis definition
