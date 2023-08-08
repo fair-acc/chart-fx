@@ -161,6 +161,13 @@
   -fx-alignment: center-left;
   -fx-content-display: left;
 }
+.chart .renderer {
+  -fx-show-in-legend: true;
+  -fx-assume-sorted-data: true;
+  -fx-min-required-reduction-size: 5;
+  -fx-parallel-implementation: true;
+  -fx-point-reduction: true;
+}
 
 .axis {
   -fx-border-width: 0px;

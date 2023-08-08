@@ -38,7 +38,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  *
  * Points without any label data are ignored by the renderer.
  */
-public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMarkerRenderer> implements Renderer {
+public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRenderer> implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(LabelledMarkerRenderer.class);
     private static final String STYLE_CLASS_LABELLED_MARKER = "chart-labelled-marker";
     private static final String DEFAULT_FONT = "Helvetica";
@@ -46,7 +46,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
     private static final Color DEFAULT_GRID_LINE_COLOR = Color.GREEN;
     private static final double DEFAULT_GRID_LINE_WIDTH = 1;
     private static final double[] DEFAULT_GRID_DASH_PATTERM = { 3.0, 3.0 };
-    protected final StringProperty style = new SimpleStringProperty(this, "style", null);
     protected final BooleanProperty verticalMarker = new SimpleBooleanProperty(this, "verticalMarker", true);
     protected final BooleanProperty horizontalMarker = new SimpleBooleanProperty(this, "horizontalMarker", false);
     protected Paint strokeColorMarker = LabelledMarkerRenderer.DEFAULT_GRID_LINE_COLOR;
@@ -191,10 +190,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         return getThis();
     }
 
-    public String getStyle() {
-        return styleProperty().get();
-    }
-
     @Override
     protected LabelledMarkerRenderer getThis() {
         return this;
@@ -315,15 +310,6 @@ public class LabelledMarkerRenderer extends AbstractDataSetManagement<LabelledMa
         } else {
             gc.setLineDashes(dashPattern);
         }
-    }
-
-    public LabelledMarkerRenderer setStyle(final String newStyle) {
-        styleProperty().set(newStyle);
-        return getThis();
-    }
-
-    public StringProperty styleProperty() {
-        return style;
     }
 
     public final LabelledMarkerRenderer updateCSS() {

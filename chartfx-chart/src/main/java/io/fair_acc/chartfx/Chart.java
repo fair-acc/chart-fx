@@ -5,6 +5,8 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
+import io.fair_acc.chartfx.ui.css.StyleGroup;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
@@ -132,6 +134,9 @@ public abstract class Chart extends Region implements EventSource {
     protected final ToolBarFlowPane toolBar = new ToolBarFlowPane(this);
     protected final BooleanProperty toolBarPinned = new SimpleBooleanProperty(this, "toolBarPinned", false);
 
+    // Other nodes that need to be styled via CSS
+    protected final StyleGroup styleableNodes = new StyleGroup(this, getChildren(), "chart");
+
     {
         // Build hierarchy
         // > menuPane (hidden toolbars that slide in from top/bottom)
@@ -144,7 +149,6 @@ public abstract class Chart extends Region implements EventSource {
         //           > canvas foreground
         //           > plugins
         //         > plot background/foreground
-        StyleUtil.addStyles(this, "chart");
         var canvasPane = StyleUtil.addStyles(new PlotAreaPane(canvas, canvasForeground, pluginsArea), "chart-plot-area");
         plotArea.setContent(canvasPane);
         axesAndCanvasPane.addCenter(plotBackground, plotArea, plotForeGround);
@@ -848,6 +852,13 @@ public abstract class Chart extends Region implements EventSource {
                     dataset.addListener(dataSetState);
                 }
                 renderer.getDatasets().addListener(datasetChangeListener);
+                if (renderer instanceof AbstractRenderer) {
+                    var node = (AbstractRenderer<?>) renderer;
+                    node.setChart(this);
+                    if (!styleableNodes.getChildren().contains(node)) {
+                        styleableNodes.getChildren().add(node);
+                    }
+                }
             }
 
             // handle removed renderer
@@ -856,6 +867,11 @@ public abstract class Chart extends Region implements EventSource {
                     dataset.removeListener(dataSetState);
                 }
                 renderer.getDatasets().removeListener(datasetChangeListener);
+                if (renderer instanceof AbstractRenderer) {
+                    var node = (AbstractRenderer<?>) renderer;
+                    styleableNodes.getChildren().remove(node);
+                    node.setChart(null);
+                }
             }
 
         }

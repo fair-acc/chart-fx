@@ -29,7 +29,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * 
  * @author braeun
  */
-public class ReducingLineRenderer extends AbstractDataSetManagement<ReducingLineRenderer> implements Renderer {
+public class ReducingLineRenderer extends AbstractRenderer<ReducingLineRenderer> implements Renderer {
     private int maxPoints;
 
     public ReducingLineRenderer() {
