@@ -37,7 +37,7 @@ public class ChartFxDatasetSamplerProject implements FXSamplerProject {
         pane.getChildren().add(imgView);
         Label label = new Label();
         label.setWrapText(true);
-        label.setText("Weilcome to ChartFx!\nThis library provides a wide array of facilities for high performance scientiific plotting.\n\n Explore the available chart controls by clicking on the options to the left.");
+        label.setText("Welcome to ChartFx!\nThis library provides a wide array of facilities for high performance scientific plotting.\n\n Explore the available chart controls by clicking on the options to the left.");
         label.setStyle("-fx-font-size: 1.5em; -fx-padding: 20 0 0 5;");
         vBox.getChildren().addAll(pane, label);
         return new WelcomePage("Welcome to ChartFx!", vBox);

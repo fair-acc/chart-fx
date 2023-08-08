@@ -37,7 +37,7 @@ public class ChartFxFinancialSamplerProject implements FXSamplerProject {
         pane.getChildren().add(imgView);
         Label label = new Label();
         label.setWrapText(true);
-        label.setText("Weilcome to ChartFx!\nThis library provides a wide array of facilities for high performance scientiific plotting.\n\n Explore the available chart controls by clicking on the options to the left.");
+        label.setText("Welcome to the ChartFx financial samples!\nThese samples showcase the financial plotting tools included in ChartFx.\n\n Explore the available chart types by clicking on the options to the left.");
         label.setStyle("-fx-font-size: 1.5em; -fx-padding: 20 0 0 5;");
         vBox.getChildren().addAll(pane, label);
         return new WelcomePage("Welcome to ChartFx!", vBox);
