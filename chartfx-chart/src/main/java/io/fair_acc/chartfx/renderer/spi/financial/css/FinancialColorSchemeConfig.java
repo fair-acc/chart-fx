@@ -200,10 +200,10 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
             chart.getGridRenderer().getHorizontalMajorGrid().setStroke(Color.DARKGREY);
             chart.getGridRenderer().getVerticalMajorGrid().setStroke(Color.DARKGREY);
             if (chart.getXAxis() instanceof AbstractAxisParameter) {
-                ((AbstractAxisParameter) chart.getXAxis()).setTickLabelFill(Color.BLACK);
+                ((AbstractAxisParameter) chart.getXAxis()).getTickLabelStyle().setFill(Color.BLACK);
             }
             if (chart.getYAxis() instanceof AbstractAxisParameter) {
-                ((AbstractAxisParameter) chart.getYAxis()).setTickLabelFill(Color.BLACK);
+                ((AbstractAxisParameter) chart.getYAxis()).getTickLabelStyle().setFill(Color.BLACK);
             }
             break;
 
@@ -216,10 +216,10 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
             chart.getGridRenderer().getHorizontalMajorGrid().setVisible(false);
             chart.getTitleLabel().setTextFill(Color.WHITE);
             if (chart.getXAxis() instanceof AbstractAxisParameter) {
-                ((AbstractAxisParameter) chart.getXAxis()).setTickLabelFill(Color.WHITESMOKE);
+                ((AbstractAxisParameter) chart.getXAxis()).getTickLabelStyle().setFill(Color.WHITESMOKE);
             }
             if (chart.getYAxis() instanceof AbstractAxisParameter) {
-                ((AbstractAxisParameter) chart.getYAxis()).setTickLabelFill(Color.WHITESMOKE);
+                ((AbstractAxisParameter) chart.getYAxis()).getTickLabelStyle().setFill(Color.WHITESMOKE);
             }
             break;
 
@@ -233,10 +233,10 @@ public class FinancialColorSchemeConfig implements FinancialColorSchemeAware {
             chart.getGridRenderer().getHorizontalMajorGrid().setStroke(Color.rgb(106, 106, 106));
             chart.getTitleLabel().setTextFill(Color.WHITE);
             if (chart.getXAxis() instanceof AbstractAxisParameter) {
-                ((AbstractAxisParameter) chart.getXAxis()).setTickLabelFill(Color.rgb(194, 194, 194));
+                ((AbstractAxisParameter) chart.getXAxis()).getTickLabelStyle().setFill(Color.rgb(194, 194, 194));
             }
             if (chart.getYAxis() instanceof AbstractAxisParameter) {
-                ((AbstractAxisParameter) chart.getYAxis()).setTickLabelFill(Color.rgb(194, 194, 194));
+                ((AbstractAxisParameter) chart.getYAxis()).getTickLabelStyle().setFill(Color.rgb(194, 194, 194));
             }
             break;
         }

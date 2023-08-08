@@ -200,8 +200,8 @@ public class ChartIndicatorSample extends ChartSample {
 
         xAxis1.setAutoRangeRounding(false);
         xAxis2.setAutoRangeRounding(false);
-        xAxis1.setTickLabelRotation(45);
-        xAxis2.setTickLabelRotation(45);
+        xAxis1.getTickLabelStyle().setRotate(45);
+        xAxis2.getTickLabelStyle().setRotate(45);
         xAxis1.invertAxis(false);
         xAxis2.invertAxis(false);
         xAxis1.setTimeAxis(true);

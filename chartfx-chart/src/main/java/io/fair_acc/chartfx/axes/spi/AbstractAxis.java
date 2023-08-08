@@ -17,9 +17,7 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -83,11 +81,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     };
 
     protected AbstractAxis() {
-        super();
-        // Can we remove these? Axes without a chart don't work anymore.
-        VBox.setVgrow(this, Priority.ALWAYS);
-        HBox.setHgrow(this, Priority.ALWAYS);
-
         // Canvas settings
         setMouseTransparent(false);
         setPickOnBounds(true);
@@ -100,15 +93,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         getChildren().add(canvas);
 
         // set default axis title/label alignment
-        updateTickLabelAlignment();
-        updateAxisLabelAlignment();
-        sideProperty().addListener((ch, o, n) -> {
-            updateAxisLabelAlignment();
-            updateTickLabelAlignment();
-        });
-        tickLabelRotationProperty().addListener((ch, o, n) -> {
-            updateTickLabelAlignment();
-        });
+        PropUtil.initAndRunOnChange(this::updateAxisLabelAlignment,
+                sideProperty());
+        PropUtil.initAndRunOnChange(this::updateTickLabelAlignment,
+                sideProperty(),
+                getTickLabelStyle().rotateProperty());
     }
 
     protected AbstractAxis(final double lowerBound, final double upperBound) {
@@ -920,7 +909,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     }
 
-    protected double measureTickMarkLength(final Double major) {
+    protected double measureTickMarkLength(final double major) {
         // N.B. this is a known performance hot-spot -> start optimisation here
         tmpTickMark.setValue(major, getTickMarkLabel(major));
         return getSide().isHorizontal() ? tmpTickMark.getWidth() : tmpTickMark.getHeight();

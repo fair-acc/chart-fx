@@ -149,8 +149,8 @@ public class GridRenderer extends Parent implements Renderer {
                 gc.strokeOval(xCentre - yNorm, yCentre - yNorm, 2 * yNorm, 2 * yNorm);
 
                 gc.save();
-                gc.setFont(yAxis.getTickLabelFont());
-                gc.setStroke(yAxis.getTickLabelFill());
+                gc.setFont(yAxis.getTickLabelStyle().getFont());
+                gc.setStroke(yAxis.getTickLabelStyle().getFill()); // TODO: why stroke rather than fill?
                 gc.setLineDashes((double[]) null);
                 gc.setTextBaseline(VPos.CENTER);
                 gc.strokeText(label, xCentre + (int) yAxis.getTickLabelGap(), yCentre - yNorm);
@@ -198,8 +198,8 @@ public class GridRenderer extends Parent implements Renderer {
                 gc.strokeLine(xCentre, yCentre, x, y);
 
                 gc.save();
-                gc.setFont(yAxis.getTickLabelFont());
-                gc.setStroke(yAxis.getTickLabelFill());
+                gc.setFont(yAxis.getTickLabelStyle().getFont());
+                gc.setStroke(yAxis.getTickLabelStyle().getFill()); // TODO: why stroke rather than fill?
                 gc.setLineDashes((double[]) null);
                 gc.setTextBaseline(VPos.CENTER);
                 if (phi < 350) {

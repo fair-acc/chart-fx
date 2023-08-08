@@ -95,8 +95,8 @@ class AbstractAxisTests {
         assertDoesNotThrow(() -> axis.drawAxis(null, 100, 100));
         assertDoesNotThrow(() -> AbstractAxis.drawTickMarkLabel(gc, 10, 10, 1.0, new TickMark(Side.BOTTOM, 1.0, 1.0, 0.0, "label")));
         assertDoesNotThrow(() -> AbstractAxis.drawTickMarkLabel(gc, 10, 10, 0.9, new TickMark(Side.BOTTOM, 1.0, 1.0, 90.0, "label")));
-        axis.setTickMarkVisible(false);
-        axis.setMinorTickVisible(false);
+        axis.getMajorTickStyle().setVisible(false);
+        axis.getMinorTickStyle().setVisible(false);
         assertDoesNotThrow(() -> axis.drawAxis(gc, 100, 100));
     }
 
@@ -278,7 +278,7 @@ class AbstractAxisTests {
         var style = axis.getTickLabelStyle();
 
         // No rotation
-        axis.setTickLabelRotation(0);
+        axis.getTickLabelStyle().setRotate(0);
         axis.setSide(Side.TOP);
         assertEquals(TextAlignment.CENTER, style.getTextAlignment());
         assertEquals(VPos.BOTTOM, style.getTextOrigin());
@@ -296,7 +296,7 @@ class AbstractAxisTests {
         assertEquals(VPos.CENTER, style.getTextOrigin());
 
         // 90 deg
-        axis.setTickLabelRotation(90);
+        axis.getTickLabelStyle().setRotate(90);
         axis.setSide(Side.TOP);
         assertEquals(TextAlignment.LEFT, style.getTextAlignment());
         assertEquals(VPos.CENTER, style.getTextOrigin());
@@ -315,7 +315,7 @@ class AbstractAxisTests {
 
 
         // special non 'n x 90 degree' rotation cases for top/bottom
-        axis.setTickLabelRotation(45);
+        axis.getTickLabelStyle().setRotate(45);
 
         axis.setSide(Side.TOP);
         assertEquals(TextAlignment.LEFT, style.getTextAlignment());

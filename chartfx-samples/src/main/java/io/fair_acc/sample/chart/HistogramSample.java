@@ -74,7 +74,7 @@ public class HistogramSample extends ChartSample {
     public Node getChartPanel(final Stage primaryStage) {
         final StackPane root = new StackPane();
         final CategoryAxis xAxis1 = new CategoryAxis("months");
-        xAxis1.setTickLabelRotation(90);
+        xAxis1.getTickLabelStyle().setRotate(90);
 
         final DefaultNumericAxis xAxis2 = new DefaultNumericAxis("x-Axis");
         xAxis2.setAutoRangeRounding(false);

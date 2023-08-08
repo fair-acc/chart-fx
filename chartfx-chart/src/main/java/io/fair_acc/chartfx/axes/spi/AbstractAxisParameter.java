@@ -24,6 +24,7 @@ import javafx.util.StringConverter;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.geometry.Side;
 
 /**
@@ -39,8 +40,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * Create a auto-ranging AbstractAxisParameter
      */
     public AbstractAxisParameter() {
-        super();
-
         // Properties that may be relevant to the layout and must always at least redraw the canvas
         PropUtil.runOnChange(invalidateLayout = state.onAction(ChartBits.AxisLayout, ChartBits.AxisCanvas),
                 // distance to main line
@@ -49,17 +48,13 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                 tickMarkGap,
 
                 // tick marks
-                tickMarkVisible,
                 tickLength,
                 majorTickStyle.changeCounterProperty(),
 
                 // tick labels
-                tickLabelsVisible,
                 tickLabelGap,
-                tickLabelRotation,
                 overlapPolicy,
                 tickLabelStyle.changeCounterProperty(),
-                tickLabelFont, // already in style
 
                 // axis label
                 axisLabelGap,
@@ -102,14 +97,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         // Properties that require a redraw of the canvas but won't affect the placement of ticks
         PropUtil.runOnChange(invalidateCanvas = state.onAction(ChartBits.AxisCanvas),
                 // minor ticks
-                minorTickVisible,
                 minorTickStyle.changeCounterProperty(), // not used for layout calculation
                 minorTickCount,
                 minorTickLength,
 
                 // item placement
                 axisCenterPosition,
-                axisLabelTextAlignment,
 
                 // the main properties of what the axis currently shows.
                 // Used for internal computation, so we don't want them to
@@ -179,11 +172,11 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * Note that we can use the tick label style as a temporary node for getting the font metrics w/ the correct style.
      * Unmanaged nodes do not trigger a re-layout of the parent, but invisible text still computes valid font metrics.
      */
-    private final StyleGroup styles = new StyleGroup(this, "axis");
-    private final transient LineStyle majorTickStyle = styles.newLineStyle("axis-tick-mark");
-    private final transient LineStyle minorTickStyle =  styles.newLineStyle("axis-minor-tick-mark");
-    private final transient TextStyle tickLabelStyle =  styles.newTextStyle("axis-tick-label");
-    private final transient TextStyle axisLabel =  styles.newTextStyle("axis-label");
+    private final transient StyleGroup styleGroup = new StyleGroup(this, "axis");
+    private final transient LineStyle majorTickStyle = styleGroup.newLineStyle("axis-major-tick-mark");
+    private final transient LineStyle minorTickStyle = styleGroup.newLineStyle("axis-minor-tick-mark");
+    private final transient TextStyle tickLabelStyle = styleGroup.newTextStyle("axis-tick-label");
+    private final transient TextStyle axisLabel = styleGroup.newTextStyle("axis-label");
 
     protected final transient DoubleArrayList majorTickMarkValues = new DoubleArrayList();
     protected final transient DoubleArrayList minorTickMarkValues = new DoubleArrayList();
@@ -217,28 +210,13 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient StyleableDoubleProperty axisCenterPosition = CSS.createDoubleProperty(this, "axisCenterPosition", 0.5, true, (oldVal, newVal) -> Math.max(0.0, Math.min(newVal, 1.0)));
 
     /**
-     * axis label alignment
-     */
-    private final transient ObjectProperty<TextAlignment> axisLabelTextAlignment = axisLabel.textAlignmentProperty();
-
-    /**
      * The axis label
      */
     private final transient StyleableStringProperty axisName = CSS.createStringProperty(this, "axisName", "");
 
     /**
-     * true if tick marks should be displayed
-     */
-    private final transient BooleanProperty tickMarkVisible = majorTickStyle.visibleProperty();
-
-    /**
-     * true if tick mark labels should be displayed
-     */
-    private final transient BooleanProperty tickLabelsVisible = tickLabelStyle.visibleProperty();
-
-    /**
      * The length of tick mark lines
-     */ 
+     */
     private final transient StyleableDoubleProperty axisPadding = CSS.createDoubleProperty(this, "axisPadding", 15.0);
 
     /**
@@ -260,16 +238,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
             setAutoRanging(false);
         }
     });
-
-    /**
-     * The font for all tick labels
-     */
-    private final transient ObjectProperty<Font> tickLabelFont = tickLabelStyle.fontProperty();
-
-    /**
-     * The fill for all tick labels
-     */
-    private final transient ObjectProperty<Paint> tickLabelFill = tickLabelStyle.fillProperty();
 
     /**
      * The gap between tick marks and the canvas area
@@ -305,16 +273,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
      * When true any changes to the axis and its range will be animated.
      */
     private final transient BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
-
-    /**
-     * Rotation in degrees of tick mark labels from their normal horizontal.
-     */
-    protected final transient DoubleProperty tickLabelRotation = tickLabelStyle.rotateProperty();
-
-    /**
-     * true if minor tick marks should be displayed
-     */
-    private final transient BooleanProperty minorTickVisible = minorTickStyle.visibleProperty();
 
     /**
      * The scale factor from data units to visual units
@@ -356,7 +314,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     private final transient StyleableIntegerProperty minorTickCount = CSS.createIntegerProperty(this, "minorTickCount", 10);
 
     protected boolean isInvertedAxis = false; // internal use (for performance reason)
-    private final transient BooleanProperty invertAxis = PropUtil.createBooleanProperty(this, "invertAxis", isInvertedAxis, () -> {
+    private final transient StyleableBooleanProperty invertAxis = CSS.createBooleanProperty(this, "invertAxis", isInvertedAxis, () -> {
         isInvertedAxis = invertAxisProperty().get();
     });
 
@@ -372,7 +330,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     private final transient StyleableBooleanProperty autoRangeRounding = CSS.createBooleanProperty(this, "autoRangeRounding", false);
 
-    private final transient DoubleProperty autoRangePadding = PropUtil.createDoubleProperty(this, "autoRangePadding", 0);
+    private final transient StyleableDoubleProperty autoRangePadding = CSS.createDoubleProperty(this, "autoRangePadding", 0);
 
     /**
      * The axis unit label
@@ -382,7 +340,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The axis unit label
      */
-    private final transient BooleanProperty autoUnitScaling = PropUtil.createBooleanProperty(this, "autoUnitScaling", false);
+    private final transient StyleableBooleanProperty autoUnitScaling = CSS.createBooleanProperty(this, "autoUnitScaling", false);
 
     /**
      * The axis unit label
@@ -489,10 +447,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return axisLabelGap;
     }
 
-    public ObjectProperty<TextAlignment> axisLabelTextAlignmentProperty() {
-        return axisLabelTextAlignment;
-    }
-
     public DoubleProperty axisPaddingProperty() {
         return axisPadding;
     }
@@ -547,10 +501,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public double getAxisLabelGap() {
         return axisLabelGapProperty().get();
-    }
-
-    public TextAlignment getAxisLabelTextAlignment() {
-        return axisLabelTextAlignmentProperty().get();
     }
 
     public double getAxisPadding() {
@@ -662,17 +612,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return sideProperty().get();
     }
 
-    @Override
-    public Paint getTickLabelFill() {
-        return tickLabelFillProperty().get();
-    }
-
-    @Override
-    public Font getTickLabelFont() {
-        return tickLabelFontProperty().get();
-    }
-
-    @Override
     public StringConverter<Number> getTickLabelFormatter() {
         return tickLabelFormatterProperty().getValue();
     }
@@ -685,10 +624,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public double getTickLabelGap() {
         return tickLabelGapProperty().get();
-    }
-
-    public double getTickLabelRotation() {
-        return tickLabelRotationProperty().getValue();
     }
 
     @Override
@@ -813,18 +748,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return invertAxisProperty().get();
     }
 
-    public boolean isMinorTickVisible() {
-        return minorTickVisibleProperty().get();
-    }
-
-    public boolean isTickLabelsVisible() {
-        return tickLabelsVisibleProperty().get();
-    }
-
-    public boolean isTickMarkVisible() {
-        return tickMarkVisibleProperty().get();
-    }
-
     /**
      * This is true when the axis corresponds to a time-axis
      *
@@ -852,10 +775,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     public DoubleProperty minorTickLengthProperty() {
         return minorTickLength;
-    }
-
-    public BooleanProperty minorTickVisibleProperty() {
-        return minorTickVisible;
     }
 
     /**
@@ -977,10 +896,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         axisLabelGapProperty().set(value);
     }
 
-    public void setAxisLabelTextAlignment(final TextAlignment value) {
-        axisLabelTextAlignmentProperty().set(value);
-    }
-
     public void setAxisPadding(final double value) {
         axisPaddingProperty().set(value);
     }
@@ -1020,10 +935,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         minorTickLengthProperty().set(value);
     }
 
-    public void setMinorTickVisible(final boolean value) {
-        minorTickVisibleProperty().set(value);
-    }
-
     @Override
     public void setName(final String value) {
         nameProperty().set(value);
@@ -1038,14 +949,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         sideProperty().set(value);
     }
 
-    public void setTickLabelFill(final Paint value) {
-        tickLabelFillProperty().set(value);
-    }
-
-    public void setTickLabelFont(final Font value) {
-        tickLabelFontProperty().set(value);
-    }
-
     public void setTickLabelFormatter(final StringConverter<Number> value) {
         tickLabelFormatterProperty().setValue(value);
     }
@@ -1058,24 +961,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         tickLabelGapProperty().set(value);
     }
 
-    public void setTickLabelRotation(final double value) {
-        tickLabelRotationProperty().setValue(value);
-    }
-
     public void setTickLabelSpacing(final double value) {
         tickLabelSpacingProperty().set(value);
     }
 
-    public void setTickLabelsVisible(final boolean value) {
-        tickLabelsVisibleProperty().set(value);
-    }
-
     public void setTickLength(final double value) {
         tickLengthProperty().set(value);
-    }
-
-    public void setTickMarkVisible(final boolean value) {
-        tickMarkVisibleProperty().set(value);
     }
 
     /**
@@ -1111,14 +1002,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return side;
     }
 
-    public ObjectProperty<Paint> tickLabelFillProperty() {
-        return tickLabelFill;
-    }
-
-    public ObjectProperty<Font> tickLabelFontProperty() {
-        return tickLabelFont;
-    }
-
     public ObjectProperty<StringConverter<Number>> tickLabelFormatterProperty() {
         return tickLabelFormatter;
     }
@@ -1131,24 +1014,12 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         return tickLabelGap;
     }
 
-    public DoubleProperty tickLabelRotationProperty() {
-        return tickLabelRotation;
-    }
-
     public DoubleProperty tickLabelSpacingProperty() {
         return tickLabelSpacing;
     }
 
-    public BooleanProperty tickLabelsVisibleProperty() {
-        return tickLabelsVisible;
-    }
-
     public DoubleProperty tickLengthProperty() {
         return tickLength;
-    }
-
-    public BooleanProperty tickMarkVisibleProperty() {
-        return tickMarkVisible;
     }
 
     /**
@@ -1169,6 +1040,26 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     @Override
     public DoubleProperty unitScalingProperty() {
         return unitScaling;
+    }
+
+    protected boolean isMinorTickVisible() {
+        return minorTickStyle.isVisible();
+    }
+
+    protected boolean isTickLabelsVisible() {
+        return tickLabelStyle.isVisible();
+    }
+
+    protected boolean isTickMarkVisible() {
+        return majorTickStyle.isVisible();
+    }
+
+    protected double getTickLabelRotation() {
+        return tickLabelStyle.getRotate();
+    }
+
+    protected Font getTickLabelFont() {
+        return getTickLabelStyle().getFont();
     }
 
     protected void setScale(final double scale) {

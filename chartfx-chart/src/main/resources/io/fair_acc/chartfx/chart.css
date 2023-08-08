@@ -167,6 +167,9 @@
   -fx-auto-ranging: true;
   -fx-auto-grow-ranging: false;
   -fx-auto-range-rounding: false;
+  -fx-auto-range-padding: 0;
+  -fx-auto-unit-scaling: false;
+  -fx-invert-axis: false;
   -fx-axis-center-position: 0.5;
   -fx-overlap-policy: SKIP_ALT;
   -fx-axis-padding: 15px;
@@ -198,9 +201,10 @@
   -fx-rotate: -90;
 }
 .axis .axis-tick-label {
+  -fx-fill: black;
   -fx-font-size: 10px;
 }
-.axis .axis-tick-mark, .axis .axis-minor-tick-mark {
+.axis .axis-major-tick-mark, .axis .axis-minor-tick-mark {
   visibility: visible;
   -fx-stroke: #c3c3c3;
   -fx-stroke-width: 1;

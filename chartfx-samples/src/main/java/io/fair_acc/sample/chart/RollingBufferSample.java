@@ -165,7 +165,7 @@ public class RollingBufferSample extends ChartSample {
 
         final DefaultNumericAxis xAxis1 = new DefaultNumericAxis("time");
         xAxis1.setAutoRangeRounding(false);
-        xAxis1.setTickLabelRotation(45);
+        xAxis1.getTickLabelStyle().setRotate(45);
         xAxis1.setMinorTickCount(30);
         xAxis1.invertAxis(false);
         xAxis1.setTimeAxis(true);
