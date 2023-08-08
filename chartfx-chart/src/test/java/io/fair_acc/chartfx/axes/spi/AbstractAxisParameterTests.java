@@ -173,7 +173,7 @@ class AbstractAxisParameterTests {
             assertTrue(state.isDirty(ChartBits.AxisLayout));
             state.clear(ChartBits.AxisLayout);
         }
-        axis.setSide(null);
+        assertThrows(IllegalArgumentException.class, () -> axis.setSide(null));
         assertEquals(Double.NaN, axis.getLength());
         axis.setSide(Side.LEFT);
 

@@ -160,20 +160,20 @@ class AbstractAxisTests {
         axis.setUnit(null);
         axis.setSide(Side.BOTTOM);
         assertEquals(+1.0, axis.calculateNewScale(10, -5.0, +5.0));
-        assertEquals(+25, axis.computePrefHeight(100), 2);
+        assertEquals(+30, axis.computePrefHeight(100), 2);
         assertEquals(+150.0, axis.computePrefWidth(-1));
         axis.setSide(Side.LEFT);
         assertEquals(-1.0, axis.calculateNewScale(10, -5.0, +5.0));
         assertEquals(+150, axis.computePrefHeight(-1));
-        assertEquals(+22, axis.computePrefWidth(100), 2);
+        assertEquals(+26, axis.computePrefWidth(100), 2);
 
         axis.setUnit("");
         axis.setSide(Side.BOTTOM);
-        assertEquals(+44, axis.computePrefHeight(100), 2);
+        assertEquals(+49, axis.computePrefHeight(100), 2);
         assertEquals(+150.0, axis.computePrefWidth(-1));
         axis.setSide(Side.LEFT);
         assertEquals(+150, axis.computePrefHeight(-1));
-        assertEquals(+44, axis.computePrefWidth(100), 2);
+        assertEquals(+48, axis.computePrefWidth(100), 2);
 
         assertDoesNotThrow(axis::clear);
         assertDoesNotThrow(axis::forceRedraw);
