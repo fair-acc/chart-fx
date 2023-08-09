@@ -17,7 +17,7 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -542,10 +542,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     private void applyOverlapPolicy(List<TickMark> tickMarks) {
-        // Default to all visible
+        if (tickMarks.isEmpty()) {
+            return;
+        }
+
+        // Start with everything being visible
         for (TickMark tickMark : tickMarks) {
             tickMark.setVisible(true);
         }
+
+        // Hide labels that would get cut off by the parent
+        hideLabelsOutsideParentBounds(tickMarks);
 
         // Check whether any labels overlap.
         // Note: We technically only need to compute it for cases that
@@ -573,7 +580,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
             case SKIP_ALT:
                 // make every other label visible to gain a factor 2 margin
-                for (int i = 1; i < tickMarks.size(); i += 2) {
+                int firstHidden = !tickMarks.get(0).isVisible() ? 0 : 1;
+                for (int i = firstHidden; i < tickMarks.size(); i += 2) {
                     tickMarks.get(i).setVisible(false);
                 }
                 break;
@@ -588,6 +596,43 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         }
 
+    }
+
+    /**
+     * Hides labels that can't be fully displayed due to the
+     * bounds of the parent container. This often manifests
+     * on the top of y axes when there is no title padding.
+     * <p>
+     * Note that the layout bounds may not be available
+     * until the bounds phase, so we use layout x/y directly.
+     */
+    private void hideLabelsOutsideParentBounds(List<TickMark> tickMarks) {
+        if (getParent() == null || !(getParent() instanceof Pane)) {
+            return;
+        }
+        if (getSide().isHorizontal()) {
+            final double offset = getLayoutX();
+            final double parentWidth = ((Pane) getParent()).getWidth();
+            for (TickMark tickMark : tickMarks) {
+                double width = tickMark.getWidth();
+                double min = tickMark.getPosition() - width / 2 + offset;
+                double max = tickMark.getPosition() + width / 2 + offset;
+                if (min < 0 || max > parentWidth) {
+                    tickMark.setVisible(false);
+                }
+            }
+        } else {
+            final double offset = getLayoutY();
+            final double parentHeight = ((Pane) getParent()).getHeight();
+            for (TickMark tickMark : tickMarks) {
+                double height = tickMark.getHeight();
+                double min = tickMark.getPosition() - height / 2 + offset;
+                double max = tickMark.getPosition() + height / 2 + offset;
+                if (min < 0 || max > parentHeight) {
+                    tickMark.setVisible(false);
+                }
+            }
+        }
     }
 
     @Deprecated // for testing purposes

@@ -133,9 +133,6 @@
 .chart {
   -fx-tool-bar-side: TOP;
 }
-.chart .chart-content {
-  -fx-padding: 5 0 0 0px;
-}
 .chart .chart-title {
   visibility: visible;
   -fx-side: top;
