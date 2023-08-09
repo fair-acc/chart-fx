@@ -348,35 +348,29 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         final double minSize = getMarkerSize();
-        if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                || localCachedPoints.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
+        if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR && localCachedPoints.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
             // X, X_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double radius = Math.max(minSize,
-                        localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
+                final double radius = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
                 final double x = localCachedPoints.xValues[i] - radius;
                 final double y = localCachedPoints.yValues[i] - radius;
 
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
-        } else if (localCachedPoints.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
-                   || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+        } else if (localCachedPoints.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR && localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // Y, Y_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double radius = Math.max(minSize,
-                        localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
+                final double radius = Math.max(minSize, localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
                 final double x = localCachedPoints.xValues[i] - radius;
                 final double y = localCachedPoints.yValues[i] - radius;
 
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
-        } else if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                   || localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+        } else if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR && localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // XY, XY_ASYMMETRIC
             for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
                 final double width = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
-                final double height = Math.max(minSize,
-                        localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
+                final double height = Math.max(minSize, localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
                 final double x = localCachedPoints.xValues[i] - width;
                 final double y = localCachedPoints.yValues[i] - height;
 
