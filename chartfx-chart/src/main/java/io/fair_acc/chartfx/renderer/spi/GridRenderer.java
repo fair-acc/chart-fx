@@ -4,10 +4,7 @@ import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
 
-import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
-import io.fair_acc.chartfx.ui.css.LineStyle;
-import io.fair_acc.chartfx.ui.css.StyleGroup;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.ui.css.*;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -267,12 +264,17 @@ public class GridRenderer extends Parent implements Renderer {
 
     @Override
     public ObservableList<DataSet> getDatasets() {
-        return null;
+        return FXCollections.emptyObservableList();
     }
 
     @Override
     public ObservableList<DataSet> getDatasetsCopy() {
-        return null;
+        return FXCollections.emptyObservableList();
+    }
+
+    @Override
+    public ObservableList<DataSetNode> getDatasetNodes() {
+        return FXCollections.emptyObservableList();
     }
 
     /**

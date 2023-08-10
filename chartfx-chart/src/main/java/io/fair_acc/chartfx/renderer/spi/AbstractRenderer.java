@@ -2,11 +2,13 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
@@ -26,6 +28,7 @@ import javafx.scene.Parent;
 
 import java.util.List;
 import java.util.function.IntSupplier;
+import java.util.stream.Collectors;
 
 /**
  * @author rstein
@@ -35,12 +38,33 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
 
     protected final StyleableBooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
+    private final ObservableList<DataSetNode> dataSetNodes = FXCollections.observableArrayList();
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final ObjectProperty<Chart> chart = new SimpleObjectProperty<>();
+
+    protected DataSetNode createNode(DataSet dataSet) {
+        // Reuse existing nodes when possible
+        for (DataSetNode dataSetNode : dataSetNodes) {
+            if (dataSetNode.getDataSet() == dataSet) {
+                return dataSetNode;
+            }
+        }
+        return new DataSetNode(dataSet);
+    }
 
     public AbstractRenderer() {
         StyleUtil.addStyles(this, "renderer");
         PropUtil.runOnChange(() -> fireInvalidated(ChartBits.ChartLegend), showInLegend);
+        dataSetNodes.addListener((ListChangeListener<DataSetNode>) c -> {
+            getChildren().setAll(dataSetNodes);
+        });
+        datasets.addListener((ListChangeListener<DataSet>) c -> {
+            dataSetNodes.setAll(datasets.stream().distinct().map(this::createNode).collect(Collectors.toList()));
+            int i = 0;
+            for (DataSetNode dataSetNode : dataSetNodes) {
+                dataSetNode.setLocalIndex(i++);
+            }
+        });
     }
 
     @Override
@@ -51,6 +75,10 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     @Override
     public ObservableList<DataSet> getDatasets() {
         return datasets;
+    }
+
+    public ObservableList<DataSetNode> getDatasetNodes() {
+        return dataSetNodes;
     }
 
     @Override

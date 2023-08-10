@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -163,6 +164,11 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     @Override
     public ObservableList<DataSet> getDatasetsCopy() {
         return FXCollections.observableArrayList();
+    }
+
+    @Override
+    public ObservableList<DataSetNode> getDatasetNodes() {
+        return FXCollections.emptyObservableList();
     }
 
     protected List<DataSet> getDataSetsWithMetaData(List<DataSet> dataSets) {
