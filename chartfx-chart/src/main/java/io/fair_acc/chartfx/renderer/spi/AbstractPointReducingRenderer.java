@@ -1,6 +1,7 @@
 package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -15,12 +16,12 @@ public abstract class AbstractPointReducingRenderer<R extends AbstractPointReduc
         extends AbstractRenderer<R> {
     private final ReadOnlyBooleanWrapper actualPointReduction = registerCanvasProp(new ReadOnlyBooleanWrapper(this, "actualPointReduction",
             true));
-    private final BooleanProperty assumeSortedData = CSS.createBooleanProperty(this, "assumeSortedData", true);
-    private final IntegerProperty minRequiredReductionSize = registerCanvasProp(CSS.createIntegerProperty(this, "minRequiredReductionSize",
+    private final BooleanProperty assumeSortedData = css().createBooleanProperty(this, "assumeSortedData", true);
+    private final IntegerProperty minRequiredReductionSize = registerCanvasProp(css().createIntegerProperty(this, "minRequiredReductionSize",
             5));
-    private final BooleanProperty parallelImplementation = registerCanvasProp(CSS.createBooleanProperty(this, "parallelImplementation",
+    private final BooleanProperty parallelImplementation = registerCanvasProp(css().createBooleanProperty(this, "parallelImplementation",
             true));
-    private final BooleanProperty pointReduction = CSS.createBooleanProperty(this, "pointReduction", true);
+    private final BooleanProperty pointReduction = css().createBooleanProperty(this, "pointReduction", true);
 
     public AbstractPointReducingRenderer() {
         super();
@@ -160,14 +161,10 @@ public abstract class AbstractPointReducingRenderer<R extends AbstractPointReduc
     }
 
     @Override
-    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
-        return getClassCssMetaData();
+    protected CssPropertyFactory<AbstractRenderer<?>> css() {
+        return CSS;
     }
 
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return CSS.getCssMetaData();
-    }
-
-    private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(AbstractRenderer.getClassCssMetaData());
+    private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(AbstractPointReducingRenderer.getClassCssMetaData());
 
 }

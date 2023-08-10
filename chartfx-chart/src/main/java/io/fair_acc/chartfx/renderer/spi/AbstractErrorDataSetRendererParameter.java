@@ -1,8 +1,12 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import java.util.List;
 import java.util.Objects;
 
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.utils.PropUtil;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -22,6 +26,8 @@ import io.fair_acc.chartfx.renderer.datareduction.MaxDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
 import io.fair_acc.dataset.utils.AssertUtils;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
 
 /**
  * simple class to move the various parameters out of the class containing the algorithms uses the shadow field pattern
@@ -36,33 +42,34 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         extends AbstractPointReducingRenderer<R> {
     // intensity fading factor per stage
     protected static final double DEFAULT_HISTORY_INTENSITY_FADING = 0.65;
-    private final ObjectProperty<ErrorStyle> errorStyle = new SimpleObjectProperty<>(this, "errorStyle",
-            ErrorStyle.ERRORCOMBO);
+    private final ObjectProperty<ErrorStyle> errorStyle = css().createEnumPropertyWithPseudoclasses(this, "errorStyle",
+            ErrorStyle.ERRORCOMBO, ErrorStyle.class);
     private final ObjectProperty<RendererDataReducer> rendererDataReducer = new SimpleObjectProperty<>(this,
             "rendererDataReducer", new DefaultDataReducer());
 
-    private final IntegerProperty dashSize = new SimpleIntegerProperty(this, "dashSize", 3);
-    private final DoubleProperty markerSize = new SimpleDoubleProperty(this, "markerSize", 1.5);
-    private final BooleanProperty drawMarker = new SimpleBooleanProperty(this, "drawMarker", true);
-    private final ObjectProperty<LineStyle> polyLineStyle = new SimpleObjectProperty<>(this, "polyLineStyle",
-            LineStyle.NORMAL);
+    private final IntegerProperty dashSize = css().createIntegerProperty(this, "dashSize", 3);
+    private final DoubleProperty markerSize = css().createDoubleProperty(this, "markerSize", 1.5);
+    private final BooleanProperty drawMarker = css().createBooleanProperty(this, "drawMarker", true);
+    private final ObjectProperty<LineStyle> polyLineStyle = css().createEnumPropertyWithPseudoclasses(this, "polyLineStyle",
+            LineStyle.NORMAL, LineStyle.class);
     private final BooleanProperty drawChartDataSets = new SimpleBooleanProperty(this, "drawChartDataSets", true);
-    private final BooleanProperty drawBars = new SimpleBooleanProperty(this, "drawBars", false);
-    private final BooleanProperty shiftBar = new SimpleBooleanProperty(this, "shiftBar", true);
-    private final IntegerProperty shiftBarOffset = new SimpleIntegerProperty(this, "shiftBarOffset", 3);
-    private final BooleanProperty dynamicBarWidth = new SimpleBooleanProperty(this, "dynamicBarWidth", true);
-    private final DoubleProperty barWidthPercentage = new SimpleDoubleProperty(this, "barWidthPercentage", 70.0);
-    private final IntegerProperty barWidth = new SimpleIntegerProperty(this, "barWidth", 5);
-    private final DoubleProperty intensityFading = new SimpleDoubleProperty(this, "intensityFading",
+    private final BooleanProperty drawBars = css().createBooleanProperty(this, "drawBars", false);
+    private final BooleanProperty shiftBar = css().createBooleanProperty(this, "shiftBar", true);
+    private final IntegerProperty shiftBarOffset = css().createIntegerProperty(this, "shiftBarOffset", 3);
+    private final BooleanProperty dynamicBarWidth = css().createBooleanProperty(this, "dynamicBarWidth", true);
+    private final DoubleProperty barWidthPercentage = css().createDoubleProperty(this, "barWidthPercentage", 70.0);
+    private final IntegerProperty barWidth = css().createIntegerProperty(this, "barWidth", 5);
+    private final DoubleProperty intensityFading = css().createDoubleProperty(this, "intensityFading",
             AbstractErrorDataSetRendererParameter.DEFAULT_HISTORY_INTENSITY_FADING);
-    private final BooleanProperty drawBubbles = new SimpleBooleanProperty(this, "drawBubbles", false);
-    private final BooleanProperty allowNaNs = new SimpleBooleanProperty(this, "allowNaNs", false);
+    private final BooleanProperty drawBubbles = css().createBooleanProperty(this, "drawBubbles", false);
+    private final BooleanProperty allowNans = css().createBooleanProperty(this, "allowNans", false);
 
     /**
      * 
      */
     public AbstractErrorDataSetRendererParameter() {
         super();
+        StyleUtil.addStyles(this,"error-dataset-renderer");
         PropUtil.runOnChange(this::invalidateCanvas,
                 errorStyle,
                 rendererDataReducer,
@@ -79,17 +86,14 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
                 barWidth,
                 intensityFading,
                 drawBubbles,
-                allowNaNs);
-    }
-
-    protected void invalidateCanvas() {
+                allowNans);
     }
 
     /**
      * @return the drawBubbles property
      */
     public BooleanProperty allowNaNsProperty() {
-        return allowNaNs;
+        return allowNans;
     }
 
     public DoubleProperty barWidthPercentageProperty() {
@@ -178,7 +182,9 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @see ErrorDataSetRenderer#setErrorType(ErrorStyle style) for details
      */
     public ErrorStyle getErrorType() {
-        return errorStyleProperty().get();
+        // TODO: figure out why 'none' in CSS maps to null
+        var type = errorStyleProperty().get();
+        return type == null ? ErrorStyle.NONE : type;
     }
 
     /**
@@ -542,4 +548,12 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
 
         return getThis();
     }
+
+    @Override
+    protected CssPropertyFactory<AbstractRenderer<?>> css() {
+        return CSS;
+    }
+
+    private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(AbstractPointReducingRenderer.getClassCssMetaData());
+
 }
