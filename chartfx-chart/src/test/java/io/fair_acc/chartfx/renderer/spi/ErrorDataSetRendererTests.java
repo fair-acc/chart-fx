@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 
+import io.fair_acc.chartfx.ui.utils.TestFx;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -74,13 +75,20 @@ public class ErrorDataSetRendererTests {
     @EnumSource(LineStyle.class)
     public void testRendererNominal(final LineStyle lineStyle) throws Exception {
         for (ErrorStyle eStyle : ErrorStyle.values()) {
-            renderer.setErrorType(eStyle);
-            testRenderer(lineStyle);
+            FXUtils.runAndWait(() -> {
+                renderer.setErrorType(eStyle);
+                try {
+                    testRenderer(lineStyle);
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
     }
 
     @Test
-    public void testRendererSepcialCases() throws Exception {
+    @TestFx
+    public void testRendererSpecialCases() throws Exception {
         final LineStyle lineStyle = LineStyle.NORMAL;
 
         renderer.setPointReduction(false);
