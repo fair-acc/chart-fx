@@ -51,8 +51,7 @@ public class DefaultLegend extends FlowPane implements Legend {
     private final ObservableList<LegendItem> items = FXCollections.observableArrayList();
 
     public DefaultLegend() {
-        getStyleClass().setAll("chart-legend");
-        managedProperty().bind(visibleProperty().and(Bindings.size(items).isNotEqualTo(0)));
+        StyleUtil.addStyles(this, "chart-legend");
         items.addListener((ListChangeListener<LegendItem>) c -> getChildren().setAll(items));
         PropUtil.runOnChange(this::applyCss, sideProperty());
 

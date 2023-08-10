@@ -165,6 +165,22 @@
   -fx-parallel-implementation: true;
   -fx-point-reduction: true;
 }
+.chart .error-dataset-renderer {
+  -fx-poly-line-style: normal;
+  -fx-error-style: errorcombo;
+  -fx-dash-size: 3;
+  -fx-allow-nans: false;
+  -fx-draw-bubbles: false;
+  -fx-draw-marker: true;
+  -fx-marker-size: 1.5;
+  -fx-draw-bars: false;
+  -fx-shift-bar: true;
+  -fx-shift-bar-offset: 3;
+  -fx-dynamic-bar-width: true;
+  -fx-bar-width-percentage: 70;
+  -fx-bar-width: 5;
+  -fx-intensity-fading: 0.65;
+}
 
 .axis {
   -fx-border-width: 0px;

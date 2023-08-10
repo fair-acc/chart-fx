@@ -222,6 +222,25 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     -fx-point-reduction: true;
   }
 
+  .error-dataset-renderer {
+    -fx-poly-line-style: normal; // normal, area, zero-order-holder, stair-case, histogram, histogram-filled, bezier-curve
+    -fx-error-style: errorcombo; // none, errorbars, errorsurface, errorcombo
+    -fx-dash-size: 3;
+    -fx-allow-nans: false;
+
+    -fx-draw-bubbles: false;
+    -fx-draw-marker: true;
+    -fx-marker-size: 1.5;
+
+    -fx-draw-bars: false;
+    -fx-shift-bar: true;
+    -fx-shift-bar-offset: 3;
+    -fx-dynamic-bar-width: true;
+    -fx-bar-width-percentage: 70.0;
+    -fx-bar-width: 5;
+    -fx-intensity-fading: 0.65;
+  }
+
 }
 
 // Axis styles

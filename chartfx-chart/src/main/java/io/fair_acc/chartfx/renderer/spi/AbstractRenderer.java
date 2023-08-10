@@ -33,7 +33,7 @@ import java.util.function.IntSupplier;
  */
 public abstract class AbstractRenderer<R extends Renderer> extends Parent implements Renderer {
 
-    protected final StyleableBooleanProperty showInLegend = CSS.createBooleanProperty(this, "showInLegend", true, this::invalidateCanvas);
+    protected final StyleableBooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final ObjectProperty<Chart> chart = new SimpleObjectProperty<>();
@@ -184,13 +184,13 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
         }
     }
 
-    @Override
-    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
-        return getClassCssMetaData();
+    protected CssPropertyFactory<AbstractRenderer<?>> css() {
+        return CSS; // subclass specific CSS due to inheritance issues otherwise
     }
 
-    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
-        return CSS.getCssMetaData();
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return css().getCssMetaData();
     }
 
     private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
