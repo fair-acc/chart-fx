@@ -223,7 +223,7 @@ mvn exec:java
 </tr>
 <tr>
 <td colspan=2><figure><img src="docs/pics/ContourChartSample2.png" alt="ContourChartSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/ContourChartSample.java">ContourChartSample.java</a></figcaption></figure></td>
-<td></td>
+<td><figure><img src="docs/pics/ScatterAndBubbleRendererSample2.png" alt="ScatterAndBubbleRendererSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/ScatterAndBubbleRendererSample.java">ScatterAndBubbleRendererSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
