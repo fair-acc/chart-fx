@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.renderer;
 
 import java.util.List;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
@@ -35,6 +36,8 @@ public interface Renderer {
     ObservableList<DataSet> getDatasets();
 
     ObservableList<DataSet> getDatasetsCopy();
+
+    ObservableList<DataSetNode> getDatasetNodes();
 
     /**
      * Optional method that allows the renderer make layout changes after axes and dataset limits are known

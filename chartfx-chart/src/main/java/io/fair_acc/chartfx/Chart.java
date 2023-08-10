@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.StyleGroup;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
@@ -794,7 +795,18 @@ public abstract class Chart extends Region implements EventSource {
                 set.addListener(dataSetState);
             }
         }
+
+        // set global indices
+        int i = datasets.size();
+        for (Renderer renderer : renderers) {
+            for (DataSetNode datasetNode : renderer.getDatasetNodes()) {
+                datasetNode.setGlobalIndex(i++);
+            }
+        }
+
+        // Rebuild legend (modifies SceneGraph and needs to be done before styling)
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartDataSets, ChartBits.ChartLegend);
+        updateLegend();
     }
 
     /**
@@ -847,7 +859,6 @@ public abstract class Chart extends Region implements EventSource {
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
-            // TODO: how to work with renderer axes that are not in the SceneGraph? The length would never get set.
 
             // handle added renderer
             for (Renderer renderer : change.getAddedSubList()) {
