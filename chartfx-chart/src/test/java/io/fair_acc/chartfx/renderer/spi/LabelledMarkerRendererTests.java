@@ -74,11 +74,11 @@ public class LabelledMarkerRendererTests {
         localRenderer.enableHorizontalMarker(true);
         assertTrue(localRenderer.isHorizontalMarker());
 
-        assertNull(localRenderer.getStyle());
+        assertEquals("", localRenderer.getStyle());
         localRenderer.setStyle("arbitrary");
         assertEquals("arbitrary", localRenderer.getStyle());
         localRenderer.setStyle(null);
-        assertNull(localRenderer.getStyle());
+        assertEquals("", localRenderer.getStyle());
     }
 
     @Test
