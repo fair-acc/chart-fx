@@ -360,18 +360,13 @@ public class XYChart extends Chart {
         if (axis.isAutoGrowRanging() && axis.getAutoRange().isDefined()) {
             changed = axis.getAutoRange().add(dsRange);
         } else {
-            changed = axis.getAutoRange().set(dsRange);
+            changed = axis.getAutoRange().set(dsRange.getMin(), dsRange.getMax());
         }
 
         // Trigger a redraw
         if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
             axis.invalidateRange();
         }
-
-        // TODO: is this used for anything? can it be removed?
-        double axisLength = axis.getLength() == 0 ? 1 : axis.getLength();
-        axis.getAutoRange().setAxisLength(axisLength, side);
-        axis.getUserRange().setAxisLength(axisLength, side);
 
     }
 }
