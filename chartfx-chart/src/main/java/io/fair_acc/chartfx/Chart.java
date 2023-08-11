@@ -21,7 +21,6 @@ import javafx.animation.KeyFrame;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -86,11 +85,8 @@ public abstract class Chart extends Region implements EventSource {
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = Boolean.getBoolean("chartfx.debug"); // for more verbose debugging
-
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
-    {
-        showing.bind(FXUtils.getShowingBinding(this));
-    }
+
 
     /**
      * When true any data changes will be animated.
@@ -108,18 +104,16 @@ public abstract class Chart extends Region implements EventSource {
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
     private final ObservableList<Renderer> renderers = FXCollections.observableArrayList();
-    {
-        getRenderers().addListener(this::rendererChanged);
-    }
+
 
     // Inner canvas for the drawn content
-    protected final ResizableCanvas canvas = new ResizableCanvas();
+    protected final ResizableCanvas canvas = StyleUtil.addStyles(new ResizableCanvas(), "chart-canvas");
     protected final Pane canvasForeground = new Pane();
     protected final Group pluginsArea = Chart.createChildGroup();
 
     // Area where plots get drawn
     protected final Pane plotBackground = StyleUtil.addStyles(new Pane(), "chart-plot-background");
-    protected final HiddenSidesPane plotArea = StyleUtil.addStyles(new HiddenSidesPane(), "chart-plot-content");
+    protected final HiddenSidesPane plotArea = StyleUtil.addStyles(new HiddenSidesPane(), "chart-plot-area");
     protected final Pane plotForeGround = StyleUtil.addStyles(new Pane(), "chart-plot-foreground");
 
     // Outer chart elements
@@ -135,39 +129,15 @@ public abstract class Chart extends Region implements EventSource {
     // Other nodes that need to be styled via CSS
     protected final StyleGroup styleableNodes = new StyleGroup(this, getChildren(), "chart");
 
-    {
-        // Build hierarchy
-        // > menuPane (hidden toolbars that slide in from top/bottom)
-        //   > measurement pane (labels/menus for working with data)
-        //     > legend & title pane (static legend and title)
-        //       > axis pane (x/y axes)
-        //         > axes
-        //         > plot area (plotted content, hidden elements for zoom etc.)
-        //           > canvas (main)
-        //           > canvas foreground
-        //           > plugins
-        //         > plot background/foreground
-        var canvasPane = StyleUtil.addStyles(new PlotAreaPane(canvas, canvasForeground, pluginsArea), "chart-plot-area");
-        plotArea.setContent(canvasPane);
-        axesAndCanvasPane.addCenter(plotBackground, plotArea, plotForeGround);
-        titleLegendPane.addCenter(axesAndCanvasPane);
-        measurementPane.addCenter(titleLegendPane);
-        menuPane.setContent(measurementPane);
-        getChildren().add(menuPane);
-    }
+    protected final TitleLabel titleLabel = StyleUtil.addStyles(new TitleLabel(), "chart-title");
 
+
+    // Listeners
+    protected final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
     protected final ListChangeListener<Axis> axesChangeListenerLocal = this::axesChangedLocal;
     protected final ListChangeListener<Axis> axesChangeListener = this::axesChanged;
     protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
     protected final ListChangeListener<ChartPlugin> pluginsChangedListener = this::pluginsChanged;
-
-    {
-        getDatasets().addListener(datasetChangeListener);
-        getAxes().addListener(axesChangeListener);
-        getAxes().addListener(axesChangeListenerLocal);
-    }
-
-    protected final TitleLabel titleLabel = StyleUtil.addStyles(new TitleLabel(), "chart-title");
 
     /**
      * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
@@ -246,6 +216,15 @@ public abstract class Chart extends Region implements EventSource {
         // Register the layout hooks where chart elements get drawn
         FXUtils.registerLayoutHooks(this, this::runPreLayout, this::runPostLayout);
 
+        // Setup listeners
+        showing.bind(FXUtils.getShowingBinding(this));
+        getRenderers().addListener(rendererChangeListener);
+        getDatasets().addListener(datasetChangeListener);
+        getPlugins().addListener(pluginsChangedListener);
+        getAxes().addListener(axesChangeListenerLocal);
+        getAxes().addListener(axesChangeListener);
+
+
         menuPane.setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
         plotBackground.toBack();
         plotForeGround.toFront();
@@ -257,24 +236,7 @@ public abstract class Chart extends Region implements EventSource {
         // hiddenPane.setMouseTransparent(true);
         plotArea.setPickOnBounds(false);
 
-        // alt: canvas resize (default JavaFX Canvas does not automatically
-        // resize to pref width/height according to parent constraints
-        // canvas.widthProperty().bind(stackPane.widthProperty());
-        // canvas.heightProperty().bind(stackPane.heightProperty());
         getCanvasForeground().setManaged(false);
-        final ChangeListener<Number> canvasSizeChangeListener = (ch, o, n) -> {
-            final double width = getCanvas().getWidth();
-            final double height = getCanvas().getHeight();
-
-            if (getCanvasForeground().getWidth() != width || getCanvasForeground().getHeight() != height) {
-                // workaround needed so that pane within pane does not trigger
-                // recursions w.r.t. repainting
-                getCanvasForeground().resize(width, height);
-            }
-        };
-        canvas.widthProperty().addListener(canvasSizeChangeListener);
-        canvas.heightProperty().addListener(canvasSizeChangeListener);
-
         getCanvasForeground().setMouseTransparent(true);
         getCanvas().toFront();
         getCanvasForeground().toFront();
@@ -285,23 +247,37 @@ public abstract class Chart extends Region implements EventSource {
             canvas.setCacheHint(CacheHint.QUALITY);
         }
 
-        canvas.setStyle("-fx-background-color: rgba(200, 250, 200, 0.5);");
-
-        // add plugin handling and listeners
-        getPlugins().addListener(pluginsChangedListener);
-
         // add default chart content ie. ToolBar and Legend
         // can be repositioned via setToolBarSide(...) and setLegendSide(...)
-        titleLabel.setAlignment(Pos.CENTER);
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
-        VBox.setVgrow(titleLabel, Priority.ALWAYS);
         titleLabel.focusTraversableProperty().bind(Platform.accessibilityActiveProperty());
+        getTitleLegendPane().getChildren().add(titleLabel);
 
         // register listener in tool bar FlowPane
         toolBar.registerListener();
         menuPane.setTop(getToolBar());
 
-        getTitleLegendPane().getChildren().add(titleLabel);
+        // Chart hierarchy
+        // > style nodes
+        // > menuPane (hidden toolbars that slide in from top/bottom)
+        //   > measurement pane (labels/menus for working with data)
+        //     > legend & title pane (static legend and title)
+        //       > axes pane (x/y axes)
+        //         > axes
+        //         > plot background/foreground
+        //         > plot content
+        //           > hidden elements for zoom etc.
+        //           > plot area
+        //             > canvas (main)
+        //             > canvas foreground
+        //             > plugins
+        var canvasArea = StyleUtil.addStyles(new PlotAreaPane(canvas, canvasForeground, pluginsArea), "chart-canvas-area");
+        plotArea.setContent(canvasArea);
+        axesAndCanvasPane.addCenter(plotBackground, plotArea, plotForeGround);
+        titleLegendPane.addCenter(axesAndCanvasPane);
+        measurementPane.addCenter(titleLegendPane);
+        menuPane.setContent(measurementPane);
+        getChildren().add(menuPane);
+
     }
 
     @Override

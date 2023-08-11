@@ -141,8 +141,10 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
         }
         .chart-plot-background {
         }
-        .chart-plot-content {
-          .chart-plot-area {
+        .chart-plot-area {
+          .chart-canvas-area {
+            .chart-canvas {
+            }
           }
         }
         .chart-plot-foreground {
@@ -159,12 +161,11 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   }
 }
 
-/*
- Set some reasonable default sizes so users
- can override them via CSS and JavaFX panes
- won't flicker (usually +/- 1px) or act odd.
- */
-.chart, .chart-content, .chart-plot-area {
+// XY Chart styles
+.chart {
+
+  // Set some reasonable default sizes so JavaFX panes won't flicker
+  // (often +/- 1px) and users users can override them via CSS
   -fx-padding: 0px;
   -fx-min-width: 100px;
   -fx-min-height: 100px;
@@ -172,15 +173,13 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   -fx-pref-height: 450px;
   -fx-max-height: 4096px;
   -fx-max-width: 4096px;
-}
 
-// XY Chart styles
-.chart {
-  // TODO: they don't seem to work and maybe we should create panes with a side property? deprecate these?
+  // TODO: the side property doesn't seem to work. Should probably become a dedicated pane
   -fx-tool-bar-side: TOP;
 
   .chart-title {
     visibility: visible;
+    -fx-alignment: center;
     -fx-side: top;
     -fx-rotate: 0;
 
