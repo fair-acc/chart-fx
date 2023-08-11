@@ -7,17 +7,19 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 
 import javax.swing.event.ChangeListener;
 
 /**
- * A hidden group that holds styles. This hides style nodes even
- * if the visibility property is set to true.
+ * A hidden node that holds styles. This hides style nodes even
+ * if the visibility property is set to true. This node is
+ * unmanaged and does not do any layout.
  *
  * @author ennerf
  */
-public class StyleGroup extends Group {
+public class StyleGroup extends Parent {
 
     public StyleGroup(Pane pane, String... paneStyles) {
         this(pane, pane.getChildren(), paneStyles);
@@ -30,9 +32,17 @@ public class StyleGroup extends Group {
 
     public StyleGroup(ObservableList<Node> children) {
         StyleUtil.hiddenStyleNode(this);
-        setAutoSizeChildren(false);
-        relocate(0, 0);
         children.add(this);
+    }
+
+    @Override
+    public void layoutChildren() {
+        // do nothing
+    }
+
+    @Override
+    public ObservableList<Node> getChildren() {
+        return super.getChildren();
     }
 
     public LineStyle newLineStyle(String... styles) {

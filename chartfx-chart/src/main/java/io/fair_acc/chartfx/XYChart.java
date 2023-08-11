@@ -208,8 +208,9 @@ public class XYChart extends Chart {
         // are already locked, so we can use parallel stream without extra synchronization.
         getAllDatasets().stream()
                 .filter(DataSet::isVisible)
+                .filter(ds -> ds.getBitState().isDirty())
                 .forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
-                        .filter(axisD -> !axisD.isDefined())
+                        .filter(axisD -> !axisD.isDefined() || axisD.getBitState().isDirty())
                         .forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
 
         // Update each of the axes

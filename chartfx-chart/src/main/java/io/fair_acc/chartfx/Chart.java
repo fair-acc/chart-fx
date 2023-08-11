@@ -12,7 +12,7 @@ import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
-import io.fair_acc.chartfx.ui.utils.LayoutHook;
+import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
@@ -33,7 +33,6 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Control;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Paint;
 import javafx.util.Duration;
 
 import org.slf4j.Logger;
@@ -67,12 +66,10 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
 public abstract class Chart extends Region implements EventSource {
-    private final LayoutHook layoutHooks = LayoutHook.newPreAndPostHook(this, this::runPreLayout, this::runPostLayout);
 
     // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
     // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
     protected final BitState state = BitState.initDirty(this, BitState.ALL_BITS)
-            .addChangeListener(ChartBits.KnownMask, (src, bits) -> layoutHooks.registerOnce())
             .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout());
 
     // DataSets are the only part that can potentially get updated from different threads, so we use a separate
@@ -244,6 +241,12 @@ public abstract class Chart extends Region implements EventSource {
                 abstractAxis.setDimIndex(dim);
             }
         }
+
+        // Setup layout hooks. Note that dataset changes by themselves do not trigger a layout,
+        // so in order to force a chart update we manually request a layout on an unmanaged
+        // style node that results in a NO-OP.
+        FXUtils.registerLayoutHooks(this, this::runPreLayout, this::runPostLayout);
+        state.addChangeListener(ChartBits.KnownMask, (src, bits) -> styleableNodes.requestLayout());
 
         menuPane.setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
         plotBackground.toBack();
@@ -502,25 +505,28 @@ public abstract class Chart extends Region implements EventSource {
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartCanvas);
     }
 
-    protected void updateLegend() {
+    protected void runPreLayout() {
+        state.setDirty(dataSetState.clear());
+        if (state.isClean()) {
+            return;
+        }
+
+        // Update legend
         if (state.isDirty(ChartBits.ChartLegend)) {
             updateLegend(getDatasets(), getRenderers());
         }
         state.clear(ChartBits.ChartLegend);
-    }
 
-    protected void runPreLayout() {
-        forEachDataSet(ds -> lockedDataSets.add(ds.lock().readLock()));
-        updateLegend();
-
+        // Update data ranges
         final long start = ProcessingProfiler.getTimeStamp();
+        ensureLockedDataSets();
         updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
 
+        // Update other components
         for (Renderer renderer : renderers) {
             renderer.runPreLayout();
         }
-
         for (ChartPlugin plugin : plugins) {
             plugin.runPreLayout();
         }
@@ -548,36 +554,57 @@ public abstract class Chart extends Region implements EventSource {
 
         // Note: there are some rare corner cases, e.g., computing
         // the pref size of the scene (and the HiddenSidesPane),
-        // that call for a layout without calling the hooks. The
-        // plugins may rely on datasets being locked, so we skip
-        // the update to be safe.
-        if (layoutHooks.hasRunPreLayout()) {
+        // that call for a layout without any dirty bits. It is also
+        // possible that the layout triggers a resizing, so we may
+        // need to lock the datasets here.
+        if (state.isDirty()) {
+            ensureLockedDataSets();
             layoutPluginsChildren();
         }
 
     }
 
     protected void runPostLayout() {
+        // nothing to do
+        if (state.isClean() && !hasLocked) {
+            return;
+        }
+        ensureLockedDataSets();
+
         // Make sure that renderer axes that are not part of
         // the chart still produce an accurate axis transform.
         updateStandaloneRendererAxes();
 
-        // Update the actual Canvas content
         final long start = ProcessingProfiler.getTimeStamp();
+
+        // Redraw the axes (they internally check dirty bits)
         for (Axis axis : axesList) {
             axis.drawAxis();
         }
+
+        // Redraw the main canvas
         redrawCanvas();
+
+        // Update other components
         for (Renderer renderer : renderers) {
             renderer.runPostLayout();
         }
         for (var plugin : plugins) {
             plugin.runPostLayout();
         }
+
+        // Clear bits
         clearStates();
 
         // TODO: plugins etc., do locking
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
+    }
+
+    protected void ensureLockedDataSets() {
+        if (!hasLocked) {
+            forEachDataSet(ds -> lockedDataSets.add(ds.lock().readLock()));
+            hasLocked = true;
+        }
     }
 
     protected void clearStates() {
@@ -593,13 +620,16 @@ public abstract class Chart extends Region implements EventSource {
             }
         }
 
-        dataSetState.clear();
         state.clear();
 
         for (var ds : lockedDataSets) {
+            for (AxisDescription axisDescription : ds.getAxisDescriptions()) {
+                axisDescription.getBitState().clear();
+            }
             ds.getBitState().clear(); // technically a 'write'
             ds.lock().readUnLock();
         }
+        hasLocked = false;
         lockedDataSets.clear();
     }
 
@@ -638,6 +668,7 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     private final List<DataSet> lockedDataSets = new ArrayList<>();
+    private boolean hasLocked = false;
 
     public final ObjectProperty<Legend> legendProperty() {
         return legend;

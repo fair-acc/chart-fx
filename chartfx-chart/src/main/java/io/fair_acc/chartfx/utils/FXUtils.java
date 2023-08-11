@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.dataset.events.StateListener;
+import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -339,6 +340,54 @@ public final class FXUtils {
             parent = parent.getParent();
         }
         return Optional.empty();
+    }
+
+    /**
+     * Utility method for registering pre-layout and post-layout hooks.
+     * Each JavaFX tick is executed in phases:
+     * <p>
+     * 1) animations/timers, e.g., Platform.runLater()
+     * 2) pre-layout hook
+     * 3) CSS styling pass (styling etc. gets updated)
+     * 4) layout pass (layoutChildren)
+     * 5) post-layout hook
+     * 6) update bounds
+     * 7) copy dirty node changes to the rendering thread
+     * <p>
+     * Drawing inside layout children is problematic because
+     * the layout may be recursive and can result in many
+     * unnecessary drawing operations.
+     * <p>
+     * The layout hooks will be executed every time there is a pulse,
+     * (e.g. renders or mouse press events), but they do not trigger
+     * a pulse by themselves.
+     * <p>
+     * This class registers actions as soon as a Scene is available,
+     * and unregisters them when the Scene is removed. Note that the
+     * Scene is set during the CSS phase, so the first execution is
+     * triggered immediately.
+     */
+    public static void registerLayoutHooks(Node node, Runnable preLayoutAction, Runnable postLayoutAction) {
+        AssertUtils.notNull("preLayoutAction", preLayoutAction);
+        AssertUtils.notNull("preLayoutAction", postLayoutAction);
+        node.sceneProperty().addListener((observable, oldScene, scene) -> {
+            // Remove from the old scene
+            if (oldScene != null) {
+                oldScene.removePreLayoutPulseListener(preLayoutAction);
+                oldScene.removePostLayoutPulseListener(postLayoutAction);
+            }
+
+            // Register when the scene changes. The scene reference gets
+            // set in the CSS phase, so by the time we can register it is
+            // already be too late. Waiting for the layout phase wouldn't
+            // let us change the scene graph, so we need to manually run the
+            // layout hook during CSS.
+            if (scene != null) {
+                scene.addPreLayoutPulseListener(preLayoutAction);
+                scene.addPostLayoutPulseListener(postLayoutAction);
+                preLayoutAction.run();
+            }
+        });
     }
 
 }
