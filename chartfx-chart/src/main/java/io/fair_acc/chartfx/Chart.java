@@ -70,7 +70,8 @@ public abstract class Chart extends Region implements EventSource {
     // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
     // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
     protected final BitState state = BitState.initDirty(this, BitState.ALL_BITS)
-            .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout());
+            .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout())
+            .addChangeListener(ChartBits.KnownMask, (src, bits) -> ensureJavaFxPulse());
 
     // DataSets are the only part that can potentially get updated from different threads, so we use a separate
     // state object that can handle multithreaded updates. The state always represents the current aggregate state
@@ -242,11 +243,8 @@ public abstract class Chart extends Region implements EventSource {
             }
         }
 
-        // Setup layout hooks. Note that dataset changes by themselves do not trigger a layout,
-        // so in order to force a chart update we manually request a layout on an unmanaged
-        // style node that results in a NO-OP.
+        // Register the layout hooks where chart elements get drawn
         FXUtils.registerLayoutHooks(this, this::runPreLayout, this::runPostLayout);
-        state.addChangeListener(ChartBits.KnownMask, (src, bits) -> styleableNodes.requestLayout());
 
         menuPane.setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
         plotBackground.toBack();
@@ -934,6 +932,16 @@ public abstract class Chart extends Region implements EventSource {
         var pluginChildren = plugins.stream().map(pluginGroups::get).collect(Collectors.toList());
         pluginsArea.getChildren().setAll(pluginChildren);
         fireInvalidated(ChartBits.ChartPlugins);
+    }
+
+    /**
+     * Dataset changes do not trigger a pulse, so in order
+     * to ensure a redraw we manually request a layout. We
+     * use an unmanaged node without a layout implementation,
+     * so that we don't accidentally do unnecessary work.
+     */
+    private void ensureJavaFxPulse() {
+        styleableNodes.requestLayout();
     }
 
     /**
