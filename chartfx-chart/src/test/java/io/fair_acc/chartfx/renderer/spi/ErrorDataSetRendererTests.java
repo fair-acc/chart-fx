@@ -130,7 +130,7 @@ public class ErrorDataSetRendererTests {
         renderer.setPolyLineStyle(lineStyle);
         final String referenceImage = getReferenceImageFileName();
         FXUtils.runAndWait(() -> renderer.getDatasets().setAll(getTestDataSet()));
-        FXUtils.runAndWait(() -> chart.getLegend().updateLegend(renderer.getDatasets(), Collections.singletonList(renderer), true));
+        FXUtils.runAndWait(() -> chart.getLegend().updateLegend(Collections.singletonList(renderer), true));
         FXUtils.runAndWait(() -> chart.invalidate());
         assertTrue(FXUtils.waitForFxTicks(chart.getScene(), WAIT_N_FX_PULSES, MAX_TIMEOUT_MILLIS));
 

@@ -64,7 +64,7 @@ public class CustomColourSchemeSample extends ChartSample {
         strokeStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
             DefaultRenderColorScheme.strokeColorProperty().set(n.getPalette());
             chart.invalidate();
-            chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
+            chart.getLegend().updateLegend(Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated stroke colour scheme to " + n.name());
         });
 
@@ -77,7 +77,7 @@ public class CustomColourSchemeSample extends ChartSample {
             DefaultRenderColorScheme.fillStylesProperty().clear();
             DefaultRenderColorScheme.fillStylesProperty().set(DefaultRenderColorScheme.getStandardFillStyle());
             chart.invalidate();
-            chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
+            chart.getLegend().updateLegend(Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated fill colour scheme to " + n.name());
         });
 
@@ -102,7 +102,7 @@ public class CustomColourSchemeSample extends ChartSample {
             DefaultRenderColorScheme.fillStylesProperty().clear();
             DefaultRenderColorScheme.fillStylesProperty().set(values);
             chart.invalidate();
-            chart.getLegend().updateLegend(chart.getDatasets(), Collections.singletonList(renderer), true);
+            chart.getLegend().updateLegend(Collections.singletonList(renderer), true);
             LOGGER.atInfo().log("updated to custom filling scheme");
         });
 

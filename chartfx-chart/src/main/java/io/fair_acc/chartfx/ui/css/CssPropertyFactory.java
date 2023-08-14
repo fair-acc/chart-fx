@@ -315,6 +315,21 @@ public class CssPropertyFactory<S extends Styleable> {
     }
 
     /**
+     * Create a StyleableProperty&lt;Enum&gt; with initial value and inherit flag.
+     *
+     * @param styleableBean the {@code this} reference of the returned property. This is also the property bean.
+     * @param propertyName the field name of the StyleableProperty&lt;Enum&gt;
+     * @param initialValue the initial value of the property. CSS may reset the property to this value.
+     * @param inherits whether the CSS style can be inherited from parent nodes
+     * @param enumClass the type of enum to read
+     * @return a StyleableProperty created with initial value and inherit flag
+     * @param <T> Type of the Property
+     */
+    public <T extends Enum<T>> StyleableObjectProperty<T> createEnumProperty(Styleable styleableBean, String propertyName, T initialValue, boolean inherits, Class<T> enumClass) {
+        return new StylishEnumProperty<>(styleableBean, propertyName, initialValue, inherits, enumClass, null);
+    }
+
+    /**
      * Create a StyleableProperty&lt;Boolean&gt; with initial value and inherit flag.
      * This also creates pseudoclasses for each enum value and keeps them up to date with the property.
      *

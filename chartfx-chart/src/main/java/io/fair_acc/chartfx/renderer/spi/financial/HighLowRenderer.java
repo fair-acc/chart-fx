@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -79,8 +80,9 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
     }
 
     @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        final Canvas canvas = new Canvas(width, height);
+    public boolean drawLegendSymbol(final DataSetNode dataSet, final Canvas canvas) {
+        final int width = (int) canvas.getWidth();
+        final int height = (int) canvas.getHeight();
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         final String style = dataSet.getStyle();
 
@@ -101,7 +103,7 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
         gc.strokeLine(x, 2, x, height - 2.0);
         gc.restore();
 
-        return canvas;
+        return true;
     }
 
     @Override

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.animation.AnimationTimer;
@@ -80,8 +81,9 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     }
 
     @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        final Canvas canvas = new Canvas(width, height);
+    public boolean drawLegendSymbol(final DataSetNode dataSet, final Canvas canvas) {
+        final int width = (int) canvas.getWidth();
+        final int height = (int) canvas.getHeight();
         final GraphicsContext gc = canvas.getGraphicsContext2D();
 
         final String style = dataSet.getStyle();
@@ -90,18 +92,18 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
         final int dsLayoutIndexOffset = layoutOffset == null ? 0 : layoutOffset; // TODO: rationalise
 
-        final int plotingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dsIndex : dsIndexLocal);
+        final int plottingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dataSet.getColorIndex() : dsIndexLocal);
 
         gc.save();
-        DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(), plotingIndex);
+        DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(), plottingIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, dataSet.getStyle());
-        DefaultRenderColorScheme.setFillScheme(gc, dataSet.getStyle(), plotingIndex);
+        DefaultRenderColorScheme.setFillScheme(gc, dataSet.getStyle(), plottingIndex);
 
         final double y = height / 2.0;
         gc.fillRect(1, 1, width - 2.0, height - 2.0);
         gc.strokeLine(1, y, width - 2.0, y);
         gc.restore();
-        return canvas;
+        return true;
     }
 
     public Chart getChart() {

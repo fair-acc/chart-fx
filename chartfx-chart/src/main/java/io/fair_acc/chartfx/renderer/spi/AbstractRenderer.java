@@ -1,29 +1,32 @@
 package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.events.ChartBits;
-import javafx.beans.property.*;
+import io.fair_acc.dataset.spi.DoubleDataSet;
+import io.fair_acc.dataset.spi.DoubleErrorDataSet;
+import io.fair_acc.dataset.utils.NoDuplicatesList;
+import io.fair_acc.dataset.utils.ProcessingProfiler;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableBooleanProperty;
+import javafx.css.StyleableIntegerProperty;
 import javafx.geometry.Orientation;
-
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.DataSetError;
-import io.fair_acc.dataset.spi.DoubleDataSet;
-import io.fair_acc.dataset.spi.DoubleErrorDataSet;
-import io.fair_acc.dataset.utils.NoDuplicatesList;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 import javafx.scene.Parent;
 
 import java.util.List;
@@ -37,6 +40,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractRenderer<R extends Renderer> extends Parent implements Renderer {
 
     protected final StyleableBooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
+    protected final StyleableBooleanProperty useGlobalIndex = css().createBooleanProperty(this, "useGlobalIndex", true);
+    protected final StyleableIntegerProperty indexOffset = css().createIntegerProperty(this, "indexOffset", 0);
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     private final ObservableList<DataSetNode> dataSetNodes = FXCollections.observableArrayList();
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
@@ -49,7 +54,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
                 return dataSetNode;
             }
         }
-        return new DataSetNode(dataSet);
+        return new DataSetNode(this, dataSet);
     }
 
     public AbstractRenderer() {
@@ -60,11 +65,16 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
         });
         datasets.addListener((ListChangeListener<DataSet>) c -> {
             dataSetNodes.setAll(datasets.stream().distinct().map(this::createNode).collect(Collectors.toList()));
-            int i = 0;
-            for (DataSetNode dataSetNode : dataSetNodes) {
-                dataSetNode.setLocalIndex(i++);
-            }
         });
+        dataSetNodes.addListener((ListChangeListener<DataSetNode>) c -> updateIndices());
+        PropUtil.runOnChange(this::updateIndices, useGlobalIndex, indexOffset);
+    }
+
+    protected void updateIndices() {
+        int i = useGlobalIndex.get() ? getIndexOffset() : 0;
+        for (DataSetNode datasetNode : getDatasetNodes()) {
+            datasetNode.setColorIndex(i++);
+        }
     }
 
     @Override
@@ -189,6 +199,19 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     @Override
     public final BooleanProperty showInLegendProperty() {
         return showInLegend;
+    }
+
+    @Override
+    public int getIndexOffset() {
+        return indexOffset.get();
+    }
+
+    public StyleableIntegerProperty indexOffsetProperty() {
+        return indexOffset;
+    }
+
+    public void setIndexOffset(int indexOffset) {
+        this.indexOffset.set(indexOffset);
     }
 
     /**
