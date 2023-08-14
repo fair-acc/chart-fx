@@ -115,12 +115,7 @@
   -fx-fill: rgba(65, 110, 244, 0.4078431373);
 }
 
-/*
- Set some reasonable default sizes so users
- can override them via CSS and JavaFX panes
- won't flicker (usually +/- 1px) or act odd.
- */
-.chart, .chart-content, .chart-plot-area {
+.chart {
   -fx-padding: 0px;
   -fx-min-width: 100px;
   -fx-min-height: 100px;
@@ -128,13 +123,11 @@
   -fx-pref-height: 450px;
   -fx-max-height: 4096px;
   -fx-max-width: 4096px;
-}
-
-.chart {
   -fx-tool-bar-side: TOP;
 }
 .chart .chart-title {
   visibility: visible;
+  -fx-alignment: center;
   -fx-side: top;
   -fx-rotate: 0;
 }

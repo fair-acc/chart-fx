@@ -126,12 +126,15 @@ public abstract class BitState implements StateListener {
      */
     protected abstract int setDirtyAndGetDelta(int bits);
 
-    public void clear() {
-       clear(ALL_BITS);
+    /**
+     * @return the bits before clearing
+     */
+    public int clear() {
+       return clear(ALL_BITS);
     }
 
     /**
-     * @return the state after clearing the specified bits
+     * @return the state before clearing the specified bits
      */
     public abstract int clear(int bits);
 
@@ -369,8 +372,9 @@ public abstract class BitState implements StateListener {
 
         @Override
         public int clear(final int bits) {
+            int previous = state;
             state &= ~bits;
-            return state;
+            return previous;
         }
 
         @Override
@@ -413,7 +417,7 @@ public abstract class BitState implements StateListener {
                 final int current = getBits();
                 final int newState = current & ~bits;
                 if (state.compareAndSet(current, newState)) {
-                    return newState;
+                    return current;
                 }
             }
         }

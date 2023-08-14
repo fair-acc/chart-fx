@@ -12,7 +12,7 @@ import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
-import io.fair_acc.chartfx.ui.utils.LayoutHook;
+import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
@@ -21,7 +21,6 @@ import javafx.animation.KeyFrame;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -33,7 +32,6 @@ import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Control;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Paint;
 import javafx.util.Duration;
 
 import org.slf4j.Logger;
@@ -67,13 +65,12 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
 public abstract class Chart extends Region implements EventSource {
-    private final LayoutHook layoutHooks = LayoutHook.newPreAndPostHook(this, this::runPreLayout, this::runPostLayout);
 
     // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
     // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
     protected final BitState state = BitState.initDirty(this, BitState.ALL_BITS)
-            .addChangeListener(ChartBits.KnownMask, (src, bits) -> layoutHooks.registerOnce())
-            .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout());
+            .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout())
+            .addChangeListener(ChartBits.KnownMask, (src, bits) -> ensureJavaFxPulse());
 
     // DataSets are the only part that can potentially get updated from different threads, so we use a separate
     // state object that can handle multithreaded updates. The state always represents the current aggregate state
@@ -88,11 +85,8 @@ public abstract class Chart extends Region implements EventSource {
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = Boolean.getBoolean("chartfx.debug"); // for more verbose debugging
-
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
-    {
-        showing.bind(FXUtils.getShowingBinding(this));
-    }
+
 
     /**
      * When true any data changes will be animated.
@@ -110,18 +104,16 @@ public abstract class Chart extends Region implements EventSource {
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
     private final ObservableList<Renderer> renderers = FXCollections.observableArrayList();
-    {
-        getRenderers().addListener(this::rendererChanged);
-    }
+
 
     // Inner canvas for the drawn content
-    protected final ResizableCanvas canvas = new ResizableCanvas();
+    protected final ResizableCanvas canvas = StyleUtil.addStyles(new ResizableCanvas(), "chart-canvas");
     protected final Pane canvasForeground = new Pane();
     protected final Group pluginsArea = Chart.createChildGroup();
 
     // Area where plots get drawn
     protected final Pane plotBackground = StyleUtil.addStyles(new Pane(), "chart-plot-background");
-    protected final HiddenSidesPane plotArea = StyleUtil.addStyles(new HiddenSidesPane(), "chart-plot-content");
+    protected final HiddenSidesPane plotArea = StyleUtil.addStyles(new HiddenSidesPane(), "chart-plot-area");
     protected final Pane plotForeGround = StyleUtil.addStyles(new Pane(), "chart-plot-foreground");
 
     // Outer chart elements
@@ -137,39 +129,15 @@ public abstract class Chart extends Region implements EventSource {
     // Other nodes that need to be styled via CSS
     protected final StyleGroup styleableNodes = new StyleGroup(this, getChildren(), "chart");
 
-    {
-        // Build hierarchy
-        // > menuPane (hidden toolbars that slide in from top/bottom)
-        //   > measurement pane (labels/menus for working with data)
-        //     > legend & title pane (static legend and title)
-        //       > axis pane (x/y axes)
-        //         > axes
-        //         > plot area (plotted content, hidden elements for zoom etc.)
-        //           > canvas (main)
-        //           > canvas foreground
-        //           > plugins
-        //         > plot background/foreground
-        var canvasPane = StyleUtil.addStyles(new PlotAreaPane(canvas, canvasForeground, pluginsArea), "chart-plot-area");
-        plotArea.setContent(canvasPane);
-        axesAndCanvasPane.addCenter(plotBackground, plotArea, plotForeGround);
-        titleLegendPane.addCenter(axesAndCanvasPane);
-        measurementPane.addCenter(titleLegendPane);
-        menuPane.setContent(measurementPane);
-        getChildren().add(menuPane);
-    }
+    protected final TitleLabel titleLabel = StyleUtil.addStyles(new TitleLabel(), "chart-title");
 
+
+    // Listeners
+    protected final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
     protected final ListChangeListener<Axis> axesChangeListenerLocal = this::axesChangedLocal;
     protected final ListChangeListener<Axis> axesChangeListener = this::axesChanged;
     protected final ListChangeListener<DataSet> datasetChangeListener = this::datasetsChanged;
     protected final ListChangeListener<ChartPlugin> pluginsChangedListener = this::pluginsChanged;
-
-    {
-        getDatasets().addListener(datasetChangeListener);
-        getAxes().addListener(axesChangeListener);
-        getAxes().addListener(axesChangeListenerLocal);
-    }
-
-    protected final TitleLabel titleLabel = StyleUtil.addStyles(new TitleLabel(), "chart-title");
 
     /**
      * The node to display as the Legend. Subclasses can set a node here to be displayed on a side as the legend. If no
@@ -245,6 +213,18 @@ public abstract class Chart extends Region implements EventSource {
             }
         }
 
+        // Register the layout hooks where chart elements get drawn
+        FXUtils.registerLayoutHooks(this, this::runPreLayout, this::runPostLayout);
+
+        // Setup listeners
+        showing.bind(FXUtils.getShowingBinding(this));
+        getRenderers().addListener(rendererChangeListener);
+        getDatasets().addListener(datasetChangeListener);
+        getPlugins().addListener(pluginsChangedListener);
+        getAxes().addListener(axesChangeListenerLocal);
+        getAxes().addListener(axesChangeListener);
+
+
         menuPane.setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
         plotBackground.toBack();
         plotForeGround.toFront();
@@ -256,24 +236,7 @@ public abstract class Chart extends Region implements EventSource {
         // hiddenPane.setMouseTransparent(true);
         plotArea.setPickOnBounds(false);
 
-        // alt: canvas resize (default JavaFX Canvas does not automatically
-        // resize to pref width/height according to parent constraints
-        // canvas.widthProperty().bind(stackPane.widthProperty());
-        // canvas.heightProperty().bind(stackPane.heightProperty());
         getCanvasForeground().setManaged(false);
-        final ChangeListener<Number> canvasSizeChangeListener = (ch, o, n) -> {
-            final double width = getCanvas().getWidth();
-            final double height = getCanvas().getHeight();
-
-            if (getCanvasForeground().getWidth() != width || getCanvasForeground().getHeight() != height) {
-                // workaround needed so that pane within pane does not trigger
-                // recursions w.r.t. repainting
-                getCanvasForeground().resize(width, height);
-            }
-        };
-        canvas.widthProperty().addListener(canvasSizeChangeListener);
-        canvas.heightProperty().addListener(canvasSizeChangeListener);
-
         getCanvasForeground().setMouseTransparent(true);
         getCanvas().toFront();
         getCanvasForeground().toFront();
@@ -284,23 +247,37 @@ public abstract class Chart extends Region implements EventSource {
             canvas.setCacheHint(CacheHint.QUALITY);
         }
 
-        canvas.setStyle("-fx-background-color: rgba(200, 250, 200, 0.5);");
-
-        // add plugin handling and listeners
-        getPlugins().addListener(pluginsChangedListener);
-
         // add default chart content ie. ToolBar and Legend
         // can be repositioned via setToolBarSide(...) and setLegendSide(...)
-        titleLabel.setAlignment(Pos.CENTER);
-        HBox.setHgrow(titleLabel, Priority.ALWAYS);
-        VBox.setVgrow(titleLabel, Priority.ALWAYS);
         titleLabel.focusTraversableProperty().bind(Platform.accessibilityActiveProperty());
+        getTitleLegendPane().getChildren().add(titleLabel);
 
         // register listener in tool bar FlowPane
         toolBar.registerListener();
         menuPane.setTop(getToolBar());
 
-        getTitleLegendPane().getChildren().add(titleLabel);
+        // Chart hierarchy
+        // > style nodes
+        // > menuPane (hidden toolbars that slide in from top/bottom)
+        //   > measurement pane (labels/menus for working with data)
+        //     > legend & title pane (static legend and title)
+        //       > axes pane (x/y axes)
+        //         > axes
+        //         > plot background/foreground
+        //         > plot content
+        //           > hidden elements for zoom etc.
+        //           > plot area
+        //             > canvas (main)
+        //             > canvas foreground
+        //             > plugins
+        var canvasArea = StyleUtil.addStyles(new PlotAreaPane(canvas, canvasForeground, pluginsArea), "chart-canvas-area");
+        plotArea.setContent(canvasArea);
+        axesAndCanvasPane.addCenter(plotBackground, plotArea, plotForeGround);
+        titleLegendPane.addCenter(axesAndCanvasPane);
+        measurementPane.addCenter(titleLegendPane);
+        menuPane.setContent(measurementPane);
+        getChildren().add(menuPane);
+
     }
 
     @Override
@@ -502,25 +479,28 @@ public abstract class Chart extends Region implements EventSource {
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartCanvas);
     }
 
-    protected void updateLegend() {
+    protected void runPreLayout() {
+        state.setDirty(dataSetState.clear());
+        if (state.isClean()) {
+            return;
+        }
+
+        // Update legend
         if (state.isDirty(ChartBits.ChartLegend)) {
             updateLegend(getDatasets(), getRenderers());
         }
         state.clear(ChartBits.ChartLegend);
-    }
 
-    protected void runPreLayout() {
-        forEachDataSet(ds -> lockedDataSets.add(ds.lock().readLock()));
-        updateLegend();
-
+        // Update data ranges
         final long start = ProcessingProfiler.getTimeStamp();
+        ensureLockedDataSets();
         updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
         ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
 
+        // Update other components
         for (Renderer renderer : renderers) {
             renderer.runPreLayout();
         }
-
         for (ChartPlugin plugin : plugins) {
             plugin.runPreLayout();
         }
@@ -548,36 +528,57 @@ public abstract class Chart extends Region implements EventSource {
 
         // Note: there are some rare corner cases, e.g., computing
         // the pref size of the scene (and the HiddenSidesPane),
-        // that call for a layout without calling the hooks. The
-        // plugins may rely on datasets being locked, so we skip
-        // the update to be safe.
-        if (layoutHooks.hasRunPreLayout()) {
+        // that call for a layout without any dirty bits. It is also
+        // possible that the layout triggers a resizing, so we may
+        // need to lock the datasets here.
+        if (state.isDirty()) {
+            ensureLockedDataSets();
             layoutPluginsChildren();
         }
 
     }
 
     protected void runPostLayout() {
+        // nothing to do
+        if (state.isClean() && !hasLocked) {
+            return;
+        }
+        ensureLockedDataSets();
+
         // Make sure that renderer axes that are not part of
         // the chart still produce an accurate axis transform.
         updateStandaloneRendererAxes();
 
-        // Update the actual Canvas content
         final long start = ProcessingProfiler.getTimeStamp();
+
+        // Redraw the axes (they internally check dirty bits)
         for (Axis axis : axesList) {
             axis.drawAxis();
         }
+
+        // Redraw the main canvas
         redrawCanvas();
+
+        // Update other components
         for (Renderer renderer : renderers) {
             renderer.runPostLayout();
         }
         for (var plugin : plugins) {
             plugin.runPostLayout();
         }
+
+        // Clear bits
         clearStates();
 
         // TODO: plugins etc., do locking
         ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
+    }
+
+    protected void ensureLockedDataSets() {
+        if (!hasLocked) {
+            forEachDataSet(ds -> lockedDataSets.add(ds.lock().readLock()));
+            hasLocked = true;
+        }
     }
 
     protected void clearStates() {
@@ -593,13 +594,16 @@ public abstract class Chart extends Region implements EventSource {
             }
         }
 
-        dataSetState.clear();
         state.clear();
 
         for (var ds : lockedDataSets) {
+            for (AxisDescription axisDescription : ds.getAxisDescriptions()) {
+                axisDescription.getBitState().clear();
+            }
             ds.getBitState().clear(); // technically a 'write'
             ds.lock().readUnLock();
         }
+        hasLocked = false;
         lockedDataSets.clear();
     }
 
@@ -638,6 +642,7 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     private final List<DataSet> lockedDataSets = new ArrayList<>();
+    private boolean hasLocked = false;
 
     public final ObjectProperty<Legend> legendProperty() {
         return legend;
@@ -903,6 +908,16 @@ public abstract class Chart extends Region implements EventSource {
         var pluginChildren = plugins.stream().map(pluginGroups::get).collect(Collectors.toList());
         pluginsArea.getChildren().setAll(pluginChildren);
         fireInvalidated(ChartBits.ChartPlugins);
+    }
+
+    /**
+     * Dataset changes do not trigger a pulse, so in order
+     * to ensure a redraw we manually request a layout. We
+     * use an unmanaged node without a layout implementation,
+     * so that we don't accidentally do unnecessary work.
+     */
+    private void ensureJavaFxPulse() {
+        styleableNodes.requestLayout();
     }
 
     /**
