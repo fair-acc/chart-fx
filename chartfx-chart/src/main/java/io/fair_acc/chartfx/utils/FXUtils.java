@@ -370,7 +370,7 @@ public final class FXUtils {
      */
     public static void registerLayoutHooks(Node node, Runnable preLayoutAction, Runnable postLayoutAction) {
         AssertUtils.notNull("preLayoutAction", preLayoutAction);
-        AssertUtils.notNull("preLayoutAction", postLayoutAction);
+        AssertUtils.notNull("postLayoutAction", postLayoutAction);
         node.sceneProperty().addListener((observable, oldScene, scene) -> {
             // Remove from the old scene
             if (oldScene != null) {
