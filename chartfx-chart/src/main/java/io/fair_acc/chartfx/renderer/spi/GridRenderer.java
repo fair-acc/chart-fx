@@ -15,7 +15,6 @@ import javafx.css.StyleableBooleanProperty;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.TextAlignment;
 
@@ -108,12 +107,6 @@ public class GridRenderer extends Parent implements Renderer {
                 DashPatternStyle.strokeDashedLine(gc, zeroSnapped, y, xAxisWidthSnapped, y);
             }
         }
-    }
-
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not applicable
-        return null;
     }
 
     protected void drawPolarCircle(final GraphicsContext gc, final Axis yAxis, final double yRange,
@@ -371,6 +364,15 @@ public class GridRenderer extends Parent implements Renderer {
     @Override
     public BooleanProperty showInLegendProperty() {
         return null;
+    }
+
+    @Override
+    public void setIndexOffset(int value) {
+    }
+
+    @Override
+    public int getIndexOffset() {
+        return 0;
     }
 
     @Override

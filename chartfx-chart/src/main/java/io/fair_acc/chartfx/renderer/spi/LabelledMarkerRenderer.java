@@ -111,12 +111,6 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
         gc.restore();
     }
 
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not applicable
-        return null;
-    }
-
     /**
      * Draws vertical markers with vertical (default) labels attached to the top
      *

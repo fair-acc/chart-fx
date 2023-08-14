@@ -279,11 +279,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         ProcessingProfiler.getTimeDiff(start, "drawHexagonMapContour");
     }
 
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        return null; // TODO: implement
-    }
-
     /**
      * @return the instance of this ContourDataSetRenderer.
      */

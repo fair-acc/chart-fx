@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
-import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.css.StyleGroup;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
@@ -91,7 +91,7 @@ public abstract class Chart extends Region implements EventSource {
     /**
      * When true any data changes will be animated.
      */
-    private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", true);
+    private final BooleanProperty animated = new SimpleBooleanProperty(this, "animated", false);
     // TODO: Check whether 'this' or chart contents need to be added
     /**
      * Animator for animating stuff on the chart
@@ -101,7 +101,6 @@ public abstract class Chart extends Region implements EventSource {
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final Map<ChartPlugin, Pane> pluginPanes = new HashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
-    private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
     private final ObservableList<Renderer> renderers = FXCollections.observableArrayList();
 
@@ -337,10 +336,13 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     /**
-     * @return datasets attached to the chart and drawn by all renderers
+     * @return datasets of the first renderer. Creates a renderer if needed.
      */
     public ObservableList<DataSet> getDatasets() {
-        return datasets;
+        if (getRenderers().isEmpty()) {
+            getRenderers().add(new ErrorDataSetRenderer());
+        }
+        return getRenderers().get(0).getDatasets();
     }
 
     public Axis getFirstAxis(final Orientation orientation) {
@@ -555,6 +557,10 @@ public abstract class Chart extends Region implements EventSource {
             axis.drawAxis();
         }
 
+        // Redraw legend icons
+        // TODO: only update if the style actually changed
+        legend.get().drawLegend();
+
         // Redraw the main canvas
         redrawCanvas();
 
@@ -630,9 +636,6 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     private void forEachDataSet(Consumer<DataSet> action) {
-        for (DataSet dataset : datasets) {
-            action.accept(dataset);
-        }
         for (Renderer renderer : renderers) {
             for (DataSet dataset : renderer.getDatasets()) {
                 action.accept(dataset);
@@ -797,16 +800,14 @@ public abstract class Chart extends Region implements EventSource {
         }
 
         // set global indices
-        int i = datasets.size();
+        int indexOffset = 0;
         for (Renderer renderer : renderers) {
-            for (DataSetNode datasetNode : renderer.getDatasetNodes()) {
-                datasetNode.setGlobalIndex(i++);
-            }
+            renderer.setIndexOffset(indexOffset);
+            indexOffset += renderer.getDatasetNodes().size();
         }
 
         // Rebuild legend (modifies SceneGraph and needs to be done before styling)
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartDataSets, ChartBits.ChartLegend);
-        updateLegend();
     }
 
     /**
@@ -910,7 +911,7 @@ public abstract class Chart extends Region implements EventSource {
         if (legend == null) {
             return;
         }
-        legend.updateLegend(dataSets, renderers);
+        legend.updateLegend(renderers);
     }
 
     protected void updatePluginsArea() {

@@ -98,12 +98,6 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         setInfoBoxSide(Side.TOP); // NOPMD by rstein on 13/06/19 14:25
     }
 
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        // not applicable for this class
-        return null;
-    }
-
     public BooleanProperty drawOnCanvasProperty() {
         return drawOnCanvas;
     }

@@ -2,12 +2,7 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.security.InvalidParameterException;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -22,6 +17,8 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
     protected static final double DEFAULT_GRID_LINE_WIDTH = 1;
     protected static final double[] DEFAULT_GRID_DASH_PATTERM = { 3.0, 3.0 };
     protected final StringProperty style = new SimpleStringProperty(this, "style", null);
+
+    protected final IntegerProperty indexOffset = new SimpleIntegerProperty(this, "indexOffset", 0);
     protected Paint strokeColorMarker = AbstractMetaDataRendererParameter.DEFAULT_GRID_LINE_COLOR;
     protected double strokeLineWidthMarker = AbstractMetaDataRendererParameter.DEFAULT_GRID_LINE_WIDTH;
     protected double[] strokeDashPattern = AbstractMetaDataRendererParameter.DEFAULT_GRID_DASH_PATTERM;
@@ -97,6 +94,18 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
 
     public StringProperty styleProperty() {
         return style;
+    }
+
+    public int getIndexOffset() {
+        return indexOffset.get();
+    }
+
+    public IntegerProperty indexOffsetProperty() {
+        return indexOffset;
+    }
+
+    public void setIndexOffset(int indexOffset) {
+        this.indexOffset.set(indexOffset);
     }
 
     // ******************************* CSS Style Stuff *********************

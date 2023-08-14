@@ -4,6 +4,7 @@ import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.function.Supplier;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
@@ -48,7 +49,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<ErrorDataSetRenderer>
         implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
-    private Marker marker = DefaultMarker.RECTANGLE; // default: rectangle
+    private Marker marker = DefaultMarker.DEFAULT;
     private long stopStamp;
 
     /**
@@ -68,15 +69,14 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     /**
-     * @param dataSet for which the representative icon should be generated
-     * @param dsIndex index within renderer set
-     * @param width requested width of the returning Canvas
-     * @param height requested height of the returning Canvas
-     * @return a graphical icon representation of the given data sets
+     * @param dataSet the data set for which the representative icon should be generated
+     * @param canvas the canvas in which the representative icon should be drawn
+     * @return true if the renderer generates symbols that should be displayed
      */
     @Override
-    public Canvas drawLegendSymbol(final DataSet dataSet, final int dsIndex, final int width, final int height) {
-        final Canvas canvas = new Canvas(width, height);
+    public boolean drawLegendSymbol(final DataSetNode dataSet, final Canvas canvas) {
+        final int width = (int) canvas.getWidth();
+        final int height = (int) canvas.getHeight();
         final GraphicsContext gc = canvas.getGraphicsContext2D();
 
         final String style = dataSet.getStyle();
@@ -85,7 +85,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int dsLayoutIndexOffset = layoutOffset == null ? 0 : layoutOffset; // TODO: rationalise
 
-        final int plottingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dsIndex : dsIndexLocal);
+        final int plottingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dataSet.getColorIndex() : dsIndexLocal);
 
         gc.save();
 
@@ -116,7 +116,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             gc.strokeLine(1, y, width - 2.0, y);
         }
         gc.restore();
-        return canvas;
+        return true;
     }
 
     /**

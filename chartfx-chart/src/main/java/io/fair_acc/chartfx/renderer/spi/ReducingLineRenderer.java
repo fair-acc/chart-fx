@@ -40,11 +40,6 @@ public class ReducingLineRenderer extends AbstractRenderer<ReducingLineRenderer>
         this.maxPoints = maxPoints;
     }
 
-    @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        return null; // not implemented for this class
-    }
-
     public int getMaxPoints() {
         return maxPoints;
     }

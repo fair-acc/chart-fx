@@ -1,11 +1,13 @@
 package io.fair_acc.chartfx;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.BooleanProperty;
@@ -94,10 +96,7 @@ public class XYChart extends Chart {
                 gridRenderer.getVerticalMinorGrid().changeCounterProperty(),
                 gridRenderer.drawOnTopProperty());
 
-        this.setAnimated(false);
         getRenderers().addListener(this::rendererChanged);
-
-        getRenderers().add(new ErrorDataSetRenderer());
     }
 
     /**
@@ -110,14 +109,12 @@ public class XYChart extends Chart {
         }
 
         allDataSets.clear();
-        allDataSets.addAll(getDatasets());
         for (Renderer renderer : getRenderers()) {
             if(renderer instanceof LabelledMarkerRenderer){
                 continue;
             }
             allDataSets.addAll(renderer.getDatasets());
         }
-
         return allDataSets;
     }
 
@@ -206,9 +203,12 @@ public class XYChart extends Chart {
 
         // Check that all registered data sets have proper ranges defined. The datasets
         // are already locked, so we can use parallel stream without extra synchronization.
-        getAllDatasets().stream()
-                .filter(DataSet::isVisible)
-                .filter(ds -> ds.getBitState().isDirty())
+        getRenderers().stream()
+                .flatMap(renderer -> renderer.getDatasetNodes().stream())
+                .filter(DataSetNode::isVisible)
+                .map(DataSetNode::getDataSet)
+                .filter(ds -> ds.getBitState().isDirty(ChartBits.DataSetData, ChartBits.DataSetRange))
+                .distinct()
                 .forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
                         .filter(axisD -> !axisD.isDefined() || axisD.getBitState().isDirty())
                         .forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
@@ -272,14 +272,13 @@ public class XYChart extends Chart {
         getAxes().addAll(renderer.getAxes().stream().limit(2).filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
     }
 
-    protected List<DataSet> getDataSetForAxis(final Axis axis) {
-        final List<DataSet> retVal = new ArrayList<>();
-        if (axis == null) {
-            return retVal;
-        }
-        retVal.addAll(getDatasets());
-        getRenderers().forEach(renderer -> renderer.getAxes().stream().filter(axis::equals).forEach(rendererAxis -> retVal.addAll(renderer.getDatasets())));
-        return retVal;
+    protected List<DataSetNode> getDataSetForAxis(final Axis axis) {
+        final List<DataSetNode> list = new ArrayList<>();
+        getRenderers().stream()
+                .filter(renderer -> renderer.getAxes().contains(axis))
+                .map(Renderer::getDatasetNodes)
+                .forEach(list::addAll);
+        return list;
     }
 
     @Override
@@ -328,7 +327,7 @@ public class XYChart extends Chart {
         }
     }
 
-    protected static void updateNumericAxis(final Axis axis, final List<DataSet> dataSets) {
+    protected static void updateNumericAxis(final Axis axis, final List<DataSetNode> dataSets) {
         if (dataSets == null || dataSets.isEmpty()) {
             return;
         }
@@ -339,8 +338,9 @@ public class XYChart extends Chart {
         // Determine the range of all datasets for this axis
         final AxisRange dsRange = new AxisRange();
         dsRange.clear();
-        dataSets.stream().filter(DataSet::isVisible).forEach(dataset -> {
-            if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
+        dataSets.stream().filter(DataSetNode::isVisible).map(DataSetNode::getDataSet)
+                .forEach(dataset -> {
+                    if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
                 if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
                     dataset.recomputeLimits(DataSet.DIM_Z);
                 }

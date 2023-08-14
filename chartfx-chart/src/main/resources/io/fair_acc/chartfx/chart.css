@@ -153,6 +153,7 @@
 }
 .chart .renderer {
   -fx-show-in-legend: true;
+  -fx-use-global-index: true;
   -fx-assume-sorted-data: true;
   -fx-min-required-reduction-size: 5;
   -fx-parallel-implementation: true;

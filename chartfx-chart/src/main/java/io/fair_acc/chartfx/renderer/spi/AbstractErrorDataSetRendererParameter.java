@@ -42,16 +42,16 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         extends AbstractPointReducingRenderer<R> {
     // intensity fading factor per stage
     protected static final double DEFAULT_HISTORY_INTENSITY_FADING = 0.65;
-    private final ObjectProperty<ErrorStyle> errorStyle = css().createEnumPropertyWithPseudoclasses(this, "errorStyle",
-            ErrorStyle.ERRORCOMBO, ErrorStyle.class);
+    private final ObjectProperty<ErrorStyle> errorStyle = css().createEnumProperty(this, "errorStyle",
+            ErrorStyle.ERRORCOMBO, true, ErrorStyle.class);
     private final ObjectProperty<RendererDataReducer> rendererDataReducer = new SimpleObjectProperty<>(this,
             "rendererDataReducer", new DefaultDataReducer());
 
     private final IntegerProperty dashSize = css().createIntegerProperty(this, "dashSize", 3);
     private final DoubleProperty markerSize = css().createDoubleProperty(this, "markerSize", 1.5);
     private final BooleanProperty drawMarker = css().createBooleanProperty(this, "drawMarker", true);
-    private final ObjectProperty<LineStyle> polyLineStyle = css().createEnumPropertyWithPseudoclasses(this, "polyLineStyle",
-            LineStyle.NORMAL, LineStyle.class);
+    private final ObjectProperty<LineStyle> polyLineStyle = css().createEnumProperty(this, "polyLineStyle",
+            LineStyle.NORMAL, false, LineStyle.class);
     private final BooleanProperty drawChartDataSets = new SimpleBooleanProperty(this, "drawChartDataSets", true);
     private final BooleanProperty drawBars = css().createBooleanProperty(this, "drawBars", false);
     private final BooleanProperty shiftBar = css().createBooleanProperty(this, "shiftBar", true);

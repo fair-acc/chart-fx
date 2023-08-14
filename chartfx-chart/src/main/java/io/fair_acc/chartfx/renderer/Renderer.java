@@ -21,12 +21,12 @@ import io.fair_acc.dataset.DataSet;
 public interface Renderer {
     /**
      * @param dataSet the data set for which the representative icon should be generated
-     * @param dsIndex index within renderer set
-     * @param width requested width of the returning Canvas
-     * @param height requested height of the returning Canvas
-     * @return a graphical icon representation of the given data sets
+     * @param canvas the canvas in which the representative icon should be drawn
+     * @return true if the renderer generates symbols that should be displayed
      */
-    Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height);
+    default boolean drawLegendSymbol(DataSetNode dataSet, Canvas canvas) {
+        return false;
+    }
 
     /**
      * @return observable list of axes that are supposed to be used by the renderer
@@ -81,4 +81,8 @@ public interface Renderer {
      * @return true (default) if data sets are supposed to be drawn
      */
     BooleanProperty showInLegendProperty();
+
+    void setIndexOffset(int value);
+    int getIndexOffset();
+
 }

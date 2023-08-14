@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -125,8 +126,9 @@ public class FootprintRenderer extends AbstractFinancialRenderer<FootprintRender
     }
 
     @Override
-    public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-        final Canvas canvas = new Canvas(width, height);
+    public boolean drawLegendSymbol(final DataSetNode dataSet, final Canvas canvas) {
+        final int width = (int) canvas.getWidth();
+        final int height = (int) canvas.getHeight();
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         final String style = dataSet.getStyle();
 
@@ -147,7 +149,7 @@ public class FootprintRenderer extends AbstractFinancialRenderer<FootprintRender
         gc.strokeLine(x, 1, x, height - 3.0);
         gc.restore();
 
-        return canvas;
+        return true;
     }
 
     @Override
