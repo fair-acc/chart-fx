@@ -88,11 +88,10 @@
   -color-dataset-7: darkgray;
   -color-dataset-8: pink;
   -color-dataset-9: black;
-}
-.chart .renderer {
   -fx-color-count: 9;
 }
-.chart:misc {
+
+.chart:misc, .renderer:misc {
   -color-dataset-1: #5DA5DA;
   -color-dataset-2: #F15854;
   -color-dataset-3: #FAA43A;
@@ -102,11 +101,9 @@
   -color-dataset-7: #B276B2;
   -color-dataset-8: #DECF3F;
   -color-dataset-9: #4D4D4D;
-}
-.chart:misc .renderer {
   -fx-color-count: 9;
 }
-.chart:adobe {
+.chart:adobe, .renderer:adobe {
   -color-dataset-1: #00a4e4;
   -color-dataset-2: #ff0000;
   -color-dataset-3: #fbb034;
@@ -114,11 +111,9 @@
   -color-dataset-5: #c1d82f;
   -color-dataset-6: #8a7967;
   -color-dataset-7: #6a737b;
-}
-.chart:adobe .renderer {
   -fx-color-count: 7;
 }
-.chart:dell {
+.chart:dell, .renderer:dell {
   -color-dataset-1: #0085c3;
   -color-dataset-2: #7ab800;
   -color-dataset-3: #f2af00;
@@ -127,11 +122,9 @@
   -color-dataset-6: #71c6c1;
   -color-dataset-7: #009bbb;
   -color-dataset-8: #444444;
-}
-.chart:dell .renderer {
   -fx-color-count: 8;
 }
-.chart:equidistant {
+.chart:equidistant, .renderer:equidistant {
   -color-dataset-1: #003f5c;
   -color-dataset-2: #2f4b7c;
   -color-dataset-3: #665191;
@@ -140,11 +133,9 @@
   -color-dataset-6: #f95d6a;
   -color-dataset-7: #ff7c43;
   -color-dataset-8: #ffa600;
-}
-.chart:equidistant .renderer {
   -fx-color-count: 8;
 }
-.chart:tuneviewer {
+.chart:tuneviewer, .renderer:tuneviewer {
   -color-dataset-1: #0000c8;
   -color-dataset-2: #c80000;
   -color-dataset-3: #00c800;
@@ -154,11 +145,9 @@
   -color-dataset-7: darkgray;
   -color-dataset-8: pink;
   -color-dataset-9: black;
-}
-.chart:tuneviewer .renderer {
   -fx-color-count: 9;
 }
-.chart:matlab {
+.chart:matlab, .renderer:matlab {
   -color-dataset-1: rgb(0, 114, 189);
   -color-dataset-2: rgb(217, 83, 25);
   -color-dataset-3: rgb(237, 177, 32);
@@ -166,11 +155,9 @@
   -color-dataset-5: rgb(119, 172, 48);
   -color-dataset-6: rgb(77, 190, 238);
   -color-dataset-7: rgb(162, 20, 47);
-}
-.chart:matlab .renderer {
   -fx-color-count: 7;
 }
-.chart:matlab-dark {
+.chart:matlab-dark, .renderer:matlab-dark {
   -color-dataset-1: rgb(89, 149, 189);
   -color-dataset-2: rgb(217, 115, 71);
   -color-dataset-3: rgb(237, 177, 32);
@@ -178,8 +165,6 @@
   -color-dataset-5: rgb(119, 172, 48);
   -color-dataset-6: rgb(77, 190, 238);
   -color-dataset-7: rgb(162, 137, 141);
-}
-.chart:matlab-dark .renderer {
   -fx-color-count: 7;
 }
 

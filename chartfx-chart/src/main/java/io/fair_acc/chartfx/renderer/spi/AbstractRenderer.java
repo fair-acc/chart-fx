@@ -39,7 +39,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     protected final StyleableBooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
     protected final StyleableBooleanProperty useGlobalIndex = css().createBooleanProperty(this, "useGlobalIndex", true);
     protected final StyleableIntegerProperty indexOffset = css().createIntegerProperty(this, "indexOffset", 0);
-    protected final IntegerProperty colorCount = css().createIntegerProperty(this, "colorCount", 8);
+    protected final IntegerProperty colorCount = css().createIntegerProperty(this, "colorCount", 8, true, null);
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     private final ObservableList<DataSetNode> dataSetNodes = FXCollections.observableArrayList();
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());

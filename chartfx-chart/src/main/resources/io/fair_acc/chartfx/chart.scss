@@ -4,7 +4,9 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 
 .chart {
   @include palette.tuneviewer();
+}
 
+.chart, .renderer {
   &:misc {
     @include palette.misc();
   }
