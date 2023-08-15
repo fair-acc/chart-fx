@@ -51,16 +51,16 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
         changeCounterProperty().addListener(getBitState().onPropChange(ChartBits.DataSetMetaData)::set);
 
         // Integrate with the JavaFX default CSS color selectors
+        StyleUtil.styleNode(this, "dataset", DefaultColorClass.getForIndex(getColorIndex()));
         colorIndexProperty().addListener((observable, oldValue, newValue) -> {
             if (oldValue != null) {
                 getStyleClass().removeAll(DefaultColorClass.getForIndex(oldValue.intValue()));
             }
             if (newValue != null) {
-                getStyleClass().add(2, DefaultColorClass.getForIndex(newValue.intValue()));
+                getStyleClass().add(1, DefaultColorClass.getForIndex(newValue.intValue()));
             }
             // TODO: reapply CSS? usually set before CSS, but could potentially be modified after CSS too. might be expensive
         });
-        StyleUtil.styleNode(this, "dataset", "chart-series-line", DefaultColorClass.getForIndex(getColorIndex()));
     }
 
     @Override

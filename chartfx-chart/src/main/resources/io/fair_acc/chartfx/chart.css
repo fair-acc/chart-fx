@@ -1,3 +1,188 @@
+.dataset.default-color0 {
+  -fx-stroke: -color-dataset-1;
+  -fx-fill: -color-dataset-1;
+}
+
+.dataset.default-color1 {
+  -fx-stroke: -color-dataset-2;
+  -fx-fill: -color-dataset-2;
+}
+
+.dataset.default-color2 {
+  -fx-stroke: -color-dataset-3;
+  -fx-fill: -color-dataset-3;
+}
+
+.dataset.default-color3 {
+  -fx-stroke: -color-dataset-4;
+  -fx-fill: -color-dataset-4;
+}
+
+.dataset.default-color4 {
+  -fx-stroke: -color-dataset-5;
+  -fx-fill: -color-dataset-5;
+}
+
+.dataset.default-color5 {
+  -fx-stroke: -color-dataset-6;
+  -fx-fill: -color-dataset-6;
+}
+
+.dataset.default-color6 {
+  -fx-stroke: -color-dataset-7;
+  -fx-fill: -color-dataset-7;
+}
+
+.dataset.default-color7 {
+  -fx-stroke: -color-dataset-8;
+  -fx-fill: -color-dataset-8;
+}
+
+.dataset.default-color8 {
+  -fx-stroke: -color-dataset-9;
+  -fx-fill: -color-dataset-9;
+}
+
+.dataset.default-color9 {
+  -fx-stroke: -color-dataset-10;
+  -fx-fill: -color-dataset-10;
+}
+
+.dataset.default-color10 {
+  -fx-stroke: -color-dataset-11;
+  -fx-fill: -color-dataset-11;
+}
+
+.dataset.default-color11 {
+  -fx-stroke: -color-dataset-12;
+  -fx-fill: -color-dataset-12;
+}
+
+.dataset.default-color12 {
+  -fx-stroke: -color-dataset-13;
+  -fx-fill: -color-dataset-13;
+}
+
+.dataset.default-color13 {
+  -fx-stroke: -color-dataset-14;
+  -fx-fill: -color-dataset-14;
+}
+
+.dataset.default-color14 {
+  -fx-stroke: -color-dataset-15;
+  -fx-fill: -color-dataset-15;
+}
+
+.dataset.default-color15 {
+  -fx-stroke: -color-dataset-16;
+  -fx-fill: -color-dataset-16;
+}
+
+.chart {
+  -color-dataset-1: #0000c8;
+  -color-dataset-2: #c80000;
+  -color-dataset-3: #00c800;
+  -color-dataset-4: orange;
+  -color-dataset-5: magenta;
+  -color-dataset-6: cyan;
+  -color-dataset-7: darkgray;
+  -color-dataset-8: pink;
+  -color-dataset-9: black;
+}
+.chart .renderer {
+  -fx-color-count: 9;
+}
+.chart:misc {
+  -color-dataset-1: #5DA5DA;
+  -color-dataset-2: #F15854;
+  -color-dataset-3: #FAA43A;
+  -color-dataset-4: #60BD68;
+  -color-dataset-5: #F17CB0;
+  -color-dataset-6: #B2912F;
+  -color-dataset-7: #B276B2;
+  -color-dataset-8: #DECF3F;
+  -color-dataset-9: #4D4D4D;
+}
+.chart:misc .renderer {
+  -fx-color-count: 9;
+}
+.chart:adobe {
+  -color-dataset-1: #00a4e4;
+  -color-dataset-2: #ff0000;
+  -color-dataset-3: #fbb034;
+  -color-dataset-4: #ffdd00;
+  -color-dataset-5: #c1d82f;
+  -color-dataset-6: #8a7967;
+  -color-dataset-7: #6a737b;
+}
+.chart:adobe .renderer {
+  -fx-color-count: 7;
+}
+.chart:dell {
+  -color-dataset-1: #0085c3;
+  -color-dataset-2: #7ab800;
+  -color-dataset-3: #f2af00;
+  -color-dataset-4: #dc5034;
+  -color-dataset-5: #6e2585;
+  -color-dataset-6: #71c6c1;
+  -color-dataset-7: #009bbb;
+  -color-dataset-8: #444444;
+}
+.chart:dell .renderer {
+  -fx-color-count: 8;
+}
+.chart:equidistant {
+  -color-dataset-1: #003f5c;
+  -color-dataset-2: #2f4b7c;
+  -color-dataset-3: #665191;
+  -color-dataset-4: #a05195;
+  -color-dataset-5: #d45087;
+  -color-dataset-6: #f95d6a;
+  -color-dataset-7: #ff7c43;
+  -color-dataset-8: #ffa600;
+}
+.chart:equidistant .renderer {
+  -fx-color-count: 8;
+}
+.chart:tuneviewer {
+  -color-dataset-1: #0000c8;
+  -color-dataset-2: #c80000;
+  -color-dataset-3: #00c800;
+  -color-dataset-4: orange;
+  -color-dataset-5: magenta;
+  -color-dataset-6: cyan;
+  -color-dataset-7: darkgray;
+  -color-dataset-8: pink;
+  -color-dataset-9: black;
+}
+.chart:tuneviewer .renderer {
+  -fx-color-count: 9;
+}
+.chart:matlab {
+  -color-dataset-1: rgb(0, 114, 189);
+  -color-dataset-2: rgb(217, 83, 25);
+  -color-dataset-3: rgb(237, 177, 32);
+  -color-dataset-4: rgb(126, 47, 142);
+  -color-dataset-5: rgb(119, 172, 48);
+  -color-dataset-6: rgb(77, 190, 238);
+  -color-dataset-7: rgb(162, 20, 47);
+}
+.chart:matlab .renderer {
+  -fx-color-count: 7;
+}
+.chart:matlab-dark {
+  -color-dataset-1: rgb(89, 149, 189);
+  -color-dataset-2: rgb(217, 115, 71);
+  -color-dataset-3: rgb(237, 177, 32);
+  -color-dataset-4: rgb(218, 81, 245);
+  -color-dataset-5: rgb(119, 172, 48);
+  -color-dataset-6: rgb(77, 190, 238);
+  -color-dataset-7: rgb(162, 137, 141);
+}
+.chart:matlab-dark .renderer {
+  -fx-color-count: 7;
+}
+
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
   -fx-border-color: black;
@@ -154,7 +339,6 @@
 .chart .renderer {
   -fx-show-in-legend: true;
   -fx-use-global-index: true;
-  -fx-color-count: 8;
   -fx-assume-sorted-data: true;
   -fx-min-required-reduction-size: 5;
   -fx-parallel-implementation: true;
@@ -175,6 +359,11 @@
   -fx-bar-width-percentage: 70;
   -fx-bar-width: 5;
   -fx-intensity-fading: 0.65;
+}
+
+.dataset {
+  -fx-stroke-width: 1.5;
+  -fx-marker-stroke-width: 0.5;
 }
 
 .axis {

@@ -30,6 +30,7 @@ public abstract class DataSetNodeParameter extends TextStyle {
     final DoubleProperty intensity = css().createDoubleProperty(this, "intensity", 100);
     final BooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
     final ObjectProperty<DefaultMarker> markerType = css().createEnumProperty(this, "markerType", DefaultMarker.DEFAULT, true, DefaultMarker.class);
+    final DoubleProperty markerStrokeWidth = css().createDoubleProperty(this, "markerStrokeWidth", 0.5);
 
     public int getLocalIndex() {
         return localIndex.get();
@@ -101,6 +102,18 @@ public abstract class DataSetNodeParameter extends TextStyle {
 
     public void setMarkerType(DefaultMarker markerType) {
         this.markerType.set(markerType);
+    }
+
+    public double getMarkerStrokeWidth() {
+        return markerStrokeWidth.get();
+    }
+
+    public DoubleProperty markerStrokeWidthProperty() {
+        return markerStrokeWidth;
+    }
+
+    public void setMarkerStrokeWidth(double markerStrokeWidth) {
+        this.markerStrokeWidth.set(markerStrokeWidth);
     }
 
     @Override
