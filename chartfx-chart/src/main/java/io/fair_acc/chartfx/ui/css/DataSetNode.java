@@ -8,7 +8,6 @@ import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.events.StateListener;
 import io.fair_acc.dataset.utils.AssertUtils;
-import javafx.beans.binding.Bindings;
 
 /**
  * A dataset wrapper that lives in the SceneGraph for CSS styling

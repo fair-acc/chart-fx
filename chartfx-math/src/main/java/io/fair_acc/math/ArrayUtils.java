@@ -2,6 +2,9 @@ package io.fair_acc.math;
 
 import io.fair_acc.dataset.utils.AssertUtils;
 
+import java.util.Arrays;
+import java.util.function.IntFunction;
+
 /**
  * Utility class containing only static functions used to manipulate arrays.
  *
@@ -343,4 +346,69 @@ public final class ArrayUtils {
         final int len = array.length;
         ArrayUtils.fillArray(array, 0, len, value);
     }
+
+    /**
+     * @param array current value
+     * @param minSize minimum size
+     * @return a new array if the existing one is not large enough
+     */
+    public static boolean[] resizeMin(boolean[] array, int minSize) {
+        if(array != null && array.length >= minSize) {
+            return array;
+        }
+        return new boolean[minSize];
+    }
+
+    /**
+     * @param array current value
+     * @param minSize minimum size
+     * @return a new array if the existing one is not large enough
+     */
+    public static double[] resizeMin(double[] array, int minSize) {
+        if(array != null && array.length >= minSize) {
+            return array;
+        }
+        return new double[minSize];
+    }
+
+    /**
+     * @param array current value
+     * @param minSize minimum size
+     * @return a new array if the existing one is not large enough
+     */
+    public static <T> T[] resizeMinNulled(T[] array, int minSize, IntFunction<T[]> constructor) {
+        if(array != null && array.length >= minSize) {
+            Arrays.fill(array, 0, minSize, null);
+            return array;
+        }
+        return constructor.apply(minSize);
+    }
+
+    /**
+     * @param array existing array
+     * @param maxSize max size
+     * @return existing array or null if it is larger than the max size
+     */
+    public static boolean[] clearIfLarger(boolean[] array, int maxSize) {
+        return array != null && array.length > maxSize ? null : array;
+    }
+
+    /**
+     * @param array existing array
+     * @param maxSize max size
+     * @return existing array or null if it is larger than the max size
+     */
+    public static double[] clearIfLarger(double[] array, int maxSize) {
+        return array != null && array.length > maxSize ? null : array;
+    }
+
+    /**
+     * @param array existing array
+     * @param maxSize max size
+     * @return existing array or null if it is larger than the max size
+     */
+    public static <T> T[] clearIfLarger(T[] array, int maxSize) {
+        return array != null && array.length > maxSize ? null : array;
+    }
+
 }

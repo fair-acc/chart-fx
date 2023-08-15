@@ -169,7 +169,6 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         yAxis.setAutoRanging(true);
         yAxis.setAutoUnitScaling(true);
         renderer.getAxes().addAll(xAxis, yAxis);
-        renderer.setDrawChartDataSets(false);
         renderer.getDatasets().add(isTrending ? trendingDataSet : mathDataSet);
 
         localChart.addListener(localChartChangeListener);

@@ -1,7 +1,6 @@
 package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
@@ -13,6 +12,7 @@ import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
+import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.*;
@@ -108,6 +108,16 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
         return dataSets;
     }
 
+    public Axis getFirstHorizontalAxis() {
+        AssertUtils.notNull("chart", getChart());
+        return getFirstAxis(Orientation.HORIZONTAL, getChart());
+    }
+
+    public Axis getFirstVerticalAxis() {
+        AssertUtils.notNull("chart", getChart());
+        return getFirstAxis(Orientation.VERTICAL, getChart());
+    }
+
     public Axis getFirstAxis(final Orientation orientation) {
         for (final Axis axis : getAxes()) {
             if (axis.getSide() == null) {
@@ -142,7 +152,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
      * @param fallback The chart from which to get the axis if no axis is present
      * @return The requested axis
      */
-    protected Axis getFirstAxis(final Orientation orientation, final XYChart fallback) {
+    protected Axis getFirstAxis(final Orientation orientation, final Chart fallback) {
         final Axis axis = getFirstAxis(orientation);
         if (axis == null) {
             return fallback.getFirstAxis(orientation);

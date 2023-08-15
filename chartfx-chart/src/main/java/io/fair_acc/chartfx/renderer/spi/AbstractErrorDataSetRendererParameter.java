@@ -52,7 +52,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final BooleanProperty drawMarker = css().createBooleanProperty(this, "drawMarker", true);
     private final ObjectProperty<LineStyle> polyLineStyle = css().createEnumProperty(this, "polyLineStyle",
             LineStyle.NORMAL, false, LineStyle.class);
-    private final BooleanProperty drawChartDataSets = new SimpleBooleanProperty(this, "drawChartDataSets", true);
     private final BooleanProperty drawBars = css().createBooleanProperty(this, "drawBars", false);
     private final BooleanProperty shiftBar = css().createBooleanProperty(this, "shiftBar", true);
     private final IntegerProperty shiftBarOffset = css().createIntegerProperty(this, "shiftBarOffset", 3);
@@ -77,7 +76,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
                 markerSize,
                 drawMarker,
                 polyLineStyle,
-                drawChartDataSets,
                 drawBars,
                 shiftBar,
                 shiftBarOffset,
@@ -120,13 +118,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public BooleanProperty drawBubblesProperty() {
         return drawBubbles;
-    }
-
-    /**
-     * @return the drawChartDataSets state, ie. if all or only the DataSets attached to the Renderer shall be drawn 
-     */
-    public BooleanProperty drawChartDataSetsProperty() {
-        return drawChartDataSets;
     }
 
     /**
@@ -257,14 +248,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
-     * 
-     * @return whether all or only the DataSets attached to the Renderer shall be drawn 
-     */
-    public boolean isDrawChartDataSets() {
-        return drawChartDataSetsProperty().get();
-    }
-
-    /**
      * @return true if point reduction is on (default) else false.
      */
     public boolean isDrawMarker() {
@@ -372,14 +355,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     public R setDrawBubbles(final boolean state) {
         drawBubblesProperty().set(state);
         return getThis();
-    }
-
-    /**
-     * 
-     * @param state whether all (true) or only the DataSets attached to the Renderer shall be drawn (false) 
-     */
-    public void setDrawChartDataSets(final boolean state) {
-        drawChartDataSetsProperty().set(state);
     }
 
     /**
@@ -498,7 +473,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         markerSizeProperty().bind(other.markerSizeProperty());
         drawMarkerProperty().bind(other.drawMarkerProperty());
         polyLineStyleProperty().bind(other.polyLineStyleProperty());
-        drawChartDataSetsProperty().bind(other.drawChartDataSetsProperty());
         drawBarsProperty().bind(other.drawBarsProperty());
         drawBubblesProperty().bind(other.drawBubblesProperty());
         allowNaNsProperty().bind(other.allowNaNsProperty());
@@ -535,7 +509,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         markerSizeProperty().unbind();
         drawMarkerProperty().unbind();
         polyLineStyleProperty().unbind();
-        drawChartDataSetsProperty().unbind();
         drawBarsProperty().unbind();
         drawBubblesProperty().unbind();
         allowNaNsProperty().unbind();
