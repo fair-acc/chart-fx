@@ -15,6 +15,10 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
         StyleUtil.forEachStyleProp(this, StyleUtil.incrementOnChange(changeCounter));
     }
 
+    protected void incrementChangeCounter() {
+        changeCounter.set(changeCounter.get() + 1);
+    }
+
     @Override
     public String toString() {
         return StyleUtil.toStyleString(this);

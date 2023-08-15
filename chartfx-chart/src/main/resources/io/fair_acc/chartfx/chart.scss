@@ -214,6 +214,7 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     // abstract renderer
     -fx-show-in-legend: true;
     -fx-use-global-index: true;
+    -fx-color-count: 8;
 
     // point reducing renderers
     -fx-assume-sorted-data: true;
