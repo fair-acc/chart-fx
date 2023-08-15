@@ -9,6 +9,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -179,6 +180,11 @@ public final class DefaultRenderColorScheme {
         return markerLineWidth;
     }
 
+    public static void setFillScheme(final GraphicsContext gc, final DataSetNode dataSetNode) {
+        setFillScheme(gc, dataSetNode.getStyle(), dataSetNode.getColorIndex());
+    }
+
+    @Deprecated
     public static void setFillScheme(final GraphicsContext gc, final String defaultStyle, final int dsIndex) {
         AssertUtils.gtEqThanZero("setFillScheme dsIndex", dsIndex);
         final Map<String, List<String>> map = splitQuery(defaultStyle);
@@ -200,6 +206,11 @@ public final class DefaultRenderColorScheme {
         }
     }
 
+    public static void setGraphicsContextAttributes(final GraphicsContext gc, final DataSetNode dataSetNode) {
+        setGraphicsContextAttributes(gc, dataSetNode.getStyle());
+    }
+
+    @Deprecated
     public static void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
         if ((gc == null) || (style == null)) {
             return;
@@ -232,6 +243,12 @@ public final class DefaultRenderColorScheme {
         }
     }
 
+    public static void setLineScheme(final GraphicsContext gc, final DataSetNode dataSet) {
+        // TODO: implement using css colors
+        setLineScheme(gc, dataSet.getStyle(), dataSet.getColorIndex());
+    }
+
+    @Deprecated // TODO: replace with css colors
     public static void setLineScheme(final GraphicsContext gc, final String defaultStyle, final int dsIndex) {
         AssertUtils.gtEqThanZero("setLineScheme dsIndex", dsIndex);
         final Map<String, List<String>> map = splitQuery(defaultStyle);
@@ -246,6 +263,11 @@ public final class DefaultRenderColorScheme {
         gc.setStroke(getColorModifier(map, rawColor));
     }
 
+    public static void setMarkerScheme(final GraphicsContext gc, final DataSetNode dataSetNode) {
+        setMarkerScheme(gc, dataSetNode.getStyle(), dataSetNode.getColorIndex());
+    }
+
+    @Deprecated // TODO: replace with CSS colors
     public static void setMarkerScheme(final GraphicsContext gc, final String defaultStyle, final int dsIndex) {
         AssertUtils.gtEqThanZero("setMarkerScheme dsIndex", dsIndex);
         final Map<String, List<String>> map = splitQuery(defaultStyle);

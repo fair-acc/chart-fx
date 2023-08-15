@@ -69,9 +69,13 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     }
 
     protected void updateIndices() {
-        int i = useGlobalIndex.get() ? getIndexOffset() : 0;
+        int localIndex = 0;
+        int globalIndex = getIndexOffset();
+        int colorIndex = useGlobalIndex.get() ? globalIndex : localIndex;
         for (DataSetNode datasetNode : getDatasetNodes()) {
-            datasetNode.setColorIndex(i++ % getColorCount());
+            datasetNode.setLocalIndex(localIndex++);
+            datasetNode.setGlobalIndex(globalIndex++);
+            datasetNode.setColorIndex(colorIndex++ % getColorCount());
         }
     }
 
