@@ -8,9 +8,7 @@
   -color-dataset-7: #B276B2; // (purple)
   -color-dataset-8: #DECF3F; // (yellow)
   -color-dataset-9: #4D4D4D; // (gray)
-  .renderer {
-    -fx-color-count: 9;
-  }
+  -fx-color-count: 9;
 }
 
 @mixin adobe() {
@@ -21,9 +19,7 @@
   -color-dataset-5: #c1d82f; // green
   -color-dataset-6: #8a7967; // brown
   -color-dataset-7: #6a737b; // darkbrown/black
-  .renderer {
-    -fx-color-count: 7;
-  }
+  -fx-color-count: 7;
 }
 
 @mixin dell() {
@@ -35,9 +31,7 @@
   -color-dataset-6: #71c6c1;
   -color-dataset-7: #009bbb;
   -color-dataset-8: #444444;
-  .renderer {
-    -fx-color-count: 8;
-  }
+  -fx-color-count: 8;
 }
 
 @mixin equidistant() {
@@ -49,9 +43,7 @@
   -color-dataset-6: #f95d6a;
   -color-dataset-7: #ff7c43;
   -color-dataset-8: #ffa600;
-  .renderer {
-    -fx-color-count: 8;
-  }
+  -fx-color-count: 8;
 }
 
 @mixin tuneviewer() {
@@ -65,9 +57,7 @@
   -color-dataset-7: darkgray;
   -color-dataset-8: pink;
   -color-dataset-9: black;
-  .renderer {
-    -fx-color-count: 9;
-  }
+  -fx-color-count: 9;
 }
 
 @mixin matlab() {
@@ -79,9 +69,7 @@
   -color-dataset-5: rgb(119, 172, 48);
   -color-dataset-6: rgb(77, 190, 238);
   -color-dataset-7: rgb(162, 20, 47);
-  .renderer {
-    -fx-color-count: 7;
-  }
+  -fx-color-count: 7;
 }
 
 @mixin matlab-dark() {
@@ -93,9 +81,7 @@
   -color-dataset-5: rgb(119, 172, 48);
   -color-dataset-6: rgb(77, 190, 238);
   -color-dataset-7: rgb(162, 137, 141);
-  .renderer {
-    -fx-color-count: 7;
-  }
+  -fx-color-count: 7;
 }
 
 // CSS classes that set the default similar to the JavaFX charts
