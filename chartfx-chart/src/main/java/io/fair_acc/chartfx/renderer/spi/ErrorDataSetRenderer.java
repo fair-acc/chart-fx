@@ -435,8 +435,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int nDataCount = localCachedPoints.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
-        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
-        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
+        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
+        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         for (int i = 0; i < nDataCount; i++) {
@@ -476,8 +476,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int nDataCount = localCachedPoints.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
-        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
-        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArrayExact(nPolygoneEdges);
+        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
+        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         int count = 0;
@@ -689,8 +689,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(n + 2);
-        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(n + 2);
+        final int length = n + 2;
+        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
         final double zero = localCachedPoints.yZero;
         System.arraycopy(localCachedPoints.xValues, 0, newX, 0, n);
@@ -706,7 +707,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
         // use stroke as fill colour
         gc.setFill(gc.getStroke());
-        gc.fillPolygon(newX, newY, n + 2);
+        gc.fillPolygon(newX, newY, length);
         gc.restore();
 
         // release arrays to cache
@@ -721,8 +722,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
-        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
+        final int length = 2 * (n + 1);
+        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -742,15 +744,15 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             newY[2 * i + 2] = localCachedPoints.yValues[i];
         }
         // last point
-        newX[2 * (n + 1) - 1] = localCachedPoints.xValues[n - 1] + diffRight;
-        newY[2 * (n + 1) - 1] = localCachedPoints.yZero;
+        newX[length - 1] = localCachedPoints.xValues[n - 1] + diffRight;
+        newY[length - 1] = localCachedPoints.yZero;
 
         gc.save();
         DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
                 localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
 
-        for (int i = 0; i < 2 * (n + 1) - 1; i++) {
+        for (int i = 0; i < length - 1; i++) {
             final double x1 = newX[i];
             final double x2 = newX[i + 1];
             final double y1 = newY[i];
@@ -774,10 +776,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] xCp1 = DoubleArrayCache.getInstance().getArrayExact(n);
-        final double[] yCp1 = DoubleArrayCache.getInstance().getArrayExact(n);
-        final double[] xCp2 = DoubleArrayCache.getInstance().getArrayExact(n);
-        final double[] yCp2 = DoubleArrayCache.getInstance().getArrayExact(n);
+        final double[] xCp1 = DoubleArrayCache.getInstance().getArray(n);
+        final double[] yCp1 = DoubleArrayCache.getInstance().getArray(n);
+        final double[] xCp2 = DoubleArrayCache.getInstance().getArray(n);
+        final double[] yCp2 = DoubleArrayCache.getInstance().getArray(n);
 
         BezierCurve.calcCurveControlPoints(localCachedPoints.xValues, localCachedPoints.yValues, xCp1, yCp1, xCp2, yCp2,
                 localCachedPoints.actualDataCount);
@@ -825,8 +827,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
-        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * (n + 1));
+        final int length = 2 * (n + 1);
+        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
         final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
         double diffLeft;
@@ -846,8 +849,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             newY[2 * i + 2] = localCachedPoints.yValues[i];
         }
         // last point
-        newX[2 * (n + 1) - 1] = localCachedPoints.xValues[n - 1] + diffRight;
-        newY[2 * (n + 1) - 1] = localCachedPoints.yZero;
+        newX[length - 1] = localCachedPoints.xValues[n - 1] + diffRight;
+        newY[length - 1] = localCachedPoints.yZero;
 
         gc.save();
         DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle,
@@ -855,7 +858,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
         // use stroke as fill colour
         gc.setFill(gc.getStroke());
-        gc.fillPolygon(newX, newY, 2 * (n + 1));
+        gc.fillPolygon(newX, newY, length);
         gc.restore();
 
         // release arrays to cache
@@ -919,8 +922,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // need to allocate new array :-(
-        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * n);
-        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * n);
+        final int length = 2 * n;
+        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
         for (int i = 0; i < n - 1; i++) {
             newX[2 * i] = localCachedPoints.xValues[i];
@@ -929,17 +933,17 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             newY[2 * i + 1] = localCachedPoints.yValues[i];
         }
         // last point
-        newX[2 * (n - 1)] = localCachedPoints.xValues[n - 1];
-        newY[2 * (n - 1)] = localCachedPoints.yValues[n - 1];
-        newX[2 * n - 1] = localCachedPoints.xMax;
-        newY[2 * n - 1] = localCachedPoints.yValues[n - 1];
+        newX[length - 2] = localCachedPoints.xValues[n - 1];
+        newY[length - 2] = localCachedPoints.yValues[n - 1];
+        newX[length - 1] = localCachedPoints.xMax;
+        newY[length - 1] = localCachedPoints.yValues[n - 1];
 
         gc.save();
         DefaultRenderColorScheme.setLineScheme(gc, localCachedPoints.defaultStyle, localCachedPoints.dataSetIndex + localCachedPoints.dataSetStyleIndex);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, localCachedPoints.defaultStyle);
         // gc.strokePolyline(newX, newY, 2*n);
 
-        for (int i = 0; i < 2 * n - 1; i++) {
+        for (int i = 0; i < length - 1; i++) {
             final double x1 = newX[i];
             final double x2 = newX[i + 1];
             final double y1 = newY[i];
