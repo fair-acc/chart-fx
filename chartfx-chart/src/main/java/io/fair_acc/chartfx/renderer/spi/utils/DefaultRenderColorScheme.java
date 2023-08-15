@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -18,6 +19,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.ImagePattern;
@@ -30,6 +32,15 @@ import io.fair_acc.dataset.utils.AssertUtils;
 
 @SuppressWarnings("PMD.FieldNamingConventions")
 public final class DefaultRenderColorScheme {
+
+    public static PseudoClass PALETTE_MISC = PseudoClass.getPseudoClass("misc");
+    public static PseudoClass PALETTE_ADOBE = PseudoClass.getPseudoClass("adobe");
+    public static PseudoClass PALETTE_DELL = PseudoClass.getPseudoClass("dell");
+    public static PseudoClass PALETTE_EQUIDISTANT = PseudoClass.getPseudoClass("equidistant");
+    public static PseudoClass PALETTE_TUNEVIEWER = PseudoClass.getPseudoClass("tuneviewer");
+    public static PseudoClass PALETTE_MATLAB = PseudoClass.getPseudoClass("matlab");
+    public static PseudoClass PALETTE_MATLAB_DARK = PseudoClass.getPseudoClass("matlab-dark");
+    
     private static final String DEFAULT_FONT = "Helvetica";
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final DefaultRenderColorScheme SELF = new DefaultRenderColorScheme();
@@ -130,6 +141,17 @@ public final class DefaultRenderColorScheme {
         return defaultFont;
     }
 
+    private static Paint getModifiedColor(Paint color, double intensity) {
+        if (!(color instanceof Color)) {
+            return color;
+        }
+        if(intensity < 0 || intensity >= 100) {
+            return color;
+        }
+        final double scale = intensity / 100;
+        return ((Color) color).deriveColor(0, scale, 1.0, scale);
+    }
+
     private static Color getColorModifier(final Map<String, List<String>> parameterMap, final Color orignalColor) {
         Color color = orignalColor;
 
@@ -206,8 +228,8 @@ public final class DefaultRenderColorScheme {
         }
     }
 
-    public static void setGraphicsContextAttributes(final GraphicsContext gc, final DataSetNode dataSetNode) {
-        setGraphicsContextAttributes(gc, dataSetNode.getStyle());
+    public static void setGraphicsContextAttributes(final GraphicsContext gc, final DataSetNode style) {
+        setGraphicsContextAttributes(gc, style.getStyle());
     }
 
     @Deprecated
@@ -244,8 +266,11 @@ public final class DefaultRenderColorScheme {
     }
 
     public static void setLineScheme(final GraphicsContext gc, final DataSetNode dataSet) {
-        // TODO: implement using css colors
-        setLineScheme(gc, dataSet.getStyle(), dataSet.getColorIndex());
+//        setLineScheme(gc, dataSet.getStyle(), dataSet.getColorIndex());
+        gc.setLineWidth(dataSet.getStrokeWidth());
+        StyleUtil.copyLineDashes(gc, dataSet);
+        gc.setFill(dataSet.getFill());
+        gc.setStroke(getModifiedColor(dataSet.getStroke(), dataSet.getIntensity()));
     }
 
     @Deprecated // TODO: replace with css colors
@@ -264,7 +289,11 @@ public final class DefaultRenderColorScheme {
     }
 
     public static void setMarkerScheme(final GraphicsContext gc, final DataSetNode dataSetNode) {
-        setMarkerScheme(gc, dataSetNode.getStyle(), dataSetNode.getColorIndex());
+//        setMarkerScheme(gc, dataSetNode.getStyle(), dataSetNode.getColorIndex());
+        var color = getModifiedColor(dataSetNode.getStroke(), dataSetNode.getIntensity());
+        gc.setLineWidth(dataSetNode.getMarkerStrokeWidth());
+        gc.setStroke(color);
+        gc.setFill(color);
     }
 
     @Deprecated // TODO: replace with CSS colors

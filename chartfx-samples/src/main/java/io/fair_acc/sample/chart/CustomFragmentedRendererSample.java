@@ -52,6 +52,7 @@ public class CustomFragmentedRendererSample extends ChartSample {
                             filteredDataSets.add(innerDataSet);
                         }
                     } else {
+                        // TODO: fix the dataset offsets after refactoring (multiple datasets that should have the same color)
                         ds.setStyle(XYChartCss.DATASET_INDEX + '=' + dsIndex);
                         filteredDataSets.add(ds);
                     }

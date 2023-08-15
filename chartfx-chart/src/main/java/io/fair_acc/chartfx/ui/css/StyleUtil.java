@@ -186,6 +186,10 @@ public class StyleUtil {
         return prop -> prop.addListener(listener);
     }
 
+    public static void copyLineDashes(final GraphicsContext gc, Shape style) {
+        gc.setLineDashes(toLineDashArray(style.getStrokeDashArray()));
+    }
+
     private static double[] toLineDashArray(List<Double> numbers) {
         if (numbers == null || numbers.isEmpty()) {
             return null;

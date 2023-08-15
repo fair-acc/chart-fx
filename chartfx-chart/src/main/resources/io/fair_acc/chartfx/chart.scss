@@ -1,4 +1,38 @@
+@use "_palette.scss" as palette;
+
 $null: null; // null gets removed from Sass. Maybe create a placeholder and replace after generation?
+
+.chart {
+  @include palette.tuneviewer();
+
+  &:misc {
+    @include palette.misc();
+  }
+
+  &:adobe {
+    @include palette.adobe();
+  }
+
+  &:dell {
+    @include palette.dell();
+  }
+
+  &:equidistant {
+    @include palette.equidistant();
+  }
+
+  &:tuneviewer {
+    @include palette.tuneviewer();
+  }
+
+  &:matlab {
+    @include palette.matlab();
+  }
+
+  &:matlab-dark {
+    @include palette.matlab-dark();
+  }
+}
 
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
@@ -214,7 +248,6 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     // abstract renderer
     -fx-show-in-legend: true;
     -fx-use-global-index: true;
-    -fx-color-count: 8;
 
     // point reducing renderers
     -fx-assume-sorted-data: true;
@@ -242,6 +275,12 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     -fx-intensity-fading: 0.65;
   }
 
+}
+
+.dataset {
+  -fx-stroke-width: 1.5;
+  -fx-stroke-dash-array: null;
+  -fx-marker-stroke-width: 0.5;
 }
 
 // Axis styles
@@ -367,3 +406,4 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 .chart-horizontal-zero-line {
   -fx-stroke: derive(-fx-text-background-color, 40%);
 }
+
