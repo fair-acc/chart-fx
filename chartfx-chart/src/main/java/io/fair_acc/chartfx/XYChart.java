@@ -1,7 +1,6 @@
 package io.fair_acc.chartfx;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.PolarTickStep;
 import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.renderer.spi.GridRenderer;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
 import io.fair_acc.chartfx.ui.geometry.Side;
@@ -311,10 +309,8 @@ public class XYChart extends Chart {
         }
 
         // Data
-        int dataSetOffset = 0;
         for (final Renderer renderer : getRenderers()) {
-            final List<DataSet> drawnDataSets = renderer.render(gc, this, dataSetOffset, getDatasets());
-            dataSetOffset += drawnDataSets == null ? 0 : drawnDataSets.size();
+            renderer.render(gc, this, renderer.getIndexOffset(), FXCollections.emptyObservableList());
         }
 
         // Top grid

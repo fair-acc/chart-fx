@@ -2,11 +2,9 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.security.InvalidParameterException;
 import java.util.*;
-import java.util.function.Supplier;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.collections.ObservableList;
-import javafx.geometry.Orientation;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -19,7 +17,6 @@ import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.XYChartCss;
 import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
@@ -50,7 +47,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
     private Marker marker = DefaultMarker.DEFAULT;
-    private long stopStamp;
 
     /**
      * Creates new <code>ErrorDataSetRenderer</code>.
@@ -129,31 +125,20 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int unusedOffset,
+            final ObservableList<DataSet> unusedDataSets) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
 
-        // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = isDrawChartDataSets() ? new ArrayList<>(datasets) : new ArrayList<>();
-        localDataSetList.addAll(super.getDatasets());
-
         // If there are no data sets
-        if (localDataSetList.isEmpty()) {
+        if (getDatasets().isEmpty()) {
             return Collections.emptyList();
         }
 
-        Axis xAxisTemp = getFirstAxis(Orientation.HORIZONTAL);
-        if (xAxisTemp == null) {
-            xAxisTemp = chart.getFirstAxis(Orientation.HORIZONTAL);
-        }
-        final Axis xAxis = xAxisTemp;
-        Axis yAxisTemp = getFirstAxis(Orientation.VERTICAL);
-        if (yAxisTemp == null) {
-            yAxisTemp = chart.getFirstAxis(Orientation.VERTICAL);
-        }
-        final Axis yAxis = yAxisTemp;
+        final Axis xAxis = getFirstHorizontalAxis();
+        final Axis yAxis = getFirstVerticalAxis();
+
         final long start = ProcessingProfiler.getTimeStamp();
         final double xAxisWidth = xAxis.getWidth();
         final boolean xAxisInverted = xAxis.isInvertedAxis();
@@ -164,10 +149,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             ProcessingProfiler.getTimeDiff(start, "init");
         }
 
-        for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final int ldataSetIndex = dataSetIndex;
-            stopStamp = ProcessingProfiler.getTimeStamp();
-            final DataSet dataSet = localDataSetList.get(dataSetIndex);
+        for (int dataSetIndex = getDatasetNodes().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
+            DataSetNode dataSet = getDatasetNodes().get(dataSetIndex);
             if (!dataSet.isVisible()) {
                 continue;
             }
@@ -176,83 +159,61 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             // detecting redundant or too frequent render updates)
             // System.err.println(String.format("render for range [%f,%f] and dataset = '%s'", xMin, xMax, dataSet.getName()));
 
-            // update categories in case of category axes for the first (index == '0') indexed data set
-            if (dataSetIndex == 0) {
-                if (getFirstAxis(Orientation.HORIZONTAL) instanceof CategoryAxis) {
-                    final CategoryAxis axis = (CategoryAxis) getFirstAxis(Orientation.HORIZONTAL);
-                    axis.updateCategories(dataSet);
-                }
-
-                if (getFirstAxis(Orientation.VERTICAL) instanceof CategoryAxis) {
-                    final CategoryAxis axis = (CategoryAxis) getFirstAxis(Orientation.VERTICAL);
-                    axis.updateCategories(dataSet);
-                }
+            var timestamp = ProcessingProfiler.getTimeStamp();
+            final var data = dataSet.getDataSet();
+            int indexMin;
+            int indexMax; /* indexMax is excluded in the drawing */
+            if (isAssumeSortedData()) {
+                indexMin = Math.max(0, data.getIndex(DataSet.DIM_X, xMin) - 1);
+                indexMax = Math.min(data.getIndex(DataSet.DIM_X, xMax) + 2, data.getDataCount());
+            } else {
+                indexMin = 0;
+                indexMax = data.getDataCount();
             }
 
-            // check for potentially reduced data range we are supposed to plot
-            Supplier<Optional<CachedDataPoints>> cachedPoints = () -> {
-                int indexMin;
-                int indexMax; /* indexMax is excluded in the drawing */
-                if (isAssumeSortedData()) {
-                    indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin) - 1);
-                    indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 2, dataSet.getDataCount());
-                } else {
-                    indexMin = 0;
-                    indexMax = dataSet.getDataCount();
-                }
-
-                if (indexMax - indexMin <= 0) {
-                    // zero length/range data set -> nothing to be drawn
-                    return Optional.empty();
-                }
-
-                if (ProcessingProfiler.getDebugState()) {
-                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp,
-                            "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
-                }
-
-                final CachedDataPoints localCachedPoints = new CachedDataPoints(indexMin, indexMax,
-                        dataSet.getDataCount(), true);
-                if (ProcessingProfiler.getDebugState()) {
-                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "get CachedPoints");
-                }
-
-                // compute local screen coordinates
-                final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
-                if (isParallelImplementation()) {
-                    localCachedPoints.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
-                            dataSetOffset + ldataSetIndex, indexMin, indexMax, getErrorType(), isPolarPlot,
-                            isallowNaNs());
-                } else {
-                    localCachedPoints.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSetOffset + ldataSetIndex,
-                            indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
-                }
-                if (ProcessingProfiler.getDebugState()) {
-                    stopStamp = ProcessingProfiler.getTimeDiff(stopStamp, "computeScreenCoordinates()");
-                }
-                return Optional.of(localCachedPoints);
-            };
-
-            cachedPoints.get().ifPresent(value -> {
-                // invoke data reduction algorithm
-                value.reduce(rendererDataReducerProperty().get(), isReducePoints(),
-                        getMinRequiredReductionSize());
-
-                // draw individual plot components
-                drawChartCompontents(gc, value);
-
-                value.release();
-            });
-
-            stopStamp = ProcessingProfiler.getTimeStamp();
+            // zero length/range data set -> nothing to be drawn
+            if (indexMax - indexMin <= 0) {
+                continue;
+            }
 
             if (ProcessingProfiler.getDebugState()) {
-                ProcessingProfiler.getTimeDiff(stopStamp, "localCachedPoints.release()");
+                timestamp = ProcessingProfiler.getTimeDiff(timestamp,
+                        "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
             }
+
+            final CachedDataPoints points = STATIC_POINTS_CACHE.resizeMin(indexMin, indexMax, data.getDataCount(), true);
+            if (ProcessingProfiler.getDebugState()) {
+                timestamp = ProcessingProfiler.getTimeDiff(timestamp, "get CachedPoints");
+            }
+
+            // compute local screen coordinates
+            final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
+            if (isParallelImplementation()) {
+                points.computeScreenCoordinatesInParallel(xAxis, yAxis, data,
+                        dataSet.getColorIndex(), indexMin, indexMax, getErrorType(), isPolarPlot,
+                        isallowNaNs());
+            } else {
+                points.computeScreenCoordinates(xAxis, yAxis, data, dataSet.getColorIndex(),
+                        indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
+            }
+            if (ProcessingProfiler.getDebugState()) {
+                timestamp = ProcessingProfiler.getTimeDiff(timestamp, "computeScreenCoordinates()");
+            }
+
+            // invoke data reduction algorithm
+            points.reduce(rendererDataReducerProperty().get(), isReducePoints(),
+                    getMinRequiredReductionSize());
+
+            // draw individual plot components
+            drawChartCompontents(gc, points);
+            if (ProcessingProfiler.getDebugState()) {
+                timestamp = ProcessingProfiler.getTimeDiff(timestamp, "drawChartComponents()");
+            }
+
         } // end of 'dataSetIndex' loop
         ProcessingProfiler.getTimeDiff(start);
 
-        return localDataSetList;
+        return getDatasets();
     }
 
     /**
@@ -998,4 +959,15 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             System.arraycopy(input, input.length - stopIndex, input, stopIndex, stopIndex);
         }
     }
+
+    // The points cache is thread-safe from the JavaFX thread and can be shared across all instances
+    private static final CachedDataPoints STATIC_POINTS_CACHE = new CachedDataPoints();
+
+    /**
+     * Deletes all arrays that are larger than necessary for the last drawn dataset
+     */
+    public static void trimPointsCache() {
+        STATIC_POINTS_CACHE.trim();
+    }
+
 }

@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import static io.fair_acc.dataset.DataSet.DIM_X;
 import static io.fair_acc.dataset.DataSet.DIM_Y;
+import static io.fair_acc.math.ArrayUtils.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +18,7 @@ import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.DataSetError.ErrorType;
-import io.fair_acc.dataset.utils.ArrayCache;
 import io.fair_acc.dataset.utils.CachedDaemonThreadFactory;
-import io.fair_acc.dataset.utils.DoubleArrayCache;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 import io.fair_acc.math.ArrayUtils;
 
@@ -31,8 +30,6 @@ import io.fair_acc.math.ArrayUtils;
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyFields" }) // designated purpose of this class
 class CachedDataPoints {
-    private static final String STYLES2 = "styles";
-    private static final String SELECTED2 = "selected";
     private static final double DEG_TO_RAD = Math.PI / 180.0;
 
     protected double[] xValues;
@@ -67,21 +64,35 @@ class CachedDataPoints {
     protected int maxDataCount;
     protected int actualDataCount; // number of data points that remain after data reduction
 
-    public CachedDataPoints(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
-        maxDataCount = dataLength;
-        xValues = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-        yValues = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-        styles = ArrayCache.getCachedStringArray(STYLES2, dataLength);
+    public void trim() {
+        xValues = clearIfLarger(xValues, maxDataCount);
+        yValues = clearIfLarger(yValues, maxDataCount);
+        errorYNeg = clearIfLarger(errorYNeg, maxDataCount);
+        errorYPos = clearIfLarger(errorYPos, maxDataCount);
+        errorXNeg = clearIfLarger(errorXNeg, maxDataCount);
+        errorXPos = clearIfLarger(errorXPos, maxDataCount);
+        selected = clearIfLarger(selected, maxDataCount);
+        styles = clearIfLarger(styles, maxDataCount);
+        errorType = clearIfLarger(errorType, 10); // depends on ds dimensions
+    }
+
+    public CachedDataPoints resizeMin(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
         this.indexMin = indexMin;
         this.indexMax = indexMax;
-        errorYNeg = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-        errorYPos = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+        maxDataCount = dataLength;
+        xValues = ArrayUtils.resizeMin(xValues, dataLength);
+        yValues = ArrayUtils.resizeMin(yValues, dataLength);
+        errorYNeg = ArrayUtils.resizeMin(errorYNeg, dataLength);
+        errorYPos = ArrayUtils.resizeMin(errorYPos, dataLength);
         if (full) {
-            errorXNeg = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
-            errorXPos = DoubleArrayCache.getInstance().getArrayExact(maxDataCount);
+            errorXNeg = ArrayUtils.resizeMin(errorXNeg, dataLength);
+            errorXPos = ArrayUtils.resizeMin(errorXPos, dataLength);
         }
-        selected = ArrayCache.getCachedBooleanArray(SELECTED2, dataLength);
-        ArrayUtils.fillArray(styles, null);
+        selected = ArrayUtils.resizeMin(selected,  dataLength);
+
+        // TODO: do we really need to extract all point styles?
+        styles = ArrayUtils.resizeMinNulled(styles, dataLength, String[]::new);
+        return this;
     }
 
     protected void computeBoundaryVariables(final Axis xAxis, final Axis yAxis) {
@@ -493,17 +504,6 @@ class CachedDataPoints {
         minDataPointDistanceX();
     }
 
-    public void release() {
-        DoubleArrayCache.getInstance().add(xValues);
-        DoubleArrayCache.getInstance().add(yValues);
-        DoubleArrayCache.getInstance().add(errorYNeg);
-        DoubleArrayCache.getInstance().add(errorYPos);
-        DoubleArrayCache.getInstance().add(errorXNeg);
-        DoubleArrayCache.getInstance().add(errorXPos);
-        ArrayCache.release(SELECTED2, selected);
-        ArrayCache.release(STYLES2, styles);
-    }
-
     private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int dsIndex,
             final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
             final boolean doAllowForNaNs) {
@@ -519,12 +519,11 @@ class CachedDataPoints {
     }
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {
-        errorType = new ErrorType[dataSet.getDimension()];
+        errorType = ArrayUtils.resizeMinNulled(errorType, dataSet.getDimension(), ErrorType[]::new);
         if (dataSet instanceof DataSetError) {
             final DataSetError ds = (DataSetError) dataSet;
             for (int dimIndex = 0; dimIndex < ds.getDimension(); dimIndex++) {
-                final int tmpIndex = dimIndex;
-                errorType[dimIndex] = ds.getErrorType(tmpIndex);
+                errorType[dimIndex] = ds.getErrorType(dimIndex);
             }
         } else if (errorStyle == ErrorStyle.NONE) {
             // special case where users does not want error bars
