@@ -86,18 +86,10 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         final int height = (int) canvas.getHeight();
         final GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        final String style = dataSet.getStyle();
-        final Integer layoutOffset = StyleParser.getIntegerPropertyValue(style, XYChartCss.DATASET_LAYOUT_OFFSET);
-        final Integer dsIndexLocal = StyleParser.getIntegerPropertyValue(style, XYChartCss.DATASET_INDEX);
-
-        final int dsLayoutIndexOffset = layoutOffset == null ? 0 : layoutOffset; // TODO: rationalise
-
-        final int plottingIndex = dsLayoutIndexOffset + (dsIndexLocal == null ? dataSet.getColorIndex() : dsIndexLocal);
-
         gc.save();
-        DefaultRenderColorScheme.setLineScheme(gc, dataSet.getStyle(), plottingIndex);
+        DefaultRenderColorScheme.setLineScheme(gc, dataSet);
         DefaultRenderColorScheme.setGraphicsContextAttributes(gc, dataSet.getStyle());
-        DefaultRenderColorScheme.setFillScheme(gc, dataSet.getStyle(), plottingIndex);
+        DefaultRenderColorScheme.setFillScheme(gc, dataSet.getStyle(), dataSet.getColorIndex());
 
         final double y = height / 2.0;
         gc.fillRect(1, 1, width - 2.0, height - 2.0);

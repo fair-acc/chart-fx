@@ -10,11 +10,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import io.fair_acc.chartfx.XYChartCss;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.RendererDataReducer;
-import io.fair_acc.chartfx.utils.StyleParser;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.DataSetError.ErrorType;
@@ -42,9 +41,8 @@ class CachedDataPoints {
     protected String[] styles;
     protected boolean xAxisInverted;
     protected boolean yAxisInverted;
-    protected String defaultStyle;
-    protected int dataSetIndex;
-    protected int dataSetStyleIndex;
+    protected String defaultStyle; // TODO: get rid of this
+    protected DataSetNode styleNode;
     protected boolean allowForNaNs;
     protected ErrorType[] errorType;
     protected int indexMin;
@@ -177,14 +175,14 @@ class CachedDataPoints {
         }
     }
 
-    protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
+    protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, final DataSetNode dataSet,
             final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
             final boolean isPolarPlot, final boolean doAllowForNaNs) {
         setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot,
                 doAllowForNaNs);
 
         // compute data set to screen coordinates
-        computeScreenCoordinatesNonThreaded(xAxis, yAxis, dataSet, min, max);
+        computeScreenCoordinatesNonThreaded(xAxis, yAxis, dataSet.getDataSet(), min, max);
     }
 
     private void computeScreenCoordinatesEuclidean(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
@@ -213,14 +211,14 @@ class CachedDataPoints {
         computeErrorStyles(dataSet, min, max);
     }
 
-    protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
+    protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSetNode dataSet,
             final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
             final boolean isPolarPlot, final boolean doAllowForNaNs) {
         setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot,
                 doAllowForNaNs);
 
         // compute data set to screen coordinates
-        computeScreenCoordinatesParallel(xAxis, yAxis, dataSet, min, max);
+        computeScreenCoordinatesParallel(xAxis, yAxis, dataSet.getDataSet(), min, max);
     }
 
     protected void computeScreenCoordinatesNonThreaded(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
@@ -504,7 +502,7 @@ class CachedDataPoints {
         minDataPointDistanceX();
     }
 
-    private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final int dsIndex,
+    private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSetNode dataSet, final int dsIndex,
             final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
             final boolean doAllowForNaNs) {
         indexMin = min;
@@ -515,7 +513,7 @@ class CachedDataPoints {
 
         computeBoundaryVariables(xAxis, yAxis);
         setStyleVariable(dataSet, dsIndex);
-        setErrorType(dataSet, rendererErrorStyle);
+        setErrorType(dataSet.getDataSet(), rendererErrorStyle);
     }
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {
@@ -546,13 +544,8 @@ class CachedDataPoints {
         }
     }
 
-    protected void setStyleVariable(final DataSet dataSet, final int dsIndex) {
+    protected void setStyleVariable(final DataSetNode dataSet, final int dsIndex) {
         defaultStyle = dataSet.getStyle();
-        final Integer layoutOffset = StyleParser.getIntegerPropertyValue(defaultStyle,
-                XYChartCss.DATASET_LAYOUT_OFFSET);
-        final Integer dsIndexLocal = StyleParser.getIntegerPropertyValue(defaultStyle, XYChartCss.DATASET_INDEX);
-
-        dataSetStyleIndex = layoutOffset == null ? 0 : layoutOffset;
-        dataSetIndex = dsIndexLocal == null ? dsIndex : dsIndexLocal;
+        styleNode = dataSet;
     }
 }
