@@ -15,10 +15,7 @@ import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -42,6 +39,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     protected final StyleableBooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
     protected final StyleableBooleanProperty useGlobalIndex = css().createBooleanProperty(this, "useGlobalIndex", true);
     protected final StyleableIntegerProperty indexOffset = css().createIntegerProperty(this, "indexOffset", 0);
+    protected final IntegerProperty colorCount = css().createIntegerProperty(this, "colorCount", 8);
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     private final ObservableList<DataSetNode> dataSetNodes = FXCollections.observableArrayList();
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
@@ -67,13 +65,13 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
             dataSetNodes.setAll(datasets.stream().distinct().map(this::createNode).collect(Collectors.toList()));
         });
         dataSetNodes.addListener((ListChangeListener<DataSetNode>) c -> updateIndices());
-        PropUtil.runOnChange(this::updateIndices, useGlobalIndex, indexOffset);
+        PropUtil.runOnChange(this::updateIndices, useGlobalIndex, indexOffset, colorCount);
     }
 
     protected void updateIndices() {
         int i = useGlobalIndex.get() ? getIndexOffset() : 0;
         for (DataSetNode datasetNode : getDatasetNodes()) {
-            datasetNode.setColorIndex(i++);
+            datasetNode.setColorIndex(i++ % getColorCount());
         }
     }
 
@@ -212,6 +210,18 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
 
     public void setIndexOffset(int indexOffset) {
         this.indexOffset.set(indexOffset);
+    }
+
+    public int getColorCount() {
+        return colorCount.get();
+    }
+
+    public IntegerProperty colorCountProperty() {
+        return colorCount;
+    }
+
+    public void setColorCount(int colorCount) {
+        this.colorCount.set(colorCount);
     }
 
     /**
