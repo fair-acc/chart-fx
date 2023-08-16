@@ -859,15 +859,19 @@ public class Zoomer extends ChartPlugin {
 
             final Side side = axis.getSide();
 
-            final double prevData = axis.getValueForDisplay(side.isHorizontal() ? oldMouseX : oldMouseY);
-            final double newData = axis.getValueForDisplay(side.isHorizontal() ? newMouseX : newMouseY);
-            final double offset = prevData - newData;
-
             final boolean allowsShift = side.isHorizontal() ? getAxisMode().allowsX() : getAxisMode().allowsY();
             if (!hasBoundedRange(axis) && allowsShift) {
+                final double offset = (side.isHorizontal() ? oldMouseX : oldMouseY) - (side.isHorizontal() ? newMouseX : newMouseY);
                 axis.setAutoRanging(false);
                 // shift bounds
-                axis.set(axis.getMin() + offset, axis.getMax() + offset);
+                final double newMin = axis.getValueForDisplay(0 + offset);
+                final double newMax = axis.getValueForDisplay(axis.getLength() + offset);
+                if (side.isHorizontal()) {
+                    axis.set(newMin, newMax);
+                } else {
+                    axis.set(newMax, newMin);
+                }
+                axis.updateCachedTransforms();
             }
         }
         previousMouseLocation = mouseLocation;
@@ -948,6 +952,7 @@ public class Zoomer extends ChartPlugin {
             if (!hasBoundedRange(axis)) {
                 // only update if this axis is not bound to another (e.g. auto-range) managed axis)
                 axis.set(zoomState.zoomRangeMin, zoomState.zoomRangeMax);
+                axis.updateCachedTransforms();
             }
         }
 
@@ -1155,14 +1160,22 @@ public class Zoomer extends ChartPlugin {
         final boolean isHorizontal = axis.getSide().isHorizontal();
 
         final double mousePos = isHorizontal ? event.getX() : event.getY();
-        final double posOnAxis = axis.getValueForDisplay(mousePos);
-        final double max = axis.getMax();
-        final double min = axis.getMin();
+        final double max = axis.getLength();
         final double scaling = isZoomIn ? 0.9 : 1 / 0.9;
-        final double diffHalf1 = scaling * Math.abs(posOnAxis - min);
-        final double diffHalf2 = scaling * Math.abs(max - posOnAxis);
+        final double minDisplay;
+        final double maxDisplay;
+        if (isHorizontal) {
+            minDisplay = (1 - scaling) * mousePos;
+            maxDisplay = mousePos + scaling * (max - mousePos);
+        } else {
+            maxDisplay = (1 - scaling) * mousePos;
+            minDisplay = mousePos + scaling * (max - mousePos);
+        }
+        final double newMin = axis.getValueForDisplay(minDisplay);
+        final double newMax = axis.getValueForDisplay(maxDisplay);
 
-        axis.set(posOnAxis - diffHalf1, posOnAxis + diffHalf2);
+        axis.set(newMin, newMax);
+        axis.updateCachedTransforms();
 
         axis.forceRedraw();
     }

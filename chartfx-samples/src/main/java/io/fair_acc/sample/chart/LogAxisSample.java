@@ -30,9 +30,7 @@ public class LogAxisSample extends ChartSample {
         // yAxis.setLogarithmBase(2);
 
         final XYChart chart = new XYChart(xAxis, yAxis);
-        final Zoomer zoomer = new Zoomer();
-        zoomer.setPannerEnabled(false); // not recommended (ie. Axes do not support complex numbers, e.g. 'log(-1)')
-        chart.getPlugins().add(zoomer); // zoom around
+        chart.getPlugins().add(new Zoomer()); // zoom around
         chart.getPlugins().add(new EditAxis()); // manually modify axis
 
         root.getChildren().add(chart);
