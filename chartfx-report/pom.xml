@@ -12,6 +12,10 @@
     <artifactId>report</artifactId>
     <name>chartfx-report</name>
 
+    <properties>
+        <project.moduleName>io.fair_acc.chartfx_report</project.moduleName>
+    </properties>
+
     <description>
         Container for handling testing and code coverage reports
     </description>

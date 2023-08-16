@@ -11,7 +11,7 @@
     <artifactId>dataset</artifactId>
     <name>chartfx-dataset</name>
     <properties>
-        <project.moduleName>io.fair-acc.dataset</project.moduleName>
+        <project.moduleName>io.fair_acc.dataset</project.moduleName>
     </properties>
 
     <description>

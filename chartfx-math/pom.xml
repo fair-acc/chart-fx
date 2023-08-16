@@ -12,7 +12,7 @@
     <artifactId>math</artifactId>
     <name>chartfx_math</name>
     <properties>
-        <project.moduleName>io.fair-acc.math</project.moduleName>
+        <project.moduleName>io.fair_acc.math</project.moduleName>
     </properties>
 
     <description>
