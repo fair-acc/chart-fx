@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.ui.css.*;
-import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
@@ -15,10 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.css.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
-import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
 
 import io.fair_acc.chartfx.Chart;
@@ -360,7 +356,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * to be overwritten by derived class that want to cache variables for efficiency reasons
      */
-    protected void updateCachedVariables() { // NOPMD by rstein function can but does not have to be overwritten
+    @Override
+    public void updateCachedTransforms() { // NOPMD by rstein function can but does not have to be overwritten
         // called once new axis parameters have been established
         cachedOffset = getSide().isHorizontal() ? 0 : getLength();
     }
@@ -816,7 +813,8 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
     @Override
     public boolean set(final double min, final double max) {
-        return PropUtil.set(minProp, min) | PropUtil.set(maxProp, max);
+        final boolean result = PropUtil.set(minProp, min) | PropUtil.set(maxProp, max);
+        return result;
     }
 
     @Override

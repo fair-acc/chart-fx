@@ -1,10 +1,5 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.BooleanProperty;
@@ -540,8 +535,8 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     }
 
     @Override
-    protected void updateCachedVariables() {
-        super.updateCachedVariables();
+    public void updateCachedTransforms() {
+        super.updateCachedTransforms();
         if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return;
         }

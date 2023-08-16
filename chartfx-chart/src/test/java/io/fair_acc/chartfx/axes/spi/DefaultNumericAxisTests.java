@@ -80,7 +80,7 @@ public class DefaultNumericAxisTests {
         assertTrue(axis.isLogAxis());
         assertEquals(LogAxisType.LOG10_SCALE, axis.getLogAxisType());
         axis.setMin(0.1);
-        axis.updateCachedVariables();
+        axis.updateCachedTransforms();
         axis.layoutChildren();
         assertEquals(axis.getZeroPosition(), axis.getDisplayPosition(axis.getMin()));
         assertEquals(10, axis.getLogarithmBase());
@@ -89,7 +89,7 @@ public class DefaultNumericAxisTests {
 
         axis.setLogAxis(false);
         assertFalse(axis.isLogAxis());
-        axis.updateCachedVariables();
+        axis.updateCachedTransforms();
         tickValues.clear();
         axis.calculateMinorTickValues(tickValues);
     }
