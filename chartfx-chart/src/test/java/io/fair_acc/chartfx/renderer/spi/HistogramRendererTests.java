@@ -98,7 +98,6 @@ public class HistogramRendererTests {
         final XYChart chart = new XYChart();
         assertNotNull(renderer.chartProperty());
         assertNull(renderer.getChart());
-        assertDoesNotThrow(() -> renderer.setChartChart(chart));
         assertEquals(chart, renderer.getChart());
 
         assertTrue(renderer.isRoundedCorner());

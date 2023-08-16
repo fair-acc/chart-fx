@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -453,42 +454,16 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
+    protected void render(GraphicsContext gc, DataSet dataSet, DataSetNode style) {
+        long start = ProcessingProfiler.getTimeStamp();
+        localCache = new ContourDataSetCache(getChart(), this, dataSet); // NOPMD
+        ProcessingProfiler.getTimeDiff(start, "updateCachedVariables");
 
-        // If there are no data sets
-        if (getDatasets().isEmpty()) {
-            return;
-        }
+        // data reduction algorithm here
+        paintCanvas(gc);
+        localCache.releaseCachedVariables();
+        ProcessingProfiler.getTimeDiff(start, "finished drawing");
 
-        final XYChart xyChart = (XYChart) chart;
-        long mid = ProcessingProfiler.getTimeDiff(start, "init");
-        // N.B. importance of reverse order: start with last index, so that
-        // most(-like) important DataSet is drawn on
-        // top of the others
-
-        for (int dataSetIndex = getDatasets().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final DataSet dataSet = getDatasets().get(dataSetIndex);
-            if (!dataSet.isVisible() || !(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2 || dataSet.getDataCount() == 0) {
-                continue; // DataSet not applicable to ContourChartRenderer
-            }
-
-            long stop = ProcessingProfiler.getTimeDiff(mid, "dataSet.lock()");
-            localCache = new ContourDataSetCache(xyChart, this, dataSet); // NOPMD
-            ProcessingProfiler.getTimeDiff(stop, "updateCachedVariables");
-
-            // data reduction algorithm here
-            paintCanvas(gc);
-            localCache.releaseCachedVariables();
-
-            ProcessingProfiler.getTimeDiff(mid, "finished drawing");
-
-        } // end of 'dataSetIndex' loop
-
-        ProcessingProfiler.getTimeDiff(start);
     }
 
     public void shiftZAxisToLeft() {

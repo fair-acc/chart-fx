@@ -506,6 +506,11 @@ public abstract class Chart extends Region implements EventSource {
             return;
         }
 
+        // Update axis mapping in the renderers
+        for (Renderer renderer : renderers) {
+            renderer.updateAxes();
+        }
+
         // Update legend
         if (state.isDirty(ChartBits.ChartLegend)) {
             updateLegend(getDatasets(), getRenderers());

@@ -40,13 +40,22 @@ public interface Renderer {
     ObservableList<DataSetNode> getDatasetNodes();
 
     /**
-     * Optional method that allows the renderer make layout changes after axes and dataset limits are known
+     * Optional method that allows the renderer make layout changes after axes and dataset limits are known.
+     * Gets called after axis ranges are known
      */
     default void runPreLayout() { // #NOPMD
         // empty by default
     }
 
     default void runPostLayout() { // #NOPMD
+        // empty by default
+    }
+
+    /**
+     * Sets up axis mapping and creates any axes that may be needed.
+     * Gets called before axis ranges are updated.
+     */
+    default void updateAxes() {
         // empty by default
     }
 

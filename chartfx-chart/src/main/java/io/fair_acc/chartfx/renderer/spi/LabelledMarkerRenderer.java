@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -38,7 +39,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  *
  * Points without any label data are ignored by the renderer.
  */
-public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRenderer> implements Renderer {
+public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRenderer> implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(LabelledMarkerRenderer.class);
     private static final String STYLE_CLASS_LABELLED_MARKER = "chart-labelled-marker";
     private static final String DEFAULT_FONT = "Helvetica";
@@ -202,64 +203,28 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException(
-                    "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
-        final XYChart xyChart = (XYChart) chart;
+    protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
 
-        // If there are no data sets
-        if (getDatasets().isEmpty()) {
+        // check for potentially reduced data range we are supposed to plot
+        final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
+        final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
+                dataSet.getDataCount());
+
+        // return if zero length data set
+        if (indexMax - indexMin <= 0) {
             return;
         }
 
-        Axis xAxis = this.getFirstAxis(Orientation.HORIZONTAL);
-        if (xAxis == null) {
-            xAxis = xyChart.getFirstAxis(Orientation.HORIZONTAL);
+        if (isHorizontalMarker()) {
+            // draw horizontal marker
+            drawHorizontalLabelledMarker(gc, getChart(), dataSet, indexMin, indexMax);
         }
-        if (xAxis == null) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.atWarn().addArgument(LabelledMarkerRenderer.class.getSimpleName()).log("{}::render(...) getFirstAxis(HORIZONTAL) returned null skip plotting");
-            }
-            return;
+
+        if (isVerticalMarker()) {
+            // draw vertical marker
+            drawVerticalLabelledMarker(gc, getChart(), dataSet, indexMin, indexMax);
         }
-        final double xAxisWidth = xAxis.getWidth();
-        final double xMin = xAxis.getValueForDisplay(0);
-        final double xMax = xAxis.getValueForDisplay(xAxisWidth);
 
-        // N.B. importance of reverse order: start with last index, so that
-        // most(-like) important DataSet is drawn on top of the others
-
-        for (int dataSetIndex = getDatasets().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final DataSet dataSet = getDatasets().get(dataSetIndex);
-            if (!dataSet.isVisible()) {
-                continue;
-            }
-            // check for potentially reduced data range we are supposed to plot
-            final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
-            final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
-                    dataSet.getDataCount());
-
-            // return if zero length data set
-            if (indexMax - indexMin <= 0) {
-                continue;
-            }
-
-            if (isHorizontalMarker()) {
-                // draw horizontal marker
-                drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-            }
-
-            if (isVerticalMarker()) {
-                // draw vertical marker
-                drawVerticalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
-            }
-
-        } // end of 'dataSetIndex' loop
-
-        ProcessingProfiler.getTimeDiff(start);
     }
 
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {

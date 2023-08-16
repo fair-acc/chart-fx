@@ -117,16 +117,6 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
         return dataSets;
     }
 
-    public Axis getFirstHorizontalAxis() {
-        AssertUtils.notNull("chart", getChart());
-        return getFirstAxis(Orientation.HORIZONTAL, getChart());
-    }
-
-    public Axis getFirstVerticalAxis() {
-        AssertUtils.notNull("chart", getChart());
-        return getFirstAxis(Orientation.VERTICAL, getChart());
-    }
-
     public Axis getFirstAxis(final Orientation orientation) {
         for (final Axis axis : getAxes()) {
             if (axis.getSide() == null) {

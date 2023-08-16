@@ -13,7 +13,7 @@ import javafx.css.Styleable;
 import java.util.List;
 
 public abstract class AbstractPointReducingRenderer<R extends AbstractPointReducingRenderer<R>>
-        extends AbstractRenderer<R> {
+        extends AbstractRendererXY<R> {
     private final ReadOnlyBooleanWrapper actualPointReduction = registerCanvasProp(new ReadOnlyBooleanWrapper(this, "actualPointReduction",
             true));
     private final BooleanProperty assumeSortedData = css().createBooleanProperty(this, "assumeSortedData", true);
