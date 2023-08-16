@@ -361,4 +361,11 @@ public interface Axis extends AxisDescription {
      * @return the canvas of the axis
      */
     Canvas getCanvas();
+
+    /**
+     * Hook to manually update the cached axis transforms outside of the render loop.
+     * This is needed e.g. when plugins adjust the axes and at the same time need to perform
+     * transformations with the modified ranges.
+     */
+    default void updateCachedTransforms() {};
 }

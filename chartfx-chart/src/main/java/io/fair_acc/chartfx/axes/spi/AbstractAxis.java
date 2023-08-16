@@ -250,7 +250,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         updateScaleAndUnitPrefix();
 
         // Update the cache to the new range
-        updateCachedVariables();
+        updateCachedTransforms();
 
         // Compute new tick marks and locations
         updateMajorTickMarks(range);

@@ -86,7 +86,7 @@ public class OscilloscopeAxisTests {
         final OscilloscopeAxis axis = new OscilloscopeAxis("axis title", 0.0, 100.0, 10.0);
 
         assertDoesNotThrow(() -> axis.setSide(Side.BOTTOM));
-        assertDoesNotThrow(axis::updateCachedVariables);
+        assertDoesNotThrow(axis::updateCachedTransforms);
 
         final double zero = axis.getDisplayPosition(axis.getValueForDisplay(0));
         assertEquals(0.0, zero);
@@ -167,13 +167,13 @@ public class OscilloscopeAxisTests {
         axis.setTickUnitSupplier(testTickUnitSupplier);
         assertEquals(testTickUnitSupplier, axis.getTickUnitSupplier());
 
-        assertDoesNotThrow(axis::updateCachedVariables);
+        assertDoesNotThrow(axis::updateCachedTransforms);
 
         assertDoesNotThrow(() -> axis.setSide(Side.BOTTOM));
-        assertDoesNotThrow(axis::updateCachedVariables);
+        assertDoesNotThrow(axis::updateCachedTransforms);
 
         assertDoesNotThrow(() -> axis.setSide(Side.LEFT));
-        assertDoesNotThrow(axis::updateCachedVariables);
+        assertDoesNotThrow(axis::updateCachedTransforms);
 
         assertNotNull(axis.getAxisTransform());
 

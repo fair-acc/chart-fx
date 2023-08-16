@@ -372,8 +372,8 @@ public class OscilloscopeAxis extends AbstractAxis implements Axis {
     }
 
     @Override
-    protected void updateCachedVariables() {
-        super.updateCachedVariables();
+    public void updateCachedTransforms() {
+        super.updateCachedTransforms();
         if (cache == null) { // lgtm [java/useless-null-check] NOPMD NOSONAR -- called from static initializer
             return;
         }
