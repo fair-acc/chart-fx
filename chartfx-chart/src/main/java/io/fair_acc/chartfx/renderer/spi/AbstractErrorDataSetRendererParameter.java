@@ -465,6 +465,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     protected R bind(final R other) {
+        chartProperty().bind(other.chartProperty());
         errorStyleProperty().bind(other.errorStyleProperty());
         pointReductionProperty().bind(other.pointReductionProperty());
         assumeSortedDataProperty().bind(other.assumeSortedDataProperty());
@@ -502,6 +503,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     protected abstract R getThis();
 
     protected R unbind() {
+        chartProperty().unbind();
         errorStyleProperty().unbind();
         pointReductionProperty().unbind();
         dashSizeProperty().unbind();

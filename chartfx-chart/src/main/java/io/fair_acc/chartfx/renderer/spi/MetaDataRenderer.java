@@ -239,8 +239,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         final long start = ProcessingProfiler.getTimeStamp();
 
         final ObservableList<DataSet> allDataSets = chart.getAllDatasets();
@@ -299,7 +298,6 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
         }
 
         ProcessingProfiler.getTimeDiff(start);
-        return Collections.emptyList();
     }
 
     public void setDrawOnCanvas(boolean state) {

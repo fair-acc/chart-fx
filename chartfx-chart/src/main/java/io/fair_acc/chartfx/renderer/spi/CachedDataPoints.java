@@ -175,14 +175,14 @@ class CachedDataPoints {
         }
     }
 
-    protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, final DataSetNode dataSet,
-            final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
+    protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, DataSet dataSet, final DataSetNode style,
+                                            final int min, final int max, final ErrorStyle localRendErrorStyle,
             final boolean isPolarPlot, final boolean doAllowForNaNs) {
-        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot,
+        setBoundaryConditions(xAxis, yAxis, dataSet, style, min, max, localRendErrorStyle, isPolarPlot,
                 doAllowForNaNs);
 
         // compute data set to screen coordinates
-        computeScreenCoordinatesNonThreaded(xAxis, yAxis, dataSet.getDataSet(), min, max);
+        computeScreenCoordinatesNonThreaded(xAxis, yAxis, dataSet, min, max);
     }
 
     private void computeScreenCoordinatesEuclidean(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
@@ -211,14 +211,14 @@ class CachedDataPoints {
         computeErrorStyles(dataSet, min, max);
     }
 
-    protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSetNode dataSet,
-            final int dsIndex, final int min, final int max, final ErrorStyle localRendErrorStyle,
+    protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final DataSetNode style,
+                                                      final int min, final int max, final ErrorStyle localRendErrorStyle,
             final boolean isPolarPlot, final boolean doAllowForNaNs) {
-        setBoundaryConditions(xAxis, yAxis, dataSet, dsIndex, min, max, localRendErrorStyle, isPolarPlot,
+        setBoundaryConditions(xAxis, yAxis, dataSet, style, min, max, localRendErrorStyle, isPolarPlot,
                 doAllowForNaNs);
 
         // compute data set to screen coordinates
-        computeScreenCoordinatesParallel(xAxis, yAxis, dataSet.getDataSet(), min, max);
+        computeScreenCoordinatesParallel(xAxis, yAxis, dataSet, min, max);
     }
 
     protected void computeScreenCoordinatesNonThreaded(final Axis xAxis, final Axis yAxis, final DataSet dataSet,
@@ -502,18 +502,20 @@ class CachedDataPoints {
         minDataPointDistanceX();
     }
 
-    private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, final DataSetNode dataSet, final int dsIndex,
-            final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
-            final boolean doAllowForNaNs) {
+    private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, DataSet dataSet, final DataSetNode style,
+                                       final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
+                                       final boolean doAllowForNaNs) {
         indexMin = min;
         indexMax = max;
         polarPlot = isPolarPlot;
         this.allowForNaNs = doAllowForNaNs;
         this.rendererErrorStyle = rendererErrorStyle;
 
+        defaultStyle = dataSet.getStyle();
+        styleNode = style;
+
         computeBoundaryVariables(xAxis, yAxis);
-        setStyleVariable(dataSet, dsIndex);
-        setErrorType(dataSet.getDataSet(), rendererErrorStyle);
+        setErrorType(dataSet, rendererErrorStyle);
     }
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {
@@ -544,8 +546,4 @@ class CachedDataPoints {
         }
     }
 
-    protected void setStyleVariable(final DataSetNode dataSet, final int dsIndex) {
-        defaultStyle = dataSet.getStyle();
-        styleNode = dataSet;
-    }
 }

@@ -53,16 +53,11 @@ public class ReducingLineRenderer extends AbstractRenderer<ReducingLineRenderer>
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
         final XYChart xyChart = (XYChart) chart;
-
-        // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
-        localDataSetList.addAll(super.getDatasets());
 
         final long start = ProcessingProfiler.getTimeStamp();
         final Axis xAxis = xyChart.getXAxis();
@@ -72,25 +67,11 @@ public class ReducingLineRenderer extends AbstractRenderer<ReducingLineRenderer>
         final double xmin = xAxis.getValueForDisplay(0);
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
-        for (final DataSet ds : localDataSetList) {
+        for (final DataSet ds : getDatasets()) {
             if (!ds.isVisible()) {
                 continue;
             }
             final int lindex = index;
-            // update categories in case of category axes for the first
-            // (index == '0') indexed data set
-            if (lindex == 0) {
-                if (xyChart.getXAxis() instanceof CategoryAxis) {
-                    final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
-                    axis.updateCategories(ds);
-                }
-
-                if (xyChart.getYAxis() instanceof CategoryAxis) {
-                    final CategoryAxis axis = (CategoryAxis) xyChart.getYAxis();
-                    axis.updateCategories(ds);
-                }
-            }
-
             gc.save();
             DefaultRenderColorScheme.setLineScheme(gc, ds.getStyle(), lindex);
             DefaultRenderColorScheme.setGraphicsContextAttributes(gc, ds.getStyle());
@@ -153,8 +134,6 @@ public class ReducingLineRenderer extends AbstractRenderer<ReducingLineRenderer>
             index++;
         }
         ProcessingProfiler.getTimeDiff(start);
-
-        return localDataSetList;
     }
 
     public void setMaxPoints(final int maxPoints) {

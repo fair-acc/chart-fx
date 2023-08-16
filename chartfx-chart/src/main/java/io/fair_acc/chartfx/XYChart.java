@@ -305,17 +305,17 @@ public class XYChart extends Chart {
 
         // Bottom grid
         if (!gridRenderer.isDrawOnTop()) {
-            gridRenderer.render(gc, this, 0, null);
+            gridRenderer.render(gc, this, 0);
         }
 
         // Data
         for (final Renderer renderer : getRenderers()) {
-            renderer.render(gc, this, renderer.getIndexOffset(), FXCollections.emptyObservableList());
+            renderer.render(gc, this, renderer.getIndexOffset());
         }
 
         // Top grid
         if (gridRenderer.isDrawOnTop()) {
-            gridRenderer.render(gc, this, 0, null);
+            gridRenderer.render(gc, this, 0);
         }
 
         if (DEBUG && LOGGER.isDebugEnabled()) {

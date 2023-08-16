@@ -56,7 +56,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     private final IntegerProperty roundedCornerRadius = new SimpleIntegerProperty(this, "roundedCornerRadius", 10);
     private final Map<String, Double> scaling = new ConcurrentHashMap<>();
     private final AnimationTimer timer = new MyTimer();
-    private final List<DataSet> localDataSetList = new ArrayList<>();
 
     public HistogramRenderer() {
         super();
@@ -119,16 +118,14 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset, final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         final long start = ProcessingProfiler.getTimeStamp();
         setChartChart(chart);
         final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
         final Axis yAxis = getFirstAxis(Orientation.VERTICAL);
 
         // make local copy and add renderer specific data sets
-        localDataSetList.clear();
-        localDataSetList.addAll(datasets);
-        localDataSetList.addAll(super.getDatasets());
+        final var localDataSetList = new ArrayList<>(getDatasets());
 
         // verify that allDataSets are sorted
         for (int i = 0; i < localDataSetList.size(); i++) {
@@ -166,7 +163,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
         ProcessingProfiler.getTimeDiff(start);
 
-        return localDataSetList;
     }
 
     public void invalidateCanvas() {
@@ -686,7 +682,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
                 return;
             }
 
-            for (final DataSet dataSet : localDataSetList) {
+            for (final var dataSet : getDatasets()) {
                 // scheme 1
                 // final Double val = scaling.put(dataSet.getName(), Math.min(scaling.computeIfAbsent(dataSet.getName(), ds -> 0.0) + 0.05, 1.0))
                 // scheme 2

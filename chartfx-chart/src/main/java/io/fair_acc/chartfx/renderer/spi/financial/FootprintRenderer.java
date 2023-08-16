@@ -158,17 +158,12 @@ public class FootprintRenderer extends AbstractFinancialRenderer<FootprintRender
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
         final XYChart xyChart = (XYChart) chart;
-
-        // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
-        localDataSetList.addAll(super.getDatasets());
 
         long start = 0;
         if (ProcessingProfiler.getDebugState()) {
@@ -183,7 +178,7 @@ public class FootprintRenderer extends AbstractFinancialRenderer<FootprintRender
         final double xmax = xAxis.getValueForDisplay(xAxisWidth);
         int index = 0;
 
-        for (final DataSet ds : localDataSetList) {
+        for (final DataSet ds : getDatasets()) {
             if (ds.getDimension() < 7)
                 continue;
             final int lindex = index;
@@ -280,7 +275,6 @@ public class FootprintRenderer extends AbstractFinancialRenderer<FootprintRender
             ProcessingProfiler.getTimeDiff(start);
         }
 
-        return localDataSetList;
     }
 
     private void drawFootprintItem(GraphicsContext gc, Axis yAxis, DataSet ds, int i,

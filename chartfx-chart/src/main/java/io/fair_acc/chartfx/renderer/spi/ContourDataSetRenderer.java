@@ -453,20 +453,15 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-                                final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
 
-        // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
-        localDataSetList.addAll(getDatasets());
-
         // If there are no data sets
-        if (localDataSetList.isEmpty()) {
-            return Collections.emptyList();
+        if (getDatasets().isEmpty()) {
+            return;
         }
 
         final XYChart xyChart = (XYChart) chart;
@@ -475,9 +470,8 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         // most(-like) important DataSet is drawn on
         // top of the others
 
-        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
-        for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final DataSet dataSet = localDataSetList.get(dataSetIndex);
+        for (int dataSetIndex = getDatasets().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
+            final DataSet dataSet = getDatasets().get(dataSetIndex);
             if (!dataSet.isVisible() || !(dataSet instanceof GridDataSet) || dataSet.getDimension() <= 2 || dataSet.getDataCount() == 0) {
                 continue; // DataSet not applicable to ContourChartRenderer
             }
@@ -488,7 +482,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
             // data reduction algorithm here
             paintCanvas(gc);
-            drawnDataSet.add(dataSet);
             localCache.releaseCachedVariables();
 
             ProcessingProfiler.getTimeDiff(mid, "finished drawing");
@@ -496,8 +489,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         } // end of 'dataSetIndex' loop
 
         ProcessingProfiler.getTimeDiff(start);
-
-        return drawnDataSet;
     }
 
     public void shiftZAxisToLeft() {

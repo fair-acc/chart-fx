@@ -126,7 +126,7 @@ public class AbstractErrorDataSetRendererParameterTests {
         }
 
         @Override
-        public List<DataSet> render(GraphicsContext gc, Chart chart, int dataSetOffset, ObservableList<DataSet> datasets) {
+        public void render(GraphicsContext gc, Chart chart, int dataSetOffset) {
             throw new UnsupportedOperationException();
         }
 
