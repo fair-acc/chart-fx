@@ -5,15 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
-
-import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 
 import org.junit.jupiter.api.Test;
 
-import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.renderer.ContourType;
 import io.fair_acc.chartfx.renderer.datareduction.ReductionType;
 import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
@@ -79,7 +74,7 @@ public class AbstractContourDataSetRendererParameterTests {
         }
 
         @Override
-        public void render(GraphicsContext gc, Chart chart, int dataSetOffset) {
+        public void render() {
             throw new UnsupportedOperationException();
         }
 

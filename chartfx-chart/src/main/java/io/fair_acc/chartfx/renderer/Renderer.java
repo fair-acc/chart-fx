@@ -1,14 +1,10 @@
 package io.fair_acc.chartfx.renderer;
 
-import java.util.List;
-
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 
-import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.dataset.DataSet;
 
@@ -68,12 +64,9 @@ public interface Renderer {
     }
 
     /**
-     * @param gc            the Canvas' GraphicsContext the renderer should draw upon
-     * @param chart         the corresponding chart
-     * @param dataSetOffset global offset of the last drawn DataSet
-     * @return List of drawn DataSets (N.B. return '0' in case {@link #showInLegend} is false)
+     * renders the contents to screen
      */
-    void render(GraphicsContext gc, Chart chart, int dataSetOffset);
+    void render();
 
     /**
      * Sets whether DataSets attached to this renderer shall be shown in the legend
