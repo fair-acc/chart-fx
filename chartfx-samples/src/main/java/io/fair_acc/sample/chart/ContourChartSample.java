@@ -254,8 +254,8 @@ public class ContourChartSample extends ChartSample {
         final DefaultNumericAxis xAxis2 = (DefaultNumericAxis) chartPane2.getXAxis();
         final DefaultNumericAxis yAxis2 = (DefaultNumericAxis) chartPane2.getYAxis();
 
-        final DefaultNumericAxis zAxis1 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane1.getRenderers().get(0)).getZAxis();
-        final DefaultNumericAxis zAxis2 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane2.getRenderers().get(0)).getZAxis();
+        final DefaultNumericAxis zAxis1 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane1.getRenderers().get(0)).getAxes().get(2);
+        final DefaultNumericAxis zAxis2 = (DefaultNumericAxis) ((ContourDataSetRenderer) chartPane2.getRenderers().get(0)).getAxes().get(2);
 
         // xAxis1.setAutoRanging(false);
         // yAxis1.setAutoRanging(false);

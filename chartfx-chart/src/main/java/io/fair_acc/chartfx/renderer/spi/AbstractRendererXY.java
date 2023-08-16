@@ -70,10 +70,10 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         // Get or create one in the chart if needed
         var chart = AssertUtils.notNull("chart", getChart());
         if (xAxis == null) {
-            xAxis = chart.getFirstAxis(Orientation.HORIZONTAL);
+            xAxis = chart.getXAxis();
         }
         if (yAxis == null) {
-            yAxis = chart.getFirstAxis(Orientation.VERTICAL);
+            yAxis = chart.getYAxis();
         }
     }
 
