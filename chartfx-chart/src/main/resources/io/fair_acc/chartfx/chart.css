@@ -167,6 +167,28 @@
   -color-dataset-7: #a2898d;
   -fx-color-count: 7;
 }
+.chart:palette-modena, .renderer:palette-modena {
+  -color-dataset-1: CHART_COLOR_1;
+  -color-dataset-2: CHART_COLOR_2;
+  -color-dataset-3: CHART_COLOR_3;
+  -color-dataset-4: CHART_COLOR_4;
+  -color-dataset-5: CHART_COLOR_5;
+  -color-dataset-6: CHART_COLOR_6;
+  -color-dataset-7: CHART_COLOR_7;
+  -color-dataset-8: CHART_COLOR_8;
+  -fx-color-count: 8;
+}
+.chart:palette-atlantafx, .renderer:palette-atlantafx {
+  -color-dataset-1: -color-chart-1;
+  -color-dataset-2: -color-chart-2;
+  -color-dataset-3: -color-chart-3;
+  -color-dataset-4: -color-chart-4;
+  -color-dataset-5: -color-chart-5;
+  -color-dataset-6: -color-chart-6;
+  -color-dataset-7: -color-chart-7;
+  -color-dataset-8: -color-chart-8;
+  -fx-color-count: 8;
+}
 
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);

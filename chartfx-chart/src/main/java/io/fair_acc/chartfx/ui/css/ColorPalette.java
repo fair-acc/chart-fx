@@ -16,7 +16,9 @@ public enum ColorPalette {
     EQUIDISTANT("equidistant"),
     TUNEVIEWER("tuneviewer"),
     MATLAB_LIGHT("matlab-light"),
-    MATLAB_DARK("matlab-dark");
+    MATLAB_DARK("matlab-dark"),
+    MODENA("modena"),
+    ATLANTAFX("atlantafx");
 
     private ColorPalette() {
         this.pseudoClass = null;

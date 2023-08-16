@@ -7,6 +7,7 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 }
 
 .chart, .renderer {
+
   &:palette-misc {
     @include palette.misc();
   }
@@ -34,6 +35,15 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   &:palette-matlab-dark {
     @include palette.matlab-dark();
   }
+
+  &:palette-modena {
+    @include palette.modena();
+  }
+
+  &:palette-atlantafx {
+    @include palette.atlantafx();
+  }
+
 }
 
 .chart-datapoint-tooltip-label {
