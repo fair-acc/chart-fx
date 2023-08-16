@@ -290,20 +290,29 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
     @Override
     public void updateAxes() {
-        if (zAxis != null) {
-            return;
-        }
         super.updateAxes();
 
         // Check if there is a user-specified 3rd axis
-        for (Axis axis : getAxes()) {
-            if (axis != xAxis && axis != yAxis) {
-                zAxis = axis;
-                break;
+        if (zAxis != null) {
+            for (Axis axis : getAxes()) {
+                if (axis != xAxis && axis != yAxis) {
+                    zAxis = axis;
+                    break;
+                }
             }
         }
 
-        // Create a new one if necessary
+        // Check if there is one in the chart
+        // TODO: confirm that this is reasonable
+        if (zAxis != null) {
+            for (Axis axis : getChart().getAxes()) {
+                if (axis != xAxis && axis != yAxis && axis.getDimIndex() == DataSet.DIM_Z) {
+                    zAxis = axis;
+                }
+            }
+        }
+
+        // Create a new one if necessary and add locally
         if (zAxis != null) {
             zAxis = createZAxis();
             getAxes().setAll(xAxis, yAxis, zAxis);
@@ -316,6 +325,11 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         zAxis.setSide(Side.RIGHT);
         zAxis.setDimIndex(DataSet.DIM_Z);
         return zAxis;
+    }
+
+    @Override
+    public boolean isUsingAxis(Axis axis) {
+        return super.isUsingAxis(axis) || axis == zAxis;
     }
 
     /**

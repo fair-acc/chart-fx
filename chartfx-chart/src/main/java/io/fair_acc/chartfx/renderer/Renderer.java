@@ -60,6 +60,14 @@ public interface Renderer {
     }
 
     /**
+     * @param axis axis to be checked
+     * @return true if the axis is actively being used by the renderer. Must be called after updateAxes()
+     */
+    default boolean isUsingAxis(Axis axis) {
+        return getAxes().contains(axis);
+    }
+
+    /**
      * @param gc            the Canvas' GraphicsContext the renderer should draw upon
      * @param chart         the corresponding chart
      * @param dataSetOffset global offset of the last drawn DataSet

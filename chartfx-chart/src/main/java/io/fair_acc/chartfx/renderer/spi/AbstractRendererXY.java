@@ -77,6 +77,11 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         }
     }
 
+    @Override
+    public boolean isUsingAxis(Axis axis) {
+        return axis == xAxis || axis == yAxis;
+    }
+
     protected void updateCachedVariables() {
         xMin = xAxis.getValueForDisplay(xAxis.isInvertedAxis() ? xAxis.getLength() : 0.0);
         xMax = xAxis.getValueForDisplay(xAxis.isInvertedAxis() ? 0.0 : xAxis.getLength());

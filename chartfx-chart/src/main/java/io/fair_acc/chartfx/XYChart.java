@@ -273,7 +273,7 @@ public class XYChart extends Chart {
     protected List<DataSetNode> getDataSetForAxis(final Axis axis) {
         final List<DataSetNode> list = new ArrayList<>();
         getRenderers().stream()
-                .filter(renderer -> renderer.getAxes().contains(axis))
+                .filter(renderer -> renderer.isUsingAxis(axis))
                 .map(Renderer::getDatasetNodes)
                 .forEach(list::addAll);
         return list;
