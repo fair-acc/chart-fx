@@ -35,7 +35,7 @@ public interface Renderer {
 
     ObservableList<DataSet> getDatasets();
 
-    ObservableList<DataSet> getDatasetsCopy();
+    ObservableList<DataSet> getDatasetsCopy(); // TODO: get rid of this? add getDatasetNodes?
 
     ObservableList<DataSetNode> getDatasetNodes();
 
@@ -51,14 +51,12 @@ public interface Renderer {
     }
 
     /**
-     *
-     * @param gc the Canvas' GraphicsContext the renderer should draw upon
-     * @param chart the corresponding chart
+     * @param gc            the Canvas' GraphicsContext the renderer should draw upon
+     * @param chart         the corresponding chart
      * @param dataSetOffset global offset of the last drawn DataSet
-     * @param datasets list of globally (ie. in Chart) stored DataSets
      * @return List of drawn DataSets (N.B. return '0' in case {@link #showInLegend} is false)
      */
-    List<DataSet> render(GraphicsContext gc, Chart chart, int dataSetOffset, ObservableList<DataSet> datasets);
+    void render(GraphicsContext gc, Chart chart, int dataSetOffset);
 
     /**
      * Sets whether DataSets attached to this renderer shall be shown in the legend

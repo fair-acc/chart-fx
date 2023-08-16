@@ -4,7 +4,6 @@ import java.security.InvalidParameterException;
 import java.util.*;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -117,95 +116,101 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int unusedOffset,
-            final ObservableList<DataSet> unusedDataSets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int unusedOffset) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
 
         // If there are no data sets
         if (getDatasets().isEmpty()) {
-            return Collections.emptyList();
+            return;
         }
 
-        final Axis xAxis = getFirstHorizontalAxis();
-        final Axis yAxis = getFirstVerticalAxis();
+
 
         final long start = ProcessingProfiler.getTimeStamp();
-        final double xAxisWidth = xAxis.getWidth();
-        final boolean xAxisInverted = xAxis.isInvertedAxis();
-        final double xMin = xAxis.getValueForDisplay(xAxisInverted ? xAxisWidth : 0.0);
-        final double xMax = xAxis.getValueForDisplay(xAxisInverted ? 0.0 : xAxisWidth);
+
+
 
         if (ProcessingProfiler.getDebugState()) {
             ProcessingProfiler.getTimeDiff(start, "init");
         }
 
-        for (int dataSetIndex = getDatasetNodes().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            DataSetNode dataSet = getDatasetNodes().get(dataSetIndex);
-            if (!dataSet.isVisible()) {
-                continue;
-            }
-
-            // N.B. print out for debugging purposes, please keep (used for
-            // detecting redundant or too frequent render updates)
-            // System.err.println(String.format("render for range [%f,%f] and dataset = '%s'", xMin, xMax, dataSet.getName()));
-
-            var timestamp = ProcessingProfiler.getTimeStamp();
-            final var data = dataSet.getDataSet();
-            int indexMin;
-            int indexMax; /* indexMax is excluded in the drawing */
-            if (isAssumeSortedData()) {
-                indexMin = Math.max(0, data.getIndex(DataSet.DIM_X, xMin) - 1);
-                indexMax = Math.min(data.getIndex(DataSet.DIM_X, xMax) + 2, data.getDataCount());
-            } else {
-                indexMin = 0;
-                indexMax = data.getDataCount();
-            }
-
-            // zero length/range data set -> nothing to be drawn
-            if (indexMax - indexMin <= 0) {
-                continue;
-            }
-
-            if (ProcessingProfiler.getDebugState()) {
-                timestamp = ProcessingProfiler.getTimeDiff(timestamp,
-                        "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
-            }
-
-            final CachedDataPoints points = STATIC_POINTS_CACHE.resizeMin(indexMin, indexMax, data.getDataCount(), true);
-            if (ProcessingProfiler.getDebugState()) {
-                timestamp = ProcessingProfiler.getTimeDiff(timestamp, "get CachedPoints");
-            }
-
-            // compute local screen coordinates
-            final boolean isPolarPlot = ((XYChart) chart).isPolarPlot();
-            if (isParallelImplementation()) {
-                points.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet,
-                        dataSet.getColorIndex(), indexMin, indexMax, getErrorType(), isPolarPlot,
-                        isallowNaNs());
-            } else {
-                points.computeScreenCoordinates(xAxis, yAxis, dataSet, dataSet.getColorIndex(),
-                        indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
-            }
-            if (ProcessingProfiler.getDebugState()) {
-                timestamp = ProcessingProfiler.getTimeDiff(timestamp, "computeScreenCoordinates()");
-            }
-
-            // invoke data reduction algorithm
-            points.reduce(rendererDataReducerProperty().get(), isReducePoints(),
-                    getMinRequiredReductionSize());
-
-            // draw individual plot components
-            drawChartComponents(gc, points);
-            if (ProcessingProfiler.getDebugState()) {
-                timestamp = ProcessingProfiler.getTimeDiff(timestamp, "drawChartComponents()");
-            }
-
+        for (int i = getDatasetNodes().size() - 1; i >= 0; i--) {
+            var dataSetNode = getDatasetNodes().get(i);
+            render(gc, dataSetNode.getDataSet(), dataSetNode);
         } // end of 'dataSetIndex' loop
+
         ProcessingProfiler.getTimeDiff(start);
 
-        return getDatasets();
+    }
+
+    protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
+        if (!style.isVisible()) {
+            return;
+        }
+
+        final Axis xAxis = getFirstHorizontalAxis();
+        final Axis yAxis = getFirstVerticalAxis();
+
+        // N.B. print out for debugging purposes, please keep (used for
+        // detecting redundant or too frequent render updates)
+        // System.err.println(String.format("render for range [%f,%f] and dataset = '%s'", xMin, xMax, dataSet.getName()));
+
+        var timestamp = ProcessingProfiler.getTimeStamp();
+        int indexMin;
+        int indexMax; /* indexMax is excluded in the drawing */
+        if (isAssumeSortedData()) {
+            final double xAxisWidth = xAxis.getWidth();
+            final boolean xAxisInverted = xAxis.isInvertedAxis();
+            final double xMin = xAxis.getValueForDisplay(xAxisInverted ? xAxisWidth : 0.0);
+            final double xMax = xAxis.getValueForDisplay(xAxisInverted ? 0.0 : xAxisWidth);
+            indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin) - 1);
+            indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 2, dataSet.getDataCount());
+        } else {
+            indexMin = 0;
+            indexMax = dataSet.getDataCount();
+        }
+
+        // zero length/range data set -> nothing to be drawn
+        if (indexMax - indexMin <= 0) {
+            return;
+        }
+
+        if (ProcessingProfiler.getDebugState()) {
+            timestamp = ProcessingProfiler.getTimeDiff(timestamp,
+                    "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
+        }
+
+        final CachedDataPoints points = STATIC_POINTS_CACHE.resizeMin(indexMin, indexMax, dataSet.getDataCount(), true);
+        if (ProcessingProfiler.getDebugState()) {
+            timestamp = ProcessingProfiler.getTimeDiff(timestamp, "get CachedPoints");
+        }
+
+        // compute local screen coordinates
+        final boolean isPolarPlot = ((XYChart) getChart()).isPolarPlot();
+        if (isParallelImplementation()) {
+            points.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet, style,
+                    indexMin, indexMax, getErrorType(), isPolarPlot,
+                    isallowNaNs());
+        } else {
+            points.computeScreenCoordinates(xAxis, yAxis, dataSet, style,
+                    indexMin, indexMax, getErrorType(), isPolarPlot, isallowNaNs());
+        }
+        if (ProcessingProfiler.getDebugState()) {
+            timestamp = ProcessingProfiler.getTimeDiff(timestamp, "computeScreenCoordinates()");
+        }
+
+        // invoke data reduction algorithm
+        points.reduce(rendererDataReducerProperty().get(), isReducePoints(),
+                getMinRequiredReductionSize());
+
+        // draw individual plot components
+        drawChartComponents(gc, points);
+        if (ProcessingProfiler.getDebugState()) {
+            timestamp = ProcessingProfiler.getTimeDiff(timestamp, "drawChartComponents()");
+        }
+
     }
 
     /**

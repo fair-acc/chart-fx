@@ -334,8 +334,7 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
@@ -347,8 +346,6 @@ public class GridRenderer extends Parent implements Renderer {
         } else {
             drawEuclideanGrid(gc, xyChart);
         }
-
-        return Collections.emptyList();
     }
 
     @Override

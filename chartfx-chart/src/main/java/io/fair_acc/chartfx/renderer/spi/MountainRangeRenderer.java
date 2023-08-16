@@ -9,10 +9,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.BitState;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.GraphicsContext;
 
@@ -37,8 +41,6 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 public class MountainRangeRenderer extends ErrorDataSetRenderer implements Renderer {
     private static final int MIN_DIM = 3;
     protected DoubleProperty mountainRangeOffset = new SimpleDoubleProperty(this, "mountainRangeOffset", 0.5);
-    private final ObservableList<ErrorDataSetRenderer> renderers = FXCollections.observableArrayList();
-    private final ObservableList<DataSet> empty = FXCollections.observableArrayList();
     private final WeakHashMap<Double, Integer> xWeakIndexMap = new WeakHashMap<>();
     private final WeakHashMap<Double, Integer> yWeakIndexMap = new WeakHashMap<>();
     private double mountainRangeExtra;
@@ -71,8 +73,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
@@ -82,18 +83,18 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         final Axis yAxis = xyChart.getYAxis();
 
         // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
-        localDataSetList.addAll(getDatasets());
+        final List<DataSet> localDataSetList = getDatasets();
 
         final double zRangeMin = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMin()).min().orElse(-1.0);
         final double zRangeMax = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMax()).max().orElse(+1.0);
 
         // render in reverse order
-        for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final DataSet dataSet = localDataSetList.get(dataSetIndex);
+        for (int dataSetIndex = getDatasetNodes().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
+            final var dataSetNode = getDatasetNodes().get(dataSetIndex);
+            final var dataSet = dataSetNode.getDataSet();
 
             // detect and fish-out 3D DataSet, ignore others
-            if (!dataSet.isVisible() || !(dataSet instanceof GridDataSet)) {
+            if (!dataSetNode.isVisible() || !(dataSet instanceof GridDataSet)) {
                 continue;
             }
 
@@ -113,16 +114,12 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
             yAxis.setAutoRanging(autoRange);
 
             final int yCountMax = ((GridDataSet) dataSet).getShape(DIM_Y);
-            checkAndRecreateRenderer(yCountMax);
-
             for (int index = yCountMax - 1; index >= 0; index--) {
-                renderers.get(index).getDatasets().setAll(new Demux3dTo2dDataSet((GridDataSet) dataSet, index, zRangeMin, max)); // NOPMD -- new necessary here
-                renderers.get(index).render(gc, chart, 0, empty);
+                super.render(gc, new Demux3dTo2dDataSet((GridDataSet) dataSet, index, zRangeMin, max), dataSetNode);
             }
         }
 
         ProcessingProfiler.getTimeDiff(start);
-        return localDataSetList;
     }
 
     /**
@@ -136,32 +133,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         AssertUtils.gtEqThanZero("mountainRangeOffset", mountainRangeOffset);
         this.mountainRangeOffset.setValue(mountainRangeOffset);
         return this;
-    }
-
-    private void checkAndRecreateRenderer(final int nRenderer) {
-        if (renderers.size() == nRenderer) {
-            // all OK
-            return;
-        }
-
-        if (nRenderer > renderers.size()) {
-            for (int i = renderers.size(); i < nRenderer; i++) {
-                final ErrorDataSetRenderer newRenderer = new ErrorDataSetRenderer(); // NOPMD -- 'new' needed in this context
-                newRenderer.bind(this);
-                // do not show history sets in legend (single exception to
-                // binding)
-                newRenderer.showInLegendProperty().unbind();
-                newRenderer.setShowInLegend(false);
-                renderers.add(newRenderer);
-            }
-            return;
-        }
-
-        // require less renderer -> remove first until we have the right number
-        // needed
-        while (nRenderer < renderers.size()) {
-            renderers.remove(0);
-        }
     }
 
     private class Demux3dTo2dDataSet implements DataSet {
@@ -303,7 +274,7 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
 
         @Override
         public BitState getBitState() {
-            throw new AssertionError("Mountain range ds wrapper keeps no state");
+            return dataSet.getBitState();
         }
     }
 }

@@ -202,8 +202,7 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
@@ -211,15 +210,9 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
         }
         final XYChart xyChart = (XYChart) chart;
 
-        // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = new ArrayList<>(datasets);
-        // N.B. only render data sets that are directly attached to this
-        // renderer
-        localDataSetList.addAll(getDatasets());
-
         // If there are no data sets
-        if (localDataSetList.isEmpty()) {
-            return Collections.emptyList();
+        if (getDatasets().isEmpty()) {
+            return;
         }
 
         Axis xAxis = this.getFirstAxis(Orientation.HORIZONTAL);
@@ -230,7 +223,7 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.atWarn().addArgument(LabelledMarkerRenderer.class.getSimpleName()).log("{}::render(...) getFirstAxis(HORIZONTAL) returned null skip plotting");
             }
-            return Collections.emptyList();
+            return;
         }
         final double xAxisWidth = xAxis.getWidth();
         final double xMin = xAxis.getValueForDisplay(0);
@@ -239,9 +232,8 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
         // N.B. importance of reverse order: start with last index, so that
         // most(-like) important DataSet is drawn on top of the others
 
-        List<DataSet> drawnDataSet = new ArrayList<>(localDataSetList.size());
-        for (int dataSetIndex = localDataSetList.size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final DataSet dataSet = localDataSetList.get(dataSetIndex);
+        for (int dataSetIndex = getDatasets().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
+            final DataSet dataSet = getDatasets().get(dataSetIndex);
             if (!dataSet.isVisible()) {
                 continue;
             }
@@ -255,7 +247,6 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
                 continue;
             }
 
-            drawnDataSet.add(dataSet);
             if (isHorizontalMarker()) {
                 // draw horizontal marker
                 drawHorizontalLabelledMarker(gc, xyChart, dataSet, indexMin, indexMax);
@@ -269,7 +260,6 @@ public class LabelledMarkerRenderer extends AbstractRenderer<LabelledMarkerRende
         } // end of 'dataSetIndex' loop
 
         ProcessingProfiler.getTimeDiff(start);
-        return drawnDataSet;
     }
 
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {

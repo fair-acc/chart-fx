@@ -40,27 +40,17 @@ public class CustomFragmentedRendererSample extends ChartSample {
         VBox.setVgrow(chart, Priority.ALWAYS);
         ErrorDataSetRenderer renderer = new ErrorDataSetRenderer() {
             @Override
-            public List<DataSet> render(final GraphicsContext gc, final Chart renderChart, final int dataSetOffset,
-                    final ObservableList<DataSet> datasets) {
-                ObservableList<DataSet> filteredDataSets = FXCollections.observableArrayList();
-                int dsIndex = 0;
-                for (DataSet ds : datasets) {
-                    if (ds instanceof FragmentedDataSet) {
-                        final FragmentedDataSet fragDataSet = (FragmentedDataSet) ds;
+            public void render(final GraphicsContext gc, final Chart renderChart, final int dataSetOffset) {
+                for (var dsNode : getDatasetNodes()) {
+                    if (dsNode.getDataSet() instanceof FragmentedDataSet) {
+                        final FragmentedDataSet fragDataSet = (FragmentedDataSet) dsNode.getDataSet();
                         for (DataSet innerDataSet : fragDataSet.getDatasets()) {
-                            innerDataSet.setStyle(XYChartCss.DATASET_INDEX + '=' + dsIndex);
-                            filteredDataSets.add(innerDataSet);
+                            super.render(gc, innerDataSet, dsNode);
                         }
                     } else {
-                        // TODO: fix the dataset offsets after refactoring (multiple datasets that should have the same color)
-                        ds.setStyle(XYChartCss.DATASET_INDEX + '=' + dsIndex);
-                        filteredDataSets.add(ds);
+                        super.render(gc, dsNode.getDataSet(), dsNode);
                     }
-                    dsIndex++;
                 }
-                super.render(gc, renderChart, dataSetOffset, filteredDataSets);
-
-                return filteredDataSets;
             }
         };
         chart.getRenderers().clear();

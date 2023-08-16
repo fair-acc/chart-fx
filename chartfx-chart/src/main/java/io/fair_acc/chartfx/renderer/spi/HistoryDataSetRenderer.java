@@ -32,7 +32,6 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(HistoryDataSetRenderer.class);
     protected static final int DEFAULT_HISTORY_DEPTH = 3;
-    protected final ObservableList<DataSet> emptyList = FXCollections.observableArrayList();
     protected final ObservableList<DataSet> chartDataSetsCopy = FXCollections.observableArrayList();
     protected final ObservableList<ErrorDataSetRenderer> renderers = FXCollections.observableArrayList();
     protected boolean itself = false;
@@ -151,22 +150,12 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
     }
 
     @Override
-    public List<DataSet> render(final GraphicsContext gc, final Chart chart, final int dataSetOffset,
-            final ObservableList<DataSet> datasets) {
+    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
         final long start = ProcessingProfiler.getTimeStamp();
         if (!(chart instanceof XYChart)) {
             throw new InvalidParameterException(
                     "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
         }
-        // add local datasets from upstream chart if not already present
-        final ObservableList<DataSet> localList = FXCollections.observableArrayList();
-        for (final DataSet set : datasets) {
-            // don't add duplicates
-            if (!getDatasets().contains(set)) {
-                localList.add(set);
-            }
-        }
-        getDatasets().addAll(localList);
 
         int dsIndex = 0;
         List<DataSet> drawnDataSet = new ArrayList<>(super.getDatasets().size());
@@ -181,13 +170,12 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         final int nRenderer = renderers.size();
         for (int index = nRenderer - 1; index >= 0; index--) {
             final ErrorDataSetRenderer renderer = renderers.get(index);
-            renderer.render(gc, chart, dataSetOffset, emptyList);
+            renderer.render(gc, chart, dataSetOffset);
         }
 
-        super.render(gc, chart, dataSetOffset, emptyList);
+        super.render(gc, chart, dataSetOffset);
 
         ProcessingProfiler.getTimeDiff(start);
-        return drawnDataSet;
     }
 
     public void shiftHistory() {
