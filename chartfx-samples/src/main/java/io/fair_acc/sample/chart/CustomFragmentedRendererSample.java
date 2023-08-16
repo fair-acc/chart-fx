@@ -2,6 +2,7 @@ package io.fair_acc.sample.chart;
 
 import java.util.List;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,16 +41,13 @@ public class CustomFragmentedRendererSample extends ChartSample {
         VBox.setVgrow(chart, Priority.ALWAYS);
         ErrorDataSetRenderer renderer = new ErrorDataSetRenderer() {
             @Override
-            public void render(final GraphicsContext gc, final Chart renderChart, final int dataSetOffset) {
-                for (var dsNode : getDatasetNodes()) {
-                    if (dsNode.getDataSet() instanceof FragmentedDataSet) {
-                        final FragmentedDataSet fragDataSet = (FragmentedDataSet) dsNode.getDataSet();
-                        for (DataSet innerDataSet : fragDataSet.getDatasets()) {
-                            super.render(gc, innerDataSet, dsNode);
-                        }
-                    } else {
-                        super.render(gc, dsNode.getDataSet(), dsNode);
+            protected void render(final GraphicsContext gc, DataSet dataSet, final DataSetNode style) {
+                if (dataSet instanceof FragmentedDataSet) {
+                    for (DataSet fragment : ((FragmentedDataSet) dataSet).getDatasets()) {
+                        super.render(gc, fragment, style);
                     }
+                } else {
+                    super.render(gc, dataSet, style);
                 }
             }
         };

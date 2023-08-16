@@ -4,6 +4,7 @@ import static io.fair_acc.dataset.DataSet.DIM_X;
 import static io.fair_acc.dataset.DataSet.DIM_Y;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,7 +52,6 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<HistogramRenderer> implements Renderer {
     private final BooleanProperty animate = new SimpleBooleanProperty(this, "animate", false);
     private final BooleanProperty autoSorting = new SimpleBooleanProperty(this, "autoSorting", true);
-    private final ObjectProperty<Chart> chartProperty = new SimpleObjectProperty<>(this, "chartProperty", null);
     private final BooleanProperty roundedCorner = new SimpleBooleanProperty(this, "roundedCorner", true);
     private final IntegerProperty roundedCornerRadius = new SimpleIntegerProperty(this, "roundedCornerRadius", 10);
     private final Map<String, Double> scaling = new ConcurrentHashMap<>();
@@ -75,10 +75,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         return autoSorting;
     }
 
-    public ObjectProperty<Chart> chartProperty() {
-        return chartProperty;
-    }
-
     @Override
     public boolean drawLegendSymbol(final DataSetNode dataSet, final Canvas canvas) {
         final int width = (int) canvas.getWidth();
@@ -95,10 +91,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         gc.strokeLine(1, y, width - 2.0, y);
         gc.restore();
         return true;
-    }
-
-    public Chart getChart() {
-        return chartProperty().get();
     }
 
     public int getRoundedCornerRadius() {
@@ -118,59 +110,23 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        setChartChart(chart);
-        final Axis xAxis = getFirstAxis(Orientation.HORIZONTAL);
-        final Axis yAxis = getFirstAxis(Orientation.VERTICAL);
-
-        // make local copy and add renderer specific data sets
-        final var localDataSetList = new ArrayList<>(getDatasets());
-
-        // verify that allDataSets are sorted
-        for (int i = 0; i < localDataSetList.size(); i++) {
-            DataSet dataSet = localDataSetList.get(i);
-            if (!(dataSet instanceof Histogram) && isAutoSorting() && (!isDataSetSorted(dataSet, DIM_X) && !isDataSetSorted(dataSet, DIM_Y))) {
-                // replace DataSet with sorted variety
-                // do not need to do this for Histograms as they are always sorted by design
-                LimitedIndexedTreeDataSet newDataSet = new LimitedIndexedTreeDataSet(dataSet.getName(), Integer.MAX_VALUE);
-                newDataSet.setVisible(dataSet.isVisible());
-                newDataSet.set(dataSet);
-                localDataSetList.set(i, newDataSet);
-            }
-
-            if (i != 0) {
-                continue;
-            }
-            // update categories for the first (index == '0') indexed data set
-            if (xAxis instanceof CategoryAxis) {
-                final CategoryAxis axis = (CategoryAxis) xAxis;
-                axis.updateCategories(dataSet);
-            }
-
-            if (yAxis instanceof CategoryAxis) {
-                final CategoryAxis axis = (CategoryAxis) yAxis;
-                axis.updateCategories(dataSet);
-            }
+    protected void render(final GraphicsContext gc, DataSet dataSet, final DataSetNode style) {
+        // replace DataSet with sorted variety
+        // do not need to do this for Histograms as they are always sorted by design
+        if (!(dataSet instanceof Histogram) && isAutoSorting() && (!isDataSetSorted(dataSet, DIM_X) && !isDataSetSorted(dataSet, DIM_Y))) {
+            LimitedIndexedTreeDataSet newDataSet = new LimitedIndexedTreeDataSet(dataSet.getName(), Integer.MAX_VALUE);
+            dataSet = newDataSet.set(dataSet);
         }
 
-        drawHistograms(gc, localDataSetList, xAxis, yAxis, dataSetOffset);
-        drawBars(gc, localDataSetList, xAxis, yAxis, dataSetOffset, true);
+        // TODO: replace styling with CSS node
+        var localDataSetList = Collections.singletonList(dataSet);
+        drawHistograms(gc, localDataSetList, xAxis, yAxis, style.getColorIndex());
+        drawBars(gc, localDataSetList, xAxis, yAxis, style.getColorIndex(), true);
 
         if (isAnimate()) {
             timer.start();
         }
 
-        ProcessingProfiler.getTimeDiff(start);
-
-    }
-
-    public void invalidateCanvas() {
-        final Chart chart = getChart();
-        if (chart == null) {
-            return;
-        }
-        chart.fireInvalidated(ChartBits.ChartCanvas);
     }
 
     public BooleanProperty roundedCornerProperty() {
@@ -187,10 +143,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
     public void setAutoSorting(final boolean autoSorting) {
         this.autoSortingProperty().set(autoSorting);
-    }
-
-    public void setChartChart(final Chart chartProperty) {
-        this.chartProperty().set(chartProperty);
     }
 
     public void setRoundedCorner(final boolean roundedCorner) {

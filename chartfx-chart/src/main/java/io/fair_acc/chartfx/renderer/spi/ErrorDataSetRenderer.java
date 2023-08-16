@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.XYChartCss;
-import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
@@ -116,43 +115,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int unusedOffset) {
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
-
-        // If there are no data sets
-        if (getDatasets().isEmpty()) {
-            return;
-        }
-
-
-
-        final long start = ProcessingProfiler.getTimeStamp();
-
-
-
-        if (ProcessingProfiler.getDebugState()) {
-            ProcessingProfiler.getTimeDiff(start, "init");
-        }
-
-        for (int i = getDatasetNodes().size() - 1; i >= 0; i--) {
-            var dataSetNode = getDatasetNodes().get(i);
-            render(gc, dataSetNode.getDataSet(), dataSetNode);
-        } // end of 'dataSetIndex' loop
-
-        ProcessingProfiler.getTimeDiff(start);
-
-    }
-
     protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
-        if (!style.isVisible()) {
-            return;
-        }
-
-        final Axis xAxis = getFirstHorizontalAxis();
-        final Axis yAxis = getFirstVerticalAxis();
-
         // N.B. print out for debugging purposes, please keep (used for
         // detecting redundant or too frequent render updates)
         // System.err.println(String.format("render for range [%f,%f] and dataset = '%s'", xMin, xMax, dataSet.getName()));
@@ -161,10 +124,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         int indexMin;
         int indexMax; /* indexMax is excluded in the drawing */
         if (isAssumeSortedData()) {
-            final double xAxisWidth = xAxis.getWidth();
-            final boolean xAxisInverted = xAxis.isInvertedAxis();
-            final double xMin = xAxis.getValueForDisplay(xAxisInverted ? xAxisWidth : 0.0);
-            final double xMax = xAxis.getValueForDisplay(xAxisInverted ? 0.0 : xAxisWidth);
             indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin) - 1);
             indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 2, dataSet.getDataCount());
         } else {
@@ -188,7 +147,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         // compute local screen coordinates
-        final boolean isPolarPlot = ((XYChart) getChart()).isPolarPlot();
+        final boolean isPolarPlot = getChart().isPolarPlot();
         if (isParallelImplementation()) {
             points.computeScreenCoordinatesInParallel(xAxis, yAxis, dataSet, style,
                     indexMin, indexMax, getErrorType(), isPolarPlot,
