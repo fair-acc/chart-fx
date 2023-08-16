@@ -293,33 +293,41 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         super.updateAxes();
 
         // Check if there is a user-specified 3rd axis
-        if (zAxis != null) {
-            for (Axis axis : getAxes()) {
-                if (axis != xAxis && axis != yAxis) {
-                    zAxis = axis;
-                    break;
-                }
-            }
+        if (zAxis == null) {
+            zAxis = tryGetZAxis(getAxes(), false);
         }
 
-        // Check if there is one in the chart
-        // TODO: confirm that this is reasonable
-        if (zAxis != null) {
-            for (Axis axis : getChart().getAxes()) {
-                if (axis != xAxis && axis != yAxis && axis.getDimIndex() == DataSet.DIM_Z) {
-                    zAxis = axis;
-                }
-            }
+        // Fallback to one from the chart
+        if (zAxis == null) {
+            zAxis = tryGetZAxis(getChart().getAxes(), true);
         }
 
-        // Create a new one if necessary and add locally
-        if (zAxis != null) {
+        // Fallback to adding one to the chart (to match behavior of X and Y)
+        if (zAxis == null) {
             zAxis = createZAxis();
-            getAxes().setAll(xAxis, yAxis, zAxis);
+            getChart().getAxes().add(zAxis);
         }
     }
 
-    public static Axis createZAxis() {
+    private Axis tryGetZAxis(List<Axis> axes, boolean requireDimZ) {
+        Axis firstNonXY = null;
+        for (Axis axis : axes) {
+            if (axis != xAxis && axis != yAxis) {
+                // Prefer DIM_Z if possible
+                if (axis.getDimIndex() == DataSet.DIM_Z) {
+                    return axis;
+                }
+
+                // Potentially allow the first unused one
+                if (firstNonXY == null) {
+                    firstNonXY = axis;
+                }
+            }
+        }
+        return requireDimZ ? null : firstNonXY;
+    }
+
+    public static DefaultNumericAxis createZAxis() {
         var zAxis = new DefaultNumericAxis("z-Axis");
         zAxis.setAnimated(false);
         zAxis.setSide(Side.RIGHT);

@@ -74,8 +74,8 @@ public class HistogramRendererSample extends ChartSample {
         chart1.getRenderers().set(0, renderer1);
         final HistogramRenderer renderer2 = new HistogramRenderer();
         renderer2.getDatasets().addAll(dataSet1, dataSet3);
-        dataSet1.setStyle("strokeColor=red; strokeWidth=3");
-        dataSet3.setStyle("strokeColor=green; strokeWidth=3");
+        dataSet1.setStyle("strokeColor:red; strokeWidth:3");
+        dataSet3.setStyle("strokeColor:green; strokeWidth:3");
         renderer2.setPolyLineStyle(LineStyle.HISTOGRAM);
         chart1.getRenderers().add(renderer2);
 
