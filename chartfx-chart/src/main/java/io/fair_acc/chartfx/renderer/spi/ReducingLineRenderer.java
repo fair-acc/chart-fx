@@ -11,6 +11,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -29,7 +30,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * 
  * @author braeun
  */
-public class ReducingLineRenderer extends AbstractRenderer<ReducingLineRenderer> implements Renderer {
+public class ReducingLineRenderer extends AbstractRendererXY<ReducingLineRenderer> implements Renderer {
     private int maxPoints;
 
     public ReducingLineRenderer() {
@@ -53,87 +54,66 @@ public class ReducingLineRenderer extends AbstractRenderer<ReducingLineRenderer>
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
-        final XYChart xyChart = (XYChart) chart;
-
-        final long start = ProcessingProfiler.getTimeStamp();
-        final Axis xAxis = xyChart.getXAxis();
-        final Axis yAxis = xyChart.getYAxis();
-
-        final double xAxisWidth = xAxis.getWidth();
-        final double xmin = xAxis.getValueForDisplay(0);
-        final double xmax = xAxis.getValueForDisplay(xAxisWidth);
-        int index = 0;
-        for (final DataSet ds : getDatasets()) {
-            if (!ds.isVisible()) {
-                continue;
-            }
-            final int lindex = index;
-            gc.save();
-            DefaultRenderColorScheme.setLineScheme(gc, ds.getStyle(), lindex);
-            DefaultRenderColorScheme.setGraphicsContextAttributes(gc, ds.getStyle());
-            if (ds.getDataCount() > 0) {
-                final int indexMin = Math.max(0, ds.getIndex(DIM_X, xmin));
-                final int indexMax = Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount());
-                final int n = Math.abs(indexMax - indexMin);
-                final int d = n / maxPoints;
-                if (d <= 1) {
-                    int i = ds.getIndex(DIM_X, xmin);
-                    if (i < 0) {
-                        i = 0;
-                    }
-                    double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                    double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                    i++;
-                    for (; i < Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount()); i++) {
-                        final double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                        final double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+    protected void render(GraphicsContext gc, DataSet ds, DataSetNode style) {
+        gc.save();
+        DefaultRenderColorScheme.setLineScheme(gc, style);
+        DefaultRenderColorScheme.setGraphicsContextAttributes(gc, style);
+        if (ds.getDataCount() > 0) {
+            final int indexMin = Math.max(0, ds.getIndex(DIM_X, xMin));
+            final int indexMax = Math.min(ds.getIndex(DIM_X, xMax) + 1, ds.getDataCount());
+            final int n = Math.abs(indexMax - indexMin);
+            final int d = n / maxPoints;
+            if (d <= 1) {
+                int i = ds.getIndex(DIM_X, xMin);
+                if (i < 0) {
+                    i = 0;
+                }
+                double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                i++;
+                for (; i < Math.min(ds.getIndex(DIM_X, xMax) + 1, ds.getDataCount()); i++) {
+                    final double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                    final double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                    gc.strokeLine(x0, y0, x1, y1);
+                    x0 = x1;
+                    y0 = y1;
+                }
+            } else {
+                int i = ds.getIndex(DIM_X, xMin);
+                if (i < 0) {
+                    i = 0;
+                }
+                double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                i++;
+                double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                double delta = Math.abs(y1 - y0);
+                i++;
+                int j = d - 2;
+                for (; i < Math.min(ds.getIndex(DIM_X, xMax) + 1, ds.getDataCount()); i++) {
+                    if (j > 0) {
+                        final double x2 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                        final double y2 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                        if (Math.abs(y2 - y0) > delta) {
+                            x1 = x2;
+                            y1 = y2;
+                            delta = Math.abs(y2 - y0);
+                        }
+                        j--;
+                    } else {
                         gc.strokeLine(x0, y0, x1, y1);
                         x0 = x1;
                         y0 = y1;
-                    }
-                } else {
-                    int i = ds.getIndex(DIM_X, xmin);
-                    if (i < 0) {
-                        i = 0;
-                    }
-                    double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                    double y0 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                    i++;
-                    double x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                    double y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                    double delta = Math.abs(y1 - y0);
-                    i++;
-                    int j = d - 2;
-                    for (; i < Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount()); i++) {
-                        if (j > 0) {
-                            final double x2 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                            final double y2 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                            if (Math.abs(y2 - y0) > delta) {
-                                x1 = x2;
-                                y1 = y2;
-                                delta = Math.abs(y2 - y0);
-                            }
-                            j--;
-                        } else {
-                            gc.strokeLine(x0, y0, x1, y1);
-                            x0 = x1;
-                            y0 = y1;
-                            x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                            y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
-                            delta = Math.abs(y1 - y0);
-                            j = d - 1;
-                        }
+                        x1 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                        y1 = yAxis.getDisplayPosition(ds.get(DIM_Y, i));
+                        delta = Math.abs(y1 - y0);
+                        j = d - 1;
                     }
                 }
             }
-            gc.restore();
-            index++;
         }
-        ProcessingProfiler.getTimeDiff(start);
+        gc.restore();
     }
 
     public void setMaxPoints(final int maxPoints) {

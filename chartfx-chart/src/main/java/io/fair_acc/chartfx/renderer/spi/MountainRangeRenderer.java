@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.BitState;
 import javafx.beans.InvalidationListener;
@@ -72,54 +73,40 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         return mountainRangeOffset;
     }
 
+    protected void updateCachedVariables() {
+        super.updateCachedVariables();
+        zRangeMin = getDatasets().stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMin()).min().orElse(-1.0);
+        zRangeMax = getDatasets().stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMax()).max().orElse(+1.0);
+    }
+
+    double zRangeMin, zRangeMax;
+
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
-        final long start = ProcessingProfiler.getTimeStamp(); // NOPMD - time keeping needs to be defined here
-        final XYChart xyChart = (XYChart) chart;
-
-        final Axis yAxis = xyChart.getYAxis();
-
-        // make local copy and add renderer specific data sets
-        final List<DataSet> localDataSetList = getDatasets();
-
-        final double zRangeMin = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMin()).min().orElse(-1.0);
-        final double zRangeMax = localDataSetList.stream().mapToDouble(ds -> ds.getAxisDescription(DIM_Z).getMax()).max().orElse(+1.0);
-
-        // render in reverse order
-        for (int dataSetIndex = getDatasetNodes().size() - 1; dataSetIndex >= 0; dataSetIndex--) {
-            final var dataSetNode = getDatasetNodes().get(dataSetIndex);
-            final var dataSet = dataSetNode.getDataSet();
-
-            // detect and fish-out 3D DataSet, ignore others
-            if (!dataSetNode.isVisible() || !(dataSet instanceof GridDataSet)) {
-                continue;
-            }
-
-            xWeakIndexMap.clear();
-            yWeakIndexMap.clear();
-            mountainRangeExtra = getMountainRangeOffset();
-
-            final double max = zRangeMax * (1.0 + mountainRangeExtra);
-            final boolean autoRange = yAxis.isAutoRanging();
-            if (autoRange && (zRangeMin != yAxis.getMin() || max != yAxis.getMax())) {
-                yAxis.setAutoRanging(false);
-                yAxis.setMin(zRangeMin);
-                yAxis.setMax(max);
-                yAxis.setTickUnit(Math.abs(max - zRangeMin) / 10.0);
-                yAxis.forceRedraw();
-            }
-            yAxis.setAutoRanging(autoRange);
-
-            final int yCountMax = ((GridDataSet) dataSet).getShape(DIM_Y);
-            for (int index = yCountMax - 1; index >= 0; index--) {
-                super.render(gc, new Demux3dTo2dDataSet((GridDataSet) dataSet, index, zRangeMin, max), dataSetNode);
-            }
+    protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
+        // detect and fish-out 3D DataSet, ignore others
+        if (!(dataSet instanceof GridDataSet)) {
+            return;
         }
 
-        ProcessingProfiler.getTimeDiff(start);
+        xWeakIndexMap.clear();
+        yWeakIndexMap.clear();
+        mountainRangeExtra = getMountainRangeOffset();
+
+        final double max = zRangeMax * (1.0 + mountainRangeExtra);
+        final boolean autoRange = yAxis.isAutoRanging();
+        if (autoRange && (zRangeMin != yAxis.getMin() || max != yAxis.getMax())) {
+            yAxis.setAutoRanging(false);
+            yAxis.setMin(zRangeMin);
+            yAxis.setMax(max);
+            yAxis.setTickUnit(Math.abs(max - zRangeMin) / 10.0);
+            yAxis.forceRedraw();
+        }
+        yAxis.setAutoRanging(autoRange);
+
+        final int yCountMax = ((GridDataSet) dataSet).getShape(DIM_Y);
+        for (int index = yCountMax - 1; index >= 0; index--) {
+            super.render(gc, new Demux3dTo2dDataSet((GridDataSet) dataSet, index, zRangeMin, max), style);
+        }
     }
 
     /**
