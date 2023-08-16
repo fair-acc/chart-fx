@@ -1,6 +1,6 @@
 [![Join the chat at https://gitter.im/fair-acc/chart](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fair-acc/chart?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![License](https://img.shields.io/badge/License-LGPL%203.0-blue.svg)](https://opensource.org/licenses/LGPL-3.0)
-[![Maven Central](https://img.shields.io/maven-central/v/io.fair_acc.chartfx/chart/11.svg)](https://search.maven.org/search?q=g:io.fair_acc.chartfx+AND+a:chart+AND+v:11*)
+[![Maven Central](https://img.shields.io/maven-central/v/de.gsi.chart/chartfx-chart/11.svg)](https://search.maven.org/search?q=g:de.gsi.chart+a:chartfx-chart+v:11*)
 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1cac6d33dc824411bb56f9c939d02121?branch=master)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=fair-acc/chart-fx&amp;utm_campaign=Badge_Grade)
 [![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/fair-acc/chart-fx.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fair-acc/chart-fx/context:java)
@@ -39,9 +39,9 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
 ```Maven POM
 <dependencies>
   <dependency>
-    <groupId>io.fair-acc</groupId>
-    <artifactId>chartfx</artifactId>
-    <version>11.3.0</version>
+    <groupId>de.gsi.chart</groupId>
+    <artifactId>chartfx-chart</artifactId>
+    <version>11.2.7</version>
   </dependency>
 </dependencies>
 ```
@@ -49,10 +49,10 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
 or your build.gradle like this:
 
 ```gradle
-implementation 'io.fair-acc:chartfx:11.3.0'
+implementation 'de.gsi.chart:chartfx-chart:11.2.7'
 ```
 
-To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=g:io.fair-acc%20AND%20a:chartfx&core=gav).
+To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=g:de.gsi.chart%20a:chartfx-chart&core=gav).
 
 While most users will need the `chartfx-chart` artifact it is also possible to use the data containers from `chartfx-dataset`
 and the algorithms from `chartfx-math` independently without the quite heavy UI dependencies.
@@ -77,7 +77,7 @@ example pom.xml for current master (click to expand)
 <repositories>
     <repository>
         <id>oss.sonatype.org-snapshot</id>
-        <url>http://oss.sonatype.org/content/repositories/snapshots</url>
+        <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
         <releases>
             <enabled>false</enabled>
         </releases>
