@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.canvas.GraphicsContext;
@@ -30,7 +31,13 @@ import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
  * @author afischer
  */
 @SuppressWarnings({ "PMD.ExcessiveParameterList" })
-public abstract class AbstractFinancialRenderer<R extends Renderer> extends AbstractRenderer<R> implements Renderer {
+public abstract class AbstractFinancialRenderer<R extends AbstractRendererXY<R>> extends AbstractRendererXY<R> implements Renderer {
+
+    {
+        // TODO: the previous color indexing was based on the local index
+        useGlobalIndex.set(false);
+    }
+
     protected PaintBarMarker paintBarMarker;
 
     private final BooleanProperty computeLocalYRange = new SimpleBooleanProperty(this, "computeLocalYRange", true);
