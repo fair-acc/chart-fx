@@ -1,15 +1,11 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.GraphicsContext;
 
@@ -36,7 +32,7 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int unusedOffset) {
+    public void render() {
         // Nothing to do
         if (getDatasets().isEmpty()) {
             return;

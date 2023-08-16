@@ -2,7 +2,6 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
@@ -16,8 +15,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
@@ -239,7 +236,7 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
+    public void render() {
         final long start = ProcessingProfiler.getTimeStamp();
 
         final ObservableList<DataSet> allDataSets = chart.getAllDatasets();

@@ -1,10 +1,10 @@
 package io.fair_acc.chartfx.renderer.spi;
 
 import java.security.InvalidParameterException;
-import java.util.Collections;
 import java.util.List;
 
 import io.fair_acc.chartfx.ui.css.*;
+import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,7 +18,6 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.TextAlignment;
 
-import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.TickMark;
@@ -48,9 +47,11 @@ public class GridRenderer extends Parent implements Renderer {
     private final StyleableBooleanProperty drawGridOnTop = CSS.createBooleanProperty(this, "drawGridOnTop", true);
 
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
+    private final XYChart chart;
 
-    public GridRenderer() {
+    public GridRenderer(XYChart chart) {
         super();
+        this.chart = AssertUtils.notNull("chart", chart);
         StyleUtil.hiddenStyleNode(this, STYLE_CLASS_GRID_RENDERER);
         StyleUtil.applyPseudoClass(horMajorGridStyleNode, GridRenderer.WITH_MINOR_PSEUDO_CLASS, horMinorGridStyleNode.visibleProperty());
         StyleUtil.applyPseudoClass(verMajorGridStyleNode, GridRenderer.WITH_MINOR_PSEUDO_CLASS, verMinorGridStyleNode.visibleProperty());
@@ -334,17 +335,11 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException(
-                    "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
-        final XYChart xyChart = (XYChart) chart;
-
-        if (xyChart.isPolarPlot()) {
-            drawPolarGrid(gc, xyChart);
+    public void render() {
+        if (chart.isPolarPlot()) {
+            drawPolarGrid(chart.getCanvas().getGraphicsContext2D(), chart);
         } else {
-            drawEuclideanGrid(gc, xyChart);
+            drawEuclideanGrid(chart.getCanvas().getGraphicsContext2D(), chart);
         }
     }
 

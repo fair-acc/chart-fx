@@ -48,7 +48,7 @@ public class XYChart extends Chart {
     protected static final int BURST_LIMIT_MS = 15;
     protected final BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
-    private final GridRenderer gridRenderer = new GridRenderer();
+    private final GridRenderer gridRenderer = new GridRenderer(this);
 
     /**
      * Construct a new XYChart with the given axes.
@@ -305,17 +305,17 @@ public class XYChart extends Chart {
 
         // Bottom grid
         if (!gridRenderer.isDrawOnTop()) {
-            gridRenderer.render(gc, this, 0);
+            gridRenderer.render();
         }
 
         // Data
         for (final Renderer renderer : getRenderers()) {
-            renderer.render(gc, this, renderer.getIndexOffset());
+            renderer.render();
         }
 
         // Top grid
         if (gridRenderer.isDrawOnTop()) {
-            gridRenderer.render(gc, this, 0);
+            gridRenderer.render();
         }
 
         if (DEBUG && LOGGER.isDebugEnabled()) {
