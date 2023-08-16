@@ -112,151 +112,121 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException(
-                    "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-        }
-        final XYChart xyChart = (XYChart) chart;
-
-        long start = 0;
-        if (ProcessingProfiler.getDebugState()) {
-            start = ProcessingProfiler.getTimeStamp();
+    protected void render(GraphicsContext gc, DataSet ds, DataSetNode styleNode) {
+        if (ds.getDimension() < 7){
+            return;
         }
 
-        final Axis xAxis = xyChart.getXAxis();
-        final Axis yAxis = xyChart.getYAxis();
+        AttributeModelAware attrs = null;
+        if (ds instanceof AttributeModelAware) {
+            attrs = (AttributeModelAware) ds;
+        }
+        IOhlcvItemAware itemAware = null;
+        if (ds instanceof IOhlcvItemAware) {
+            itemAware = (IOhlcvItemAware) ds;
+        }
+        boolean isEpAvailable = !paintAfterEPS.isEmpty() || paintBarMarker != null;
 
-        final double xAxisWidth = xAxis.getWidth();
-        final double xmin = xAxis.getValueForDisplay(0);
-        final double xmax = xAxis.getValueForDisplay(xAxisWidth);
-        int index = 0;
+        gc.save();
+        // default styling level
+        String style = ds.getStyle();
+        DefaultRenderColorScheme.setLineScheme(gc, styleNode);
+        DefaultRenderColorScheme.setGraphicsContextAttributes(gc, styleNode);
+        // financial styling level
+        Color longBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_LONG_COLOR, Color.GREEN);
+        Color shortBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_SHORT_COLOR, Color.RED);
+        Color longTickColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_TICK_LONG_COLOR, Color.GREEN);
+        Color shortTickColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_TICK_SHORT_COLOR, Color.RED);
+        Color hiLowShadowColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_SHADOW_COLOR, null);
+        Color candleVolumeLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_LONG_COLOR, Color.rgb(139, 199, 194, 0.2));
+        Color candleVolumeShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_SHORT_COLOR, Color.rgb(235, 160, 159, 0.2));
+        double bodyLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_BODY_LINEWIDTH, 1.2d);
+        double tickLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_TICK_LINEWIDTH, 1.2d);
+        double barWidthPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_BAR_WIDTH_PERCENTAGE, 0.6d);
+        double shadowLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_LINE_WIDTH, 2.5d);
+        double shadowTransPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_TRANSPOSITION_PERCENT, 0.5d);
 
-        for (final DataSet ds : getDatasets()) {
-            if (!ds.isVisible() || ds.getDimension() < 7)
-                continue;
-            final int lindex = index;
+        if (ds.getDataCount() > 0) {
+            int iMin = ds.getIndex(DIM_X, xMin);
+            if (iMin < 0)
+                iMin = 0;
+            int iMax = Math.min(ds.getIndex(DIM_X, xMax) + 1, ds.getDataCount());
 
-            // update categories in case of category axes for the first (index == '0') indexed data set
-            if (lindex == 0 && xyChart.getXAxis() instanceof CategoryAxis) {
-                final CategoryAxis axis = (CategoryAxis) xyChart.getXAxis();
-                axis.updateCategories(ds);
+            double[] distances = null;
+            double minRequiredWidth = 0.0;
+            if (styleNode.getLocalIndex() == 0) {
+                distances = findAreaDistances(findAreaDistances, ds, xAxis, yAxis, xMin, xMax);
+                minRequiredWidth = distances[0];
             }
-            AttributeModelAware attrs = null;
-            if (ds instanceof AttributeModelAware) {
-                attrs = (AttributeModelAware) ds;
-            }
-            IOhlcvItemAware itemAware = null;
-            if (ds instanceof IOhlcvItemAware) {
-                itemAware = (IOhlcvItemAware) ds;
-            }
-            boolean isEpAvailable = !paintAfterEPS.isEmpty() || paintBarMarker != null;
+            double localBarWidth = minRequiredWidth * barWidthPercent;
+            double barWidthHalf = localBarWidth / 2.0;
 
-            gc.save();
-            // default styling level
-            String style = ds.getStyle();
-            DefaultRenderColorScheme.setLineScheme(gc, style, lindex);
-            DefaultRenderColorScheme.setGraphicsContextAttributes(gc, style);
-            // financial styling level
-            Color longBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_LONG_COLOR, Color.GREEN);
-            Color shortBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_SHORT_COLOR, Color.RED);
-            Color longTickColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_TICK_LONG_COLOR, Color.GREEN);
-            Color shortTickColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_TICK_SHORT_COLOR, Color.RED);
-            Color hiLowShadowColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_SHADOW_COLOR, null);
-            Color candleVolumeLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_LONG_COLOR, Color.rgb(139, 199, 194, 0.2));
-            Color candleVolumeShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_SHORT_COLOR, Color.rgb(235, 160, 159, 0.2));
-            double bodyLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_BODY_LINEWIDTH, 1.2d);
-            double tickLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_TICK_LINEWIDTH, 1.2d);
-            double barWidthPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_BAR_WIDTH_PERCENTAGE, 0.6d);
-            double shadowLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_LINE_WIDTH, 2.5d);
-            double shadowTransPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_TRANSPOSITION_PERCENT, 0.5d);
+            for (int i = iMin; i < iMax; i++) {
+                double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
+                double yOpen = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_OPEN, i));
+                double yHigh = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_HIGH, i));
+                double yLow = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_LOW, i));
+                double yClose = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_CLOSE, i));
 
-            if (ds.getDataCount() > 0) {
-                int iMin = ds.getIndex(DIM_X, xmin);
-                if (iMin < 0)
-                    iMin = 0;
-                int iMax = Math.min(ds.getIndex(DIM_X, xmax) + 1, ds.getDataCount());
-
-                double[] distances = null;
-                double minRequiredWidth = 0.0;
-                if (lindex == 0) {
-                    distances = findAreaDistances(findAreaDistances, ds, xAxis, yAxis, xmin, xmax);
-                    minRequiredWidth = distances[0];
+                // prepare extension point data (if EPs available)
+                OhlcvRendererEpData data = null;
+                if (isEpAvailable) {
+                    data = new OhlcvRendererEpData();
+                    data.gc = gc;
+                    data.ds = ds;
+                    data.attrs = attrs;
+                    data.ohlcvItemAware = itemAware;
+                    data.ohlcvItem = itemAware != null ? itemAware.getItem(i) : null;
+                    data.index = i;
+                    data.minIndex = iMin;
+                    data.maxIndex = iMax;
+                    data.barWidth = localBarWidth;
+                    data.barWidthHalf = barWidthHalf;
+                    data.xCenter = x0;
+                    data.yOpen = yOpen;
+                    data.yHigh = yHigh;
+                    data.yLow = yLow;
+                    data.yClose = yClose;
                 }
-                double localBarWidth = minRequiredWidth * barWidthPercent;
-                double barWidthHalf = localBarWidth / 2.0;
 
-                for (int i = iMin; i < iMax; i++) {
-                    double x0 = xAxis.getDisplayPosition(ds.get(DIM_X, i));
-                    double yOpen = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_OPEN, i));
-                    double yHigh = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_HIGH, i));
-                    double yLow = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_LOW, i));
-                    double yClose = yAxis.getDisplayPosition(ds.get(OhlcvDataSet.DIM_Y_CLOSE, i));
+                // paint volume
+                if (paintVolume) {
+                    assert distances != null;
+                    paintVolume(gc, ds, i, candleVolumeLongColor, candleVolumeShortColor, yAxis, distances, localBarWidth, barWidthHalf, x0);
+                }
 
-                    // prepare extension point data (if EPs available)
-                    OhlcvRendererEpData data = null;
-                    if (isEpAvailable) {
-                        data = new OhlcvRendererEpData();
-                        data.gc = gc;
-                        data.ds = ds;
-                        data.attrs = attrs;
-                        data.ohlcvItemAware = itemAware;
-                        data.ohlcvItem = itemAware != null ? itemAware.getItem(i) : null;
-                        data.index = i;
-                        data.minIndex = iMin;
-                        data.maxIndex = iMax;
-                        data.barWidth = localBarWidth;
-                        data.barWidthHalf = barWidthHalf;
-                        data.xCenter = x0;
-                        data.yOpen = yOpen;
-                        data.yHigh = yHigh;
-                        data.yLow = yLow;
-                        data.yClose = yClose;
-                    }
+                // paint shadow
+                if (hiLowShadowColor != null) {
+                    double lineWidth = gc.getLineWidth();
+                    paintHiLowShadow(gc, hiLowShadowColor, shadowLineWidth, shadowTransPercent, barWidthHalf, x0, yOpen, yClose, yLow, yHigh);
+                    gc.setLineWidth(lineWidth);
+                }
 
-                    // paint volume
-                    if (paintVolume) {
-                        assert distances != null;
-                        paintVolume(gc, ds, i, candleVolumeLongColor, candleVolumeShortColor, yAxis, distances, localBarWidth, barWidthHalf, x0);
-                    }
+                // choose color of the bar
+                Paint barPaint = data == null ? null : getPaintBarColor(data);
 
-                    // paint shadow
-                    if (hiLowShadowColor != null) {
-                        double lineWidth = gc.getLineWidth();
-                        paintHiLowShadow(gc, hiLowShadowColor, shadowLineWidth, shadowTransPercent, barWidthHalf, x0, yOpen, yClose, yLow, yHigh);
-                        gc.setLineWidth(lineWidth);
-                    }
+                // the ohlc body
+                gc.setStroke(Objects.requireNonNullElse(barPaint, yOpen > yClose ? longBodyColor : shortBodyColor));
+                gc.setLineWidth(bodyLineWidth);
+                gc.strokeLine(x0, yLow, x0, yHigh);
 
-                    // choose color of the bar
-                    Paint barPaint = data == null ? null : getPaintBarColor(data);
+                // paint open/close tick
+                gc.setStroke(Objects.requireNonNullElse(barPaint, yOpen > yClose ? longTickColor : shortTickColor));
+                gc.setLineWidth(tickLineWidth);
+                gc.strokeLine(x0 - barWidthHalf, yOpen, x0, yOpen);
+                gc.strokeLine(x0, yClose, x0 + barWidthHalf, yClose);
 
-                    // the ohlc body
-                    gc.setStroke(Objects.requireNonNullElse(barPaint, yOpen > yClose ? longBodyColor : shortBodyColor));
-                    gc.setLineWidth(bodyLineWidth);
-                    gc.strokeLine(x0, yLow, x0, yHigh);
-
-                    // paint open/close tick
-                    gc.setStroke(Objects.requireNonNullElse(barPaint, yOpen > yClose ? longTickColor : shortTickColor));
-                    gc.setLineWidth(tickLineWidth);
-                    gc.strokeLine(x0 - barWidthHalf, yOpen, x0, yOpen);
-                    gc.strokeLine(x0, yClose, x0 + barWidthHalf, yClose);
-
-                    // extension point - paint after painting of bar
-                    if (!paintAfterEPS.isEmpty()) {
-                        paintAfter(data);
-                    }
+                // extension point - paint after painting of bar
+                if (!paintAfterEPS.isEmpty()) {
+                    paintAfter(data);
                 }
             }
-            gc.restore();
-
-            // possibility to re-arrange y-axis by min/max of dataset (after paint)
-            if (computeLocalRange()) {
-                applyLocalYRange(ds, yAxis, xmin, xmax);
-            }
-            index++;
         }
-        if (ProcessingProfiler.getDebugState()) {
-            ProcessingProfiler.getTimeDiff(start);
+        gc.restore();
+
+        // possibility to re-arrange y-axis by min/max of dataset (after paint)
+        if (computeLocalRange()) {
+            applyLocalYRange(ds, yAxis, xMin, xMax);
         }
 
     }
