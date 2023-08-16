@@ -9,6 +9,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+import io.fair_acc.dataset.utils.*;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -27,10 +28,6 @@ import io.fair_acc.chartfx.utils.WritableImageCache;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
 import io.fair_acc.dataset.spi.DataRange;
-import io.fair_acc.dataset.utils.ByteArrayCache;
-import io.fair_acc.dataset.utils.CachedDaemonThreadFactory;
-import io.fair_acc.dataset.utils.DoubleArrayCache;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * @author rstein
@@ -94,9 +91,9 @@ class ContourDataSetCache extends WritableImageCache {
         }
         final long start = ProcessingProfiler.getTimeStamp();
         this.dataSet = dataSet;
-        this.xAxis = chart.getXAxis();
-        this.yAxis = chart.getYAxis();
-        this.zAxis = renderer.getZAxis();
+        this.xAxis = renderer.xAxis;
+        this.yAxis = renderer.yAxis;
+        this.zAxis = renderer.zAxis;
 
         // zMin/zMax from the axis are usually either DataSet driven (via computeLimits)
         // or user-defined limits on the z axis

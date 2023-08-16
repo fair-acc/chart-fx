@@ -116,12 +116,11 @@ public class ShortTimeFourierTransformSample extends ChartSample {
         final DefaultNumericAxis yAxis1 = new DefaultNumericAxis();
         yAxis1.setSide(Side.LEFT);
         yAxis1.setDimIndex(DataSet.DIM_Y);
-        contourChartRenderer1.getAxes().addAll(xAxis1, yAxis1);
-        final Axis zAxis1 = contourChartRenderer1.getZAxis();
+        final Axis zAxis1 = ContourDataSetRenderer.createZAxis();
         zAxis1.setName("Amplitude"); // TODO: fix label updater to respect z-axis
         zAxis1.setUnit("dB");
-        ((AbstractAxisParameter) zAxis1).setDimIndex(DataSet.DIM_Z);
-        chart1.getAxes().addAll(xAxis1, yAxis1, zAxis1);
+        contourChartRenderer1.getAxes().setAll(xAxis1, yAxis1, zAxis1);
+        chart1.getAxes().addAll(contourChartRenderer1.getAxes());
         // Add plugins after all axes are correctly set up
         chart1.getPlugins().add(new UpdateAxisLabels());
         chart1.getPlugins().add(new Zoomer());
@@ -140,12 +139,11 @@ public class ShortTimeFourierTransformSample extends ChartSample {
         final DefaultNumericAxis yAxis2 = new DefaultNumericAxis();
         yAxis2.setSide(Side.LEFT);
         yAxis2.setDimIndex(DataSet.DIM_Y);
-        contourChartRenderer2.getAxes().addAll(xAxis2, yAxis2);
-        final Axis zAxis2 = contourChartRenderer2.getZAxis();
+        final Axis zAxis2 = ContourDataSetRenderer.createZAxis();
         zAxis2.setName("Amplitude");
         zAxis2.setUnit("dB");
-        ((AbstractAxisParameter) zAxis2).setDimIndex(DataSet.DIM_Z);
-        chart2.getAxes().addAll(xAxis2, yAxis2, zAxis2);
+        contourChartRenderer2.getAxes().setAll(xAxis2, yAxis2, zAxis2);
+        chart2.getAxes().addAll(contourChartRenderer2.getAxes());
         chart2.getRenderers().add(new MetaDataRenderer(chart2));
         chart2.getPlugins().add(new UpdateAxisLabels());
         chart2.getPlugins().add(new Zoomer());

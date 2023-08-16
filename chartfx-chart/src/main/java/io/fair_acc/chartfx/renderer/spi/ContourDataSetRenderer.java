@@ -77,7 +77,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 public class ContourDataSetRenderer extends AbstractContourDataSetRendererParameter<ContourDataSetRenderer> implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ContourDataSetRenderer.class);
     private ContourDataSetCache localCache;
-    private Axis zAxis;
+    protected Axis zAxis;
     protected final ColorGradientBar gradientBar = new ColorGradientBar();
 
     private void drawContour(final GraphicsContext gc, final ContourDataSetCache lCache) {
@@ -288,21 +288,33 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         return this;
     }
 
-    public Axis getZAxis() {
-        final ArrayList<Axis> localAxesList = new ArrayList<>(getAxes());
-        localAxesList.remove(getFirstAxis(Orientation.HORIZONTAL));
-        localAxesList.remove(getFirstAxis(Orientation.VERTICAL));
-        if (localAxesList.isEmpty()) {
-            zAxis = new DefaultNumericAxis("z-Axis");
-            zAxis.setAnimated(false);
-            zAxis.setSide(Side.RIGHT);
-            getAxes().add(zAxis);
-        } else {
-            zAxis = localAxesList.get(0);
-            if (zAxis.getSide() == null) {
-                zAxis.setSide(Side.RIGHT);
+    @Override
+    public void updateAxes() {
+        if (zAxis != null) {
+            return;
+        }
+        super.updateAxes();
+
+        // Check if there is a user-specified 3rd axis
+        for (Axis axis : getAxes()) {
+            if (axis != xAxis && axis != yAxis) {
+                zAxis = axis;
+                break;
             }
         }
+
+        // Create a new one if necessary
+        if (zAxis != null) {
+            zAxis = createZAxis();
+            getAxes().setAll(xAxis, yAxis, zAxis);
+        }
+    }
+
+    public static Axis createZAxis() {
+        var zAxis = new DefaultNumericAxis("z-Axis");
+        zAxis.setAnimated(false);
+        zAxis.setSide(Side.RIGHT);
+        zAxis.setDimIndex(DataSet.DIM_Z);
         return zAxis;
     }
 
@@ -420,11 +432,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             return;
         }
 
-        final Axis localZAxis = getZAxis();
-        if (localZAxis == null) {
-            return;
-        }
-        final AxisTransform axisTransform = localZAxis.getAxisTransform();
+        final AxisTransform axisTransform = zAxis.getAxisTransform();
         if (axisTransform == null) {
             return;
         }
@@ -450,7 +458,7 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
     @Override
     public void runPreLayout() {
-        layoutZAxis(getZAxis());
+        layoutZAxis(zAxis);
     }
 
     @Override
