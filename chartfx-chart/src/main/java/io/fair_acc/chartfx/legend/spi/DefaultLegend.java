@@ -194,6 +194,9 @@ public class DefaultLegend extends FlowPane implements Legend {
         }
 
         public void drawLegendSymbol() {
+            if (symbol.isVisible()) {
+                symbol.getGraphicsContext2D().clearRect(0, 0, symbol.getWidth(), symbol.getWidth());
+            }
             symbol.setVisible(series.getRenderer().drawLegendSymbol(series, symbol));
         }
 
