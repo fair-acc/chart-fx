@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -150,32 +151,33 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
     }
 
     @Override
-    public void render(final GraphicsContext gc, final Chart chart, final int dataSetOffset) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        if (!(chart instanceof XYChart)) {
-            throw new InvalidParameterException(
-                    "must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
+    protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
+        final double originalIntensity = style.getIntensity();
+        try {
+
+            // render history in reverse order
+            final int nRenderer = renderers.size();
+            for (int historyIx = nRenderer - 1; historyIx >= 0; historyIx--) {
+                final var historical = renderers.get(historyIx);
+                if (historical.getDatasets().size() > style.getLocalIndex()) {
+                    // Change the intensity to make the history more faded
+                    // Note: we are already in the drawing phase, so the changes won't cause a new pulse
+                    // TODO: the fading does not seem to work properly yet. Check HistoryDataSetSample.
+                    // TODO: maybe copy the style node so we don't accidentally prevent CSS updates?
+                    final var faded = (int) Math.pow(getIntensityFading(), historyIx + 2.0) * originalIntensity;
+                    style.setIntensity(faded);
+
+                    // Draw the historical set
+                    var histDs = historical.getDatasets().get(style.getLocalIndex());
+                    super.render(gc, histDs, style);
+                }
+            }
+
+        } finally {
+            style.setIntensity(originalIntensity);
         }
 
-        int dsIndex = 0;
-        List<DataSet> drawnDataSet = new ArrayList<>(super.getDatasets().size());
-        for (final DataSet ds : super.getDatasets()) {
-            // add index if missing
-            modifyStyle(ds, dataSetOffset + dsIndex);
-            drawnDataSet.add(ds);
-            dsIndex++;
-        }
-
-        // render in reverse order
-        final int nRenderer = renderers.size();
-        for (int index = nRenderer - 1; index >= 0; index--) {
-            final ErrorDataSetRenderer renderer = renderers.get(index);
-            renderer.render(gc, chart, dataSetOffset);
-        }
-
-        super.render(gc, chart, dataSetOffset);
-
-        ProcessingProfiler.getTimeDiff(start);
+        super.render(gc, dataSet, style);
     }
 
     public void shiftHistory() {
@@ -209,7 +211,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
                     ((EditableDataSet) ds).setName(ds.getName().split("_")[0] + "History_{-" + index + "}");
                 }
 
-                // modify style
+                // modify style TODO: get rid of old-style style settings
                 final String style = ds.getStyle();
                 final Map<String, String> map = StyleParser.splitIntoMap(style);
                 map.put(XYChartCss.DATASET_INTENSITY.toLowerCase(), Double.toString(fading));
