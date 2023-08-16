@@ -13,7 +13,7 @@
     <artifactId>samples</artifactId>
     <name>chartfx-samples</name>
     <properties>
-        <project.moduleName>io.fair-acc.samples</project.moduleName>
+        <project.moduleName>io.fair_acc.samples</project.moduleName>
     </properties>
 
     <description>

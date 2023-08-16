@@ -11,7 +11,7 @@
     <artifactId>acc</artifactId>
     <name>chartfx-acc</name>
     <properties>
-        <project.moduleName>io.fair-acc.acc</project.moduleName>
+        <project.moduleName>io.fair_acc.acc</project.moduleName>
         <javalin.version>3.9.0</javalin.version>
         <jetty.version>9.4.29.v20200521</jetty.version> <!-- always update version with Javalin -->
         <micrometer.version>1.5.1</micrometer.version>

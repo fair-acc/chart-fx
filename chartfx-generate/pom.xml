@@ -14,7 +14,7 @@
     <name>chartfx-generate</name>
     <packaging>maven-plugin</packaging>
     <properties>
-        <project.moduleName>io.fair-acc.generate</project.moduleName>
+        <project.moduleName>io.fair_acc.generate</project.moduleName>
     </properties>
 
 

@@ -12,7 +12,7 @@
     <artifactId>chartfx</artifactId>
     <name>chartfx-chart</name>
     <properties>
-        <project.moduleName>io.fair-acc.chartfx</project.moduleName>
+        <project.moduleName>io.fair_acc.chartfx</project.moduleName>
         <sass.version>1.64.2</sass.version>
         <scss.inputDir>${project.basedir}/src/main/resources/io/fair_acc/chartfx/</scss.inputDir>
         <css.outputDir>${scss.inputDir}</css.outputDir>
