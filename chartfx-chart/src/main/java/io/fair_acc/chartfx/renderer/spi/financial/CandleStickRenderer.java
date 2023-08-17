@@ -1,43 +1,25 @@
 package io.fair_acc.chartfx.renderer.spi.financial;
 
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_BAR_WIDTH_PERCENTAGE;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_LONG_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_LONG_WICK_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_SHADOW_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_SHORT_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_SHORT_WICK_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_LONG_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_SHORT_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_LINE_WIDTH;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_TRANSPOSITION_PERCENT;
 import static io.fair_acc.dataset.DataSet.DIM_X;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import javafx.collections.ObservableList;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEP;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAware;
-import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
-import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * Candlestick renderer
@@ -69,6 +51,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
     protected final List<RendererPaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     public CandleStickRenderer(boolean paintVolume) {
+        StyleUtil.addStyles(this, "candlestick");
         this.paintVolume = paintVolume;
         this.findAreaDistances = paintVolume ? new XMinVolumeMaxAreaDistances() : new XMinAreaDistances();
     }
@@ -91,11 +74,11 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         final int width = (int) canvas.getWidth();
         final int height = (int) canvas.getHeight();
         final var gc = canvas.getGraphicsContext2D();
-        final String style = dataSet.getStyle();
 
         gc.save();
-        var candleLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_COLOR, Color.GREEN);
-        var candleShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_COLOR, Color.RED);
+        final FinancialDataSetNode style = (FinancialDataSetNode) dataSet;
+        var candleLongColor = style.getCandleLongColor();
+        var candleShortColor = style.getCandleShortColor();
 
         gc.setFill(candleLongColor);
         gc.setStroke(candleLongColor);
@@ -137,21 +120,21 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         gc.save();
 
         // default styling level
-        String style = ds.getStyle();
-        DefaultRenderColorScheme.setLineScheme(gc, styleNode);
-        DefaultRenderColorScheme.setGraphicsContextAttributes(gc, styleNode);
+        FinancialDataSetNode style = (FinancialDataSetNode) styleNode;
+        gc.setLineWidth(style.getLineWidth());
+        gc.setLineDashes(style.getLineDashes());
 
         // financial styling level
-        var candleLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_COLOR, Color.GREEN);
-        var candleShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_COLOR, Color.RED);
-        var candleLongWickColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_LONG_WICK_COLOR, Color.BLACK);
-        var candleShortWickColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHORT_WICK_COLOR, Color.BLACK);
-        var candleShadowColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_SHADOW_COLOR, null);
-        var candleVolumeLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_LONG_COLOR, Color.rgb(139, 199, 194, 0.2));
-        var candleVolumeShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_SHORT_COLOR, Color.rgb(235, 160, 159, 0.2));
-        double barWidthPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_CANDLESTICK_BAR_WIDTH_PERCENTAGE, 0.5d);
-        double shadowLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_LINE_WIDTH, 2.5d);
-        double shadowTransPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_TRANSPOSITION_PERCENT, 0.5d);
+        var candleLongColor = style.getCandleLongColor();
+        var candleShortColor = style.getCandleShortColor();
+        var candleLongWickColor = style.getCandleLongWickColor();
+        var candleShortWickColor = style.getCandleShortWickColor();
+        var candleShadowColor = style.getCandleShadowColor();
+        var candleVolumeLongColor = style.getCandleVolumeLongColor();
+        var candleVolumeShortColor = style.getCandleVolumeShortColor();
+        double barWidthPercent = style.getBarWidthPercent();
+        double shadowLineWidth = style.getShadowLineWidth();
+        double shadowTransPercent = style.getShadowTransPercent();
 
         if (ds.getDataCount() > 0) {
             int iMin = ds.getIndex(DIM_X, xMin);
@@ -184,6 +167,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
                     data = new OhlcvRendererEpData();
                     data.gc = gc;
                     data.ds = ds;
+                    data.style = style;
                     data.attrs = attrs;
                     data.ohlcvItemAware = itemAware;
                     data.ohlcvItem = itemAware != null ? itemAware.getItem(i) : null;
@@ -278,7 +262,7 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
      * @param yDiff              Difference of candle for painting candle body
      * @param yMin               minimal coordination for painting of candle body
      */
-    protected void paintCandleShadow(GraphicsContext gc, Color shadowColor, double shadowLineWidth, double shadowTransPercent, double localBarWidth, double barWidthHalf,
+    protected void paintCandleShadow(GraphicsContext gc, Paint shadowColor, double shadowLineWidth, double shadowTransPercent, double localBarWidth, double barWidthHalf,
             double x0, double yOpen, double yClose, double yLow,
             double yHigh, double yDiff, double yMin) {
         double trans = shadowTransPercent * barWidthHalf;

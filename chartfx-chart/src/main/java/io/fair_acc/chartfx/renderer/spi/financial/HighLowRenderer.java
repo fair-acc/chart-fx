@@ -1,46 +1,25 @@
 package io.fair_acc.chartfx.renderer.spi.financial;
 
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_LONG_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_CANDLESTICK_VOLUME_SHORT_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BAR_WIDTH_PERCENTAGE;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BODY_LINEWIDTH;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BODY_LONG_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_BODY_SHORT_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_SHADOW_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_TICK_LINEWIDTH;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_TICK_LONG_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_HILOW_TICK_SHORT_COLOR;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_LINE_WIDTH;
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.DATASET_SHADOW_TRANSPOSITION_PERCENT;
 import static io.fair_acc.dataset.DataSet.DIM_X;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import javafx.collections.ObservableList;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEP;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAware;
-import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
-import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * High-Low renderer (OHLC-V/OI Chart)
@@ -67,6 +46,7 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
     protected List<RendererPaintAfterEP> paintAfterEPS = new ArrayList<>();
 
     public HighLowRenderer(boolean paintVolume) {
+        StyleUtil.addStyles(this, "highlow");
         this.paintVolume = paintVolume;
         this.findAreaDistances = paintVolume ? new XMinVolumeMaxAreaDistances() : new XMinAreaDistances();
     }
@@ -84,11 +64,11 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
         final int width = (int) canvas.getWidth();
         final int height = (int) canvas.getHeight();
         final GraphicsContext gc = canvas.getGraphicsContext2D();
-        final String style = dataSet.getStyle();
 
         gc.save();
-        Color longBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_LONG_COLOR, Color.GREEN);
-        Color shortBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_SHORT_COLOR, Color.RED);
+        final FinancialDataSetNode style = (FinancialDataSetNode) dataSet;
+        var longBodyColor = style.getHighLowLongColor();
+        var shortBodyColor = style.getHighLowShortColor();
 
         gc.setStroke(shortBodyColor);
         double x = width / 4.0;
@@ -128,23 +108,25 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
         boolean isEpAvailable = !paintAfterEPS.isEmpty() || paintBarMarker != null;
 
         gc.save();
+
         // default styling level
-        String style = ds.getStyle();
-        DefaultRenderColorScheme.setLineScheme(gc, styleNode);
-        DefaultRenderColorScheme.setGraphicsContextAttributes(gc, styleNode);
+        FinancialDataSetNode style = (FinancialDataSetNode) styleNode;
+        gc.setLineWidth(style.getLineWidth());
+        gc.setLineDashes(style.getLineDashes());
+
         // financial styling level
-        Color longBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_LONG_COLOR, Color.GREEN);
-        Color shortBodyColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_BODY_SHORT_COLOR, Color.RED);
-        Color longTickColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_TICK_LONG_COLOR, Color.GREEN);
-        Color shortTickColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_TICK_SHORT_COLOR, Color.RED);
-        Color hiLowShadowColor = StyleParser.getColorPropertyValue(style, DATASET_HILOW_SHADOW_COLOR, null);
-        Color candleVolumeLongColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_LONG_COLOR, Color.rgb(139, 199, 194, 0.2));
-        Color candleVolumeShortColor = StyleParser.getColorPropertyValue(style, DATASET_CANDLESTICK_VOLUME_SHORT_COLOR, Color.rgb(235, 160, 159, 0.2));
-        double bodyLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_BODY_LINEWIDTH, 1.2d);
-        double tickLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_TICK_LINEWIDTH, 1.2d);
-        double barWidthPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_HILOW_BAR_WIDTH_PERCENTAGE, 0.6d);
-        double shadowLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_LINE_WIDTH, 2.5d);
-        double shadowTransPercent = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_SHADOW_TRANSPOSITION_PERCENT, 0.5d);
+        var longBodyColor = style.getHighLowLongColor();
+        var shortBodyColor = style.getHighLowShortColor();
+        var longTickColor = style.getHighLowLongTickColor();
+        var shortTickColor = style.getHighLowShortTickColor();
+        var hiLowShadowColor = style.getHiLowShadowColor();
+        var candleVolumeLongColor = style.getCandleVolumeLongColor();
+        var candleVolumeShortColor = style.getCandleVolumeShortColor();
+        double bodyLineWidth = style.getHighLowBodyLineWidth();
+        double tickLineWidth = style.getHighLowTickLineWidth();
+        double barWidthPercent = style.getHiLowBarWidthPercent();
+        double shadowLineWidth = style.getShadowLineWidth();
+        double shadowTransPercent = style.getShadowTransPercent();
 
         if (ds.getDataCount() > 0) {
             int iMin = ds.getIndex(DIM_X, xMin);
@@ -174,6 +156,7 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
                     data = new OhlcvRendererEpData();
                     data.gc = gc;
                     data.ds = ds;
+                    data.style = style;
                     data.attrs = attrs;
                     data.ohlcvItemAware = itemAware;
                     data.ohlcvItem = itemAware != null ? itemAware.getItem(i) : null;
@@ -257,7 +240,7 @@ public class HighLowRenderer extends AbstractFinancialRenderer<HighLowRenderer> 
      * @param yLow               coordination of Low price
      * @param yHigh              coordination of High price
      */
-    protected void paintHiLowShadow(GraphicsContext gc, Color shadowColor, double shadowLineWidth, double shadowTransPercent, double barWidthHalf,
+    protected void paintHiLowShadow(GraphicsContext gc, Paint shadowColor, double shadowLineWidth, double shadowTransPercent, double barWidthHalf,
             double x0, double yOpen, double yClose, double yLow, double yHigh) {
         double trans = shadowTransPercent * barWidthHalf;
         gc.setLineWidth(shadowLineWidth);

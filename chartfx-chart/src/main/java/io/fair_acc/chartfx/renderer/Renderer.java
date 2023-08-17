@@ -54,12 +54,14 @@ public interface Renderer {
         return getStyleableNode(dataSet);
     }
 
-    default List<DataSetNode> addDataSets(DataSet... dataSets) {
-        List<DataSetNode> retVal = new ArrayList<>(dataSets.length);
-        for (DataSet dataSet : dataSets) {
-            retVal.add(addDataSet(dataSet));
-        }
-        return retVal;
+    default Renderer addDataSets(DataSet... dataSets) {
+        getDatasets().addAll(dataSets);
+        return this;
+    }
+
+    default Renderer addAxes(Axis... axes) {
+        getAxes().addAll(axes);
+        return this;
     }
 
     /**
