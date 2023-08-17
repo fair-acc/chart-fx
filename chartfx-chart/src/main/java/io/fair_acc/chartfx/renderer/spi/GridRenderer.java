@@ -359,11 +359,11 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     @Override
-    public void setIndexOffset(int value) {
+    public void setGlobalIndexOffset(int value) {
     }
 
     @Override
-    public int getIndexOffset() {
+    public int getGlobalIndexOffset() {
         return 0;
     }
 

@@ -12,7 +12,6 @@ import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 import javafx.beans.property.*;
@@ -22,7 +21,6 @@ import javafx.collections.ObservableList;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableBooleanProperty;
-import javafx.css.StyleableIntegerProperty;
 import javafx.geometry.Orientation;
 import javafx.scene.Parent;
 
@@ -37,8 +35,9 @@ import java.util.stream.Collectors;
 public abstract class AbstractRenderer<R extends Renderer> extends Parent implements Renderer {
 
     protected final StyleableBooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
-    protected final StyleableBooleanProperty useGlobalIndex = css().createBooleanProperty(this, "useGlobalIndex", true);
-    protected final StyleableIntegerProperty indexOffset = css().createIntegerProperty(this, "indexOffset", 0);
+    protected final StyleableBooleanProperty useGlobalColorIndex = css().createBooleanProperty(this, "useGlobalColorIndex", true);
+    protected final IntegerProperty globalIndexOffset = new SimpleIntegerProperty(this, "globalIndexOffset", 0);
+    protected final IntegerProperty localIndexOffset = css().createIntegerProperty(this, "localIndexOffset", 0);
     protected final IntegerProperty colorCount = css().createIntegerProperty(this, "colorCount", 8, true, null);
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     private final ObservableList<DataSetNode> dataSetNodes = FXCollections.observableArrayList();
@@ -66,17 +65,18 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
             dataSetNodes.setAll(datasets.stream().distinct().map(this::createNode).collect(Collectors.toList()));
         });
         dataSetNodes.addListener((ListChangeListener<DataSetNode>) c -> updateIndices());
-        PropUtil.runOnChange(this::updateIndices, useGlobalIndex, indexOffset, colorCount);
+        PropUtil.runOnChange(this::updateIndices, useGlobalColorIndex, globalIndexOffset, localIndexOffset, colorCount);
     }
 
     protected void updateIndices() {
-        int localIndex = 0;
-        int globalIndex = getIndexOffset();
-        int colorIndex = useGlobalIndex.get() ? globalIndex : localIndex;
+        int localIndex = getLocalIndexOffset();
+        int globalIndex = getGlobalIndexOffset() + localIndex;
+        int colorIndex = useGlobalColorIndex.get() ? globalIndex : localIndex;
+        int maxColorCount = getColorCount();
         for (DataSetNode datasetNode : getDatasetNodes()) {
             datasetNode.setLocalIndex(localIndex++);
             datasetNode.setGlobalIndex(globalIndex++);
-            datasetNode.setColorIndex(colorIndex++ % getColorCount());
+            datasetNode.setColorIndex(colorIndex++ % maxColorCount);
         }
     }
 
@@ -209,16 +209,40 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     }
 
     @Override
-    public int getIndexOffset() {
-        return indexOffset.get();
+    public int getGlobalIndexOffset() {
+        return globalIndexOffset.get();
     }
 
-    public StyleableIntegerProperty indexOffsetProperty() {
-        return indexOffset;
+    public ReadOnlyIntegerProperty globalIndexOffsetProperty() {
+        return globalIndexOffset;
     }
 
-    public void setIndexOffset(int indexOffset) {
-        this.indexOffset.set(indexOffset);
+    public void setGlobalIndexOffset(int globalIndexOffset) {
+        this.globalIndexOffset.set(globalIndexOffset);
+    }
+
+    public int getLocalIndexOffset() {
+        return localIndexOffset.get();
+    }
+
+    public IntegerProperty localIndexOffsetProperty() {
+        return localIndexOffset;
+    }
+
+    public void setLocalIndexOffset(int localIndexOffset) {
+        this.localIndexOffset.set(localIndexOffset);
+    }
+
+    public boolean isUseGlobalColorIndex() {
+        return useGlobalColorIndex.get();
+    }
+
+    public BooleanProperty useGlobalColorIndexProperty() {
+        return useGlobalColorIndex;
+    }
+
+    public void setUseGlobalColorIndex(boolean useGlobalColorIndex) {
+        this.useGlobalColorIndex.set(useGlobalColorIndex);
     }
 
     public int getColorCount() {

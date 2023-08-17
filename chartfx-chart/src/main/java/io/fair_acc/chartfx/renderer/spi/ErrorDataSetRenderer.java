@@ -39,8 +39,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     @Deprecated // should go on styleable node
     private Marker marker = DefaultMarker.DEFAULT;
 
-    // internal state
-    protected final DataSetStyleParser styleParser = new DataSetStyleParser();
+    private final DataSetStyleParser styleParser = new DataSetStyleParser();
 
     /**
      * Creates new <code>ErrorDataSetRenderer</code>.

@@ -826,14 +826,18 @@ public abstract class Chart extends Region implements EventSource {
         }
 
         // set global indices
-        int indexOffset = 0;
-        for (Renderer renderer : renderers) {
-            renderer.setIndexOffset(indexOffset);
-            indexOffset += renderer.getDatasetNodes().size();
-        }
+        updateDataSetIndices();
 
         // Rebuild legend (modifies SceneGraph and needs to be done before styling)
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartDataSets, ChartBits.ChartLegend);
+    }
+
+    protected void updateDataSetIndices() {
+        int globalIndexOffset = 0;
+        for (Renderer renderer : renderers) {
+            renderer.setGlobalIndexOffset(globalIndexOffset);
+            globalIndexOffset += renderer.getDatasetNodes().size();
+        }
     }
 
     /**
@@ -916,6 +920,9 @@ public abstract class Chart extends Region implements EventSource {
             }
 
         }
+
+        updateDataSetIndices();
+
         // reset change to allow derived classes to add additional listeners to renderer changes
         change.reset();
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartRenderers, ChartBits.ChartLegend);
