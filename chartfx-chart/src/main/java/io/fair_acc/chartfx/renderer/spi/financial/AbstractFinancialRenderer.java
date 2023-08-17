@@ -13,7 +13,6 @@ import javafx.scene.paint.Paint;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.PaintBarMarker;
 import io.fair_acc.dataset.DataSet;
@@ -35,7 +34,7 @@ public abstract class AbstractFinancialRenderer<R extends AbstractRendererXY<R>>
 
     {
         // TODO: the previous color indexing was based on the local index
-        useGlobalIndex.set(false);
+        useGlobalColorIndex.set(false);
     }
 
     protected PaintBarMarker paintBarMarker;

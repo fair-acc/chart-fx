@@ -97,7 +97,7 @@ public class HistogramSample extends ChartSample {
 
         final ErrorDataSetRenderer renderer2 = new ErrorDataSetRenderer();
         renderer2.getDatasets().addAll(dataSet1, dataSet3);
-        dataSet1.setStyle("strokeColor=red; strokeWidth=3");
+        dataSet1.setStyle("-fx-stroke:red; -fx-stroke-width:3;");
         renderer2.setPolyLineStyle(LineStyle.HISTOGRAM);
         renderer2.setErrorType(ErrorStyle.ERRORBARS);
         chart.getRenderers().add(renderer2);

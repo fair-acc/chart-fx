@@ -90,7 +90,7 @@ public interface Renderer {
      */
     BooleanProperty showInLegendProperty();
 
-    void setIndexOffset(int value);
-    int getIndexOffset();
+    void setGlobalIndexOffset(int value);
+    int getGlobalIndexOffset();
 
 }

@@ -261,7 +261,7 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   .renderer {
     // abstract renderer
     -fx-show-in-legend: true;
-    -fx-use-global-index: true;
+    -fx-use-global-color-index: true;
 
     // point reducing renderers
     -fx-assume-sorted-data: true;

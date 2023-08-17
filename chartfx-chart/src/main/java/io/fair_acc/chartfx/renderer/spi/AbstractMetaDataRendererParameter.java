@@ -96,7 +96,7 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
         return style;
     }
 
-    public int getIndexOffset() {
+    public int getGlobalIndexOffset() {
         return indexOffset.get();
     }
 
@@ -104,8 +104,8 @@ public abstract class AbstractMetaDataRendererParameter<R extends AbstractMetaDa
         return indexOffset;
     }
 
-    public void setIndexOffset(int indexOffset) {
-        this.indexOffset.set(indexOffset);
+    public void setGlobalIndexOffset(int globalIndexOffset) {
+        this.indexOffset.set(globalIndexOffset);
     }
 
     // ******************************* CSS Style Stuff *********************
