@@ -22,6 +22,7 @@ import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableBooleanProperty;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 
 import java.util.List;
@@ -48,7 +49,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     protected DataSetNode createNode(DataSet dataSet) {
         // Reuse existing nodes when possible
         for (DataSetNode dataSetNode : dataSetNodes) {
-            if (dataSetNode.getDataSet() == dataSet) {
+            if(dataSetNode.getDataSet() == dataSet) {
                 return dataSetNode;
             }
         }
@@ -276,6 +277,11 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
         if (chart != null) {
            chart.fireInvalidated(bit);
         }
+    }
+
+    @Override
+    public Node getNode() {
+        return this;
     }
 
     protected CssPropertyFactory<AbstractRenderer<?>> css() {

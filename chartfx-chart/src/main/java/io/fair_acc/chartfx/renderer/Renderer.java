@@ -1,12 +1,17 @@
 package io.fair_acc.chartfx.renderer;
 
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.dataset.DataSet;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * -- generic renderer interface --
@@ -34,6 +39,28 @@ public interface Renderer {
     ObservableList<DataSet> getDatasetsCopy(); // TODO: get rid of this? add getDatasetNodes?
 
     ObservableList<DataSetNode> getDatasetNodes();
+
+    default DataSetNode getStyleableNode(DataSet dataSet) {
+        for (DataSetNode datasetNode : getDatasetNodes()) {
+            if (datasetNode.getDataSet() == dataSet) {
+                return datasetNode;
+            }
+        }
+        throw new IllegalArgumentException("dataset does not have a styleable node");
+    }
+
+    default DataSetNode addDataSet(DataSet dataSet) {
+        getDatasets().add(dataSet);
+        return getStyleableNode(dataSet);
+    }
+
+    default List<DataSetNode> addDataSets(DataSet... dataSets) {
+        List<DataSetNode> retVal = new ArrayList<>(dataSets.length);
+        for (DataSet dataSet : dataSets) {
+            retVal.add(addDataSet(dataSet));
+        }
+        return retVal;
+    }
 
     /**
      * Optional method that allows the renderer make layout changes after axes and dataset limits are known.
@@ -92,5 +119,14 @@ public interface Renderer {
 
     void setGlobalIndexOffset(int value);
     int getGlobalIndexOffset();
+
+    default void setChart(Chart chart) {
+        // do nothing if it's not needed
+    }
+
+    default Node getNode() {
+        // add nothing if not needed
+        return null;
+    }
 
 }

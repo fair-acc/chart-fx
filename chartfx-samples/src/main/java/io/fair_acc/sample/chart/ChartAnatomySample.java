@@ -73,7 +73,7 @@ public class ChartAnatomySample extends Application {
             }
 
             @Override
-            protected void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers) {
+            protected void updateLegend(final List<Renderer> renderers) {
                 // TODO Auto-generated method stub
             }
         };
