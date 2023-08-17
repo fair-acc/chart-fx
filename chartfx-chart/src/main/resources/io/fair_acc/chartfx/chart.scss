@@ -7,31 +7,31 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 }
 
 .chart, .renderer {
-  &:misc {
+  &:palette-misc {
     @include palette.misc();
   }
 
-  &:adobe {
+  &:palette-adobe {
     @include palette.adobe();
   }
 
-  &:dell {
+  &:palette-dell {
     @include palette.dell();
   }
 
-  &:equidistant {
+  &:palette-equidistant {
     @include palette.equidistant();
   }
 
-  &:tuneviewer {
+  &:palette-tuneviewer {
     @include palette.tuneviewer();
   }
 
-  &:matlab {
-    @include palette.matlab();
+  &:palette-matlab-light {
+    @include palette.matlab-light();
   }
 
-  &:matlab-dark {
+  &:palette-matlab-dark {
     @include palette.matlab-dark();
   }
 }
@@ -210,8 +210,8 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   -fx-max-height: 4096px;
   -fx-max-width: 4096px;
 
-  // TODO: the side property doesn't seem to work. Should probably become a dedicated pane
-  -fx-tool-bar-side: TOP;
+  -fx-tool-bar-side: top; // TODO: move side property one level up?
+  -fx-color-palette: default; // default, adobe, tuneviewer, dell
 
   .chart-title {
     visibility: visible;

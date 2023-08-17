@@ -2,6 +2,7 @@ package io.fair_acc.sample.chart;
 
 import java.util.Collections;
 
+import io.fair_acc.chartfx.ui.css.ColorPalette;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -58,21 +59,10 @@ public class CustomColourSchemeSample extends ChartSample {
             chart.getDatasets().add(dataSet);
         }
 
-        ComboBox<PseudoClass> palettePseudoClassCB = new ComboBox<>();
-        palettePseudoClassCB.setItems(FXCollections.observableArrayList(
-                DefaultRenderColorScheme.PALETTE_MISC,
-                DefaultRenderColorScheme.PALETTE_ADOBE,
-                DefaultRenderColorScheme.PALETTE_DELL,
-                DefaultRenderColorScheme.PALETTE_EQUIDISTANT,
-                DefaultRenderColorScheme.PALETTE_TUNEVIEWER,
-                DefaultRenderColorScheme.PALETTE_MATLAB,
-                DefaultRenderColorScheme.PALETTE_MATLAB_DARK
-        ));
-        palettePseudoClassCB.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            chart.pseudoClassStateChanged(oldValue, false);
-            chart.pseudoClassStateChanged(newValue, true);
-            LOGGER.atInfo().log("applied pseudo class " + newValue);
-        });
+        ComboBox<ColorPalette> palettePseudoClassCB = new ComboBox<>();
+        palettePseudoClassCB.setItems(FXCollections.observableArrayList(ColorPalette.values()));
+        palettePseudoClassCB.getSelectionModel().select(chart.getColorPalette());
+        chart.colorPaletteProperty().bind(palettePseudoClassCB.getSelectionModel().selectedItemProperty());
 
         ComboBox<DefaultRenderColorScheme.Palette> strokeStyleCB = new ComboBox<>();
         strokeStyleCB.getItems().setAll(DefaultRenderColorScheme.Palette.values());
@@ -124,7 +114,7 @@ public class CustomColourSchemeSample extends ChartSample {
         });
 
         ToolBar toolBar = new ToolBar(
-                new Label("CSS PseudoClass: "), palettePseudoClassCB,
+                new Label("CSS Palette: "), palettePseudoClassCB,
                 new Label("stroke colour: "), strokeStyleCB,
                 new Label("fill colour: "), fillStyleCB,
                 new Label("error style: "), errorStyleCB,
