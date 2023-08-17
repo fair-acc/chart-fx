@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
+import io.fair_acc.chartfx.ui.css.ErrorStyleParser;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
@@ -21,7 +21,6 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.utils.BezierCurve;
-import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.Histogram;
 import io.fair_acc.dataset.spi.LimitedIndexedTreeDataSet;
@@ -44,7 +43,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     private final IntegerProperty roundedCornerRadius = new SimpleIntegerProperty(this, "roundedCornerRadius", 10);
     private final Map<String, Double> scaling = new ConcurrentHashMap<>();
     private final AnimationTimer timer = new MyTimer();
-    private final DataSetStyleParser styleParser = new DataSetStyleParser();
+    private final ErrorStyleParser styleParser = new ErrorStyleParser();
 
     public HistogramRenderer() {
         super();

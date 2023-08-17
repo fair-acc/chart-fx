@@ -1,7 +1,7 @@
 package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
+import io.fair_acc.chartfx.ui.css.ErrorStyleParser;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.FillRule;
@@ -39,7 +39,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     @Deprecated // should go on styleable node
     private Marker marker = DefaultMarker.DEFAULT;
 
-    private final DataSetStyleParser styleParser = new DataSetStyleParser();
+    private final ErrorStyleParser styleParser = new ErrorStyleParser();
 
     /**
      * Creates new <code>ErrorDataSetRenderer</code>.
@@ -206,13 +206,13 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         if (points.polarPlot) {
             for (int i = 0; i < points.actualDataCount; i++) {
-                if (points.styles[i] == null) {
+                if (points.styles[i] == null || !styleParser.tryParse(points.styles[i])) {
                     gc.strokeLine(points.xZero, points.yZero, points.xValues[i],
                             points.yValues[i]);
                 } else {
                     // work-around: bar colour controlled by the marker color
                     gc.save();
-                    styleParser.parse(points.styles[i]).getFillColor().ifPresent(gc::setFill);
+                    styleParser.getFillColor().ifPresent(gc::setFill);
                     gc.setLineWidth(barWidthHalf);
                     gc.strokeLine(points.xZero, points.yZero, points.xValues[i],
                             points.yValues[i]);
@@ -230,12 +230,12 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     yDiff = Math.abs(yDiff);
                 }
 
-                if (points.styles[i] == null) {
+                if (points.styles[i] == null || !styleParser.tryParse(points.styles[i])) {
                     gc.fillRect(points.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
 
                 } else {
                     gc.save();
-                    styleParser.parse(points.styles[i]).getFillColor().ifPresent(gc::setFill);
+                    styleParser.getFillColor().ifPresent(gc::setFill);
                     gc.fillRect(points.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
                     gc.restore();
                 }
@@ -495,10 +495,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
             final double x = localCachedPoints.xValues[i];
             final double y = localCachedPoints.yValues[i];
-            if (localCachedPoints.styles[i] == null) {
+            if (localCachedPoints.styles[i] == null || !styleParser.tryParse(localCachedPoints.styles[i])) {
                 marker.draw(gc, x, y, markerSize);
             } else {
-                styleParser.parse(localCachedPoints.styles[i]);
                 var customColor = styleParser.getMarkerColor().orElse(markerColor);
                 Marker customMarker = styleParser.getMarker().orElse(marker);
                 double customSize = styleParser.getMarkerSize().orElse(markerSize);
