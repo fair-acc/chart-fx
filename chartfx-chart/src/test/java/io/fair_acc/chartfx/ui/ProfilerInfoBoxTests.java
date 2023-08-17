@@ -74,9 +74,8 @@ public class ProfilerInfoBoxTests {
     public void testSetterGetter() {
         assertDoesNotThrow((ThrowingSupplier<ProfilerInfoBox>) ProfilerInfoBox::new);
         assertDoesNotThrow(() -> new ProfilerInfoBox(1000));
-        assertDoesNotThrow(() -> new ProfilerInfoBox(new Scene(new Pane(), 100, 100)));
+        assertDoesNotThrow(() -> new ProfilerInfoBox());
 
-        //        final Scene scene = new Scene(new Pane(), 100,100);
         final ProfilerInfoBox infoBox = new ProfilerInfoBox(); // force fastest update
 
         for (final DebugLevel debugLevel : DebugLevel.values()) {
