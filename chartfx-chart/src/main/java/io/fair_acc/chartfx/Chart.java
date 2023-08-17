@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.css.ColorPalette;
 import io.fair_acc.chartfx.ui.css.StyleGroup;
@@ -220,7 +219,6 @@ public abstract class Chart extends Region implements EventSource {
         // Setup listeners
         showing.bind(FXUtils.getShowingBinding(this));
         getRenderers().addListener(rendererChangeListener);
-        getDatasets().addListener(datasetChangeListener);
         getPlugins().addListener(pluginsChangedListener);
         getAxes().addListener(axesChangeListenerLocal);
         getAxes().addListener(axesChangeListener);
@@ -284,6 +282,9 @@ public abstract class Chart extends Region implements EventSource {
         menuPane.setContent(measurementPane);
         getChildren().add(menuPane);
 
+        // TODO: get rid of default instance. It's created if anyone wants to use getDatasets()
+        getRenderers().add(new ErrorDataSetRenderer());
+
     }
 
     @Override
@@ -310,17 +311,16 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     /**
-     * @return datasets attached to the chart and datasets attached to all renderers
+     * @return datasets attached to all renderers
      */
     public ObservableList<DataSet> getAllDatasets() {
-        if (getRenderers() == null) {
-            return allDataSets;
-        }
-
         allDataSets.clear();
-        allDataSets.addAll(getDatasets());
-        getRenderers().stream().filter(renderer -> !(renderer instanceof LabelledMarkerRenderer)).forEach(renderer -> allDataSets.addAll(renderer.getDatasets()));
-
+        for (Renderer renderer : renderers) {
+            if (renderer instanceof LabelledMarkerRenderer) {
+                continue;
+            }
+            allDataSets.addAll(renderer.getDatasets());
+        }
         return allDataSets;
     }
 
@@ -341,16 +341,6 @@ public abstract class Chart extends Region implements EventSource {
 
     public final Pane getCanvasForeground() {
         return canvasForeground;
-    }
-
-    /**
-     * @return datasets of the first renderer. Creates a renderer if needed.
-     */
-    public ObservableList<DataSet> getDatasets() {
-        if (getRenderers().isEmpty()) {
-            getRenderers().add(new ErrorDataSetRenderer());
-        }
-        return getRenderers().get(0).getDatasets();
     }
 
     public Axis getFirstAxis(final Orientation orientation) {
@@ -513,7 +503,7 @@ public abstract class Chart extends Region implements EventSource {
 
         // Update legend
         if (state.isDirty(ChartBits.ChartLegend)) {
-            updateLegend(getDatasets(), getRenderers());
+            updateLegend(getRenderers());
         }
         state.clear(ChartBits.ChartLegend);
 
@@ -661,7 +651,7 @@ public abstract class Chart extends Region implements EventSource {
         }
     }
 
-    private void forEachDataSet(Consumer<DataSet> action) {
+    protected void forEachDataSet(Consumer<DataSet> action) {
         for (Renderer renderer : renderers) {
             for (DataSet dataset : renderer.getDatasets()) {
                 action.accept(dataset);
@@ -897,12 +887,10 @@ public abstract class Chart extends Region implements EventSource {
                     dataset.addListener(dataSetState);
                 }
                 renderer.getDatasets().addListener(datasetChangeListener);
-                if (renderer instanceof AbstractRenderer) {
-                    var node = (AbstractRenderer<?>) renderer;
-                    node.setChart(this);
-                    if (!styleableNodes.getChildren().contains(node)) {
-                        styleableNodes.getChildren().add(node);
-                    }
+                renderer.setChart(this);
+                var node = renderer.getNode();
+                if (node != null && !styleableNodes.getChildren().contains(node)) {
+                    styleableNodes.getChildren().add(node);
                 }
             }
 
@@ -912,11 +900,8 @@ public abstract class Chart extends Region implements EventSource {
                     dataset.removeListener(dataSetState);
                 }
                 renderer.getDatasets().removeListener(datasetChangeListener);
-                if (renderer instanceof AbstractRenderer) {
-                    var node = (AbstractRenderer<?>) renderer;
-                    styleableNodes.getChildren().remove(node);
-                    node.setChart(null);
-                }
+                styleableNodes.getChildren().remove(renderer.getNode());
+                renderer.setChart(null);
             }
 
         }
@@ -939,7 +924,7 @@ public abstract class Chart extends Region implements EventSource {
         return isAnimated() && getScene() != null;
     }
 
-    protected void updateLegend(final List<DataSet> dataSets, final List<Renderer> renderers) {
+    protected void updateLegend(final List<Renderer> renderers) {
         final Legend legend = getLegend();
         if (legend == null) {
             return;

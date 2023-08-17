@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.events.StateListener;
 import javafx.beans.value.ChangeListener;
@@ -27,6 +28,7 @@ import io.fair_acc.dataset.event.EventRateLimiter;
  * updated, if there is exactly one DataSet in the each Renderer or the Chart.
  *
  * TODO: revisit this plugin. we should be able to turn this into a single chart listener and an update method (ennerf)
+ * TODO: this is using Chart::getDataSets() which doesn't really exist anymore
  *
  * @author akrimm
  */
@@ -69,8 +71,8 @@ public class UpdateAxisLabels extends ChartPlugin {
 
     // called whenever the chart for the plugin is changed
     private final ChangeListener<? super Chart> chartChangeListener = (change, oldChart, newChart) -> {
-        removeRendererAndDataSetListener(oldChart);
-        addRendererAndDataSetListener(newChart);
+        removeRendererAndDataSetListener((XYChart) oldChart);
+        addRendererAndDataSetListener((XYChart) newChart);
     };
 
     /**
@@ -79,10 +81,10 @@ public class UpdateAxisLabels extends ChartPlugin {
     public UpdateAxisLabels() {
         super();
         chartProperty().addListener(chartChangeListener);
-        addRendererAndDataSetListener(getChart());
+        addRendererAndDataSetListener(getXYChart());
     }
 
-    private void addRendererAndDataSetListener(Chart newChart) {
+    private void addRendererAndDataSetListener(XYChart newChart) {
         if (newChart == null) {
             return;
         }
@@ -91,10 +93,14 @@ public class UpdateAxisLabels extends ChartPlugin {
         newChart.getRenderers().forEach((Renderer r) -> setupDataSetListeners(r, r.getDatasets()));
     }
 
+    private XYChart getXYChart() {
+        return (XYChart) super.getChart();
+    }
+
     // the actual DataSet renaming logic
     private void dataSetChange(DataSet dataSet, Renderer renderer) {
         if (renderer == null) { // dataset was added to / is registered at chart
-            if (getChart().getDatasets().size() == 1) {
+            if (getXYChart().getDatasets().size() == 1) {
                 for (int dimIdx = 0; dimIdx < dataSet.getDimension(); dimIdx++) {
                     final int dimIndex = dimIdx;
                     Optional<Axis> oldAxis = getChart().getAxes().stream().filter(axis -> axis.getDimIndex() == dimIndex).findFirst();
@@ -156,7 +162,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         }
     }
 
-    private void removeRendererAndDataSetListener(Chart oldChart) {
+    private void removeRendererAndDataSetListener(XYChart oldChart) {
         if (oldChart == null) {
             return;
         }

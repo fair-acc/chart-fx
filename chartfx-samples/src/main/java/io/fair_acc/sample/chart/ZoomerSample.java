@@ -112,7 +112,7 @@ public class ZoomerSample extends ChartSample {
     }
 
     private static Chart getTestChart(final String title, final DataSet testDataSet) {
-        final Chart chart = new XYChart();
+        final var chart = new XYChart();
         chart.setTitle(title);
         chart.setLegendVisible(false);
         chart.getDatasets().add(testDataSet);

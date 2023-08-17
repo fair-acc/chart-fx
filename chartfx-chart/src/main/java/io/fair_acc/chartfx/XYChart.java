@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.ChartBits;
@@ -98,6 +99,16 @@ public class XYChart extends Chart {
     }
 
     /**
+     * @return datasets of the first renderer. Creates a renderer if needed.
+     */
+    public ObservableList<DataSet> getDatasets() {
+        if (getRenderers().isEmpty()) {
+            getRenderers().add(new ErrorDataSetRenderer());
+        }
+        return getRenderers().get(0).getDatasets();
+    }
+
+    /**
      * @return datasets attached to the chart and datasets attached to all renderers
      */
     @Override
@@ -122,7 +133,6 @@ public class XYChart extends Chart {
      */
     public ObservableList<DataSet> getAllShownDatasets() {
         final ObservableList<DataSet> ret = FXCollections.observableArrayList();
-        ret.addAll(getDatasets());
         getRenderers().stream().filter(Renderer::showInLegend).forEach(renderer -> ret.addAll(renderer.getDatasets()));
         return ret;
     }
@@ -195,10 +205,6 @@ public class XYChart extends Chart {
 
     @Override
     public void updateAxisRange() {
-        if (isDataEmpty()) {
-            return;
-        }
-
         // Check that all registered data sets have proper ranges defined. The datasets
         // are already locked, so we can use parallel stream without extra synchronization.
         getRenderers().stream()
@@ -213,11 +219,6 @@ public class XYChart extends Chart {
 
         // Update each of the axes
         getAxes().forEach(chartAxis -> updateNumericAxis(chartAxis, getDataSetForAxis(chartAxis)));
-
-    }
-
-    private boolean isDataEmpty() {
-        return getAllDatasets() == null || getAllDatasets().isEmpty();
     }
 
     /**
@@ -366,4 +367,5 @@ public class XYChart extends Chart {
         }
 
     }
+
 }
