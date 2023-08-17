@@ -27,7 +27,6 @@ import javafx.collections.ObservableList;
 import javafx.css.*;
 import javafx.geometry.*;
 import javafx.scene.CacheHint;
-import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.control.Control;
@@ -99,17 +98,16 @@ public abstract class Chart extends Region implements EventSource {
     protected final ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
 
     protected final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
-    private final Map<ChartPlugin, Group> pluginGroups = new HashMap<>();
+    private final Map<ChartPlugin, Pane> pluginPanes = new HashMap<>();
     private final ObservableList<ChartPlugin> plugins = FXCollections.observableList(new LinkedList<>());
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     protected final ObservableList<DataSet> allDataSets = FXCollections.observableArrayList();
     private final ObservableList<Renderer> renderers = FXCollections.observableArrayList();
 
-
     // Inner canvas for the drawn content
     protected final ResizableCanvas canvas = StyleUtil.addStyles(new ResizableCanvas(), "chart-canvas");
-    protected final Pane canvasForeground = new Pane();
-    protected final Group pluginsArea = Chart.createChildGroup();
+    protected final Pane canvasForeground = FXUtils.createUnmanagedPane();
+    protected final Pane pluginsArea = FXUtils.createUnmanagedPane();
 
     // Area where plots get drawn
     protected final Pane plotBackground = StyleUtil.addStyles(new Pane(), "chart-plot-background");
@@ -814,9 +812,9 @@ public abstract class Chart extends Region implements EventSource {
 
     protected void pluginAdded(final ChartPlugin plugin) {
         plugin.setChart(Chart.this);
-        final Group group = Chart.createChildGroup();
-        Bindings.bindContent(group.getChildren(), plugin.getChartChildren());
-        pluginGroups.put(plugin, group);
+        final Pane pane = FXUtils.createUnmanagedPane();
+        Bindings.bindContent(pane.getChildren(), plugin.getChartChildren());
+        pluginPanes.put(plugin, pane);
     }
 
     // -------------- STYLESHEET HANDLING
@@ -824,10 +822,10 @@ public abstract class Chart extends Region implements EventSource {
 
     protected void pluginRemoved(final ChartPlugin plugin) {
         plugin.setChart(null);
-        final Group group = pluginGroups.remove(plugin);
-        Bindings.unbindContent(group, plugin.getChartChildren());
-        group.getChildren().clear();
-        pluginsArea.getChildren().remove(group);
+        final Pane pane = pluginPanes.remove(plugin);
+        Bindings.unbindContent(pane, plugin.getChartChildren());
+        pane.getChildren().clear();
+        pluginsArea.getChildren().remove(pane);
     }
 
     protected void pluginsChanged(final ListChangeListener.Change<? extends ChartPlugin> change) {
@@ -905,7 +903,7 @@ public abstract class Chart extends Region implements EventSource {
     }
 
     protected void updatePluginsArea() {
-        var pluginChildren = plugins.stream().map(pluginGroups::get).collect(Collectors.toList());
+        var pluginChildren = plugins.stream().map(pluginPanes::get).collect(Collectors.toList());
         pluginsArea.getChildren().setAll(pluginChildren);
         fireInvalidated(ChartBits.ChartPlugins);
     }
@@ -927,13 +925,4 @@ public abstract class Chart extends Region implements EventSource {
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return CSS.getCssMetaData();
     }
-
-    protected static Group createChildGroup() {
-        final Group group = new Group();
-        group.setManaged(false);
-        group.setAutoSizeChildren(false);
-        group.relocate(0, 0);
-        return group;
-    }
-
 }
