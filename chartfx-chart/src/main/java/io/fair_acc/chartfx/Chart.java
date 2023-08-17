@@ -12,7 +12,7 @@ import io.fair_acc.chartfx.ui.css.StyleGroup;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
-import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
+import io.fair_acc.chartfx.ui.layout.FullSizePane;
 import io.fair_acc.chartfx.ui.*;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.AxisDescription;
@@ -107,13 +107,13 @@ public abstract class Chart extends Region implements EventSource {
 
     // Inner canvas for the drawn content
     protected final ResizableCanvas canvas = StyleUtil.addStyles(new ResizableCanvas(), "chart-canvas");
-    protected final Pane canvasForeground = FXUtils.createUnmanagedPane();
+    protected final Pane canvasForeground = StyleUtil.addStyles(new FullSizePane(), "chart-canvas-foreground");
     protected final Pane pluginsArea = FXUtils.createUnmanagedPane();
 
     // Area where plots get drawn
-    protected final Pane plotBackground = StyleUtil.addStyles(new Pane(), "chart-plot-background");
+    protected final Pane plotBackground = StyleUtil.addStyles(new FullSizePane(), "chart-plot-background");
     protected final HiddenSidesPane plotArea = StyleUtil.addStyles(new HiddenSidesPane(), "chart-plot-area");
-    protected final Pane plotForeGround = StyleUtil.addStyles(new Pane(), "chart-plot-foreground");
+    protected final Pane plotForeGround = StyleUtil.addStyles(new FullSizePane(), "chart-plot-foreground");
 
     // Outer chart elements
     protected final ChartPane measurementPane = StyleUtil.addStyles(new ChartPane(), "chart-measurement-pane");
@@ -276,7 +276,7 @@ public abstract class Chart extends Region implements EventSource {
         //             > canvas (main)
         //             > canvas foreground
         //             > plugins
-        var canvasArea = StyleUtil.addStyles(new PlotAreaPane(canvas, canvasForeground, pluginsArea), "chart-canvas-area");
+        var canvasArea = StyleUtil.addStyles(new FullSizePane(canvas, canvasForeground, pluginsArea), "chart-canvas-area");
         plotArea.setContent(canvasArea);
         axesAndCanvasPane.addCenter(plotBackground, plotArea, plotForeGround);
         titleLegendPane.addCenter(axesAndCanvasPane);
