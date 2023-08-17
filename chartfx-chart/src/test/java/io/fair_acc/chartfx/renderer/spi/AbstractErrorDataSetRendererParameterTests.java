@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.scene.canvas.Canvas;
 
+import javafx.scene.canvas.GraphicsContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -51,11 +53,6 @@ public class AbstractErrorDataSetRendererParameterTests {
         assertTrue(renderer.isDrawBubbles());
         renderer.setDrawBubbles(false);
         assertFalse(renderer.isDrawBubbles());
-
-        renderer.setDrawChartDataSets(true);
-        assertTrue(renderer.isDrawChartDataSets());
-        renderer.setDrawChartDataSets(false);
-        assertFalse(renderer.isDrawChartDataSets());
 
         renderer.setDrawMarker(true);
         assertTrue(renderer.isDrawMarker());
@@ -115,13 +112,9 @@ public class AbstractErrorDataSetRendererParameterTests {
      * basic test class, only supports limited getter/setter/property functions
      */
     public static class TestErrorDataSetRendererParameter extends AbstractErrorDataSetRendererParameter<TestErrorDataSetRendererParameter> {
-        @Override
-        public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-            throw new UnsupportedOperationException();
-        }
 
         @Override
-        public void render() {
+        protected void render(GraphicsContext gc, DataSet dataSet, DataSetNode style) {
             throw new UnsupportedOperationException();
         }
 

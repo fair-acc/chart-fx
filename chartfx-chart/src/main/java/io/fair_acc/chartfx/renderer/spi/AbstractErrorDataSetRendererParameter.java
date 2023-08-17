@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.application.Platform;
@@ -48,7 +49,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
             "rendererDataReducer", new DefaultDataReducer());
 
     private final IntegerProperty dashSize = css().createIntegerProperty(this, "dashSize", 3);
-    private final DoubleProperty markerSize = css().createDoubleProperty(this, "markerSize", 1.5);
     private final BooleanProperty drawMarker = css().createBooleanProperty(this, "drawMarker", true);
     private final ObjectProperty<LineStyle> polyLineStyle = css().createEnumProperty(this, "polyLineStyle",
             LineStyle.NORMAL, false, LineStyle.class);
@@ -73,7 +73,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
                 errorStyle,
                 rendererDataReducer,
                 dashSize,
-                markerSize,
                 drawMarker,
                 polyLineStyle,
                 drawBars,
@@ -188,15 +187,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
-     * Returns the <code>markerSize</code>.
-     *
-     * @return the <code>markerSize</code>.
-     */
-    public double getMarkerSize() {
-        return markerSizeProperty().get();
-    }
-
-    /**
      * whether renderer should draw no, simple (point-to-point), stair-case, Bezier, ... lines
      *
      * @return LineStyle
@@ -266,10 +256,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      */
     public boolean isShiftBar() {
         return shiftBarProperty().get();
-    }
-
-    public DoubleProperty markerSizeProperty() {
-        return markerSize;
     }
 
     /**
@@ -400,18 +386,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     /**
-     * Sets the <code>markerSize</code> to the specified value.
-     *
-     * @param size the <code>markerSize</code> to set.
-     * @return itself (fluent design)
-     */
-    public R setMarkerSize(final double size) {
-        AssertUtils.gtEqThanZero("marker size ", size);
-        markerSizeProperty().setValue(size);
-        return getThis();
-    }
-
-    /**
      * Sets whether renderer should draw no, simple (point-to-point), stair-case, Bezier, ... lines
      *
      * @param style draw no, simple (point-to-point), stair-case, Bezier, ... lines
@@ -464,6 +438,21 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         return shiftBar;
     }
 
+    @Deprecated // TODO: remove from examples and provide a way to better get to it from the datasets
+    public void setMarkerSize(double value) {
+        for (DataSetNode datasetNode : getDatasetNodes()) {
+            datasetNode.setMarkerSize(value);
+        }
+    }
+
+    @Deprecated // TODO: remove from examples
+    public double getMarkerSize() {
+        for (DataSetNode datasetNode : getDatasetNodes()) {
+            return datasetNode.getMarkerSize();
+        }
+        return 1.5;
+    }
+
     protected R bind(final R other) {
         chartProperty().bind(other.chartProperty());
         errorStyleProperty().bind(other.errorStyleProperty());
@@ -471,7 +460,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         assumeSortedDataProperty().bind(other.assumeSortedDataProperty());
         dashSizeProperty().bind(other.dashSizeProperty());
         minRequiredReductionSizeProperty().bind(other.minRequiredReductionSizeProperty());
-        markerSizeProperty().bind(other.markerSizeProperty());
         drawMarkerProperty().bind(other.drawMarkerProperty());
         polyLineStyleProperty().bind(other.polyLineStyleProperty());
         drawBarsProperty().bind(other.drawBarsProperty());
@@ -508,7 +496,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         pointReductionProperty().unbind();
         dashSizeProperty().unbind();
         minRequiredReductionSizeProperty().unbind();
-        markerSizeProperty().unbind();
         drawMarkerProperty().unbind();
         polyLineStyleProperty().unbind();
         drawBarsProperty().unbind();

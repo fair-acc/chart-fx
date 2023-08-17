@@ -56,8 +56,10 @@ public class ReducingLineRenderer extends AbstractRendererXY<ReducingLineRendere
     @Override
     protected void render(GraphicsContext gc, DataSet ds, DataSetNode style) {
         gc.save();
-        DefaultRenderColorScheme.setLineScheme(gc, style);
-        DefaultRenderColorScheme.setGraphicsContextAttributes(gc, style);
+        gc.setLineWidth(style.getLineWidth());
+        gc.setLineDashes(style.getLineDashes());
+        gc.setStroke(style.getLineColor());
+
         if (ds.getDataCount() > 0) {
             final int indexMin = Math.max(0, ds.getIndex(DIM_X, xMin));
             final int indexMax = Math.min(ds.getIndex(DIM_X, xMax) + 1, ds.getDataCount());
