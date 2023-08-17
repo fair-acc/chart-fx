@@ -76,6 +76,7 @@ public class SimplePerformanceMeter extends Region {
             @Override
             public void handle(long now) {
                 pulseCounter.getAndIncrement();
+                updateProperties();
             }
         };
 
@@ -212,8 +213,6 @@ public class SimplePerformanceMeter extends Region {
                 frameRateAvgInternal = computeAverage(frameRateInternal, frameRateAvgInternal, alpha);
                 cpuLoadProcessAvgInternal = computeAverage(cpuLoadProcessInternal, cpuLoadProcessAvgInternal, alpha);
                 cpuLoadSystemAvgInternal = computeAverage(cpuLoadSystemInternal, cpuLoadSystemAvgInternal, alpha);
-
-                FXUtils.runFX(SimplePerformanceMeter.this::updateProperties);
             }
         }, 0, updateDuration);
         scene.addPostLayoutPulseListener(pulseListener);

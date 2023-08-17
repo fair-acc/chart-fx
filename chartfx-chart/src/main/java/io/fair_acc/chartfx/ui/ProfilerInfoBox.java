@@ -6,7 +6,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
@@ -37,33 +36,20 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
     private final FontIcon chevronIcon = new FontIcon("fa-thermometer-quarter:" + (2 * FONT_SIZE));
     private final ObjectProperty<DebugLevel> debugLevel = new SimpleObjectProperty<>(this, "debugLevel", DebugLevel.NONE);
     private final TreeItem<VBox> treeRoot;
-    private SimplePerformanceMeter meter;
 
     public ProfilerInfoBox() {
-        this(null, DEFAULT_DEBUG_UPDATE_RATE);
+        this(DEFAULT_DEBUG_UPDATE_RATE);
     }
 
     /**
      * @param updateRateMillis static update rate in milli-seconds
      */
     public ProfilerInfoBox(final int updateRateMillis) {
-        this(null, updateRateMillis);
-    }
-
-    /**
-     * @param scene superordinate scene that should be monitored
-     */
-    public ProfilerInfoBox(Scene scene) {
-        this(scene, DEFAULT_DEBUG_UPDATE_RATE);
-    }
-
-    /**
-     * @param scene superordinate scene that should be monitored, 
-     *              N.B. if {@code null} the ProfilerInfoBox own Scene where it is added to is being used
-     * @param updateRateMillis static update rate in milli-seconds
-     */
-    public ProfilerInfoBox(final Scene scene, final int updateRateMillis) {
         super();
+        SimplePerformanceMeter meter = new SimplePerformanceMeter(updateRateMillis);
+        // note: meter has to be added to a node which is visible  when the stats are shown, in this case the CPU crumb
+        // adding it to this.getChildren() does not work, since it is overwritten by the bread crumb bar with the content
+
         setCrumbFactory((TreeItem<VBox> param) -> new CustomBreadCrumbButton(param.getValue()));
         setAutoNavigationEnabled(false);
 
@@ -73,45 +59,35 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
 
         final CustomLabel fxFPS = new CustomLabel();
         fxFPS.setTooltip(new Tooltip("internal JavaFX tick frame-rate (aka. pulse, usually around 60 FPS)"));
+        fxFPS.textProperty().bind(meter.fxFrameRateProperty().asString("FX %4.1f FPS"));
         final CustomLabel chartFPS = new CustomLabel();
         chartFPS.setTooltip(new Tooltip("(visible) frame update (usually <= 25 FPS"));
+        chartFPS.textProperty().bind(meter.actualFrameRateProperty().asString("actual %4.1f FPS"));
         final CustomLabel cpuLoadProcess = new CustomLabel();
         cpuLoadProcess.setTooltip(new Tooltip("CPU load of this process"));
+        cpuLoadProcess.textProperty().bind(meter.averageProcessCpuLoadProperty().asString("Process %5.1f %%"));
         final CustomLabel cpuLoadSystem = new CustomLabel();
-        cpuLoadProcess.setTooltip(new Tooltip("CPU system load (100% <-> 1 core fully loaded)"));
-
-        final ChangeListener<? super Number> updateLabelListener = (ch, o, n) -> {
-            final String fxRate = String.format("%4.1f", meter.getFxFrameRate());
-            final String actualRate = String.format("%4.1f", meter.getActualFrameRate());
-            final String cpuProcess = String.format("%5.1f", meter.getProcessCpuLoad());
-            final String cpuSystem = String.format("%5.1f", meter.getSystemCpuLoad());
-
-            if (meter.getFxFrameRate() < LEVEL_ERROR) {
+        cpuLoadSystem.setTooltip(new Tooltip("CPU system load (100% <-> 1 core fully loaded)"));
+        cpuLoadSystem.textProperty().bind(meter.systemCpuLoadProperty().asString("System %5.1f %%"));
+        meter.fxFrameRateProperty().addListener((b, o, n) -> {
+            if (n.doubleValue() < LEVEL_ERROR) {
                 chevronIcon.setFill(Color.RED);
-            } else if (meter.getFxFrameRate() < LEVEL_WARNING) {
+            } else if (n.doubleValue() < LEVEL_WARNING) {
                 chevronIcon.setFill(Color.DARKORANGE);
             } else {
                 chevronIcon.setFill(Color.BLACK);
             }
-
-            fxFPS.setTextFiltered(String.format("%6s: %4s %s", "FX", fxRate, "FPS"));
-            chartFPS.setTextFiltered(String.format("%6s: %4s %s", "actual", actualRate, "FPS"));
-            cpuLoadProcess.setTextFiltered(String.format("%7s: %4s %s", "Process", cpuProcess, "%"));
-            cpuLoadSystem.setTextFiltered(String.format("%7s: %4s %s", "System", cpuSystem, "%"));
-        };
+        });
 
         final Label javaVersion = new CustomLabel(System.getProperty("java.vm.name") + " " + System.getProperty("java.version"));
         final Label javafxVersion = new CustomLabel("JavaFX: " + System.getProperty("javafx.runtime.version") /*+ " Chart-fx: " + System.getProperty("chartfx.version")*/);
         // TODO: add Chart-fx version (commit ID, release version)
-        meter = new SimplePerformanceMeter(updateRateMillis);
-        meter.fxFrameRateProperty().addListener(updateLabelListener);
-        this.getChildren().add(meter);
 
         treeRoot = new TreeItem<>(new VBox(chevron));
         treeRoot.getValue().setId("ProfilerInfoBox-treeRoot");
         final TreeItem<VBox> fpsItem = new TreeItem<>(new VBox(fxFPS, chartFPS));
         fpsItem.getValue().setId("ProfilerInfoBox-fpsItem");
-        final TreeItem<VBox> cpuItem = new TreeItem<>(new VBox(cpuLoadProcess, cpuLoadSystem));
+        final TreeItem<VBox> cpuItem = new TreeItem<>(new VBox(cpuLoadProcess, cpuLoadSystem, meter));
         cpuItem.getValue().setId("ProfilerInfoBox-cpuItem");
         final TreeItem<VBox> versionItem = new TreeItem<>(new VBox(javaVersion, javafxVersion));
         versionItem.getValue().setId("ProfilerInfoBox-versionItem");
@@ -154,7 +130,7 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
 
     private ChangeListener<? super DebugLevel> updateSelectedCrumbLevelListener(final TreeItem<VBox> fpsItem, final TreeItem<VBox> cpuItem, final TreeItem<VBox> versionItem) {
         return (ch, o, n) -> {
-            switch (getDebugLevel()) {
+            switch (n) {
             case FRAMES_PER_SECOND:
                 setSelectedCrumb(fpsItem);
                 break;
@@ -196,13 +172,6 @@ public class ProfilerInfoBox extends BreadCrumbBar<VBox> {
             super(text);
             setPadding(Insets.EMPTY);
             setFont(Font.font(FONT_MONO_SPACE, FONT_SIZE));
-        }
-
-        public void setTextFiltered(final String text) {
-            if (getText() != null && getText().equals(text)) {
-                return;
-            }
-            super.setText(text);
         }
     }
 }
