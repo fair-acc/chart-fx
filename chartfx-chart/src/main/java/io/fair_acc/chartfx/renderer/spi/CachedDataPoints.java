@@ -41,8 +41,6 @@ class CachedDataPoints {
     protected String[] styles;
     protected boolean xAxisInverted;
     protected boolean yAxisInverted;
-    protected String defaultStyle; // TODO: get rid of this
-    protected DataSetNode styleNode;
     protected boolean allowForNaNs;
     protected ErrorType[] errorType;
     protected int indexMin;
@@ -510,9 +508,6 @@ class CachedDataPoints {
         polarPlot = isPolarPlot;
         this.allowForNaNs = doAllowForNaNs;
         this.rendererErrorStyle = rendererErrorStyle;
-
-        defaultStyle = dataSet.getStyle();
-        styleNode = style;
 
         computeBoundaryVariables(xAxis, yAxis);
         setErrorType(dataSet, rendererErrorStyle);
