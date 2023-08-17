@@ -24,6 +24,14 @@ public class DataSetStyleParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSetStyleParser.class);
 
+    public boolean tryParse(String style) {
+        if(style == null || style.isEmpty()) {
+            return false;
+        }
+        parse(style);
+        return true;
+    }
+
     public DataSetStyleParser parse(String dataSetStyle) {
         clear();
         if (dataSetStyle == null || dataSetStyle.isBlank()) {
@@ -69,6 +77,24 @@ public class DataSetStyleParser {
             }
         }
 
+        final String strokeColor = map.get(XYChartCss.STROKE_COLOR.toLowerCase(Locale.UK));
+        if (markerColor != null) {
+            try {
+                this.strokeColor = Color.web(markerColor);
+            } catch (final IllegalArgumentException ex) {
+                LOGGER.error("could not parse stroke color description for '" + XYChartCss.STROKE_COLOR + "'='" + markerColor + "'", ex);
+            }
+        }
+
+        final String strokeWidth = map.get(XYChartCss.STROKE_WIDTH.toLowerCase(Locale.UK));
+        if (markerSize != null) {
+            try {
+                this.lineWidth = Double.parseDouble(strokeWidth);
+            } catch (final NumberFormatException ex) {
+                LOGGER.error("could not parse line width description for '" + XYChartCss.STROKE_WIDTH + "'='" + markerSize + "'", ex);
+            }
+        }
+
 
         return this;
     }
@@ -81,6 +107,10 @@ public class DataSetStyleParser {
         return Double.isFinite(markerSize) ? OptionalDouble.of(markerSize) : OptionalDouble.empty();
     }
 
+    public OptionalDouble getLineWidth() {
+        return Double.isFinite(lineWidth) ? OptionalDouble.of(lineWidth) : OptionalDouble.empty();
+    }
+
     public Optional<Paint> getMarkerColor() {
         return Optional.ofNullable(markerColor);
     }
@@ -89,16 +119,24 @@ public class DataSetStyleParser {
         return Optional.ofNullable(fillColor);
     }
 
+    public Optional<Paint> getLineColor() {
+        return Optional.ofNullable(strokeColor);
+    }
+
     public void clear() {
         marker = null;
         markerSize = Double.NaN;
+        lineWidth = Double.NaN;
         markerColor = null;
         fillColor = null;
+        strokeColor = null;
     }
 
     private Marker marker;
     private double markerSize;
+    private double lineWidth;
     private Paint markerColor;
     private Paint fillColor;
+    private Paint strokeColor;
 
 }

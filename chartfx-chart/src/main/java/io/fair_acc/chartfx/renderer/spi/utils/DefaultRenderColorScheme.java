@@ -194,10 +194,6 @@ public final class DefaultRenderColorScheme {
         return markerLineWidth;
     }
 
-    public static void setFillScheme(final GraphicsContext gc, final DataSetNode dataSetNode) {
-        setFillScheme(gc, dataSetNode.getStyle(), dataSetNode.getColorIndex());
-    }
-
     @Deprecated
     public static void setFillScheme(final GraphicsContext gc, final String defaultStyle, final int dsIndex) {
         AssertUtils.gtEqThanZero("setFillScheme dsIndex", dsIndex);
@@ -220,6 +216,7 @@ public final class DefaultRenderColorScheme {
         }
     }
 
+    @Deprecated
     public static void setGraphicsContextAttributes(final GraphicsContext gc, final DataSetNode style) {
         setGraphicsContextAttributes(gc, style.getStyle());
     }
@@ -257,6 +254,7 @@ public final class DefaultRenderColorScheme {
         }
     }
 
+    @Deprecated
     public static void setLineScheme(final GraphicsContext gc, final DataSetNode dataSet) {
 //        setLineScheme(gc, dataSet.getStyle(), dataSet.getColorIndex());
         gc.setLineWidth(dataSet.getStrokeWidth());
@@ -280,6 +278,7 @@ public final class DefaultRenderColorScheme {
         gc.setStroke(getColorModifier(map, rawColor));
     }
 
+    @Deprecated
     public static void setMarkerScheme(final GraphicsContext gc, final DataSetNode dataSetNode) {
 //        setMarkerScheme(gc, dataSetNode.getStyle(), dataSetNode.getColorIndex());
         var color = getModifiedColor(dataSetNode.getStroke(), dataSetNode.getIntensity());
