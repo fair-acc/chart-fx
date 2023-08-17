@@ -9,6 +9,7 @@ import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.chart.NumberAxis;
 
 import org.slf4j.Logger;
@@ -52,32 +53,35 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
     protected boolean isLogAxis = false; // internal use (for performance reason
 
-    private final transient BooleanProperty logAxis = PropUtil.createBooleanProperty(this, "logAxis", isLogAxis, () -> {
-        isLogAxis = isLogAxis();
-        if (isLogAxis) {
-            if (DefaultNumericAxis.this.isTimeAxis()) {
-                axisTransform = logTimeTransform;
-                setMinorTickCount(0);
+    private final transient BooleanProperty logAxis = new SimpleBooleanProperty(this, "logAxis", isLogAxis);
+    {
+        logAxis.addListener((bean, oldVal, newVal) -> {
+            isLogAxis = newVal;
+            if (isLogAxis) {
+                if (DefaultNumericAxis.this.isTimeAxis()) {
+                    axisTransform = logTimeTransform;
+                    setMinorTickCount(0);
+                } else {
+                    axisTransform = logTransform;
+                    setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
+                }
+                if (getMin() <= 0) {
+                    isUpdating = true;
+                    setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+                    isUpdating = false;
+                }
             } else {
-                axisTransform = logTransform;
-                setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
+                axisTransform = linearTransform;
+                if (DefaultNumericAxis.this.isTimeAxis()) {
+                    setMinorTickCount(0);
+                } else {
+                    setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
+                }
             }
-            if (getMin() <= 0) {
-                isUpdating = true;
-                setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
-                isUpdating = false;
-            }
-        } else {
-            axisTransform = linearTransform;
-            if (DefaultNumericAxis.this.isTimeAxis()) {
-                setMinorTickCount(0);
-            } else {
-                setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
-            }
-        }
 
-        invalidateAxisRange.run();
-    });
+            invalidateAxisRange.run();
+        });
+    }
 
     /**
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
