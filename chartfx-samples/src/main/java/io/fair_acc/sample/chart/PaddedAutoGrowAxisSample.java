@@ -2,6 +2,7 @@ package io.fair_acc.sample.chart;
 
 import java.util.concurrent.TimeUnit;
 
+import io.fair_acc.dataset.utils.CachedDaemonThreadFactory;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.stage.Stage;
@@ -12,7 +13,6 @@ import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.spi.CircularDoubleErrorDataSet;
-import io.fair_acc.math.Math;
 
 /**
  * Auto grow-ranging example.
@@ -37,7 +37,7 @@ public class PaddedAutoGrowAxisSample extends ChartSample {
 
         var ds = new CircularDoubleErrorDataSet("", 150);
         chart.getDatasets().addAll(ds);
-        new Thread(() -> {
+        CachedDaemonThreadFactory.getInstance().newThread(() -> {
             while (true) {
                 ds.reset();
                 try {

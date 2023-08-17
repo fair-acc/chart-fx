@@ -12,6 +12,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.utils.CachedDaemonThreadFactory;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
@@ -172,7 +173,7 @@ public class SimpleOhlcvReplayDataSet extends OhlcvDataSet implements Iterable<I
     public void start() {
         paused.set(false);
         running.set(true);
-        new Thread(getDataUpdateTask()).start();
+        CachedDaemonThreadFactory.getInstance().newThread(getDataUpdateTask()).start();
     }
 
     public void step() {
