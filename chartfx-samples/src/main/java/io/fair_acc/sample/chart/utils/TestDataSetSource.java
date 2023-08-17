@@ -67,7 +67,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
 
     protected transient Timer updateTimer;
     protected transient Timer audioTimer;
-    protected transient TimerTask traskAudioIO;
+    protected transient TimerTask taskAudioIO;
     protected transient TimerTask taskDataUpdate;
 
     public TestDataSetSource() {
@@ -216,7 +216,7 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
 
         if (audioTimer != null) {
             audioTimer.cancel();
-            traskAudioIO.cancel();
+            taskAudioIO.cancel();
             audioTimer = null;
         }
 
@@ -226,8 +226,8 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
         }
 
         audioTimer = new Timer(TestDataSetSource.class.getSimpleName() + "-Audio", true);
-        traskAudioIO = getAudioTimerTask();
-        audioTimer.schedule(traskAudioIO, 0);
+        taskAudioIO = getAudioTimerTask();
+        audioTimer.schedule(taskAudioIO, 0);
 
         updateTimer = new Timer(TestDataSetSource.class.getSimpleName() + "-Data", true);
         taskDataUpdate = getDataUpdateTask();
@@ -257,6 +257,11 @@ public class TestDataSetSource extends AbstractDataSet<TestDataSetSource> implem
         running = false;
         paused = false;
         synth.stop();
+    }
+
+    public void close() {
+        stop();
+        synth.close();
     }
 
     protected TimerTask getAudioTimerTask() {

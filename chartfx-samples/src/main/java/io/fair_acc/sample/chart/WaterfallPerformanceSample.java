@@ -8,6 +8,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -76,19 +77,16 @@ public class WaterfallPerformanceSample extends ChartSample {
     private final CheckBox altImplementation = new CheckBox("alt impl.");
     private final CheckBox parallelImplementation = new CheckBox("parallel impl.");
 
-    private final TestDataSetSource dataSet = new TestDataSetSource();
+    private TestDataSetSource dataSet;
+    private EventHandler<WindowEvent> previousCloseHandler = null;
     private Timer timer;
 
-    private void closeDemo(final WindowEvent evt) {
-        if (evt.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST) && LOGGER.isInfoEnabled()) {
-            LOGGER.atInfo().log("requested demo to shut down");
-        }
+    private void closeDemo() {
         if (timer != null) {
             timer.cancel();
             timer = null; // NOPMD
-            dataSet.stop();
         }
-        Platform.exit();
+        dataSet.close();
     }
 
     private XYChart getChartPane(final ContourType colorMap) {
@@ -313,6 +311,7 @@ public class WaterfallPerformanceSample extends ChartSample {
 
     @Override
     public Node getChartPanel(final Stage primaryStage) {
+        dataSet = new TestDataSetSource();
         ProcessingProfiler.setDebugState(false);
         ProcessingProfiler.setLoggerOutputState(false);
 
@@ -330,6 +329,18 @@ public class WaterfallPerformanceSample extends ChartSample {
         ToolBar contourToolBar = getContourToolBar(chart, renderer);
 
         root.getChildren().addAll(testVariableToolBar, chart, contourToolBar, dataSetToolBar);
+
+        root.sceneProperty().addListener((b, o, n) -> {
+            if (n != null) {
+                if (previousCloseHandler == null) {
+                    previousCloseHandler = n.getWindow().getOnCloseRequest();
+                    n.getWindow().setOnCloseRequest(evt -> {
+                        closeDemo();
+                    });
+                }
+            }
+        });
+
         return root;
     }
 

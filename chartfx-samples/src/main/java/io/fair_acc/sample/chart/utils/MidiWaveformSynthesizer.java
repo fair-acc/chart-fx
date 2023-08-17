@@ -188,13 +188,6 @@ public class MidiWaveformSynthesizer {
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Override
-    public void finalize() { // NOPMD needed and on purpose
-        sequencer.close();
-        synthesizer.close();
-    }
-
     public DoubleCircularBuffer getBuffer() {
         return buffer;
     }
@@ -263,9 +256,17 @@ public class MidiWaveformSynthesizer {
     }
 
     public void stop() {
-        sequencer.stop();
-        sequencer.setTickPosition(0);
+        if (sequencer.isOpen()) {
+            sequencer.stop();
+            sequencer.setTickPosition(0);
+        }
         reset();
+    }
+
+    public void close() {
+        stop();
+        sequencer.close();
+        synthesizer.close();
     }
 
     public void update(final int samplingRate, final int nBits) {
