@@ -79,7 +79,6 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
     private final DataSet dataSet;
     private final AbstractRenderer<?> renderer;
 
-
     static class DefaultColorClass {
 
         public static String getForIndex(int index) {

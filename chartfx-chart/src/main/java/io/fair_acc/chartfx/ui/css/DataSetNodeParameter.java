@@ -48,6 +48,10 @@ public abstract class DataSetNodeParameter extends TextStyle {
         return getStrokeWidth();
     }
 
+    public Paint getFillColor() {
+        return getModifiedColor(getFill());
+    }
+
     /**
      * @return a fill pattern of crossed lines using the lineFill color
      */
