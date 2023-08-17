@@ -9,7 +9,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
@@ -41,13 +40,11 @@ import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.dataset.testdata.spi.*;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
-public class ErrorDataSetRendererStylingSample extends Application {
+public class ErrorDataSetRendererStylingSample extends ChartSample {
     private static final String STOP_TIMER = "stop timer";
     private static final String START_TIMER = "start timer";
     private static final Logger LOGGER = LoggerFactory.getLogger(RollingBufferSample.class);
     private static final int DEBUG_UPDATE_RATE = 1000;
-    private static final int DEFAULT_WIDTH = 1200;
-    private static final int DEFAULT_HEIGHT = 600;
     private static final int UPDATE_DELAY = 1000; // [ms]
     private static final int UPDATE_PERIOD = 100; // [ms]
     private static final double N_MAX_SAMPLES = 10_000;
@@ -432,15 +429,12 @@ public class ErrorDataSetRendererStylingSample extends Application {
     }
 
     @Override
-    public void start(final Stage primaryStage) {
+    public Node getChartPanel(final Stage primaryStage) {
         ProcessingProfiler.setVerboseOutputState(false);
         ProcessingProfiler.setLoggerOutputState(true);
         ProcessingProfiler.setDebugState(false);
 
         final BorderPane root = new BorderPane();
-
-        final Scene scene = new Scene(root, ErrorDataSetRendererStylingSample.DEFAULT_WIDTH,
-                ErrorDataSetRendererStylingSample.DEFAULT_HEIGHT);
 
         final DefaultNumericAxis xAxis = new DefaultNumericAxis();
         xAxis.setUnit("Largeness");
@@ -457,7 +451,6 @@ public class ErrorDataSetRendererStylingSample extends Application {
         final ErrorDataSetRenderer errorRenderer = new ErrorDataSetRenderer();
         chart.getRenderers().set(0, errorRenderer);
         chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new DataPointTooltip());
         chart.getPlugins().add(new TableViewer());
@@ -529,11 +522,8 @@ public class ErrorDataSetRendererStylingSample extends Application {
         ProcessingProfiler.getTimeDiff(startTime, "adding chart into StackPane");
 
         startTime = ProcessingProfiler.getTimeStamp();
-        primaryStage.setTitle(this.getClass().getSimpleName());
-        primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> Platform.exit());
-        primaryStage.show();
         ProcessingProfiler.getTimeDiff(startTime, "for showing");
+        return root;
     }
 
     /**
