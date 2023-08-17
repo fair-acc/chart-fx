@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.renderer.spi.financial.service;
 
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialDataSetNode;
 import javafx.scene.canvas.GraphicsContext;
 
 import io.fair_acc.dataset.DataSet;
@@ -13,6 +14,7 @@ import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
 public class OhlcvRendererEpData {
     public GraphicsContext gc;
     public DataSet ds;
+    public FinancialDataSetNode style; // style information (may wrap a different dataset than ds)
     public AttributeModelAware attrs; // addon (if available)
     public IOhlcvItemAware ohlcvItemAware; // get item by index (if available)
     public IOhlcvItem ohlcvItem; // item domain object (if available)

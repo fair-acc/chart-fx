@@ -11,6 +11,7 @@ import javafx.beans.property.Property;
 import javafx.css.*;
 import javafx.scene.Node;
 
+import javafx.scene.paint.Paint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -312,6 +313,10 @@ public class CssPropertyFactory<S extends Styleable> {
         };
         filter.apply(null, initialValue);
         return createObjectProperty(styleableBean, "side", initialValue, false, converter, filter, invalidateActions);
+    }
+
+    public final StyleableObjectProperty<Paint> createPaintProperty(S styleableBean, String propertyName, Paint initialValue, Runnable... invalidateActions) {
+        return createObjectProperty(styleableBean, propertyName, initialValue, true, StyleConverter.getPaintConverter(), null);
     }
 
     /**

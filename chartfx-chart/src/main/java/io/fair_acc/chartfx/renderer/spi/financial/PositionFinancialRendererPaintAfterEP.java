@@ -1,11 +1,10 @@
 package io.fair_acc.chartfx.renderer.spi.financial;
 
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialCss.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
@@ -14,7 +13,6 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.spi.financial.service.DataSetAware;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEP;
-import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
 
 /**
@@ -54,15 +52,15 @@ public class PositionFinancialRendererPaintAfterEP implements RendererPaintAfter
     protected final Axis xAxis;
     protected final Axis yAxis;
 
-    private Color positionTriangleLongColor;
-    private Color positionTriangleShortColor;
-    private Color positionTriangleExitColor;
-    private Color positionArrowLongColor;
-    private Color positionArrowShortColor;
-    private Color positionArrowExitColor;
-    private Color positionLabelTradeDescriptionColor;
-    private Color positionOrderLinkageProfitColor;
-    private Color positionOrderLinkageLossColor;
+    private Paint positionTriangleLongColor;
+    private Paint positionTriangleShortColor;
+    private Paint positionTriangleExitColor;
+    private Paint positionArrowLongColor;
+    private Paint positionArrowShortColor;
+    private Paint positionArrowExitColor;
+    private Paint positionLabelTradeDescriptionColor;
+    private Paint positionOrderLinkageProfitColor;
+    private Paint positionOrderLinkageLossColor;
     private String positionLabelLongText;
     private String positionLabelShortText;
     private double positionPaintMainRatio;
@@ -84,28 +82,27 @@ public class PositionFinancialRendererPaintAfterEP implements RendererPaintAfter
         return ds;
     }
 
-    protected void initByDatasetFxStyle() {
-        String style = ds.getStyle();
-        positionTriangleLongColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_TRIANGLE_LONG_COLOR, Color.GREEN);
-        positionTriangleShortColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_TRIANGLE_SHORT_COLOR, Color.RED);
-        positionTriangleExitColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_TRIANGLE_EXIT_COLOR, Color.BLACK);
-        positionArrowLongColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_ARROW_LONG_COLOR, Color.GREEN);
-        positionArrowShortColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_ARROW_SHORT_COLOR, Color.RED);
-        positionArrowExitColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_ARROW_EXIT_COLOR, Color.BLACK);
-        positionLabelTradeDescriptionColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_LABEL_TRADE_DESCRIPTION_COLOR, Color.BLACK);
-        positionOrderLinkageProfitColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_ORDER_LINKAGE_PROFIT_COLOR, Color.GREEN);
-        positionOrderLinkageLossColor = StyleParser.getColorPropertyValue(style, DATASET_POSITION_ORDER_LINKAGE_LOSS_COLOR, Color.RED);
-        positionLabelLongText = StyleParser.getPropertyValue(style, DATASET_POSITION_LABEL_LONG_TEXT, "Buy%n%1.0f%n(%1.1f)");
-        positionLabelShortText = StyleParser.getPropertyValue(style, DATASET_POSITION_LABEL_SHORT_TEXT, "Sell%n%1.0f%n(%1.1f)");
-        positionOrderLinkageLineDash = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_POSITION_ORDER_LINKAGE_LINE_DASH, 8.0d);
-        positionOrderLinkageLineWidth = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_POSITION_ORDER_LINKAGE_LINE_WIDTH, 2.0d);
-        positionPaintMainRatio = StyleParser.getFloatingDecimalPropertyValue(style, DATASET_POSITION_PAINT_MAIN_RATIO, 5.157d);
+    protected void initByDatasetFxStyle(FinancialDataSetNode style) {
+        positionTriangleLongColor = style.getPositionTriangleLongColor();
+        positionTriangleShortColor = style.getPositionTriangleShortColor();
+        positionTriangleExitColor = style.getPositionTriangleExitColor();
+        positionArrowLongColor = style.getPositionArrowLongColor();
+        positionArrowShortColor = style.getPositionArrowShortColor();
+        positionArrowExitColor = style.getPositionArrowExitColor();
+        positionLabelTradeDescriptionColor = style.getPositionLabelTradeDescriptionColor();
+        positionOrderLinkageProfitColor = style.getPositionOrderLinkageProfitColor();
+        positionOrderLinkageLossColor = style.getPositionOrderLinkageLossColor();
+        positionLabelLongText = style.getPositionLabelLongText();
+        positionLabelShortText = style.getPositionLabelShortText();
+        positionOrderLinkageLineDash = style.getPositionOrderLinkageLineDash();
+        positionOrderLinkageLineWidth = style.getPositionOrderLinkageLineWidth();
+        positionPaintMainRatio = style.getPositionPaintMainRatio();
     }
 
     @Override
     public void paintAfter(OhlcvRendererEpData d) {
         if (d.index == d.minIndex) {
-            initByDatasetFxStyle();
+            initByDatasetFxStyle(d.style);
         }
         long xcorr = Math.round(d.ohlcvItem.getTimeStamp().getTime() / 1000.0);
         PositionRendered position = ((PositionRenderedAware) ds).getPositionByTime(xcorr);
