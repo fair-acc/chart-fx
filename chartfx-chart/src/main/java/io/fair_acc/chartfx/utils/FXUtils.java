@@ -21,6 +21,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
+import javafx.scene.layout.Pane;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -390,4 +391,10 @@ public final class FXUtils {
         });
     }
 
+    public static Pane createUnmanagedPane() {
+        final Pane pane = new Pane();
+        pane.setManaged(false);
+        pane.relocate(0, 0);
+        return pane;
+    }
 }
