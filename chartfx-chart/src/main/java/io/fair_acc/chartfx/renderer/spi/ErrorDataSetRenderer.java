@@ -40,7 +40,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     private Marker marker = DefaultMarker.DEFAULT;
 
     // internal state
-    private DataSetNode style;
     protected final DataSetStyleParser styleParser = new DataSetStyleParser();
 
     /**
@@ -164,12 +163,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 getMinRequiredReductionSize());
 
         // draw individual plot components
-        try {
-            this.style = style;
-            drawChartComponents(gc, points);
-        } finally {
-            this.style = null;
-        }
+        drawChartComponents(gc, style, points);
         if (ProcessingProfiler.getDebugState()) {
             timestamp = ProcessingProfiler.getTimeDiff(timestamp, "drawChartComponents()");
         }
@@ -187,15 +181,15 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     /**
      * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawBars(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected void drawBars(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         if (!isDrawBars()) {
             return;
         }
 
         final int xOffset = Math.max(style.getGlobalIndex(), 0);
-        final int minRequiredWidth = Math.max(getDashSize(), localCachedPoints.minDistanceX);
+        final int minRequiredWidth = Math.max(getDashSize(), points.minDistanceX);
 
         final double barWPercentage = getBarWidthPercentage();
         final double dynBarWidth = minRequiredWidth * barWPercentage / 100;
@@ -211,39 +205,39 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.setStroke(markerColor);
         gc.setFill(markerColor);
 
-        if (localCachedPoints.polarPlot) {
-            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                if (localCachedPoints.styles[i] == null) {
-                    gc.strokeLine(localCachedPoints.xZero, localCachedPoints.yZero, localCachedPoints.xValues[i],
-                            localCachedPoints.yValues[i]);
+        if (points.polarPlot) {
+            for (int i = 0; i < points.actualDataCount; i++) {
+                if (points.styles[i] == null) {
+                    gc.strokeLine(points.xZero, points.yZero, points.xValues[i],
+                            points.yValues[i]);
                 } else {
                     // work-around: bar colour controlled by the marker color
                     gc.save();
-                    styleParser.parse(localCachedPoints.styles[i]).getFillColor().ifPresent(gc::setFill);
+                    styleParser.parse(points.styles[i]).getFillColor().ifPresent(gc::setFill);
                     gc.setLineWidth(barWidthHalf);
-                    gc.strokeLine(localCachedPoints.xZero, localCachedPoints.yZero, localCachedPoints.xValues[i],
-                            localCachedPoints.yValues[i]);
+                    gc.strokeLine(points.xZero, points.yZero, points.xValues[i],
+                            points.yValues[i]);
                     gc.restore();
                 }
             }
         } else {
-            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                double yDiff = localCachedPoints.yValues[i] - localCachedPoints.yZero;
+            for (int i = 0; i < points.actualDataCount; i++) {
+                double yDiff = points.yValues[i] - points.yZero;
                 final double yMin;
                 if (yDiff > 0) {
-                    yMin = localCachedPoints.yZero;
+                    yMin = points.yZero;
                 } else {
-                    yMin = localCachedPoints.yValues[i];
+                    yMin = points.yValues[i];
                     yDiff = Math.abs(yDiff);
                 }
 
-                if (localCachedPoints.styles[i] == null) {
-                    gc.fillRect(localCachedPoints.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
+                if (points.styles[i] == null) {
+                    gc.fillRect(points.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
 
                 } else {
                     gc.save();
-                    styleParser.parse(localCachedPoints.styles[i]).getFillColor().ifPresent(gc::setFill);
-                    gc.fillRect(localCachedPoints.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
+                    styleParser.parse(points.styles[i]).getFillColor().ifPresent(gc::setFill);
+                    gc.fillRect(points.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
                     gc.restore();
                 }
             }
@@ -254,9 +248,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     /**
      * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawBubbles(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected void drawBubbles(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         if (!isDrawBubbles()) {
             return;
         }
@@ -266,38 +260,38 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.setFill(style.getLineColor());
         final double minSize = style.getMarkerSize();
 
-        if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR && localCachedPoints.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
+        if (points.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR && points.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
             // X, X_ASYMMETRIC
-            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double radius = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
-                final double x = localCachedPoints.xValues[i] - radius;
-                final double y = localCachedPoints.yValues[i] - radius;
+            for (int i = 0; i < points.actualDataCount; i++) {
+                final double radius = Math.max(minSize, points.errorXPos[i] - points.errorXNeg[i]);
+                final double x = points.xValues[i] - radius;
+                final double y = points.yValues[i] - radius;
 
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
-        } else if (localCachedPoints.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR && localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+        } else if (points.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR && points.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // Y, Y_ASYMMETRIC
-            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double radius = Math.max(minSize, localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
-                final double x = localCachedPoints.xValues[i] - radius;
-                final double y = localCachedPoints.yValues[i] - radius;
+            for (int i = 0; i < points.actualDataCount; i++) {
+                final double radius = Math.max(minSize, points.errorYNeg[i] - points.errorYPos[i]);
+                final double x = points.xValues[i] - radius;
+                final double y = points.yValues[i] - radius;
 
                 gc.fillOval(x, y, 2 * radius, 2 * radius);
             }
-        } else if (localCachedPoints.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR && localCachedPoints.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+        } else if (points.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR && points.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
             // XY, XY_ASYMMETRIC
-            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double width = Math.max(minSize, localCachedPoints.errorXPos[i] - localCachedPoints.errorXNeg[i]);
-                final double height = Math.max(minSize, localCachedPoints.errorYNeg[i] - localCachedPoints.errorYPos[i]);
-                final double x = localCachedPoints.xValues[i] - width;
-                final double y = localCachedPoints.yValues[i] - height;
+            for (int i = 0; i < points.actualDataCount; i++) {
+                final double width = Math.max(minSize, points.errorXPos[i] - points.errorXNeg[i]);
+                final double height = Math.max(minSize, points.errorYNeg[i] - points.errorYPos[i]);
+                final double x = points.xValues[i] - width;
+                final double y = points.yValues[i] - height;
 
                 gc.fillOval(x, y, 2 * width, 2 * height);
             }
         } else { // NO ERROR
-            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double x = localCachedPoints.xValues[i] - minSize;
-                final double y = localCachedPoints.yValues[i] - minSize;
+            for (int i = 0; i < points.actualDataCount; i++) {
+                final double x = points.xValues[i] - minSize;
+                final double y = points.yValues[i] - minSize;
 
                 gc.fillOval(x, y, 2 * minSize, 2 * minSize);
             }
@@ -308,23 +302,23 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     /**
      * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawDefaultNoErrors(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
-        drawBars(gc, localCachedPoints);
-        drawPolyLine(gc, localCachedPoints);
-        drawMarker(gc, localCachedPoints);
-        drawBubbles(gc, localCachedPoints);
+    protected void drawDefaultNoErrors(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
+        drawBars(gc, style, points);
+        drawPolyLine(gc, style, points);
+        drawMarker(gc, style, points);
+        drawBubbles(gc, style, points);
     }
 
     /**
      * @param gc the graphics context from the Canvas parent
-     * @param lCacheP reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawErrorBars(final GraphicsContext gc, final CachedDataPoints lCacheP) {
+    protected void drawErrorBars(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         final long start = ProcessingProfiler.getTimeStamp();
 
-        drawBars(gc, lCacheP);
+        drawBars(gc, style, points);
 
         final int dashHalf = getDashSize() / 2;
         gc.save();
@@ -332,84 +326,84 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.setStroke(style.getLineColor());
         gc.setLineWidth(style.getLineWidth());
 
-        for (int i = 0; i < lCacheP.actualDataCount; i++) {
-            if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                    && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+        for (int i = 0; i < points.actualDataCount; i++) {
+            if (points.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
+                    && points.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
-                gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
-                gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
+                gc.strokeLine(points.xValues[i], points.errorYNeg[i], points.xValues[i], points.errorYPos[i]);
+                gc.strokeLine(points.errorXNeg[i], points.yValues[i], points.errorXPos[i], points.yValues[i]);
 
                 // draw horizontal dashes
-                gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYNeg[i], lCacheP.xValues[i] + dashHalf,
-                        lCacheP.errorYNeg[i]);
-                gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYPos[i], lCacheP.xValues[i] + dashHalf,
-                        lCacheP.errorYPos[i]);
+                gc.strokeLine(points.xValues[i] - dashHalf, points.errorYNeg[i], points.xValues[i] + dashHalf,
+                        points.errorYNeg[i]);
+                gc.strokeLine(points.xValues[i] - dashHalf, points.errorYPos[i], points.xValues[i] + dashHalf,
+                        points.errorYPos[i]);
 
                 // draw vertical dashes
-                gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i] - dashHalf, lCacheP.errorXNeg[i],
-                        lCacheP.yValues[i] + dashHalf);
-                gc.strokeLine(lCacheP.errorXPos[i], lCacheP.yValues[i] - dashHalf, lCacheP.errorXPos[i],
-                        lCacheP.yValues[i] + dashHalf);
-            } else if (lCacheP.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
-                       && lCacheP.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
+                gc.strokeLine(points.errorXNeg[i], points.yValues[i] - dashHalf, points.errorXNeg[i],
+                        points.yValues[i] + dashHalf);
+                gc.strokeLine(points.errorXPos[i], points.yValues[i] - dashHalf, points.errorXPos[i],
+                        points.yValues[i] + dashHalf);
+            } else if (points.errorType[DataSet.DIM_X] == ErrorType.NO_ERROR
+                       && points.errorType[DataSet.DIM_Y] != ErrorType.NO_ERROR) {
                 // draw error bars
-                gc.strokeLine(lCacheP.xValues[i], lCacheP.errorYNeg[i], lCacheP.xValues[i], lCacheP.errorYPos[i]);
+                gc.strokeLine(points.xValues[i], points.errorYNeg[i], points.xValues[i], points.errorYPos[i]);
 
                 // draw horizontal dashes
-                gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYNeg[i], lCacheP.xValues[i] + dashHalf,
-                        lCacheP.errorYNeg[i]);
-                gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYPos[i], lCacheP.xValues[i] + dashHalf,
-                        lCacheP.errorYPos[i]);
-            } else if (lCacheP.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
-                       && lCacheP.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
+                gc.strokeLine(points.xValues[i] - dashHalf, points.errorYNeg[i], points.xValues[i] + dashHalf,
+                        points.errorYNeg[i]);
+                gc.strokeLine(points.xValues[i] - dashHalf, points.errorYPos[i], points.xValues[i] + dashHalf,
+                        points.errorYPos[i]);
+            } else if (points.errorType[DataSet.DIM_X] != ErrorType.NO_ERROR
+                       && points.errorType[DataSet.DIM_Y] == ErrorType.NO_ERROR) {
                 // draw error bars
-                gc.strokeLine(lCacheP.errorXNeg[i], lCacheP.yValues[i], lCacheP.errorXPos[i], lCacheP.yValues[i]);
+                gc.strokeLine(points.errorXNeg[i], points.yValues[i], points.errorXPos[i], points.yValues[i]);
 
                 // draw horizontal dashes
-                gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYNeg[i], lCacheP.xValues[i] + dashHalf,
-                        lCacheP.errorYNeg[i]);
-                gc.strokeLine(lCacheP.xValues[i] - dashHalf, lCacheP.errorYPos[i], lCacheP.xValues[i] + dashHalf,
-                        lCacheP.errorYPos[i]);
+                gc.strokeLine(points.xValues[i] - dashHalf, points.errorYNeg[i], points.xValues[i] + dashHalf,
+                        points.errorYNeg[i]);
+                gc.strokeLine(points.xValues[i] - dashHalf, points.errorYPos[i], points.xValues[i] + dashHalf,
+                        points.errorYPos[i]);
             }
         }
         gc.restore();
 
-        drawPolyLine(gc, lCacheP);
-        drawMarker(gc, lCacheP);
-        drawBubbles(gc, lCacheP);
+        drawPolyLine(gc, style, points);
+        drawMarker(gc, style, points);
+        drawBubbles(gc, style, points);
 
         ProcessingProfiler.getTimeDiff(start);
     }
 
     /**
      * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawErrorSurface(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected void drawErrorSurface(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         final long start = ProcessingProfiler.getTimeStamp();
 
         gc.setFill(style.getLineFillPattern());
 
-        final int nDataCount = localCachedPoints.actualDataCount;
+        final int nDataCount = points.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
         final double[] xValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
         final double[] yValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         for (int i = 0; i < nDataCount; i++) {
-            xValuesSurface[i] = localCachedPoints.xValues[i];
-            yValuesSurface[i] = localCachedPoints.errorYNeg[i];
-            xValuesSurface[xend - i] = localCachedPoints.xValues[i];
-            yValuesSurface[xend - i] = localCachedPoints.errorYPos[i];
+            xValuesSurface[i] = points.xValues[i];
+            yValuesSurface[i] = points.errorYNeg[i];
+            xValuesSurface[xend - i] = points.xValues[i];
+            yValuesSurface[xend - i] = points.errorYPos[i];
         }
 
         gc.setFillRule(FillRule.EVEN_ODD);
         gc.fillPolygon(xValuesSurface, yValuesSurface, nPolygoneEdges);
 
-        drawPolyLine(gc, localCachedPoints);
-        drawBars(gc, localCachedPoints);
-        drawMarker(gc, localCachedPoints);
-        drawBubbles(gc, localCachedPoints);
+        drawPolyLine(gc, style, points);
+        drawBars(gc, style, points);
+        drawMarker(gc, style, points);
+        drawBubbles(gc, style, points);
 
         DoubleArrayCache.getInstance().add(xValuesSurface);
         DoubleArrayCache.getInstance().add(yValuesSurface);
@@ -421,15 +415,15 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
      * NaN compatible algorithm
      *
      * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawErrorSurfaceNaNCompatible(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected void drawErrorSurfaceNaNCompatible(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         final long start = ProcessingProfiler.getTimeStamp();
 
         gc.setFill(style.getLineFillPattern());
         gc.setFillRule(FillRule.EVEN_ODD);
 
-        final int nDataCount = localCachedPoints.actualDataCount;
+        final int nDataCount = points.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
         final double[] xValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
         final double[] yValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
@@ -437,9 +431,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final int xend = nPolygoneEdges - 1;
         int count = 0;
         for (int i = 0; i < nDataCount; i++) {
-            final double x = localCachedPoints.xValues[i];
-            final double yen = localCachedPoints.errorYNeg[i];
-            final double yep = localCachedPoints.errorYPos[i];
+            final double x = points.xValues[i];
+            final double yen = points.errorYNeg[i];
+            final double yep = points.errorYPos[i];
 
             if (Double.isFinite(yen) && Double.isFinite(yep)) {
                 xValuesSurface[count] = x;
@@ -470,10 +464,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             gc.fillPolygon(xValuesSurface, yValuesSurface, 2 * count);
         }
 
-        drawPolyLine(gc, localCachedPoints);
-        drawBars(gc, localCachedPoints);
-        drawMarker(gc, localCachedPoints);
-        drawBubbles(gc, localCachedPoints);
+        drawPolyLine(gc, style, points);
+        drawBars(gc, style, points);
+        drawMarker(gc, style, points);
+        drawBubbles(gc, style, points);
 
         DoubleArrayCache.getInstance().add(xValuesSurface);
         DoubleArrayCache.getInstance().add(yValuesSurface);
@@ -485,7 +479,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
      * @param gc the graphics context from the Canvas parent
      * @param localCachedPoints reference to local cached data point object
      */
-    protected void drawMarker(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected void drawMarker(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints localCachedPoints) {
         if (!isDrawMarker()) {
             return;
         }
@@ -522,31 +516,31 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     /**
      * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawPolyLine(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    protected void drawPolyLine(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         switch (getPolyLineStyle()) {
         case NONE:
             return;
         case AREA:
-            drawPolyLineArea(gc, style, localCachedPoints);
+            drawPolyLineArea(gc, style, points);
             break;
         case ZERO_ORDER_HOLDER:
         case STAIR_CASE:
-            drawPolyLineStairCase(gc, style, localCachedPoints);
+            drawPolyLineStairCase(gc, style, points);
             break;
         case HISTOGRAM:
-            drawPolyLineHistogram(gc, style, localCachedPoints);
+            drawPolyLineHistogram(gc, style, points);
             break;
         case HISTOGRAM_FILLED:
-            drawPolyLineHistogramFilled(gc, style, localCachedPoints);
+            drawPolyLineHistogramFilled(gc, style, points);
             break;
         case BEZIER_CURVE:
-            drawPolyLineHistogramBezier(gc, style, localCachedPoints);
+            drawPolyLineHistogramBezier(gc, style, points);
             break;
         case NORMAL:
         default:
-            drawPolyLineLine(gc, style, localCachedPoints);
+            drawPolyLineLine(gc, style, points);
             break;
         }
     }
@@ -559,40 +553,40 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         return this;
     }
 
-    private void drawChartComponents(final GraphicsContext gc, final CachedDataPoints localCachedPoints) {
+    private void drawChartComponents(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         final long start = ProcessingProfiler.getTimeStamp();
         switch (getErrorType()) {
         case ERRORBARS:
-            drawErrorBars(gc, localCachedPoints);
+            drawErrorBars(gc, style, points);
             break;
         case ERRORSURFACE:
             if (isallowNaNs()) {
-                drawErrorSurfaceNaNCompatible(gc, localCachedPoints);
+                drawErrorSurfaceNaNCompatible(gc, style, points);
             } else {
-                drawErrorSurface(gc, localCachedPoints);
+                drawErrorSurface(gc, style, points);
             }
             break;
         case ERRORCOMBO:
-            if (localCachedPoints.getMinXDistance() >= getDashSize() * 2) {
-                drawErrorBars(gc, localCachedPoints);
+            if (points.getMinXDistance() >= getDashSize() * 2) {
+                drawErrorBars(gc, style, points);
             } else {
                 if (isallowNaNs()) {
-                    drawErrorSurfaceNaNCompatible(gc, localCachedPoints);
+                    drawErrorSurfaceNaNCompatible(gc, style, points);
                 } else {
-                    drawErrorSurface(gc, localCachedPoints);
+                    drawErrorSurface(gc, style, points);
                 }
             }
             break;
         case NONE:
         default:
-            drawDefaultNoErrors(gc, localCachedPoints);
+            drawDefaultNoErrors(gc, style, points);
             break;
         }
         ProcessingProfiler.getTimeDiff(start);
     }
 
-    protected static void drawPolyLineArea(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints localCachedPoints) {
-        final int n = localCachedPoints.actualDataCount;
+    protected static void drawPolyLineArea(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
+        final int n = points.actualDataCount;
         if (n == 0) {
             return;
         }
@@ -602,12 +596,12 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final double[] newX = DoubleArrayCache.getInstance().getArray(length);
         final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
-        final double zero = localCachedPoints.yZero;
-        System.arraycopy(localCachedPoints.xValues, 0, newX, 0, n);
-        System.arraycopy(localCachedPoints.yValues, 0, newY, 0, n);
-        newX[n] = localCachedPoints.xValues[n - 1];
+        final double zero = points.yZero;
+        System.arraycopy(points.xValues, 0, newX, 0, n);
+        System.arraycopy(points.yValues, 0, newY, 0, n);
+        newX[n] = points.xValues[n - 1];
         newY[n] = zero;
-        newX[n + 1] = localCachedPoints.xValues[0];
+        newX[n + 1] = points.xValues[0];
         newY[n + 1] = zero;
 
         gc.save();
@@ -620,8 +614,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DoubleArrayCache.getInstance().add(newY);
     }
 
-    protected static void drawPolyLineHistogram(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints localCachedPoints) {
-        final int n = localCachedPoints.actualDataCount;
+    protected static void drawPolyLineHistogram(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
+        final int n = points.actualDataCount;
         if (n == 0) {
             return;
         }
@@ -631,26 +625,26 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final double[] newX = DoubleArrayCache.getInstance().getArray(length);
         final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
-        final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
+        final double xRange = points.xMax - points.xMin;
         double diffLeft;
-        double diffRight = n > 0 ? 0.5 * (localCachedPoints.xValues[1] - localCachedPoints.xValues[0]) : 0.5 * xRange;
-        newX[0] = localCachedPoints.xValues[0] - diffRight;
-        newY[0] = localCachedPoints.yZero;
+        double diffRight = n > 0 ? 0.5 * (points.xValues[1] - points.xValues[0]) : 0.5 * xRange;
+        newX[0] = points.xValues[0] - diffRight;
+        newY[0] = points.yZero;
         for (int i = 0; i < n; i++) {
-            diffLeft = localCachedPoints.xValues[i] - newX[2 * i];
-            diffRight = i + 1 < n ? 0.5 * (localCachedPoints.xValues[i + 1] - localCachedPoints.xValues[i]) : diffLeft;
+            diffLeft = points.xValues[i] - newX[2 * i];
+            diffRight = i + 1 < n ? 0.5 * (points.xValues[i + 1] - points.xValues[i]) : diffLeft;
             if (i == 0) {
                 diffLeft = diffRight;
             }
 
-            newX[2 * i + 1] = localCachedPoints.xValues[i] - diffLeft;
-            newY[2 * i + 1] = localCachedPoints.yValues[i];
-            newX[2 * i + 2] = localCachedPoints.xValues[i] + diffRight;
-            newY[2 * i + 2] = localCachedPoints.yValues[i];
+            newX[2 * i + 1] = points.xValues[i] - diffLeft;
+            newY[2 * i + 1] = points.yValues[i];
+            newX[2 * i + 2] = points.xValues[i] + diffRight;
+            newY[2 * i + 2] = points.yValues[i];
         }
         // last point
-        newX[length - 1] = localCachedPoints.xValues[n - 1] + diffRight;
-        newY[length - 1] = localCachedPoints.yZero;
+        newX[length - 1] = points.xValues[n - 1] + diffRight;
+        newY[length - 1] = points.yZero;
 
         gc.save();
         gc.setStroke(style.getLineColor());
@@ -674,10 +668,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     protected static void drawPolyLineHistogramBezier(final GraphicsContext gc,
             final DataSetNode style,
-            final CachedDataPoints localCachedPoints) {
-        final int n = localCachedPoints.actualDataCount;
+            final CachedDataPoints points) {
+        final int n = points.actualDataCount;
         if (n < 2) {
-            drawPolyLineLine(gc, style, localCachedPoints);
+            drawPolyLineLine(gc, style, points);
             return;
         }
 
@@ -687,8 +681,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final double[] xCp2 = DoubleArrayCache.getInstance().getArray(n);
         final double[] yCp2 = DoubleArrayCache.getInstance().getArray(n);
 
-        BezierCurve.calcCurveControlPoints(localCachedPoints.xValues, localCachedPoints.yValues, xCp1, yCp1, xCp2, yCp2,
-                localCachedPoints.actualDataCount);
+        BezierCurve.calcCurveControlPoints(points.xValues, points.yValues, xCp1, yCp1, xCp2, yCp2,
+                points.actualDataCount);
 
         gc.save();
 
@@ -699,10 +693,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         gc.beginPath();
         for (int i = 0; i < n - 1; i++) {
-            final double x0 = localCachedPoints.xValues[i];
-            final double x1 = localCachedPoints.xValues[i + 1];
-            final double y0 = localCachedPoints.yValues[i];
-            final double y1 = localCachedPoints.yValues[i + 1];
+            final double x0 = points.xValues[i];
+            final double x1 = points.xValues[i + 1];
+            final double y0 = points.yValues[i];
+            final double y1 = points.yValues[i + 1];
 
             // coordinates of first Bezier control point.
             final double xc0 = xCp1[i];
@@ -714,7 +708,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             gc.moveTo(x0, y0);
             gc.bezierCurveTo(xc0, yc0, xc1, yc1, x1, y1);
         }
-        gc.moveTo(localCachedPoints.xValues[n - 1], localCachedPoints.yValues[n - 1]);
+        gc.moveTo(points.xValues[n - 1], points.yValues[n - 1]);
         gc.closePath();
         gc.stroke();
         gc.restore();
@@ -728,8 +722,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     protected static void drawPolyLineHistogramFilled(final GraphicsContext gc,
                                                       final DataSetNode style,
-                                                      final CachedDataPoints localCachedPoints) {
-        final int n = localCachedPoints.actualDataCount;
+                                                      final CachedDataPoints points) {
+        final int n = points.actualDataCount;
         if (n == 0) {
             return;
         }
@@ -739,26 +733,26 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final double[] newX = DoubleArrayCache.getInstance().getArray(length);
         final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
-        final double xRange = localCachedPoints.xMax - localCachedPoints.xMin;
+        final double xRange = points.xMax - points.xMin;
         double diffLeft;
-        double diffRight = n > 0 ? 0.5 * (localCachedPoints.xValues[1] - localCachedPoints.xValues[0]) : 0.5 * xRange;
-        newX[0] = localCachedPoints.xValues[0] - diffRight;
-        newY[0] = localCachedPoints.yZero;
+        double diffRight = n > 0 ? 0.5 * (points.xValues[1] - points.xValues[0]) : 0.5 * xRange;
+        newX[0] = points.xValues[0] - diffRight;
+        newY[0] = points.yZero;
         for (int i = 0; i < n; i++) {
-            diffLeft = localCachedPoints.xValues[i] - newX[2 * i];
-            diffRight = i + 1 < n ? 0.5 * (localCachedPoints.xValues[i + 1] - localCachedPoints.xValues[i]) : diffLeft;
+            diffLeft = points.xValues[i] - newX[2 * i];
+            diffRight = i + 1 < n ? 0.5 * (points.xValues[i + 1] - points.xValues[i]) : diffLeft;
             if (i == 0) {
                 diffLeft = diffRight;
             }
 
-            newX[2 * i + 1] = localCachedPoints.xValues[i] - diffLeft;
-            newY[2 * i + 1] = localCachedPoints.yValues[i];
-            newX[2 * i + 2] = localCachedPoints.xValues[i] + diffRight;
-            newY[2 * i + 2] = localCachedPoints.yValues[i];
+            newX[2 * i + 1] = points.xValues[i] - diffLeft;
+            newY[2 * i + 1] = points.yValues[i];
+            newX[2 * i + 2] = points.xValues[i] + diffRight;
+            newY[2 * i + 2] = points.yValues[i];
         }
         // last point
-        newX[length - 1] = localCachedPoints.xValues[n - 1] + diffRight;
-        newY[length - 1] = localCachedPoints.yZero;
+        newX[length - 1] = points.xValues[n - 1] + diffRight;
+        newY[length - 1] = points.yZero;
 
         gc.save();
         gc.setFill(style.getLineColor());
@@ -770,7 +764,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         DoubleArrayCache.getInstance().add(newY);
     }
 
-    protected static void drawPolyLineLine(final GraphicsContext gc, DataSetNode style, final CachedDataPoints localCachedPoints) {
+    protected static void drawPolyLineLine(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         gc.save();
 
         gc.setLineWidth(style.getLineWidth());
@@ -778,15 +772,15 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.setStroke(style.getLineColor());
         gc.setFill(gc.getStroke());
 
-        if (localCachedPoints.allowForNaNs) {
+        if (points.allowForNaNs) {
             gc.beginPath();
-            gc.moveTo(localCachedPoints.xValues[0], localCachedPoints.yValues[0]);
+            gc.moveTo(points.xValues[0], points.yValues[0]);
             boolean lastIsFinite = true;
             double xLastValid = 0.0;
             double yLastValid = 0.0;
-            for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-                final double x0 = localCachedPoints.xValues[i];
-                final double y0 = localCachedPoints.yValues[i];
+            for (int i = 0; i < points.actualDataCount; i++) {
+                final double x0 = points.xValues[i];
+                final double y0 = points.yValues[i];
                 if (Double.isFinite(x0) && Double.isFinite(y0)) {
                     if (!lastIsFinite) {
                         gc.moveTo(x0, y0);
@@ -806,13 +800,13 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             gc.stroke();
         } else {
             if (gc.getLineDashes() != null) {
-                gc.strokePolyline(localCachedPoints.xValues, localCachedPoints.yValues, localCachedPoints.actualDataCount);
+                gc.strokePolyline(points.xValues, points.yValues, points.actualDataCount);
             } else {
-                for (int i = 0; i < localCachedPoints.actualDataCount - 1; i++) {
-                    final double x1 = localCachedPoints.xValues[i];
-                    final double x2 = localCachedPoints.xValues[i + 1];
-                    final double y1 = localCachedPoints.yValues[i];
-                    final double y2 = localCachedPoints.yValues[i + 1];
+                for (int i = 0; i < points.actualDataCount - 1; i++) {
+                    final double x1 = points.xValues[i];
+                    final double x2 = points.xValues[i + 1];
+                    final double y1 = points.yValues[i];
+                    final double y2 = points.yValues[i + 1];
 
                     gc.strokeLine(x1, y1, x2, y2);
                 }
@@ -822,8 +816,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
     }
 
-    protected static void drawPolyLineStairCase(final GraphicsContext gc, DataSetNode style, final CachedDataPoints localCachedPoints) {
-        final int n = localCachedPoints.actualDataCount;
+    protected static void drawPolyLineStairCase(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
+        final int n = points.actualDataCount;
         if (n == 0) {
             return;
         }
@@ -834,16 +828,16 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         final double[] newY = DoubleArrayCache.getInstance().getArray(length);
 
         for (int i = 0; i < n - 1; i++) {
-            newX[2 * i] = localCachedPoints.xValues[i];
-            newY[2 * i] = localCachedPoints.yValues[i];
-            newX[2 * i + 1] = localCachedPoints.xValues[i + 1];
-            newY[2 * i + 1] = localCachedPoints.yValues[i];
+            newX[2 * i] = points.xValues[i];
+            newY[2 * i] = points.yValues[i];
+            newX[2 * i + 1] = points.xValues[i + 1];
+            newY[2 * i + 1] = points.yValues[i];
         }
         // last point
-        newX[length - 2] = localCachedPoints.xValues[n - 1];
-        newY[length - 2] = localCachedPoints.yValues[n - 1];
-        newX[length - 1] = localCachedPoints.xMax;
-        newY[length - 1] = localCachedPoints.yValues[n - 1];
+        newX[length - 2] = points.xValues[n - 1];
+        newY[length - 2] = points.yValues[n - 1];
+        newX[length - 1] = points.xMax;
+        newY[length - 1] = points.yValues[n - 1];
 
         gc.save();
 
