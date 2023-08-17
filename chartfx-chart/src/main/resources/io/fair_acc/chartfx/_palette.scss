@@ -60,27 +60,27 @@
   -fx-color-count: 9;
 }
 
-@mixin matlab() {
-  // default MATLAB 'colororder'
-  -color-dataset-1: rgb(0, 114, 189);
-  -color-dataset-2: rgb(217, 83, 25);
-  -color-dataset-3: rgb(237, 177, 32);
-  -color-dataset-4: rgb(126, 47, 142);
-  -color-dataset-5: rgb(119, 172, 48);
-  -color-dataset-6: rgb(77, 190, 238);
-  -color-dataset-7: rgb(162, 20, 47);
+@mixin matlab-light() {
+  // default MATLAB 'colororder' https://mathworks.com/help/matlab/ref/colororder.html
+  -color-dataset-1: #0072bd;
+  -color-dataset-2: #d95319;
+  -color-dataset-3: #edb120;
+  -color-dataset-4: #7e2f8e;
+  -color-dataset-5: #77ac30;
+  -color-dataset-6: #4dbeee;
+  -color-dataset-7: #a2142f;
   -fx-color-count: 7;
 }
 
 @mixin matlab-dark() {
-  // https://de.mathworks.com/matlabcentral/fileexchange/86533-dark-mode-plot
-  -color-dataset-1: rgb(89, 149, 189);
-  -color-dataset-2: rgb(217, 115, 71);
-  -color-dataset-3: rgb(237, 177, 32);
-  -color-dataset-4: rgb(218, 81, 245);
-  -color-dataset-5: rgb(119, 172, 48);
-  -color-dataset-6: rgb(77, 190, 238);
-  -color-dataset-7: rgb(162, 137, 141);
+  // https://mathworks.com/matlabcentral/fileexchange/86533-dark-mode-plot
+  -color-dataset-1: #5995bd;
+  -color-dataset-2: #d97347;
+  -color-dataset-3: #edb120; // same
+  -color-dataset-4: #da51f5;
+  -color-dataset-5: #77ac30; // same
+  -color-dataset-6: #4dbeee; // same
+  -color-dataset-7: #a2898d;
   -fx-color-count: 7;
 }
 

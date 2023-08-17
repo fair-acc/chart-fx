@@ -33,14 +33,6 @@ import io.fair_acc.dataset.utils.AssertUtils;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public final class DefaultRenderColorScheme {
 
-    public static PseudoClass PALETTE_MISC = PseudoClass.getPseudoClass("misc");
-    public static PseudoClass PALETTE_ADOBE = PseudoClass.getPseudoClass("adobe");
-    public static PseudoClass PALETTE_DELL = PseudoClass.getPseudoClass("dell");
-    public static PseudoClass PALETTE_EQUIDISTANT = PseudoClass.getPseudoClass("equidistant");
-    public static PseudoClass PALETTE_TUNEVIEWER = PseudoClass.getPseudoClass("tuneviewer");
-    public static PseudoClass PALETTE_MATLAB = PseudoClass.getPseudoClass("matlab");
-    public static PseudoClass PALETTE_MATLAB_DARK = PseudoClass.getPseudoClass("matlab-dark");
-    
     private static final String DEFAULT_FONT = "Helvetica";
     private static final int DEFAULT_FONT_SIZE = 18;
     private static final DefaultRenderColorScheme SELF = new DefaultRenderColorScheme();

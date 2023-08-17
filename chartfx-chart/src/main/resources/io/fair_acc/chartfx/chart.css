@@ -91,7 +91,7 @@
   -fx-color-count: 9;
 }
 
-.chart:misc, .renderer:misc {
+.chart:palette-misc, .renderer:palette-misc {
   -color-dataset-1: #5DA5DA;
   -color-dataset-2: #F15854;
   -color-dataset-3: #FAA43A;
@@ -103,7 +103,7 @@
   -color-dataset-9: #4D4D4D;
   -fx-color-count: 9;
 }
-.chart:adobe, .renderer:adobe {
+.chart:palette-adobe, .renderer:palette-adobe {
   -color-dataset-1: #00a4e4;
   -color-dataset-2: #ff0000;
   -color-dataset-3: #fbb034;
@@ -113,7 +113,7 @@
   -color-dataset-7: #6a737b;
   -fx-color-count: 7;
 }
-.chart:dell, .renderer:dell {
+.chart:palette-dell, .renderer:palette-dell {
   -color-dataset-1: #0085c3;
   -color-dataset-2: #7ab800;
   -color-dataset-3: #f2af00;
@@ -124,7 +124,7 @@
   -color-dataset-8: #444444;
   -fx-color-count: 8;
 }
-.chart:equidistant, .renderer:equidistant {
+.chart:palette-equidistant, .renderer:palette-equidistant {
   -color-dataset-1: #003f5c;
   -color-dataset-2: #2f4b7c;
   -color-dataset-3: #665191;
@@ -135,7 +135,7 @@
   -color-dataset-8: #ffa600;
   -fx-color-count: 8;
 }
-.chart:tuneviewer, .renderer:tuneviewer {
+.chart:palette-tuneviewer, .renderer:palette-tuneviewer {
   -color-dataset-1: #0000c8;
   -color-dataset-2: #c80000;
   -color-dataset-3: #00c800;
@@ -147,24 +147,24 @@
   -color-dataset-9: black;
   -fx-color-count: 9;
 }
-.chart:matlab, .renderer:matlab {
-  -color-dataset-1: rgb(0, 114, 189);
-  -color-dataset-2: rgb(217, 83, 25);
-  -color-dataset-3: rgb(237, 177, 32);
-  -color-dataset-4: rgb(126, 47, 142);
-  -color-dataset-5: rgb(119, 172, 48);
-  -color-dataset-6: rgb(77, 190, 238);
-  -color-dataset-7: rgb(162, 20, 47);
+.chart:palette-matlab-light, .renderer:palette-matlab-light {
+  -color-dataset-1: #0072bd;
+  -color-dataset-2: #d95319;
+  -color-dataset-3: #edb120;
+  -color-dataset-4: #7e2f8e;
+  -color-dataset-5: #77ac30;
+  -color-dataset-6: #4dbeee;
+  -color-dataset-7: #a2142f;
   -fx-color-count: 7;
 }
-.chart:matlab-dark, .renderer:matlab-dark {
-  -color-dataset-1: rgb(89, 149, 189);
-  -color-dataset-2: rgb(217, 115, 71);
-  -color-dataset-3: rgb(237, 177, 32);
-  -color-dataset-4: rgb(218, 81, 245);
-  -color-dataset-5: rgb(119, 172, 48);
-  -color-dataset-6: rgb(77, 190, 238);
-  -color-dataset-7: rgb(162, 137, 141);
+.chart:palette-matlab-dark, .renderer:palette-matlab-dark {
+  -color-dataset-1: #5995bd;
+  -color-dataset-2: #d97347;
+  -color-dataset-3: #edb120;
+  -color-dataset-4: #da51f5;
+  -color-dataset-5: #77ac30;
+  -color-dataset-6: #4dbeee;
+  -color-dataset-7: #a2898d;
   -fx-color-count: 7;
 }
 
@@ -293,7 +293,8 @@
   -fx-pref-height: 450px;
   -fx-max-height: 4096px;
   -fx-max-width: 4096px;
-  -fx-tool-bar-side: TOP;
+  -fx-tool-bar-side: top;
+  -fx-color-palette: default;
 }
 .chart .chart-title {
   visibility: visible;

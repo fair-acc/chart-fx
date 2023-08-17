@@ -42,6 +42,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     protected final IntegerProperty colorCount = css().createIntegerProperty(this, "colorCount", 8, true, null);
     private final ObservableList<DataSet> datasets = FXCollections.observableArrayList();
     private final ObservableList<DataSetNode> dataSetNodes = FXCollections.observableArrayList();
+    private final ObservableList<DataSetNode> readOnlyDataSetNodes = FXCollections.unmodifiableObservableList(dataSetNodes);
     private final ObservableList<Axis> axesList = FXCollections.observableList(new NoDuplicatesList<>());
     private final ObjectProperty<Chart> chart = new SimpleObjectProperty<>();
 
@@ -90,6 +91,10 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     }
 
     public ObservableList<DataSetNode> getDatasetNodes() {
+        return readOnlyDataSetNodes;
+    }
+
+    protected ObservableList<DataSetNode> getInternalDataSetNodes() {
         return dataSetNodes;
     }
 

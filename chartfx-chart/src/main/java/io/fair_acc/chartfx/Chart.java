@@ -7,12 +7,14 @@ import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.chartfx.ui.css.ColorPalette;
 import io.fair_acc.chartfx.ui.css.StyleGroup;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.PlotAreaPane;
 import io.fair_acc.chartfx.ui.*;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.BitState;
@@ -30,7 +32,6 @@ import javafx.geometry.*;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.control.Control;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
@@ -82,7 +83,7 @@ public abstract class Chart extends Region implements EventSource {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
-    private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Control.getClassCssMetaData());
+    private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = Boolean.getBoolean("chartfx.debug"); // for more verbose debugging
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
@@ -164,6 +165,8 @@ public abstract class Chart extends Region implements EventSource {
         }
     };
 
+    private final StyleableObjectProperty<ColorPalette> colorPalette = CSS.createEnumProperty(this, "colorPalette", ColorPalette.DEFAULT, true, ColorPalette.class);
+
     private final StyleableObjectProperty<Side> toolBarSide = CSS.createObjectProperty(this, "toolBarSide", Side.TOP, false,
             StyleConverter.getEnumConverter(Side.class), (oldVal, newVal) -> {
                 AssertUtils.notNull("Side must not be null", newVal);
@@ -222,6 +225,11 @@ public abstract class Chart extends Region implements EventSource {
         getAxes().addListener(axesChangeListenerLocal);
         getAxes().addListener(axesChangeListener);
 
+        // Apply color palette
+        PropUtil.runOnChange(() -> {
+            getColorPalette().applyPseudoClasses(this);
+            applyCss(); // avoid extra pulse when set during CSS phase
+        }, colorPalette);
 
         menuPane.setTriggerDistance(Chart.DEFAULT_TRIGGER_DISTANCE);
         plotBackground.toBack();
@@ -446,6 +454,18 @@ public abstract class Chart extends Region implements EventSource {
         return toolBarSideProperty().get();
     }
 
+    public ColorPalette getColorPalette() {
+        return colorPalette.get();
+    }
+
+    public StyleableObjectProperty<ColorPalette> colorPaletteProperty() {
+        return colorPalette;
+    }
+
+    public void setColorPalette(ColorPalette colorPalette) {
+        this.colorPalette.set(colorPalette);
+    }
+
     /**
      * Indicates whether data changes will be animated or not.
      *
@@ -544,6 +564,7 @@ public abstract class Chart extends Region implements EventSource {
         if (state.isClean() && !hasLocked) {
             return;
         }
+
         ensureLockedDataSets();
 
         // Make sure that renderer axes that are not part of
@@ -937,4 +958,10 @@ public abstract class Chart extends Region implements EventSource {
     public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
         return CSS.getCssMetaData();
     }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return CSS.getCssMetaData();
+    }
+
 }
