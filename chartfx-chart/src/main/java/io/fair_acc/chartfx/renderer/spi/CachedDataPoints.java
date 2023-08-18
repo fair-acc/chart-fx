@@ -5,6 +5,7 @@ import static io.fair_acc.dataset.DataSet.DIM_Y;
 import static io.fair_acc.math.ArrayUtils.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -18,6 +19,7 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.DataSetError.ErrorType;
 import io.fair_acc.dataset.utils.CachedDaemonThreadFactory;
+import io.fair_acc.dataset.utils.IndexedStringConsumer;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 import io.fair_acc.math.ArrayUtils;
 
@@ -42,6 +44,7 @@ class CachedDataPoints {
     protected boolean xAxisInverted;
     protected boolean yAxisInverted;
     protected boolean allowForNaNs;
+    protected boolean hasStyles;
     protected ErrorType[] errorType;
     protected int indexMin;
     protected int indexMax;
@@ -72,7 +75,7 @@ class CachedDataPoints {
         errorType = clearIfLarger(errorType, 10); // depends on ds dimensions
     }
 
-    public CachedDataPoints resizeMin(final int indexMin, final int indexMax, final int dataLength, final boolean full) {
+    public CachedDataPoints resizeMin(final int indexMin, final int indexMax, final int dataLength, final boolean useErrorsX) {
         this.indexMin = indexMin;
         this.indexMax = indexMax;
         maxDataCount = dataLength;
@@ -80,14 +83,12 @@ class CachedDataPoints {
         yValues = ArrayUtils.resizeMin(yValues, dataLength);
         errorYNeg = ArrayUtils.resizeMin(errorYNeg, dataLength);
         errorYPos = ArrayUtils.resizeMin(errorYPos, dataLength);
-        if (full) {
+        if (useErrorsX) {
             errorXNeg = ArrayUtils.resizeMin(errorXNeg, dataLength);
             errorXPos = ArrayUtils.resizeMin(errorXPos, dataLength);
         }
         selected = ArrayUtils.resizeMin(selected,  dataLength);
-
-        // TODO: do we really need to extract all point styles?
-        styles = ArrayUtils.resizeMinNulled(styles, dataLength, String[]::new);
+        hasStyles = false;  // Styles get updated in boundary condition.
         return this;
     }
 
@@ -123,13 +124,6 @@ class CachedDataPoints {
         }
     }
 
-    private void computeErrorStyles(final DataSet dataSet, final int min, final int max) {
-        // no error attached
-        for (int index = min; index < max; index++) {
-            styles[index] = dataSet.getStyle(index);
-        }
-    }
-
     private void computeFullPolar(final Axis yAxis, final DataSetError dataSet, final int min, final int max) {
         for (int index = min; index < max; index++) {
             final double x = dataSet.get(DIM_X, index);
@@ -150,7 +144,6 @@ class CachedDataPoints {
             if (!Double.isFinite(yValues[index])) {
                 yValues[index] = yZero;
             }
-            styles[index] = dataSet.getStyle(index);
         }
     }
 
@@ -169,7 +162,6 @@ class CachedDataPoints {
             if (!Double.isFinite(yValues[index])) {
                 yValues[index] = yZero;
             }
-            styles[index] = dataSet.getStyle(index);
         }
     }
 
@@ -205,8 +197,6 @@ class CachedDataPoints {
                 break;
             }
         }
-
-        computeErrorStyles(dataSet, min, max);
     }
 
     protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final DataSetNode style,
@@ -420,7 +410,6 @@ class CachedDataPoints {
             if (!Double.isFinite(yValues[index])) {
                 yValues[index] = yZero;
             }
-            styles[index] = dataSet.getStyle(index);
         }
     }
 
@@ -509,9 +498,21 @@ class CachedDataPoints {
         this.allowForNaNs = doAllowForNaNs;
         this.rendererErrorStyle = rendererErrorStyle;
 
+        // set optional styles
+        hasStyles = dataSet.hasStyles();
+        if (hasStyles) {
+            styles = ArrayUtils.resizeMinNulled(styles, maxDataCount, String[]::new);
+            dataSet.forEachStyle(min, max, styleSetter);
+        } else {
+            // For now we still need to allocate the array to not break other code
+            // (e.g. reducer). TODO: remove unnecessary array
+            styles = ArrayUtils.resizeMin(styles, maxDataCount, String[]::new, false);
+        }
+
         computeBoundaryVariables(xAxis, yAxis);
         setErrorType(dataSet, rendererErrorStyle);
     }
+    private final IndexedStringConsumer styleSetter = (i, style) -> styles[i] = style;
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {
         errorType = ArrayUtils.resizeMinNulled(errorType, dataSet.getDimension(), ErrorType[]::new);

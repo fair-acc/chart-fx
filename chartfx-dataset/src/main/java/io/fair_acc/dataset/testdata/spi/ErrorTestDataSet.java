@@ -79,6 +79,11 @@ public class ErrorTestDataSet implements DataSetError {
     }
 
     @Override
+    public boolean hasDataLabels() {
+        return false;
+    }
+
+    @Override
     public int getDimension() {
         return 2;
     }
@@ -105,6 +110,11 @@ public class ErrorTestDataSet implements DataSetError {
     @Override
     public String getStyle(final int index) {
         return null;
+    }
+
+    @Override
+    public boolean hasStyles() {
+        return false;
     }
 
     @Override

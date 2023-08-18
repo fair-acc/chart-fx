@@ -171,6 +171,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
+        public boolean hasDataLabels() {
+            return dataSet.hasDataLabels();
+        }
+
+        @Override
         public int getDimension() {
             return 2;
         }
@@ -203,6 +208,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public String getStyle(final int index) {
             return null;
+        }
+
+        @Override
+        public boolean hasStyles() {
+            return dataSet.hasStyles();
         }
 
         @Override

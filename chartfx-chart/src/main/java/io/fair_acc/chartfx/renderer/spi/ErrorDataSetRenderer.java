@@ -138,7 +138,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
         }
 
-        final CachedDataPoints points = SHARED_POINTS_CACHE.resizeMin(indexMin, indexMax, dataSet.getDataCount(), true);
+        final boolean enableErrorsX = true; // TODO: what is this used for?
+        final CachedDataPoints points = SHARED_POINTS_CACHE.resizeMin(indexMin, indexMax, dataSet.getDataCount(), enableErrorsX);
         if (ProcessingProfiler.getDebugState()) {
             timestamp = ProcessingProfiler.getTimeDiff(timestamp, "get CachedPoints");
         }
@@ -206,7 +207,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         if (points.polarPlot) {
             for (int i = 0; i < points.actualDataCount; i++) {
-                if (points.styles[i] == null || !styleParser.tryParse(points.styles[i])) {
+                if (!points.hasStyles || !styleParser.tryParse(points.styles[i])) {
                     gc.strokeLine(points.xZero, points.yZero, points.xValues[i],
                             points.yValues[i]);
                 } else {
@@ -230,7 +231,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     yDiff = Math.abs(yDiff);
                 }
 
-                if (points.styles[i] == null || !styleParser.tryParse(points.styles[i])) {
+                if (!points.hasStyles || !styleParser.tryParse(points.styles[i])) {
                     gc.fillRect(points.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
 
                 } else {
@@ -470,9 +471,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     /**
      * @param gc the graphics context from the Canvas parent
-     * @param localCachedPoints reference to local cached data point object
+     * @param points reference to local cached data point object
      */
-    protected void drawMarker(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints localCachedPoints) {
+    protected void drawMarker(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         if (!isDrawMarker()) {
             return;
         }
@@ -486,10 +487,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.setStroke(markerColor);
         gc.setFill(markerColor);
 
-        for (int i = 0; i < localCachedPoints.actualDataCount; i++) {
-            final double x = localCachedPoints.xValues[i];
-            final double y = localCachedPoints.yValues[i];
-            if (localCachedPoints.styles[i] == null || !styleParser.tryParse(localCachedPoints.styles[i])) {
+        for (int i = 0; i < points.actualDataCount; i++) {
+            final double x = points.xValues[i];
+            final double y = points.yValues[i];
+            if (!points.hasStyles || !styleParser.tryParse(points.styles[i])) {
                 marker.draw(gc, x, y, markerSize);
             } else {
                 var customColor = styleParser.getMarkerColor().orElse(markerColor);
