@@ -30,7 +30,6 @@ import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.chartfx.renderer.spi.utils.DefaultRenderColorScheme;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 
 /**
@@ -62,30 +61,9 @@ public class CustomColourSchemeSample extends ChartSample {
         ComboBox<ColorPalette> palettePseudoClassCB = new ComboBox<>();
         palettePseudoClassCB.setItems(FXCollections.observableArrayList(ColorPalette.values()));
         palettePseudoClassCB.getSelectionModel().select(chart.getColorPalette());
-        chart.colorPaletteProperty().bind(palettePseudoClassCB.getSelectionModel().selectedItemProperty());
-
-        ComboBox<DefaultRenderColorScheme.Palette> strokeStyleCB = new ComboBox<>();
-        strokeStyleCB.getItems().setAll(DefaultRenderColorScheme.Palette.values());
-        strokeStyleCB.getSelectionModel().select(
-                DefaultRenderColorScheme.Palette.getValue(DefaultRenderColorScheme.strokeColorProperty().get()));
-        strokeStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
-            DefaultRenderColorScheme.strokeColorProperty().set(n.getPalette());
-            chart.invalidate();
-            chart.getLegend().updateLegend(Collections.singletonList(renderer), true);
-            LOGGER.atInfo().log("updated stroke colour scheme to " + n.name());
-        });
-
-        ComboBox<DefaultRenderColorScheme.Palette> fillStyleCB = new ComboBox<>();
-        fillStyleCB.getItems().setAll(DefaultRenderColorScheme.Palette.values());
-        fillStyleCB.getSelectionModel()
-                .select(DefaultRenderColorScheme.Palette.getValue(DefaultRenderColorScheme.fillColorProperty().get()));
-        fillStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
-            DefaultRenderColorScheme.fillColorProperty().set(n.getPalette());
-            DefaultRenderColorScheme.fillStylesProperty().clear();
-            DefaultRenderColorScheme.fillStylesProperty().set(DefaultRenderColorScheme.getStandardFillStyle());
-            chart.invalidate();
-            chart.getLegend().updateLegend(Collections.singletonList(renderer), true);
-            LOGGER.atInfo().log("updated fill colour scheme to " + n.name());
+        palettePseudoClassCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
+            chart.setColorPalette(n);
+            LOGGER.atInfo().log("updated color palette style to " + n.name());
         });
 
         ComboBox<ErrorStyle> errorStyleCB = new ComboBox<>();
@@ -93,32 +71,12 @@ public class CustomColourSchemeSample extends ChartSample {
         errorStyleCB.getSelectionModel().select(renderer.getErrorType());
         errorStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
             renderer.setErrorType(n);
-            chart.invalidate();
             LOGGER.atInfo().log("updated error style to " + n.name());
-        });
-
-        Button customFill = new Button("custom fill");
-        customFill.setOnAction(evt -> {
-            final ObservableList<Paint> values = FXCollections.observableArrayList();
-            for (Color colour : DefaultRenderColorScheme.fillColorProperty()) {
-                Stop[] stops = new Stop[] { new Stop(0, colour.brighter().interpolate(Color.TRANSPARENT, 0.4)), // NOPMD
-                    new Stop(1, colour.brighter().interpolate(Color.TRANSPARENT, 0.95)) }; // NOPMD
-                LinearGradient gradient = new LinearGradient(0.0, 0.0, 1.0, 0.0, true, CycleMethod.REPEAT, stops); // NOPMD
-                values.add(gradient);
-            }
-            DefaultRenderColorScheme.fillStylesProperty().clear();
-            DefaultRenderColorScheme.fillStylesProperty().set(values);
-            chart.invalidate();
-            chart.getLegend().updateLegend(Collections.singletonList(renderer), true);
-            LOGGER.atInfo().log("updated to custom filling scheme");
         });
 
         ToolBar toolBar = new ToolBar(
                 new Label("CSS Palette: "), palettePseudoClassCB,
-                new Label("stroke colour: "), strokeStyleCB,
-                new Label("fill colour: "), fillStyleCB,
-                new Label("error style: "), errorStyleCB,
-                customFill);
+                new Label("error style: "), errorStyleCB);
         return new VBox(toolBar, chart);
     }
 
