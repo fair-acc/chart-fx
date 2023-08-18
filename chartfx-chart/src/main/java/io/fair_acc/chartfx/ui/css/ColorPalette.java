@@ -33,7 +33,7 @@ public enum ColorPalette {
     }
 
     public void applyPseudoClasses(Node node) {
-        for (ColorPalette palette : values) {
+        for (var palette : values) {
             node.pseudoClassStateChanged(palette.getPseudoClass(), this == palette);
         }
     }

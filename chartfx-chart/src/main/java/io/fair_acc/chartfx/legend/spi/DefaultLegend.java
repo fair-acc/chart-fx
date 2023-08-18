@@ -179,6 +179,7 @@ public class DefaultLegend extends FlowPane implements Legend {
             StyleUtil.addStyles(this, "chart-legend-item");
             textProperty().bind(series.textProperty());
             setGraphic(symbol);
+            symbol.managedProperty().bind(symbol.visibleProperty());
             symbol.widthProperty().bind(symbolWidth);
             symbol.heightProperty().bind(symbolHeight);
             this.series = series;
@@ -205,7 +206,6 @@ public class DefaultLegend extends FlowPane implements Legend {
             return CSS.getCssMetaData();
         }
         private static final CssPropertyFactory<LegendItem> CSS = new CssPropertyFactory<>(Label.getClassCssMetaData());
-
 
     }
 }
