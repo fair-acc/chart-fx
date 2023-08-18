@@ -108,6 +108,8 @@
   -fx-color-count: 8;
 }
 
+@mixin defaultColorDefinitions() {
+
 // CSS classes that set the default similar to the JavaFX charts
 // Using an undefined index result in a lookup error.
 .dataset.default-color0 {
@@ -188,4 +190,6 @@
 .dataset.default-color15 {
   -fx-stroke: -color-dataset-16;
   -fx-fill: -color-dataset-16;
+}
+
 }

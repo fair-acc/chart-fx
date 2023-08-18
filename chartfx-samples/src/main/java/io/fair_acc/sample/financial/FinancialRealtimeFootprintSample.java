@@ -5,8 +5,8 @@ import static io.fair_acc.sample.financial.service.period.IntradayPeriod.Intrada
 import java.util.HashMap;
 
 import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import io.fair_acc.chartfx.renderer.spi.financial.FootprintRenderer;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
@@ -28,7 +28,7 @@ public class FinancialRealtimeFootprintSample extends FinancialRealtimeCandlesti
     @Override
     protected void configureApp() {
         title = "Replay FOOTPRINT Tick Data in real-time (press 'replay' button, zoom by mousewheel)";
-        theme = FinancialColorSchemeConstants.DARK;
+        theme = FinancialTheme.Dark;
         resource = "REALTIME_OHLC_TICK";
         timeRange = "2016/07/29 13:25-2016/07/29 14:25";
         tt = "00:00-23:59"; // time template whole day session

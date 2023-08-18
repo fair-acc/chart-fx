@@ -1,4 +1,5 @@
 @use "_palette.scss" as palette;
+@use "_financial.scss";
 
 $null: null; // null gets removed from Sass. Maybe create a placeholder and replace after generation?
 
@@ -421,3 +422,5 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   -fx-stroke: derive(-fx-text-background-color, 40%);
 }
 
+@include palette.defaultColorDefinitions();
+@include financial.financial-themes();

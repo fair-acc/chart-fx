@@ -1,0 +1,309 @@
+@mixin dataset-classic {
+  // Position
+  -fx-position-triangle-long-color: blue;
+  -fx-position-triangle-short-color: #a10000;
+  -fx-position-triangle-exit-color: black;
+  -fx-position-arrow-long-color: blue;
+  -fx-position-arrow-short-color: red;
+  -fx-position-arrow-exit-color: black;
+  -fx-position-label-trade-description-color: black;
+  -fx-position-order-linkage-profit-color: blue;
+  -fx-position-order-linkage-loss-color: #a10000;
+
+  // Footprint
+  -fx-footprint-long-color: green;
+  -fx-footprint-short-color: red;
+  -fx-footprint-cross-line-color: grey;
+  -fx-footprint-default-font-color: rgba(255, 255, 255, 0.58);
+  -fx-footprint-poc-color: #d1d100;
+  -fx-footprint-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-footprint-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // high-low
+  -fx-high-low-body-line-width: 1.6;
+  -fx-high-low-tick-line-width: 2.0;
+  -fx-high-low-long-color: green;
+  -fx-high-low-long-tick-color: green;
+  -fx-high-low-short-color: red;
+  -fx-high-low-short-tick-color: red;
+  -fx-high-low-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-high-low-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // candlestick
+  -fx-stroke-width: 1.6;
+  -fx-candle-long-color: green;
+  -fx-candle-short-color: red;
+  -fx-candle-long-wick-color: green;
+  -fx-candle-short-wick-color: red;
+  -fx-candle-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-candle-volume-short-color: rgba(235, 160, 159, 0.4);
+}
+
+@mixin dataset-clearlook {
+  // Position
+  -fx-position-triangle-long-color: green;
+  -fx-position-triangle-short-color: red;
+  -fx-position-triangle-exit-color: black;
+  -fx-position-arrow-long-color: green;
+  -fx-position-arrow-short-color: red;
+  -fx-position-arrow-exit-color: black;
+  -fx-position-label-trade-description-color: black;
+  -fx-position-order-linkage-profit-color: green;
+  -fx-position-order-linkage-loss-color: red;
+
+  // Footprint
+  -fx-footprint-long-color: #4c4c4c;
+  -fx-footprint-short-color: red;
+  -fx-footprint-cross-line-color: grey;
+  -fx-footprint-default-font-color: rgba(255, 255, 255, 0.58);
+  -fx-footprint-poc-color: #d1d100;
+  -fx-footprint-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-footprint-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // high-low
+  -fx-high-low-body-line-width: 1.6;
+  -fx-high-low-tick-line-width: 2.0;
+  -fx-high-low-long-color: black;
+  -fx-high-low-long-tick-color: black;
+  -fx-high-low-short-color: red;
+  -fx-high-low-short-tick-color: red;
+  -fx-high-low-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-high-low-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // candlestick
+  -fx-stroke-width: 0.9;
+  -fx-stroke-color: black;
+  -fx-candle-long-color: white;
+  -fx-candle-short-color: red;
+  -fx-candle-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-candle-volume-short-color: rgba(235, 160, 159, 0.4);
+}
+
+@mixin dataset-sand {
+  // Position
+  -fx-position-triangle-long-color: green;
+  -fx-position-triangle-short-color: red;
+  -fx-position-triangle-exit-color: black;
+  -fx-position-arrow-long-color: green;
+  -fx-position-arrow-short-color: red;
+  -fx-position-arrow-exit-color: black;
+  -fx-position-label-trade-description-color: black;
+  -fx-position-order-linkage-profit-color: green;
+  -fx-position-order-linkage-loss-color: red;
+
+  // Footprint
+  -fx-footprint-long-color: #00aa00;
+  -fx-footprint-short-color: red;
+  -fx-footprint-cross-line-color: black;
+  -fx-footprint-default-font-color: rgba(255, 255, 255, 0.58);
+  -fx-footprint-poc-color: #d1d100;
+  -fx-candle-shadow-color: rgba(72, 72, 72, 0-2);
+  -fx-footprint-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-footprint-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // high-low
+  -fx-high-low-body-line-width: 1.2;
+  -fx-high-low-tick-line-width: 1.2;
+  -fx-high-low-long-color: black;
+  -fx-high-low-long-tick-color: black;
+  -fx-high-low-short-color: red;
+  -fx-high-low-short-tick-color: red;
+  -fx-hi-low-shadow-color: rgba(72, 72, 72, 0-2);
+  -fx-high-low-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-high-low-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // candlestick
+  -fx-stroke-width: 0.9;
+  -fx-stroke-color: black;
+  -fx-candle-long-color: white;
+  -fx-candle-short-color: red;
+  -fx-candle-shadow-color: rgba(72, 72, 72, 0.2);
+  -fx-candle-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-candle-volume-short-color: rgba(235, 160, 159, 0.4);
+}
+
+@mixin dataset-blackberry {
+  // Position
+  -fx-position-triangle-long-color: green;
+  -fx-position-triangle-short-color: red;
+  -fx-position-triangle-exit-color: white;
+  -fx-position-arrow-long-color: green;
+  -fx-position-arrow-short-color: red;
+  -fx-position-arrow-exit-color: white;
+  -fx-position-label-trade-description-color: white;
+  -fx-position-order-linkage-profit-color: green;
+  -fx-position-order-linkage-loss-color: red;
+
+  // Footprint
+  -fx-footprint-long-color: #00022e;
+  -fx-footprint-short-color: #780000;
+  -fx-footprint-cross-line-color: grey;
+  -fx-footprint-default-font-color: rgba(255, 255, 255, 0.58);
+  -fx-footprint-poc-color: yellow;
+  -fx-candle-long-wick-color: white;
+  -fx-candle-short-wick-color: red;
+  -fx-footprint-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-footprint-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // high-low
+  -fx-high-low-body-line-width: 2.0;
+  -fx-high-low-tick-line-width: 2.5;
+  -fx-high-low-long-color: white;
+  -fx-high-low-long-tick-color: white;
+  -fx-high-low-short-color: red;
+  -fx-high-low-short-tick-color: red;
+  -fx-high-low-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-high-low-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // candlestick
+  -fx-stroke-width: 1.5;
+  -fx-stroke-color: black;
+  -fx-candle-long-color: #00022e;
+  -fx-candle-short-color: #780000;
+  -fx-candle-long-wick-color: white;
+  -fx-candle-short-wick-color: red;
+  -fx-candle-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-candle-volume-short-color: rgba(235, 160, 159, 0.4);
+}
+
+@mixin dataset-dark {
+  // Position
+  -fx-position-triangle-long-color: green;
+  -fx-position-triangle-short-color: red;
+  -fx-position-triangle-exit-color: white;
+  -fx-position-arrow-long-color: green;
+  -fx-position-arrow-short-color: red;
+  -fx-position-arrow-exit-color: white;
+  -fx-position-label-trade-description-color: white;
+  -fx-position-order-linkage-profit-color: green;
+  -fx-position-order-linkage-loss-color: red;
+
+  // Footprint
+  -fx-footprint-long-color: #298988;
+  -fx-footprint-short-color: #963838;
+  -fx-footprint-cross-line-color: grey;
+  -fx-footprint-default-font-color: rgba(255, 255, 255, 0.58);
+  -fx-footprint-poc-color: yellow;
+  -fx-footprint-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-footprint-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // high-low
+  -fx-high-low-body-line-width: 2.0;
+  -fx-high-low-tick-line-width: 2.5;
+  -fx-high-low-long-color: #89e278;
+  -fx-high-low-long-tick-color: #89e278;
+  -fx-high-low-short-color: #e85656;
+  -fx-high-low-short-tick-color: #e85656;
+  -fx-high-low-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-high-low-volume-short-color: rgba(235, 160, 159, 0.4);
+
+  // candlestick
+  -fx-stroke-width: 1.5;
+  -fx-stroke-color: black;
+  -fx-candle-long-color: #298988;
+  -fx-candle-short-color: #963838;
+  -fx-candle-long-wick-color: #89e278;
+  -fx-candle-short-wick-color: #e85656;
+  -fx-candle-volume-long-color: rgba(139, 199, 194, 0.4);
+  -fx-candle-volume-short-color: rgba(235, 160, 159, 0.4);
+}
+
+@mixin financial-themes() {
+
+  .chart:financial-classic {
+    .dataset.financial {
+      @include dataset-classic;
+    }
+  }
+
+  .chart:financial-clearlook {
+    .dataset.financial {
+      @include dataset-clearlook;
+    }
+  }
+
+  .chart:financial-sand {
+
+    &, .chart-plot-background {
+      -fx-background-image: url("images/sand.png");
+    }
+
+    .grid-renderer {
+      .chart-major-grid-lines {
+        visibility: visible;
+        -fx-stroke: darkgrey;
+      }
+
+      .chart-minor-grid-lines {
+        visibility: visible;
+      }
+    }
+
+    .axis-tick-label {
+      -fx-fill: black;
+    }
+
+    .dataset.financial {
+      @include dataset-sand;
+    }
+
+  }
+
+  .chart:financial-blackberry {
+
+    &, .chart-plot-background {
+      -fx-background-color: rgb(0, 2, 46);
+    }
+
+    .grid-renderer {
+      .chart-major-grid-lines, .chart-minor-grid-lines {
+        visibility: hidden;
+      }
+    }
+
+    .chart-title {
+      -fx-text-fill: white;
+    }
+
+    .axis-tick-label {
+      -fx-fill: whitesmoke;
+    }
+
+    .dataset.financial {
+      @include dataset-blackberry;
+    }
+
+  }
+
+  .chart:financial-dark {
+
+    &, .chart-plot-background {
+      -fx-background-color: rgb(47, 47, 47);
+    }
+
+    .grid-renderer {
+      .chart-minor-grid-lines, .chart-major-vertical-lines {
+        visibility: hidden;
+      }
+
+      .chart-major-horizontal-lines {
+        visibility: visible;
+        -fx-stroke: rgb(106, 106, 106);
+      }
+    }
+
+    .chart-title {
+      -fx-text-fill: white;
+    }
+
+    .axis-tick-label {
+      -fx-fill: rgb(194, 194, 194);
+    }
+
+    .dataset.financial {
+      @include dataset-dark;
+    }
+
+  }
+
+}
