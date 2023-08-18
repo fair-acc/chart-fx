@@ -1,11 +1,10 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.utils.StyleParser;
+import io.fair_acc.dataset.utils.StyleBuilder;
 import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Function;
@@ -33,16 +32,16 @@ public abstract class AbstractStyleParser {
 
     protected boolean parse(String style) {
         clear();
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-        boolean usedAtLeastOneKey = false;
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            String value = entry.getValue();
-            if (value != null && !value.isEmpty()) {
-                usedAtLeastOneKey |= parseEntry(currentKey = entry.getKey(), value);
-            }
-        }
+        usedAtLeastOneKey = false;
+        StyleBuilder.forEachProperty(style, this::onEntry);
         return usedAtLeastOneKey;
     }
+
+    private void onEntry(String key, String value) {
+        usedAtLeastOneKey |= parseEntry(key, value);
+    }
+
+    boolean usedAtLeastOneKey = false;
 
     protected abstract void clear();
 
