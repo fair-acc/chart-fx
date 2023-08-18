@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.ErrorStyleParser;
+import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
@@ -24,7 +25,6 @@ import io.fair_acc.chartfx.renderer.spi.utils.BezierCurve;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.Histogram;
 import io.fair_acc.dataset.spi.LimitedIndexedTreeDataSet;
-import io.fair_acc.dataset.utils.DoubleArrayCache;
 
 /**
  * Simple renderer specialised for 1D histograms.
@@ -253,8 +253,8 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
         // need to allocate new array :-(
         final int nRange = Math.abs(indexMax - indexMin);
-        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * (nRange + 1));
-        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * (nRange + 1));
+        final double[] newX = SHARED_ARRAYS.getArray(0, 2 * (nRange + 1));
+        final double[] newY = SHARED_ARRAYS.getArray(1, 2 * (nRange + 1));
         final double axisMin = getAxisMin(xAxis, yAxis, !isVerticalDataSet);
 
         for (int i = 0; i < nRange; i++) {
@@ -284,9 +284,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
         gc.restore();
 
-        // release arrays to cache
-        DoubleArrayCache.getInstance().add(newX);
-        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolyLineHistogramBezier(final GraphicsContext gc, final DataSetNode style, final DataSet ds, final Axis xAxis, final Axis yAxis, boolean filled) {
@@ -305,14 +302,13 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
             return;
         }
 
-        // need to allocate new array :-(
-        final double[] xCp1 = DoubleArrayCache.getInstance().getArrayExact(nRange);
-        final double[] yCp1 = DoubleArrayCache.getInstance().getArrayExact(nRange);
-        final double[] xCp2 = DoubleArrayCache.getInstance().getArrayExact(nRange);
-        final double[] yCp2 = DoubleArrayCache.getInstance().getArrayExact(nRange);
+        final double[] xCp1 = SHARED_ARRAYS.getArray(0, nRange);
+        final double[] yCp1 = SHARED_ARRAYS.getArray(1, nRange);
+        final double[] xCp2 = SHARED_ARRAYS.getArray(2, nRange);
+        final double[] yCp2 = SHARED_ARRAYS.getArray(3, nRange);
 
-        final double[] xValues = DoubleArrayCache.getInstance().getArrayExact(nRange);
-        final double[] yValues = DoubleArrayCache.getInstance().getArrayExact(nRange);
+        final double[] xValues = SHARED_ARRAYS.getArray(4, nRange);
+        final double[] yValues = SHARED_ARRAYS.getArray(5, nRange);
 
         for (int i = 0; i < nRange; i++) {
             xValues[i] = xAxis.getDisplayPosition(ds.get(DIM_X, min + i));
@@ -346,14 +342,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         gc.closePath();
         gc.stroke();
         gc.restore();
-
-        // release arrays to Cache
-        DoubleArrayCache.getInstance().add(xValues);
-        DoubleArrayCache.getInstance().add(yValues);
-        DoubleArrayCache.getInstance().add(xCp1);
-        DoubleArrayCache.getInstance().add(yCp1);
-        DoubleArrayCache.getInstance().add(xCp2);
-        DoubleArrayCache.getInstance().add(yCp2);
     }
 
     protected static void drawPolyLineLine(final GraphicsContext gc, final DataSetNode style, final DataSet ds, final Axis xAxis, final Axis yAxis, boolean filled) { // NOPMD NOSONAR - complexity nearly unavoidable
@@ -430,8 +418,8 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         }
 
         // need to allocate new array :-(
-        final double[] newX = DoubleArrayCache.getInstance().getArrayExact(2 * nRange);
-        final double[] newY = DoubleArrayCache.getInstance().getArrayExact(2 * nRange);
+        final double[] newX = SHARED_ARRAYS.getArray(0, 2 * nRange);
+        final double[] newY = SHARED_ARRAYS.getArray(1, 2 * nRange);
 
         for (int i = 0; i < nRange - 1; i++) {
             final int index = i + min;
@@ -453,10 +441,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
 
         drawPolygon(gc, newX, newY, filled, isVerticalDataSet);
         gc.restore();
-
-        // release arrays to cache
-        DoubleArrayCache.getInstance().add(newX);
-        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolygon(final GraphicsContext gc, final double[] a, final double[] b, final boolean filled, final boolean isVerticalDataSet) {
@@ -603,4 +587,16 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
             }
         }
     }
+
+    /**
+     * Deletes all arrays that are larger than necessary for the last drawn dataset
+     */
+    public static void trimCache() {
+        SHARED_ARRAYS.trim();
+    }
+
+    // The cache can be shared because there can only ever be one renderer accessing it
+    // Note: should not be exposed to child classes to guarantee that arrays aren't double used.
+    private static final FastDoubleArrayCache SHARED_ARRAYS = new FastDoubleArrayCache(6);
+
 }
