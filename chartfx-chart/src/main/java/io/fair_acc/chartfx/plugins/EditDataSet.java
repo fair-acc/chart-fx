@@ -975,9 +975,10 @@ public class EditDataSet extends TableViewer {
         }
 
         public void applyDrag(final double deltaX, final double deltaY) {
-            if (!dataSet.isVisible()) {
+            // TODO: replace with dataSetNode.isVisible() - it uses XYChart::getDataSets(), so maybe needs more refactoring
+            /*if (!dataSet.isVisible()) {
                 return;
-            }
+            }*/
 
             double nX = getX();
             double nY = getY();
@@ -1020,9 +1021,10 @@ public class EditDataSet extends TableViewer {
         }
 
         public boolean delete() {
-            if (!dataSet.isVisible()) {
+            // TODO: replace with dataSetNode.isVisible() - it uses XYChart::getDataSets(), so maybe needs more refactoring
+            /*if (!dataSet.isVisible()) {
                 return false;
-            }
+            }*/
 
             final EditConstraints constraints = dataSet.getEditConstraints();
             int index = getIndex();

@@ -45,8 +45,6 @@ class ErrorTestDataSetTest {
         assertThrows(UnsupportedOperationException.class, () -> dsUnderTest.getIndex(DataSet.DIM_Z, 5.4));
         assertThrows(IndexOutOfBoundsException.class, () -> dsUnderTest.getErrorPositive(DataSet.DIM_Z, 5));
         assertDoesNotThrow(() -> dsUnderTest.recomputeLimits(DataSet.DIM_X));
-        assertTrue(dsUnderTest.isVisible());
-        assertThrows(UnsupportedOperationException.class, () -> dsUnderTest.setVisible(false));
         // getIndex
         // getValue
     }

@@ -1,5 +1,6 @@
 package io.fair_acc.dataset.testdata.spi;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -103,6 +104,11 @@ public class ErrorTestDataSet implements DataSetError {
     }
 
     @Override
+    public List<String> getStyleClasses() {
+        return Collections.emptyList();
+    }
+
+    @Override
     public String getStyle() {
         return null;
     }
@@ -167,16 +173,6 @@ public class ErrorTestDataSet implements DataSetError {
 
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean isVisible() {
-        return true;
-    }
-
-    @Override
-    public DataSet setVisible(boolean visible) {
         throw new UnsupportedOperationException();
     }
 

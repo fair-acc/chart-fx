@@ -87,10 +87,6 @@ class MultiDimDoubleDataSetTests {
                 trimArray(dataset.getValues(DataSet.DIM_X), dataset.getDataCount()));
         assertArrayEquals(new double[] { 6, 7, 8 },
                 trimArray(dataset.getValues(DataSet.DIM_Y), dataset.getDataCount()));
-        // test visibility
-        assertTrue(dataset.isVisible());
-        dataset.setVisible(false);
-        assertFalse(dataset.isVisible());
     }
 
     private static double[] trimArray(final double[] values, final int dataCount) {

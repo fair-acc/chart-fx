@@ -114,6 +114,11 @@ public class TransposedDataSet implements DataSet {
         return dataSet.getName();
     }
 
+    @Override
+    public List<String> getStyleClasses() {
+        return dataSet.getStyleClasses();
+    }
+
     public int[] getPermutation() {
         return Arrays.copyOf(permutation, permutation.length);
     }
@@ -197,16 +202,6 @@ public class TransposedDataSet implements DataSet {
     @Override
     public DataSet set(final DataSet other, final boolean copy) {
         throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
-    }
-
-    @Override
-    public boolean isVisible() {
-        return dataSet.isVisible();
-    }
-
-    @Override
-    public DataSet setVisible(boolean visible) {
-        return dataSet.setVisible(visible);
     }
 
     public void setTransposed(final boolean transposed) {

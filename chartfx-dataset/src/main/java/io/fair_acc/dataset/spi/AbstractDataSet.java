@@ -44,6 +44,7 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     private final transient DataSetLock<? extends DataSet> lock = new DefaultDataSetLock<>(this);
     private final StringHashMapList dataLabels = new StringHashMapList();
     private final StringHashMapList dataStyles = new StringHashMapList();
+    private final List<String> styleClasses = new ArrayList<>();
     private final List<String> infoList = new ArrayList<>();
     private final List<String> warningList = new ArrayList<>();
     private final List<String> errorList = new ArrayList<>();
@@ -346,20 +347,6 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return true;
     }
 
-    @Override
-    public boolean isVisible() {
-        return isVisible;
-    }
-
-    @Override
-    public D setVisible(boolean visible) {
-        if (visible != isVisible) {
-            isVisible = visible;
-            fireInvalidated(ChartBits.DataSetVisibility);
-        }
-        return getThis();
-    }
-
     /**
      * @return axis descriptions of the primary and secondary axes
      */
@@ -436,6 +423,45 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    public List<String> getStyleClasses() {
+        return styleClasses;
+    }
+
+    public D addStyleClasses(String... cssClass) {
+        boolean changed = false;
+        for (String selector : cssClass) {
+            if (!styleClasses.contains(selector)) {
+                styleClasses.add(selector);
+                changed = true;
+            }
+        }
+        if (changed) {
+            fireInvalidated(ChartBits.DataSetStyle);
+        }
+        return getThis();
+    }
+
+    public D removeStyleClasses(String... cssClass) {
+        boolean changed = false;
+        for (String selector : cssClass) {
+            changed |= styleClasses.remove(selector);
+        }
+        if (changed) {
+            fireInvalidated(ChartBits.DataSetStyle);
+        }
+        return getThis();
+    }
+
+    @Override
+    public D setStyle(final String style) {
+        if (!Objects.equals(getStyle(), style)) {
+            super.setStyle(style);
+            fireInvalidated(ChartBits.DataSetStyle);
+        }
+        return getThis();
     }
 
     /**
