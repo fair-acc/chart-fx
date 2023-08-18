@@ -5,8 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.scene.canvas.Canvas;
 
+import javafx.scene.canvas.GraphicsContext;
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.chartfx.renderer.ContourType;
@@ -68,13 +70,14 @@ public class AbstractContourDataSetRendererParameterTests {
      * basic test class, only supports limited getter/setter/property functions
      */
     public static class TestContourDataSetRendererParameter extends AbstractContourDataSetRendererParameter<TestContourDataSetRendererParameter> {
+
         @Override
-        public Canvas drawLegendSymbol(DataSet dataSet, int dsIndex, int width, int height) {
-            throw new UnsupportedOperationException();
+        public boolean drawLegendSymbol(DataSetNode dataSet, Canvas canvas) {
+            return super.drawLegendSymbol(dataSet, canvas);
         }
 
         @Override
-        public void render() {
+        protected void render(GraphicsContext gc, DataSet dataSet, DataSetNode style) {
             throw new UnsupportedOperationException();
         }
 

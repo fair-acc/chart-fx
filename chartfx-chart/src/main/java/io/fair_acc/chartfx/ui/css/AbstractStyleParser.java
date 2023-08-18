@@ -5,8 +5,10 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
@@ -56,6 +58,12 @@ public abstract class AbstractStyleParser {
         }
     }
 
+    protected double[] parseDoubleArray(String value) {
+        return parse(value, str -> Arrays.stream(value.split("\\s+"))
+                .mapToDouble(Double::parseDouble)
+                .toArray());
+    }
+
     protected Color parseColor(String value) {
         try {
             return Color.web(value);
@@ -63,6 +71,15 @@ public abstract class AbstractStyleParser {
             LOGGER.error("could not parse color value of '" + currentKey + "'='" + value + "'", ex);
             return null;
         }
+    }
+
+    protected boolean parseColor(String value, Consumer<Color> onSuccess) {
+        var color = parseColor(value);
+        if (isValid(color)) {
+            onSuccess.accept(color);
+            return true;
+        }
+        return false;
     }
 
     protected <T> T parse(String value, Function<String, T> func) {

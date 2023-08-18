@@ -1,20 +1,14 @@
 package io.fair_acc.sample.chart;
 
-import java.util.List;
-
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.XYChartCss;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;

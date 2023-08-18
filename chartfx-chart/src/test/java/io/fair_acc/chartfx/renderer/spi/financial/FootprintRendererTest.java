@@ -20,8 +20,6 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConfig;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.CalendarUtils;
@@ -42,20 +40,19 @@ public class FootprintRendererTest {
     private FootprintRenderer rendererTested;
     private XYChart chart;
     private OhlcvDataSet ohlcvDataSet;
-    private final String[] schemes = FinancialColorSchemeConstants.getDefaultColorSchemes();
-
+    private final FinancialTheme[] themes = FinancialTheme.values();
     @Start
     public void start(Stage stage) throws Exception {
-        for (String scheme : schemes) {
-            financialComponentTest(stage, scheme);
+        for (var theme : themes) {
+            financialComponentTest(stage, theme);
         }
     }
 
-    private void financialComponentTest(Stage stage, String scheme) throws Exception {
+    private void financialComponentTest(Stage stage, FinancialTheme theme) throws Exception {
         ProcessingProfiler.setDebugState(false); // enable for detailed renderer tracing
         ohlcvDataSet = new OhlcvDataSet("ohlc1");
         ohlcvDataSet.setData(FinancialTestUtils.createTestOhlcv());
-        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(scheme);
+        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(theme);
         rendererTested = new FootprintRenderer(
                 new FootprintRenderedAPIDummyAdapter(footprintAttrs),
                 true,
@@ -91,7 +88,7 @@ public class FootprintRendererTest {
         rendererTested.addPaintAfterEp(data -> assertNotNull(data.gc));
         assertEquals(1, rendererTested.getPaintAfterEps().size());
 
-        new FinancialColorSchemeConfig().applyTo(scheme, chart);
+        theme.applyPseudoClasses(chart);
 
         stage.setScene(new Scene(chart, 800, 600));
         stage.show();
@@ -139,7 +136,7 @@ public class FootprintRendererTest {
 
     @Test
     public void testShortConstructor() {
-        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(schemes[0]);
+        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(themes[0]);
         FootprintRenderer renderer = new FootprintRenderer(
                 new FootprintRenderedAPIDummyAdapter(footprintAttrs));
         assertFalse(renderer.isPaintVolume());
@@ -149,7 +146,7 @@ public class FootprintRendererTest {
 
     @Test
     public void testLongConstructor() {
-        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(schemes[0]);
+        FootprintRendererAttributes footprintAttrs = FootprintRendererAttributes.getDefaultValues(themes[0]);
         FootprintRenderer renderer = new FootprintRenderer(
                 new FootprintRenderedAPIDummyAdapter(footprintAttrs),
                 true,
@@ -171,7 +168,7 @@ public class FootprintRendererTest {
 
     @TestFx
     public void noXyChartInstance() {
-        assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null));
+        assertThrows(InvalidParameterException.class, () -> rendererTested.setChart(new TestChart()));
     }
 
     @Test

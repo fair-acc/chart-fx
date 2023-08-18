@@ -43,7 +43,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     private final IntegerProperty roundedCornerRadius = new SimpleIntegerProperty(this, "roundedCornerRadius", 10);
     private final Map<String, Double> scaling = new ConcurrentHashMap<>();
     private final AnimationTimer timer = new MyTimer();
-    private final DataSetStyleParser styleParser = new DataSetStyleParser();
+    private final DataSetStyleParser styleParser = DataSetStyleParser.newInstance();
 
     public HistogramRenderer() {
         super();

@@ -1,19 +1,13 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -23,14 +17,10 @@ import javafx.scene.text.TextAlignment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.XYChartCss;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * Draws horizontal markers with horizontal (default) labels attached at the top.
@@ -228,37 +218,14 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
     }
 
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
-        final Color strokeColor = StyleParser.getColorPropertyValue(style, XYChartCss.STROKE_COLOR);
-        if (strokeColor == null) {
-            gc.setStroke(strokeColorMarker);
-        } else {
-            gc.setStroke(strokeColor);
+        if (!styleParser.tryParse(style)) {
+            return;
         }
-
-        final Color fillColor = StyleParser.getColorPropertyValue(style, XYChartCss.FILL_COLOR);
-        if (fillColor == null) {
-            gc.setFill(strokeColorMarker);
-        } else {
-            gc.setFill(fillColor);
-        }
-
-        final Double strokeWidth = StyleParser.getFloatingDecimalPropertyValue(style, XYChartCss.STROKE_WIDTH);
-        gc.setLineWidth(Objects.requireNonNullElseGet(strokeWidth, () -> strokeLineWidthMarker));
-
-        final Font font = StyleParser.getFontPropertyValue(style);
-        if (font == null) {
-            gc.setFont(Font.font(LabelledMarkerRenderer.DEFAULT_FONT, LabelledMarkerRenderer.DEFAULT_FONT_SIZE));
-        } else {
-            gc.setFont(font);
-        }
-
-        final double[] dashPattern = StyleParser.getFloatingDecimalArrayPropertyValue(style,
-                XYChartCss.STROKE_DASH_PATTERN);
-        if (dashPattern == null) {
-            gc.setLineDashes(strokeDashPattern);
-        } else {
-            gc.setLineDashes(dashPattern);
-        }
+        styleParser.getStrokeColor().ifPresent(gc::setStroke);
+        styleParser.getFillColor().ifPresent(gc::setFill);
+        styleParser.getLineWidth().ifPresent(gc::setLineWidth);
+        styleParser.getFont().ifPresent(gc::setFont);
+        styleParser.getLineDashPattern().ifPresent(gc::setLineDashes);
     }
 
     public final LabelledMarkerRenderer updateCSS() {
@@ -281,4 +248,7 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
     public BooleanProperty verticalMarkerProperty() {
         return verticalMarker;
     }
+
+    private static final DataSetStyleParser styleParser = DataSetStyleParser.newInstance();
+
 }

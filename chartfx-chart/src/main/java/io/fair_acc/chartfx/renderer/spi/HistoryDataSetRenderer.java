@@ -1,9 +1,7 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.utils.DataSetStyleBuilder;
@@ -15,16 +13,11 @@ import javafx.scene.canvas.GraphicsContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.XYChartCss;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.chartfx.utils.StyleParser;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.EditableDataSet;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * Renders the data set with the pre-described
@@ -198,7 +191,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
 
                 // modify style
                 // TODO: is this doing anything now?
-                ds.setStyle(DataSetStyleBuilder.getInstance()
+                ds.setStyle(DataSetStyleBuilder.instance()
                         .withExisting(ds.getStyle())
                         .setIntensity(fading)
                         .setShowInLegend(false)
@@ -228,9 +221,4 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         // System.gc();
     }
 
-    private static String setLegendCounter(final String oldStyle, final int count) {
-        final Map<String, String> map = StyleParser.splitIntoMap(oldStyle);
-        map.put(XYChartCss.DATASET_INDEX, Integer.toString(count));
-        return StyleParser.mapToString(map);
-    }
 }
