@@ -1,115 +1,3 @@
-.chart {
-  -color-dataset-1: #0000c8;
-  -color-dataset-2: #c80000;
-  -color-dataset-3: #00c800;
-  -color-dataset-4: orange;
-  -color-dataset-5: magenta;
-  -color-dataset-6: cyan;
-  -color-dataset-7: darkgray;
-  -color-dataset-8: pink;
-  -color-dataset-9: black;
-  -fx-color-count: 9;
-}
-
-.chart:palette-misc, .renderer:palette-misc {
-  -color-dataset-1: #5DA5DA;
-  -color-dataset-2: #F15854;
-  -color-dataset-3: #FAA43A;
-  -color-dataset-4: #60BD68;
-  -color-dataset-5: #F17CB0;
-  -color-dataset-6: #B2912F;
-  -color-dataset-7: #B276B2;
-  -color-dataset-8: #DECF3F;
-  -color-dataset-9: #4D4D4D;
-  -fx-color-count: 9;
-}
-.chart:palette-adobe, .renderer:palette-adobe {
-  -color-dataset-1: #00a4e4;
-  -color-dataset-2: #ff0000;
-  -color-dataset-3: #fbb034;
-  -color-dataset-4: #ffdd00;
-  -color-dataset-5: #c1d82f;
-  -color-dataset-6: #8a7967;
-  -color-dataset-7: #6a737b;
-  -fx-color-count: 7;
-}
-.chart:palette-dell, .renderer:palette-dell {
-  -color-dataset-1: #0085c3;
-  -color-dataset-2: #7ab800;
-  -color-dataset-3: #f2af00;
-  -color-dataset-4: #dc5034;
-  -color-dataset-5: #6e2585;
-  -color-dataset-6: #71c6c1;
-  -color-dataset-7: #009bbb;
-  -color-dataset-8: #444444;
-  -fx-color-count: 8;
-}
-.chart:palette-equidistant, .renderer:palette-equidistant {
-  -color-dataset-1: #003f5c;
-  -color-dataset-2: #2f4b7c;
-  -color-dataset-3: #665191;
-  -color-dataset-4: #a05195;
-  -color-dataset-5: #d45087;
-  -color-dataset-6: #f95d6a;
-  -color-dataset-7: #ff7c43;
-  -color-dataset-8: #ffa600;
-  -fx-color-count: 8;
-}
-.chart:palette-tuneviewer, .renderer:palette-tuneviewer {
-  -color-dataset-1: #0000c8;
-  -color-dataset-2: #c80000;
-  -color-dataset-3: #00c800;
-  -color-dataset-4: orange;
-  -color-dataset-5: magenta;
-  -color-dataset-6: cyan;
-  -color-dataset-7: darkgray;
-  -color-dataset-8: pink;
-  -color-dataset-9: black;
-  -fx-color-count: 9;
-}
-.chart:palette-matlab-light, .renderer:palette-matlab-light {
-  -color-dataset-1: #0072bd;
-  -color-dataset-2: #d95319;
-  -color-dataset-3: #edb120;
-  -color-dataset-4: #7e2f8e;
-  -color-dataset-5: #77ac30;
-  -color-dataset-6: #4dbeee;
-  -color-dataset-7: #a2142f;
-  -fx-color-count: 7;
-}
-.chart:palette-matlab-dark, .renderer:palette-matlab-dark {
-  -color-dataset-1: #5995bd;
-  -color-dataset-2: #d97347;
-  -color-dataset-3: #edb120;
-  -color-dataset-4: #da51f5;
-  -color-dataset-5: #77ac30;
-  -color-dataset-6: #4dbeee;
-  -color-dataset-7: #a2898d;
-  -fx-color-count: 7;
-}
-.chart:palette-modena, .renderer:palette-modena {
-  -color-dataset-1: CHART_COLOR_1;
-  -color-dataset-2: CHART_COLOR_2;
-  -color-dataset-3: CHART_COLOR_3;
-  -color-dataset-4: CHART_COLOR_4;
-  -color-dataset-5: CHART_COLOR_5;
-  -color-dataset-6: CHART_COLOR_6;
-  -color-dataset-7: CHART_COLOR_7;
-  -color-dataset-8: CHART_COLOR_8;
-  -fx-color-count: 8;
-}
-.chart:palette-atlantafx, .renderer:palette-atlantafx {
-  -color-dataset-1: -color-chart-1;
-  -color-dataset-2: -color-chart-2;
-  -color-dataset-3: -color-chart-3;
-  -color-dataset-4: -color-chart-4;
-  -color-dataset-5: -color-chart-5;
-  -color-dataset-6: -color-chart-6;
-  -color-dataset-7: -color-chart-7;
-  -color-dataset-8: -color-chart-8;
-  -fx-color-count: 8;
-}
-
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
   -fx-border-color: black;
@@ -227,6 +115,105 @@
   -fx-fill: rgba(65, 110, 244, 0.4078431373);
 }
 
+.chart:palette-misc, .renderer:palette-misc {
+  -color-dataset-1: #5DA5DA;
+  -color-dataset-2: #F15854;
+  -color-dataset-3: #FAA43A;
+  -color-dataset-4: #60BD68;
+  -color-dataset-5: #F17CB0;
+  -color-dataset-6: #B2912F;
+  -color-dataset-7: #B276B2;
+  -color-dataset-8: #DECF3F;
+  -color-dataset-9: #4D4D4D;
+  -fx-color-count: 9;
+}
+.chart:palette-adobe, .renderer:palette-adobe {
+  -color-dataset-1: #00a4e4;
+  -color-dataset-2: #ff0000;
+  -color-dataset-3: #fbb034;
+  -color-dataset-4: #ffdd00;
+  -color-dataset-5: #c1d82f;
+  -color-dataset-6: #8a7967;
+  -color-dataset-7: #6a737b;
+  -fx-color-count: 7;
+}
+.chart:palette-dell, .renderer:palette-dell {
+  -color-dataset-1: #0085c3;
+  -color-dataset-2: #7ab800;
+  -color-dataset-3: #f2af00;
+  -color-dataset-4: #dc5034;
+  -color-dataset-5: #6e2585;
+  -color-dataset-6: #71c6c1;
+  -color-dataset-7: #009bbb;
+  -color-dataset-8: #444444;
+  -fx-color-count: 8;
+}
+.chart:palette-equidistant, .renderer:palette-equidistant {
+  -color-dataset-1: #003f5c;
+  -color-dataset-2: #2f4b7c;
+  -color-dataset-3: #665191;
+  -color-dataset-4: #a05195;
+  -color-dataset-5: #d45087;
+  -color-dataset-6: #f95d6a;
+  -color-dataset-7: #ff7c43;
+  -color-dataset-8: #ffa600;
+  -fx-color-count: 8;
+}
+.chart:palette-tuneviewer, .renderer:palette-tuneviewer {
+  -color-dataset-1: #0000c8;
+  -color-dataset-2: #c80000;
+  -color-dataset-3: #00c800;
+  -color-dataset-4: orange;
+  -color-dataset-5: magenta;
+  -color-dataset-6: cyan;
+  -color-dataset-7: darkgray;
+  -color-dataset-8: pink;
+  -color-dataset-9: black;
+  -fx-color-count: 9;
+}
+.chart:palette-matlab-light, .renderer:palette-matlab-light {
+  -color-dataset-1: #0072bd;
+  -color-dataset-2: #d95319;
+  -color-dataset-3: #edb120;
+  -color-dataset-4: #7e2f8e;
+  -color-dataset-5: #77ac30;
+  -color-dataset-6: #4dbeee;
+  -color-dataset-7: #a2142f;
+  -fx-color-count: 7;
+}
+.chart:palette-matlab-dark, .renderer:palette-matlab-dark {
+  -color-dataset-1: #5995bd;
+  -color-dataset-2: #d97347;
+  -color-dataset-3: #edb120;
+  -color-dataset-4: #da51f5;
+  -color-dataset-5: #77ac30;
+  -color-dataset-6: #4dbeee;
+  -color-dataset-7: #a2898d;
+  -fx-color-count: 7;
+}
+.chart:palette-modena, .renderer:palette-modena {
+  -color-dataset-1: CHART_COLOR_1;
+  -color-dataset-2: CHART_COLOR_2;
+  -color-dataset-3: CHART_COLOR_3;
+  -color-dataset-4: CHART_COLOR_4;
+  -color-dataset-5: CHART_COLOR_5;
+  -color-dataset-6: CHART_COLOR_6;
+  -color-dataset-7: CHART_COLOR_7;
+  -color-dataset-8: CHART_COLOR_8;
+  -fx-color-count: 8;
+}
+.chart:palette-atlantafx, .renderer:palette-atlantafx {
+  -color-dataset-1: -color-chart-1;
+  -color-dataset-2: -color-chart-2;
+  -color-dataset-3: -color-chart-3;
+  -color-dataset-4: -color-chart-4;
+  -color-dataset-5: -color-chart-5;
+  -color-dataset-6: -color-chart-6;
+  -color-dataset-7: -color-chart-7;
+  -color-dataset-8: -color-chart-8;
+  -fx-color-count: 8;
+}
+
 .chart {
   -fx-padding: 0px;
   -fx-min-width: 100px;
@@ -236,6 +223,16 @@
   -fx-max-height: 4096px;
   -fx-max-width: 4096px;
   -fx-tool-bar-side: top;
+  -color-dataset-1: #0000c8;
+  -color-dataset-2: #c80000;
+  -color-dataset-3: #00c800;
+  -color-dataset-4: orange;
+  -color-dataset-5: magenta;
+  -color-dataset-6: cyan;
+  -color-dataset-7: darkgray;
+  -color-dataset-8: pink;
+  -color-dataset-9: black;
+  -fx-color-count: 9;
   -fx-color-palette: default;
 }
 .chart .chart-title {
@@ -292,6 +289,70 @@
 .dataset {
   -fx-stroke-width: 1.5;
   -fx-marker-stroke-width: 0.5;
+}
+.dataset.default-color0 {
+  -fx-stroke: -color-dataset-1;
+  -fx-fill: -color-dataset-1;
+}
+.dataset.default-color1 {
+  -fx-stroke: -color-dataset-2;
+  -fx-fill: -color-dataset-2;
+}
+.dataset.default-color2 {
+  -fx-stroke: -color-dataset-3;
+  -fx-fill: -color-dataset-3;
+}
+.dataset.default-color3 {
+  -fx-stroke: -color-dataset-4;
+  -fx-fill: -color-dataset-4;
+}
+.dataset.default-color4 {
+  -fx-stroke: -color-dataset-5;
+  -fx-fill: -color-dataset-5;
+}
+.dataset.default-color5 {
+  -fx-stroke: -color-dataset-6;
+  -fx-fill: -color-dataset-6;
+}
+.dataset.default-color6 {
+  -fx-stroke: -color-dataset-7;
+  -fx-fill: -color-dataset-7;
+}
+.dataset.default-color7 {
+  -fx-stroke: -color-dataset-8;
+  -fx-fill: -color-dataset-8;
+}
+.dataset.default-color8 {
+  -fx-stroke: -color-dataset-9;
+  -fx-fill: -color-dataset-9;
+}
+.dataset.default-color9 {
+  -fx-stroke: -color-dataset-10;
+  -fx-fill: -color-dataset-10;
+}
+.dataset.default-color10 {
+  -fx-stroke: -color-dataset-11;
+  -fx-fill: -color-dataset-11;
+}
+.dataset.default-color11 {
+  -fx-stroke: -color-dataset-12;
+  -fx-fill: -color-dataset-12;
+}
+.dataset.default-color12 {
+  -fx-stroke: -color-dataset-13;
+  -fx-fill: -color-dataset-13;
+}
+.dataset.default-color13 {
+  -fx-stroke: -color-dataset-14;
+  -fx-fill: -color-dataset-14;
+}
+.dataset.default-color14 {
+  -fx-stroke: -color-dataset-15;
+  -fx-fill: -color-dataset-15;
+}
+.dataset.default-color15 {
+  -fx-stroke: -color-dataset-16;
+  -fx-fill: -color-dataset-16;
 }
 
 .axis {
@@ -376,86 +437,6 @@
 .chart-vertical-zero-line,
 .chart-horizontal-zero-line {
   -fx-stroke: derive(-fx-text-background-color, 40%);
-}
-
-.dataset.default-color0 {
-  -fx-stroke: -color-dataset-1;
-  -fx-fill: -color-dataset-1;
-}
-
-.dataset.default-color1 {
-  -fx-stroke: -color-dataset-2;
-  -fx-fill: -color-dataset-2;
-}
-
-.dataset.default-color2 {
-  -fx-stroke: -color-dataset-3;
-  -fx-fill: -color-dataset-3;
-}
-
-.dataset.default-color3 {
-  -fx-stroke: -color-dataset-4;
-  -fx-fill: -color-dataset-4;
-}
-
-.dataset.default-color4 {
-  -fx-stroke: -color-dataset-5;
-  -fx-fill: -color-dataset-5;
-}
-
-.dataset.default-color5 {
-  -fx-stroke: -color-dataset-6;
-  -fx-fill: -color-dataset-6;
-}
-
-.dataset.default-color6 {
-  -fx-stroke: -color-dataset-7;
-  -fx-fill: -color-dataset-7;
-}
-
-.dataset.default-color7 {
-  -fx-stroke: -color-dataset-8;
-  -fx-fill: -color-dataset-8;
-}
-
-.dataset.default-color8 {
-  -fx-stroke: -color-dataset-9;
-  -fx-fill: -color-dataset-9;
-}
-
-.dataset.default-color9 {
-  -fx-stroke: -color-dataset-10;
-  -fx-fill: -color-dataset-10;
-}
-
-.dataset.default-color10 {
-  -fx-stroke: -color-dataset-11;
-  -fx-fill: -color-dataset-11;
-}
-
-.dataset.default-color11 {
-  -fx-stroke: -color-dataset-12;
-  -fx-fill: -color-dataset-12;
-}
-
-.dataset.default-color12 {
-  -fx-stroke: -color-dataset-13;
-  -fx-fill: -color-dataset-13;
-}
-
-.dataset.default-color13 {
-  -fx-stroke: -color-dataset-14;
-  -fx-fill: -color-dataset-14;
-}
-
-.dataset.default-color14 {
-  -fx-stroke: -color-dataset-15;
-  -fx-fill: -color-dataset-15;
-}
-
-.dataset.default-color15 {
-  -fx-stroke: -color-dataset-16;
-  -fx-fill: -color-dataset-16;
 }
 
 .chart:financial-classic .dataset.financial {
