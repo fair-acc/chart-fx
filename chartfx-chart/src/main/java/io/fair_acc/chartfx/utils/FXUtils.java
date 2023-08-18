@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.utils;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -62,7 +63,11 @@ public final class FXUtils {
         if (Platform.isFxApplicationThread()) {
             function.run();
         } else {
-            CompletableFuture.runAsync(function, Platform::runLater).get();
+            try {
+                CompletableFuture.runAsync(function, Platform::runLater).get();
+            } catch (ExecutionException ex) {
+                throw unwrapExecutionException(ex);
+            }
         }
     }
 
@@ -77,8 +82,12 @@ public final class FXUtils {
      * @throws Exception if a exception is occurred in the run method of the Runnable
      */
     public static <R> R runAndWait(final Supplier<R> function) throws Exception {
-        return Platform.isFxApplicationThread() ? function.get() :
-                CompletableFuture.supplyAsync(function, Platform::runLater).get();
+        try {
+            return Platform.isFxApplicationThread() ? function.get() :
+                    CompletableFuture.supplyAsync(function, Platform::runLater).get();
+        } catch (ExecutionException ex) {
+            throw unwrapExecutionException(ex);
+        }
     }
 
     /**
@@ -91,11 +100,23 @@ public final class FXUtils {
      * @param <T> generic for argument type
      * @param <R> generic for return type
      * @return function result of type R
-     * @throws Exception if a exception is occurred in the run method of the Runnable
+     * @throws Exception if an exception occurred in the run method of the Runnable
      */
     public static <T, R> R runAndWait(final T argument, final Function<T, R> function) throws Exception {
-        return Platform.isFxApplicationThread() ? function.apply(argument) :
-                CompletableFuture.supplyAsync(() -> function.apply(argument), Platform::runLater).get();
+        try {
+            return Platform.isFxApplicationThread() ? function.apply(argument) :
+                    CompletableFuture.supplyAsync(() -> function.apply(argument), Platform::runLater).get();
+        } catch (ExecutionException ex) {
+            throw unwrapExecutionException(ex);
+        }
+    }
+
+    private static Exception unwrapExecutionException(ExecutionException ex) {
+        // Unwrap original cause to match previous unit tests
+        if (ex.getCause() instanceof Exception) {
+            return (Exception) ex.getCause();
+        }
+        return ex;
     }
 
     public static void runFX(final Runnable run) {

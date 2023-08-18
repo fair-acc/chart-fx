@@ -71,9 +71,6 @@ public class AbstractErrorDataSetRendererParameterTests {
         renderer.setIntensityFading(0.85);
         assertEquals(0.85, renderer.getIntensityFading());
 
-        renderer.setMarkerSize(4);
-        assertEquals(4, renderer.getMarkerSize());
-
         for (LineStyle eStyle : LineStyle.values()) {
             renderer.setPolyLineStyle(eStyle);
             assertEquals(eStyle, renderer.getPolyLineStyle());

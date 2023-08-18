@@ -59,6 +59,23 @@ class DataSetStyleParserTest {
         assertEquals("System", parser.getFont().orElseThrow().getFamily());
         assertEquals(FontWeight.BOLD, parser.getFontWeight().orElseThrow());
 
+        style = builder.reset()
+                .setStrokeWidth(3)
+                .setFont("Serif")
+                .setFontSize(20)
+                .setFontItalic(true)
+                .setFontWeight("bold")
+                .setStrokeWidth(3)
+                .setFont("monospace")
+                .setFontItalic(true)
+                .setStroke("0xEE00EE")
+                .setFill("0xEE00EE")
+                .setStrokeDashPattern(5, 8, 5, 16)
+                .setFill("blue")
+                .setStrokeDashPattern(3, 5, 8, 5)
+                .build();
+        assertTrue(parser.tryParse(style));
+        assertArrayEquals(new double[]{3, 5, 8, 5}, parser.getLineDashPattern().orElseThrow());
     }
 
 }

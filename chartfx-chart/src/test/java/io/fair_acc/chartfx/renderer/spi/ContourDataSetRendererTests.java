@@ -126,7 +126,11 @@ public class ContourDataSetRendererTests {
 
     @TestFx
     public void test() {
-        final ContourDataSetCache cache = new ContourDataSetCache(new XYChart(), new ContourDataSetRenderer(), getTestDataSet());
+        var chart = new XYChart();
+        var renderer = new ContourDataSetRenderer();
+        chart.getRenderers().add(renderer);
+        renderer.updateAxes();
+        final ContourDataSetCache cache = new ContourDataSetCache(chart, renderer, getTestDataSet());
         Assertions.assertDoesNotThrow(() -> cache.convertDataArrayToImage(TEST_DATA_Z, TEST_DATA_X.length, TEST_DATA_Y.length, ColorGradient.DEFAULT), "data to colour image conversion");
     }
 

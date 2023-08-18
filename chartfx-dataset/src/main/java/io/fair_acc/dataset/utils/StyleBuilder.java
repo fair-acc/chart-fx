@@ -102,13 +102,17 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
             return 0;
         }
         int addedEntries = 0;
-        final String[] keyVals = AT_LEAST_ONE_WHITESPACE_PATTERN.matcher(style).replaceAll("").split(";");
-        for (final String keyVal : keyVals) {
-            final String[] parts = STYLE_ASSIGNMENT_PATTERN.split(keyVal, 2);
-            if (parts.length <= 1) {
+        for (final String property : PROPERTY_END_PATTERN.split(style)) {
+            final String[] parts = STYLE_ASSIGNMENT_PATTERN.split(property, 2);
+            if (parts.length != 2) {
                 continue;
             }
-            consumer.accept(parts[0], QUOTES_PATTERN.matcher(parts[1]).replaceAll(""));
+            String key = parts[0].trim();
+            String value = parts[1].trim();
+            if (value.startsWith("\"") || value.startsWith("'")) {
+                value = value.substring(1, value.length() - 1);
+            }
+            consumer.accept(key, value);
             addedEntries++;
         }
         return addedEntries;
@@ -127,8 +131,7 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
         return localized;
     }
 
-    private static final Pattern AT_LEAST_ONE_WHITESPACE_PATTERN = Pattern.compile("\\s+");
-    private static final Pattern QUOTES_PATTERN = Pattern.compile("[\"']");
+    private static final Pattern PROPERTY_END_PATTERN = Pattern.compile(";");
     private static final Pattern STYLE_ASSIGNMENT_PATTERN = Pattern.compile("[=:]");
 
 }

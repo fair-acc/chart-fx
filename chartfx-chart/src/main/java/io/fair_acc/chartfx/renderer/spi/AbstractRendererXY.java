@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
@@ -19,11 +20,21 @@ import java.security.InvalidParameterException;
 public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extends AbstractRenderer<R> {
 
     public AbstractRendererXY() {
-        chartProperty().addListener((observable, oldValue, chart) -> {
-            if (chart != null && !(chart instanceof XYChart)) {
-                throw new InvalidParameterException("must be derivative of XYChart for renderer - " + this.getClass().getSimpleName());
-            }
-        });
+        chartProperty().addListener((obs, old, chart) -> requireChartXY(chart));
+    }
+
+    @Override
+    public void setChart(Chart chart) {
+        // throw early to provide a better stacktrace without lots of listeners
+        super.setChart(requireChartXY(chart));
+    }
+
+    private XYChart requireChartXY(Chart chart) {
+        if (chart == null || chart instanceof XYChart) {
+            return (XYChart) chart;
+        }
+        throw new InvalidParameterException("must be derivative of XYChart for renderer - "
+                + this.getClass().getSimpleName());
     }
 
     @Override
