@@ -16,6 +16,7 @@ import io.fair_acc.dataset.locks.DefaultDataSetLock;
 import io.fair_acc.dataset.spi.utils.MathUtils;
 import io.fair_acc.dataset.spi.utils.StringHashMapList;
 import io.fair_acc.dataset.utils.AssertUtils;
+import io.fair_acc.dataset.utils.IndexedStringConsumer;
 
 /**
  * <p>
@@ -379,6 +380,21 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
         return dataLabels.get(index);
     }
 
+    @Override
+    public boolean hasDataLabels() {
+        return !dataLabels.isEmpty();
+    }
+
+    @Override
+    public void forEachDataLabel(int minIx, int maxIx, IndexedStringConsumer consumer) {
+        for (Map.Entry<Integer, String> entry : dataLabels.entrySet()) {
+            int index = entry.getKey();
+            if (index >= minIx && index < maxIx) {
+                consumer.accept(index, entry.getValue());
+            }
+        }
+    }
+
     /**
      * @return data label map for given data point
      */
@@ -432,6 +448,21 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     @Override
     public String getStyle(final int index) {
         return dataStyles.get(index);
+    }
+
+    @Override
+    public boolean hasStyles() {
+        return !dataStyles.isEmpty();
+    }
+
+    @Override
+    public void forEachStyle(int minIx, int maxIx, IndexedStringConsumer consumer) {
+        for (Map.Entry<Integer, String> entry : dataStyles.entrySet()) {
+            int index = entry.getKey();
+            if (index >= minIx && index < maxIx) {
+                consumer.accept(index, entry.getValue());
+            }
+        }
     }
 
     @SuppressWarnings("unchecked")

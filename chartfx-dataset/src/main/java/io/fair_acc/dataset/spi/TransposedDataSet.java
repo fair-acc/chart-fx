@@ -94,6 +94,11 @@ public class TransposedDataSet implements DataSet {
     }
 
     @Override
+    public boolean hasDataLabels() {
+        return dataSet.hasDataLabels();
+    }
+
+    @Override
     public int getDimension() {
         return permutation.length;
     }
@@ -121,6 +126,11 @@ public class TransposedDataSet implements DataSet {
     @Override
     public String getStyle(int index) {
         return dataSet.getStyle(index);
+    }
+
+    @Override
+    public boolean hasStyles() {
+        return dataSet.hasStyles();
     }
 
     /**

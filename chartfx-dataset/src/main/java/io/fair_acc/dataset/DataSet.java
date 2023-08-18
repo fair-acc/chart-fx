@@ -6,6 +6,7 @@ import java.util.List;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
+import io.fair_acc.dataset.utils.IndexedStringConsumer;
 
 /**
  * Basic interface for observable data sets.
@@ -61,6 +62,25 @@ public interface DataSet extends EventSource, Serializable {
     String getDataLabel(int index);
 
     /**
+     * @return true if the dataset has at least one data label
+     */
+    boolean hasDataLabels();
+
+    /**
+     * @param minIx first index to consider
+     * @param maxIx last index, exclusive
+     * @param consumer action for each specified data label
+     */
+    default void forEachDataLabel(int minIx, int maxIx, IndexedStringConsumer consumer) {
+        for (int i = minIx; i < maxIx; i++) {
+            String value = getDataLabel(i);
+            if (value != null) {
+                consumer.accept(i, value);
+            }
+        }
+    }
+
+    /**
      * @return number of dimensions
      */
     int getDimension();
@@ -100,6 +120,25 @@ public interface DataSet extends EventSource, Serializable {
      * @return user-specific data set style description (ie. may be set by user)
      */
     String getStyle(int index);
+
+    /**
+     * @return true if the dataset has at least one style
+     */
+    boolean hasStyles();
+
+    /**
+     * @param minIx first index to consider
+     * @param maxIx last index, exclusive
+     * @param consumer action for each specified style
+     */
+    default void forEachStyle(int minIx, int maxIx, IndexedStringConsumer consumer) {
+        for (int i = minIx; i < maxIx; i++) {
+            String value = getStyle(i);
+            if (value != null) {
+                consumer.accept(i, value);
+            }
+        }
+    }
 
     /**
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')

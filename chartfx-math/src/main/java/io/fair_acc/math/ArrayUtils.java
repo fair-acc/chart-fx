@@ -378,8 +378,14 @@ public final class ArrayUtils {
      * @return a new array if the existing one is not large enough
      */
     public static <T> T[] resizeMinNulled(T[] array, int minSize, IntFunction<T[]> constructor) {
+      return resizeMin(array, minSize, constructor, true);
+    }
+
+    public static <T> T[] resizeMin(T[] array, int minSize, IntFunction<T[]> constructor, boolean setNull) {
         if(array != null && array.length >= minSize) {
-            Arrays.fill(array, 0, minSize, null);
+            if (setNull) {
+                Arrays.fill(array, 0, minSize, null);
+            }
             return array;
         }
         return constructor.apply(growSize(minSize, array, arr -> arr.length));
