@@ -291,68 +291,84 @@
   -fx-marker-stroke-width: 0.5;
 }
 .dataset.default-color0 {
-  -fx-stroke: -color-dataset-1;
-  -fx-fill: -color-dataset-1;
+  -color-dataset: -color-dataset-1;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color1 {
-  -fx-stroke: -color-dataset-2;
-  -fx-fill: -color-dataset-2;
+  -color-dataset: -color-dataset-2;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color2 {
-  -fx-stroke: -color-dataset-3;
-  -fx-fill: -color-dataset-3;
+  -color-dataset: -color-dataset-3;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color3 {
-  -fx-stroke: -color-dataset-4;
-  -fx-fill: -color-dataset-4;
+  -color-dataset: -color-dataset-4;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color4 {
-  -fx-stroke: -color-dataset-5;
-  -fx-fill: -color-dataset-5;
+  -color-dataset: -color-dataset-5;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color5 {
-  -fx-stroke: -color-dataset-6;
-  -fx-fill: -color-dataset-6;
+  -color-dataset: -color-dataset-6;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color6 {
-  -fx-stroke: -color-dataset-7;
-  -fx-fill: -color-dataset-7;
+  -color-dataset: -color-dataset-7;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color7 {
-  -fx-stroke: -color-dataset-8;
-  -fx-fill: -color-dataset-8;
+  -color-dataset: -color-dataset-8;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color8 {
-  -fx-stroke: -color-dataset-9;
-  -fx-fill: -color-dataset-9;
+  -color-dataset: -color-dataset-9;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color9 {
-  -fx-stroke: -color-dataset-10;
-  -fx-fill: -color-dataset-10;
+  -color-dataset: -color-dataset-10;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color10 {
-  -fx-stroke: -color-dataset-11;
-  -fx-fill: -color-dataset-11;
+  -color-dataset: -color-dataset-11;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color11 {
-  -fx-stroke: -color-dataset-12;
-  -fx-fill: -color-dataset-12;
+  -color-dataset: -color-dataset-12;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color12 {
-  -fx-stroke: -color-dataset-13;
-  -fx-fill: -color-dataset-13;
+  -color-dataset: -color-dataset-13;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color13 {
-  -fx-stroke: -color-dataset-14;
-  -fx-fill: -color-dataset-14;
+  -color-dataset: -color-dataset-14;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color14 {
-  -fx-stroke: -color-dataset-15;
-  -fx-fill: -color-dataset-15;
+  -color-dataset: -color-dataset-15;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 .dataset.default-color15 {
-  -fx-stroke: -color-dataset-16;
-  -fx-fill: -color-dataset-16;
+  -color-dataset: -color-dataset-16;
+  -fx-stroke: -color-dataset;
+  -fx-fill: -color-dataset;
 }
 
 .axis {
