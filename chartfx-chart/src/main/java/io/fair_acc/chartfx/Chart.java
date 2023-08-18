@@ -279,9 +279,6 @@ public abstract class Chart extends Region implements EventSource {
         menuPane.setContent(measurementPane);
         getChildren().add(menuPane);
 
-        // TODO: get rid of default instance. It's created if anyone wants to use getDatasets()
-        getRenderers().add(new ErrorDataSetRenderer());
-
     }
 
     @Override

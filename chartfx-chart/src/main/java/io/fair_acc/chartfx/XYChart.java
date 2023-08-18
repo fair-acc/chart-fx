@@ -96,6 +96,9 @@ public class XYChart extends Chart {
                 gridRenderer.drawOnTopProperty());
 
         getRenderers().addListener(this::rendererChanged);
+
+        // TODO: get rid of default instance. It's created if anyone wants to use getDatasets()
+        getRenderers().add(new ErrorDataSetRenderer());
     }
 
     /**
