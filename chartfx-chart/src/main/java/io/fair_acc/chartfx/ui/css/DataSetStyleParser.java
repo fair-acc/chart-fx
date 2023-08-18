@@ -1,8 +1,8 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.XYChartCss;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.scene.paint.Paint;
 
 import java.util.Optional;
@@ -13,29 +13,28 @@ import java.util.OptionalDouble;
  *
  * @author ennerf
  */
-public class ErrorStyleParser extends AbstractStyleParser {
+public class DataSetStyleParser extends AbstractStyleParser {
 
     @Override
     protected boolean parseEntry(String key, String value) {
-        // TODO: account for lowercase and/or switch to valid CSS names
         switch (key) {
 
-            case XYChartCss.MARKER_TYPE:
+            case DataSetStyleBuilder.MARKER_TYPE:
                 return isValid(marker = parse(value, DefaultMarker::get));
 
-            case XYChartCss.FILL_COLOR:
+            case DataSetStyleBuilder.FILL_COLOR:
                 return isValid(fillColor = parseColor(value));
 
-            case XYChartCss.MARKER_COLOR:
+            case DataSetStyleBuilder.MARKER_COLOR:
                 return isValid(markerColor = parseColor(value));
 
-            case XYChartCss.STROKE_COLOR:
+            case DataSetStyleBuilder.STROKE_COLOR:
                 return isValid(strokeColor = parseColor(value));
 
-            case XYChartCss.MARKER_SIZE:
+            case DataSetStyleBuilder.MARKER_SIZE:
                 return isValid(markerSize = parseDouble(value));
 
-            case XYChartCss.STROKE_WIDTH:
+            case DataSetStyleBuilder.STROKE_WIDTH:
                 return isValid(lineWidth = parseDouble(value));
 
             default:

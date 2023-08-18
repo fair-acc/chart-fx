@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -134,22 +135,6 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
         return retVal;
     }
 
-    protected void modifyStyle(final DataSet dataSet, final int dataSetIndex) {
-        // modify style and add dsIndex if there is not strokeColor or dsIndex
-        // Marker
-        final String style = dataSet.getStyle();
-        final Map<String, String> map = StyleParser.splitIntoMap(style);
-
-        final String stroke = map.get(XYChartCss.DATASET_STROKE_COLOR.toLowerCase());
-        final String fill = map.get(XYChartCss.DATASET_FILL_COLOR.toLowerCase());
-        final String index = map.get(XYChartCss.DATASET_INDEX.toLowerCase());
-
-        if (stroke == null && fill == null && index == null) {
-            map.put(XYChartCss.DATASET_INDEX, Integer.toString(dataSetIndex));
-            dataSet.setStyle(StyleParser.mapToString(map));
-        }
-    }
-
     @Override
     protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
         final double originalIntensity = style.getIntensity();
@@ -211,12 +196,13 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
                     ((EditableDataSet) ds).setName(ds.getName().split("_")[0] + "History_{-" + index + "}");
                 }
 
-                // modify style TODO: get rid of old-style style settings
-                final String style = ds.getStyle();
-                final Map<String, String> map = StyleParser.splitIntoMap(style);
-                map.put(XYChartCss.DATASET_INTENSITY.toLowerCase(), Double.toString(fading));
-                map.put(XYChartCss.DATASET_SHOW_IN_LEGEND.toLowerCase(), Boolean.toString(false));
-                ds.setStyle(StyleParser.mapToString(map));
+                // modify style
+                // TODO: is this doing anything now?
+                ds.setStyle(DataSetStyleBuilder.getInstance()
+                        .withExisting(ds.getStyle())
+                        .setIntensity(fading)
+                        .setShowInLegend(false)
+                        .build());
 
                 if (!getDatasets().contains(ds)) {
                     try {

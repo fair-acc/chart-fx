@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.ErrorStyleParser;
+import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
 import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.animation.AnimationTimer;
@@ -43,7 +43,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     private final IntegerProperty roundedCornerRadius = new SimpleIntegerProperty(this, "roundedCornerRadius", 10);
     private final Map<String, Double> scaling = new ConcurrentHashMap<>();
     private final AnimationTimer timer = new MyTimer();
-    private final ErrorStyleParser styleParser = new ErrorStyleParser();
+    private final DataSetStyleParser styleParser = new DataSetStyleParser();
 
     public HistogramRenderer() {
         super();

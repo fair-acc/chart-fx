@@ -1,7 +1,7 @@
 package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.ErrorStyleParser;
+import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
 import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -39,7 +39,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     @Deprecated // should go on styleable node
     private Marker marker = DefaultMarker.DEFAULT;
 
-    private final ErrorStyleParser styleParser = new ErrorStyleParser();
+    private final DataSetStyleParser styleParser = new DataSetStyleParser();
 
     /**
      * Creates new <code>ErrorDataSetRenderer</code>.
