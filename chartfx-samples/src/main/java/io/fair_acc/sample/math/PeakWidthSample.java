@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
@@ -19,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fair_acc.chartfx.XYChartCss;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
@@ -35,8 +35,8 @@ import io.fair_acc.sample.math.utils.DemoChart;
 public class PeakWidthSample extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(PeakWidthSample.class);
     private static final String FILE_NAME = "./LongSchottkySIS18.dat";
-    private static final String MEAS_STROKE_COLOUR = "strokeColor=lightGray";
-    private static final String FONT_SIZE = XYChartCss.FONT_SIZE + "=20;";
+    private static final String MEAS_STROKE_COLOUR = DataSetStyleBuilder.instance().setStroke("lightGray").build();
+    private static final String FONT_SIZE = DataSetStyleBuilder.instance().setFontSize(20).build();
     private static final char SIGMA_CHAR = (char) 0x03C3;
     private static final int N_SAMPLES = 3000;
     private static final double A1 = 1.05;

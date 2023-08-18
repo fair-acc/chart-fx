@@ -20,8 +20,6 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConfig;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.CalendarUtils;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.FinancialTestUtils;
@@ -77,7 +75,7 @@ public class CandleStickRendererTest {
         rendererTested.addPaintAfterEp(data -> assertNotNull(data.gc));
         assertEquals(1, rendererTested.getPaintAfterEps().size());
 
-        new FinancialColorSchemeConfig().applyTo(FinancialColorSchemeConstants.SAND, chart);
+        FinancialTheme.Sand.applyPseudoClasses(chart);
 
         stage.setScene(new Scene(chart, 800, 600));
         stage.show();
@@ -135,7 +133,7 @@ public class CandleStickRendererTest {
 
     @TestFx
     public void noXyChartInstance() {
-        assertThrows(InvalidParameterException.class, () -> rendererTested.render(new Canvas(300, 200).getGraphicsContext2D(), new TestChart(), 0, null));
+        assertThrows(InvalidParameterException.class, () -> rendererTested.setChart(new TestChart()));
     }
 
     @Test

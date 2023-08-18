@@ -29,7 +29,7 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
     }
 
     protected T setDoubleProp(String key, double value) {
-        properties.put(key, String.valueOf(value));
+        properties.put(key, english(value));
         return getThis();
     }
 
@@ -44,7 +44,7 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
         builder.setLength(0);
         builder.append(values[0]);
         for (int i = 1; i < values.length; i++) {
-            builder.append(" ").append(values[i]);
+            builder.append(" ").append(english(values[i]));
         }
         return builder.toString();
     }
@@ -60,11 +60,14 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
     }
 
     protected T setColorProp(String key, int r, int g, int b, double a) {
-        properties.put(key, String.format("rgb(%d,%d,%d,%f)", r & 0xFF, g & 0xFF, b & 0xFF, a));
+        properties.put(key, String.format("rgba(%d,%d,%d,%s)", r & 0xFF, g & 0xFF, b & 0xFF, english(a)));
         return getThis();
     }
 
     public String build() {
+        if (properties.isEmpty()) {
+            return "";
+        }
         builder.setLength(0);
 
         // add all entries
@@ -72,6 +75,10 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
             if (entry.getKey() != null && entry.getValue() != null) {
                 builder.append(entry.getKey()).append(": ").append(entry.getValue()).append(";\n");
             }
+        }
+
+        if (builder.length() == 0) {
+            return "";
         }
 
         // remove last newline
@@ -90,7 +97,7 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
     private final HashMap<String, String> properties = new HashMap<>();
     private final StringBuilder builder = new StringBuilder();
 
-    public static int forEachProperty(String style, BiConsumer<String,String> consumer) {
+    public static int forEachProperty(String style, BiConsumer<String, String> consumer) {
         if (style == null || style.isEmpty()) {
             return 0;
         }
@@ -105,6 +112,19 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
             addedEntries++;
         }
         return addedEntries;
+    }
+
+    private String english(double value) {
+        // The Double parsing can't deal with non-english locales,
+        // but there is still no good Java API for getting a number
+        // without trailing zeros in a specific locale without setting
+        // the default locale. Schubfach is in the chart project, so
+        // it's easiest to just replace the comma if we encounter one.
+        String localized = String.valueOf(value);
+        if (localized.contains(",")) {
+            return localized.replace(',', '.');
+        }
+        return localized;
     }
 
     private static final Pattern AT_LEAST_ONE_WHITESPACE_PATTERN = Pattern.compile("\\s+");

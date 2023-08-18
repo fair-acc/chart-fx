@@ -19,8 +19,6 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConfig;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.CalendarUtils;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.FinancialTestUtils;
 import io.fair_acc.chartfx.renderer.spi.financial.utils.Interval;
@@ -88,7 +86,7 @@ class PositionFinancialRendererPaintAfterEPTest {
         // Extension point usage
         candleStickRenderer.addPaintAfterEp(positionPaintAfterEPTested);
 
-        new FinancialColorSchemeConfig().applyTo(FinancialColorSchemeConstants.SAND, chart);
+        FinancialTheme.Sand.applyPseudoClasses(chart);
 
         stage.setScene(new Scene(chart, 800, 600));
         stage.show();

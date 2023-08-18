@@ -6,40 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Collections;
-import java.util.List;
-
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.scene.Node;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.Stage;
-
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
-import org.testfx.framework.junit5.Start;
 
 import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.XYChartCss;
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.legend.spi.DefaultLegend;
-import io.fair_acc.chartfx.legend.spi.DefaultLegend.LegendItem;
-import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
-import io.fair_acc.chartfx.ui.utils.TestFx;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.testdata.spi.SineFunction;
 
 /**
  * Tests {@link io.fair_acc.chartfx.legend.Legend }, {@link io.fair_acc.chartfx.legend.spi.DefaultLegend } and it's position in {@link Chart }
