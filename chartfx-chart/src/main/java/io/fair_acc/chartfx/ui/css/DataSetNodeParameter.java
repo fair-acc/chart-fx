@@ -7,6 +7,7 @@ import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.css.*;
 import javafx.scene.Node;
 import javafx.scene.paint.Color;
@@ -21,16 +22,6 @@ import java.util.WeakHashMap;
  * @author ennerf
  */
 public abstract class DataSetNodeParameter extends TextStyle {
-
-    public DataSetNodeParameter() {
-        PropUtil.runOnChange(super::incrementChangeCounter,
-                colorIndex,
-                intensity,
-                showInLegend,
-                actualMarkerType,
-                markerSize
-        );
-    }
 
     public Paint getMarkerColor() {
         return getModifiedColor(getStroke());
@@ -91,24 +82,29 @@ public abstract class DataSetNodeParameter extends TextStyle {
         return ((Color) color).deriveColor(0, scale, 1.0, scale);
     }
 
+    protected <T extends ObservableValue<?>> T addOnChange(T observable) {
+        PropUtil.runOnChange(this::incrementChangeCounter, observable);
+        return observable;
+    }
+
     private final IntegerProperty localIndex = new SimpleIntegerProperty();
     private final IntegerProperty globalIndex = new SimpleIntegerProperty();
-    private final IntegerProperty colorIndex = new SimpleIntegerProperty();
-    private final DoubleProperty intensity = css().createDoubleProperty(this, "intensity", 100);
-    private final BooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
+    private final IntegerProperty colorIndex = addOnChange(new SimpleIntegerProperty());
+    private final DoubleProperty intensity = addOnChange(css().createDoubleProperty(this, "intensity", 100));
+    private final BooleanProperty showInLegend = addOnChange(css().createBooleanProperty(this, "showInLegend", true));
 
     // The CSS enum property can't be set to the base interface, so we provide a user binding that overrides the CSS
     private final ObjectProperty<DefaultMarker> markerType = css().createEnumProperty(this, "markerType", DefaultMarker.DEFAULT, true, DefaultMarker.class);
     private final ObjectProperty<Marker> userMarkerType = new SimpleObjectProperty<>(null);
-    private final ObjectBinding<Marker> actualMarkerType = Bindings.createObjectBinding(() -> {
+    private final ObjectBinding<Marker> actualMarkerType = addOnChange(Bindings.createObjectBinding(() -> {
         return userMarkerType.get() != null ? userMarkerType.get() : markerType.get();
-    }, userMarkerType, markerType);
+    }, userMarkerType, markerType));
 
     // Marker specific properties
-    private final DoubleProperty markerStrokeWidth = css().createDoubleProperty(this, "markerStrokeWidth", 0.5);
-    private final DoubleProperty markerSize = css().createDoubleProperty(this, "markerSize", 1.5, true, (oldVal, newVal) -> {
+    private final DoubleProperty markerStrokeWidth = addOnChange(css().createDoubleProperty(this, "markerStrokeWidth", 0.5));
+    private final DoubleProperty markerSize = addOnChange(css().createDoubleProperty(this, "markerSize", 1.5, true, (oldVal, newVal) -> {
         return newVal >= 0 ? newVal : oldVal;
-    });
+    }));
 
     public int getLocalIndex() {
         return localIndex.get();

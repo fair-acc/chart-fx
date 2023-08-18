@@ -4,6 +4,7 @@ import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
 import io.fair_acc.chartfx.ui.css.*;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.DataSet;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -29,232 +30,232 @@ public class FinancialDataSetNode extends DataSetNode {
     /**
      * The line width  which is used for painting base shadow of the dataset
      */
-    private final DoubleProperty shadowLineWidth = css().createDoubleProperty(this, "shadowLineWidth", 2.5d);
+    private final DoubleProperty shadowLineWidth = addOnChange(css().createDoubleProperty(this, "shadowLineWidth", 2.5d));
 
     /**
      * Transposition of original object to paint shadowed object in percent
      */
-    private final DoubleProperty shadowTransPercent = css().createDoubleProperty(this, "shadowTransPercent", 0.5d);
+    private final DoubleProperty shadowTransPercent = addOnChange(css().createDoubleProperty(this, "shadowTransPercent", 0.5d));
 
     // Candlesticks ----------------------------------------------------------
 
     /**
      * The candle color for candle's upstick
      */
-    private final ObjectProperty<Paint> candleLongColor = css().createPaintProperty(this, "candleLongColor", Color.GREEN);
+    private final ObjectProperty<Paint> candleLongColor = addOnChange(css().createPaintProperty(this, "candleLongColor", Color.GREEN));
 
     /**
      * The candle color for candle's downstick
      */
-    private final ObjectProperty<Paint> candleShortColor = css().createPaintProperty(this, "candleShortColor", Color.RED);
+    private final ObjectProperty<Paint> candleShortColor = addOnChange(css().createPaintProperty(this, "candleShortColor", Color.RED));
 
     /**
      * The candle wicks color for candle's upstick
      */
-    private final ObjectProperty<Paint> candleLongWickColor = css().createPaintProperty(this, "candleLongWickColor", Color.BLACK);
+    private final ObjectProperty<Paint> candleLongWickColor = addOnChange(css().createPaintProperty(this, "candleLongWickColor", Color.BLACK));
 
     /**
      * The candle wicks color for candle's downstick
      */
-    private final ObjectProperty<Paint> candleShortWickColor = css().createPaintProperty(this, "candleShortWickColor", Color.BLACK);
+    private final ObjectProperty<Paint> candleShortWickColor = addOnChange(css().createPaintProperty(this, "candleShortWickColor", Color.BLACK));
 
     /**
      * If available, generated candlestick shadow with this defined color and transparency
      */
-    private final ObjectProperty<Paint> candleShadowColor = css().createPaintProperty(this, "candleShadowColor", null);
+    private final ObjectProperty<Paint> candleShadowColor = addOnChange(css().createPaintProperty(this, "candleShadowColor", null));
 
     /**
      * Volume Long bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
      */
-    private final ObjectProperty<Paint> candleVolumeLongColor = css().createPaintProperty(this, "candleVolumeLongColor", DEFAULT_CANDLE_VOLUME_LONG_COLOR );
+    private final ObjectProperty<Paint> candleVolumeLongColor = addOnChange(css().createPaintProperty(this, "candleVolumeLongColor", DEFAULT_CANDLE_VOLUME_LONG_COLOR));
     private static final Color DEFAULT_CANDLE_VOLUME_LONG_COLOR = Color.rgb(139, 199, 194, 0.2);
 
     /**
      * Volume Short bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
      */
-    private final ObjectProperty<Paint> candleVolumeShortColor = css().createPaintProperty(this, "candleVolumeShortColor", DEFAULT_CANDLE_VOLUME_SHORT_COLOR);
+    private final ObjectProperty<Paint> candleVolumeShortColor = addOnChange(css().createPaintProperty(this, "candleVolumeShortColor", DEFAULT_CANDLE_VOLUME_SHORT_COLOR));
     private static final Color DEFAULT_CANDLE_VOLUME_SHORT_COLOR = Color.rgb(235, 160, 159, 0.2);
 
     /**
      * Candle/bar relative width against actual scaled view. Defined in percentage range: {@literal <}0.0, 1.0{@literal >}
      */
-    private final DoubleProperty barWidthPercent = css().createDoubleProperty(this, "barWidthPercent", 0.5d);
+    private final DoubleProperty barWidthPercent = addOnChange(css().createDoubleProperty(this, "barWidthPercent", 0.5d));
 
     // HiLow (OHLC) ----------------------------------------------------------
 
     /**
      * The ohlc body color for OHLC's upstick
      */
-    private final ObjectProperty<Paint> highLowLongColor = css().createPaintProperty(this, "highLowLongColor", Color.GREEN);
+    private final ObjectProperty<Paint> highLowLongColor = addOnChange(css().createPaintProperty(this, "highLowLongColor", Color.GREEN));
 
     /**
      * The ohlc body color for OHLC's downstick
      */
-    private final ObjectProperty<Paint> highLowShortColor = css().createPaintProperty(this, "highLowShortColor", Color.RED);
+    private final ObjectProperty<Paint> highLowShortColor = addOnChange(css().createPaintProperty(this, "highLowShortColor", Color.RED));
 
     /**
      * The ohlc body stroke for OHLC's
      */
-     private final DoubleProperty highLowBodyLineWidth = css().createDoubleProperty(this, "highLowBodyLineWidth", 1.2d);
+    private final DoubleProperty highLowBodyLineWidth = addOnChange(css().createDoubleProperty(this, "highLowBodyLineWidth", 1.2d));
 
     /**
      * The ohlc color for OHLC's open/close ticks
      */
-    private final ObjectProperty<Paint> highLowLongTickColor = css().createPaintProperty(this, "highLowLongTickColor", Color.GREEN);
+    private final ObjectProperty<Paint> highLowLongTickColor = addOnChange(css().createPaintProperty(this, "highLowLongTickColor", Color.GREEN));
 
     /**
      * The ohlc color for OHLC's open/close ticks
      */
-    private final ObjectProperty<Paint> highLowShortTickColor = css().createPaintProperty(this, "highLowShortTickColor", Color.RED);
+    private final ObjectProperty<Paint> highLowShortTickColor = addOnChange(css().createPaintProperty(this, "highLowShortTickColor", Color.RED));
 
     /**
      * Volume Long bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
      * TODO: not used anywhere
      */
-    private final ObjectProperty<Paint> highLowVolumeLongColor = css().createPaintProperty(this, "highLowVolumeLongColor", Color.GREEN);
+    private final ObjectProperty<Paint> highLowVolumeLongColor = addOnChange(css().createPaintProperty(this, "highLowVolumeLongColor", Color.GREEN));
 
     /**
      * Volume Short bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
      * TODO: not used anywhere
      */
-    private final ObjectProperty<Paint> highLowVolumeShortColor = css().createPaintProperty(this, "highLowVolumeShortColor", Color.RED);
+    private final ObjectProperty<Paint> highLowVolumeShortColor = addOnChange(css().createPaintProperty(this, "highLowVolumeShortColor", Color.RED));
 
     /**
      * The ohlc open/close tick stroke for OHLC's
      */
-     private final DoubleProperty highLowTickLineWidth = css().createDoubleProperty(this, "highLowTickLineWidth", 1.2d);
+    private final DoubleProperty highLowTickLineWidth = addOnChange(css().createDoubleProperty(this, "highLowTickLineWidth", 1.2d));
 
     /**
      * If available, generated HiLow OHLC shadow with this defined color and transparency
      */
-    private final ObjectProperty<Paint> hiLowShadowColor = css().createPaintProperty(this, "hiLowShadowColor", null);
+    private final ObjectProperty<Paint> hiLowShadowColor = addOnChange(css().createPaintProperty(this, "hiLowShadowColor", null));
 
     /**
      * HiLow (OHLC) relative width against actual scaled view. Defined in percentage range: {@literal <}0.0, 1.0{@literal >}
      */
-     private final DoubleProperty hiLowBarWidthPercent = css().createDoubleProperty(this, "hiLowBarWidthPercent", 0.6d);
+    private final DoubleProperty hiLowBarWidthPercent = addOnChange(css().createDoubleProperty(this, "hiLowBarWidthPercent", 0.6d));
 
     // Position / Order Renderers ----------------------------------------------------------
 
     /**
      * Position renderer the main ratio for resizing of the final position paint
      */
-     private final DoubleProperty positionPaintMainRatio = css().createDoubleProperty(this, "positionPaintMainRatio", 5.157d);
+    private final DoubleProperty positionPaintMainRatio = addOnChange(css().createDoubleProperty(this, "positionPaintMainRatio", 5.157d));
 
     /**
      * Small triangle defines the filled price for entry long position color
      */
-    private final ObjectProperty<Paint> positionTriangleLongColor = css().createPaintProperty(this, "positionTriangleLongColor", Color.GREEN);
+    private final ObjectProperty<Paint> positionTriangleLongColor = addOnChange(css().createPaintProperty(this, "positionTriangleLongColor", Color.GREEN));
 
     /**
      * Small triangle defines the filled price for entry short position color
      */
-    private final ObjectProperty<Paint> positionTriangleShortColor = css().createPaintProperty(this, "positionTriangleShortColor", Color.RED);
+    private final ObjectProperty<Paint> positionTriangleShortColor = addOnChange(css().createPaintProperty(this, "positionTriangleShortColor", Color.RED));
 
     /**
      * Small triangle defines the filled price for exit long and short positions color
      */
-    private final ObjectProperty<Paint> positionTriangleExitColor = css().createPaintProperty(this, "positionTriangleExitColor", Color.BLACK);
+    private final ObjectProperty<Paint> positionTriangleExitColor = addOnChange(css().createPaintProperty(this, "positionTriangleExitColor", Color.BLACK));
 
     /**
      * The arrow shows bars where the trade is present, this is a entry long position color
      */
-    private final ObjectProperty<Paint> positionArrowLongColor = css().createPaintProperty(this, "positionArrowLongColor", Color.GREEN);
+    private final ObjectProperty<Paint> positionArrowLongColor = addOnChange(css().createPaintProperty(this, "positionArrowLongColor", Color.GREEN));
 
     /**
      * The arrow shows bars where the trade is present, this is a entry short position color
      */
-    private final ObjectProperty<Paint> positionArrowShortColor = css().createPaintProperty(this, "positionArrowShortColor", Color.RED);
+    private final ObjectProperty<Paint> positionArrowShortColor = addOnChange(css().createPaintProperty(this, "positionArrowShortColor", Color.RED));
 
     /**
      * The arrow shows bars where the trade is present, this is a exit long and short positions color
      */
-    private final ObjectProperty<Paint> positionArrowExitColor = css().createPaintProperty(this, "positionArrowExitColor", Color.BLACK);
+    private final ObjectProperty<Paint> positionArrowExitColor = addOnChange(css().createPaintProperty(this, "positionArrowExitColor", Color.BLACK));
 
     /**
      * Trade Order description text color
      */
-    private final ObjectProperty<Paint> positionLabelTradeDescriptionColor = css().createPaintProperty(this, "positionLabelTradeDescriptionColor", Color.BLACK);
+    private final ObjectProperty<Paint> positionLabelTradeDescriptionColor = addOnChange(css().createPaintProperty(this, "positionLabelTradeDescriptionColor", Color.BLACK));
 
     /**
      * Text which is shown for trade order description, long positions
      */
-    private final StringProperty positionLabelLongText = css().createStringProperty(this, "positionLabelLongText", "Buy%n%1.0f%n(%1.1f)");
+    private final StringProperty positionLabelLongText = addOnChange(css().createStringProperty(this, "positionLabelLongText", "Buy%n%1.0f%n(%1.1f)"));
 
     /**
      * Text which is shown for trade order description, short positions
      */
-    private final StringProperty positionLabelShortText = css().createStringProperty(this, "positionLabelShortText", "Sell%n%1.0f%n(%1.1f)");
+    private final StringProperty positionLabelShortText = addOnChange(css().createStringProperty(this, "positionLabelShortText", "Sell%n%1.0f%n(%1.1f)"));
 
     /**
      * The linkage line between entry and exit orders for specific position, the color for profitable position
      */
-    private final ObjectProperty<Paint> positionOrderLinkageProfitColor = css().createPaintProperty(this, "positionOrderLinkageProfitColor",  Color.GREEN);
+    private final ObjectProperty<Paint> positionOrderLinkageProfitColor = addOnChange(css().createPaintProperty(this, "positionOrderLinkageProfitColor", Color.GREEN));
 
     /**
      * The linkage line between entry and exit orders for specific position, the color for loss position
      */
-    private final ObjectProperty<Paint> positionOrderLinkageLossColor = css().createPaintProperty(this, "positionOrderLinkageLossColor", Color.RED);
+    private final ObjectProperty<Paint> positionOrderLinkageLossColor = addOnChange(css().createPaintProperty(this, "positionOrderLinkageLossColor", Color.RED));
 
     /**
      * The linkage line between entry and exit orders for specific position, the dash line style
      */
-     private final DoubleProperty positionOrderLinkageLineDash = css().createDoubleProperty(this, "positionOrderLinkageLineDash", 8.0d);
+    private final DoubleProperty positionOrderLinkageLineDash = addOnChange(css().createDoubleProperty(this, "positionOrderLinkageLineDash", 8.0d));
 
     /**
      * The linkage line between entry and exit orders for specific position, the line width
      */
-     private final DoubleProperty positionOrderLinkageLineWidth = css().createDoubleProperty(this, "positionOrderLinkageLineWidth", 2.0d);
+    private final DoubleProperty positionOrderLinkageLineWidth = addOnChange(css().createDoubleProperty(this, "positionOrderLinkageLineWidth", 2.0d));
 
     // FOOTPRINT ----------------------------------------------------------
 
     /**
      * Footprint bar relative width against actual scaled view. Defined in percentage range: {@literal <}0.0, 1.0{@literal >}
      */
-     private final DoubleProperty footprintBarWidthPercent = css().createDoubleProperty(this, "footprintBarWidthPercent", 0.5d);
+    private final DoubleProperty footprintBarWidthPercent = addOnChange(css().createDoubleProperty(this, "footprintBarWidthPercent", 0.5d));
 
     /**
      * Footprint renderer the main ratio for resizing of the final footprint bar paint
      */
-     private final DoubleProperty footprintPaintMainRatio = css().createDoubleProperty(this, "footprintPaintMainRatio", 5.157d);
+    private final DoubleProperty footprintPaintMainRatio = addOnChange(css().createDoubleProperty(this, "footprintPaintMainRatio", 5.157d));
 
     /**
      * The footprint candle boxes color for candle's upstick
      */
-    private final ObjectProperty<Paint> footprintLongColor = css().createPaintProperty(this, "footprintLongColor", Color.GREEN);
+    private final ObjectProperty<Paint> footprintLongColor = addOnChange(css().createPaintProperty(this, "footprintLongColor", Color.GREEN));
 
     /**
      * The footprint candle boxed color for candle's downstick
      */
-    private final ObjectProperty<Paint> footprintShortColor = css().createPaintProperty(this, "footprintShortColor", Color.RED);
+    private final ObjectProperty<Paint> footprintShortColor = addOnChange(css().createPaintProperty(this, "footprintShortColor", Color.RED));
 
     /**
      * Volume Long bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
      */
-    private final ObjectProperty<Paint> footprintVolumeLongColor = css().createPaintProperty(this, "footprintVolumeLongColor", DEFAULT_FOOTPRINT_VOLUME_LONG_COLOR);
+    private final ObjectProperty<Paint> footprintVolumeLongColor = addOnChange(css().createPaintProperty(this, "footprintVolumeLongColor", DEFAULT_FOOTPRINT_VOLUME_LONG_COLOR));
     private static final Paint DEFAULT_FOOTPRINT_VOLUME_LONG_COLOR = Color.rgb(139, 199, 194, 0.2);
 
     /**
      * Volume Short bars with this defined color and transparency, if paintVolume=true, the volume bars are painted.
      */
-    private final ObjectProperty<Paint> footprintVolumeShortColor = css().createPaintProperty(this, "footprintVolumeShortColor", DEFAULT_FOOTPRINT_VOLUME_SHORT_COLOR);
+    private final ObjectProperty<Paint> footprintVolumeShortColor = addOnChange(css().createPaintProperty(this, "footprintVolumeShortColor", DEFAULT_FOOTPRINT_VOLUME_SHORT_COLOR));
     private static final Paint DEFAULT_FOOTPRINT_VOLUME_SHORT_COLOR = Color.rgb(235, 160, 159, 0.2);
 
     /**
      * Footprint division line between bid and ask numbers (cross-line vertical)
      */
-    private final ObjectProperty<Paint> footprintCrossLineColor = css().createPaintProperty(this, "footprintCrossLineColor", Color.GRAY);
+    private final ObjectProperty<Paint> footprintCrossLineColor = addOnChange(css().createPaintProperty(this, "footprintCrossLineColor", Color.GRAY));
 
     /**
      * Footprint default font color. If the column color grouping is disabled, this color is taken.
      */
-    private final ObjectProperty<Paint> footprintDefaultFontColor = css().createPaintProperty(this, "footprintDefaultFontColor", FOOTPRINT_DEFAULT_FONT_COLOR);
+    private final ObjectProperty<Paint> footprintDefaultFontColor = addOnChange(css().createPaintProperty(this, "footprintDefaultFontColor", FOOTPRINT_DEFAULT_FONT_COLOR));
     private static final Paint FOOTPRINT_DEFAULT_FONT_COLOR = Color.rgb(255, 255, 255, 0.58);
 
     /**
      * Footprint POC color. POC = Point of control.
      */
-    private final ObjectProperty<Paint> footprintPocColor = css().createPaintProperty(this, "footprintPocColor", Color.YELLOW);
+    private final ObjectProperty<Paint> footprintPocColor = addOnChange(css().createPaintProperty(this, "footprintPocColor", Color.YELLOW));
 
     // REQUIRED INHERITANCE METHODS -------------------------------
 

@@ -7,6 +7,7 @@ import static io.fair_acc.sample.financial.service.period.IntradayPeriod.Intrada
 import java.util.ArrayList;
 import java.util.List;
 
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
 import javafx.scene.control.ToolBar;
@@ -22,7 +23,6 @@ import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.CandleStickRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAware;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.spi.DefaultDataSet;
@@ -53,7 +53,7 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
     @Override
     protected void configureApp() {
         title = "Replay OHLC/V Tick Data in real-time (press 'replay' button, zoom by mousewheel)";
-        theme = FinancialColorSchemeConstants.SAND;
+        theme = FinancialTheme.Sand;
         resource = "REALTIME_OHLC_TICK";
         timeRange = "2016/07/29 00:00-2016/07/29 20:15";
         tt = "00:00-23:59"; // time template whole day session
@@ -142,7 +142,7 @@ public class FinancialRealtimeCandlestickSample extends AbstractBasicFinancialAp
         chart.getPlugins().add(createRsLevel(yAxis, 4731, 4733, "Daily Resistance"));
 
         // apply all changes by addons and extensions
-        applyColorScheme(theme, (XYChart) chart);
+        theme.applyPseudoClasses(chart);
 
         VBox root = new VBox();
         VBox.setVgrow(chart, Priority.SOMETIMES);

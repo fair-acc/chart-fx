@@ -2,6 +2,7 @@ package io.fair_acc.sample.financial;
 
 import java.util.Calendar;
 
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -14,7 +15,6 @@ import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.CandleStickRenderer;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeKey;
@@ -36,7 +36,7 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
     public Node getChartPanel(Stage stage) {
         timeRange = "2020/06/24 0:00-2020/11/12 0:00";
 
-        final var chart = getDefaultFinancialTestChart(FinancialColorSchemeConstants.SAND);
+        final var chart = getDefaultFinancialTestChart(FinancialTheme.Sand);
         final AbstractFinancialRenderer<?> renderer = (AbstractFinancialRenderer<?>) chart.getRenderers().get(0);
 
         // prepare top financial toolbar

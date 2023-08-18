@@ -1,6 +1,6 @@
 package io.fair_acc.chartfx.renderer.spi.financial.service.footprint;
 
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -48,7 +48,7 @@ public class FootprintRendererAttributes extends AttributeModel {
       * @param scheme the coloring scheme
       * @return define default values
       */
-    public static FootprintRendererAttributes getDefaultValues(String scheme) {
+    public static FootprintRendererAttributes getDefaultValues(FinancialTheme scheme) {
         FootprintRendererAttributes model = new FootprintRendererAttributes();
 
         model.setAttribute(COLUMN_COLORING_FEATURE_ACTIVE, true);
@@ -69,9 +69,9 @@ public class FootprintRendererAttributes extends AttributeModel {
 
         Color[][] columnColorGroupSettings;
         switch (scheme) {
-        case FinancialColorSchemeConstants.SAND:
-        case FinancialColorSchemeConstants.CLASSIC:
-        case FinancialColorSchemeConstants.CLEARLOOK:
+        case Sand:
+        case Classic:
+        case Clearlook:
             columnColorGroupSettings = new Color[][] {
                 {
                         Color.rgb(0, 128, 255), // RANGE 0 BID COLOR, color: light blue

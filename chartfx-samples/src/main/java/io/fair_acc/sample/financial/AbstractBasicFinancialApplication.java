@@ -1,6 +1,5 @@
 package io.fair_acc.sample.financial;
 
-import static io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants.getDefaultColorSchemes;
 import static io.fair_acc.chartfx.ui.ProfilerInfoBox.DebugLevel.VERSION;
 
 import java.io.IOException;
@@ -12,6 +11,7 @@ import java.util.Map;
 
 import fxsampler.SampleBase;
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.financial.service.consolidate.OhlcvConsolidationAddon;
 import javafx.application.Application;
@@ -20,10 +20,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -41,9 +38,6 @@ import io.fair_acc.chartfx.plugins.DataPointTooltip;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeAware;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConfig;
-import io.fair_acc.chartfx.renderer.spi.financial.css.FinancialColorSchemeConstants;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.spi.DefaultDataSet;
@@ -77,7 +71,7 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
     protected int DEBUG_UPDATE_RATE = 500;
 
     protected String title; // application title
-    protected String theme = FinancialColorSchemeConstants.SAND;
+    protected FinancialTheme theme = FinancialTheme.Sand;
     protected String resource = "@ES-[TF1D]";
     protected String timeRange = "2020/08/24 0:00-2020/11/12 0:00";
     protected String tt;
@@ -85,9 +79,6 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
     protected IntradayPeriod period;
     protected OhlcvDataSet ohlcvDataSet;
     protected Map<String, OhlcvConsolidationAddon[]> consolidationAddons;
-
-    // injection
-    protected final FinancialColorSchemeAware financialColorScheme = new FinancialColorSchemeConfig();
 
     private final Spinner<Double> updatePeriod = new Spinner<>(1.0, 500.0, UPDATE_PERIOD, 1.0);
     private final CheckBox localRange = new CheckBox("auto-y");
@@ -181,11 +172,11 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
      */
     public Node getChartPanel(Stage stage) {
         // show all default financial color schemes
-        final FlowPane root = new FlowPane();
+        final var root = new FlowPane();
         root.setAlignment(Pos.CENTER);
-        Chart[] charts = Arrays.stream(getDefaultColorSchemes()).map(this::getDefaultFinancialTestChart).toArray(Chart[] ::new);
-        root.getChildren().addAll(charts);
-
+        Arrays.stream(FinancialTheme.values())
+                .map(this::getDefaultFinancialTestChart)
+                .forEach(root.getChildren()::add);
         return root;
     }
 
@@ -194,7 +185,7 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
      *
      * @param theme defines theme which has to be used for sample app
      */
-    protected Chart getDefaultFinancialTestChart(final String theme) {
+    protected Chart getDefaultFinancialTestChart(final FinancialTheme theme) {
         // load datasets
         DefaultDataSet indiSet = null;
         if (resource.startsWith("REALTIME")) {
@@ -243,7 +234,7 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
 
         // prepare chart structure
         final XYChart chart = new XYChart(xAxis1, yAxis1);
-        chart.setTitle(theme);
+        chart.setTitle(theme.name());
         chart.setLegendVisible(true);
         chart.setPrefSize(prefChartWidth, prefChartHeight);
         // set them false to make the plot faster
@@ -263,7 +254,7 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
         prepareRenderers(chart, ohlcvDataSet, indiSet);
 
         // apply color scheme
-        applyColorScheme(theme, chart);
+        theme.applyPseudoClasses(chart);
 
         // zoom to specific time range
         if (timeRange != null) {
@@ -271,14 +262,6 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
         }
 
         return chart;
-    }
-
-    protected void applyColorScheme(String theme, XYChart chart) {
-        try {
-            financialColorScheme.applyTo(theme, chart);
-        } catch (Exception e) {
-            throw new IllegalArgumentException(e.getMessage(), e);
-        }
     }
 
     /**
