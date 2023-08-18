@@ -28,7 +28,7 @@ public class DataSetFilterSample extends ChartSample {
 
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(false);
-        chart.getRenderer(0).setErrorType(ErrorStyle.ERRORSURFACE);
+        chart.getRenderer(0).setErrorStyle(ErrorStyle.ERRORSURFACE);
 
         GaussianFunction gaussFunction = new GaussianFunction("gauss") {
             @Override

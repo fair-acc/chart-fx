@@ -36,8 +36,8 @@ public class DataSetAverageSample extends ChartSample {
     public Node getChartPanel(Stage stage) {
         final DemoChart chart = new DemoChart(2);
         chart.getRenderer(0).setPolyLineStyle(LineStyle.NONE);
-        chart.getRenderer(0).setErrorType(ErrorStyle.NONE);
-        chart.getRenderer(1).setErrorType(ErrorStyle.ERRORSURFACE);
+        chart.getRenderer(0).setErrorStyle(ErrorStyle.NONE);
+        chart.getRenderer(1).setErrorStyle(ErrorStyle.ERRORSURFACE);
         chart.getYAxis(1).setAutoRanging(false);
         chart.getYAxis().maxProperty().bindBidirectional(chart.getYAxis(1).maxProperty());
         chart.getYAxis().minProperty().bindBidirectional(chart.getYAxis(1).minProperty());

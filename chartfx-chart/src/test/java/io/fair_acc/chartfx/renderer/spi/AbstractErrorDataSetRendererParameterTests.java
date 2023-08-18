@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import javafx.scene.canvas.Canvas;
 
 import javafx.scene.canvas.GraphicsContext;
 import org.junit.jupiter.api.Assertions;
@@ -65,7 +64,7 @@ public class AbstractErrorDataSetRendererParameterTests {
         assertFalse(renderer.isDynamicBarWidth());
 
         for (ErrorStyle eStyle : ErrorStyle.values()) {
-            renderer.setErrorType(eStyle);
+            renderer.setErrorStyle(eStyle);
             assertEquals(eStyle, renderer.getErrorType());
         }
         renderer.setIntensityFading(0.85);

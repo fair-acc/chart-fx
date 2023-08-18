@@ -126,7 +126,7 @@ public class ScatterAndBubbleRendererSample extends ChartSample {
         final ErrorDataSetRenderer errorRenderer1 = new ErrorDataSetRenderer();
         errorRenderer1.setMarkerSize(1);
         errorRenderer1.setPolyLineStyle(LineStyle.NONE);
-        errorRenderer1.setErrorType(ErrorStyle.ERRORBARS);
+        errorRenderer1.setErrorStyle(ErrorStyle.ERRORBARS);
         errorRenderer1.setDrawMarker(false);
         errorRenderer1.setDrawBubbles(true);
         errorRenderer1.setAssumeSortedData(false); // !! important since DS is likely unsorted
@@ -140,7 +140,7 @@ public class ScatterAndBubbleRendererSample extends ChartSample {
         final ErrorDataSetRenderer errorRenderer2 = new ErrorDataSetRenderer();
         errorRenderer2.setMarkerSize(5);
         errorRenderer2.setPolyLineStyle(LineStyle.NONE);
-        errorRenderer2.setErrorType(ErrorStyle.NONE);
+        errorRenderer2.setErrorStyle(ErrorStyle.NONE);
         errorRenderer2.setDrawMarker(true);
         errorRenderer2.setAssumeSortedData(false); // !! important since DS is likely unsorted
         // set default marker either via

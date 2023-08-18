@@ -26,7 +26,6 @@ import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.plugins.DataPointTooltip;
 import io.fair_acc.chartfx.plugins.EditAxis;
-import io.fair_acc.chartfx.plugins.Panner;
 import io.fair_acc.chartfx.plugins.TableViewer;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
@@ -283,7 +282,7 @@ public class ErrorDataSetRendererStylingSample extends ChartSample {
         errorStyleSelect.getItems().addAll(ErrorStyle.values());
         errorStyleSelect.setValue(errorRenderer.getErrorType());
         errorStyleSelect.valueProperty().addListener((ch, old, selection) -> {
-            errorRenderer.setErrorType(selection);
+            errorRenderer.setErrorStyle(selection);
             chart.invalidate();
         });
         pane.addToParameterPane("Error-Bar Style: ", errorStyleSelect);

@@ -1,20 +1,15 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.utils.PropUtil;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 
@@ -27,8 +22,6 @@ import io.fair_acc.chartfx.renderer.datareduction.MaxDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
 import io.fair_acc.dataset.utils.AssertUtils;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
 
 /**
  * simple class to move the various parameters out of the class containing the algorithms uses the shadow field pattern
@@ -169,7 +162,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
 
     /**
      * @return returns error plotting style
-     * @see ErrorDataSetRenderer#setErrorType(ErrorStyle style) for details
+     * @see ErrorDataSetRenderer#setErrorStyle(ErrorStyle style) for details
      */
     public ErrorStyle getErrorType() {
         // TODO: figure out why 'none' in CSS maps to null
@@ -369,7 +362,7 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
      * @param style ErrorStyle @see ErrorStyle enum
      * @return itself (fluent design)
      */
-    public R setErrorType(final ErrorStyle style) {
+    public R setErrorStyle(final ErrorStyle style) {
         errorStyleProperty().set(style);
         return getThis();
     }

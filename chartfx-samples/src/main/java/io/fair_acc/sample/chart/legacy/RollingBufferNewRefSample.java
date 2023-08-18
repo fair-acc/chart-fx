@@ -35,7 +35,7 @@ public class RollingBufferNewRefSample extends RollingBufferSample {
         // for higher performance w/o error bars, enable this for comparing with
         // the standard JavaFX charting library (which does not support error
         // handling, etc.)
-        eRenderer.setErrorType(ErrorStyle.NONE);
+        eRenderer.setErrorStyle(ErrorStyle.NONE);
         eRenderer.setDashSize(0);
         eRenderer.setDrawMarker(false);
         final DefaultDataReducer reductionAlgorithm = (DefaultDataReducer) eRenderer.getRendererDataReducer();

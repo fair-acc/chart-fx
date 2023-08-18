@@ -26,7 +26,6 @@ import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox.DebugLevel;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.spi.CircularDoubleErrorDataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
@@ -213,11 +212,11 @@ public class RollingBufferSample extends ChartSample {
     }
 
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
-        eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
+        eRenderer.setErrorStyle(ErrorStyle.ERRORSURFACE);
         // for higher performance w/o error bars, enable this for comparing with
         // the standard JavaFX charting library (which does not support error
         // handling, etc.)
-        eRenderer.setErrorType(ErrorStyle.NONE);
+        eRenderer.setErrorStyle(ErrorStyle.NONE);
         eRenderer.setDashSize(RollingBufferSample.MIN_PIXEL_DISTANCE); // plot pixel-to-pixel distance
         eRenderer.setPointReduction(true);
         eRenderer.setDrawMarker(false);
