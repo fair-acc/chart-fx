@@ -7,6 +7,7 @@ import javafx.scene.text.FontWeight;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static io.fair_acc.dataset.utils.DataSetStyleBuilder.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -74,8 +75,24 @@ class DataSetStyleParserTest {
                 .setFill("blue")
                 .setStrokeDashPattern(3, 5, 8, 5)
                 .build();
+        assertEquals("" +
+                "-fx-fill: blue;\n" +
+                "-fx-font-size: 20.0;\n" +
+                "-fx-font-style: italic;\n" +
+                "-fx-stroke-width: 3.0;\n" +
+                "-fx-stroke-dash-array: 3.0 5.0 8.0 5.0;\n" +
+                "-fx-font: monospace;\n" +
+                "-fx-font-weight: bold;\n" +
+                "-fx-stroke: 0xEE00EE;", style);
         assertTrue(parser.tryParse(style));
         assertArrayEquals(new double[]{3, 5, 8, 5}, parser.getLineDashPattern().orElseThrow());
+
+        style = builder.reset()
+                .setStringProp(STROKE_DASH_PATTERN, "1, 2, 3")
+                .build();
+        assertTrue(parser.tryParse(style));
+        assertArrayEquals(new double[]{1, 2, 3}, parser.getLineDashPattern().orElseThrow());
+
     }
 
 }
