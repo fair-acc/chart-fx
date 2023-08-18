@@ -41,7 +41,7 @@ public class DemoChart extends XYChart {
 
         ErrorDataSetRenderer defaultRenderer = (ErrorDataSetRenderer) getRenderers().get(0);
         defaultRenderer.setPolyLineStyle(LineStyle.NORMAL);
-        defaultRenderer.setErrorType(ErrorStyle.ERRORCOMBO);
+        defaultRenderer.setErrorStyle(ErrorStyle.ERRORCOMBO);
         renderer.add(defaultRenderer);
 
         getYAxis().setAutoRangePadding(0.05);

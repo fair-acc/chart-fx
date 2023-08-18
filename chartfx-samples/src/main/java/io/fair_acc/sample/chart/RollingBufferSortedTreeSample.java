@@ -195,7 +195,7 @@ public class RollingBufferSortedTreeSample extends ChartSample {
     }
 
     protected void initErrorDataSetRenderer(final ErrorDataSetRenderer eRenderer) {
-        eRenderer.setErrorType(ErrorStyle.ERRORSURFACE);
+        eRenderer.setErrorStyle(ErrorStyle.ERRORSURFACE);
         eRenderer.setDashSize(RollingBufferSample.MIN_PIXEL_DISTANCE); // plot
                                                                        // pixel-to-pixel
                                                                        // distance

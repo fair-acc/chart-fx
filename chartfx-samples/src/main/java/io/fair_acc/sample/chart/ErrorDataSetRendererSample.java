@@ -26,7 +26,6 @@ import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox.DebugLevel;
-import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.dataset.testdata.spi.RandomDataGenerator;
@@ -122,8 +121,8 @@ public class ErrorDataSetRendererSample extends ChartSample {
 
         final ErrorDataSetRenderer errorRenderer = new ErrorDataSetRenderer();
         chart.getRenderers().setAll(errorRenderer);
-        errorRenderer.setErrorType(ErrorStyle.ERRORBARS);
-        errorRenderer.setErrorType(ErrorStyle.ERRORCOMBO);
+        errorRenderer.setErrorStyle(ErrorStyle.ERRORBARS);
+        errorRenderer.setErrorStyle(ErrorStyle.ERRORCOMBO);
         // errorRenderer.setErrorType(ErrorStyle.ESTYLE_NONE);
         errorRenderer.setDrawMarker(true);
         errorRenderer.setMarkerSize(1.0);

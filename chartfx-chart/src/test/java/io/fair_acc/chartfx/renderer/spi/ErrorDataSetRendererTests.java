@@ -76,7 +76,7 @@ public class ErrorDataSetRendererTests {
     public void testRendererNominal(final LineStyle lineStyle) throws Exception {
         for (ErrorStyle eStyle : ErrorStyle.values()) {
             FXUtils.runAndWait(() -> {
-                renderer.setErrorType(eStyle);
+                renderer.setErrorStyle(eStyle);
                 try {
                     testRenderer(lineStyle);
                 } catch (Exception e) {

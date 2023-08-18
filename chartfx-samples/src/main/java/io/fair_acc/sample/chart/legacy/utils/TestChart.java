@@ -1,6 +1,5 @@
 package io.fair_acc.sample.chart.legacy.utils;
 
-import javafx.application.Application;
 import javafx.scene.Node;
 
 import io.fair_acc.chartfx.XYChart;
@@ -58,7 +57,7 @@ public class TestChart extends AbstractTestApplication implements ChartTestCase 
             ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
             renderer.setDrawBars(false);
             renderer.setDrawMarker(false);
-            renderer.setErrorType(ErrorStyle.NONE);
+            renderer.setErrorStyle(ErrorStyle.NONE);
             renderer.setParallelImplementation(false);
             DefaultDataReducer reducer = (DefaultDataReducer) renderer.getRendererDataReducer();
             reducer.setMinPointPixelDistance(5);

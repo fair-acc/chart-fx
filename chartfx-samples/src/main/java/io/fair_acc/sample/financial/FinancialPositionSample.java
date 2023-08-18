@@ -47,7 +47,7 @@ public class FinancialPositionSample extends AbstractBasicFinancialApplication {
 
         ErrorDataSetRenderer avgRenderer = new ErrorDataSetRenderer();
         avgRenderer.setDrawMarker(false);
-        avgRenderer.setErrorType(ErrorStyle.NONE);
+        avgRenderer.setErrorStyle(ErrorStyle.NONE);
         avgRenderer.getDatasets().addAll(indiSet);
 
         chart.getRenderers().clear();

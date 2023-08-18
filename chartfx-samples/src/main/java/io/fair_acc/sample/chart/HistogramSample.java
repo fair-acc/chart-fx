@@ -99,7 +99,7 @@ public class HistogramSample extends ChartSample {
         renderer2.getDatasets().addAll(dataSet1, dataSet3);
         dataSet1.setStyle("-fx-stroke:red; -fx-stroke-width:3;");
         renderer2.setPolyLineStyle(LineStyle.HISTOGRAM);
-        renderer2.setErrorType(ErrorStyle.ERRORBARS);
+        renderer2.setErrorStyle(ErrorStyle.ERRORBARS);
         chart.getRenderers().add(renderer2);
 
         final MetaDataRenderer metaRenderer = new MetaDataRenderer(chart);

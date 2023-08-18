@@ -5,7 +5,6 @@ import java.util.Calendar;
 import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import javafx.application.Application;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
@@ -56,7 +55,7 @@ public class FinancialAdvancedCandlestickSample extends AbstractBasicFinancialAp
 
         var avgRenderer = new ErrorDataSetRenderer();
         avgRenderer.setDrawMarker(false);
-        avgRenderer.setErrorType(ErrorStyle.NONE);
+        avgRenderer.setErrorStyle(ErrorStyle.NONE);
         avgRenderer.getDatasets().addAll(indiSet);
 
         chart.getRenderers().clear();

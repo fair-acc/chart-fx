@@ -37,7 +37,7 @@ public class LimitsSample extends ChartSample {
         ErrorDataSetRenderer rendererValue = (ErrorDataSetRenderer) chart.getRenderers().get(0);
         rendererValue.setDrawMarker(true);
         var rendererLimits = new ErrorDataSetRenderer();
-        rendererLimits.setErrorType(ErrorStyle.ERRORSURFACE);
+        rendererLimits.setErrorStyle(ErrorStyle.ERRORSURFACE);
         rendererLimits.setDrawMarker(false);
         chart.getRenderers().add(rendererLimits);
 

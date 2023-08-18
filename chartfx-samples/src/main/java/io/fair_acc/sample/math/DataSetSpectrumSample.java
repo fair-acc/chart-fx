@@ -34,7 +34,7 @@ public class DataSetSpectrumSample extends ChartSample {
 
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(false);
-        chart.getRenderer(0).setErrorType(ErrorStyle.ERRORSURFACE);
+        chart.getRenderer(0).setErrorStyle(ErrorStyle.ERRORSURFACE);
 
         TrigSineFunction sineFunction = new TrigSineFunction("sine") {
             @Override
@@ -60,7 +60,7 @@ public class DataSetSpectrumSample extends ChartSample {
         final boolean dbScale = false;
         final DemoChart chart2 = new DemoChart(2);
         chart2.getRenderer(0).setDrawMarker(true);
-        chart2.getRenderer(0).setErrorType(ErrorStyle.ERRORSURFACE);
+        chart2.getRenderer(0).setErrorStyle(ErrorStyle.ERRORSURFACE);
         chart2.getXAxis().setName("frequency");
         chart2.getXAxis().setUnit(normaliseFrequency ? "fs" : "Hz");
         chart2.getYAxis().setName("magnitude");

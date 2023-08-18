@@ -27,7 +27,7 @@ public class DataSetIntegrationWithLimitsSample extends ChartSample {
 
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(true);
-        chart.getRenderer(0).setErrorType(ErrorStyle.ERRORSURFACE);
+        chart.getRenderer(0).setErrorStyle(ErrorStyle.ERRORSURFACE);
 
         GaussianFunction gaussFunction = new GaussianFunction("gauss") {
             @Override
