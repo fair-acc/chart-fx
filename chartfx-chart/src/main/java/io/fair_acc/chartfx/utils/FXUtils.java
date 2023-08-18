@@ -1,6 +1,7 @@
 package io.fair_acc.chartfx.utils;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Condition;
@@ -58,10 +59,11 @@ public final class FXUtils {
      * @throws Exception if a exception is occurred in the run method of the Runnable
      */
     public static void runAndWait(final Runnable function) throws Exception {
-        runAndWait("runAndWait(Runnable)", t -> {
+        if (Platform.isFxApplicationThread()) {
             function.run();
-            return "FXUtils::runAndWait - null Runnable return";
-        });
+        } else {
+            CompletableFuture.runAsync(function, Platform::runLater).get();
+        }
     }
 
     /**
@@ -75,7 +77,8 @@ public final class FXUtils {
      * @throws Exception if a exception is occurred in the run method of the Runnable
      */
     public static <R> R runAndWait(final Supplier<R> function) throws Exception {
-        return runAndWait("runAndWait(Supplier<R>)", t -> function.get());
+        return Platform.isFxApplicationThread() ? function.get() :
+                CompletableFuture.supplyAsync(function, Platform::runLater).get();
     }
 
     /**
@@ -91,46 +94,8 @@ public final class FXUtils {
      * @throws Exception if a exception is occurred in the run method of the Runnable
      */
     public static <T, R> R runAndWait(final T argument, final Function<T, R> function) throws Exception {
-        if (Platform.isFxApplicationThread()) {
-            return function.apply(argument);
-        } else {
-            final AtomicBoolean runCondition = new AtomicBoolean(true);
-            final Lock lock = new ReentrantLock();
-            final Condition condition = lock.newCondition();
-            final ExceptionWrapper throwableWrapper = new ExceptionWrapper();
-
-            final RunnableWithReturn<R> run = new RunnableWithReturn<>(() -> {
-                R returnValue = null;
-                lock.lock();
-                try {
-                    returnValue = function.apply(argument);
-                } catch (final Exception e) {
-                    throwableWrapper.t = e;
-                } finally {
-                    try {
-                        runCondition.set(false);
-                        condition.signal();
-                    } finally {
-                        runCondition.set(false);
-                        lock.unlock();
-                    }
-                }
-                return returnValue;
-            });
-            lock.lock();
-            try {
-                Platform.runLater(run);
-                while (runCondition.get()) {
-                    condition.await();
-                }
-                if (throwableWrapper.t != null) {
-                    throw throwableWrapper.t;
-                }
-            } finally {
-                lock.unlock();
-            }
-            return run.getReturnValue();
-        }
+        return Platform.isFxApplicationThread() ? function.apply(argument) :
+                CompletableFuture.supplyAsync(() -> function.apply(argument), Platform::runLater).get();
     }
 
     public static void runFX(final Runnable run) {
@@ -217,33 +182,6 @@ public final class FXUtils {
         }
 
         return tickCount.get() >= nTicks;
-    }
-
-    private static class ExceptionWrapper {
-        private Exception t;
-    }
-
-    private static class RunnableWithReturn<R> implements Runnable {
-        private final Supplier<R> internalRunnable;
-        private final Object lock = new Object();
-        private R returnValue;
-
-        public RunnableWithReturn(final Supplier<R> run) {
-            internalRunnable = run;
-        }
-
-        public R getReturnValue() {
-            synchronized (lock) {
-                return returnValue;
-            }
-        }
-
-        @Override
-        public void run() {
-            synchronized (lock) {
-                returnValue = internalRunnable.get();
-            }
-        }
     }
 
     // Similar to internal Pane::setConstraint
