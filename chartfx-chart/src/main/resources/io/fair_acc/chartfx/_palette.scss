@@ -108,88 +108,52 @@
   -fx-color-count: 8;
 }
 
-@mixin defaultColorDefinitions() {
+@mixin pseudoClassPalettes() {
+  &:palette-misc {
+    @include misc();
+  }
 
-// CSS classes that set the default similar to the JavaFX charts
-// Using an undefined index result in a lookup error.
-.dataset.default-color0 {
-  -fx-stroke: -color-dataset-1;
-  -fx-fill: -color-dataset-1;
+  &:palette-adobe {
+    @include adobe();
+  }
+
+  &:palette-dell {
+    @include dell();
+  }
+
+  &:palette-equidistant {
+    @include equidistant();
+  }
+
+  &:palette-tuneviewer {
+    @include tuneviewer();
+  }
+
+  &:palette-matlab-light {
+    @include matlab-light();
+  }
+
+  &:palette-matlab-dark {
+    @include matlab-dark();
+  }
+
+  &:palette-modena {
+    @include modena();
+  }
+
+  &:palette-atlantafx {
+    @include atlantafx();
+  }
 }
 
-.dataset.default-color1 {
-  -fx-stroke: -color-dataset-2;
-  -fx-fill: -color-dataset-2;
-}
-
-.dataset.default-color2 {
-  -fx-stroke: -color-dataset-3;
-  -fx-fill: -color-dataset-3;
-}
-
-.dataset.default-color3 {
-  -fx-stroke: -color-dataset-4;
-  -fx-fill: -color-dataset-4;
-}
-
-.dataset.default-color4 {
-  -fx-stroke: -color-dataset-5;
-  -fx-fill: -color-dataset-5;
-}
-
-.dataset.default-color5 {
-  -fx-stroke: -color-dataset-6;
-  -fx-fill: -color-dataset-6;
-}
-
-.dataset.default-color6 {
-  -fx-stroke: -color-dataset-7;
-  -fx-fill: -color-dataset-7;
-}
-
-.dataset.default-color7 {
-  -fx-stroke: -color-dataset-8;
-  -fx-fill: -color-dataset-8;
-}
-
-.dataset.default-color8 {
-  -fx-stroke: -color-dataset-9;
-  -fx-fill: -color-dataset-9;
-}
-
-.dataset.default-color9 {
-  -fx-stroke: -color-dataset-10;
-  -fx-fill: -color-dataset-10;
-}
-
-.dataset.default-color10 {
-  -fx-stroke: -color-dataset-11;
-  -fx-fill: -color-dataset-11;
-}
-
-.dataset.default-color11 {
-  -fx-stroke: -color-dataset-12;
-  -fx-fill: -color-dataset-12;
-}
-
-.dataset.default-color12 {
-  -fx-stroke: -color-dataset-13;
-  -fx-fill: -color-dataset-13;
-}
-
-.dataset.default-color13 {
-  -fx-stroke: -color-dataset-14;
-  -fx-fill: -color-dataset-14;
-}
-
-.dataset.default-color14 {
-  -fx-stroke: -color-dataset-15;
-  -fx-fill: -color-dataset-15;
-}
-
-.dataset.default-color15 {
-  -fx-stroke: -color-dataset-16;
-  -fx-fill: -color-dataset-16;
-}
-
+// CSS classes that map selectors to the specified default colors
+// Classes with undefined colors are ignored until used.
+@mixin defaultColorDefinitions($maxColors) {
+  @for $i from 0 through $maxColors {
+    &.default-color#{$i} {
+      $color: -color-dataset-#{$i+1};
+      -fx-stroke: $color;
+      -fx-fill: $color;
+    }
+  }
 }

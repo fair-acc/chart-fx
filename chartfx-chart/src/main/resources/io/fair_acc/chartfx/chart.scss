@@ -3,50 +3,6 @@
 
 $null: null; // null gets removed from Sass. Maybe create a placeholder and replace after generation?
 
-.chart {
-  @include palette.tuneviewer();
-}
-
-.chart, .renderer {
-
-  &:palette-misc {
-    @include palette.misc();
-  }
-
-  &:palette-adobe {
-    @include palette.adobe();
-  }
-
-  &:palette-dell {
-    @include palette.dell();
-  }
-
-  &:palette-equidistant {
-    @include palette.equidistant();
-  }
-
-  &:palette-tuneviewer {
-    @include palette.tuneviewer();
-  }
-
-  &:palette-matlab-light {
-    @include palette.matlab-light();
-  }
-
-  &:palette-matlab-dark {
-    @include palette.matlab-dark();
-  }
-
-  &:palette-modena {
-    @include palette.modena();
-  }
-
-  &:palette-atlantafx {
-    @include palette.atlantafx();
-  }
-
-}
-
 .chart-datapoint-tooltip-label {
   -fx-background-color: rgb(153, 204, 204);
   -fx-border-color: black;
@@ -210,6 +166,10 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   }
 }
 
+.chart, .renderer {
+  @include palette.pseudoClassPalettes();
+}
+
 // XY Chart styles
 .chart {
 
@@ -224,6 +184,10 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   -fx-max-width: 4096px;
 
   -fx-tool-bar-side: top; // TODO: move side property one level up?
+
+  // Let users change the color scheme by setting CSS pseudo classes
+  // default maps to no pseudo class, other pseudo classes overwrite
+  @include palette.tuneviewer(); // when there is no pseudo class
   -fx-color-palette: default; // default, adobe, tuneviewer, dell
 
   .chart-title {
@@ -293,6 +257,7 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 }
 
 .dataset {
+  @include palette.defaultColorDefinitions(15);
   -fx-stroke-width: 1.5;
   -fx-stroke-dash-array: null;
   -fx-marker-stroke-width: 0.5;
@@ -422,5 +387,4 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   -fx-stroke: derive(-fx-text-background-color, 40%);
 }
 
-@include palette.defaultColorDefinitions();
 @include financial.financial-themes();
