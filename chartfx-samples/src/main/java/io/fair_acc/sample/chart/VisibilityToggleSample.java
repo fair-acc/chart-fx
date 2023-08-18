@@ -41,6 +41,8 @@ public class VisibilityToggleSample extends ChartSample {
         // TODO: dataSet2.addListener(evt -> LOGGER.atInfo().log("dataSet2 - event: " + evt.toString()));
 
         chart.getDatasets().addAll(dataSet1, dataSet2); // for two data sets
+        var dsNode1 = chart.getRenderers().get(0).getStyleableNode(dataSet1);
+        var dsNode2 = chart.getRenderers().get(0).getStyleableNode(dataSet2);
 
         final double[] xValues = new double[N_SAMPLES];
         final double[] yValues1 = new double[N_SAMPLES];
@@ -56,22 +58,13 @@ public class VisibilityToggleSample extends ChartSample {
 
         final BorderPane borderPane = new BorderPane(chart);
         final HBox toolbar = new HBox();
+
         final CheckBox visibility1 = new CheckBox("show Dataset 1");
-        visibility1.setSelected(true);
-        visibility1.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            dataSet1.setVisible(newValue);
-        });
-        dataSet1.getBitState().addInvalidateListener(ChartBits.DataSetVisibility, FXUtils.runOnFxThread((obs, bits) -> {
-            visibility1.setSelected(dataSet1.isVisible());
-        }));
+        visibility1.selectedProperty().bindBidirectional(dsNode1.visibleProperty());
+
         final CheckBox visibility2 = new CheckBox("show Dataset 2");
-        visibility2.setSelected(true);
-        visibility2.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            dataSet2.setVisible(newValue);
-        });
-        dataSet2.getBitState().addInvalidateListener(ChartBits.DataSetVisibility, FXUtils.runOnFxThread((obs, bits) -> {
-            visibility2.setSelected(dataSet2.isVisible());
-        }));
+        visibility2.selectedProperty().bindBidirectional(dsNode2.visibleProperty());
+
         toolbar.getChildren().addAll(visibility1, visibility2);
         borderPane.setTop(toolbar);
         return borderPane;

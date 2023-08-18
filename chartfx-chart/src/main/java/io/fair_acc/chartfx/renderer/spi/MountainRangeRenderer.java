@@ -201,6 +201,11 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
+        public List<String> getStyleClasses() {
+            return dataSet.getStyleClasses();
+        }
+
+        @Override
         public String getStyle() {
             return dataSet.getStyle();
         }
@@ -257,16 +262,6 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         @Override
         public DataSet set(final DataSet other, final boolean copy) {
             throw new UnsupportedOperationException("copy setter not implemented for Demux3dTo2dDataSet");
-        }
-
-        @Override
-        public boolean isVisible() {
-            return dataSet.isVisible();
-        }
-
-        @Override
-        public DataSet setVisible(boolean visible) {
-            return dataSet.setVisible(visible);
         }
 
         @Override

@@ -22,11 +22,11 @@ public enum ChartBits implements IntSupplier {
     ChartLegend,
     ChartPlugins,
     ChartPluginState,
-    DataSetVisibility,
     DataSetDataAdded,
     DataSetDataRemoved,
     DataSetRange,
     DataSetName,
+    DataSetStyle,
     DataSetMetaData,
     DataSetPermutation,
     DataViewWindow, // TODO: WindowMinimisedEvent/WindowMaximisedEvent/... necessary?
@@ -37,7 +37,7 @@ public enum ChartBits implements IntSupplier {
     public static final int AxisMask = BitState.mask(AxisLayout, AxisCanvas, AxisRange, AxisTickLabelText, AxisLabelText);
 
     public static final IntSupplier DataSetData = BitState.maskSupplier(DataSetDataAdded, DataSetDataRemoved); // any data update
-    public static final int DataSetMask = BitState.mask(DataSetData, ChartDataSets, DataSetVisibility, DataSetRange, DataSetMetaData, DataSetPermutation);
+    public static final int DataSetMask = BitState.mask(DataSetData, ChartDataSets, DataSetStyle, DataSetRange, DataSetMetaData, DataSetPermutation, ChartCanvas);
 
     public static StateListener printer() {
         return PRINTER;

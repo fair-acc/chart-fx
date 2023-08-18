@@ -98,10 +98,6 @@ class TransposedDataSetTest {
         assertEquals("fx-color: red", transposed2.getStyle());
         assertNull(transposed2.getStyle(0));
         assertNull(transposed2.getDataLabel(0));
-        // visibility
-        assertTrue(transposed2.isVisible());
-        transposed2.setVisible(false);
-        assertFalse(transposed2.isVisible());
     }
 
     @Test

@@ -60,23 +60,6 @@ class GenericDataSetTests {
     @ParameterizedTest
     @MethodSource("dataSetClassProvider")
     @Timeout(1)
-    void testVisibility(final Class<DataSet> clazz) throws AssertionError {
-        DataSet dataSet = getDefaultTestDataSet(clazz, DEFAULT_DATASET_NAME1, DEFAULT_COUNT_MAX + 2);
-        final AtomicBoolean visibilityChanged = new AtomicBoolean(false);
-        dataSet.getBitState().addInvalidateListener((src, bits) -> {
-            if (ChartBits.DataSetVisibility.isSet(bits)) {
-                visibilityChanged.set(true);
-            }
-        });
-        assertTrue(dataSet.isVisible());
-        dataSet.setVisible(false);
-        assertFalse(dataSet.isVisible());
-        assertTrue(visibilityChanged.get());
-    }
-
-    @ParameterizedTest
-    @MethodSource("dataSetClassProvider")
-    @Timeout(1)
     void testSetDataSet(final Class<DataSet> clazz) throws AssertionError {
         DataSet dataSet = getDefaultTestDataSet(clazz, DEFAULT_DATASET_NAME1, DEFAULT_COUNT_MAX);
         assertNotNull(dataSet, "test data set: " + clazz.getName());

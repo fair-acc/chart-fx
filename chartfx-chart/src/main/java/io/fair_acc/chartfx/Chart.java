@@ -6,9 +6,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.chartfx.ui.css.ColorPalette;
-import io.fair_acc.chartfx.ui.css.StyleGroup;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.chartfx.ui.layout.FullSizePane;
@@ -45,7 +43,6 @@ import io.fair_acc.chartfx.legend.spi.DefaultLegend;
 import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
-import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
@@ -516,6 +513,9 @@ public abstract class Chart extends Region implements EventSource {
         // Update other components
         for (Renderer renderer : renderers) {
             renderer.runPreLayout();
+            for (DataSetNode datasetNode : renderer.getDatasetNodes()) {
+                datasetNode.runPreLayout();
+            }
         }
         for (ChartPlugin plugin : plugins) {
             plugin.runPreLayout();

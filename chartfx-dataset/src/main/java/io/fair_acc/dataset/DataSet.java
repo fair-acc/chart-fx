@@ -1,6 +1,7 @@
 package io.fair_acc.dataset;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.List;
 
 import io.fair_acc.dataset.event.EventSource;
@@ -102,6 +103,11 @@ public interface DataSet extends EventSource, Serializable {
      * @return the name of the DataSet
      */
     String getName();
+
+    /**
+     * @return a list of CSS selector classes that should be applied to this dataset
+     */
+    List<String> getStyleClasses();
 
     /**
      * A string representation of the CSS style associated with this specific {@code DataSet}. This is analogous to the
@@ -208,18 +214,4 @@ public interface DataSet extends EventSource, Serializable {
         return set(other, true);
     }
 
-    /**
-     * Returns a boolean flag whether this {@code DataSet} should be rendered.
-     *
-     * @return true if the dataset should be rendered
-     */
-    public boolean isVisible();
-
-    /**
-     * Sets the visibility status of this {@code DataSet}.
-     *
-     * @param visible true: tells renderers to render this dataset
-     * @return itself (fluent design)
-     */
-    public DataSet setVisible(boolean visible);
 }

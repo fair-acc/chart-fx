@@ -249,6 +249,11 @@ class DataSetBuilderTests {
         }
 
         @Override
+        public boolean hasDataLabels() {
+            return false;
+        }
+
+        @Override
         public int getDimension() {
             // TODO Auto-generated method stub
             return 0;
@@ -265,6 +270,11 @@ class DataSetBuilderTests {
         }
 
         @Override
+        public List<String> getStyleClasses() {
+            return Collections.emptyList();
+        }
+
+        @Override
         public String getStyle() {
             return null;
         }
@@ -272,6 +282,11 @@ class DataSetBuilderTests {
         @Override
         public String getStyle(int index) {
             return null;
+        }
+
+        @Override
+        public boolean hasStyles() {
+            return false;
         }
 
         @Override
@@ -313,14 +328,5 @@ class DataSetBuilderTests {
             throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
         }
 
-        @Override
-        public boolean isVisible() {
-            return true;
-        }
-
-        @Override
-        public DataSet setVisible(boolean visible) {
-            return null;
-        }
     }
 }

@@ -9,8 +9,12 @@ import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.events.StateListener;
 import io.fair_acc.dataset.utils.AssertUtils;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+
+import java.util.Objects;
 
 /**
  * A dataset wrapper that lives in the SceneGraph for CSS styling
@@ -62,48 +66,64 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
         this.renderer = AssertUtils.notNull("renderer", renderer);
         this.dataSet = AssertUtils.notNull("dataSet", dataSet);
 
-        // Forward changes from dataset to the node
-        final StateListener updateText = (src, bits) -> setText(dataSet.getName());
-        final StateListener updateVisibility = (src, bits) -> setVisible(dataSet.isVisible());
-        sceneProperty().addListener((observable, oldScene, newScene) -> {
-            if (oldScene != null) {
-                dataSet.getBitState().removeInvalidateListener(updateText);
-                dataSet.getBitState().removeInvalidateListener(updateVisibility);
-            }
-            setText(dataSet.getName());
-            setVisible(dataSet.isVisible());
-            if (newScene != null) {
-                dataSet.getBitState().addInvalidateListener(ChartBits.DataSetName, updateText);
-                dataSet.getBitState().addInvalidateListener(ChartBits.DataSetVisibility, updateVisibility);
-            }
-        });
+        // Generate a class for the default CSS color selector.
+        // Note: we don't force applyCss() here because the index typically gets set before CSS,
+        // and it could result in a good bit of overhead. Setting via CSS might trigger an extra pulse.
+        StyleUtil.styleNode(this, getDefaultColorClass(), "dataset");
+        PropUtil.runOnChange(() -> getStyleClass().set(0, getDefaultColorClass()), colorIndexProperty());
 
-        // Initialize with the dataset style TODO: integrate with deprecated style data
-        if (!PropUtil.isNullOrEmpty(dataSet.getStyle())) {
-            setStyle(dataSet.getStyle());
-        }
+        // Add other styles
 
-        // Forward changes from the node to the dataset TODO: remove visibility from dataset
-        PropUtil.runOnChange(() -> dataSet.setVisible(isVisible()), visibleProperty());
+        // Initialize styles in case the dataset has clean bits
+        setText(dataSet.getName());
+        setStyle(dataSet.getStyle());
+        currentUserStyles.setAll(dataSet.getStyleClasses());
+        getStyleClass().addAll(currentUserStyles);
 
         // Notify style updates via the dataset state. Note that the node could
         // have a dedicated state, but that only provides benefits when one
         // dataset is in multiple charts where one draw could be skipped.
         // TODO: maybe notify the chart directly that the Canvas needs to be redrawn?
-        changeCounterProperty().addListener(getBitState().onPropChange(ChartBits.DataSetMetaData)::set);
-
-        // Integrate with the JavaFX default CSS color selectors
-        StyleUtil.styleNode(this, "dataset", DefaultColorClass.getForIndex(getColorIndex()));
-        colorIndexProperty().addListener((observable, oldValue, newValue) -> {
-            if (oldValue != null) {
-                getStyleClass().removeAll(DefaultColorClass.getForIndex(oldValue.intValue()));
-            }
-            if (newValue != null) {
-                getStyleClass().add(1, DefaultColorClass.getForIndex(newValue.intValue()));
-            }
-            // TODO: reapply CSS? usually set before CSS, but could potentially be modified after CSS too. might be expensive
-        });
+        changeCounterProperty().addListener(dataSet.getBitState().onPropChange(ChartBits.ChartCanvas)::set);
     }
+
+    protected String getDefaultColorClass() {
+        return DefaultColorClass.getForIndex(getColorIndex());
+    }
+
+    /**
+     * Updates any style or name changes on the source set. Needs to be called before CSS.
+     */
+    public void runPreLayout() {
+        var state = dataSet.getBitState();
+        if (state.isClean(ChartBits.DataSetName, ChartBits.DataSetStyle)) {
+            return;
+        }
+
+        // Note: don't clear because the dataset might be in multiple nodes
+        if (state.isDirty(ChartBits.DataSetName)) {
+            setText(dataSet.getName());
+        }
+
+        // Update style info
+        if (state.isDirty(ChartBits.DataSetStyle)) {
+
+            // Replace user styles with the new classes
+            if (!currentUserStyles.equals(dataSet.getStyleClasses())) {
+                getStyleClass().removeAll(currentUserStyles);
+                currentUserStyles.setAll(dataSet.getStyleClasses());
+                getStyleClass().addAll(currentUserStyles);
+            }
+
+            // Update the style
+            if (!Objects.equals(getStyle(), dataSet.getStyle())) {
+                setStyle(dataSet.getStyle());
+            }
+
+        }
+    }
+
+    private final ObservableList<String> currentUserStyles = FXCollections.observableArrayList();
 
     @Override
     public BitState getBitState() {

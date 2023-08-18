@@ -366,7 +366,7 @@ public final class FXUtils {
      * This class registers actions as soon as a Scene is available,
      * and unregisters them when the Scene is removed. Note that the
      * Scene is set during the CSS phase, so the first execution is
-     * triggered immediately.
+     * triggered immediately (still before CSS application).
      */
     public static void registerLayoutHooks(Node node, Runnable preLayoutAction, Runnable postLayoutAction) {
         AssertUtils.notNull("preLayoutAction", preLayoutAction);
@@ -379,10 +379,10 @@ public final class FXUtils {
             }
 
             // Register when the scene changes. The scene reference gets
-            // set in the CSS phase, so by the time we can register it is
-            // already be too late. Waiting for the layout phase wouldn't
-            // let us change the scene graph, so we need to manually run the
-            // layout hook during CSS.
+            // set at the beginning of the CSS phase, so the registration
+            // already missed this pulse. However, since the CSS hasn't
+            // been applied yet, we can get a similar effect by forcing
+            // a manual run now.
             if (scene != null) {
                 scene.addPreLayoutPulseListener(preLayoutAction);
                 scene.addPostLayoutPulseListener(postLayoutAction);
