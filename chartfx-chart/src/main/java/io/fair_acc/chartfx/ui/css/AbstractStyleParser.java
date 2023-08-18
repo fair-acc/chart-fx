@@ -34,12 +34,14 @@ public abstract class AbstractStyleParser {
 
     protected boolean parse(String style) {
         clear();
+        currentKey = null;
         usedAtLeastOneKey = false;
         StyleBuilder.forEachProperty(style, this::onEntry);
         return usedAtLeastOneKey;
     }
 
     private void onEntry(String key, String value) {
+        currentKey = key;
         usedAtLeastOneKey |= parseEntry(key, value);
     }
 
@@ -53,13 +55,14 @@ public abstract class AbstractStyleParser {
         try {
             return Double.parseDouble(value);
         } catch (final NumberFormatException ex) {
-            LOGGER.error("could not parse double value of '" + currentKey + "'='" + value + "'", ex);
+            LOGGER.error("could not parse double value of \"" + currentKey + ": " + value + ";\"", ex);
             return Double.NaN;
         }
     }
 
     protected double[] parseDoubleArray(String value) {
-        return parse(value, str -> Arrays.stream(value.split("\\s+"))
+        return parse(value, str -> Arrays.stream(value.split("[\\s+|,?]"))
+                .filter(part -> !part.isBlank()) // note: low priority, couldn't figure out a working regex for " ,  "
                 .mapToDouble(Double::parseDouble)
                 .toArray());
     }
@@ -68,7 +71,7 @@ public abstract class AbstractStyleParser {
         try {
             return Color.web(value);
         } catch (final IllegalArgumentException ex) {
-            LOGGER.error("could not parse color value of '" + currentKey + "'='" + value + "'", ex);
+            LOGGER.error("could not parse color value of \"" + currentKey + ": " + value + ";\"", ex);
             return null;
         }
     }
@@ -86,7 +89,7 @@ public abstract class AbstractStyleParser {
         try {
             return func.apply(value);
         } catch (RuntimeException ex) {
-            LOGGER.error("could not parse value of '" + currentKey + "'='" + value + "'", ex);
+            LOGGER.error("could not parse value of \"" + currentKey + ": " + value + ";\"", ex);
             return null;
         }
     }
