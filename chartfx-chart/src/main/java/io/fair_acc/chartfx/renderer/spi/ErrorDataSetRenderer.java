@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.ErrorStyleParser;
+import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.FillRule;
@@ -16,7 +17,6 @@ import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.utils.BezierCurve;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError.ErrorType;
-import io.fair_acc.dataset.utils.DoubleArrayCache;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
@@ -138,7 +138,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     "get min/max" + String.format(" from:%d to:%d", indexMin, indexMax));
         }
 
-        final CachedDataPoints points = STATIC_POINTS_CACHE.resizeMin(indexMin, indexMax, dataSet.getDataCount(), true);
+        final CachedDataPoints points = SHARED_POINTS_CACHE.resizeMin(indexMin, indexMax, dataSet.getDataCount(), true);
         if (ProcessingProfiler.getDebugState()) {
             timestamp = ProcessingProfiler.getTimeDiff(timestamp, "get CachedPoints");
         }
@@ -385,8 +385,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int nDataCount = points.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
-        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
-        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
+        final double[] xValuesSurface = SHARED_ARRAYS.getArray(0, nPolygoneEdges);
+        final double[] yValuesSurface = SHARED_ARRAYS.getArray(1, nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         for (int i = 0; i < nDataCount; i++) {
@@ -403,9 +403,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         drawBars(gc, style, points);
         drawMarker(gc, style, points);
         drawBubbles(gc, style, points);
-
-        DoubleArrayCache.getInstance().add(xValuesSurface);
-        DoubleArrayCache.getInstance().add(yValuesSurface);
 
         ProcessingProfiler.getTimeDiff(start);
     }
@@ -424,8 +421,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         final int nDataCount = points.actualDataCount;
         final int nPolygoneEdges = 2 * nDataCount;
-        final double[] xValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
-        final double[] yValuesSurface = DoubleArrayCache.getInstance().getArray(nPolygoneEdges);
+        final double[] xValuesSurface = SHARED_ARRAYS.getArray(0, nPolygoneEdges);
+        final double[] yValuesSurface = SHARED_ARRAYS.getArray(1, nPolygoneEdges);
 
         final int xend = nPolygoneEdges - 1;
         int count = 0;
@@ -467,9 +464,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         drawBars(gc, style, points);
         drawMarker(gc, style, points);
         drawBubbles(gc, style, points);
-
-        DoubleArrayCache.getInstance().add(xValuesSurface);
-        DoubleArrayCache.getInstance().add(yValuesSurface);
 
         ProcessingProfiler.getTimeDiff(start);
     }
@@ -589,10 +583,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        // need to allocate new array :-(
         final int length = n + 2;
-        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
-        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newX = SHARED_ARRAYS.getArray(0, length);
+        final double[] newY = SHARED_ARRAYS.getArray(1, length);
 
         final double zero = points.yZero;
         System.arraycopy(points.xValues, 0, newX, 0, n);
@@ -606,10 +599,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.setFill(style.getLineColor());
         gc.fillPolygon(newX, newY, length);
         gc.restore();
-
-        // release arrays to cache
-        DoubleArrayCache.getInstance().add(newX);
-        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolyLineHistogram(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
@@ -618,10 +607,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        // need to allocate new array :-(
         final int length = 2 * (n + 1);
-        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
-        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newX = SHARED_ARRAYS.getArray(0, length);
+        final double[] newY = SHARED_ARRAYS.getArray(1, length);
 
         final double xRange = points.xMax - points.xMin;
         double diffLeft;
@@ -658,10 +646,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         gc.restore();
-
-        // release arrays to cache
-        DoubleArrayCache.getInstance().add(newX);
-        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolyLineHistogramBezier(final GraphicsContext gc,
@@ -673,11 +657,10 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        // need to allocate new array :-(
-        final double[] xCp1 = DoubleArrayCache.getInstance().getArray(n);
-        final double[] yCp1 = DoubleArrayCache.getInstance().getArray(n);
-        final double[] xCp2 = DoubleArrayCache.getInstance().getArray(n);
-        final double[] yCp2 = DoubleArrayCache.getInstance().getArray(n);
+        final double[] xCp1 = SHARED_ARRAYS.getArray(0, n);
+        final double[] yCp1 = SHARED_ARRAYS.getArray(1, n);
+        final double[] xCp2 = SHARED_ARRAYS.getArray(2, n);
+        final double[] yCp2 = SHARED_ARRAYS.getArray(3, n);
 
         BezierCurve.calcCurveControlPoints(points.xValues, points.yValues, xCp1, yCp1, xCp2, yCp2,
                 points.actualDataCount);
@@ -710,12 +693,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.closePath();
         gc.stroke();
         gc.restore();
-
-        // release arrays to Cache
-        DoubleArrayCache.getInstance().add(xCp1);
-        DoubleArrayCache.getInstance().add(yCp1);
-        DoubleArrayCache.getInstance().add(xCp2);
-        DoubleArrayCache.getInstance().add(yCp2);
     }
 
     protected static void drawPolyLineHistogramFilled(final GraphicsContext gc,
@@ -726,10 +703,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             return;
         }
 
-        // need to allocate new array :-(
         final int length = 2 * (n + 1);
-        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
-        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newX = SHARED_ARRAYS.getArray(0, length);
+        final double[] newY = SHARED_ARRAYS.getArray(1, length);
 
         final double xRange = points.xMax - points.xMin;
         double diffLeft;
@@ -756,10 +732,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.setFill(style.getLineColor());
         gc.fillPolygon(newX, newY, length);
         gc.restore();
-
-        // release arrays to cache
-        DoubleArrayCache.getInstance().add(newX);
-        DoubleArrayCache.getInstance().add(newY);
     }
 
     protected static void drawPolyLineLine(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
@@ -822,8 +794,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
         // need to allocate new array :-(
         final int length = 2 * n;
-        final double[] newX = DoubleArrayCache.getInstance().getArray(length);
-        final double[] newY = DoubleArrayCache.getInstance().getArray(length);
+        final double[] newX = SHARED_ARRAYS.getArray(0, length);
+        final double[] newY = SHARED_ARRAYS.getArray(1, length);
 
         for (int i = 0; i < n - 1; i++) {
             newX[2 * i] = points.xValues[i];
@@ -855,10 +827,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         gc.restore();
-
-        // release arrays to cache
-        DoubleArrayCache.getInstance().add(newX);
-        DoubleArrayCache.getInstance().add(newY);
     }
 
     private static void compactVector(final double[] input, final int stopIndex) {
@@ -867,14 +835,17 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
     }
 
-    // The points cache is thread-safe from the JavaFX thread and can be shared across all instances
-    private static final CachedDataPoints STATIC_POINTS_CACHE = new CachedDataPoints();
+    // The cache can be shared because there can only ever be one renderer accessing it
+    // Note: should not be exposed to child classes to guarantee that arrays aren't double used.
+    private static final FastDoubleArrayCache SHARED_ARRAYS = new FastDoubleArrayCache(4);
+    private static final CachedDataPoints SHARED_POINTS_CACHE = new CachedDataPoints();
 
     /**
      * Deletes all arrays that are larger than necessary for the last drawn dataset
      */
-    public static void trimPointsCache() {
-        STATIC_POINTS_CACHE.trim();
+    public static void trimCache() {
+        SHARED_ARRAYS.trim();
+        SHARED_POINTS_CACHE.trim();
     }
 
 }

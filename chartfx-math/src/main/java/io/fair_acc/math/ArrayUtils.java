@@ -4,6 +4,7 @@ import io.fair_acc.dataset.utils.AssertUtils;
 
 import java.util.Arrays;
 import java.util.function.IntFunction;
+import java.util.function.ToIntFunction;
 
 /**
  * Utility class containing only static functions used to manipulate arrays.
@@ -356,7 +357,7 @@ public final class ArrayUtils {
         if(array != null && array.length >= minSize) {
             return array;
         }
-        return new boolean[minSize];
+        return new boolean[growSize(minSize, array, arr -> arr.length)];
     }
 
     /**
@@ -368,7 +369,7 @@ public final class ArrayUtils {
         if(array != null && array.length >= minSize) {
             return array;
         }
-        return new double[minSize];
+        return new double[growSize(minSize, array, arr -> arr.length)];
     }
 
     /**
@@ -381,7 +382,14 @@ public final class ArrayUtils {
             Arrays.fill(array, 0, minSize, null);
             return array;
         }
-        return constructor.apply(minSize);
+        return constructor.apply(growSize(minSize, array, arr -> arr.length));
+    }
+
+    private static <T> int growSize(int minSize, T object, ToIntFunction<T> getSize) {
+        // grow by at least some elements or a percentage to avoid pressure from small increases
+        int currentSize = object == null ? 0 : getSize.applyAsInt(object);
+        int minGrowSize = Math.max(currentSize + 200, (int) (currentSize * 1.2));
+        return Math.max(minSize, minGrowSize);
     }
 
     /**
