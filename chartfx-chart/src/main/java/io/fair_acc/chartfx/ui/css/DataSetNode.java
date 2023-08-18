@@ -1,6 +1,7 @@
 package io.fair_acc.chartfx.ui.css;
 
 import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
+import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.event.EventSource;
@@ -8,6 +9,8 @@ import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.events.StateListener;
 import io.fair_acc.dataset.utils.AssertUtils;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 
 /**
  * A dataset wrapper that lives in the SceneGraph for CSS styling
@@ -15,6 +18,45 @@ import io.fair_acc.dataset.utils.AssertUtils;
  * @author ennerf
  */
 public class DataSetNode extends DataSetNodeParameter implements EventSource {
+
+    public Paint getLineColor() {
+        if (lineColor == null) {
+            lineColor = getIntensifiedColor(getStroke());
+        }
+        return lineColor;
+    }
+    private Paint lineColor = null;
+
+    public Paint getFillColor() {
+        if(fillColor == null) {
+            fillColor = getIntensifiedColor(getFill());
+        }
+        return fillColor;
+    }
+    private Paint fillColor = null;
+
+    /**
+     * @return a fill pattern of crossed lines using the lineFill color
+     */
+    public Paint getLineFillPattern() {
+        if (lineFillPattern == null) {
+            var color = getLineColor();
+            color = color instanceof Color ? ((Color) color).brighter() : color;
+            var hatchShift = getHatchShiftByIndex() * (getGlobalIndex() + 1); // start at 1 to look better
+            lineFillPattern = FillPatternStyleHelper.getDefaultHatch(color, hatchShift);
+        }
+        return lineFillPattern;
+    }
+
+    private Paint lineFillPattern = null;
+
+    {
+        // Reset cached colors
+        PropUtil.runOnChange(() -> lineColor = null, intensityProperty(), strokeProperty());
+        PropUtil.runOnChange(() -> fillColor = null, intensityProperty(), fillProperty());
+        PropUtil.runOnChange(() -> lineFillPattern = null, intensityProperty(), strokeProperty(),
+                hatchShiftByIndexProperty(), globalIndexProperty());
+    }
 
     public DataSetNode(AbstractRenderer<?> renderer,  DataSet dataSet) {
         this.renderer = AssertUtils.notNull("renderer", renderer);

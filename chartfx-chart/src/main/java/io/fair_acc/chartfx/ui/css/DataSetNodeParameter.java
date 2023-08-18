@@ -2,7 +2,6 @@ package io.fair_acc.chartfx.ui.css;
 
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
-import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -14,7 +13,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
 import java.util.List;
-import java.util.WeakHashMap;
 
 /**
  * Holds the styleable parameters of the DataSetNode
@@ -24,37 +22,18 @@ import java.util.WeakHashMap;
 public abstract class DataSetNodeParameter extends TextStyle {
 
     public Paint getMarkerColor() {
-        return getModifiedColor(getStroke());
+        return getIntensifiedColor(getStroke());
     }
 
     public double getMarkerLineWidth() {
         return getMarkerStrokeWidth();
     }
 
-    public Paint getLineColor() {
-        return getModifiedColor(getStroke());
-    }
+
 
     public double getLineWidth() {
         return getStrokeWidth();
     }
-
-    public Paint getFillColor() {
-        return getModifiedColor(getFill());
-    }
-
-    /**
-     * @return a fill pattern of crossed lines using the lineFill color
-     */
-    public Paint getLineFillPattern() {
-        return lineFillPattern.computeIfAbsent(getLineColor(), color -> {
-            color = color instanceof Color ? ((Color) color).brighter() : color;
-            var defaultHatchShift = 1.5;
-            return FillPatternStyleHelper.getDefaultHatch(color, defaultHatchShift);
-        });
-    }
-
-    private static WeakHashMap<Paint, Paint> lineFillPattern = new WeakHashMap<>(31);
 
     public double[] getLineDashes() {
         if (getStrokeDashArray().isEmpty()) {
@@ -71,7 +50,7 @@ public abstract class DataSetNodeParameter extends TextStyle {
 
     private double[] dashArray = null;
 
-    private Paint getModifiedColor(Paint color) {
+    protected Paint getIntensifiedColor(Paint color) {
         if (getIntensity() >= 100 || !(color instanceof Color)) {
             return color;
         }
@@ -105,6 +84,8 @@ public abstract class DataSetNodeParameter extends TextStyle {
     private final DoubleProperty markerSize = addOnChange(css().createDoubleProperty(this, "markerSize", 1.5, true, (oldVal, newVal) -> {
         return newVal >= 0 ? newVal : oldVal;
     }));
+
+    private final DoubleProperty hatchShiftByIndex = addOnChange(css().createDoubleProperty(this, "hatchShiftByIndex", 1.5));
 
     public int getLocalIndex() {
         return localIndex.get();
@@ -200,6 +181,18 @@ public abstract class DataSetNodeParameter extends TextStyle {
 
     public void setMarkerSize(double markerSize) {
         this.markerSize.set(markerSize);
+    }
+
+    public double getHatchShiftByIndex() {
+        return hatchShiftByIndex.get();
+    }
+
+    public DoubleProperty hatchShiftByIndexProperty() {
+        return hatchShiftByIndex;
+    }
+
+    public void setHatchShiftByIndex(double hatchShiftByIndex) {
+        this.hatchShiftByIndex.set(hatchShiftByIndex);
     }
 
     @Override
