@@ -1,36 +1,24 @@
 package io.fair_acc.sample.chart;
 
-import java.util.Collections;
-
-import io.fair_acc.chartfx.ui.css.ColorPalette;
-import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.css.PseudoClass;
-import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ToolBar;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Paint;
-import javafx.scene.paint.Stop;
-import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.chartfx.ui.css.ColorPalette;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
+import javafx.application.Application;
+import javafx.collections.FXCollections;
+import javafx.scene.Node;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Example illustrating the various colour scheme options
@@ -61,16 +49,16 @@ public class CustomColourSchemeSample extends ChartSample {
         ComboBox<ColorPalette> palettePseudoClassCB = new ComboBox<>();
         palettePseudoClassCB.setItems(FXCollections.observableArrayList(ColorPalette.values()));
         palettePseudoClassCB.getSelectionModel().select(chart.getColorPalette());
+        chart.colorPaletteProperty().bind(palettePseudoClassCB.getSelectionModel().selectedItemProperty());
         palettePseudoClassCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
-            chart.setColorPalette(n);
             LOGGER.atInfo().log("updated color palette style to " + n.name());
         });
 
         ComboBox<ErrorStyle> errorStyleCB = new ComboBox<>();
         errorStyleCB.getItems().setAll(ErrorStyle.values());
         errorStyleCB.getSelectionModel().select(renderer.getErrorType());
+        renderer.errorStyleProperty().bind(errorStyleCB.getSelectionModel().selectedItemProperty());
         errorStyleCB.getSelectionModel().selectedItemProperty().addListener((ch, o, n) -> {
-            renderer.setErrorType(n);
             LOGGER.atInfo().log("updated error style to " + n.name());
         });
 
