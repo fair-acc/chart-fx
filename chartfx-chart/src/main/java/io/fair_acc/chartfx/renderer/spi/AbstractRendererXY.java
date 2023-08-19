@@ -3,10 +3,12 @@ package io.fair_acc.chartfx.renderer.spi;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.profiler.DurationMeasurement;
+import io.fair_acc.chartfx.profiler.Profileable;
+import io.fair_acc.chartfx.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.AssertUtils;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.GraphicsContext;
 
@@ -17,7 +19,7 @@ import java.security.InvalidParameterException;
  *
  * @author ennerf
  */
-public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extends AbstractRenderer<R> {
+public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extends AbstractRenderer<R> implements Profileable {
 
     public AbstractRendererXY() {
         chartProperty().addListener((obs, old, chart) -> requireChartXY(chart));
@@ -49,20 +51,22 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
             return;
         }
 
-        final long start = ProcessingProfiler.getTimeStamp();
-
+        benchRender.start();
         updateCachedVariables();
+
 
         // N.B. importance of reverse order: start with last index, so that
         // most(-like) important DataSet is drawn on top of the others
         for (int i = getDatasetNodes().size() - 1; i >= 0; i--) {
             var dataSetNode = getDatasetNodes().get(i);
             if (dataSetNode.isVisible()) {
+                benchRenderSingle.start();
                 render(getChart().getCanvas().getGraphicsContext2D(), dataSetNode.getDataSet(), dataSetNode);
+                benchRenderSingle.stop();
             }
         }
 
-        ProcessingProfiler.getTimeDiff(start, "render");
+        benchRender.stop();
 
     }
 
@@ -97,5 +101,14 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     protected double xMin, xMax;
     protected Axis xAxis;
     protected Axis yAxis;
+
+    @Override
+    public void setProfiler(Profiler profiler) {
+        benchRender = profiler.newDuration("xy-render");
+        benchRenderSingle = profiler.newDuration("xy-render-single");
+    }
+
+    private DurationMeasurement benchRender = DurationMeasurement.DISABLED;
+    private DurationMeasurement benchRenderSingle = DurationMeasurement.DISABLED;
 
 }
