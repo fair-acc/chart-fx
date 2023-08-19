@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
+import io.fair_acc.chartfx.profiler.DurationMeasurement;
+import io.fair_acc.chartfx.profiler.Profileable;
+import io.fair_acc.chartfx.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -33,7 +36,7 @@ import io.fair_acc.chartfx.ui.geometry.Side;
 /**
  * @author rstein
  */
-public abstract class AbstractAxis extends AbstractAxisParameter implements Axis {
+public abstract class AbstractAxis extends AbstractAxisParameter implements Axis, Profileable {
     protected static final double MIN_NARROW_FONT_SCALE = 0.7;
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final double MIN_TICK_GAP = 1.0;
@@ -227,8 +230,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * range, caches, etc.
      */
     protected void updateDirtyContent(double length) {
+        benchUpdateDirtyContent.start();
         updateAxisRange(length);
         updateAxisLabel();
+        benchUpdateDirtyContent.stop();
     }
 
     protected void updateAxisRange(double length) {
@@ -401,6 +406,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return computeMinSize();
         }
 
+        benchComputePrefSize.start();
+
         // We can cache the existing layout if nothing has changed.
         final boolean isHorizontal = getSide().isHorizontal();
         if (getLength() == axisLength && state.isClean(ChartBits.AxisLayout)) {
@@ -472,6 +479,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if(getSide() == Side.CENTER_VER) {
             axisLabelOffset = -axisLabelOffset;
         }
+
+        benchComputePrefSize.stop();
 
         return Math.ceil(getSide().isCenter() ? 2 * totalSize : totalSize);
 
@@ -932,6 +941,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (state.isClean()) {
             return;
         }
+        benchDrawAxis.start();
 
         // update labels, tick marks etc.
         updateDirtyContent(getLength());
@@ -951,6 +961,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // everything is updated
         state.clear();
+
+        benchDrawAxis.stop();
 
     }
 
@@ -1215,5 +1227,16 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     public void invalidateRange() {
         invalidateAxisRange.run();
     }
+
+    @Override
+    public void setProfiler(Profiler profiler) {
+        benchComputePrefSize = profiler.newDuration("axis-computePrefSize");
+        benchUpdateDirtyContent = profiler.newDuration("axis-updateDirtyContent");
+        benchDrawAxis = profiler.newDuration("axis-drawAxis");
+    }
+
+    private DurationMeasurement benchComputePrefSize = DurationMeasurement.DISABLED;
+    private DurationMeasurement benchUpdateDirtyContent = DurationMeasurement.DISABLED;
+    private DurationMeasurement benchDrawAxis = DurationMeasurement.DISABLED;
 
 }
