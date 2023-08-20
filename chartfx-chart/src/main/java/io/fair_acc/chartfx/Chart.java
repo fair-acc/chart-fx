@@ -527,12 +527,8 @@ public abstract class Chart extends Region implements EventSource, Profileable {
         }
 
         benchPreLayout.stop();
-
-        hasRunPreLayout = true;
         benchCssAndLayout.start();
     }
-
-    boolean hasRunPreLayout = false;
 
     @Override
     public void layoutChildren() {
@@ -569,10 +565,8 @@ public abstract class Chart extends Region implements EventSource, Profileable {
     }
 
     protected void runPostLayout() {
-        if (hasRunPreLayout) {
-            benchCssAndLayout.stop();
-            hasRunPreLayout = false;
-        }
+        benchCssAndLayout.stop();
+
         // nothing to do
         if (state.isClean() && !hasLocked) {
             return;
@@ -958,7 +952,7 @@ public abstract class Chart extends Region implements EventSource, Profileable {
     @Override
     public void setProfiler(Profiler profiler) {
         benchPreLayout = profiler.newDuration("chart-runPreLayout");
-        benchCssAndLayout = profiler.newDuration("chart-cssAndLayout");
+        benchCssAndLayout = profiler.newDuration("chart-cssAndLayout").ignoreMissingStart();
         benchLayoutChildren = profiler.newDuration("chart-layoutChildren");
         benchPostLayout = profiler.newDuration("chart-runPostLayout");
         benchLockDataSets = profiler.newDuration("chart-lockDataSets");

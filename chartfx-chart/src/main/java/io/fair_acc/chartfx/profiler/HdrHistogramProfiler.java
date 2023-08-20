@@ -1,7 +1,6 @@
 package io.fair_acc.chartfx.profiler;
 
 import io.fair_acc.dataset.utils.AssertUtils;
-import org.HdrHistogram.EncodableHistogram;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;
 import org.HdrHistogram.SingleWriterRecorder;
@@ -112,7 +111,7 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
     private final ScheduledFuture<?> task;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-    static class HdrHistogramMeasurement extends DurationMeasurement.AbstractDurationMeasurement {
+    static class HdrHistogramMeasurement extends DurationMeasurement.SimpleDurationMeasurement {
 
         HdrHistogramMeasurement(final String tag) {
             super(System::nanoTime);
