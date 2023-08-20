@@ -1,12 +1,13 @@
 package io.fair_acc.dataset.locks;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.profiler.DurationMeasure;
+import io.fair_acc.dataset.profiler.Profiler;
 
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach Some implementation recommendation:
@@ -112,6 +113,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D readLock() {
+        benchReadLock.start();
         if (lastReadStamp.get() == -1 && readerCount.get() == 0) {
             // first reader needs to acquire a lock to guard against writes
             final long stamp = stampedLock.readLock();
@@ -122,7 +124,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         }
         // other readers just increment the reader lock
         readerCount.getAndIncrement();
-
+        benchReadLock.stop();
         return dataSet;
     }
 
@@ -203,6 +205,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public D writeLock() {
+        benchWriteLock.start();
         final long callingThreadId = Thread.currentThread().getId();
         if (writerLockedByThreadId.get() != callingThreadId) {
             // new/not matching existing thread holding lock - need to acquire new lock
@@ -217,6 +220,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         }
         // we acquired a new lock or are already owner of a previously acquired lock
         writerCount.incrementAndGet();
+        benchWriteLock.stop();
         return dataSet;
     }
 
@@ -257,4 +261,14 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
         }
         return dataSet;
     }
+
+    @Override
+    public void setProfiler(Profiler profiler) {
+        benchReadLock = profiler.newDuration("lock-readLock");
+        benchWriteLock = profiler.newDuration("lock-writeLock");
+    }
+
+    private DurationMeasure benchReadLock = DurationMeasure.DISABLED;
+    private DurationMeasure benchWriteLock = DurationMeasure.DISABLED;
+
 }

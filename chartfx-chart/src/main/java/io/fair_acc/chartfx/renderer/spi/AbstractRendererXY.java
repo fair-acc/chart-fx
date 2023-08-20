@@ -51,7 +51,7 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
             return;
         }
 
-        benchRender.start();
+        benchDrawAll.start();
         updateCachedVariables();
 
 
@@ -60,13 +60,13 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         for (int i = getDatasetNodes().size() - 1; i >= 0; i--) {
             var dataSetNode = getDatasetNodes().get(i);
             if (dataSetNode.isVisible()) {
-                benchRenderSingle.start();
+                benchDrawSingle.start();
                 render(getChart().getCanvas().getGraphicsContext2D(), dataSetNode.getDataSet(), dataSetNode);
-                benchRenderSingle.stop();
+                benchDrawSingle.stop();
             }
         }
 
-        benchRender.stop();
+        benchDrawAll.stop();
 
     }
 
@@ -104,11 +104,11 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
 
     @Override
     public void setProfiler(Profiler profiler) {
-        benchRender = profiler.newDuration("xy-render");
-        benchRenderSingle = profiler.newDuration("xy-render-single");
+        benchDrawAll = profiler.newDuration("xy-draw-all");
+        benchDrawSingle = profiler.newDuration("xy-draw-single");
     }
 
-    private DurationMeasure benchRender = DurationMeasure.DISABLED;
-    private DurationMeasure benchRenderSingle = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawAll = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawSingle = DurationMeasure.DISABLED;
 
 }

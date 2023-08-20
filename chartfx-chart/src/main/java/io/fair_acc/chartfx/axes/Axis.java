@@ -1,7 +1,6 @@
 package io.fair_acc.chartfx.axes;
 
 import io.fair_acc.dataset.profiler.Profileable;
-import io.fair_acc.dataset.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import javafx.beans.property.BooleanProperty;
@@ -364,8 +363,5 @@ public interface Axis extends AxisDescription, Profileable {
      * transformations with the modified ranges.
      */
     default void updateCachedTransforms() {};
-
-    default void setProfiler(Profiler profiler) {
-    }
 
 }
