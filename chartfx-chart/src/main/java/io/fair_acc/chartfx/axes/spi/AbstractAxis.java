@@ -406,13 +406,13 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return computeMinSize();
         }
 
-        benchComputePrefSize.start();
-
         // We can cache the existing layout if nothing has changed.
         final boolean isHorizontal = getSide().isHorizontal();
         if (getLength() == axisLength && state.isClean(ChartBits.AxisLayout)) {
             return isHorizontal ? getHeight() : getWidth(); // secondary dimension
         }
+
+        benchComputePrefSize.start();
 
         // Compute the ticks with correctly placed labels to determine the
         // overlap. The initial estimate is usually correct, so later changes

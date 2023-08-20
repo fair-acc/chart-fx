@@ -2,6 +2,8 @@ package io.fair_acc.chartfx.axes;
 
 import java.util.List;
 
+import io.fair_acc.chartfx.profiler.Profileable;
+import io.fair_acc.chartfx.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.dataset.events.BitState;
@@ -23,7 +25,7 @@ import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.event.UpdateEvent;
 
-public interface Axis extends AxisDescription {
+public interface Axis extends AxisDescription, Profileable {
     /**
      * This is true when the axis determines its range from the data automatically
      *
@@ -368,4 +370,8 @@ public interface Axis extends AxisDescription {
      * transformations with the modified ranges.
      */
     default void updateCachedTransforms() {};
+
+    default void setProfiler(Profiler profiler) {
+    }
+
 }
