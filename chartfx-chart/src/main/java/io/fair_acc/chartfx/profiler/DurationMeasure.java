@@ -12,7 +12,7 @@ import java.util.function.LongSupplier;
  *
  * @author ennerf
  */
-public interface DurationMeasurement {
+public interface DurationMeasure {
 
     /**
      * Called when an action begins. Sets the start timestamp.
@@ -30,14 +30,14 @@ public interface DurationMeasurement {
      *
      * @return this
      */
-    default DurationMeasurement ignoreMissingStart() {
+    default DurationMeasure ignoreMissingStart() {
         return this;
     }
 
     /**
      * A default implementation that does nothing and may be eliminated at runtime
      */
-    public static final DurationMeasurement DISABLED = new DurationMeasurement() {
+    public static final DurationMeasure DISABLED = new DurationMeasure() {
         @Override
         public void start() {
             //no-op
@@ -52,14 +52,14 @@ public interface DurationMeasurement {
     /**
      * Basic implementation for keeping time using a specifiable clock
      */
-    public static class SimpleDurationMeasurement implements DurationMeasurement {
+    public static class SimpleDurationMeasure implements DurationMeasure {
 
-        public SimpleDurationMeasurement(LongSupplier clock, LongConsumer recorder) {
+        public SimpleDurationMeasure(LongSupplier clock, LongConsumer recorder) {
             this.clock = AssertUtils.notNull("clock", clock);
             this.recorder = AssertUtils.notNull("recorder", recorder);
         }
 
-        protected SimpleDurationMeasurement(LongSupplier clock) {
+        protected SimpleDurationMeasure(LongSupplier clock) {
             this(clock, REQUIRE_CHILD_OVERRIDE);
         }
 
@@ -86,7 +86,7 @@ public interface DurationMeasurement {
         }
 
         @Override
-        public DurationMeasurement ignoreMissingStart() {
+        public DurationMeasure ignoreMissingStart() {
             ignoreMissingStart = true;
             return this;
         }
@@ -108,9 +108,9 @@ public interface DurationMeasurement {
     /**
      * A debug implementation that prints start and stop strings with duration information
      */
-    public static final class MeasurementPrinter extends SimpleDurationMeasurement {
+    public static final class MeasurePrinter extends SimpleDurationMeasure {
 
-        public MeasurementPrinter(String tag, Consumer<String> logger) {
+        public MeasurePrinter(String tag, Consumer<String> logger) {
             super(System::nanoTime);
             this.tag = tag;
             this.logger = logger;

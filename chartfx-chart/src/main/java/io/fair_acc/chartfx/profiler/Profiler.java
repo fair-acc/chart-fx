@@ -1,6 +1,6 @@
 package io.fair_acc.chartfx.profiler;
 
-import io.fair_acc.chartfx.profiler.DurationMeasurement.MeasurementPrinter;
+import io.fair_acc.chartfx.profiler.DurationMeasure.MeasurePrinter;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -17,7 +17,7 @@ public interface Profiler {
      * @param tag a descriptive name to disambiguate multiple measures
      * @return an appropriate action timer
      */
-    DurationMeasurement newDuration(String tag);
+    DurationMeasure newDuration(String tag);
 
     /**
      * A debug profiler that prints start/stop information and timestamps
@@ -26,7 +26,7 @@ public interface Profiler {
      * @return debug printer
      */
     public static Profiler debugPrinter(Consumer<String> logger) {
-        return tag -> new MeasurementPrinter(tag, logger);
+        return tag -> new MeasurePrinter(tag, logger);
     }
 
     /**
@@ -70,7 +70,7 @@ public interface Profiler {
      * @return a profiler that returns DISABLED for any non-matching tags
      */
     default Profiler filter(Predicate<String> condition) {
-        return tag -> condition.test(tag) ? newDuration(tag) : DurationMeasurement.DISABLED;
+        return tag -> condition.test(tag) ? newDuration(tag) : DurationMeasure.DISABLED;
     }
 
     /**
