@@ -1,6 +1,6 @@
 package io.fair_acc.chartfx.profiler;
 
-import io.fair_acc.chartfx.profiler.DurationMeasurement.MeasurementDebugPrinter;
+import io.fair_acc.chartfx.profiler.DurationMeasurement.MeasurementPrinter;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -14,20 +14,19 @@ import java.util.function.Predicate;
 public interface Profiler {
 
     /**
-     * @param tag a descriptive name to disambiguate multiple measurements
+     * @param tag a descriptive name to disambiguate multiple measures
      * @return an appropriate action timer
      */
     DurationMeasurement newDuration(String tag);
 
     /**
      * A debug profiler that prints start/stop information and timestamps
-     */
-    /**
+     *
      * @param logger log output
      * @return debug printer
      */
     public static Profiler debugPrinter(Consumer<String> logger) {
-        return tag -> new MeasurementDebugPrinter(tag, logger);
+        return tag -> new MeasurementPrinter(tag, logger);
     }
 
     /**
@@ -55,7 +54,7 @@ public interface Profiler {
      * @return a chart profiler
      */
     public static Profiler chartProfiler(String title) {
-        return LiveChartProfiler.showInNewStage(title);
+        return ChartProfiler.showInNewStage(title);
     }
 
     default Profiler matches(String pattern) {
