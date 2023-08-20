@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import io.fair_acc.chartfx.profiler.DurationMeasurement;
+import io.fair_acc.chartfx.profiler.DurationMeasure;
 import io.fair_acc.chartfx.profiler.Profileable;
 import io.fair_acc.chartfx.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.*;
@@ -961,14 +961,14 @@ public abstract class Chart extends Region implements EventSource, Profileable {
         benchDrawCanvas = profiler.newDuration("chart-drawCanvas");
     }
 
-    private DurationMeasurement benchPreLayout = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchCssAndLayout = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchLayoutChildren = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchPostLayout = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchLockDataSets = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchUpdateAxisRange = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchDrawAxes = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchDrawCanvas = DurationMeasurement.DISABLED;
+    private DurationMeasure benchPreLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchCssAndLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchLayoutChildren = DurationMeasure.DISABLED;
+    private DurationMeasure benchPostLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchLockDataSets = DurationMeasure.DISABLED;
+    private DurationMeasure benchUpdateAxisRange = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawAxes = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawCanvas = DurationMeasure.DISABLED;
 
     /**
      * Dataset changes do not trigger a pulse, so in order

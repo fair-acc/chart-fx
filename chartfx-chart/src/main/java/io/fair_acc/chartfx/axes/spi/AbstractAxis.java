@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
-import io.fair_acc.chartfx.profiler.DurationMeasurement;
+import io.fair_acc.chartfx.profiler.DurationMeasure;
 import io.fair_acc.chartfx.profiler.Profileable;
 import io.fair_acc.chartfx.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.LineStyle;
@@ -1235,8 +1235,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         benchDrawAxis = profiler.newDuration("axis-drawAxis");
     }
 
-    private DurationMeasurement benchComputePrefSize = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchUpdateDirtyContent = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchDrawAxis = DurationMeasurement.DISABLED;
+    private DurationMeasure benchComputePrefSize = DurationMeasure.DISABLED;
+    private DurationMeasure benchUpdateDirtyContent = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawAxis = DurationMeasure.DISABLED;
 
 }

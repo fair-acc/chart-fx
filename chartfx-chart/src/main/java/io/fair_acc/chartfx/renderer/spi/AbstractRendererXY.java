@@ -3,7 +3,7 @@ package io.fair_acc.chartfx.renderer.spi;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.profiler.DurationMeasurement;
+import io.fair_acc.chartfx.profiler.DurationMeasure;
 import io.fair_acc.chartfx.profiler.Profileable;
 import io.fair_acc.chartfx.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
@@ -108,7 +108,7 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         benchRenderSingle = profiler.newDuration("xy-render-single");
     }
 
-    private DurationMeasurement benchRender = DurationMeasurement.DISABLED;
-    private DurationMeasurement benchRenderSingle = DurationMeasurement.DISABLED;
+    private DurationMeasure benchRender = DurationMeasure.DISABLED;
+    private DurationMeasure benchRenderSingle = DurationMeasure.DISABLED;
 
 }

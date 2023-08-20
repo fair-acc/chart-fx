@@ -3,7 +3,7 @@ package io.fair_acc.chartfx.profiler;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.plugins.Zoomer;
-import io.fair_acc.chartfx.profiler.DurationMeasurement.SimpleDurationMeasurement;
+import io.fair_acc.chartfx.profiler.DurationMeasure.SimpleDurationMeasure;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
@@ -78,13 +78,13 @@ public class ChartProfiler implements Profiler {
     }
 
     @Override
-    public DurationMeasurement newDuration(String tag) {
+    public DurationMeasure newDuration(String tag) {
         // The data gets generated during the draw phase, so the dataSet may
         // be locked and can't be modified. We solve this by storing the data
         // in intermediate arrays.
         final var x = new DoubleArrayList(10);
         final var y = new DoubleArrayList(10);
-        final var measure = new SimpleDurationMeasurement(System::nanoTime, duration -> {
+        final var measure = new SimpleDurationMeasure(System::nanoTime, duration -> {
             x.add((System.nanoTime() - nanoStartOffset) * 1E-9);
             y.add(duration * 1E-9);
             state.setDirty(ChartBits.DataSetDataAdded);

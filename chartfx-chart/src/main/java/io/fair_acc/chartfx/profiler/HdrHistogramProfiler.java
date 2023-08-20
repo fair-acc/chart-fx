@@ -39,8 +39,8 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
     }
 
     @Override
-    public DurationMeasurement newDuration(String tag) {
-        HdrHistogramMeasurement recorder = new HdrHistogramMeasurement(tag);
+    public DurationMeasure newDuration(String tag) {
+        HdrHistogramMeasure recorder = new HdrHistogramMeasure(tag);
         synchronized (measurements) {
             measurements.add(recorder);
         }
@@ -67,7 +67,7 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
 
             // Get individual histograms (at roughly the same time)
             synchronized (measurements) {
-                for (HdrHistogramMeasurement recorder : measurements) {
+                for (HdrHistogramMeasure recorder : measurements) {
                     histograms.add(recorder.getTaggedIntervalHistogram());
                 }
             }
@@ -104,16 +104,16 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
 
     private final OutputStream out;
     private final HistogramLogWriter logWriter;
-    private final List<HdrHistogramMeasurement> measurements = new ArrayList<>(8);
+    private final List<HdrHistogramMeasure> measurements = new ArrayList<>(8);
     private final List<Histogram> histograms = new ArrayList<>(8);
     private volatile boolean closed = false;
 
     private final ScheduledFuture<?> task;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-    static class HdrHistogramMeasurement extends DurationMeasurement.SimpleDurationMeasurement {
+    static class HdrHistogramMeasure extends DurationMeasure.SimpleDurationMeasure {
 
-        HdrHistogramMeasurement(final String tag) {
+        HdrHistogramMeasure(final String tag) {
             super(System::nanoTime);
             this.tag = AssertUtils.notNull("tag", tag);
             this.histogramRecorder = new SingleWriterRecorder(
