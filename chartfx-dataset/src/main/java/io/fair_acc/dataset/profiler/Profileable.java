@@ -1,4 +1,4 @@
-package io.fair_acc.chartfx.profiler;
+package io.fair_acc.dataset.profiler;
 
 /**
  * An interface for classes that can be profiled, i.e.,

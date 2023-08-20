@@ -1,8 +1,8 @@
 package io.fair_acc.chartfx.renderer;
 
 import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.profiler.Profileable;
-import io.fair_acc.chartfx.profiler.Profiler;
+import io.fair_acc.dataset.profiler.Profileable;
+import io.fair_acc.dataset.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
@@ -11,9 +11,6 @@ import javafx.scene.canvas.Canvas;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.dataset.DataSet;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * -- generic renderer interface --
