@@ -5,9 +5,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import io.fair_acc.chartfx.profiler.DurationMeasure;
-import io.fair_acc.chartfx.profiler.Profileable;
-import io.fair_acc.chartfx.profiler.Profiler;
+import io.fair_acc.dataset.profiler.DurationMeasure;
+import io.fair_acc.dataset.profiler.Profileable;
+import io.fair_acc.dataset.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;

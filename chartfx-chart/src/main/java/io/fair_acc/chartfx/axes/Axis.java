@@ -1,12 +1,9 @@
 package io.fair_acc.chartfx.axes;
 
-import java.util.List;
-
-import io.fair_acc.chartfx.profiler.Profileable;
-import io.fair_acc.chartfx.profiler.Profiler;
+import io.fair_acc.dataset.profiler.Profileable;
+import io.fair_acc.dataset.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
-import io.fair_acc.dataset.events.BitState;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -14,8 +11,6 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
 import javafx.util.StringConverter;
 
 import io.fair_acc.chartfx.axes.spi.AxisRange;
@@ -23,7 +18,6 @@ import io.fair_acc.chartfx.axes.spi.MetricPrefix;
 import io.fair_acc.chartfx.axes.spi.TickMark;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.UpdateEvent;
 
 public interface Axis extends AxisDescription, Profileable {
     /**

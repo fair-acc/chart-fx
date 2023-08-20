@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
-import io.fair_acc.chartfx.profiler.DurationMeasure;
-import io.fair_acc.chartfx.profiler.Profileable;
-import io.fair_acc.chartfx.profiler.Profiler;
+import io.fair_acc.dataset.profiler.DurationMeasure;
+import io.fair_acc.dataset.profiler.Profileable;
+import io.fair_acc.dataset.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;

@@ -3,7 +3,8 @@ package io.fair_acc.chartfx.profiler;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.plugins.Zoomer;
-import io.fair_acc.chartfx.profiler.DurationMeasure.SimpleDurationMeasure;
+import io.fair_acc.dataset.profiler.DurationMeasure;
+import io.fair_acc.dataset.profiler.SimpleDurationMeasure;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
@@ -11,6 +12,7 @@ import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.profiler.Profiler;
 import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import io.fair_acc.dataset.utils.DoubleCircularBuffer;
@@ -29,7 +31,7 @@ import java.util.function.Consumer;
  */
 public class ChartProfiler implements Profiler {
 
-    public static Profiler showInNewStage(String title) {
+    public static ChartProfiler showInNewStage(String title) {
         return createChart(title, chart -> {
             var stage = new Stage();
             stage.setScene(new Scene(chart));
@@ -37,7 +39,7 @@ public class ChartProfiler implements Profiler {
         });
     }
 
-    private static Profiler createChart(String title, Consumer<XYChart> onChart) {
+    private static ChartProfiler createChart(String title, Consumer<XYChart> onChart) {
         var chart = new XYChart();
         chart.setTitle("Profiler: " + title);
         chart.getXAxis().setTimeAxis(false);
