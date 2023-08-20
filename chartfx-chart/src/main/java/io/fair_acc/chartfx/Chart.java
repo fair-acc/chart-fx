@@ -486,10 +486,8 @@ public abstract class Chart extends Region implements EventSource, Profileable {
     }
 
     protected void runPreLayout() {
-        hasRunPreLayout = true;
         state.setDirty(dataSetState.clear());
         if (state.isClean()) {
-            benchCssAndLayout.start();
             return;
         }
         benchPreLayout.start();
@@ -529,6 +527,8 @@ public abstract class Chart extends Region implements EventSource, Profileable {
         }
 
         benchPreLayout.stop();
+
+        hasRunPreLayout = true;
         benchCssAndLayout.start();
     }
 
@@ -573,7 +573,6 @@ public abstract class Chart extends Region implements EventSource, Profileable {
             benchCssAndLayout.stop();
             hasRunPreLayout = false;
         }
-
         // nothing to do
         if (state.isClean() && !hasLocked) {
             return;

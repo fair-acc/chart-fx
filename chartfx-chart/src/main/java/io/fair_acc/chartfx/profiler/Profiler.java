@@ -4,9 +4,7 @@ import io.fair_acc.chartfx.profiler.DurationMeasurement.MeasurementDebugPrinter;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 /**
  * Creates time traces for benchmarking purposes.
@@ -24,8 +22,19 @@ public interface Profiler {
     /**
      * A debug profiler that prints start/stop information and timestamps
      */
+    /**
+     * @param logger log output
+     * @return debug printer
+     */
     public static Profiler debugPrinter(Consumer<String> logger) {
         return tag -> new MeasurementDebugPrinter(tag, logger);
+    }
+
+    /**
+     * @return debug printer that prints on System.out
+     */
+    public static Profiler debugPrinter() {
+        return debugPrinter(System.out::println);
     }
 
     /**
@@ -35,7 +44,7 @@ public interface Profiler {
      * @param fileName the disk file
      * @return hdr histogram profiler
      */
-    public static Profiler newHdrHistogramProfiler(String fileName) {
+    public static Profiler hdrHistogramProfiler(String fileName) {
         return HdrHistogramProfiler.createStarted(fileName, 1, TimeUnit.SECONDS);
     }
 
@@ -45,7 +54,7 @@ public interface Profiler {
      * @param title title of the chart
      * @return a chart profiler
      */
-    public static Profiler newChartProfiler(String title) {
+    public static Profiler chartProfiler(String title) {
         return LiveChartProfiler.showInNewStage(title);
     }
 

@@ -1,6 +1,8 @@
 package io.fair_acc.chartfx.renderer;
 
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.profiler.Profileable;
+import io.fair_acc.chartfx.profiler.Profiler;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
@@ -19,7 +21,7 @@ import java.util.List;
  * @author braeun
  * @author rstein
  */
-public interface Renderer {
+public interface Renderer extends Profileable {
     /**
      * @param dataSet the data set for which the representative icon should be generated
      * @param canvas the canvas in which the representative icon should be drawn
@@ -129,6 +131,9 @@ public interface Renderer {
     default Node getNode() {
         // add nothing if not needed
         return null;
+    }
+
+    default void setProfiler(Profiler profiler) {
     }
 
 }
