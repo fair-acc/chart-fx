@@ -372,6 +372,17 @@ public final class ArrayUtils {
         return new double[growSize(minSize, array, arr -> arr.length)];
     }
 
+    public static double[] resizeMin(double[] array, int minSize, boolean copyValues) {
+        if (array != null && array.length >= minSize) {
+            return array;
+        }
+        final int newSize = growSize(minSize, array, arr -> arr.length);
+        if (!copyValues || array == null) {
+            return new double[newSize];
+        }
+        return Arrays.copyOfRange(array, 0, newSize);
+    }
+
     /**
      * @param array current value
      * @param minSize minimum size

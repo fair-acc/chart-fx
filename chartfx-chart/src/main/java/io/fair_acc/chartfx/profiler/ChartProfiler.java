@@ -1,27 +1,34 @@
 package io.fair_acc.chartfx.profiler;
 
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.plugins.Zoomer;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.SimpleDurationMeasure;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.profiler.DurationMeasure;
 import io.fair_acc.dataset.profiler.Profiler;
-import io.fair_acc.dataset.spi.AbstractDataSet;
+import io.fair_acc.dataset.profiler.SimpleDurationMeasure;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
-import io.fair_acc.dataset.utils.DoubleCircularBuffer;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tooltip;
 import javafx.stage.Stage;
+import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -39,44 +46,103 @@ public class ChartProfiler implements Profiler {
         });
     }
 
-    private static ChartProfiler createChart(String title, Consumer<XYChart> onChart) {
-        var chart = new XYChart();
-        chart.setTitle("Profiler: " + title);
-        chart.getXAxis().setTimeAxis(false);
-        chart.getXAxis().setUnit("s");
-        chart.getYAxis().setUnit("s");
-        chart.getYAxis().setAutoUnitScaling(true);
+    private static ChartProfiler createChart(String title, Consumer<Parent> onChart) {
+        // Top chart w/ time series
+        var timeChart = new XYChart(createTimeAxisX(), createValueAxisY());
+        timeChart.setTitle("Profiler: " + title);
+        timeChart.getPlugins().add(createZoomer());
+        timeChart.getLegend().getNode().setVisible(false); // TODO: somehow it shows up without any datasets?
+        timeChart.getLegend().getNode().setManaged(false);
 
-        var renderer = new ErrorDataSetRenderer();
-        renderer.setMarker(DefaultMarker.RECTANGLE);
-        renderer.setDrawMarker(true);
-        renderer.setDrawBars(false);
-        renderer.setDrawBubbles(false);
-        renderer.setPolyLineStyle(LineStyle.NONE);
-        renderer.setPointReduction(false);
-        chart.getRenderers().setAll(renderer);
+        var timeRenderer = new ErrorDataSetRenderer();
+        timeRenderer.setMarker(DefaultMarker.RECTANGLE);
+        timeRenderer.setDrawMarker(true);
+        timeRenderer.setDrawBars(false);
+        timeRenderer.setDrawBubbles(false);
+        timeRenderer.setPolyLineStyle(LineStyle.NONE);
+        timeRenderer.setPointReduction(false);
+        timeChart.getRenderers().setAll(timeRenderer);
 
-        var zoomer = new Zoomer();
-        zoomer.setAutoZoomEnabled(true);
-        chart.getPlugins().add(zoomer);
-        onChart.accept(chart);
+        // Bottom chart w/ percentile plot
+        var percentileChart = new XYChart(createPercentileAxisX(), createValueAxisY());
+        percentileChart.getPlugins().add(createZoomer());
 
-        return new ChartProfiler(renderer);
+        var percentileRenderer = new ErrorDataSetRenderer();
+        percentileRenderer.setPointReduction(false);
+        percentileRenderer.setDrawMarker(false);
+        percentileRenderer.setPolyLineStyle(LineStyle.STAIR_CASE);
+        percentileChart.getRenderers().setAll(percentileRenderer);
+
+        var profiler = new ChartProfiler(timeRenderer, percentileRenderer);
+        var clearBtn = new Button("clear");
+        clearBtn.setMaxWidth(Double.MAX_VALUE);
+        clearBtn.setOnAction(a -> profiler.clear());
+
+        final Button clearButton = new Button(null, new FontIcon("fa-trash:22"));
+        clearButton.setPadding(new Insets(3, 3, 3, 3));
+        clearButton.setTooltip(new Tooltip("clears existing data"));
+        clearButton.setOnAction(e -> profiler.clear());
+        percentileChart.getToolBar().getChildren().add(clearButton);
+
+        var pane = new SplitPane(timeChart, percentileChart);
+        pane.setOrientation(Orientation.VERTICAL);
+        onChart.accept(pane);
+        return profiler;
     }
 
-    public ChartProfiler(AbstractRendererXY<?> renderer) {
-        this.renderer = renderer;
+    private static DefaultNumericAxis createTimeAxisX() {
+        var axis = new DefaultNumericAxis();
+        axis.setTimeAxis(true);
+        axis.setName("time");
+        axis.setTimeAxis(false);
+        axis.setUnit("s");
+        return axis;
+    }
+
+    private static DefaultNumericAxis createValueAxisY() {
+        var axis = new DefaultNumericAxis();
+        axis.setForceZeroInRange(true);
+        axis.setName("Latency");
+        axis.setUnit("s");
+        axis.setAutoUnitScaling(true);
+        return axis;
+    }
+
+    private static DefaultNumericAxis createPercentileAxisX() {
+        var axis = new PercentileAxis();
+        axis.setName("Percentile");
+        axis.setUnit("%");
+        return axis;
+    }
+
+    private static Zoomer createZoomer() {
+        var zoomer = new Zoomer();
+        zoomer.setAddButtonsToToolBar(false);
+        zoomer.setAnimated(false);
+        zoomer.setSliderVisible(false);
+        zoomer.setAutoZoomEnabled(true);
+        return zoomer;
+    }
+
+    public ChartProfiler(AbstractRendererXY<?> timeSeriesRenderer, AbstractRendererXY<?> percentileRenderer) {
+        this.timeSeriesRenderer = timeSeriesRenderer;
+        this.percentileRenderer = percentileRenderer;
         Runnable updateDataSets = () -> {
             for (Runnable updateAction : updateActions) {
                 updateAction.run();
             }
             state.clear();
+
             // TODO: figure out why empty datasets fail to get started
-            if (renderer.getChart() != null) {
-                renderer.getChart().invalidate();
-            }
+            Optional.ofNullable(timeSeriesRenderer.getChart()).ifPresent(Chart::invalidate);
+            Optional.ofNullable(percentileRenderer.getChart()).ifPresent(Chart::invalidate);
         };
         state.addChangeListener((src, bits) -> Platform.runLater(updateDataSets));
+    }
+
+    public void clear() {
+        nanoStartOffset = System.nanoTime();
+        clearActions.forEach(Runnable::run);
     }
 
     @Override
@@ -93,66 +159,38 @@ public class ChartProfiler implements Profiler {
         });
 
         // Do a batch update during the next pulse
-        final var dataSet = new CircularDoubleDataSet2D(tag, defaultCapacity);
+        final var timeSeriesDs = new CircularDoubleDataSet2D(tag, defaultCapacity);
+        final var percentileDs = new HdrHistogramDataSet(tag);
         updateActions.add(() -> {
             for (int i = 0; i < x.size(); i++) {
-                dataSet.add(x.getDouble(i), y.getDouble(i));
+                timeSeriesDs.add(x.getDouble(i), y.getDouble(i));
+                percentileDs.add(y.getDouble(i));
             }
+            percentileDs.convertHistogramToXY();
+            x.clear();
+            y.clear();
+        });
+        clearActions.add(() -> {
+            timeSeriesDs.clear();
+            percentileDs.clear();
+            percentileDs.convertHistogramToXY();
             x.clear();
             y.clear();
         });
 
-        renderer.getDatasets().add(dataSet);
+        var timeNode = timeSeriesRenderer.addDataSet(timeSeriesDs);
+        var percentileNode = percentileRenderer.addDataSet(percentileDs);
+        percentileNode.visibleProperty().bindBidirectional(timeNode.visibleProperty());
+
         return measure;
     }
 
-    final Renderer renderer;
+    final Renderer timeSeriesRenderer;
+    final Renderer percentileRenderer;
     final List<Runnable> updateActions = new ArrayList<>();
+    final List<Runnable> clearActions = new ArrayList<>();
     final BitState state = BitState.initClean(this);
-    private final long nanoStartOffset = System.nanoTime();
-
-    private static class CircularDoubleDataSet2D extends AbstractDataSet<CircularDoubleDataSet2D> {
-
-        public CircularDoubleDataSet2D(String name, int capacity) {
-            super(name, 2);
-            x = new DoubleCircularBuffer(capacity);
-            y = new DoubleCircularBuffer(capacity);
-        }
-
-        @Override
-        public double get(int dimIndex, int index) {
-            switch (dimIndex) {
-                case DIM_X:
-                    return x.get(index);
-                case DIM_Y:
-                    return y.get(index);
-                default:
-                    return Double.NaN;
-            }
-        }
-
-        public void add(double x, double y) {
-            this.x.put(x);
-            this.y.put(y);
-            getAxisDescription(DIM_X).add(x);
-            getAxisDescription(DIM_Y).add(y);
-            fireInvalidated(ChartBits.DataSetData);
-        }
-
-        @Override
-        public int getDataCount() {
-            return x.available();
-        }
-
-        @Override
-        public DataSet set(DataSet other, boolean copy) {
-            throw new UnsupportedOperationException();
-        }
-
-        protected final DoubleCircularBuffer x;
-        protected final DoubleCircularBuffer y;
-
-    }
+    private long nanoStartOffset = System.nanoTime();
 
     private static final int defaultCapacity = 60 /* Hz */ * 60 /* s */;
 
