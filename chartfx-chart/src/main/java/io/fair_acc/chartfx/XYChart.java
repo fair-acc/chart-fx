@@ -10,6 +10,8 @@ import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.profiler.DurationMeasure;
+import io.fair_acc.dataset.profiler.Profiler;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -19,9 +21,6 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.GraphicsContext;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.PolarTickStep;
@@ -45,7 +44,6 @@ import io.fair_acc.dataset.utils.AssertUtils;
  * @author rstein
  */
 public class XYChart extends Chart {
-    private static final Logger LOGGER = LoggerFactory.getLogger(XYChart.class);
     protected static final int BURST_LIMIT_MS = 15;
     protected final BooleanProperty polarPlot = new SimpleBooleanProperty(this, "polarPlot", false);
     private final ObjectProperty<PolarTickStep> polarStepSize = new SimpleObjectProperty<>(PolarTickStep.THIRTY);
@@ -294,37 +292,32 @@ public class XYChart extends Chart {
 
     @Override
     protected void redrawCanvas() {
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("   xychart redrawCanvas() - pre");
-        }
         FXUtils.assertJavaFxThread();
-        final long now = System.nanoTime();
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("   xychart redrawCanvas() - executing");
-            LOGGER.debug("   xychart redrawCanvas() - canvas size = {}", String.format("%fx%f", canvas.getWidth(), canvas.getHeight()));
-        }
 
         final GraphicsContext gc = canvas.getGraphicsContext2D();
         gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
 
         // Bottom grid
         if (!gridRenderer.isDrawOnTop()) {
+            benchDrawGrid.start();
             gridRenderer.render();
+            benchDrawGrid.stop();
         }
 
         // Data
+        benchDrawData.start();
         for (final Renderer renderer : getRenderers()) {
             renderer.render();
         }
+        benchDrawData.stop();
 
         // Top grid
         if (gridRenderer.isDrawOnTop()) {
+            benchDrawGrid.start();
             gridRenderer.render();
+            benchDrawGrid.stop();
         }
 
-        if (DEBUG && LOGGER.isDebugEnabled()) {
-            LOGGER.debug("   xychart redrawCanvas() - done");
-        }
     }
 
     protected static void updateNumericAxis(final Axis axis, final List<DataSetNode> dataSets) {
@@ -370,5 +363,15 @@ public class XYChart extends Chart {
         }
 
     }
+
+    @Override
+    public void setProfiler(Profiler profiler) {
+        super.setProfiler(profiler);
+        benchDrawGrid = profiler.newDuration("xychart-drawGrid");
+        benchDrawData = profiler.newDuration("xychart-drawData");
+    }
+
+    private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawData = DurationMeasure.DISABLED;
 
 }

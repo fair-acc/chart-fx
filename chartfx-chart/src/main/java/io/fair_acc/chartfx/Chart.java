@@ -78,13 +78,11 @@ public abstract class Chart extends Region implements EventSource, Profileable {
     protected final BitState dataSetState = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
             .addChangeListener(FXUtils.runOnFxThread((src, deltaBits) -> state.setDirty(src.getBits())));
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = Boolean.getBoolean("chartfx.debug"); // for more verbose debugging
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
-
 
     /**
      * When true any data changes will be animated.
@@ -949,27 +947,6 @@ public abstract class Chart extends Region implements EventSource, Profileable {
         fireInvalidated(ChartBits.ChartPlugins);
     }
 
-    @Override
-    public void setProfiler(Profiler profiler) {
-        benchPreLayout = profiler.newDuration("chart-runPreLayout");
-        benchCssAndLayout = profiler.newDuration("chart-cssAndLayout").ignoreMissingStart();
-        benchLayoutChildren = profiler.newDuration("chart-layoutChildren");
-        benchPostLayout = profiler.newDuration("chart-runPostLayout");
-        benchLockDataSets = profiler.newDuration("chart-lockDataSets");
-        benchUpdateAxisRange = profiler.newDuration("chart-updateAxisRange");
-        benchDrawAxes = profiler.newDuration("chart-drawAxes");
-        benchDrawCanvas = profiler.newDuration("chart-drawCanvas");
-    }
-
-    private DurationMeasure benchPreLayout = DurationMeasure.DISABLED;
-    private DurationMeasure benchCssAndLayout = DurationMeasure.DISABLED;
-    private DurationMeasure benchLayoutChildren = DurationMeasure.DISABLED;
-    private DurationMeasure benchPostLayout = DurationMeasure.DISABLED;
-    private DurationMeasure benchLockDataSets = DurationMeasure.DISABLED;
-    private DurationMeasure benchUpdateAxisRange = DurationMeasure.DISABLED;
-    private DurationMeasure benchDrawAxes = DurationMeasure.DISABLED;
-    private DurationMeasure benchDrawCanvas = DurationMeasure.DISABLED;
-
     /**
      * Dataset changes do not trigger a pulse, so in order
      * to ensure a redraw we manually request a layout. We
@@ -995,5 +972,26 @@ public abstract class Chart extends Region implements EventSource, Profileable {
     public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
         return CSS.getCssMetaData();
     }
+
+    @Override
+    public void setProfiler(Profiler profiler) {
+        benchPreLayout = profiler.newDuration("chart-runPreLayout");
+        benchCssAndLayout = profiler.newDuration("chart-cssAndLayout").ignoreMissingStart();
+        benchLayoutChildren = profiler.newDuration("chart-layoutChildren");
+        benchPostLayout = profiler.newDuration("chart-runPostLayout");
+        benchLockDataSets = profiler.newDuration("chart-lockDataSets");
+        benchUpdateAxisRange = profiler.newDuration("chart-updateAxisRange");
+        benchDrawAxes = profiler.newDuration("chart-drawAxes");
+        benchDrawCanvas = profiler.newDuration("chart-drawCanvas");
+    }
+
+    private DurationMeasure benchPreLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchCssAndLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchLayoutChildren = DurationMeasure.DISABLED;
+    private DurationMeasure benchPostLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchLockDataSets = DurationMeasure.DISABLED;
+    private DurationMeasure benchUpdateAxisRange = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawAxes = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawCanvas = DurationMeasure.DISABLED;
 
 }
