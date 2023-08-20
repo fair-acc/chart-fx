@@ -1,9 +1,10 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 
 import io.fair_acc.chartfx.ui.css.*;
+import io.fair_acc.dataset.profiler.DurationMeasure;
+import io.fair_acc.dataset.profiler.Profiler;
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
@@ -336,11 +337,13 @@ public class GridRenderer extends Parent implements Renderer {
 
     @Override
     public void render() {
+        benchDrawGrid.start();
         if (chart.isPolarPlot()) {
             drawPolarGrid(chart.getCanvas().getGraphicsContext2D(), chart);
         } else {
             drawEuclideanGrid(chart.getCanvas().getGraphicsContext2D(), chart);
         }
+        benchDrawGrid.stop();
     }
 
     @Override
@@ -385,4 +388,12 @@ public class GridRenderer extends Parent implements Renderer {
     private static double snap(final double value) {
         return (int) value + 0.5;
     }
+
+    @Override
+    public void setProfiler(Profiler profiler) {
+        benchDrawGrid = profiler.newDuration("grid-drawGrid");
+    }
+
+    private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
+
 }

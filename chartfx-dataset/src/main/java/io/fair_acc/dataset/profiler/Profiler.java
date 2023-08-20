@@ -42,6 +42,10 @@ public interface Profiler {
         return filter(tag -> tag.contains(string));
     }
 
+    default Profiler startsWith(String string) {
+        return filter(tag -> tag.startsWith(string));
+    }
+
     /**
      * @param condition a condition that the tag must match
      * @return a profiler that returns DISABLED for any non-matching tags
@@ -64,6 +68,15 @@ public interface Profiler {
      */
     default Profiler addPostfix(String postfix) {
         return tag -> newDuration(postfix + tag);
+    }
+
+    /**
+     * removes the class prefix, e.g. ('chart-' or 'lock-') from the tag
+     *
+     * @return profiler
+     */
+    default Profiler removeClassPrefix() {
+        return tag -> newDuration(tag.substring(tag.indexOf('-') + 1));
     }
 
 }
