@@ -8,6 +8,7 @@ import java.util.function.Predicate;
  *
  * @author ennerf
  */
+@FunctionalInterface
 public interface Profiler {
 
     /**

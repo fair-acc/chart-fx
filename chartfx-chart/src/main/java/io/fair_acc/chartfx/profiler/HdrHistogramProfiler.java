@@ -117,14 +117,13 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
     static class HdrHistogramMeasure extends SimpleDurationMeasure {
 
         HdrHistogramMeasure(final String tag) {
-            super(System::nanoTime);
+            super(System::nanoTime, TimeUnit.NANOSECONDS);
             this.tag = AssertUtils.notNull("tag", tag);
-            this.histogramRecorder = new SingleWriterRecorder(
-                    defaultMinValue, defaultMaxValue, numberOfSignificantDigits);
+            this.histogramRecorder = new SingleWriterRecorder(defaultMinValue, defaultMaxValue, numberOfSignificantDigits);
         }
 
         @Override
-        protected void recordDuration(long duration) {
+        public void recordRawValue(long duration) {
             try {
                 histogramRecorder.recordValue(TimeUnit.NANOSECONDS.toMicros(duration));
             } catch (ArrayIndexOutOfBoundsException ex) {

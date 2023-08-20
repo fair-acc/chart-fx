@@ -86,7 +86,7 @@ public class ChartProfiler implements Profiler {
         // in intermediate arrays.
         final var x = new DoubleArrayList(10);
         final var y = new DoubleArrayList(10);
-        final var measure = new SimpleDurationMeasure(System::nanoTime, duration -> {
+        final var measure = SimpleDurationMeasure.usingNanoTime(duration -> {
             x.add((System.nanoTime() - nanoStartOffset) * 1E-9);
             y.add(duration * 1E-9);
             state.setDirty(ChartBits.DataSetDataAdded);

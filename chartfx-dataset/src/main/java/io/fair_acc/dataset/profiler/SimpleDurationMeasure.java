@@ -2,7 +2,7 @@ package io.fair_acc.dataset.profiler;
 
 import io.fair_acc.dataset.utils.AssertUtils;
 
-import java.util.function.LongConsumer;
+import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
 
 /**
@@ -12,17 +12,23 @@ import java.util.function.LongSupplier;
  */
 public class SimpleDurationMeasure implements DurationMeasure {
 
-    public SimpleDurationMeasure(LongSupplier clock, LongConsumer recorder) {
+    public static SimpleDurationMeasure usingNanoTime(LongMeasure recorder) {
+        return new SimpleDurationMeasure(System::nanoTime, TimeUnit.NANOSECONDS, recorder);
+    }
+
+    public SimpleDurationMeasure(LongSupplier clock, TimeUnit clockUnit, LongMeasure recorder) {
         this.clock = AssertUtils.notNull("clock", clock);
         this.recorder = AssertUtils.notNull("recorder", recorder);
+        this.clockUnit = clockUnit;
     }
 
-    protected SimpleDurationMeasure(LongSupplier clock) {
-        this(clock, REQUIRE_CHILD_OVERRIDE);
+    protected SimpleDurationMeasure(LongSupplier clock, TimeUnit clockUnit) {
+        this(clock, clockUnit, REQUIRE_CHILD_OVERRIDE);
     }
 
-    protected void recordDuration(long duration) {
-        recorder.accept(duration);
+    @Override
+    public void recordRawValue(long duration) {
+        recorder.recordRawValue(duration);
     }
 
     @Override
@@ -39,8 +45,12 @@ public class SimpleDurationMeasure implements DurationMeasure {
             throw new IllegalStateException("Invalid start time. start() must be called before stop()");
         }
         final long endTime = clock.getAsLong();
-        recordDuration(endTime - startTime);
+        recordRawValue(endTime - startTime);
         startTime = INVALID_START_TIME;
+    }
+
+    public TimeUnit getClockUnit() {
+        return clockUnit;
     }
 
     @Override
@@ -50,14 +60,15 @@ public class SimpleDurationMeasure implements DurationMeasure {
     }
 
     final LongSupplier clock;
-    final LongConsumer recorder;
+    final TimeUnit clockUnit;
+    final LongMeasure recorder;
     long startTime = INVALID_START_TIME;
     protected static final int INVALID_START_TIME = -1;
     protected boolean ignoreMissingStart = false;
 
     // Workaround to implement recordDuration in child classes where the
     // child method can't be referenced when calling the super constructor
-    private static final LongConsumer REQUIRE_CHILD_OVERRIDE = value -> {
+    private static final LongMeasure REQUIRE_CHILD_OVERRIDE = value -> {
         throw new UnsupportedOperationException("child class does not override recordDuration");
     };
 

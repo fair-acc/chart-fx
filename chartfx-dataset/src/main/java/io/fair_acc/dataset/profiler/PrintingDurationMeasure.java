@@ -1,6 +1,7 @@
 package io.fair_acc.dataset.profiler;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -11,7 +12,7 @@ import java.util.function.Consumer;
 public class PrintingDurationMeasure extends SimpleDurationMeasure {
 
     public PrintingDurationMeasure(String tag, Consumer<String> log) {
-        super(System::nanoTime);
+        super(System::nanoTime, TimeUnit.NANOSECONDS);
         this.tag = tag;
         this.log = log;
         this.startString = tag + " - started";
@@ -36,7 +37,7 @@ public class PrintingDurationMeasure extends SimpleDurationMeasure {
     }
 
     @Override
-    protected void recordDuration(long duration) {
+    public void recordRawValue(long duration) {
         log.accept(String.format(Locale.ENGLISH, stopTemplate, duration * 1E-6));
     }
 
