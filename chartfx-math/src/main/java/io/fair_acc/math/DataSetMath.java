@@ -853,7 +853,12 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     @SafeVarargs
     public static DataSet magnitudeSpectrum(final DataSet function, final Apodization apodization, final boolean dbScale, final boolean normalisedFrequency, @NotNull final Formatter<Number>... format) {
+        final String functionName = getFormatter(format).format("Mag{0}({1})", dbScale ? "[dB]" : "", function.getName());
         final int n = function.getDataCount();
+
+        if (n == 0) {
+            return new DoubleErrorDataSet(functionName, 0);
+        }
 
         final var fastFourierTrafo = new DoubleFFT_1D(n);
 
@@ -869,7 +874,6 @@ public final class DataSetMath { // NOPMD - nomen est omen
         final var dt = function.get(DIM_X, function.getDataCount() - 1) - function.get(DIM_X, 0);
         final var fsampling = normalisedFrequency || dt <= 0 ? 0.5 / mag.length : 1.0 / dt;
 
-        final String functionName = getFormatter(format).format("Mag{0}({1})", dbScale ? "[dB]" : "", function.getName());
         final var ret = new DoubleErrorDataSet(functionName, mag.length);
         for (var i = 0; i < mag.length; i++) {
             // TODO: consider magnitude error estimate
