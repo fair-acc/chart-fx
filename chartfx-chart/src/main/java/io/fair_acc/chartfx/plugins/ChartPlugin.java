@@ -3,6 +3,7 @@ package io.fair_acc.chartfx.plugins;
 import java.util.LinkedList;
 import java.util.List;
 
+import io.fair_acc.dataset.profiler.Profileable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -40,7 +41,7 @@ import io.fair_acc.dataset.spi.utils.Tuple;
  * @author braeun - modified to be able to use XYChart class
  * @author rstein - modified to new Chart, XYChart API
  */
-public abstract class ChartPlugin {
+public abstract class ChartPlugin implements Profileable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChartPlugin.class);
     private final ObservableList<Node> chartChildren = FXCollections.observableArrayList();
     private final List<Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>>> mouseEventHandlers = new LinkedList<>();
