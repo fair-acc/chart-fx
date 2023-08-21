@@ -383,6 +383,13 @@ public final class ArrayUtils {
         return Arrays.copyOfRange(array, 0, newSize);
     }
 
+    public static int[] resizeMin(int[] array, int minSize) {
+        if(array != null && array.length >= minSize) {
+            return array;
+        }
+        return new int[growSize(minSize, array, arr -> arr.length)];
+    }
+
     /**
      * @param array current value
      * @param minSize minimum size
