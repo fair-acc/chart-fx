@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.IntSupplier;
 
 /**
  * Experimental profiler that shows profile information in a chart
@@ -146,7 +147,7 @@ public class ChartProfiler implements Profiler {
     }
 
     @Override
-    public DurationMeasure newDuration(String tag) {
+    public DurationMeasure newDuration(String tag, IntSupplier level) {
         // The data gets generated during the draw phase, so the dataSet may
         // be locked and can't be modified. We solve this by storing the data
         // in intermediate arrays.

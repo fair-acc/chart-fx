@@ -976,10 +976,10 @@ public abstract class Chart extends Region implements EventSource, Profileable {
     @Override
     public void setProfiler(Profiler profiler) {
         benchPreLayout = profiler.newDuration("chart-runPreLayout");
-        benchCssAndLayout = profiler.newDuration("chart-cssAndLayout").ignoreMissingStart();
-        benchLayoutChildren = profiler.newDuration("chart-layoutChildren");
+        benchCssAndLayout = profiler.newTraceDuration("chart-cssAndLayout").ignoreMissingStart();
+        benchLayoutChildren = profiler.newTraceDuration("chart-layoutChildren");
         benchPostLayout = profiler.newDuration("chart-runPostLayout");
-        benchLockDataSets = profiler.newDuration("chart-lockDataSets");
+        benchLockDataSets = profiler.newDebugDuration("chart-lockDataSets");
         benchUpdateAxisRange = profiler.newDuration("chart-updateAxisRange");
         benchDrawAxes = profiler.newDuration("chart-drawAxes");
         benchDrawCanvas = profiler.newDuration("chart-drawCanvas");

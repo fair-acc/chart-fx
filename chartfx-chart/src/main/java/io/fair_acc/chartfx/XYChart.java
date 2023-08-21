@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.utils.PropUtil;
@@ -364,11 +365,45 @@ public class XYChart extends Chart {
 
     }
 
+    /**
+     * @param profiler profiler for this chart and all nested components
+     */
+    public void setGlobalProfiler(Profiler profiler) {
+        setProfiler(profiler);
+        int i = 0;
+        for (Axis axis : getAxes()) {
+            if (axis == getXAxis()) {
+                axis.setProfiler(profiler.addPrefix("x"));
+            } else if (axis == getYAxis()) {
+                axis.setProfiler(profiler.addPrefix("y"));
+            } else {
+                axis.setProfiler(profiler.addPrefix("axis" + i++));
+            }
+        }
+        i = 0;
+        gridRenderer.setProfiler(profiler);
+        for (var renderer : getRenderers()) {
+            var p = profiler.addPrefix("renderer" + i);
+            renderer.setProfiler(p);
+            int dsIx = 0;
+            for (var dataset : renderer.getDatasets()) {
+                dataset.setProfiler(p.addPrefix("ds" + dsIx));
+                dataset.lock().setProfiler(p.addPrefix("ds" + dsIx));
+                dsIx++;
+            }
+            i++;
+        }
+        i = 0;
+        for (ChartPlugin plugin : getPlugins()) {
+            plugin.setProfiler(profiler.addPrefix("plugin" + i++));
+        }
+    }
+
     @Override
     public void setProfiler(Profiler profiler) {
         super.setProfiler(profiler);
-        benchDrawGrid = profiler.newDuration("xychart-drawGrid");
-        benchDrawData = profiler.newDuration("xychart-drawData");
+        benchDrawGrid = profiler.newDebugDuration("xychart-drawGrid");
+        benchDrawData = profiler.newDebugDuration("xychart-drawData");
     }
 
     private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;

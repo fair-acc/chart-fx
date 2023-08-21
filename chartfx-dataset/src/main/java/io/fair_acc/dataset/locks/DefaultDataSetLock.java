@@ -264,8 +264,8 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     @Override
     public void setProfiler(Profiler profiler) {
-        benchReadLock = profiler.newDuration("lock-readLock");
-        benchWriteLock = profiler.newDuration("lock-writeLock");
+        benchReadLock = profiler.newTraceDuration("lock-readLock");
+        benchWriteLock = profiler.newTraceDuration("lock-writeLock");
     }
 
     private DurationMeasure benchReadLock = DurationMeasure.DISABLED;

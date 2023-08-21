@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.IntSupplier;
 
 /**
  * A profiler that records measurements in tagged HdrHistograms
@@ -42,7 +43,7 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
     }
 
     @Override
-    public DurationMeasure newDuration(String tag) {
+    public DurationMeasure newDuration(String tag, IntSupplier level) {
         HdrHistogramMeasure recorder = new HdrHistogramMeasure(tag);
         synchronized (measurements) {
             measurements.add(recorder);
