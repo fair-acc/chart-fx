@@ -127,7 +127,7 @@ public interface Profiler {
      * @return profiler
      */
     default Profiler addPostfix(String postfix) {
-        return (tag, level) -> newDuration(postfix + tag, level);
+        return (tag, level) -> newDuration(tag + "-" + postfix, level);
     }
 
     /**
@@ -137,6 +137,10 @@ public interface Profiler {
      */
     default Profiler removeClassPrefix() {
         return (tag, level) -> newDuration(tag.substring(tag.indexOf('-') + 1), level);
+    }
+
+    default Profiler removePostfix() {
+        return (tag, level) -> newDuration(tag.substring(tag.lastIndexOf('-') + 1), level);
     }
 
 }
