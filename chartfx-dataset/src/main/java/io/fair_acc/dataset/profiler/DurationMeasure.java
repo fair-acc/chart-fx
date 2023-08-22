@@ -22,7 +22,12 @@ public interface DurationMeasure extends LongMeasure {
     /**
      * @return timeUnit of the used clock
      */
-    public TimeUnit getClockUnit();
+    TimeUnit getClockUnit();
+
+    /**
+     * @return timestamp of the used clock, or -1 if not available
+     */
+    long getTimestamp();
 
     /**
      * Calling stop without start is typically an invalid call that may throw an
@@ -57,6 +62,13 @@ public interface DurationMeasure extends LongMeasure {
         public TimeUnit getClockUnit() {
             return TimeUnit.NANOSECONDS;
         }
+
+        @Override
+        public long getTimestamp() {
+            return INVALID_TIME;
+        }
     };
+
+    public static final long INVALID_TIME = -1;
 
 }

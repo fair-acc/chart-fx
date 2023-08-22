@@ -21,7 +21,7 @@ public class FastDoubleArrayCache {
     }
 
     public double[] getArray(int index, int minSize) {
-        return cache[index] = ArrayUtils.resizeMin(cache[index],  lastRequestedSize = minSize);
+        return cache[index] = ArrayUtils.resizeMin(cache[index], lastRequestedSize = minSize);
     }
 
     int lastRequestedSize;

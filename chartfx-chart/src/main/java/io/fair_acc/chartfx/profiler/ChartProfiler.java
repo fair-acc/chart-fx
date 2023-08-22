@@ -4,11 +4,15 @@ import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.marker.DefaultMarker;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
+import io.fair_acc.chartfx.plugins.CrosshairIndicator;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.renderer.hebi.ChartTraceRenderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.chartfx.renderer.spi.ReducingLineRenderer;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.profiler.DurationMeasure;
@@ -51,8 +55,8 @@ public class ChartProfiler implements Profiler {
         // Top chart w/ time series
         var timeChart = new XYChart(createTimeAxisX(), createValueAxisY());
         timeChart.setTitle("Profiler: " + title);
-        timeChart.getPlugins().add(createZoomer());
-        timeChart.getLegend().getNode().setVisible(false); // TODO: somehow it shows up without any datasets?
+        timeChart.getPlugins().addAll(createPlugins());
+        timeChart.getLegend().getNode().setVisible(false); // TODO: somehow it still shows up without any datasets?
         timeChart.getLegend().getNode().setManaged(false);
 
         var timeRenderer = new ErrorDataSetRenderer();
@@ -66,7 +70,7 @@ public class ChartProfiler implements Profiler {
 
         // Bottom chart w/ percentile plot
         var percentileChart = new XYChart(createPercentileAxisX(), createValueAxisY());
-        percentileChart.getPlugins().add(createZoomer());
+        percentileChart.getPlugins().addAll(createPlugins());
 
         var percentileRenderer = new ErrorDataSetRenderer();
         percentileRenderer.setPointReduction(false);
@@ -116,13 +120,14 @@ public class ChartProfiler implements Profiler {
         return axis;
     }
 
-    private static Zoomer createZoomer() {
+    private static ChartPlugin[] createPlugins() {
         var zoomer = new Zoomer();
         zoomer.setAddButtonsToToolBar(false);
         zoomer.setAnimated(false);
         zoomer.setSliderVisible(false);
         zoomer.setAutoZoomEnabled(true);
-        return zoomer;
+        var crosshair = new CrosshairIndicator();
+        return new ChartPlugin[]{zoomer/*,crosshair*/};
     }
 
     public ChartProfiler(AbstractRendererXY<?> timeSeriesRenderer, AbstractRendererXY<?> percentileRenderer) {

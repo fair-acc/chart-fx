@@ -38,7 +38,7 @@ public class SimpleDurationMeasure implements DurationMeasure {
 
     @Override
     public void stop() {
-        if (startTime == INVALID_START_TIME) {
+        if (startTime == INVALID_TIME) {
             if (ignoreMissingStart) {
                 return;
             }
@@ -46,11 +46,16 @@ public class SimpleDurationMeasure implements DurationMeasure {
         }
         final long endTime = clock.getAsLong();
         recordRawValue(endTime - startTime);
-        startTime = INVALID_START_TIME;
+        startTime = INVALID_TIME;
     }
 
     public TimeUnit getClockUnit() {
         return clockUnit;
+    }
+
+    @Override
+    public long getTimestamp() {
+        return clock.getAsLong();
     }
 
     @Override
@@ -62,8 +67,7 @@ public class SimpleDurationMeasure implements DurationMeasure {
     final LongSupplier clock;
     final TimeUnit clockUnit;
     final LongMeasure recorder;
-    long startTime = INVALID_START_TIME;
-    protected static final int INVALID_START_TIME = -1;
+    long startTime = INVALID_TIME;
     protected boolean ignoreMissingStart = false;
 
     // Workaround to implement recordDuration in child classes where the
