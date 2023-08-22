@@ -134,18 +134,6 @@ public class ChartTraceRenderer extends AbstractRendererXY<ChartTraceRenderer> {
     private static final double minPointPixelDistance = 1;
 
     @Override
-    public boolean drawLegendSymbol(final DataSetNode style, final Canvas canvas) {
-        var gc = canvas.getGraphicsContext2D();
-        gc.save();
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
-        gc.strokeLine(1, canvas.getHeight() / 2.0, canvas.getWidth() - 2.0, canvas.getHeight() / 2.0);
-        gc.restore();
-        return true;
-    }
-
-    @Override
     protected ChartTraceRenderer getThis() {
         return this;
     }

@@ -169,21 +169,6 @@ public class BufferedImageRenderer extends AbstractRendererXY<BufferedImageRende
     Color color;
 
     @Override
-    public boolean drawLegendSymbol(DataSetNode style, Canvas canvas) {
-        final int width = (int) canvas.getWidth();
-        final int height = (int) canvas.getHeight();
-        final GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.save();
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
-        final double y = height / 2.0;
-        gc.strokeLine(1, y, width - 2.0, y);
-        gc.restore();
-        return true;
-    }
-
-    @Override
     protected BufferedImageRenderer getThis() {
         return this;
     }
