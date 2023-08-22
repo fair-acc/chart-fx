@@ -3,6 +3,10 @@ package io.fair_acc.chartfx.renderer.hebi;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.profiler.AggregateDurationMeasure;
+import io.fair_acc.dataset.profiler.DurationMeasure;
+import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.utils.StreamUtils;
 import io.fair_acc.math.ArrayUtils;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
@@ -16,7 +20,12 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.IntBuffer;
+import java.util.Arrays;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
+import static io.fair_acc.chartfx.renderer.hebi.ChartTraceRenderer.*;
 import static io.fair_acc.dataset.DataSet.*;
 
 /**
@@ -64,67 +73,96 @@ public class BufferedImageRenderer extends AbstractRendererXY<BufferedImageRende
 
     @Override
     protected void render(GraphicsContext unused, DataSet dataSet, DataSetNode style) {
-        // check for potentially reduced data range we are supposed to plot
-        int min = Math.max(0, dataSet.getIndex(DIM_X, xMin) - 1);
-        int max = Math.min(dataSet.getIndex(DIM_X, xMax) + 2, dataSet.getDataCount()); /* excluded in the drawing */
 
-        // zero length/range data set -> nothing to be drawn
-        if (max - min <= 0) {
+        // check for potentially reduced data range we are supposed to plot
+        final int min = Math.max(0, dataSet.getIndex(DIM_X, xMin) - 1);
+        final int max = Math.min(dataSet.getIndex(DIM_X, xMax) + 2, dataSet.getDataCount()); /* excluded in the drawing */
+        final int count = max - min;
+        if (count <= 0) {
             return;
         }
 
-        // make sure temp array is large enough
-        int newLength = max - min;
-        this.style = style;
-        xCoords = xCoordsShared = ArrayUtils.resizeMin(xCoordsShared, newLength);
-        yCoords = yCoordsShared = ArrayUtils.resizeMin(yCoordsShared, newLength);
-
-        // compute local screen coordinates
-        var x = toCoord(xAxis.getDisplayPosition(dataSet.get(DIM_X, min)));
-        var y = toCoord(yAxis.getDisplayPosition(dataSet.get(DIM_Y, min)));
-
-        var prevX = xCoords[0] = x;
-        var prevY = yCoords[0] = y;
-        coordLength = 1;
-        for (int i = min + 1; i < max; i++) {
-            x = toCoord(xAxis.getDisplayPosition(dataSet.get(DIM_X, i)));
-            y = toCoord(yAxis.getDisplayPosition(dataSet.get(DataSet.DIM_Y, i)));
-
-            // Reduce points if they don't provide any benefits
-            if (x == prevX && y == prevY) {
-                continue;
-            }
-
-            // Add point
-            xCoords[coordLength] = prevX = x;
-            yCoords[coordLength] = prevY = y;
-            coordLength++;
-        }
-
-
-        // draw polyline
         var gc = (Graphics2D) img.getGraphics();
         if (color == null) {
             var fxCol = (javafx.scene.paint.Color) style.getLineColor();
             color = new Color(
                     (float) fxCol.getBlue(),
                     (float) fxCol.getRed(),
-                    (float) fxCol.getGreen());
+                    (float) fxCol.getGreen(),
+                    (float) fxCol.getOpacity());
         }
-        gc.setColor(color);
-        gc.drawPolyline(xCoords, yCoords, coordLength);
+        graphics.setColor(color);
 
-       /* double x0 = xCoords[0];
-        double y0 = yCoords[0];
-        for (int i = 1; i < coordLength; i++) {
-            double x1 = xCoords[i];
-            double y1 = yCoords[i];
-            if (Double.isFinite(x0 + x1 + y0 + y1)) {
-                gc.strokeLine(x0, y0, x1, y1);
+        // make sure temp array is large enough
+        xCoords = xCoordsShared = ArrayUtils.resizeMin(xCoordsShared, count);
+        yCoords = xCoordsShared = ArrayUtils.resizeMin(yCoordsShared, count);
+
+        // compute local screen coordinates
+        for (int i = min; i < max; ) {
+
+            benchComputeCoords.start();
+
+            // find the first valid point
+            double xi = dataSet.get(DIM_X, i);
+            double yi = dataSet.get(DIM_Y, i);
+            i++;
+            while (Double.isNaN(xi) || Double.isNaN(yi)) {
+                i++;
+                continue;
             }
-            x0 = x1;
-            y0 = y1;
-        }*/
+
+            // start coord array
+            double x = xAxis.getDisplayPosition(xi);
+            double y = yAxis.getDisplayPosition(yi);
+            double prevX = x;
+            double prevY = y;
+            xCoords[0] = (int) x;
+            yCoords[0] = (int) y;
+            coordLength = 1;
+
+            // Build contiguous non-nan segments so we can use strokePolyLine
+            while (i < max) {
+                xi = dataSet.get(DIM_X, i);
+                yi = dataSet.get(DIM_Y, i);
+                i++;
+
+                // Skip iteration and draw whatever we have for now
+                if (Double.isNaN(xi) || Double.isNaN(yi)) {
+                    break;
+                }
+
+                // Remove points that are unnecessary
+                x = xAxis.getDisplayPosition(xi);
+                y = yAxis.getDisplayPosition(yi);
+                if (isSamePoint(prevX, prevY, x, y)) {
+                    continue;
+                }
+
+                // Add point
+                prevX = x;
+                prevY = y;
+                xCoords[coordLength] = (int) x;
+                yCoords[coordLength] = (int) y;
+                coordLength++;
+
+            }
+            benchComputeCoords.stop();
+
+            // Draw coordinates
+             if (coordLength == 1) {
+                // corner case for a single point that would be skipped by strokePolyLine
+                graphics.drawLine(xCoords[0], yCoords[0], xCoords[0], yCoords[0]);
+            } else {
+                // solid and dashed line
+                benchPolyLine.start();
+                graphics.drawPolyline(xCoords, yCoords, coordLength);
+                benchPolyLine.stop();
+            }
+
+        }
+
+        benchComputeCoords.reportSum();
+        benchPolyLine.reportSum();
 
     }
 
@@ -160,6 +198,16 @@ public class BufferedImageRenderer extends AbstractRendererXY<BufferedImageRende
             }
         });
     }
+
+    @Override
+    public void setProfiler(Profiler profiler) {
+        super.setProfiler(profiler);
+        benchPolyLine = AggregateDurationMeasure.wrap(profiler.newDebugDuration("j2d-drawPolyLine"));
+        benchComputeCoords = AggregateDurationMeasure.wrap(profiler.newDebugDuration("j2d-computeCoords"));
+    }
+
+    AggregateDurationMeasure benchComputeCoords = AggregateDurationMeasure.DISABLED;
+    AggregateDurationMeasure benchPolyLine = AggregateDurationMeasure.DISABLED;
 
     final ImageView imageView = new ImageView();
     BufferedImage img;
