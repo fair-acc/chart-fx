@@ -19,12 +19,23 @@ import io.fair_acc.dataset.DataSet;
  */
 public interface Renderer extends Profileable {
     /**
-     * @param dataSet the data set for which the representative icon should be generated
+     * @param style the data set node for which the representative icon should be generated
      * @param canvas the canvas in which the representative icon should be drawn
      * @return true if the renderer generates symbols that should be displayed
      */
-    default boolean drawLegendSymbol(DataSetNode dataSet, Canvas canvas) {
-        return false;
+    default boolean drawLegendSymbol(DataSetNode style, Canvas canvas) {
+        // Default to a single line in the dataset color
+        var x0 = 1;
+        var x1 = canvas.getWidth() - 2.0;
+        var y = canvas.getHeight() / 2.0;
+        var gc = canvas.getGraphicsContext2D();
+        gc.save();
+        gc.setLineWidth(style.getLineWidth());
+        gc.setLineDashes(style.getLineDashes());
+        gc.setStroke(style.getLineColor());
+        gc.strokeLine(x0, y, x1, y);
+        gc.restore();
+        return true;
     }
 
     /**
