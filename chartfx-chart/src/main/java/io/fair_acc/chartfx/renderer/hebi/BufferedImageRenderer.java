@@ -4,12 +4,9 @@ import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.profiler.AggregateDurationMeasure;
-import io.fair_acc.dataset.profiler.DurationMeasure;
 import io.fair_acc.dataset.profiler.Profiler;
-import io.fair_acc.dataset.utils.StreamUtils;
 import io.fair_acc.math.ArrayUtils;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.image.PixelBuffer;
@@ -20,12 +17,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.nio.IntBuffer;
-import java.util.Arrays;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
-import static io.fair_acc.chartfx.renderer.hebi.ChartTraceRenderer.*;
+import static io.fair_acc.chartfx.renderer.spi.BasicDataSetRenderer.*;
 import static io.fair_acc.dataset.DataSet.*;
 
 /**
