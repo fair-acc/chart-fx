@@ -431,21 +431,6 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
         return shiftBar;
     }
 
-    @Deprecated // TODO: remove from examples and provide a way to better get to it from the datasets
-    public void setMarkerSize(double value) {
-        for (DataSetNode datasetNode : getDatasetNodes()) {
-            datasetNode.setMarkerSize(value);
-        }
-    }
-
-    @Deprecated // TODO: remove from examples
-    public double getMarkerSize() {
-        for (DataSetNode datasetNode : getDatasetNodes()) {
-            return datasetNode.getMarkerSize();
-        }
-        return 1.5;
-    }
-
     protected R bind(final R other) {
         chartProperty().bind(other.chartProperty());
         errorStyleProperty().bind(other.errorStyleProperty());

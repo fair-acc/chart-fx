@@ -37,7 +37,6 @@ public class NotANumberSample extends ChartSample {
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new DataPointTooltip());
         final ErrorDataSetRenderer renderer = (ErrorDataSetRenderer) chart.getRenderers().get(0);
-        renderer.setMarkerSize(3);
 
         // enables NaN support (N.B. may have some impact on the plotting
         // performance for larger DataSets and/or high rate update (ie. 100 kPoints@25Hz)

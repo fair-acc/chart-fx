@@ -11,6 +11,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
+import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
@@ -273,7 +274,7 @@ public class FinancialDataSetNode extends DataSetNode {
         return css().getCssMetaData();
     }
 
-    private static final CssPropertyFactory<DataSetNodeParameter> CSS = new CssPropertyFactory<>(TextStyle.getClassCssMetaData());
+    private static final CssPropertyFactory<DataSetNodeParameter> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
 
     // GENERATED ACCESSOR METHODS -------------------------------
 

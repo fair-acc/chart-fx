@@ -293,23 +293,21 @@ public class ErrorDataSetRendererStylingSample extends ChartSample {
         drawMarker.setSelected(errorRenderer.isDrawMarker());
         drawMarker.selectedProperty().addListener((ch, old, selected) -> {
             errorRenderer.setDrawMarker(selected);
-            chart.invalidate();
         });
         pane.addToParameterPane("Draw Markers: ", drawMarker);
 
-        final Spinner<Number> markerSize = new Spinner<>(0, 100, errorRenderer.getMarkerSize(), 0.5);
+        final Spinner<Number> markerSize = new Spinner<>(0, 100, 1.5, 0.5);
         markerSize.isEditable();
         markerSize.valueProperty().addListener((ch, old, value) -> {
-            errorRenderer.setMarkerSize(value.intValue());
-            chart.invalidate();
+            errorRenderer.getDatasetNodes().forEach(node -> node.setMarkerSize(value.doubleValue()));
         });
         pane.addToParameterPane("   Marker Size: ", markerSize);
 
         final ComboBox<DefaultMarker> markerStyle = new ComboBox<>();
         markerStyle.getItems().addAll(DefaultMarker.values());
-        markerStyle.setValue((DefaultMarker) errorRenderer.getMarker());
+        markerStyle.setValue(DefaultMarker.DEFAULT);
         markerStyle.valueProperty().addListener((ch, old, selection) -> {
-            errorRenderer.setMarker(selection);
+            errorRenderer.getDatasetNodes().forEach(node -> node.setMarkerType(selection));
             chart.invalidate();
         });
         pane.addToParameterPane("   Marker Style: ", markerStyle);
