@@ -125,7 +125,6 @@ public class ErrorDataSetRendererSample extends ChartSample {
         errorRenderer.setErrorStyle(ErrorStyle.ERRORCOMBO);
         // errorRenderer.setErrorType(ErrorStyle.ESTYLE_NONE);
         errorRenderer.setDrawMarker(true);
-        errorRenderer.setMarkerSize(1.0);
         //        errorRenderer.setPointReduction(false);
         //        errorRenderer.setAllowNaNs(true);
 

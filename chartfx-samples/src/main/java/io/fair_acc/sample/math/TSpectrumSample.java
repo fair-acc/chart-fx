@@ -5,6 +5,7 @@ import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Objects;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
@@ -123,7 +124,7 @@ public class TSpectrumSample extends ChartSample {
         backgroundRenderer = new ErrorDataSetRenderer();
         peakRenderer = new ErrorDataSetRenderer();
         peakRenderer.setPolyLineStyle(LineStyle.NONE);
-        peakRenderer.setMarkerSize(5);
+        peakRenderer.setStyle(DataSetStyleBuilder.instance().setMarkerSize(5).build());
         peakRenderer.setAssumeSortedData(false);
         chart.getRenderers().addAll(backgroundRenderer, peakRenderer);
 

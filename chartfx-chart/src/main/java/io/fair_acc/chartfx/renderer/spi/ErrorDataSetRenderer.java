@@ -36,9 +36,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         implements Renderer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ErrorDataSetRenderer.class);
 
-    @Deprecated // should go on styleable node
-    private Marker marker = DefaultMarker.DEFAULT;
-
     private final DataSetStyleParser styleParser = DataSetStyleParser.newInstance();
 
     /**
@@ -102,15 +99,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         return true;
     }
 
-    /**
-     * Returns the marker used by this renderer.
-     *
-     * @return the marker to be drawn on the data points
-     */
-    public Marker getMarker() {
-        return marker;
-    }
-
     @Override
     protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
         // N.B. print out for debugging purposes, please keep (used for
@@ -168,15 +156,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             timestamp = ProcessingProfiler.getTimeDiff(timestamp, "drawChartComponents()");
         }
 
-    }
-
-    /**
-     * Replaces marker used by this renderer.
-     *
-     * @param marker the marker to be drawn on the data points
-     */
-    public void setMarker(final Marker marker) {
-        this.marker = marker;
     }
 
     /**

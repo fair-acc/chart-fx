@@ -12,6 +12,7 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -124,7 +125,7 @@ public class ScatterAndBubbleRendererSample extends ChartSample {
 
         Chart chart1 = getDefaultChart("Bubble-Chart via DataSetError interface");
         final ErrorDataSetRenderer errorRenderer1 = new ErrorDataSetRenderer();
-        errorRenderer1.setMarkerSize(1);
+        errorRenderer1.setStyle(DataSetStyleBuilder.instance().setMarkerSize(1).build());
         errorRenderer1.setPolyLineStyle(LineStyle.NONE);
         errorRenderer1.setErrorStyle(ErrorStyle.ERRORBARS);
         errorRenderer1.setDrawMarker(false);
@@ -138,16 +139,18 @@ public class ScatterAndBubbleRendererSample extends ChartSample {
 
         Chart chart2 = getDefaultChart("Scatter-Chart via addDataStyle(<index>, <String>) interface");
         final ErrorDataSetRenderer errorRenderer2 = new ErrorDataSetRenderer();
-        errorRenderer2.setMarkerSize(5);
         errorRenderer2.setPolyLineStyle(LineStyle.NONE);
         errorRenderer2.setErrorStyle(ErrorStyle.NONE);
         errorRenderer2.setDrawMarker(true);
         errorRenderer2.setAssumeSortedData(false); // !! important since DS is likely unsorted
-        // set default marker either via
-        bubbleDataSet2a.setStyle("markerType=circle;");
-        bubbleDataSet2b.setStyle("markerType=circle;");
-        // or via global default, this also allows to set custom marker implementing the 'Marker' interface
-        errorRenderer2.setMarker(DefaultMarker.DIAMOND);
+
+        // or via string styles
+        bubbleDataSet2a.setStyle(DataSetStyleBuilder.instance().setMarkerType("circle").setMarkerSize(5).build());
+
+        // set default marker either via style node
+        var bubbleDataSet2bStyle = errorRenderer2.addDataSet(bubbleDataSet2b);
+        bubbleDataSet2bStyle.setMarkerType(DefaultMarker.DIAMOND);
+        bubbleDataSet2bStyle.setMarkerSize(5);
 
         errorRenderer2.setDrawBubbles(false);
         chart2.getRenderers().setAll(errorRenderer2);
