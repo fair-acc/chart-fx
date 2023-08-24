@@ -177,7 +177,7 @@ public class DefaultLegend extends FlowPane implements Legend {
 
         public LegendItem(DataSetNode series) {
             StyleUtil.addStyles(this, "chart-legend-item");
-            textProperty().bind(series.textProperty());
+            textProperty().bind(series.nameProperty());
             setGraphic(symbol);
             symbol.managedProperty().bind(symbol.visibleProperty());
             symbol.widthProperty().bind(symbolWidth);

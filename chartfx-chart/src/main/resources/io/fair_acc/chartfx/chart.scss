@@ -258,9 +258,19 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
 
 .dataset {
   @include palette.defaultColorDefinitions(15);
-  -fx-stroke-width: 1.5;
-  -fx-stroke-dash-array: null;
-  -fx-marker-stroke-width: 0.5;
+
+  // Marker
+  -fx-marker-color: -color-dataset;
+  -fx-marker-type: rectangle; // rectangle, circle, diamond, etc.
+  -fx-marker-size: 1.5; // 0 to disable
+  -fx-marker-line-width: 0.5;
+  -fx-marker-line-dash-array: null;
+
+  // PolyLine
+  -fx-line-color: -color-dataset;
+  -fx-line-width: 1.0; // 0 to disable
+  -fx-line-dash-array: null;
+
 }
 
 // Axis styles

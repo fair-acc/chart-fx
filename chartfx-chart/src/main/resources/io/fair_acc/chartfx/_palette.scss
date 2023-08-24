@@ -153,8 +153,6 @@
     &.default-color#{$i} {
       // Add another lookup layer so it's easier to override all
       -color-dataset: -color-dataset-#{$i+1};
-      -fx-stroke: -color-dataset;
-      -fx-fill: -color-dataset;
     }
   }
 }

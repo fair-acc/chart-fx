@@ -3,8 +3,10 @@ package io.fair_acc.chartfx.ui.css;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ReadOnlyLongProperty;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
@@ -184,6 +186,20 @@ public class StyleUtil {
     static Consumer<ObservableValue<?>> incrementOnChange(LongProperty counter) {
         ChangeListener<Object> listener = (obs, old, value) -> counter.set(counter.get() + 1);
         return prop -> prop.addListener(listener);
+    }
+
+    public static ObjectBinding<double[]> toUnboxedDoubleArray(ReadOnlyProperty<Number[]> source) {
+        return Bindings.createObjectBinding(() -> {
+            var array = source.getValue();
+            if (array == null) {
+                return null;
+            }
+            double[] result = new double[array.length];
+            for (int i = 0; i < array.length; i++) {
+                result[i] = array[i] == null ? 0 : array[i].doubleValue();
+            }
+            return result;
+        });
     }
 
     public static void copyLineDashes(final GraphicsContext gc, Shape style) {

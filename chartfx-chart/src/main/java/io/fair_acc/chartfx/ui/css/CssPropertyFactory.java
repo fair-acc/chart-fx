@@ -1,19 +1,19 @@
 package io.fair_acc.chartfx.ui.css;
 
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.function.*;
-
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.Property;
 import javafx.css.*;
+import javafx.css.converter.SizeConverter;
 import javafx.scene.Node;
-
 import javafx.scene.paint.Paint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.function.*;
 
 /**
  * Extension of the StylablePropertyFactory. Adds types like [Stylish]DoubleProperties and provides callbacks for changes
@@ -317,6 +317,10 @@ public class CssPropertyFactory<S extends Styleable> {
 
     public final StyleableObjectProperty<Paint> createPaintProperty(S styleableBean, String propertyName, Paint initialValue, Runnable... invalidateActions) {
         return createObjectProperty(styleableBean, propertyName, initialValue, true, StyleConverter.getPaintConverter(), null);
+    }
+
+    public final StyleableObjectProperty<Number[]> createNumberArrayProperty(S styleableBean, String propertyName, Number[] initialValue, Runnable... invalidateActions) {
+        return createObjectProperty(styleableBean, propertyName, initialValue, true, SizeConverter.SequenceConverter.getInstance(), null);
     }
 
     /**
