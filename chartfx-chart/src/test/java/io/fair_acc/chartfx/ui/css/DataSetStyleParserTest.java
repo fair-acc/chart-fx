@@ -2,9 +2,7 @@ package io.fair_acc.chartfx.ui.css;
 
 import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.fair_acc.dataset.utils.DataSetStyleBuilder.*;
@@ -41,8 +39,8 @@ class DataSetStyleParserTest {
         assertTrue(parser.tryParse(style));
         assertEquals(Color.YELLOW, parser.getFillColor().orElseThrow());
 
-        style = builder.reset().setStrokeWidth(1.3).build();
-        assertEquals("-fx-stroke-width: 1.3;", style);
+        style = builder.reset().setLineWidth(1.3).build();
+        assertEquals("-fx-line-width: 1.3;", style);
         assertTrue(parser.tryParse(style));
         assertEquals(1.3, parser.getLineWidth().orElseThrow());
 
@@ -61,37 +59,37 @@ class DataSetStyleParserTest {
         assertEquals(FontWeight.BOLD, parser.getFontWeight().orElseThrow());
 
         style = builder.reset()
-                .setStrokeWidth(3)
+                .setLineWidth(3)
                 .setFont("Serif")
                 .setFontSize(20)
                 .setFontItalic(true)
                 .setFontWeight("bold")
-                .setStrokeWidth(3)
+                .setLineWidth(3)
                 .setFont("monospace")
                 .setFontItalic(true)
                 .setStroke("0xEE00EE")
                 .setFill("0xEE00EE")
-                .setStrokeDashPattern(5, 8, 5, 16)
+                .setLineDashes(5, 8, 5, 16)
                 .setFill("blue")
-                .setStrokeDashPattern(3, 5, 8, 5)
+                .setLineDashes(3, 5, 8, 5)
                 .build();
         assertEquals("" +
                 "-fx-fill: blue;\n" +
                 "-fx-font-size: 20.0;\n" +
                 "-fx-font-style: italic;\n" +
-                "-fx-stroke-width: 3.0;\n" +
-                "-fx-stroke-dash-array: 3.0 5.0 8.0 5.0;\n" +
+                "-fx-line-dash-array: 3.0 5.0 8.0 5.0;\n" +
+                "-fx-line-width: 3.0;\n" +
                 "-fx-font: monospace;\n" +
                 "-fx-font-weight: bold;\n" +
                 "-fx-stroke: 0xEE00EE;", style);
         assertTrue(parser.tryParse(style));
-        assertArrayEquals(new double[]{3, 5, 8, 5}, parser.getLineDashPattern().orElseThrow());
+        assertArrayEquals(new double[]{3, 5, 8, 5}, parser.getLineDashes().orElseThrow());
 
         style = builder.reset()
-                .setStringProp(STROKE_DASH_PATTERN, "1, 2, 3")
+                .setStringProp(LINE_DASHES, "1, 2, 3")
                 .build();
         assertTrue(parser.tryParse(style));
-        assertArrayEquals(new double[]{1, 2, 3}, parser.getLineDashPattern().orElseThrow());
+        assertArrayEquals(new double[]{1, 2, 3}, parser.getLineDashes().orElseThrow());
 
     }
 

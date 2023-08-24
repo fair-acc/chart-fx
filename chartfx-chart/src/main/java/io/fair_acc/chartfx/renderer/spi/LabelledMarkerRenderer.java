@@ -1,17 +1,13 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import java.util.Objects;
-
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
-import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 
 import org.slf4j.Logger;
@@ -221,11 +217,11 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
         if (!styleParser.tryParse(style)) {
             return;
         }
-        styleParser.getStrokeColor().ifPresent(gc::setStroke);
-        styleParser.getFillColor().ifPresent(gc::setFill);
+        styleParser.getLineColor().ifPresent(gc::setStroke);
         styleParser.getLineWidth().ifPresent(gc::setLineWidth);
+        styleParser.getLineDashes().ifPresent(gc::setLineDashes);
+        styleParser.getMarkerColor().ifPresent(gc::setFill);
         styleParser.getFont().ifPresent(gc::setFont);
-        styleParser.getLineDashPattern().ifPresent(gc::setLineDashes);
     }
 
     public final LabelledMarkerRenderer updateCSS() {
