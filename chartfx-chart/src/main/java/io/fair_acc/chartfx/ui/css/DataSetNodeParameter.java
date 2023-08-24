@@ -24,6 +24,7 @@ import java.util.List;
 public abstract class DataSetNodeParameter extends Parent implements StyleUtil.StyleNode {
 
     // ======================== State properties ========================
+    private final LongProperty changeCounter = new SimpleLongProperty(0);
     private final StringProperty name = new SimpleStringProperty();
     private final IntegerProperty localIndex = new SimpleIntegerProperty();
     private final IntegerProperty globalIndex = new SimpleIntegerProperty();
@@ -31,7 +32,10 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
     private final DoubleProperty intensity = addOnChange(css().createDoubleProperty(this, "intensity", 100));
     private final BooleanProperty showInLegend = addOnChange(css().createBooleanProperty(this, "showInLegend", true));
     private final DoubleProperty hatchShiftByIndex = addOnChange(css().createDoubleProperty(this, "hatchShiftByIndex", 1.5));
-    private final LongProperty changeCounter = new SimpleLongProperty(0);
+
+    {
+        addOnChange(visibleProperty());
+    }
 
     // ======================== Marker properties (ignored if markerSize is zero) ========================
 
