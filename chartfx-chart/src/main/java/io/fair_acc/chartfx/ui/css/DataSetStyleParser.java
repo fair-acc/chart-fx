@@ -3,6 +3,7 @@ package io.fair_acc.chartfx.ui.css;
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.dataset.utils.DataSetStyleBuilder;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
@@ -40,74 +41,100 @@ public class DataSetStyleParser extends AbstractStyleParser {
                     return null;
                 }));
 
-            case DataSetStyleBuilder.MARKER_TYPE:
-                return isValid(marker = parse(value, DefaultMarker::get));
-
-            case DataSetStyleBuilder.FILL_COLOR:
-                return isValid(fillColor = parseColor(value));
-
-            case DataSetStyleBuilder.MARKER_COLOR:
-                return isValid(markerColor = parseColor(value));
-
-            case DataSetStyleBuilder.STROKE_COLOR:
-                return isValid(strokeColor = parseColor(value));
-
-            case DataSetStyleBuilder.MARKER_SIZE:
-                return isValid(markerSize = parseDouble(value));
 
             case DataSetStyleBuilder.INTENSITY:
                 return isValid(intensity = parseDouble(value));
 
-            case DataSetStyleBuilder.STROKE_WIDTH:
-                return isValid(lineWidth = parseDouble(value));
 
+            case DataSetStyleBuilder.MARKER_TYPE:
+                return isValid(markerType = parse(value, DefaultMarker::get));
+            case DataSetStyleBuilder.MARKER_LINE_WIDTH:
+                return isValid(markerLineWidth = parseDouble(value));
+            case DataSetStyleBuilder.MARKER_SIZE:
+                return isValid(markerSize = parseDouble(value));
+            case DataSetStyleBuilder.MARKER_COLOR:
+                return isValid(markerColor = parseColor(value));
+            case DataSetStyleBuilder.MARKER_LINE_DASHES:
+                return isValid(markerLineDashes = parseDoubleArray(value));
+
+
+            case DataSetStyleBuilder.LINE_WIDTH:
+                return isValid(lineWidth = parseDouble(value));
+            case DataSetStyleBuilder.LINE_COLOR:
+                return isValid(lineColor = parseColor(value));
+            case DataSetStyleBuilder.LINE_DASHES:
+                return isValid(lineDashes = parseDoubleArray(value));
+
+
+            case DataSetStyleBuilder.FILL_COLOR:
+                return isValid(fillColor = parseColor(value));
+            case DataSetStyleBuilder.STROKE_COLOR:
+                return isValid(strokeColor = parseColor(value));
+            case DataSetStyleBuilder.STROKE_WIDTH:
+                return isValid(strokeWidth = parseDouble(value));
             case DataSetStyleBuilder.STROKE_DASH_PATTERN:
-                return isValid(lineDashPattern = parseDoubleArray(value));
+                return isValid(strokeDashPattern = parseDoubleArray(value));
+
 
             case DataSetStyleBuilder.FONT:
                 return isValid(font = parse(value, Font::font));
-
             case DataSetStyleBuilder.FONT_WEIGHT:
                 return isValid(fontWeight = parse(value, FontWeight::findByName));
-
             case DataSetStyleBuilder.FONT_SIZE:
                 return isValid(fontSize = parseDouble(value));
-
             case DataSetStyleBuilder.FONT_STYLE:
-                    return isValid(fontStyle = parse(value, FontPosture::findByName));
+                return isValid(fontStyle = parse(value, FontPosture::findByName));
 
             default:
                 return false;
         }
     }
 
+
+    // Generic
     public Optional<Boolean> getVisible() {
         return optional(visible);
     }
 
-    public Optional<Marker> getMarker() {
-        return optional(marker);
+    public OptionalDouble getIntensity() {
+        return optional(intensity);
+    }
+
+    // Marker
+    public Optional<Marker> getMarkerType() {
+        return optional(markerType);
+    }
+
+    public OptionalDouble getMarkerLineWidth() {
+        return optional(markerLineWidth);
     }
 
     public OptionalDouble getMarkerSize() {
         return optional(markerSize);
     }
 
-    public OptionalDouble getLineWidth() {
-        return optional(lineWidth);
-    }
-    public OptionalDouble getIntensity() {
-        return optional(intensity);
-    }
-
-    public Optional<double[]> getLineDashPattern() {
-        return optional(lineDashPattern);
-    }
-
     public Optional<Paint> getMarkerColor() {
         return optional(markerColor);
     }
 
+    public Optional<double[]> getMarkerLineDashes() {
+        return optional(markerLineDashes);
+    }
+
+    // Line
+    public OptionalDouble getLineWidth() {
+        return optional(lineWidth);
+    }
+
+    public Optional<Paint> getLineColor() {
+        return optional(lineColor);
+    }
+
+    public Optional<double[]> getLineDashes() {
+        return optional(lineDashes);
+    }
+
+    // Shape
     public Optional<Paint> getFillColor() {
         return optional(fillColor);
     }
@@ -116,50 +143,88 @@ public class DataSetStyleParser extends AbstractStyleParser {
         return optional(strokeColor);
     }
 
-    public Optional<Paint> getLineColor() {
-        return getStrokeColor();
+    public OptionalDouble getStrokeWidth() {
+        return optional(strokeWidth);
     }
 
+    public Optional<double[]> getStrokeDashes() {
+        return optional(strokeDashPattern);
+    }
+
+    // Text
     public Optional<Font> getFont() {
         return optional(font);
-    }
-
-    public Optional<FontPosture> getFontStyle() {
-        return optional(fontStyle);
     }
 
     public Optional<FontWeight> getFontWeight() {
         return optional(fontWeight);
     }
 
-    protected void clear() {
-        marker = null;
-        visible = null;
-        markerSize = Double.NaN;
-        intensity = Double.NaN;
-        lineWidth = Double.NaN;
-        lineDashPattern = null;
-        markerColor = null;
-        fillColor = null;
-        strokeColor = null;
-        font = null;
-        fontWeight = null;
-        fontStyle = null;
-        fontSize = Double.NaN;
+    public OptionalDouble getFontSize() {
+        return optional(fontSize);
     }
 
-    private Marker marker;
+    public Optional<FontPosture> getFontStyle() {
+        return optional(fontStyle);
+    }
+
+    protected void clear() {
+        // Generic
+        visible = null;
+        intensity = Double.NaN;
+
+        // Marker
+        markerType = null;
+        markerLineWidth = Double.NaN;
+        markerSize = Double.NaN;
+        markerColor = null;
+        markerLineDashes = null;
+
+        // Line
+        lineWidth = Double.NaN;
+        lineColor = null;
+        lineDashes = null;
+
+        // Shape
+        fillColor = null;
+        strokeColor = null;
+        strokeWidth = Double.NaN;
+        strokeDashPattern = null;
+
+        // Text
+        font = null;
+        fontWeight = null;
+        fontSize = Double.NaN;
+        fontStyle = null;
+    }
+
+    // Generic
     private Boolean visible;
-    private double markerSize;
     private double intensity;
-    private double lineWidth;
-    private double[] lineDashPattern;
+
+    // Marker
+    private Marker markerType;
+    private double markerLineWidth;
+    private double markerSize;
     private Paint markerColor;
+    private double[] markerLineDashes;
+
+    // Line
+    private double lineWidth;
+    private Color lineColor;
+    private double[] lineDashes;
+
+    // Shape
     private Paint fillColor;
     private Paint strokeColor;
+    private double strokeWidth;
+    private double[] strokeDashPattern;
+
+
+    // Text
     private Font font;
     private FontWeight fontWeight;
-    private FontPosture fontStyle;
     private double fontSize;
+    private FontPosture fontStyle;
 
 }

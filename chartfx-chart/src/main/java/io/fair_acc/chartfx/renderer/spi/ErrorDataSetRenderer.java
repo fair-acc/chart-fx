@@ -213,7 +213,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 } else {
                     // work-around: bar colour controlled by the marker color
                     gc.save();
-                    styleParser.getFillColor().ifPresent(gc::setFill);
+                    styleParser.getMarkerColor().ifPresent(gc::setFill);
                     gc.setLineWidth(barWidthHalf);
                     gc.strokeLine(points.xZero, points.yZero, points.xValues[i],
                             points.yValues[i]);
@@ -236,7 +236,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
                 } else {
                     gc.save();
-                    styleParser.getFillColor().ifPresent(gc::setFill);
+                    styleParser.getMarkerColor().ifPresent(gc::setFill);
                     gc.fillRect(points.xValues[i] - barWidthHalf, yMin, localBarWidth, yDiff);
                     gc.restore();
                 }
@@ -501,7 +501,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                     continue;
                 }
                 var customColor = styleParser.getMarkerColor().orElse(markerColor);
-                Marker customMarker = styleParser.getMarker().orElse(marker);
+                Marker customMarker = styleParser.getMarkerType().orElse(marker);
                 gc.save();
                 gc.setFill(customColor);
                 gc.setStroke(customColor);

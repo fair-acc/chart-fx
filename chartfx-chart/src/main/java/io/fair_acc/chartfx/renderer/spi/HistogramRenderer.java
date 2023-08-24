@@ -194,9 +194,10 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
             final boolean applyCustomStyle = styleParser.tryParse(ds.getStyle(index));
             if (applyCustomStyle) {
                 gc.save();
-                styleParser.getFillColor().ifPresent(gc::setFill);
-                styleParser.getLineColor().ifPresent(gc::setStroke);
                 styleParser.getLineWidth().ifPresent(gc::setLineWidth);
+                styleParser.getLineDashes().ifPresent(gc::setLineDashes);
+                styleParser.getLineColor().ifPresent(gc::setStroke);
+                styleParser.getLineColor().ifPresent(gc::setFill);
             }
 
             drawBar(gc, x0, axisMin, x1, binValue, topRadius, isVerticalDataSet, filled);
