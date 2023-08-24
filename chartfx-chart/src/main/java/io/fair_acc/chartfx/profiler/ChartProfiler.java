@@ -9,10 +9,8 @@ import io.fair_acc.chartfx.plugins.CrosshairIndicator;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.renderer.hebi.ChartTraceRenderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.chartfx.renderer.spi.ReducingLineRenderer;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.profiler.DurationMeasure;
@@ -60,7 +58,6 @@ public class ChartProfiler implements Profiler {
         timeChart.getLegend().getNode().setManaged(false);
 
         var timeRenderer = new ErrorDataSetRenderer();
-        timeRenderer.setMarker(DefaultMarker.RECTANGLE);
         timeRenderer.setDrawMarker(true);
         timeRenderer.setDrawBars(false);
         timeRenderer.setDrawBubbles(false);
