@@ -474,7 +474,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
      * @param points reference to local cached data point object
      */
     protected void drawMarker(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
-        if (!isDrawMarker()) {
+        if (!isDrawMarker() || (style.getMarkerSize() == 0 && !points.hasStyles)) {
             return;
         }
         gc.save();
@@ -491,11 +491,17 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
             final double x = points.xValues[i];
             final double y = points.yValues[i];
             if (!points.hasStyles || !styleParser.tryParse(points.styles[i])) {
+                if (markerSize == 0) {
+                    continue;
+                }
                 marker.draw(gc, x, y, markerSize);
             } else {
+                double customSize = styleParser.getMarkerSize().orElse(markerSize);
+                if (customSize == 0) {
+                    continue;
+                }
                 var customColor = styleParser.getMarkerColor().orElse(markerColor);
                 Marker customMarker = styleParser.getMarker().orElse(marker);
-                double customSize = styleParser.getMarkerSize().orElse(markerSize);
                 gc.save();
                 gc.setFill(customColor);
                 gc.setStroke(customColor);
@@ -512,6 +518,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
      * @param points reference to local cached data point object
      */
     protected void drawPolyLine(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
+        if (style.getLineWidth() == 0) {
+            return;
+        }
         switch (getPolyLineStyle()) {
         case NONE:
             return;

@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.ui.css;
 
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
+import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
@@ -9,6 +10,7 @@ import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.css.*;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
@@ -19,58 +21,19 @@ import java.util.List;
  *
  * @author ennerf
  */
-public abstract class DataSetNodeParameter extends TextStyle {
+public abstract class DataSetNodeParameter extends Parent implements StyleUtil.StyleNode {
 
-    public Paint getMarkerColor() {
-        return getIntensifiedColor(getStroke());
-    }
-
-    public double getMarkerLineWidth() {
-        return getMarkerStrokeWidth();
-    }
-
-
-
-    public double getLineWidth() {
-        return getStrokeWidth();
-    }
-
-    public double[] getLineDashes() {
-        if (getStrokeDashArray().isEmpty()) {
-            return null;
-        }
-        if (dashArray == null || dashArray.length != getStrokeDashArray().size()) {
-            dashArray = new double[getStrokeDashArray().size()];
-        }
-        for (int i = 0; i < dashArray.length; i++) {
-            dashArray[i] = getStrokeDashArray().get(i);
-        }
-        return dashArray;
-    }
-
-    private double[] dashArray = null;
-
-    protected Paint getIntensifiedColor(Paint color) {
-        if (getIntensity() >= 100 || !(color instanceof Color)) {
-            return color;
-        }
-        if (getIntensity() <= 0) {
-            return Color.TRANSPARENT;
-        }
-        int scale = (int) (getIntensity() / 100);
-        return ((Color) color).deriveColor(0, scale, 1.0, scale);
-    }
-
-    protected <T extends ObservableValue<?>> T addOnChange(T observable) {
-        PropUtil.runOnChange(this::incrementChangeCounter, observable);
-        return observable;
-    }
-
+    // ======================== State properties ========================
+    private final StringProperty name = new SimpleStringProperty();
     private final IntegerProperty localIndex = new SimpleIntegerProperty();
     private final IntegerProperty globalIndex = new SimpleIntegerProperty();
     private final IntegerProperty colorIndex = addOnChange(new SimpleIntegerProperty());
     private final DoubleProperty intensity = addOnChange(css().createDoubleProperty(this, "intensity", 100));
     private final BooleanProperty showInLegend = addOnChange(css().createBooleanProperty(this, "showInLegend", true));
+    private final DoubleProperty hatchShiftByIndex = addOnChange(css().createDoubleProperty(this, "hatchShiftByIndex", 1.5));
+    private final LongProperty changeCounter = new SimpleLongProperty(0);
+
+    // ======================== Marker properties (ignored if markerSize is zero) ========================
 
     // The CSS enum property can't be set to the base interface, so we provide a user binding that overrides the CSS
     private final ObjectProperty<DefaultMarker> markerType = css().createEnumProperty(this, "markerType", DefaultMarker.DEFAULT, true, DefaultMarker.class);
@@ -79,19 +42,63 @@ public abstract class DataSetNodeParameter extends TextStyle {
         return userMarkerType.get() != null ? userMarkerType.get() : markerType.get();
     }, userMarkerType, markerType));
 
-    // Marker specific properties
-    private final DoubleProperty markerStrokeWidth = addOnChange(css().createDoubleProperty(this, "markerStrokeWidth", 0.5));
-    private final DoubleProperty markerSize = addOnChange(css().createDoubleProperty(this, "markerSize", 1.5, true, (oldVal, newVal) -> {
-        return newVal >= 0 ? newVal : oldVal;
-    }));
+    private final DoubleProperty markerLineWidth = addOnChange(css().createDoubleProperty(this, "markerLineWidth", 0.5));
+    private final DoubleProperty markerSize = addOnChange(css().createDoubleProperty(this, "markerSize", 1.5));
+    private final ObjectProperty<Paint> markerColor = addOnChange(css().createPaintProperty(this, "markerColor", Color.BLACK));
+    protected final ObjectBinding<Paint> intensifiedMarkerColor = intensifiedColor(markerColor);
+    private final ObjectProperty<Number[]> markerLineDashArray = addOnChange(css().createNumberArrayProperty(this, "markerLineDashArray", null));
+    private final ObjectBinding<double[]> markerLineDashes = StyleUtil.toUnboxedDoubleArray(markerLineDashArray);
 
-    private final DoubleProperty hatchShiftByIndex = addOnChange(css().createDoubleProperty(this, "hatchShiftByIndex", 1.5));
+    // ======================== Line properties (ignored if lineWidth is zero) ========================
+
+    private final DoubleProperty lineWidth = addOnChange(css().createDoubleProperty(this, "lineWidth", 1.0));
+    private final ObjectProperty<Paint> lineColor = addOnChange(css().createPaintProperty(this, "lineColor", Color.BLACK));
+    protected final ObjectBinding<Paint> intensifiedLineColor = intensifiedColor(lineColor);
+    private final ObjectBinding<Paint> lineFillPattern = hatchFillPattern(lineColor);
+    private final ObjectProperty<Number[]> lineDashArray = addOnChange(css().createNumberArrayProperty(this, "lineDashArray", null));
+    private final ObjectBinding<double[]> lineDashes = StyleUtil.toUnboxedDoubleArray(lineDashArray);
+
+    // ======================== Overriden accessors ========================
+
+    public Paint getMarkerColor() {
+        return intensifiedMarkerColor.get();
+    }
+
+    public Paint getLineColor() {
+        return intensifiedLineColor.get();
+    }
+
+    public Marker getMarkerType() {
+        return markerTypeProperty().get();
+    }
+
+    public ObjectBinding<Marker> markerTypeProperty() {
+        return actualMarkerType;
+    }
+
+    public void setMarkerType(Marker marker) {
+        this.userMarkerType.set(marker);
+    }
+
+    // ======================== Generated accessors ========================
+
+    public String getName() {
+        return name.get();
+    }
+
+    public StringProperty nameProperty() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name.set(name);
+    }
 
     public int getLocalIndex() {
         return localIndex.get();
     }
 
-    public ReadOnlyIntegerProperty localIndexProperty() {
+    public IntegerProperty localIndexProperty() {
         return localIndex;
     }
 
@@ -103,7 +110,7 @@ public abstract class DataSetNodeParameter extends TextStyle {
         return globalIndex.get();
     }
 
-    public ReadOnlyIntegerProperty globalIndexProperty() {
+    public IntegerProperty globalIndexProperty() {
         return globalIndex;
     }
 
@@ -115,7 +122,7 @@ public abstract class DataSetNodeParameter extends TextStyle {
         return colorIndex.get();
     }
 
-    public ReadOnlyIntegerProperty colorIndexProperty() {
+    public IntegerProperty colorIndexProperty() {
         return colorIndex;
     }
 
@@ -147,28 +154,61 @@ public abstract class DataSetNodeParameter extends TextStyle {
         this.showInLegend.set(showInLegend);
     }
 
-    public Marker getMarkerType() {
-        return markerTypeProperty().get();
+    public double getHatchShiftByIndex() {
+        return hatchShiftByIndex.get();
     }
 
-    public ObjectBinding<Marker> markerTypeProperty() {
+    public DoubleProperty hatchShiftByIndexProperty() {
+        return hatchShiftByIndex;
+    }
+
+    public void setHatchShiftByIndex(double hatchShiftByIndex) {
+        this.hatchShiftByIndex.set(hatchShiftByIndex);
+    }
+
+    @Override
+    public long getChangeCounter() {
+        return changeCounter.get();
+    }
+
+    public void setChangeCounter(long changeCounter) {
+        this.changeCounter.set(changeCounter);
+    }
+
+    public void setMarkerType(DefaultMarker markerType) {
+        this.markerType.set(markerType);
+    }
+
+    public Marker getUserMarkerType() {
+        return userMarkerType.get();
+    }
+
+    public ObjectProperty<Marker> userMarkerTypeProperty() {
+        return userMarkerType;
+    }
+
+    public void setUserMarkerType(Marker userMarkerType) {
+        this.userMarkerType.set(userMarkerType);
+    }
+
+    public Marker getActualMarkerType() {
+        return actualMarkerType.get();
+    }
+
+    public ObjectBinding<Marker> actualMarkerTypeProperty() {
         return actualMarkerType;
     }
 
-    public void setMarkerType(Marker marker) {
-        this.userMarkerType.set(marker);
+    public double getMarkerLineWidth() {
+        return markerLineWidth.get();
     }
 
-    public double getMarkerStrokeWidth() {
-        return markerStrokeWidth.get();
+    public DoubleProperty markerLineWidthProperty() {
+        return markerLineWidth;
     }
 
-    public DoubleProperty markerStrokeWidthProperty() {
-        return markerStrokeWidth;
-    }
-
-    public void setMarkerStrokeWidth(double markerStrokeWidth) {
-        this.markerStrokeWidth.set(markerStrokeWidth);
+    public void setMarkerLineWidth(double markerLineWidth) {
+        this.markerLineWidth.set(markerLineWidth);
     }
 
     public double getMarkerSize() {
@@ -183,16 +223,139 @@ public abstract class DataSetNodeParameter extends TextStyle {
         this.markerSize.set(markerSize);
     }
 
-    public double getHatchShiftByIndex() {
-        return hatchShiftByIndex.get();
+    public ObjectProperty<Paint> markerColorProperty() {
+        return markerColor;
     }
 
-    public DoubleProperty hatchShiftByIndexProperty() {
-        return hatchShiftByIndex;
+    public void setMarkerColor(Paint markerColor) {
+        this.markerColor.set(markerColor);
     }
 
-    public void setHatchShiftByIndex(double hatchShiftByIndex) {
-        this.hatchShiftByIndex.set(hatchShiftByIndex);
+    public Paint getIntensifiedMarkerColor() {
+        return intensifiedMarkerColor.get();
+    }
+
+    public ObjectBinding<Paint> intensifiedMarkerColorProperty() {
+        return intensifiedMarkerColor;
+    }
+
+    public Number[] getMarkerLineDashArray() {
+        return markerLineDashArray.get();
+    }
+
+    public ObjectProperty<Number[]> markerLineDashArrayProperty() {
+        return markerLineDashArray;
+    }
+
+    public void setMarkerLineDashArray(Number[] markerLineDashArray) {
+        this.markerLineDashArray.set(markerLineDashArray);
+    }
+
+    public double[] getMarkerLineDashes() {
+        return markerLineDashes.get();
+    }
+
+    public ObjectBinding<double[]> markerLineDashesProperty() {
+        return markerLineDashes;
+    }
+
+    public double getLineWidth() {
+        return lineWidth.get();
+    }
+
+    public DoubleProperty lineWidthProperty() {
+        return lineWidth;
+    }
+
+    public void setLineWidth(double lineWidth) {
+        this.lineWidth.set(lineWidth);
+    }
+
+    public ObjectProperty<Paint> lineColorProperty() {
+        return lineColor;
+    }
+
+    public void setLineColor(Paint lineColor) {
+        this.lineColor.set(lineColor);
+    }
+
+    public Paint getIntensifiedLineColor() {
+        return intensifiedLineColor.get();
+    }
+
+    public ObjectBinding<Paint> intensifiedLineColorProperty() {
+        return intensifiedLineColor;
+    }
+
+    public Paint getLineFillPattern() {
+        return lineFillPattern.get();
+    }
+
+    public ObjectBinding<Paint> lineFillPatternProperty() {
+        return lineFillPattern;
+    }
+
+    public Number[] getLineDashArray() {
+        return lineDashArray.get();
+    }
+
+    public ObjectProperty<Number[]> lineDashArrayProperty() {
+        return lineDashArray;
+    }
+
+    public void setLineDashArray(Number[] lineDashArray) {
+        this.lineDashArray.set(lineDashArray);
+    }
+
+    public double[] getLineDashes() {
+        return lineDashes.get();
+    }
+
+    public ObjectBinding<double[]> lineDashesProperty() {
+        return lineDashes;
+    }
+
+    // ======================== Utility methods ========================
+
+    protected ObjectBinding<Paint> intensifiedColor(ReadOnlyObjectProperty<Paint> base) {
+        return Bindings.createObjectBinding(() -> getIntensifiedColor(base.get()), base, intensity);
+    }
+
+    protected ObjectBinding<Paint> hatchFillPattern(ReadOnlyObjectProperty<Paint> base) {
+        return Bindings.createObjectBinding(() -> {
+            var color = getIntensifiedColor(base.get());
+            if (color instanceof Color) {
+                color = ((Color) color).brighter();
+            }
+            // start at 1 to look better
+            var hatchShift = getHatchShiftByIndex() * (getGlobalIndex() + 1);
+            return FillPatternStyleHelper.getDefaultHatch(color, hatchShift);
+        }, base, globalIndex, hatchShiftByIndex);
+    }
+
+    protected Paint getIntensifiedColor(Paint color) {
+        if (getIntensity() >= 100 || !(color instanceof Color)) {
+            return color;
+        }
+        if (getIntensity() <= 0) {
+            return Color.TRANSPARENT;
+        }
+        int scale = (int) (getIntensity() / 100);
+        return ((Color) color).deriveColor(0, scale, 1.0, scale);
+    }
+
+    @Override
+    public ReadOnlyLongProperty changeCounterProperty() {
+        return changeCounter;
+    }
+
+    protected void incrementChangeCounter() {
+        changeCounter.set(changeCounter.get() + 1);
+    }
+
+    protected <T extends ObservableValue<?>> T addOnChange(T observable) {
+        PropUtil.runOnChange(this::incrementChangeCounter, observable);
+        return observable;
     }
 
     @Override
@@ -209,6 +372,6 @@ public abstract class DataSetNodeParameter extends TextStyle {
         return css().getCssMetaData();
     }
 
-    private static final CssPropertyFactory<DataSetNodeParameter> CSS = new CssPropertyFactory<>(TextStyle.getClassCssMetaData());
+    private static final CssPropertyFactory<DataSetNodeParameter> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
 
 }

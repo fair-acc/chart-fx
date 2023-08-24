@@ -23,45 +23,6 @@ import java.util.Objects;
  */
 public class DataSetNode extends DataSetNodeParameter implements EventSource {
 
-    public Paint getLineColor() {
-        if (lineColor == null) {
-            lineColor = getIntensifiedColor(getStroke());
-        }
-        return lineColor;
-    }
-    private Paint lineColor = null;
-
-    public Paint getFillColor() {
-        if(fillColor == null) {
-            fillColor = getIntensifiedColor(getFill());
-        }
-        return fillColor;
-    }
-    private Paint fillColor = null;
-
-    /**
-     * @return a fill pattern of crossed lines using the lineFill color
-     */
-    public Paint getLineFillPattern() {
-        if (lineFillPattern == null) {
-            var color = getLineColor();
-            color = color instanceof Color ? ((Color) color).brighter() : color;
-            var hatchShift = getHatchShiftByIndex() * (getGlobalIndex() + 1); // start at 1 to look better
-            lineFillPattern = FillPatternStyleHelper.getDefaultHatch(color, hatchShift);
-        }
-        return lineFillPattern;
-    }
-
-    private Paint lineFillPattern = null;
-
-    {
-        // Reset cached colors
-        PropUtil.runOnChange(() -> lineColor = null, intensityProperty(), strokeProperty());
-        PropUtil.runOnChange(() -> fillColor = null, intensityProperty(), fillProperty());
-        PropUtil.runOnChange(() -> lineFillPattern = null, intensityProperty(), strokeProperty(),
-                hatchShiftByIndexProperty(), globalIndexProperty());
-    }
-
     public DataSetNode(AbstractRenderer<?> renderer,  DataSet dataSet) {
         this.renderer = AssertUtils.notNull("renderer", renderer);
         this.dataSet = AssertUtils.notNull("dataSet", dataSet);
@@ -75,7 +36,7 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
         // Add other styles
 
         // Initialize styles in case the dataset has clean bits
-        setText(dataSet.getName());
+        setName(dataSet.getName());
         setStyle(dataSet.getStyle());
         currentUserStyles.setAll(dataSet.getStyleClasses());
         getStyleClass().addAll(currentUserStyles);
@@ -102,7 +63,7 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
 
         // Note: don't clear because the dataset might be in multiple nodes
         if (state.isDirty(ChartBits.DataSetName)) {
-            setText(dataSet.getName());
+            setName(dataSet.getName());
         }
 
         // Update style info

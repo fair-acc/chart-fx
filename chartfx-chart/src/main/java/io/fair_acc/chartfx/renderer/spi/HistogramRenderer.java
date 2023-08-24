@@ -167,7 +167,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         gc.setLineWidth(style.getLineWidth());
         gc.setLineDashes(style.getLineDashes());
         gc.setStroke(style.getLineColor());
-        gc.setFill(style.getFillColor());
+        gc.setFill(style.getLineColor());
 
         for (int i = 0; i < nRange; i++) {
             final int index = indexMin + i;
