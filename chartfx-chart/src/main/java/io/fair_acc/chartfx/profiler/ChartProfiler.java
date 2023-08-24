@@ -59,10 +59,9 @@ public class ChartProfiler implements Profiler {
 
         var timeRenderer = new ErrorDataSetRenderer();
         timeRenderer.setDrawMarker(true);
-        timeRenderer.setDrawBars(false);
-        timeRenderer.setDrawBubbles(false);
         timeRenderer.setPolyLineStyle(LineStyle.NONE);
         timeRenderer.setPointReduction(false);
+        timeRenderer.setAllowNaNs(false);
         timeChart.getRenderers().setAll(timeRenderer);
 
         // Bottom chart w/ percentile plot
@@ -70,9 +69,10 @@ public class ChartProfiler implements Profiler {
         percentileChart.getPlugins().addAll(createPlugins());
 
         var percentileRenderer = new ErrorDataSetRenderer();
-        percentileRenderer.setPointReduction(false);
         percentileRenderer.setDrawMarker(false);
-        percentileRenderer.setPolyLineStyle(LineStyle.STAIR_CASE);
+        percentileRenderer.setPolyLineStyle(LineStyle.NORMAL);
+        percentileRenderer.setPointReduction(false);
+        percentileRenderer.setAllowNaNs(false);
         percentileChart.getRenderers().setAll(percentileRenderer);
 
         var profiler = new ChartProfiler(timeRenderer, percentileRenderer);
