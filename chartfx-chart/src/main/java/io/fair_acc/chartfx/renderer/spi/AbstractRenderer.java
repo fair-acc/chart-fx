@@ -25,9 +25,8 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 
-import java.util.List;
+import java.util.*;
 import java.util.function.IntSupplier;
-import java.util.stream.Collectors;
 
 /**
  * @author rstein
@@ -49,7 +48,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     protected DataSetNode createNode(DataSet dataSet) {
         // Reuse existing nodes when possible
         for (DataSetNode dataSetNode : dataSetNodes) {
-            if(dataSetNode.getDataSet() == dataSet) {
+            if (dataSetNode.getDataSet() == dataSet) {
                 return dataSetNode;
             }
         }
@@ -62,12 +61,26 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
         dataSetNodes.addListener((ListChangeListener<DataSetNode>) c -> {
             getChildren().setAll(dataSetNodes);
         });
-        datasets.addListener((ListChangeListener<DataSet>) c -> {
-            dataSetNodes.setAll(datasets.stream().distinct().map(this::createNode).collect(Collectors.toList()));
-        });
+        datasets.addListener((ListChangeListener<DataSet>) c -> updateNodes());
         dataSetNodes.addListener((ListChangeListener<DataSetNode>) c -> updateIndices());
         PropUtil.runOnChange(this::updateIndices, useGlobalColorIndex, globalIndexOffset, localIndexOffset, colorCount);
     }
+
+    protected void updateNodes() {
+        // Note: we can't use Stream::distinct() because it uses Objects::equal,
+        // but in this case we need to check for equal object identity.
+        List<DataSetNode> nodes = new ArrayList<>(datasets.size());
+        distinctDataSets.clear();
+        for (var dataset : datasets) {
+            if (distinctDataSets.add(dataset)) {
+                nodes.add(createNode(dataset));
+            }
+        }
+        distinctDataSets.clear();
+        dataSetNodes.setAll(nodes);
+    }
+
+    private final Set<DataSet> distinctDataSets = Collections.newSetFromMap(new IdentityHashMap<>());
 
     protected void updateIndices() {
         int localIndex = getLocalIndexOffset();
