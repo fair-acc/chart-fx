@@ -62,23 +62,29 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
         gc.setFill(style.getLineColor());
 
         // compute local screen coordinates
+        double xi, yi, prevX = Double.NaN, prevY = Double.NaN;
         for (int i = indexMin; i < indexMax; ) {
 
             benchComputeCoords.start();
 
-            // find the first valid point
-            double xi = dataSet.get(DIM_X, i);
-            double yi = dataSet.get(DIM_Y, i);
-            i++;
-            while (Double.isNaN(xi) || Double.isNaN(yi)) {
+            // Advance the first valid point
+            numCoords = 0;
+            while (i < indexMax) {
+                xi = dataSet.get(DIM_X, i);
+                yi = dataSet.get(DIM_Y, i);
                 i++;
-                continue;
-            }
 
-            // start coord array
-            double prevX = xCoords[0] = xAxis.getDisplayPosition(xi);
-            double prevY = yCoords[0] = yAxis.getDisplayPosition(yi);
-            numCoords = 1;
+                // invalid -> keep searching
+                if (Double.isNaN(yi) || Double.isNaN(xi)) {
+                    continue;
+                }
+
+                // start from here
+                prevX = xCoords[0] = xAxis.getDisplayPosition(xi);
+                prevY = yCoords[0] = yAxis.getDisplayPosition(yi);
+                numCoords = 1;
+                break;
+            }
 
             // Build contiguous non-nan segments, so we can use the more efficient strokePolyLine
             while (i < indexMax) {
@@ -87,11 +93,11 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
                 i++;
 
                 // Skip iteration and draw whatever we have for now
-                if (Double.isNaN(xi) || Double.isNaN(yi)) {
+                if (Double.isNaN(yi) || Double.isNaN(xi)) {
                     break;
                 }
 
-                // Remove points that are unnecessary
+                // Ignore duplicate points
                 final double x = xAxis.getDisplayPosition(xi);
                 final double y = yAxis.getDisplayPosition(yi);
                 if (isSamePoint(prevX, prevY, x, y)) {
@@ -107,8 +113,10 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
             benchComputeCoords.stop();
 
             // Draw elements
-            drawMarkers(gc, style, xCoords, yCoords, numCoords);
-            drawPolyLine(gc, style, xCoords, yCoords, numCoords);
+            if (numCoords > 0) {
+                drawMarkers(gc, style, xCoords, yCoords, numCoords);
+                drawPolyLine(gc, style, xCoords, yCoords, numCoords);
+            }
 
         }
 
@@ -162,8 +170,11 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
             if (size == 0) {
                 return;
             }
-            double x = xAxis.getDisplayPosition(dataSet.get(DIM_X, index));
-            double y = yAxis.getDisplayPosition(dataSet.get(DIM_Y, index));
+            final double x = xAxis.getDisplayPosition(dataSet.get(DIM_X, index));
+            final double y = yAxis.getDisplayPosition(dataSet.get(DIM_Y, index));
+            if (Double.isNaN(y) || Double.isNaN(x)) {
+                return;
+            }
             var customMarker = styleParser.getMarkerType().orElse(style.getMarkerType());
             var color = styleParser.getMarkerColor().orElse(style.getMarkerColor());
             gc.save();
