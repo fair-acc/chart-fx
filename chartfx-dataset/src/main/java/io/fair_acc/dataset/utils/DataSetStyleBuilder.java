@@ -54,6 +54,16 @@ public class DataSetStyleBuilder extends StyleBuilder<DataSetStyleBuilder> {
         return setDoubleProp(HATCH_SHIFT_BY_INDEX, value);
     }
 
+    public static final String DATASET_COLOR = "-color-dataset"; // default lookup if nothing is specified
+
+    public DataSetStyleBuilder setDatasetColor(String color) {
+        return setStringProp(DATASET_COLOR, color);
+    }
+
+    public DataSetStyleBuilder setDatasetColor(int r, int g, int b, double a) {
+        return setColorProp(DATASET_COLOR, r, g, b, a);
+    }
+
     // =================== Marker properties ===================
 
     public static final String MARKER_TYPE = "-fx-marker-type";

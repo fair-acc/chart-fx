@@ -110,6 +110,12 @@ public interface DataSet extends EventSource, Serializable {
     List<String> getStyleClasses();
 
     /**
+     * @param cssClass a list of css selector classes that should be applied to this dataset
+     * @return this
+     */
+    DataSet addStyleClasses(String... cssClass);
+
+    /**
      * A string representation of the CSS style associated with this specific {@code DataSet}. This is analogous to the
      * "style" attribute of an HTML element. Note that, like the HTML style attribute, this variable contains style
      * properties and values and not the selector portion of a style rule.

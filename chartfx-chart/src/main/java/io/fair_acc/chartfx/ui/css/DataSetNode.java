@@ -1,18 +1,14 @@
 package io.fair_acc.chartfx.ui.css;
 
 import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
-import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.events.StateListener;
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 
 import java.util.Objects;
 
@@ -49,7 +45,11 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
     }
 
     protected String getDefaultColorClass() {
-        return DefaultColorClass.getForIndex(getColorIndex());
+        return getDefaultColorClass(getColorIndex());
+    }
+
+    public static String getDefaultColorClass(int index) {
+        return DefaultColorClass.getForIndex(index);
     }
 
     /**
@@ -63,7 +63,9 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
 
         // Note: don't clear because the dataset might be in multiple nodes
         if (state.isDirty(ChartBits.DataSetName)) {
-            setName(dataSet.getName());
+            if (!nameProperty().isBound() && !Objects.equals(getName(), dataSet.getName())) {
+                setName(dataSet.getName());
+            }
         }
 
         // Update style info

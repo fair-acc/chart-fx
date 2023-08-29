@@ -109,6 +109,11 @@ public class ErrorTestDataSet implements DataSetError {
     }
 
     @Override
+    public DataSet addStyleClasses(String... cssClass) {
+        return this;
+    }
+
+    @Override
     public String getStyle() {
         return null;
     }
