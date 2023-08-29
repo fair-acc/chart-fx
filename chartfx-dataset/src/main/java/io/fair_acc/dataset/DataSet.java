@@ -3,7 +3,7 @@ package io.fair_acc.dataset;
 import java.io.Serializable;
 import java.util.List;
 
-import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.EventSource;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.bench.Measurable;

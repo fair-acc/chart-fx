@@ -1,4 +1,4 @@
-package io.fair_acc.dataset.event;
+package io.fair_acc.dataset.events;
 
 import java.util.Objects;
 import java.util.function.IntSupplier;

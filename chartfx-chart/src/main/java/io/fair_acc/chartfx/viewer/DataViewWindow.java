@@ -43,7 +43,7 @@ import io.fair_acc.chartfx.ui.BorderedTitledPane;
 import io.fair_acc.chartfx.utils.DragResizerUtil;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.chartfx.utils.MouseUtils;
-import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.EventSource;
 
 /**
  * DataViewWindow containing content pane (based on BorderPane) and window

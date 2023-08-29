@@ -12,7 +12,6 @@ import javafx.scene.input.MouseEvent;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.dataset.event.EventSource;
 
 /**
  * A horizontal line drawn on the plot area, indicating specified Y value, with an optional {@link #textProperty() text
@@ -29,7 +28,7 @@ import io.fair_acc.dataset.event.EventSource;
  *
  * @author mhrabia
  */
-public class YValueIndicator extends AbstractSingleValueIndicator implements EventSource, ValueIndicator {
+public class YValueIndicator extends AbstractSingleValueIndicator implements ValueIndicator {
     /**
      * Creates a new instance indicating given Y value belonging to the specified {@code yAxis}.
      *
@@ -70,10 +69,11 @@ public class YValueIndicator extends AbstractSingleValueIndicator implements Eve
         }
 
         mouseEvent.consume();
+        runPostLayout();
     }
 
     @Override
-    public void layoutChildren() {
+    public void runPostLayout() {
         if (getChart() == null) {
             return;
         }

@@ -191,6 +191,7 @@ public class TSpectrumSample extends ChartSample {
 
     @Override
     public Node getChartPanel(Stage stage) {
+        //ThreadEventProcessor.setUserInstance(new FxEventProcessor()); // uncomment to run all processing on javafx thread
         Chart chart = getChart();
         final BorderPane root = new BorderPane(chart);
         root.setTop(getTopToolBar());
@@ -213,7 +214,7 @@ public class TSpectrumSample extends ChartSample {
         }, demoDataSet);
         backgroundRenderer.getDatasets().addAll(dsMarkov);
 
-        DoubleDataSet dsBgSearch = new DoubleDataSet("peak search background");
+        DoubleDataSet dsBgSearchBuffer = new DoubleDataSet("peak search background"); // buffer dataset not in renderer to prevent deadlocks
         MathDataSet foundPeaks = new MathDataSet("peak", (DataSet dataSet) -> {
             if (!(dataSet instanceof DataSet2D)) {
                 return new DoubleDataSet("no peaks(processing error)");
@@ -232,7 +233,7 @@ public class TSpectrumSample extends ChartSample {
             final List<DoublePoint> peaks = TSpectrum.search(freq, ArrayMath.inverseDecibel(rawData), destVector, dataSet.getDataCount(), 100, sigma, threshold, //
                     backgroundRemove, nIter, markov, nAverage);
 
-            dsBgSearch.set(freq, ArrayMath.decibel(destVector), dataSet.getDataCount(), true);
+            dsBgSearchBuffer.set(freq, ArrayMath.decibel(destVector), dataSet.getDataCount(), true);
 
             DoubleDataSet retVal = new DoubleDataSet("peaks", 10);
             LOGGER.atInfo().addArgument(peaks.size()).addArgument(dataSet.getDataCount()).log("found {} peaks in spectrum of length {}");
@@ -243,6 +244,7 @@ public class TSpectrumSample extends ChartSample {
 
             return retVal;
         }, demoDataSet);
+        MathDataSet dsBgSearch = new MathDataSet("peak", DoubleDataSet::new, dsBgSearchBuffer);
         peakRenderer.getDatasets().addAll(foundPeaks);
         backgroundRenderer.getDatasets().addAll(dsBgSearch);
 

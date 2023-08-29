@@ -12,7 +12,7 @@ import io.fair_acc.bench.MeasurementRecorder;
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach Some implementation recommendation:
  * write lock guards behave the same as ReentrantLock with the additional functionality, that a <code>writeLock()</code>
- * and subsequent <code>writeUnLock()</code> mute and, respectively, un-mute the given DataSet's auto-notification
+ * and subsequent <code>writeUnLock()</code> mute and, respectively, unmute the given DataSet's auto-notification
  * states, e.g. example:
  *
  * <pre>

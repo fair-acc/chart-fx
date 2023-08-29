@@ -5,7 +5,6 @@
 package io.fair_acc.chartfx.plugins;
 
 import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -15,7 +14,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 
 import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.dataset.event.EventSource;
 
 /**
  * Plugin indicating a specific X or Y value as a line drawn on the plot area, with an optional {@link #textProperty()
@@ -23,8 +21,7 @@ import io.fair_acc.dataset.event.EventSource;
  *
  * @author mhrabia
  */
-public abstract class AbstractSingleValueIndicator extends AbstractValueIndicator
-        implements EventSource, ValueIndicator {
+public abstract class AbstractSingleValueIndicator extends AbstractValueIndicator implements ValueIndicator {
     /**
      * The default distance between the data point coordinates and mouse cursor that triggers shifting the line.
      */
@@ -34,7 +31,6 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     protected static final String STYLE_CLASS_LINE = "value-indicator-line";
     protected static final String STYLE_CLASS_MARKER = "value-indicator-marker";
     protected static double triangleHalfWidth = 5.0;
-    private final transient BitState state = BitState.initDirty(this);
     private boolean autoRemove = false;
 
     /**
@@ -60,7 +56,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     private final DoubleProperty value = new SimpleDoubleProperty(this, "value") {
         @Override
         protected void invalidated() {
-            layoutChildren();
+            runPostLayout();
         }
     };
 
@@ -70,7 +66,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
             if (get() < 0 || get() > 1) {
                 throw new IllegalArgumentException("labelPosition must be in rage [0,1]");
             }
-            layoutChildren();
+            runPostLayout();
         }
     };
 
@@ -100,10 +96,9 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
         });
 
         // Need to add them so that at initialization of the stage the CCS is
-        // applied and we can calculate label's
-        // width and height
+        // applied and we can calculate label's width and height
         getChartChildren().addAll(line, label);
-        PropUtil.runOnChange(state.onAction(ChartBits.ChartPluginState), this.value);
+        PropUtil.runOnChange(getBitState().onAction(ChartBits.ChartPluginState), this.value);
     }
 
     /**
@@ -149,7 +144,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
                  * identical and for Y indicators start y and end y are identical.
                  */
                 dragDelta.x = pickLine.getStartX() - mouseEvent.getX();
-                dragDelta.y = pickLine.getStartY() - mouseEvent.getY();
+                dragDelta.y = -(pickLine.getStartY() - mouseEvent.getY());
                 pickLine.setCursor(Cursor.MOVE);
                 mouseEvent.consume();
             }
@@ -285,11 +280,6 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     @Override
     public final void setValue(final double newValue) {
         valueProperty().set(newValue);
-    }
-
-    @Override
-    public BitState getBitState() {
-        return state;
     }
 
     private void updateMouseListener(final boolean state) {

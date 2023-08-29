@@ -71,7 +71,7 @@ public class DataSetMeasurementsTests {
             assertDoesNotThrow(() -> {
                 DataSetMeasurements meas = new DataSetMeasurements(plugin, type);
                 meas.nominalAction();
-                meas.handle(ChartBits.DataSetData.getAsInt());
+                meas.handle();
                 meas.removeAction();
             });
         }
