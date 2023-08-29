@@ -95,6 +95,7 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
     }
 
     public void setName(String name) {
+        // TODO: the name may revert to the dataSet name. Should this set the underlying dataSet name? may be shared?
         this.name.set(name);
     }
 

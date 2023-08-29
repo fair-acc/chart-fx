@@ -119,6 +119,12 @@ public class TransposedDataSet implements DataSet {
         return dataSet.getStyleClasses();
     }
 
+    @Override
+    public DataSet addStyleClasses(String... cssClass) {
+        dataSet.addStyleClasses(cssClass);
+        return this;
+    }
+
     public int[] getPermutation() {
         return Arrays.copyOf(permutation, permutation.length);
     }

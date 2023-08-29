@@ -194,6 +194,12 @@ public class MountainRangeRenderer extends ErrorDataSetRenderer implements Rende
         }
 
         @Override
+        public DataSet addStyleClasses(String... cssClass) {
+            dataSet.addStyleClasses(cssClass);
+            return this;
+        }
+
+        @Override
         public String getStyle() {
             return dataSet.getStyle();
         }
