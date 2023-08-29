@@ -6,6 +6,7 @@ import static io.fair_acc.dataset.DataSet.DIM_Y;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.misc.plugins.Snow;
 import javafx.beans.property.BooleanProperty;
@@ -186,7 +187,7 @@ public class SnowFlakeSample extends ChartSample {
         final DataSet stomp = new DataSetBuilder().setName("tree").setValues(DIM_X, xStomp).setValues(DIM_Y, yStomp).build();
         stomp.getAxisDescription(DIM_X).set("X", "Mas");
         stomp.getAxisDescription(DIM_Y).set("Y", "Mas");
-        stomp.setStyle("strokeColor=#B5651D; fillColor=#B5651D");
+        stomp.setStyle(DataSetStyleBuilder.instance().setStroke("#B5651D").setFill("#B5651D").build());
 
         final double[] xTree = { 2.0, 2.0, 8.0, 8.0, 12.0, 12.0, 16.0, 16.0, 21.0, /* the tip */
             16.0, 16.0, 12.0, 12.0, 8.0, 8.0, 2.0, 2.0 };
@@ -199,7 +200,7 @@ public class SnowFlakeSample extends ChartSample {
         final DataSet tree = new DataSetBuilder().setName("tree").setValues(DIM_X, xTree).setValues(DIM_Y, yTree).build();
         tree.getAxisDescription(DIM_X).set("X", "Mas");
         tree.getAxisDescription(DIM_Y).set("Y", "Max");
-        tree.setStyle("strokeColor=darkGreen; fillColor=green");
+        tree.setStyle(DataSetStyleBuilder.instance().setStroke("darkGreen").setFill("green").build());
 
         list.add(stomp);
         list.add(tree);
