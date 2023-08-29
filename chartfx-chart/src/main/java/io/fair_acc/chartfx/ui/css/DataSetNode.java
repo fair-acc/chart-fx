@@ -3,7 +3,7 @@ package io.fair_acc.chartfx.ui.css;
 import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;

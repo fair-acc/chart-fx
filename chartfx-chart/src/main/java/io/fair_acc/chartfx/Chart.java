@@ -15,7 +15,7 @@ import io.fair_acc.chartfx.ui.layout.FullSizePane;
 import io.fair_acc.chartfx.ui.*;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.EventSource;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import javafx.animation.Animation;

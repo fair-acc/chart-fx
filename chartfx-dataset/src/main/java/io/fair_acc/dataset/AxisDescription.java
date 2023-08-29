@@ -2,7 +2,7 @@ package io.fair_acc.dataset;
 
 import java.io.Serializable;
 
-import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.EventSource;
 
 /**
  * Axis description containing the axis name, its unit as well as its minimum and maximum range.

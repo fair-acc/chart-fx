@@ -62,10 +62,16 @@ public abstract class ChartPlugin implements Measurable.EmptyDefault {
     protected ChartPlugin() {
         chartProperty().addListener((obs, oldChart, newChart) -> {
             if (oldChart != null) {
+                //if (this instanceof EventSource) {
+                //    oldChart.removeListener((EventSource) this);
+                //}
                 removeEventHandlers(oldChart.getPlotArea());
                 removeEventHandlers(oldChart.getPlotBackground());
             }
             if (newChart != null) {
+                //if (this instanceof EventSource) {
+                //    newChart.addListener((EventSource) this);
+                //}
                 addEventHandlers(newChart.getPlotArea());
                 addEventHandlers(newChart.getPlotBackground());
             }
@@ -205,7 +211,9 @@ public abstract class ChartPlugin implements Measurable.EmptyDefault {
      * Optional method that allows plug-in render something after axes and charts have been rendered
      */
     public void runPostLayout() { // #NOPMD
-        // empty by default
+        //if (this instanceof EventSource) {
+        //    ((EventSource) this).getBitState().clear();
+        //}
     }
 
     /**

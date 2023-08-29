@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx.plugins;
 
+import io.fair_acc.chartfx.plugins.measurements.TrendingMeasurements;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -141,6 +142,23 @@ public class ParameterMeasurements extends ChartPlugin {
                 final MenuItem newMeasurement = new MenuItem(measType.getName()); // NOPMD dynamic (but finite) menu generation
                 newMeasurement.setId("ParameterMeasurements::newMeasurement::" + measType.toString()); // N.B. not a unique name but for testing this suffices
                 newMeasurement.setOnAction(evt -> new DataSetMeasurements(this, measType).initialize()); // NOPMD
+                newCategory.getItems().addAll(newMeasurement);
+            }
+        }
+
+        // loop through TrendingMeasurements categories
+        for (final TrendingMeasurements.MeasurementCategory category : TrendingMeasurements.MeasurementCategory.values()) {
+            final Menu newCategory = new Menu(category.getName()); // NOPMD dynamic (but finite) menu generation
+            measurementMenu.getItems().addAll(newCategory);
+
+            // loop through measurements within categories
+            for (final TrendingMeasurements.MeasurementType measType : TrendingMeasurements.MeasurementType.values()) {
+                if (measType.getCategory() != category) {
+                    continue;
+                }
+                final MenuItem newMeasurement = new MenuItem(measType.getName()); // NOPMD dynamic (but finite) menu generation
+                newMeasurement.setId("ParameterMeasurements::newMeasurement::" + measType.toString()); // N.B. not a unique name but for testing this suffices
+                newMeasurement.setOnAction(evt -> new TrendingMeasurements(this, measType).initialize()); // NOPMD
                 newCategory.getItems().addAll(newMeasurement);
             }
         }

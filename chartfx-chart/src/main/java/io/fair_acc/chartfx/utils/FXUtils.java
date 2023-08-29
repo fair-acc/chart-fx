@@ -120,7 +120,7 @@ public final class FXUtils {
     }
 
     public static void runFX(final Runnable run) {
-        FXUtils.keepJavaFxAlive();
+        //FXUtils.keepJavaFxAlive();
         if (Platform.isFxApplicationThread()) {
             run.run();
         } else {

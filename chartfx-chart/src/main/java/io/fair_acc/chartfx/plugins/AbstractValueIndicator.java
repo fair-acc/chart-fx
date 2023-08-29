@@ -4,6 +4,9 @@
 
 package io.fair_acc.chartfx.plugins;
 
+import io.fair_acc.dataset.events.EventSource;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -32,9 +35,11 @@ import io.fair_acc.chartfx.axes.Axis;
  *
  * @author mhrabia
  */
-public abstract class AbstractValueIndicator extends ChartPlugin {
+public abstract class AbstractValueIndicator extends ChartPlugin implements EventSource {
     private final Axis axis;
     private final ChangeListener<? super Number> axisBoundsListener = (obs, oldVal, newVal) -> layoutChildren();
+
+    private final BitState state = BitState.initDirty(this);
 
     private final ListChangeListener<? super ChartPlugin> pluginsListListener = (final Change<? extends ChartPlugin> change) -> updateStyleClass();
 
@@ -49,7 +54,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     protected final BooleanProperty editableIndicator = new SimpleBooleanProperty(this, "editableIndicator", true) {
         @Override
         protected void invalidated() {
-            layoutChildren();
+            getBitState().setDirty(ChartBits.ChartPlugins);
         }
     };
 
@@ -57,7 +62,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
             "labelHorizontalAnchor", HPos.CENTER) {
         @Override
         protected void invalidated() {
-            layoutChildren();
+            getBitState().setDirty(ChartBits.ChartPlugins);
         }
     };
 
@@ -65,7 +70,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
             VPos.CENTER) {
         @Override
         protected void invalidated() {
-            layoutChildren();
+            getBitState().setDirty(ChartBits.ChartPlugins);
         }
     };
 
@@ -132,20 +137,21 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
             if (oldChart != null) {
                 removeAxisListener();
                 removePluginsListListener(oldChart);
+                this.state.removeChangeListener(oldChart.getBitState());
             }
             if (newChart != null) {
                 addAxisListener();
                 addPluginsListListener(newChart);
+                this.state.addChangeListener(newChart.getBitState());
             }
         });
 
-        textProperty().addListener((obs, oldText, newText) -> layoutChildren());
+        textProperty().addListener(getBitState().onPropChange(ChartBits.ChartPluginState)::set);
     }
 
     private void addAxisListener() {
         final Axis valueAxis = getAxis();
-        valueAxis.minProperty().addListener(axisBoundsListener);
-        valueAxis.maxProperty().addListener(axisBoundsListener);
+        valueAxis.getBitState().addChangeListener(ChartBits.AxisRange, this.getBitState());
     }
 
     protected void addChildNodeIfNotPresent(final Node node) {
@@ -378,5 +384,10 @@ public abstract class AbstractValueIndicator extends ChartPlugin {
     protected static class Delta {
         protected double x;
         protected double y;
+    }
+
+    @Override
+    public BitState getBitState() {
+        return state;
     }
 }

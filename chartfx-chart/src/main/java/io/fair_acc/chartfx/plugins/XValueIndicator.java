@@ -7,7 +7,7 @@ import javafx.scene.input.MouseEvent;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.EventSource;
 
 /**
  * A vertical line drawn on the plot area, indicating specified X value, with an optional {@link #textProperty() text
@@ -62,15 +62,11 @@ public class XValueIndicator extends AbstractSingleValueIndicator implements Eve
         }
 
         mouseEvent.consume();
-        layoutChildren();
     }
 
     @Override
     public void layoutChildren() {
-        if (getChart() == null) {
-            return;
-        }
-
+        if (getBitState().clear() == 0) { return; }
         final Bounds plotAreaBounds = getChart().getCanvas().getBoundsInLocal();
         final double minX = plotAreaBounds.getMinX();
         final double maxX = plotAreaBounds.getMaxX();

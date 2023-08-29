@@ -45,11 +45,7 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
     }
 
     @Override
-    public void layoutChildren() {
-        if (getChart() == null) {
-            return;
-        }
-
+    public void runPreLayout() {
         final Bounds plotAreaBounds = getChart().getCanvas().getBoundsInLocal();
         final double minX = plotAreaBounds.getMinX();
         final double maxX = plotAreaBounds.getMaxX();

@@ -306,6 +306,8 @@ public abstract class BitState implements StateListener {
     private static final int DEFAULT_MIN_STACK_TRACE = 6;
     private static final int DEFAULT_MAX_STACK_TRACE = 25;
 
+    public abstract void waitForFlag();
+
     private static class FilteredListener implements StateListener {
 
         private FilteredListener(int filter, StateListener listener) {
@@ -378,6 +380,11 @@ public abstract class BitState implements StateListener {
         }
 
         @Override
+        public void waitForFlag() {
+            throw new IllegalStateException("cannot wait on single threaded bitstate");
+        }
+
+        @Override
         public int getBits() {
             return state;
         }
@@ -409,7 +416,9 @@ public abstract class BitState implements StateListener {
                 if (delta == 0) {
                     return delta;
                 } else if ( state.compareAndSet(oldState, oldState | bits)) {
-                    //state.notifyAll();
+                    synchronized (state) {
+                        state.notifyAll();
+                    }
                     return delta;
                 }
             }
@@ -421,7 +430,9 @@ public abstract class BitState implements StateListener {
                 final int current = getBits();
                 final int newState = current & ~bits;
                 if (state.compareAndSet(current, newState)) {
-                    //state.notifyAll();
+                    synchronized (state) {
+                        state.notifyAll();
+                    }
                     return current;
                 }
             }
@@ -432,11 +443,13 @@ public abstract class BitState implements StateListener {
             return state.get();
         }
 
+        @Override
         public void waitForFlag() { // todo check if/where lock is needed
             while (state.get() == 0) {
                 try {
-                    //state.wait();
-                    Thread.sleep(40);
+                    synchronized (state) {
+                        state.wait();
+                    }
                 } catch (InterruptedException ignored) { }
             }
         }
