@@ -1,5 +1,7 @@
 package io.fair_acc.chartfx.plugins;
 
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 
@@ -45,12 +47,12 @@ public class YRangeIndicator extends AbstractRangeValueIndicator {
     }
 
     @Override
-    public void layoutChildren() {
-        if (getChart() == null) {
+    public void runPostLayout() {
+        Chart chart = getChart();
+        if (chart == null) {
             return;
         }
-
-        final Bounds plotAreaBounds = getChart().getCanvas().getBoundsInLocal();
+        final Bounds plotAreaBounds = chart.getCanvas().getBoundsInLocal();
         final double minX = plotAreaBounds.getMinX();
         final double maxX = plotAreaBounds.getMaxX();
         final double minY = plotAreaBounds.getMinY();

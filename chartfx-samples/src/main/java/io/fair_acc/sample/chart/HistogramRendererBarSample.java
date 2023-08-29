@@ -98,11 +98,14 @@ public class HistogramRendererBarSample extends ChartSample {
     private void updateHistogram(final String country, final int year, final boolean relative) {
         Map<String, Map<String, Map<Integer, io.fair_acc.dataset.Histogram>>> dist = relative ? relDistribution : absDistribution;
         histogramRenderer.getDatasets().setAll(dist.get(country).get(WOMEN).get(year), dist.get(country).get(MEN).get(year));
-        if (relative) {
-            histogramRenderer.getFirstAxis(Orientation.HORIZONTAL).set("relative distribution", "%");
-        } else {
-            histogramRenderer.getFirstAxis(Orientation.HORIZONTAL).set("distribution");
-            histogramRenderer.getFirstAxis(Orientation.HORIZONTAL).setUnit(null);
+        var horizontalAxis = histogramRenderer.getFirstAxis(Orientation.HORIZONTAL);
+        if (horizontalAxis != null) {
+            if (relative) {
+                horizontalAxis.set("relative distribution", "%");
+            } else {
+                horizontalAxis.set("distribution");
+                horizontalAxis.setUnit(null);
+            }
         }
     }
 

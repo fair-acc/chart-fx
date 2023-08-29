@@ -7,7 +7,6 @@ import javafx.scene.input.MouseEvent;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.dataset.event.EventSource;
 
 /**
  * A vertical line drawn on the plot area, indicating specified X value, with an optional {@link #textProperty() text
@@ -24,7 +23,7 @@ import io.fair_acc.dataset.event.EventSource;
  *
  * @author mhrabia
  */
-public class XValueIndicator extends AbstractSingleValueIndicator implements EventSource, ValueIndicator {
+public class XValueIndicator extends AbstractSingleValueIndicator implements ValueIndicator {
     /**
      * Creates a new instance of the indicator.
      *
@@ -62,11 +61,11 @@ public class XValueIndicator extends AbstractSingleValueIndicator implements Eve
         }
 
         mouseEvent.consume();
-        layoutChildren();
+        runPostLayout();
     }
 
     @Override
-    public void layoutChildren() {
+    public void runPostLayout() {
         if (getChart() == null) {
             return;
         }

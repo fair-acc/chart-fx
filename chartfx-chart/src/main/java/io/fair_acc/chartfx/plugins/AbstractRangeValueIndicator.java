@@ -25,14 +25,14 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
     private final DoubleProperty lowerBound = new SimpleDoubleProperty(this, "lowerBound") {
         @Override
         protected void invalidated() {
-            layoutChildren();
+            runPostLayout();
         }
     };
 
     private final DoubleProperty upperBound = new SimpleDoubleProperty(this, "upperBound") {
         @Override
         protected void invalidated() {
-            layoutChildren();
+            runPostLayout();
         }
     };
 
@@ -43,7 +43,7 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
             if (get() < 0 || get() > 1) {
                 throw new IllegalArgumentException("labelHorizontalPosition must be in rage [0,1]");
             }
-            layoutChildren();
+            runPostLayout();
         }
     };
 
@@ -53,7 +53,7 @@ public abstract class AbstractRangeValueIndicator extends AbstractValueIndicator
             if (get() < 0 || get() > 1) {
                 throw new IllegalArgumentException("labelVerticalPosition must be in rage [0,1]");
             }
-            layoutChildren();
+            runPostLayout();
         }
     };
 

@@ -7,7 +7,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.dataset.DataSet;
@@ -36,7 +38,10 @@ public class MathDataSetTests {
         MathDataSet identityDataSet = new MathDataSet("N", null, null, (input, output, length) -> {
             // identity function
             System.arraycopy(input, 0, output, 0, length);
-        }, -1, null, rawDataSetRef);
+        }, -1, rawDataSetRef);
+        identityDataSet.getBitState().clear();
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
+        Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_X), identityDataSet.getValues(DataSet.DIM_X));
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
         assertArrayEquals(yErrorNeg, identityDataSet.getErrorsNegative(DataSet.DIM_Y));
@@ -81,17 +86,23 @@ public class MathDataSetTests {
         final DoubleDataSet magDataSetRef = generateSineWaveSpectrumData(nBins);
         assertEquals(nBins, rawDataSetRef.getDataCount());
 
-        MathDataSet magDataSet = new MathDataSet("magI", dataSets -> {
+        final MathDataSet magDataSet = new MathDataSet("magI", dataSets -> {
             assertEquals(nBins, dataSets.getDataCount());
             return DataSetMath.magnitudeSpectrumDecibel(dataSets);
         }, rawDataSetRef);
+        magDataSet.getBitState().clear();
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
+        Awaitility.await().until(() -> magDataSet.getBitState().isDirty());
         assertArrayEquals(magDataSetRef.getValues(DataSet.DIM_Y), magDataSet.getValues(DataSet.DIM_Y));
 
-        magDataSet = new MathDataSet(null, dataSets -> {
+        final MathDataSet magDataSet2 = new MathDataSet(null, dataSets -> {
             assertEquals(nBins, dataSets.getDataCount());
             return DataSetMath.magnitudeSpectrumDecibel(dataSets);
         }, rawDataSetRef);
-        assertArrayEquals(magDataSetRef.getValues(DataSet.DIM_Y), magDataSet.getValues(DataSet.DIM_Y));
+        magDataSet2.getBitState().clear();
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
+        Awaitility.await().until(() -> magDataSet2.getBitState().isDirty());
+        assertArrayEquals(magDataSetRef.getValues(DataSet.DIM_Y), magDataSet2.getValues(DataSet.DIM_Y));
     }
 
     @Test
@@ -100,7 +111,7 @@ public class MathDataSetTests {
         final DoubleDataSet rawDataSetRef = generateSineWaveData(nBins);
         assertEquals(nBins, rawDataSetRef.getDataCount());
 
-        MathDataSet identityDataSet = new MathDataSet("I", (input, output, length) -> {
+        final MathDataSet identityDataSet = new MathDataSet("I", (input, output, length) -> {
             assertEquals(nBins, input.length);
             assertEquals(nBins, length);
             assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), input, "yValue input equality with source");
@@ -108,9 +119,12 @@ public class MathDataSetTests {
             // identity function
             System.arraycopy(input, 0, output, 0, length);
         }, rawDataSetRef);
+        identityDataSet.getBitState().clear();
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
+        Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
 
-        identityDataSet = new MathDataSet(null, (input, output, length) -> {
+        final MathDataSet identityDataSet2 = new MathDataSet(null, (input, output, length) -> {
             assertEquals(nBins, input.length);
             assertEquals(nBins, length);
             assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), input, "yValue input equality with source");
@@ -118,7 +132,10 @@ public class MathDataSetTests {
             // identity function
             System.arraycopy(input, 0, output, 0, length);
         }, rawDataSetRef);
-        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
+        identityDataSet2.getBitState().clear();
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
+        Awaitility.await().until(() -> identityDataSet2.getBitState().isDirty());
+        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet2.getValues(DataSet.DIM_Y));
     }
 
     @Test
@@ -132,44 +149,36 @@ public class MathDataSetTests {
             counter1.incrementAndGet();
             // identity function
             System.arraycopy(input, 0, output, 0, length);
-        }, -1, null, rawDataSetRef);
-        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
+        }, -1, rawDataSetRef);
         identityDataSet.getBitState().addInvalidateListener(ChartBits.DataSetData,
                 (src, bits) -> counter2.incrementAndGet());
 
-        // has been initialised once during construction
-        assertEquals(1, counter1.get());
-        assertEquals(0, counter2.get());
-        counter1.set(0);
-
         // wrong event does not invoke update
         rawDataSetRef.fireInvalidated(ChartBits.ChartLegend);
-        assertEquals(0, counter1.get());
-        assertEquals(0, counter2.get());
 
         // AddedDataEvent does invoke update
+        identityDataSet.getBitState().clear();
         rawDataSetRef.fireInvalidated(ChartBits.DataSetDataAdded);
-        assertEquals(1, counter1.get());
-        assertEquals(1, counter2.get());
+        Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
+        assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
 
         // RemovedDataEvent does invoke update
+        identityDataSet.getBitState().clear();
         rawDataSetRef.fireInvalidated(ChartBits.DataSetDataRemoved);
-        assertEquals(2, counter1.get());
-        assertEquals(2, counter2.get());
+        Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
 
+        identityDataSet.getBitState().clear();
         rawDataSetRef.fireInvalidated(ChartBits.DataSetDataRemoved);
-        assertEquals(3, counter1.get());
-        assertEquals(3, counter2.get());
+        Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
 
         // UpdatedDataEvent does invoke update
+        identityDataSet.getBitState().clear();
         rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
-        assertEquals(4, counter1.get());
-        assertEquals(4, counter2.get());
+        Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
 
+        identityDataSet.getBitState().clear();
         rawDataSetRef.fireInvalidated(ChartBits.DataSetDataAdded);
-        assertEquals(5, counter1.get());
-        assertEquals(5, counter2.get());
-        assertEquals(5, counter2.get());
+        Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
 
     }
 

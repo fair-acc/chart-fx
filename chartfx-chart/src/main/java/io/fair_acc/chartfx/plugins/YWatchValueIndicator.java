@@ -10,7 +10,7 @@ import javafx.scene.input.MouseEvent;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.dataset.event.EventSource;
+import io.fair_acc.dataset.events.EventSource;
 
 /**
  * A horizontal line drawn on the plot area, indicating specified Y value with the {@link #textProperty() text

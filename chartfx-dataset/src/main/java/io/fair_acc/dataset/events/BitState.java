@@ -395,7 +395,6 @@ public abstract class BitState implements StateListener {
         protected MultiThreadedBitState(Object source, int filter, int initial) {
             super(source, filter);
             state.set(initial);
-            //state.notifyAll();
         }
 
         @Override
@@ -406,10 +405,7 @@ public abstract class BitState implements StateListener {
                 final int oldState = getBits();
                 final int newState = oldState | bits;
                 final int delta = (oldState ^ newState);
-                if (delta == 0) {
-                    return delta;
-                } else if ( state.compareAndSet(oldState, oldState | bits)) {
-                    //state.notifyAll();
+                if (oldState == newState || state.compareAndSet(oldState, newState)) {
                     return delta;
                 }
             }
@@ -418,11 +414,10 @@ public abstract class BitState implements StateListener {
         @Override
         public int clear(int bits) {
             while (true) {
-                final int current = getBits();
-                final int newState = current & ~bits;
-                if (state.compareAndSet(current, newState)) {
-                    //state.notifyAll();
-                    return current;
+                final int oldState = getBits();
+                final int newState = oldState & ~bits;
+                if (oldState == newState || state.compareAndSet(oldState, newState)) {
+                    return oldState;
                 }
             }
         }
@@ -430,15 +425,6 @@ public abstract class BitState implements StateListener {
         @Override
         public int getBits() {
             return state.get();
-        }
-
-        public void waitForFlag() { // todo check if/where lock is needed
-            while (state.get() == 0) {
-                try {
-                    //state.wait();
-                    Thread.sleep(40);
-                } catch (InterruptedException ignored) { }
-            }
         }
 
         private final AtomicInteger state = new AtomicInteger();

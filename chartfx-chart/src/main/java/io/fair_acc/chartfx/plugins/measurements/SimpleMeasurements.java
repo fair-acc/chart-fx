@@ -9,7 +9,10 @@ import static io.fair_acc.chartfx.plugins.measurements.SimpleMeasurements.Measur
 
 import java.util.Optional;
 
-import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.chartfx.events.FxEventProcessor;
+import io.fair_acc.chartfx.plugins.AbstractSingleValueIndicator;
+import io.fair_acc.dataset.events.BitState;
+import javafx.collections.ListChangeListener;
 import javafx.scene.control.ButtonType;
 
 import org.slf4j.Logger;
@@ -51,7 +54,8 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         return measType;
     }
 
-    public void handle(final int event) {
+
+    public void handle() {
         final DataSet ds = getDataSet();
         if (getValueIndicatorsUser().size() < measType.getRequiredSelectors() || ds == null) {
             // not yet initialised
@@ -211,11 +215,6 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
                 break;
             }
         });
-
-        if (event != 0) {
-            // republish updateEvent
-            // TODO:   invokeListener(event);
-        }
     }
 
     @Override
@@ -230,8 +229,18 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
             LOGGER.atTrace().addArgument(getValueIndicatorsUser()).log("detected getValueIndicatorsUser() = {}");
         }
 
+        var dataSet = getDataSet();
+        var measurementBitState = BitState.initDirty(dataSet, BitState.ALL_BITS);
+        dataSet.getBitState().addInvalidateListener(measurementBitState);
+        getValueIndicators().forEach(indicator -> indicator.valueProperty().addListener(measurementBitState.onPropChange(BitState.ALL_BITS)::set));
+        getValueIndicators().addListener((ListChangeListener.Change<? extends AbstractSingleValueIndicator> change) -> {
+            while (change.next()) {
+                change.getAddedSubList().forEach(c -> c.valueProperty().addListener(measurementBitState.onPropChange(BitState.ALL_BITS)::set));
+                //change.getRemoved().forEach(c -> c.getBitState().removeInvalidateListener(measurementBitState));
+            }
+        });
+        FxEventProcessor.getInstance().addAction(measurementBitState, this::handle);
         // initial update
-        handle(ChartBits.DataSetData.getAsInt());
         if (LOGGER.isTraceEnabled()) {
             LOGGER.atTrace().log("initialised and called initial handle(null)");
         }

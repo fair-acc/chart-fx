@@ -1,11 +1,7 @@
 package io.fair_acc.dataset.event;
 
 import io.fair_acc.dataset.events.BitState;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import io.fair_acc.dataset.events.EventSource;
 
 /**
  * Default event source for testing

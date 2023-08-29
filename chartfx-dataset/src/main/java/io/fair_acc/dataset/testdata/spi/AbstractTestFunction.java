@@ -43,7 +43,7 @@ public abstract class AbstractTestFunction<D extends AbstractTestFunction<D>> ex
 
     @Override
     public int getDataCount() {
-        return data.length;
+        return data == null ? 0 : data.length;
     }
 
     @Override
