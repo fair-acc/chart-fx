@@ -43,16 +43,6 @@ import io.fair_acc.chartfx.ui.BorderedTitledPane;
 import io.fair_acc.chartfx.utils.DragResizerUtil;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.chartfx.utils.MouseUtils;
-import io.fair_acc.chartfx.viewer.event.WindowClosedEvent;
-import io.fair_acc.chartfx.viewer.event.WindowClosingEvent;
-import io.fair_acc.chartfx.viewer.event.WindowDetachedEvent;
-import io.fair_acc.chartfx.viewer.event.WindowDetachingEvent;
-import io.fair_acc.chartfx.viewer.event.WindowMaximisedEvent;
-import io.fair_acc.chartfx.viewer.event.WindowMaximisingEvent;
-import io.fair_acc.chartfx.viewer.event.WindowMinimisedEvent;
-import io.fair_acc.chartfx.viewer.event.WindowMinimisingEvent;
-import io.fair_acc.chartfx.viewer.event.WindowRestoredEvent;
-import io.fair_acc.chartfx.viewer.event.WindowRestoringEvent;
 import io.fair_acc.dataset.event.EventSource;
 
 /**

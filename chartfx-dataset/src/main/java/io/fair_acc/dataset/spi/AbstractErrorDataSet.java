@@ -1,7 +1,5 @@
 package io.fair_acc.dataset.spi;
 
-import io.fair_acc.dataset.event.UpdateEvent;
-import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.dataset.DataSetError;
 
 /**

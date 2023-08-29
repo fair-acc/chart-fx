@@ -19,9 +19,6 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.AxisChangeEvent;
-import io.fair_acc.dataset.event.EventListener;
-import io.fair_acc.dataset.event.EventRateLimiter;
 
 /**
  * This plugin updates the labels (name and unit) of all axes according to DataSet Metadata. For now the axes are only
@@ -37,12 +34,12 @@ public class UpdateAxisLabels extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAxisLabels.class);
 
     // listener bookkeeping
-    private Map<Renderer, Map<DataSet, StateListener>> rendererDataSetsListeners = new HashMap<>();
-    private Map<DataSet, StateListener> chartDataSetsListeners = new HashMap<>();
-    private Map<Renderer, ListChangeListener<DataSet>> renderersListeners = new HashMap<>();
+    private final Map<Renderer, Map<DataSet, StateListener>> rendererDataSetsListeners = new HashMap<>();
+    private final Map<DataSet, StateListener> chartDataSetsListeners = new HashMap<>();
+    private final Map<Renderer, ListChangeListener<DataSet>> renderersListeners = new HashMap<>();
 
     // called whenever renderers are added or removed
-    private ListChangeListener<Renderer> renderersListener = (ListChangeListener.Change<? extends Renderer> renderersChange) -> {
+    private final ListChangeListener<Renderer> renderersListener = (ListChangeListener.Change<? extends Renderer> renderersChange) -> {
         while (renderersChange.next()) {
             if (renderersChange.wasAdded()) {
                 for (Renderer renderer : renderersChange.getAddedSubList()) {

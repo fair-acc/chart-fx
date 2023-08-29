@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.StateListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -60,9 +61,6 @@ import io.fair_acc.chartfx.utils.DragResizerUtil;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
-import io.fair_acc.dataset.event.EventListener;
-import io.fair_acc.dataset.event.EventRateLimiter.UpdateStrategy;
-import io.fair_acc.dataset.event.UpdateEvent;
 import io.fair_acc.dataset.spi.LimitedIndexedTreeDataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 import io.fair_acc.math.DataSetMath;
@@ -162,7 +160,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
             trendingDataSet = null;
         }
 
-        mathDataSet = new MathDataSet(measType.getName(), dataSetFunction, DEFAULT_UPDATE_RATE_LIMIT, UpdateStrategy.INSTANTANEOUS_RATE);
+        mathDataSet = new MathDataSet(measType.getName(), dataSetFunction, DEFAULT_UPDATE_RATE_LIMIT);
         xAxis.setAutoRanging(true);
         xAxis.setAutoUnitScaling(!isTrending);
 
@@ -206,8 +204,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         return graphDetached;
     }
 
-    @Override
-    public void handle(final UpdateEvent event) {
+    public void handle(final int event) {
         if (getValueIndicatorsUser().size() < measType.requiredSelectors) {
             // not yet initialised
             return;
@@ -239,7 +236,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         FXUtils.runFX(() -> getValueField().setUnit("ms"));
         FXUtils.runFX(() -> getValueField().setValue(val));
 
-        if (event != null) {
+        if (event != 0) {
             fireInvalidated(ChartBits.DataSetMeasurement);
         }
     }
@@ -386,7 +383,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         new Timer(DataSetMeasurements.class.toString(), true).schedule(new TimerTask() {
             @Override
             public void run() {
-                handle(null);
+                handle(ChartBits.DataSetData.getAsInt());
             }
         }, 0);
     }
@@ -914,7 +911,7 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
     }
 
     protected class ExternalStage extends Stage {
-        private final EventListener titleListener = evt -> FXUtils.runFX(() -> setTitle(mathDataSet.getName()));
+        private final StateListener titleListener = (source, bits) -> FXUtils.runFX(() -> setTitle(mathDataSet.getName()));
 
         public ExternalStage() {
             super();

@@ -1,6 +1,5 @@
 package io.fair_acc.math;
 
-import static io.fair_acc.dataset.event.EventRateLimiter.UpdateStrategy.INSTANTANEOUS_RATE;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,7 +8,6 @@ import java.util.stream.Collectors;
 
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
-import io.fair_acc.dataset.event.EventRateLimiter.UpdateStrategy;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
@@ -30,86 +28,69 @@ public class MathDataSet extends DoubleErrorDataSet {
     private final transient DataSetsFunction dataSetsFunction;
     private final transient DataSetValueFunction dataSetValueFunction;
     private final transient long minUpdatePeriod; // NOPMD
-    private final transient UpdateStrategy updateStrategy; // NOPMD
+    //private final transient UpdateStrategy updateStrategy; // NOPMD
     private final transient String transformName;
 
     /**
      * @param transformName String defining the prefix of the name of the calculated DataSet
      * @param dataSetFunction the DataSet in-to-out transform. see {@link DataSetFunction} for details
      * @param source reference source DataSet
-     * N.B. a default minUpdatePeriod of 40 milliseconds and {@link UpdateStrategy#INSTANTANEOUS_RATE} is assumed
      */
     public MathDataSet(final String transformName, DataSetFunction dataSetFunction, final DataSet source) {
-        this(transformName, dataSetFunction, null, null, DEFAULT_UPDATE_LIMIT, INSTANTANEOUS_RATE, source);
+        this(transformName, dataSetFunction, null, null, DEFAULT_UPDATE_LIMIT, source);
     }
 
     /**
      * @param transformName String defining the prefix of the name of the calculated DataSet
      * @param dataSetFunction the DataSet in-to-out transform. see {@link DataSetFunction} for details
-     * @param minUpdatePeriod the minimum time in milliseconds. With {@link UpdateStrategy#INSTANTANEOUS_RATE} this implies
      *            a minimum update time-out
-     * @param updateStrategy if null defaults to {@link UpdateStrategy#INSTANTANEOUS_RATE}, see {@link UpdateStrategy} for
-     *            details
      * @param source reference source DataSet
      */
-    public MathDataSet(final String transformName, final DataSetFunction dataSetFunction, final long minUpdatePeriod, final UpdateStrategy updateStrategy, final DataSet source) {
-        this(transformName, dataSetFunction, null, null, minUpdatePeriod, updateStrategy, source);
+    public MathDataSet(final String transformName, final DataSetFunction dataSetFunction, final long minUpdatePeriod, final DataSet source) {
+        this(transformName, dataSetFunction, null, null, minUpdatePeriod, source);
     }
 
     /**
      * @param transformName String defining the prefix of the name of the calculated DataSet
      * @param dataSetFunction the DataSet in-to-out transform. see {@link DataSetsFunction} for details
      * @param sources reference source DataSet array
-     * N.B. a default minUpdatePeriod of 40 milliseconds and {@link UpdateStrategy#INSTANTANEOUS_RATE} is assumed
      */
     public MathDataSet(final String transformName, final DataSetsFunction dataSetFunction, final DataSet... sources) {
-        this(transformName, null, dataSetFunction, null, DEFAULT_UPDATE_LIMIT, INSTANTANEOUS_RATE, sources);
+        this(transformName, null, dataSetFunction, null, DEFAULT_UPDATE_LIMIT, sources);
     }
 
     /**
      * @param transformName String defining the prefix of the name of the calculated DataSet
      * @param dataSetFunction the DataSet in-to-out transform. see {@link DataSetsFunction} for details
-     * @param minUpdatePeriod the minimum time in milliseconds. With {@link UpdateStrategy#INSTANTANEOUS_RATE} this implies
-     *            a minimum update time-out
-     * @param updateStrategy if null defaults to {@link UpdateStrategy#INSTANTANEOUS_RATE}, see {@link UpdateStrategy} for
-     *            details
      * @param sources reference source DataSet array
      */
-    public MathDataSet(final String transformName, final DataSetsFunction dataSetFunction, final long minUpdatePeriod, final UpdateStrategy updateStrategy,
-            final DataSet... sources) {
-        this(transformName, null, dataSetFunction, null, minUpdatePeriod, updateStrategy, sources);
+    public MathDataSet(final String transformName, final DataSetsFunction dataSetFunction, final long minUpdatePeriod, final DataSet... sources) {
+        this(transformName, null, dataSetFunction, null, minUpdatePeriod, sources);
     }
 
     /**
      * @param transformName String defining the prefix of the name of the calculated DataSet
      * @param dataSetFunction the DataSet in-to-out transform. see {@link DataSetValueFunction} for details
      * @param source reference source DataSet
-     * N.B. a default minUpdatePeriod of 40 milliseconds and {@link UpdateStrategy#INSTANTANEOUS_RATE} is assumed
      */
     public MathDataSet(final String transformName, DataSetValueFunction dataSetFunction, final DataSet source) {
-        this(transformName, null, null, dataSetFunction, DEFAULT_UPDATE_LIMIT, INSTANTANEOUS_RATE, source);
+        this(transformName, null, null, dataSetFunction, DEFAULT_UPDATE_LIMIT, source);
     }
 
     /**
      * @param transformName String defining the prefix of the name of the calculated DataSet
      * @param dataSetFunction the DataSet in-to-out transform. see {@link DataSetValueFunction} for details
-     * @param minUpdatePeriod the minimum time in milliseconds. With {@link UpdateStrategy#INSTANTANEOUS_RATE} this implies
-     *            a minimum update time-out
-     * @param updateStrategy if null defaults to {@link UpdateStrategy#INSTANTANEOUS_RATE}, see {@link UpdateStrategy} for
-     *            details
      * @param source reference source DataSet
      */
-    public MathDataSet(final String transformName, final DataSetValueFunction dataSetFunction, final long minUpdatePeriod, final UpdateStrategy updateStrategy,
-            final DataSet source) {
-        this(transformName, null, null, dataSetFunction, minUpdatePeriod, updateStrategy, source);
+    public MathDataSet(final String transformName, final DataSetValueFunction dataSetFunction, final long minUpdatePeriod, final DataSet source) {
+        this(transformName, null, null, dataSetFunction, minUpdatePeriod, source);
     }
 
     protected MathDataSet(final String transformName, DataSetFunction dataSetFunction, DataSetsFunction dataSetsFunction, DataSetValueFunction dataSetValueFunction,
-            final long minUpdatePeriod, UpdateStrategy updateStrategy, final DataSet... sources) {
+            final long minUpdatePeriod, final DataSet... sources) {
         super(getCompositeDataSetName(transformName, sources));
         this.sourceDataSets = new ArrayList<>(Arrays.asList(sources));
         this.minUpdatePeriod = minUpdatePeriod;
-        this.updateStrategy = updateStrategy == null ? INSTANTANEOUS_RATE : updateStrategy;
         this.dataSetFunction = dataSetFunction;
         this.dataSetsFunction = dataSetsFunction;
         this.dataSetValueFunction = dataSetValueFunction;

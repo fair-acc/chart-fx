@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
@@ -114,7 +115,7 @@ class SimpleMeasurementsTests {
                 final SimpleMeasurements meas = new SimpleMeasurements(plugin, type);
                 meas.nominalAction();
                 assertNotNull(meas.getDataSet(), "error for type = " + type);
-                meas.handle(null);
+                meas.handle(ChartBits.DataSetData.getAsInt());
                 meas.removeAction();
             }, "error for type = " + type);
         }

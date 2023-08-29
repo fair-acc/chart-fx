@@ -9,6 +9,7 @@ import static io.fair_acc.chartfx.plugins.measurements.SimpleMeasurements.Measur
 
 import java.util.Optional;
 
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.scene.control.ButtonType;
 
 import org.slf4j.Logger;
@@ -23,7 +24,6 @@ import io.fair_acc.chartfx.plugins.ParameterMeasurements;
 import io.fair_acc.chartfx.utils.DragResizerUtil;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.UpdateEvent;
 import io.fair_acc.math.SimpleDataSetEstimators;
 
 /**
@@ -51,8 +51,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         return measType;
     }
 
-    @Override
-    public void handle(final UpdateEvent event) {
+    public void handle(final int event) {
         final DataSet ds = getDataSet();
         if (getValueIndicatorsUser().size() < measType.getRequiredSelectors() || ds == null) {
             // not yet initialised
@@ -213,7 +212,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
             }
         });
 
-        if (event != null) {
+        if (event != 0) {
             // republish updateEvent
             // TODO:   invokeListener(event);
         }
@@ -232,7 +231,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         }
 
         // initial update
-        handle(null);
+        handle(ChartBits.DataSetData.getAsInt());
         if (LOGGER.isTraceEnabled()) {
             LOGGER.atTrace().log("initialised and called initial handle(null)");
         }

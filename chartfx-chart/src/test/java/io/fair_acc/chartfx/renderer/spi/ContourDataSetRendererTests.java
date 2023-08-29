@@ -66,7 +66,7 @@ public class ContourDataSetRendererTests {
         renderer.getDatasets().add(getTestDataSet());
         chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
         chart.getRenderers().set(0, renderer);
-        chart.legendVisibleProperty().set(true);
+        chart.getLegend().getNode().visibleProperty().set(true);
 
         stage.setScene(new Scene(chart, WIDTH, HEIGHT));
         stage.show();

@@ -6,13 +6,7 @@ import static io.fair_acc.dataset.DataSet.DIM_X;
 import static io.fair_acc.dataset.DataSet.DIM_Y;
 import static io.fair_acc.dataset.DataSet.DIM_Z;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
-
-import io.fair_acc.dataset.event.UpdateEvent;
 
 /**
  * Tests for the DoubleGridDataSet

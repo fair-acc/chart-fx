@@ -1,7 +1,6 @@
 package io.fair_acc.dataset.event;
 
 import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 import io.fair_acc.dataset.events.BitState;
@@ -13,7 +12,7 @@ import io.fair_acc.dataset.events.StateListener;
 @SuppressWarnings("PMD.DoNotUseThreads") // thread handling is the declared purpose of this class
 public interface EventSource extends StateListener {
     /**
-     * Adds an {@link EventListener} which will be notified whenever the {@code Observable} state changed. If the same
+     * Adds a StateListener which will be notified whenever the {@code Observable} state changed. If the same
      * listener is added more than once, then it will be notified more than once. That is, no check is made to ensure
      * uniqueness.
      * <p>
@@ -41,7 +40,7 @@ public interface EventSource extends StateListener {
      * If the given listener has not been previously registered (i.e. it was never added) then this method call is a
      * no-op. If it had been previously added then it will be removed. If it had been added more than once, then only
      * the first occurrence will be removed.
-     *
+     * <p>
      * TODO: fix comment or behavior
      *
      * @see #addListener(StateListener)

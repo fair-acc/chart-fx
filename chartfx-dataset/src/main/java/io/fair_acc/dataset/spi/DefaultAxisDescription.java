@@ -1,19 +1,11 @@
 package io.fair_acc.dataset.spi;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.MathUtils;
-import io.fair_acc.dataset.event.AxisChangeEvent;
-import io.fair_acc.dataset.event.AxisNameChangeEvent;
-import io.fair_acc.dataset.event.AxisRangeChangeEvent;
-import io.fair_acc.dataset.event.AxisRecomputationEvent;
-import io.fair_acc.dataset.event.EventListener;
 
 /**
  * Simple default implementation of the AxisDescription interface
@@ -99,10 +91,6 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         final AxisDescription other = (AxisDescription) obj;
         if (hashCode() == other.hashCode()) {
             return true;
-        }
-
-        if (epsilon <= 0.0) {
-            return false;
         }
 
         if (!strEqual(getName(), other.getName())) {

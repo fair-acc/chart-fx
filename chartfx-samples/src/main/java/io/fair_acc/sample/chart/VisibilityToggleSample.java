@@ -1,6 +1,5 @@
 package io.fair_acc.sample.chart;
 
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
@@ -8,15 +7,9 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
-import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
-import io.fair_acc.dataset.event.UpdatedMetaDataEvent;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 
 /**
@@ -25,7 +18,6 @@ import io.fair_acc.dataset.spi.DoubleDataSet;
  * @author rstein
  */
 public class VisibilityToggleSample extends ChartSample {
-    private static final Logger LOGGER = LoggerFactory.getLogger(VisibilityToggleSample.class);
     private static final int N_SAMPLES = 100; // default number of data points
 
     @Override
