@@ -23,7 +23,6 @@ import io.fair_acc.chartfx.axes.AxisMode;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.plugins.Zoomer.ZoomState;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.dataset.testdata.spi.RandomDataGenerator;
 

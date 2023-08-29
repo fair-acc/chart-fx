@@ -137,7 +137,7 @@ public class HistogramRendererTests {
         final XYChart chart;
         chart = new XYChart(vertical ? yAxis : xAxis, vertical ? xAxis : yAxis);
         chart.getRenderers().set(0, renderer);
-        chart.legendVisibleProperty().set(true);
+        chart.getLegend().getNode().visibleProperty().set(true);
         chart.setLegendVisible(false);
         GridPane.setHgrow(chart, Priority.ALWAYS);
         GridPane.setVgrow(chart, Priority.ALWAYS);

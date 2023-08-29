@@ -65,7 +65,7 @@ public class ErrorDataSetRendererTests {
         renderer.getDatasets().setAll(getTestDataSet());
         chart = new XYChart(xAxis, yAxis);
         chart.getRenderers().set(0, renderer);
-        chart.legendVisibleProperty().set(true);
+        chart.getLegend().getNode().visibleProperty().set(true);
 
         stage.setScene(new Scene(chart, WIDTH, HEIGHT));
         stage.show();

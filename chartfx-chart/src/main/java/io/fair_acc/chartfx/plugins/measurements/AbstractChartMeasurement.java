@@ -3,8 +3,6 @@ package io.fair_acc.chartfx.plugins.measurements;
 import static io.fair_acc.chartfx.axes.AxisMode.X;
 
 import java.text.DecimalFormat;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,8 +53,6 @@ import io.fair_acc.chartfx.utils.MouseUtils;
 import io.fair_acc.chartfx.viewer.DataViewWindow;
 import io.fair_acc.chartfx.viewer.DataViewWindow.WindowDecoration;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.EventListener;
-import io.fair_acc.dataset.event.EventRateLimiter;
 import io.fair_acc.dataset.event.EventSource;
 
 import impl.org.controlsfx.skin.DecorationPane;
@@ -66,7 +62,7 @@ import impl.org.controlsfx.skin.DecorationPane;
  *
  * @author rstein
  */
-public abstract class AbstractChartMeasurement implements EventListener, EventSource {
+public abstract class AbstractChartMeasurement implements EventSource {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractChartMeasurement.class);
     private final BitState state = BitState.initDirty(this);
     private static final int MIN_DRAG_BORDER_WIDTH = 30;

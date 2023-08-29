@@ -8,7 +8,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
-import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.events.ChartBits;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;

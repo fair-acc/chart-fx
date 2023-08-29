@@ -17,7 +17,6 @@ import io.fair_acc.sample.financial.dos.Position;
 import io.fair_acc.sample.financial.dos.Position.PositionStatus;
 import io.fair_acc.sample.financial.dos.PositionContainer;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.AddedDataEvent;
 import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;

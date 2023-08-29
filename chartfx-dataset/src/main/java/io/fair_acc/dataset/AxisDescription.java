@@ -2,9 +2,6 @@ package io.fair_acc.dataset;
 
 import java.io.Serializable;
 
-import io.fair_acc.dataset.event.AxisChangeEvent;
-import io.fair_acc.dataset.event.AxisNameChangeEvent;
-import io.fair_acc.dataset.event.AxisRangeChangeEvent;
 import io.fair_acc.dataset.event.EventSource;
 
 /**
@@ -115,9 +112,6 @@ public interface AxisDescription extends EventSource, Serializable {
     /**
      * @param axisName the new axis name
      * @param axisUnit the new axis unit (optional variadic argument) N.B. issues
-     * @see AxisNameChangeEvent event if only the name/unit changed, or
-     * @see AxisRangeChangeEvent event if only the range changed, or
-     * @see AxisChangeEvent for a full change
      * @return <code>true</code> if this setter invalidates the existing min/max range
      */
     boolean set(final String axisName, final String... axisUnit);
@@ -127,9 +121,6 @@ public interface AxisDescription extends EventSource, Serializable {
      * @param axisUnit the new axis unit
      * @param rangeMin the user-provided new minimum value of the DataSet/Axis range
      * @param rangeMax the user-provided new maximum value of the DataSet/Axis range
-     * @see AxisNameChangeEvent event if only the name/unit changed, or
-     * @see AxisRangeChangeEvent event if only the range changed, or
-     * @see AxisChangeEvent for a full change
      * @return <code>true</code> if this setter invalidates the existing min/max range
      */
     boolean set(final String axisName, final String axisUnit, final double rangeMin, final double rangeMax);

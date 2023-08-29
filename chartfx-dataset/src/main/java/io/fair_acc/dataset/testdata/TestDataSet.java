@@ -1,7 +1,6 @@
 package io.fair_acc.dataset.testdata;
 
 import io.fair_acc.dataset.DataSet2D;
-import io.fair_acc.dataset.event.UpdateEvent;
 
 /**
  * Standard interface for test data set

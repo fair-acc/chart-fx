@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
+import io.fair_acc.dataset.events.ChartBits;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
@@ -70,7 +71,7 @@ public class DataSetMeasurementsTests {
             assertDoesNotThrow(() -> {
                 DataSetMeasurements meas = new DataSetMeasurements(plugin, type);
                 meas.nominalAction();
-                meas.handle(null);
+                meas.handle(ChartBits.DataSetData.getAsInt());
                 meas.removeAction();
             });
         }

@@ -11,11 +11,6 @@ import io.fair_acc.dataset.events.ChartBits;
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.event.AddedDataEvent;
-import io.fair_acc.dataset.event.EventRateLimiter.UpdateStrategy;
-import io.fair_acc.dataset.event.RemovedDataEvent;
-import io.fair_acc.dataset.event.UpdateEvent;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.math.MathDataSet.DataSetValueFunction;
@@ -54,29 +49,29 @@ public class MathDataSetTests {
         final DoubleDataSet dsRef1 = generateSineWaveData(nBins);
         final DoubleDataSet dsRef2 = generateSineWaveData(nBins);
 
-        assertThrows(IllegalArgumentException.class, () -> new MathDataSet("I", null, null, null, 20, UpdateStrategy.INSTANTANEOUS_RATE));
+        assertThrows(IllegalArgumentException.class, () -> new MathDataSet("I", null, null, null, 20));
 
-        assertThrows(IllegalArgumentException.class, () -> new MathDataSet("I", null, null, identityValueFunction, 20, UpdateStrategy.INSTANTANEOUS_RATE, dsRef1, dsRef2));
+        assertThrows(IllegalArgumentException.class, () -> new MathDataSet("I", null, null, identityValueFunction, 20, dsRef1, dsRef2));
 
-        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, null, null, 20, UpdateStrategy.INSTANTANEOUS_RATE, dsRef1));
+        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, null, null, 20, dsRef1));
 
-        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, null, null, -1, UpdateStrategy.INSTANTANEOUS_RATE, dsRef1));
+        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, null, null, -1, dsRef1));
 
-        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, null, null, 20, null, dsRef1));
+        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, null, null, 20, dsRef1));
 
         // test specific constructors
 
         // DataSet -> DataSet
         assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, dsRef1));
-        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, 20, null, dsRef1));
+        assertDoesNotThrow(() -> new MathDataSet("I", ds -> ds, 20, dsRef1));
 
         // List<DataSet> -> DataSet
         assertDoesNotThrow(() -> new MathDataSet("I", (inputs, out) -> out.set(inputs.get(0)), dsRef1, dsRef2));
-        assertDoesNotThrow(() -> new MathDataSet("I", (inputs, out) -> out.set(inputs.get(0)), 20, null, dsRef1, dsRef2));
+        assertDoesNotThrow(() -> new MathDataSet("I", (inputs, out) -> out.set(inputs.get(0)), 20, dsRef1, dsRef2));
 
         // modify only yValues in DataSet
         assertDoesNotThrow(() -> new MathDataSet("I", identityValueFunction, dsRef1));
-        assertDoesNotThrow(() -> new MathDataSet("I", identityValueFunction, 20, null, dsRef1));
+        assertDoesNotThrow(() -> new MathDataSet("I", identityValueFunction, 20, dsRef1));
     }
 
     @Test

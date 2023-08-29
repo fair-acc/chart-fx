@@ -6,15 +6,11 @@ import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.CrosshairIndicator;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
-import io.fair_acc.dataset.event.UpdatedDataEvent;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 
 /**
@@ -23,7 +19,6 @@ import io.fair_acc.dataset.spi.DoubleDataSet;
  * @author rstein
  */
 public class SimpleChartSample extends ChartSample {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SimpleChartSample.class);
     private static final int N_SAMPLES = 100; // default number of data points
 
     @Override
