@@ -63,7 +63,7 @@
 
     <organization>
         <name>GSI Helmholtzzentrum für Schwerionenforschung GmbH</name>
-        <url>http://www.gsi.de</url>
+        <url>https://www.gsi.de</url>
     </organization>
     <url>https://github.com/fair-acc/chart-fx</url>
 
@@ -289,33 +289,22 @@
             </dependency>
             <dependency>
                 <groupId>org.openjfx</groupId>
-                <artifactId>javafx-web</artifactId>
-                <version>${chartfx.javafx.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.openjfx</groupId>
                 <artifactId>javafx-controls</artifactId>
                 <version>${chartfx.javafx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.openjfx</groupId>
-                <artifactId>javafx-media</artifactId>
+                <artifactId>javafx-fxml</artifactId>
                 <version>${chartfx.javafx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.openjfx</groupId>
-                <artifactId>javafx-graphics</artifactId>
+                <artifactId>javafx-web</artifactId>
                 <version>${chartfx.javafx.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.openjfx</groupId>
-                <artifactId>javafx-graphics</artifactId>
-                <version>${chartfx.javafx.version}</version>
-                <classifier>win</classifier>
-            </dependency>
-            <dependency>
-                <groupId>org.openjfx</groupId>
-                <artifactId>javafx-swing</artifactId>
+                <artifactId>javafx-swing</artifactId> <!-- needed to for benchmark saving images to file -->
                 <version>${chartfx.javafx.version}</version>
             </dependency>
         </dependencies>

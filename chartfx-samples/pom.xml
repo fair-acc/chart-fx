@@ -24,12 +24,10 @@
      	<dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-web</artifactId>
-            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>io.fair-acc</groupId>
@@ -55,6 +53,12 @@
             <groupId>net.raumzeitfalle.fx</groupId>
             <artifactId>scenic-view</artifactId>
             <version>11.0.2</version>
+            <exclusions> <!-- skip openjfx deps fixed to openjfx11 -->
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency> <!-- CSS reloading -->
             <groupId>fr.brouillard.oss</groupId>

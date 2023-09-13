@@ -29,12 +29,10 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>
-            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>${chartfx.javafx.version}</version>
         </dependency>
         <dependency>
             <groupId>org.kordamp.ikonli</groupId>
@@ -87,7 +85,6 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId> <!-- needed to for benchmark saving images to file -->
-            <version>${chartfx.javafx.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
