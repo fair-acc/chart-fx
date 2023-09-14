@@ -19,11 +19,11 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableBooleanValue;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 
-import javafx.scene.layout.Pane;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -350,10 +350,10 @@ public final class FXUtils {
         });
     }
 
-    public static Pane createUnmanagedPane() {
-        final Pane pane = new Pane();
-        pane.setManaged(false);
-        pane.relocate(0, 0);
-        return pane;
+    public static Group createUnmanagedGroup() {
+        final Group group = new Group();
+        group.setManaged(false);
+        group.relocate(0, 0);
+        return group;
     }
 }
