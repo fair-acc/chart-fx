@@ -15,7 +15,7 @@ import java.util.Objects;
 
 /**
  * Experimental marker that caches the result of another marker
- * in an image and then renders the image. This provides significant
+ * as an image and then draws the image. This provides significant
  * speedup for expensive markers, but can be slower than cheap ones.
  * <p>
  * Some tested examples
