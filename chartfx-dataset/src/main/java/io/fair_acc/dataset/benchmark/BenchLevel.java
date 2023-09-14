@@ -1,14 +1,14 @@
-package io.fair_acc.dataset.profiler;
+package io.fair_acc.dataset.benchmark;
 
 import java.util.function.IntSupplier;
 
 /**
- * Levels for different types of profiling information.
+ * Levels for different types of benchmark information.
  * Copied from logging conventions.
  *
  * @author ennerf
  */
-public enum ProfilerLevel implements IntSupplier {
+public enum BenchLevel implements IntSupplier {
     /**
      * Coarse-grained high-level information
      */
@@ -24,7 +24,7 @@ public enum ProfilerLevel implements IntSupplier {
      */
     Trace(600);
 
-    ProfilerLevel(int level) {
+    BenchLevel(int level) {
         this.level = level;
     }
 

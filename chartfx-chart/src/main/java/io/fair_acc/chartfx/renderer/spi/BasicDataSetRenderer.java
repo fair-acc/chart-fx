@@ -1,14 +1,13 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
 import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.profiler.AggregateDurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.AggregateDurationMeasure;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.scene.canvas.GraphicsContext;
@@ -125,9 +124,9 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
         drawCustomStyledMarkers(gc, style, dataSet, indexMin, indexMax);
 
         gc.restore();
-        benchComputeCoords.reportSum();
-        benchDrawMarker.reportSum();
-        benchPolyLine.reportSum();
+        benchComputeCoords.recordResult();
+        benchDrawMarker.recordResult();
+        benchPolyLine.recordResult();
 
     }
 
@@ -240,11 +239,11 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        super.setProfiler(profiler);
-        benchComputeCoords = AggregateDurationMeasure.wrap(profiler.newDebugDuration("basic-computeCoords"));
-        benchDrawMarker = AggregateDurationMeasure.wrap(profiler.newDebugDuration("basic-drawMarker"));
-        benchPolyLine = AggregateDurationMeasure.wrap(profiler.newDebugDuration("basic-drawPolyLine"));
+    public void setRecorder(MeasurementRecorder recorder) {
+        super.setRecorder(recorder);
+        benchComputeCoords = recorder.newDebugDurationSum("basic-computeCoords");
+        benchDrawMarker = recorder.newDebugDurationSum("basic-drawMarker");
+        benchPolyLine = recorder.newDebugDurationSum("basic-drawPolyLine");
     }
 
     AggregateDurationMeasure benchComputeCoords = AggregateDurationMeasure.DISABLED;

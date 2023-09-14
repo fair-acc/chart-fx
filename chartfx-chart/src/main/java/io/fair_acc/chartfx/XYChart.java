@@ -10,9 +10,9 @@ import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -368,42 +368,42 @@ public class XYChart extends Chart {
     /**
      * @param profiler profiler for this chart and all nested components
      */
-    public void setGlobalProfiler(Profiler profiler) {
-        setProfiler(profiler);
+    public void setGlobalRecorder(MeasurementRecorder profiler) {
+        setRecorder(profiler);
         int i = 0;
         for (Axis axis : getAxes()) {
             if (axis == getXAxis()) {
-                axis.setProfiler(profiler.addPrefix("x"));
+                axis.setRecorder(profiler.addPrefix("x"));
             } else if (axis == getYAxis()) {
-                axis.setProfiler(profiler.addPrefix("y"));
+                axis.setRecorder(profiler.addPrefix("y"));
             } else {
-                axis.setProfiler(profiler.addPrefix("axis" + i++));
+                axis.setRecorder(profiler.addPrefix("axis" + i++));
             }
         }
         i = 0;
-        gridRenderer.setProfiler(profiler);
+        gridRenderer.setRecorder(profiler);
         for (var renderer : getRenderers()) {
             var p = profiler.addPrefix("renderer" + i);
-            renderer.setProfiler(p);
+            renderer.setRecorder(p);
             int dsIx = 0;
             for (var dataset : renderer.getDatasets()) {
-                dataset.setProfiler(p.addPrefix("ds" + dsIx));
-                dataset.lock().setProfiler(p.addPrefix("ds" + dsIx));
+                dataset.setRecorder(p.addPrefix("ds" + dsIx));
+                dataset.lock().setRecorder(p.addPrefix("ds" + dsIx));
                 dsIx++;
             }
             i++;
         }
         i = 0;
         for (ChartPlugin plugin : getPlugins()) {
-            plugin.setProfiler(profiler.addPrefix("plugin" + i++));
+            plugin.setRecorder(profiler.addPrefix("plugin" + i++));
         }
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        super.setProfiler(profiler);
-        benchDrawGrid = profiler.newDebugDuration("xychart-drawGrid");
-        benchDrawData = profiler.newDebugDuration("xychart-drawData");
+    public void setRecorder(MeasurementRecorder recorder) {
+        super.setRecorder(recorder);
+        benchDrawGrid = recorder.newDebugDuration("xychart-drawGrid");
+        benchDrawData = recorder.newDebugDuration("xychart-drawData");
     }
 
     private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;

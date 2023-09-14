@@ -1,8 +1,7 @@
-package io.fair_acc.chartfx.profiler;
+package io.fair_acc.chartfx.benchmark;
 
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
-import io.fair_acc.dataset.profiler.SimpleDurationMeasure;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
+import io.fair_acc.dataset.benchmark.TimeMeasure;
 import io.fair_acc.dataset.utils.AssertUtils;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;
@@ -20,30 +19,31 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.IntSupplier;
 
 /**
- * A profiler that records measurements in tagged HdrHistograms
- * to disk. The overhead is very low
+ * Records measurements in tagged HdrHistograms and
+ * writes them to disk. Very low overhead. Measurements
+ * assume updates from single-threads. Very
  *
  * @author ennerf
  */
-public class HdrHistogramProfiler implements Profiler, Closeable {
+public class HdrHistogramRecorder implements MeasurementRecorder, Closeable {
 
     /**
      * Simple measurement recorder that can be quickly added to any class that needs a performance benchmark
      */
-    public static HdrHistogramProfiler createStarted(String fileName, long period, TimeUnit timeUnit) {
+    public static HdrHistogramRecorder createStarted(String fileName, long period, TimeUnit timeUnit) {
         try {
             var file = Path.of(fileName);
             if (file.getParent() != null) {
                 Files.createDirectories(file.getParent());
             }
-            return new HdrHistogramProfiler(file, period, timeUnit);
+            return new HdrHistogramRecorder(file, period, timeUnit);
         } catch (Exception e) {
             throw new IllegalArgumentException(e);
         }
     }
 
     @Override
-    public DurationMeasure newDuration(String tag, IntSupplier level) {
+    public TimeMeasure newTime(String tag, IntSupplier level) {
         HdrHistogramMeasure recorder = new HdrHistogramMeasure(tag);
         synchronized (measurements) {
             measurements.add(recorder);
@@ -51,7 +51,7 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
         return recorder;
     }
 
-    private HdrHistogramProfiler(Path path, long period, TimeUnit timeUnit) throws FileNotFoundException {
+    private HdrHistogramRecorder(Path path, long period, TimeUnit timeUnit) throws FileNotFoundException {
         this.out = new FileOutputStream(path.toFile());
         logWriter = new HistogramLogWriter(out);
         logWriter.outputLogFormatVersion();
@@ -115,18 +115,17 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
     private final ScheduledFuture<?> task;
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
-    static class HdrHistogramMeasure extends SimpleDurationMeasure {
+    static class HdrHistogramMeasure implements TimeMeasure {
 
         HdrHistogramMeasure(final String tag) {
-            super(System::nanoTime, TimeUnit.NANOSECONDS);
             this.tag = AssertUtils.notNull("tag", tag);
             this.histogramRecorder = new SingleWriterRecorder(defaultMinValue, defaultMaxValue, numberOfSignificantDigits);
         }
 
         @Override
-        public void recordRawValue(long duration) {
+        public void recordTime(TimeUnit unit, long duration) {
             try {
-                histogramRecorder.recordValue(TimeUnit.NANOSECONDS.toMicros(duration));
+                histogramRecorder.recordValue(unit.toMicros(duration));
             } catch (ArrayIndexOutOfBoundsException ex) {
                 System.err.println("Measurement on '" + tag + "' exceeded recordable range. Measured: " + duration + " ns");
             }
@@ -143,7 +142,7 @@ public class HdrHistogramProfiler implements Profiler, Closeable {
         Histogram interval = null;
 
         private static final long defaultMinValue = 1;
-        private static final long defaultMaxValue = TimeUnit.SECONDS.toMicros(10);
+        private static final long defaultMaxValue = java.util.concurrent.TimeUnit.SECONDS.toMicros(10);
         private static final int numberOfSignificantDigits = 2;
 
     }

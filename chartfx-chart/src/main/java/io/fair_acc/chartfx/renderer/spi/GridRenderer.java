@@ -3,8 +3,8 @@ package io.fair_acc.chartfx.renderer.spi;
 import java.util.List;
 
 import io.fair_acc.chartfx.ui.css.*;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
@@ -390,8 +390,8 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        benchDrawGrid = profiler.newDuration("grid-drawGrid");
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchDrawGrid = recorder.newDuration("grid-drawGrid");
     }
 
     private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;

@@ -1,7 +1,7 @@
 package io.fair_acc.chartfx.renderer;
 
 import io.fair_acc.chartfx.Chart;
-import io.fair_acc.dataset.profiler.Profileable;
+import io.fair_acc.dataset.benchmark.Measurable;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
@@ -17,7 +17,7 @@ import io.fair_acc.dataset.DataSet;
  * @author braeun
  * @author rstein
  */
-public interface Renderer extends Profileable {
+public interface Renderer extends Measurable {
     /**
      * @param style the data set node for which the representative icon should be generated
      * @param canvas the canvas in which the representative icon should be drawn

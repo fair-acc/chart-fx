@@ -1,9 +1,8 @@
-package io.fair_acc.chartfx.profiler;
+package io.fair_acc.chartfx.benchmark;
 
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.plugins.CrosshairIndicator;
 import io.fair_acc.chartfx.plugins.Zoomer;
@@ -11,11 +10,10 @@ import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
+import io.fair_acc.dataset.benchmark.TimeMeasure;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
-import io.fair_acc.dataset.profiler.SimpleDurationMeasure;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -35,13 +33,14 @@ import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 /**
- * Experimental profiler that shows profile information in a chart
+ * Recorder that shows measurements in a real-time chart. It currently
+ * has no explicit support for measurements recorded on background threads.
  *
  * @author ennerf
  */
-public class ChartProfiler implements Profiler {
+public class LiveDisplayRecorder implements MeasurementRecorder {
 
-    public static ChartProfiler showInNewStage(String title) {
+    public static LiveDisplayRecorder showInNewStage(String title) {
         return createChart(title, chart -> {
             var stage = new Stage();
             stage.setScene(new Scene(chart));
@@ -49,10 +48,10 @@ public class ChartProfiler implements Profiler {
         });
     }
 
-    private static ChartProfiler createChart(String title, Consumer<Parent> onChart) {
+    private static LiveDisplayRecorder createChart(String title, Consumer<Parent> onChart) {
         // Top chart w/ time series
         var timeChart = new XYChart(createTimeAxisX(), createValueAxisY());
-        timeChart.setTitle("Profiler: " + title);
+        timeChart.setTitle("Benchmark: " + title);
         timeChart.getPlugins().addAll(createPlugins());
         timeChart.getLegend().getNode().setVisible(false); // TODO: somehow it still shows up without any datasets?
         timeChart.getLegend().getNode().setManaged(false);
@@ -75,21 +74,21 @@ public class ChartProfiler implements Profiler {
         percentileRenderer.setAllowNaNs(false);
         percentileChart.getRenderers().setAll(percentileRenderer);
 
-        var profiler = new ChartProfiler(timeRenderer, percentileRenderer);
+        var recorder = new LiveDisplayRecorder(timeRenderer, percentileRenderer);
         var clearBtn = new Button("clear");
         clearBtn.setMaxWidth(Double.MAX_VALUE);
-        clearBtn.setOnAction(a -> profiler.clear());
+        clearBtn.setOnAction(a -> recorder.clear());
 
         final Button clearButton = new Button(null, new FontIcon("fa-trash:22"));
         clearButton.setPadding(new Insets(3, 3, 3, 3));
         clearButton.setTooltip(new Tooltip("clears existing data"));
-        clearButton.setOnAction(e -> profiler.clear());
+        clearButton.setOnAction(e -> recorder.clear());
         percentileChart.getToolBar().getChildren().add(clearButton);
 
         var pane = new SplitPane(timeChart, percentileChart);
         pane.setOrientation(Orientation.VERTICAL);
         onChart.accept(pane);
-        return profiler;
+        return recorder;
     }
 
     private static DefaultNumericAxis createTimeAxisX() {
@@ -127,7 +126,7 @@ public class ChartProfiler implements Profiler {
         return new ChartPlugin[]{zoomer/*,crosshair*/};
     }
 
-    public ChartProfiler(AbstractRendererXY<?> timeSeriesRenderer, AbstractRendererXY<?> percentileRenderer) {
+    public LiveDisplayRecorder(AbstractRendererXY<?> timeSeriesRenderer, AbstractRendererXY<?> percentileRenderer) {
         this.timeSeriesRenderer = timeSeriesRenderer;
         this.percentileRenderer = percentileRenderer;
         Runnable updateDataSets = () -> {
@@ -149,17 +148,17 @@ public class ChartProfiler implements Profiler {
     }
 
     @Override
-    public DurationMeasure newDuration(String tag, IntSupplier level) {
+    public TimeMeasure newTime(String tag, IntSupplier level) {
         // The data gets generated during the draw phase, so the dataSet may
         // be locked and can't be modified. We solve this by storing the data
         // in intermediate arrays.
         final var x = new DoubleArrayList(10);
         final var y = new DoubleArrayList(10);
-        final var measure = SimpleDurationMeasure.usingNanoTime(duration -> {
+        final TimeMeasure trace = (unit, duration) -> {
             x.add((System.nanoTime() - nanoStartOffset) * 1E-9);
-            y.add(duration * 1E-9);
+            y.add(unit.toNanos(duration) * 1E-9);
             state.setDirty(ChartBits.DataSetDataAdded);
-        });
+        };
 
         // Do a batch update during the next pulse
         final var timeSeriesDs = new CircularDoubleDataSet2D(tag, defaultCapacity);
@@ -185,7 +184,7 @@ public class ChartProfiler implements Profiler {
         var percentileNode = percentileRenderer.addDataSet(percentileDs);
         percentileNode.visibleProperty().bindBidirectional(timeNode.visibleProperty());
 
-        return measure;
+        return trace;
     }
 
     final Renderer timeSeriesRenderer;

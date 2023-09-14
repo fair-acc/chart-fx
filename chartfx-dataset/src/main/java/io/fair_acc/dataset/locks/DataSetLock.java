@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.function.Supplier;
 
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.profiler.Profileable;
+import io.fair_acc.dataset.benchmark.Measurable;
 
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach
@@ -46,7 +46,7 @@ import io.fair_acc.dataset.profiler.Profileable;
  * @param <D> generics reference, usually to <code>&lt;? extends DataSet&gt;</code>
  */
 @SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize" }) // Runnable used as functional interface
-public interface DataSetLock<D extends DataSet> extends Serializable, Profileable {
+public interface DataSetLock<D extends DataSet> extends Serializable, Measurable {
 
     /**
      * reentrant read-lock

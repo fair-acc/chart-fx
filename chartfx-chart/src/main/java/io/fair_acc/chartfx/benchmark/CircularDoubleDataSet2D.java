@@ -1,4 +1,4 @@
-package io.fair_acc.chartfx.profiler;
+package io.fair_acc.chartfx.benchmark;
 
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.AxisDescription;
