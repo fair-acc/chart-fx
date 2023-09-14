@@ -6,8 +6,8 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach Some implementation recommendation:
@@ -263,9 +263,9 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        benchReadLock = profiler.newTraceDuration("lock-readLock");
-        benchWriteLock = profiler.newTraceDuration("lock-writeLock");
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchReadLock = recorder.newTraceDuration("lock-readLock");
+        benchWriteLock = recorder.newTraceDuration("lock-writeLock");
     }
 
     private DurationMeasure benchReadLock = DurationMeasure.DISABLED;

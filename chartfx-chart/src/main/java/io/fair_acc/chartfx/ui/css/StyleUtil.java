@@ -190,10 +190,15 @@ public class StyleUtil {
 
     public static ObjectBinding<double[]> toUnboxedDoubleArray(ReadOnlyProperty<Number[]> source) {
         return Bindings.createObjectBinding(() -> {
-            var array = source.getValue();
-            if (array == null) {
+            Object obj = source.getValue();
+            if (obj == null) {
                 return null;
+            } else if (obj instanceof Number) {
+                // Note: single values return a Number and do not
+                // match the generic interface.
+                return new double[]{((Number) obj).doubleValue()};
             }
+            var array = (Number[]) obj;
             double[] result = new double[array.length];
             for (int i = 0; i < array.length; i++) {
                 result[i] = array[i] == null ? 0 : array[i].doubleValue();

@@ -1,4 +1,4 @@
-package io.fair_acc.chartfx.profiler;
+package io.fair_acc.chartfx.benchmark;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
@@ -6,9 +6,6 @@ import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.util.StringConverter;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.WeakHashMap;
 
 /**
