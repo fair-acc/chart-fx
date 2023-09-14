@@ -3,8 +3,9 @@ package io.fair_acc.chartfx.renderer.hebi;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.profiler.AggregateDurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.AggregateDurationMeasure;
+import io.fair_acc.dataset.benchmark.BenchLevel;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.math.ArrayUtils;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
@@ -154,8 +155,8 @@ public class BufferedImageRenderer extends AbstractRendererXY<BufferedImageRende
 
         }
 
-        benchComputeCoords.reportSum();
-        benchPolyLine.reportSum();
+        benchComputeCoords.recordResult();
+        benchPolyLine.recordResult();
 
     }
 
@@ -178,10 +179,10 @@ public class BufferedImageRenderer extends AbstractRendererXY<BufferedImageRende
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        super.setProfiler(profiler);
-        benchPolyLine = AggregateDurationMeasure.wrap(profiler.newDebugDuration("j2d-drawPolyLine"));
-        benchComputeCoords = AggregateDurationMeasure.wrap(profiler.newDebugDuration("j2d-computeCoords"));
+    public void setRecorder(MeasurementRecorder recorder) {
+        super.setRecorder(recorder);
+        benchPolyLine = recorder.newDebugDurationSum("j2d-drawPolyLine");
+        benchComputeCoords = recorder.newDebugDurationSum("j2d-computeCoords");
     }
 
     AggregateDurationMeasure benchComputeCoords = AggregateDurationMeasure.DISABLED;

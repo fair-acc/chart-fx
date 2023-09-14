@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profileable;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -36,7 +36,7 @@ import io.fair_acc.chartfx.ui.geometry.Side;
 /**
  * @author rstein
  */
-public abstract class AbstractAxis extends AbstractAxisParameter implements Axis, Profileable {
+public abstract class AbstractAxis extends AbstractAxisParameter implements Axis, Measurable {
     protected static final double MIN_NARROW_FONT_SCALE = 0.7;
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final double MIN_TICK_GAP = 1.0;
@@ -1229,10 +1229,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        benchComputePrefSize = profiler.newDuration("axis-computePrefSize");
-        benchUpdateDirtyContent = profiler.newDuration("axis-updateDirtyContent");
-        benchDrawAxis = profiler.newDuration("axis-drawAxis");
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchComputePrefSize = recorder.newDuration("axis-computePrefSize");
+        benchUpdateDirtyContent = recorder.newDuration("axis-updateDirtyContent");
+        benchDrawAxis = recorder.newDuration("axis-drawAxis");
     }
 
     private DurationMeasure benchComputePrefSize = DurationMeasure.DISABLED;

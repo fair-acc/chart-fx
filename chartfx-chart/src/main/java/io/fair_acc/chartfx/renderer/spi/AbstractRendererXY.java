@@ -3,9 +3,9 @@ package io.fair_acc.chartfx.renderer.spi;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profileable;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.AssertUtils;
@@ -19,7 +19,7 @@ import java.security.InvalidParameterException;
  *
  * @author ennerf
  */
-public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extends AbstractRenderer<R> implements Profileable {
+public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extends AbstractRenderer<R> implements Measurable {
 
     public AbstractRendererXY() {
         chartProperty().addListener((obs, old, chart) -> requireChartXY(chart));
@@ -103,9 +103,9 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     protected Axis yAxis;
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        benchDrawAll = profiler.newDuration("xy-draw-all");
-        benchDrawSingle = profiler.newDuration("xy-draw-single");
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchDrawAll = recorder.newDuration("xy-draw-all");
+        benchDrawSingle = recorder.newDuration("xy-draw-single");
     }
 
     private DurationMeasure benchDrawAll = DurationMeasure.DISABLED;

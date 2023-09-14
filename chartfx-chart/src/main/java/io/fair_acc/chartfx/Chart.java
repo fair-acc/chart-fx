@@ -5,9 +5,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profileable;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
@@ -34,9 +34,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AbstractAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
@@ -62,7 +59,7 @@ import io.fair_acc.dataset.utils.NoDuplicatesList;
  * @author original conceptual design by Oracle (2010, 2014)
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
-public abstract class Chart extends Region implements EventSource, Profileable {
+public abstract class Chart extends Region implements EventSource, Measurable {
 
     // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
     // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
@@ -974,15 +971,15 @@ public abstract class Chart extends Region implements EventSource, Profileable {
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        benchPreLayout = profiler.newDuration("chart-runPreLayout");
-        benchCssAndLayout = profiler.newTraceDuration("chart-cssAndLayout").ignoreMissingStart();
-        benchLayoutChildren = profiler.newTraceDuration("chart-layoutChildren");
-        benchPostLayout = profiler.newDuration("chart-runPostLayout");
-        benchLockDataSets = profiler.newDebugDuration("chart-lockDataSets");
-        benchUpdateAxisRange = profiler.newDuration("chart-updateAxisRange");
-        benchDrawAxes = profiler.newDuration("chart-drawAxes");
-        benchDrawCanvas = profiler.newDuration("chart-drawCanvas");
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchPreLayout = recorder.newDuration("chart-runPreLayout");
+        benchCssAndLayout = recorder.newTraceDuration("chart-cssAndLayout").ignoreMissingStart();
+        benchLayoutChildren = recorder.newTraceDuration("chart-layoutChildren");
+        benchPostLayout = recorder.newDuration("chart-runPostLayout");
+        benchLockDataSets = recorder.newDebugDuration("chart-lockDataSets");
+        benchUpdateAxisRange = recorder.newDuration("chart-updateAxisRange");
+        benchDrawAxes = recorder.newDuration("chart-drawAxes");
+        benchDrawCanvas = recorder.newDuration("chart-drawCanvas");
     }
 
     private DurationMeasure benchPreLayout = DurationMeasure.DISABLED;

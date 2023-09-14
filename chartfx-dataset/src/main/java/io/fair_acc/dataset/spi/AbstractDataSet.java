@@ -8,12 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.IntToDoubleFunction;
 
 import io.fair_acc.dataset.*;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.dataset.locks.DefaultDataSetLock;
-import io.fair_acc.dataset.profiler.DurationMeasure;
-import io.fair_acc.dataset.profiler.Profiler;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
 import io.fair_acc.dataset.spi.utils.MathUtils;
 import io.fair_acc.dataset.spi.utils.StringHashMapList;
 import io.fair_acc.dataset.utils.AssertUtils;
@@ -753,8 +753,8 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     @Override
-    public void setProfiler(Profiler profiler) {
-        benchRecomputeLimitsSingle = profiler.newDuration("ds-RecomputeLimits-single");
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchRecomputeLimitsSingle = recorder.newDuration("ds-RecomputeLimits-single");
     }
 
     private DurationMeasure benchRecomputeLimitsSingle = DurationMeasure.DISABLED;
