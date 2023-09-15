@@ -31,7 +31,7 @@ import io.fair_acc.chartfx.utils.SimplePerformanceMeter;
  */
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
-public class MeasurementRecorderInfoBoxTests {
+public class ProfilerInfoBoxTests {
     private final Pane pane = new Pane();
     private Scene scene;
 
