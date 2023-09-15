@@ -222,19 +222,19 @@ public class XYChart extends Chart {
         for (Axis axis : getAxes()) {
 
             // Determine the current range
-            autoRange.clear();
+            axisRange.clear();
             for (Renderer renderer : getRenderers()) {
-                renderer.updateAxisRange(axis, autoRange);
+                renderer.updateAxisRange(axis, axisRange);
             }
 
             // Update the internal auto range
             boolean changed = false;
             if (axis.isAutoGrowRanging() && axis.getAutoRange().isDefined()) {
-                if (autoRange.isDefined()) {
-                    changed = axis.getAutoRange().add(autoRange);
+                if (axisRange.isDefined()) {
+                    changed = axis.getAutoRange().add(axisRange);
                 }
             } else {
-                changed = axis.getAutoRange().set(autoRange.getMin(), autoRange.getMax());
+                changed = axis.getAutoRange().set(axisRange.getMin(), axisRange.getMax());
             }
 
             // Trigger a redraw
@@ -246,7 +246,7 @@ public class XYChart extends Chart {
 
     }
 
-    private final AxisRange autoRange = new AxisRange();
+    private final AxisRange axisRange = new AxisRange();
 
     /**
      * add XYChart specific axis handling (ie. placement around charts, add new DefaultNumericAxis if one is missing,
@@ -338,24 +338,24 @@ public class XYChart extends Chart {
     }
 
     /**
-     * @param profiler profiler for this chart and all nested components
+     * @param recorder recorder for this chart and all nested components
      */
-    public void setGlobalRecorder(MeasurementRecorder profiler) {
-        setRecorder(profiler);
+    public void setGlobalRecorder(MeasurementRecorder recorder) {
+        setRecorder(recorder);
         int i = 0;
         for (Axis axis : getAxes()) {
             if (axis == getXAxis()) {
-                axis.setRecorder(profiler.addPrefix("x"));
+                axis.setRecorder(recorder.addPrefix("x"));
             } else if (axis == getYAxis()) {
-                axis.setRecorder(profiler.addPrefix("y"));
+                axis.setRecorder(recorder.addPrefix("y"));
             } else {
-                axis.setRecorder(profiler.addPrefix("axis" + i++));
+                axis.setRecorder(recorder.addPrefix("axis" + i++));
             }
         }
         i = 0;
-        gridRenderer.setRecorder(profiler);
+        gridRenderer.setRecorder(recorder);
         for (var renderer : getRenderers()) {
-            var p = profiler.addPrefix("renderer" + i);
+            var p = recorder.addPrefix("renderer" + i);
             renderer.setRecorder(p);
             int dsIx = 0;
             for (var dataset : renderer.getDatasets()) {
@@ -367,7 +367,7 @@ public class XYChart extends Chart {
         }
         i = 0;
         for (ChartPlugin plugin : getPlugins()) {
-            plugin.setRecorder(profiler.addPrefix("plugin" + i++));
+            plugin.setRecorder(recorder.addPrefix("plugin" + i++));
         }
     }
 
