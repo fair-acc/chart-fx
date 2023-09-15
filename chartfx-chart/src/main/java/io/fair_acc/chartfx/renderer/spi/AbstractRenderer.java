@@ -112,25 +112,6 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
         return dataSetNodes;
     }
 
-    @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
-        return getDatasetsCopy(getDatasets());
-    }
-
-    protected ObservableList<DataSet> getDatasetsCopy(final ObservableList<DataSet> localDataSets) {
-        final long start = ProcessingProfiler.getTimeStamp();
-        final ObservableList<DataSet> dataSets = FXCollections.observableArrayList();
-        for (final DataSet dataSet : localDataSets) {
-            if (dataSet instanceof DataSetError) {
-                dataSets.add(new DoubleErrorDataSet(dataSet));
-            } else {
-                dataSets.add(new DoubleDataSet(dataSet));
-            }
-        }
-        ProcessingProfiler.getTimeDiff(start);
-        return dataSets;
-    }
-
     public Axis getFirstAxis(final Orientation orientation) {
         for (final Axis axis : getAxes()) {
             if (axis.getSide() == null) {

@@ -264,11 +264,6 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
-        return FXCollections.emptyObservableList();
-    }
-
-    @Override
     public ObservableList<DataSetNode> getDatasetNodes() {
         return FXCollections.emptyObservableList();
     }

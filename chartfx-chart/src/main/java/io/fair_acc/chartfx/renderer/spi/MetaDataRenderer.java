@@ -154,11 +154,6 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
-        return FXCollections.observableArrayList();
-    }
-
-    @Override
     public ObservableList<DataSetNode> getDatasetNodes() {
         return FXCollections.emptyObservableList();
     }
