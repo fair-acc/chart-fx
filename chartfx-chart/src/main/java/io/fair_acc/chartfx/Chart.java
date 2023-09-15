@@ -568,10 +568,6 @@ public abstract class Chart extends Region implements EventSource, Measurable {
         }
         benchPostLayout.start();
 
-        // Make sure that renderer axes that are not part of
-        // the chart still produce an accurate axis transform.
-        updateStandaloneRendererAxes();
-
         // Redraw the axes (they internally check dirty bits)
         benchDrawAxes.start();
         for (Axis axis : axesList) {
@@ -632,29 +628,6 @@ public abstract class Chart extends Region implements EventSource, Measurable {
         }
         hasLocked = false;
         lockedDataSets.clear();
-    }
-
-    /**
-     * Update axes that are not part of the SceneGraph and that would
-     * otherwise not have a size. We could alternatively add renderer
-     * axes to the chart, but that would not match previous behavior,
-     * and it is probably a good idea to require it to be explicit.
-     */
-    private void updateStandaloneRendererAxes() {
-        for (Renderer renderer : getRenderers()) {
-            for (Axis axis : renderer.getAxes()) {
-                if (axis instanceof AbstractAxis) {
-                    var axisNode = (AbstractAxis) axis;
-                    if (axisNode.getParent() == null) {
-                        if (axis.getSide().isHorizontal()) {
-                            axisNode.prefWidth(plotArea.getHeight());
-                        } else {
-                            axisNode.prefHeight(plotArea.getWidth());
-                        }
-                    }
-                }
-            }
-        }
     }
 
     protected void forEachDataSet(Consumer<DataSet> action) {

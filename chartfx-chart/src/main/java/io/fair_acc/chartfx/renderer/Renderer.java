@@ -87,6 +87,9 @@ public interface Renderer extends Measurable {
     /**
      * Sets up axis mapping and creates any axes that may be needed.
      * Gets called before axis ranges are updated.
+     * <p>
+     * Locally specified axes are prioritized over chart axes. Local
+     * axes that are not part of the chart must be added.
      */
     default void updateAxes() {
         // empty by default
