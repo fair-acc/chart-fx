@@ -58,7 +58,7 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
     private final DoubleProperty lineWidth = addOnChange(css().createDoubleProperty(this, "lineWidth", 1.0));
     private final ObjectProperty<Paint> lineColor = addOnChange(css().createPaintProperty(this, "lineColor", Color.BLACK));
     protected final ObjectBinding<Paint> intensifiedLineColor = intensifiedColor(lineColor);
-    private final ObjectBinding<Paint> lineFillPattern = hatchFillPattern(lineColor);
+    private final ObjectBinding<Paint> lineFillPattern = hatchFillPattern(intensifiedLineColor);
     private final ObjectProperty<Number[]> lineDashArray = addOnChange(css().createNumberArrayProperty(this, "lineDashArray", null));
     private final ObjectBinding<double[]> lineDashes = StyleUtil.toUnboxedDoubleArray(lineDashArray);
 
@@ -322,13 +322,13 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
 
     // ======================== Utility methods ========================
 
-    protected ObjectBinding<Paint> intensifiedColor(ReadOnlyObjectProperty<Paint> base) {
-        return Bindings.createObjectBinding(() -> getIntensifiedColor(base.get()), base, intensity);
+    protected ObjectBinding<Paint> intensifiedColor(ObservableValue<Paint> base) {
+        return Bindings.createObjectBinding(() -> getIntensifiedColor(base.getValue()), base, intensity);
     }
 
-    protected ObjectBinding<Paint> hatchFillPattern(ReadOnlyObjectProperty<Paint> base) {
+    protected ObjectBinding<Paint> hatchFillPattern(ObservableValue<Paint> base) {
         return Bindings.createObjectBinding(() -> {
-            var color = getIntensifiedColor(base.get());
+            var color = base.getValue();
             if (color instanceof Color) {
                 color = ((Color) color).brighter();
             }
@@ -345,7 +345,7 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
         if (getIntensity() <= 0) {
             return Color.TRANSPARENT;
         }
-        int scale = (int) (getIntensity() / 100);
+        var scale = getIntensity() / 100d;
         return ((Color) color).deriveColor(0, scale, 1.0, scale);
     }
 
