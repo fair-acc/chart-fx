@@ -76,8 +76,8 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     @Override
     public void updateAxes() {
         // Default to explicitly set axes
-        xAxis = getFirstAxis(Orientation.HORIZONTAL);
-        yAxis = getFirstAxis(Orientation.VERTICAL);
+        xAxis = ensureAxisInChart(getFirstAxis(Orientation.HORIZONTAL));
+        yAxis = ensureAxisInChart(getFirstAxis(Orientation.VERTICAL));
 
         // Get or create one in the chart if needed
         var chart = AssertUtils.notNull("chart", getChart());
@@ -87,6 +87,13 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         if (yAxis == null) {
             yAxis = chart.getYAxis();
         }
+    }
+
+    protected Axis ensureAxisInChart(Axis axis) {
+        if (axis != null && !getChart().getAxes().contains(axis)) {
+            getChart().getAxes().add(axis);
+        }
+        return axis;
     }
 
     @Override

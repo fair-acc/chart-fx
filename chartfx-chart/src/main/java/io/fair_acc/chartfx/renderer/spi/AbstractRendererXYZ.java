@@ -3,7 +3,6 @@ package io.fair_acc.chartfx.renderer.spi;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.DataSet;
 
@@ -25,18 +24,17 @@ public abstract class AbstractRendererXYZ<R extends AbstractRendererXYZ<R>> exte
 
         // Check if there is a user-specified 3rd axis
         if (zAxis == null) {
-            zAxis = tryGetZAxis(getAxes(), false);
+            zAxis = ensureAxisInChart(getFirstZAxis(getAxes(), false));
         }
 
-        // Fallback to one from the chart
+        // Fallback to an existing one from the chart
         if (zAxis == null) {
-            zAxis = tryGetZAxis(getChart().getAxes(), true);
+            zAxis = getFirstZAxis(getChart().getAxes(), true);
         }
 
-        // Fallback to adding one to the chart (to match behavior of X and Y)
+        // Fallback to creating a new one (matches behavior of X and Y)
         if (zAxis == null) {
-            zAxis = createZAxis();
-            getChart().getAxes().add(zAxis);
+            zAxis = ensureAxisInChart(createZAxis());
         }
     }
 
@@ -48,7 +46,7 @@ public abstract class AbstractRendererXYZ<R extends AbstractRendererXYZ<R>> exte
         }
     }
 
-    private Axis tryGetZAxis(List<Axis> axes, boolean requireDimZ) {
+    private Axis getFirstZAxis(List<Axis> axes, boolean requireDimZ) {
         Axis firstNonXY = null;
         for (Axis axis : axes) {
             if (axis != xAxis && axis != yAxis) {

@@ -1,8 +1,5 @@
 package io.fair_acc.chartfx;
 
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
@@ -50,7 +47,6 @@ public class XYChart extends Chart {
 
     /**
      * Construct a new XYChart with the given axes.
-     *
      */
     public XYChart() {
         this(new Axis[] {}); // NOPMD NOSONAR
@@ -270,41 +266,6 @@ public class XYChart extends Chart {
         }
 
         invalidate();
-    }
-
-    /**
-     * checks whether renderer has required x and y axes and adds the first x or y from the chart itself if necessary
-     * <p>
-     * additionally moves axis from Renderer with defined Side that are not yet in the Chart also to the chart's list
-     *
-     * @param renderer to be checked
-     */
-    protected void checkRendererForRequiredAxes(final Renderer renderer) {
-        if (renderer.getAxes().size() < 2) {
-            // not enough axes present in renderer
-            Optional<Axis> xAxis = renderer.getAxes().stream().filter(a -> a.getSide().isHorizontal()).findFirst();
-            Optional<Axis> yAxis = renderer.getAxes().stream().filter(a -> a.getSide().isVertical()).findFirst();
-
-            // search for horizontal/vertical axes in Chart (which creates one if missing) and add to renderer
-            if (xAxis.isEmpty()) {
-                renderer.getAxes().add(getFirstAxis(Orientation.HORIZONTAL));
-            }
-            if (yAxis.isEmpty()) {
-                // search for horizontal axis in Chart (which creates one if missing) and add to renderer
-                renderer.getAxes().add(getFirstAxis(Orientation.VERTICAL));
-            }
-        }
-        // check if there are assignable axes not yet present in the Chart's list
-        getAxes().addAll(renderer.getAxes().stream().limit(2).filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
-    }
-
-    @Override
-    protected void runPreLayout() {
-        for (Renderer renderer : getRenderers()) {
-            // check for and add required axes
-            checkRendererForRequiredAxes(renderer);
-        }
-        super.runPreLayout();
     }
 
     @Override
