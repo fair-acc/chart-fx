@@ -1,7 +1,5 @@
 package io.fair_acc.chartfx;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -121,7 +119,7 @@ public class XYChart extends Chart {
 
         allDataSets.clear();
         for (Renderer renderer : getRenderers()) {
-            if(renderer instanceof LabelledMarkerRenderer){
+            if (renderer instanceof LabelledMarkerRenderer) {
                 continue;
             }
             allDataSets.addAll(renderer.getDatasets());
@@ -207,8 +205,9 @@ public class XYChart extends Chart {
 
     @Override
     public void updateAxisRange() {
-        // Check that all registered data sets have proper ranges defined. The datasets
-        // are already locked, so we can use parallel stream without extra synchronization.
+        // Update the axis definitions of all datasets. We do it here, so we can make better
+        // use of multi-threading. The datasets are already locked, so we can use a parallel
+        // stream without extra synchronization.
         getRenderers().stream()
                 .flatMap(renderer -> renderer.getDatasetNodes().stream())
                 .filter(DataSetNode::isVisible)
@@ -219,9 +218,35 @@ public class XYChart extends Chart {
                         .filter(axisD -> !axisD.isDefined() || axisD.getBitState().isDirty())
                         .forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
 
-        // Update each of the axes
-        getAxes().forEach(chartAxis -> updateNumericAxis(chartAxis, getDataSetForAxis(chartAxis)));
+        // Update each axis
+        for (Axis axis : getAxes()) {
+
+            // Determine the current range
+            autoRange.clear();
+            for (Renderer renderer : getRenderers()) {
+                renderer.updateAxisRange(axis, autoRange);
+            }
+
+            // Update the internal auto range
+            boolean changed = false;
+            if (axis.isAutoGrowRanging() && axis.getAutoRange().isDefined()) {
+                if (autoRange.isDefined()) {
+                    changed = axis.getAutoRange().add(autoRange);
+                }
+            } else {
+                changed = axis.getAutoRange().set(autoRange.getMin(), autoRange.getMax());
+            }
+
+            // Trigger a redraw
+            if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
+                axis.invalidateRange();
+            }
+
+        }
+
     }
+
+    private final AxisRange autoRange = new AxisRange();
 
     /**
      * add XYChart specific axis handling (ie. placement around charts, add new DefaultNumericAxis if one is missing,
@@ -273,15 +298,6 @@ public class XYChart extends Chart {
         getAxes().addAll(renderer.getAxes().stream().limit(2).filter(a -> (a.getSide() != null && !getAxes().contains(a))).collect(Collectors.toList()));
     }
 
-    protected List<DataSetNode> getDataSetForAxis(final Axis axis) {
-        final List<DataSetNode> list = new ArrayList<>();
-        getRenderers().stream()
-                .filter(renderer -> renderer.isUsingAxis(axis))
-                .map(Renderer::getDatasetNodes)
-                .forEach(list::addAll);
-        return list;
-    }
-
     @Override
     protected void runPreLayout() {
         for (Renderer renderer : getRenderers()) {
@@ -317,50 +333,6 @@ public class XYChart extends Chart {
             benchDrawGrid.start();
             gridRenderer.render();
             benchDrawGrid.stop();
-        }
-
-    }
-
-    protected static void updateNumericAxis(final Axis axis, final List<DataSetNode> dataSets) {
-        if (dataSets == null || dataSets.isEmpty()) {
-            return;
-        }
-
-        final Side side = axis.getSide();
-        final boolean isHorizontal = side.isHorizontal();
-
-        // Determine the range of all datasets for this axis
-        final AxisRange dsRange = new AxisRange();
-        dsRange.clear();
-        dataSets.stream().filter(DataSetNode::isVisible).map(DataSetNode::getDataSet)
-                .forEach(dataset -> {
-                    if (dataset.getDimension() > 2 && (side == Side.RIGHT || side == Side.TOP)) {
-                if (!dataset.getAxisDescription(DataSet.DIM_Z).isDefined()) {
-                    dataset.recomputeLimits(DataSet.DIM_Z);
-                }
-                dsRange.add(dataset.getAxisDescription(DataSet.DIM_Z).getMin());
-                dsRange.add(dataset.getAxisDescription(DataSet.DIM_Z).getMax());
-            } else {
-                final int nDim = isHorizontal ? DataSet.DIM_X : DataSet.DIM_Y;
-                if (!dataset.getAxisDescription(nDim).isDefined()) {
-                    dataset.recomputeLimits(nDim);
-                }
-                dsRange.add(dataset.getAxisDescription(nDim).getMin());
-                dsRange.add(dataset.getAxisDescription(nDim).getMax());
-            }
-        });
-
-        // Update the auto range
-        final boolean changed;
-        if (axis.isAutoGrowRanging() && axis.getAutoRange().isDefined()) {
-            changed = axis.getAutoRange().add(dsRange);
-        } else {
-            changed = axis.getAutoRange().set(dsRange.getMin(), dsRange.getMax());
-        }
-
-        // Trigger a redraw
-        if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
-            axis.invalidateRange();
         }
 
     }

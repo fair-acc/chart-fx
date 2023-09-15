@@ -1,6 +1,7 @@
 package io.fair_acc.chartfx.renderer;
 
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.dataset.benchmark.Measurable;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
@@ -94,12 +95,13 @@ public interface Renderer extends Measurable {
     }
 
     /**
-     * @param axis axis to be checked
-     * @return true if the axis is actively being used by the renderer. Must be called after updateAxes()
+     * Updates the range for the specified axis.
+     * Does nothing if the axis is not used.
+     *
+     * @param axis  axis of the range
+     * @param range auto range for the axis
      */
-    default boolean isUsingAxis(Axis axis) {
-        return getAxes().contains(axis);
-    }
+    void updateAxisRange(Axis axis, AxisRange range);
 
     /**
      * renders the contents to screen

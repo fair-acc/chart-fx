@@ -1,10 +1,11 @@
 package io.fair_acc.chartfx.renderer.spi;
 
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.DataSet;
-import javafx.scene.Node;
 
 import java.util.List;
 
@@ -39,6 +40,14 @@ public abstract class AbstractRendererXYZ<R extends AbstractRendererXYZ<R>> exte
         }
     }
 
+    @Override
+    public void updateAxisRange(Axis axis, AxisRange range) {
+        super.updateAxisRange(axis, range);
+        if (axis == zAxis) {
+            updateAxisRange(range, DataSet.DIM_Z);
+        }
+    }
+
     private Axis tryGetZAxis(List<Axis> axes, boolean requireDimZ) {
         Axis firstNonXY = null;
         for (Axis axis : axes) {
@@ -63,11 +72,6 @@ public abstract class AbstractRendererXYZ<R extends AbstractRendererXYZ<R>> exte
         zAxis.setSide(Side.RIGHT);
         zAxis.setDimIndex(DataSet.DIM_Z);
         return zAxis;
-    }
-
-    @Override
-    public boolean isUsingAxis(Axis axis) {
-        return super.isUsingAxis(axis) || axis == zAxis;
     }
 
     public void shiftZAxisToLeft() {
