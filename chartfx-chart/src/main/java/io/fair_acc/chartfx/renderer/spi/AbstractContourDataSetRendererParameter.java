@@ -13,7 +13,7 @@ import io.fair_acc.chartfx.renderer.datareduction.ReductionType;
 import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
 
 public abstract class AbstractContourDataSetRendererParameter<R extends AbstractContourDataSetRendererParameter<R>>
-        extends AbstractPointReducingRenderer<R> {
+        extends AbstractRendererXYZ<R> {
     private final BooleanProperty altImplementation = new SimpleBooleanProperty(this, "altImplementation", false);
     private final IntegerProperty reductionFactorX = new SimpleIntegerProperty(this, "reductionFactorX", 2);
     private final IntegerProperty reductionFactorY = new SimpleIntegerProperty(this, "reductionFactorY", 2);
