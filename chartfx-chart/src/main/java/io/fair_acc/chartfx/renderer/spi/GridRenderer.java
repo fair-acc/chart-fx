@@ -2,6 +2,7 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.util.List;
 
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.dataset.benchmark.DurationMeasure;
 import io.fair_acc.dataset.benchmark.MeasurementRecorder;
@@ -270,6 +271,11 @@ public class GridRenderer extends Parent implements Renderer {
     @Override
     public ObservableList<DataSetNode> getDatasetNodes() {
         return FXCollections.emptyObservableList();
+    }
+
+    @Override
+    public void updateAxisRange(Axis axis, AxisRange range) {
+        // not applicable
     }
 
     /**

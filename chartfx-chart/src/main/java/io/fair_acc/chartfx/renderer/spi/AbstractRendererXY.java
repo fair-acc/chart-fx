@@ -3,6 +3,7 @@ package io.fair_acc.chartfx.renderer.spi;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.dataset.benchmark.DurationMeasure;
 import io.fair_acc.dataset.benchmark.Measurable;
 import io.fair_acc.dataset.benchmark.MeasurementRecorder;
@@ -89,8 +90,29 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     }
 
     @Override
-    public boolean isUsingAxis(Axis axis) {
-        return axis == xAxis || axis == yAxis;
+    public void updateAxisRange(Axis axis, AxisRange range) {
+        if (axis == xAxis) {
+            updateAxisRange(range, DataSet.DIM_X);
+        } else if (axis == yAxis) {
+            updateAxisRange(range, DataSet.DIM_Y);
+        }
+    }
+
+    protected void updateAxisRange(AxisRange range, int dim) {
+        for (DataSetNode node : getDatasetNodes()) {
+            if (node.isVisible()) {
+                updateAxisRange(node.getDataSet(), range, dim);
+            }
+        }
+    }
+
+    protected void updateAxisRange(DataSet dataSet, AxisRange range, int dim) {
+        var dsRange = dataSet.getAxisDescription(dim);
+        if (!dsRange.isDefined()) {
+            dataSet.recomputeLimits(dim);
+        }
+        range.add(dsRange.getMin());
+        range.add(dsRange.getMax());
     }
 
     protected void updateCachedVariables() {
