@@ -46,8 +46,6 @@ public interface Renderer extends Measurable {
 
     ObservableList<DataSet> getDatasets();
 
-    ObservableList<DataSet> getDatasetsCopy(); // TODO: get rid of this? add getDatasetNodes?
-
     ObservableList<DataSetNode> getDatasetNodes();
 
     default DataSetNode getStyleableNode(DataSet dataSet) {
