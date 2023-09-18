@@ -382,7 +382,6 @@
   -fx-rotate: -90;
 }
 .axis .axis-tick-label {
-  -fx-fill: black;
   -fx-font-size: 10px;
 }
 .axis .axis-major-tick-mark, .axis .axis-minor-tick-mark {
