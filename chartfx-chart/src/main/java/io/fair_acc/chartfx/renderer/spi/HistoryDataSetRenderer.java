@@ -1,23 +1,18 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import java.util.ArrayList;
-import java.util.List;
-
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSetError;
+import io.fair_acc.dataset.EditableDataSet;
+import io.fair_acc.dataset.spi.DoubleDataSet;
+import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import javafx.scene.canvas.GraphicsContext;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.EditableDataSet;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Renders the data set with the pre-described
@@ -25,72 +20,48 @@ import io.fair_acc.dataset.EditableDataSet;
  * @author R.J. Steinhagen
  */
 public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Renderer {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HistoryDataSetRenderer.class);
     protected static final int DEFAULT_HISTORY_DEPTH = 3;
-    protected final ObservableList<DataSet> chartDataSetsCopy = FXCollections.observableArrayList();
-    protected final ObservableList<ErrorDataSetRenderer> renderers = FXCollections.observableArrayList();
-    protected boolean itself = false;
 
     public HistoryDataSetRenderer() {
         this(HistoryDataSetRenderer.DEFAULT_HISTORY_DEPTH);
     }
 
     public HistoryDataSetRenderer(final int historyDepth) {
-        super();
-
         if (historyDepth < 0) {
             throw new IllegalArgumentException(
                     String.format("historyDepth=='%d' should be larger than '0'", historyDepth));
         }
-
-        for (int i = 0; i < historyDepth; i++) {
-            final ErrorDataSetRenderer newRenderer = new ErrorDataSetRenderer();
-            newRenderer.bind(this);
-            // do not show history sets in legend (single exception to binding)
-            newRenderer.showInLegendProperty().unbind();
-            newRenderer.setShowInLegend(false);
-            renderers.add(newRenderer);
-        }
-
-        getAxes().addListener(HistoryDataSetRenderer.this::axisChanged);
-
-        // special data set handling to re-add local datasets from dependent
-        // renderers
-
-        super.getDatasets().addListener((ListChangeListener<? super DataSet>) e -> {
-            while (e.next()) {
-                if (e.wasAdded()) {
-                    final ObservableList<DataSet> localList = FXCollections.observableArrayList();
-                    for (final Renderer r : renderers) {
-                        for (final DataSet set : r.getDatasets()) {
-                            // don't add duplicates
-                            if (!getDatasets().contains(set)) {
-                                localList.add(set);
-                            }
-                        }
-                    }
-                    // this funny looking expression avoids infinite loops
-                    if (!localList.isEmpty() && !itself) {
-                        itself = true;
-                        super.getDatasets().addAll(localList);
-                        itself = false;
-                    }
-                }
-            }
-        });
+        this.historyDepth = historyDepth;
     }
 
-    protected void axisChanged(final ListChangeListener.Change<? extends Axis> change) {
-        while (change.next()) {
-            if (change.wasRemoved()) {
-                for (final ErrorDataSetRenderer renderer : renderers) {
-                    renderer.getAxes().removeAll(change.getRemoved());
-                }
+    @Override
+    protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
+        final double originalIntensity = style.getIntensity();
+        try {
+            // render historical data oldest first
+            var history = ((HistoryDataSetNode) style).getHistory();
+            int histIx = history.size() - 1;
+            for (DataSet histDs : history) {
+                final var faded = Math.pow(getIntensityFading(), histIx + 2.0) * originalIntensity;
+                style.setIntensity((int) faded);
+                histIx--;
+                super.render(gc, histDs, style);
             }
+        } finally {
+            style.setIntensity(originalIntensity);
+        }
+        // render latest data
+        super.render(gc, dataSet, style);
+    }
 
-            if (change.wasAdded()) {
-                for (final ErrorDataSetRenderer renderer : renderers) {
-                    renderer.getAxes().addAll(change.getAddedSubList());
+    @Override
+    protected void updateAxisRange(AxisRange range, int dim) {
+        // Add the range of the historical data as well
+        for (DataSetNode node : getDatasetNodes()) {
+            if (node.isVisible()) {
+                updateAxisRange(node.getDataSet(), range, dim);
+                for (DataSet histDs : ((HistoryDataSetNode) node).getHistory()) {
+                    updateAxisRange(histDs, range, dim);
                 }
             }
         }
@@ -100,125 +71,65 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
      * clear renderer history
      */
     public void clearHistory() {
-        for (final Renderer renderer : renderers) {
-            try {
-                FXUtils.runAndWait(() -> {
-                    super.getDatasets().removeAll(renderer.getDatasets());
-                    renderer.getDatasets().clear();
-                });
-            } catch (final Exception e) {
-                LOGGER.atError().setCause(e).log("clearHistory()");
-            }
+        for (DataSetNode ds : getDatasetNodes()) {
+            ((HistoryDataSetNode) ds).clear();
         }
-    }
-
-    /**
-     * @return all DataSets that are either from the calling graph or this first specific renderer
-     */
-    private ObservableList<DataSet> getLocalDataSets() {
-        final ObservableList<DataSet> retVal = FXCollections.observableArrayList();
-        retVal.addAll(getDatasets());
-
-        final List<DataSet> removeList = new ArrayList<>();
-        for (final Renderer r : renderers) {
-            removeList.addAll(r.getDatasets());
-        }
-
-        retVal.removeAll(removeList);
-        return retVal;
-    }
-
-    @Override
-    protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
-        final double originalIntensity = style.getIntensity();
-        try {
-
-            // render history in reverse order
-            final int nRenderer = renderers.size();
-            for (int historyIx = nRenderer - 1; historyIx >= 0; historyIx--) {
-                final var historical = renderers.get(historyIx);
-                if (historical.getDatasets().size() > style.getLocalIndex()) {
-                    // Change the intensity to make the history more faded
-                    // Note: we are already in the drawing phase, so the changes won't cause a new pulse
-                    // TODO: the fading does not seem to work properly yet. Check HistoryDataSetSample.
-                    // TODO: maybe copy the style node so we don't accidentally prevent CSS updates?
-                    final var faded = (int) Math.pow(getIntensityFading(), historyIx + 2.0) * originalIntensity;
-                    style.setIntensity(faded);
-
-                    // Draw the historical set
-                    var histDs = historical.getDatasets().get(style.getLocalIndex());
-                    super.render(gc, histDs, style);
-                }
-            }
-
-        } finally {
-            style.setIntensity(originalIntensity);
-        }
-
-        super.render(gc, dataSet, style);
     }
 
     public void shiftHistory() {
-        final int nRenderer = renderers.size();
-        if (nRenderer <= 0) {
-            return;
+        for (DataSetNode ds : getDatasetNodes()) {
+            ((HistoryDataSetNode) ds).shift();
         }
-
-        final ObservableList<DataSet> oldDataSetsToRemove = renderers.get(nRenderer - 1).getDatasets();
-        if (!oldDataSetsToRemove.isEmpty()) {
-            try {
-                FXUtils.runAndWait(() -> getDatasets().removeAll(oldDataSetsToRemove));
-            } catch (final Exception e) {
-                LOGGER.atError().setCause(e).log("oldDataSetsToRemove listener");
-            }
-        }
-
-        // create local copy of to be shifted data set
-        final ObservableList<DataSet> copyDataSet = getDatasetsCopy(getLocalDataSets());
-
-        for (int index = nRenderer - 1; index >= 0; index--) {
-            final ErrorDataSetRenderer renderer = renderers.get(index);
-            final boolean isFirstRenderer = index == 0;
-            final ErrorDataSetRenderer previousRenderer = isFirstRenderer ? this : renderers.get(index - 1);
-
-            final ObservableList<DataSet> copyList = isFirstRenderer ? copyDataSet : previousRenderer.getDatasets();
-
-            final int fading = (int) (Math.pow(getIntensityFading(), index + 2.0) * 100);
-            for (final DataSet ds : copyList) {
-                if (ds instanceof EditableDataSet) {
-                    ((EditableDataSet) ds).setName(ds.getName().split("_")[0] + "History_{-" + index + "}");
-                }
-
-                // modify style
-                // TODO: is this doing anything now?
-                ds.setStyle(DataSetStyleBuilder.instance()
-                        .withExisting(ds.getStyle())
-                        .setIntensity(fading)
-                        .setShowInLegend(false)
-                        .build());
-
-                if (!getDatasets().contains(ds)) {
-                    try {
-                        FXUtils.runAndWait(() -> getDatasets().add(ds));
-                    } catch (final Exception e) {
-                        LOGGER.atError().setCause(e).log("add missing dataset");
-                    }
-                }
-            }
-
-            try {
-                FXUtils.runAndWait(() -> renderer.getDatasets().setAll(copyList));
-            } catch (final Exception e) {
-                LOGGER.atError().setCause(e).log("add new copied dataset to getDatasets()");
-            }
-        }
-
-        // N.B. added explicit garbage collection to reduce dynamic footprint
-        // otherwise this would cause a big saw-tooth like memory footprint
-        // which obfuscates debugging/memory-leak
-        // checking -> tradeoff between: 'reduced memory footprint' vs.
-        // 'significantly reduced CPU efficiency'
-        // System.gc();
     }
+
+    @Override
+    protected HistoryDataSetNode createNode(DataSet dataSet) {
+        return new HistoryDataSetNode(this, dataSet, historyDepth);
+    }
+
+    static class HistoryDataSetNode extends DataSetNode {
+
+        HistoryDataSetNode(AbstractRenderer<?> renderer, DataSet dataSet, int depth) {
+            super(renderer, dataSet);
+            this.depth = depth;
+        }
+
+        /**
+         * @return history with the first element being the oldest
+         */
+        public List<DataSet> getHistory() {
+            return history;
+        }
+
+        public void shift() {
+            var src = getDataSet();
+            if (history.size() < depth) {
+                history.add(copy(src));
+            } else {
+                history.add(history.removeFirst().set(src));
+            }
+
+            // Set names (TODO: is this used anywhere?)
+            var prefix = src.getName().split("_")[0];
+            int index = history.size() - 1;
+            for (DataSet histDs : history) {
+                ((EditableDataSet) histDs).setName(prefix + "History_{-" + index-- + "}");
+            }
+        }
+
+        public void clear() {
+            history.clear();
+        }
+
+        static DataSet copy(DataSet ds) {
+            return ds instanceof DataSetError ? new DoubleErrorDataSet(ds) : new DoubleDataSet(ds);
+        }
+
+        final int depth;
+        final LinkedList<DataSet> history = new LinkedList<>();
+
+    }
+
+    final int historyDepth;
 
 }

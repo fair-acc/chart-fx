@@ -1,9 +1,11 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.ui.css.*;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
@@ -262,13 +264,13 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
+    public ObservableList<DataSetNode> getDatasetNodes() {
         return FXCollections.emptyObservableList();
     }
 
     @Override
-    public ObservableList<DataSetNode> getDatasetNodes() {
-        return FXCollections.emptyObservableList();
+    public void updateAxisRange(Axis axis, AxisRange range) {
+        // not applicable
     }
 
     /**
@@ -336,11 +338,13 @@ public class GridRenderer extends Parent implements Renderer {
 
     @Override
     public void render() {
+        benchDrawGrid.start();
         if (chart.isPolarPlot()) {
             drawPolarGrid(chart.getCanvas().getGraphicsContext2D(), chart);
         } else {
             drawEuclideanGrid(chart.getCanvas().getGraphicsContext2D(), chart);
         }
+        benchDrawGrid.stop();
     }
 
     @Override
@@ -385,4 +389,12 @@ public class GridRenderer extends Parent implements Renderer {
     private static double snap(final double value) {
         return (int) value + 0.5;
     }
+
+    @Override
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchDrawGrid = recorder.newDuration("grid-drawGrid");
+    }
+
+    private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
+
 }

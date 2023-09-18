@@ -5,7 +5,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;
@@ -32,9 +34,6 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AbstractAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
@@ -48,7 +47,6 @@ import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * Chart designed primarily to display data traces using DataSet interfaces which are more flexible and efficient than
@@ -61,7 +59,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
  * @author original conceptual design by Oracle (2010, 2014)
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
-public abstract class Chart extends Region implements EventSource {
+public abstract class Chart extends Region implements EventSource, Measurable {
 
     // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
     // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
@@ -77,13 +75,11 @@ public abstract class Chart extends Region implements EventSource {
     protected final BitState dataSetState = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
             .addChangeListener(FXUtils.runOnFxThread((src, deltaBits) -> state.setDirty(src.getBits())));
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Chart.class);
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
     private static final int DEFAULT_TRIGGER_DISTANCE = 50;
     protected static final boolean DEBUG = Boolean.getBoolean("chartfx.debug"); // for more verbose debugging
     protected final BooleanProperty showing = new SimpleBooleanProperty(this, "showing", false);
-
 
     /**
      * When true any data changes will be animated.
@@ -489,8 +485,10 @@ public abstract class Chart extends Region implements EventSource {
         if (state.isClean()) {
             return;
         }
+        benchPreLayout.start();
 
-        // Update axis mapping in the renderers
+        // Update what axes each renderer uses. This is needed
+        // to match datasets to axes for range computation
         for (Renderer renderer : renderers) {
             renderer.updateAxes();
         }
@@ -501,11 +499,15 @@ public abstract class Chart extends Region implements EventSource {
         }
         state.clear(ChartBits.ChartLegend);
 
-        // Update data ranges
-        final long start = ProcessingProfiler.getTimeStamp();
+        // Make sure the datasets won't be modified
+        benchLockDataSets.start();
         ensureLockedDataSets();
-        updateAxisRange(); // Update data ranges etc. to trigger anything that might need a layout
-        ProcessingProfiler.getTimeDiff(start, "updateAxisRange()");
+        benchLockDataSets.stop();
+
+        // Update data ranges etc. to trigger anything that might need a layout
+        benchUpdateAxisRange.start();
+        updateAxisRange();
+        benchUpdateAxisRange.stop();
 
         // Update other components
         for (Renderer renderer : renderers) {
@@ -514,14 +516,19 @@ public abstract class Chart extends Region implements EventSource {
                 datasetNode.runPreLayout();
             }
         }
+
         for (ChartPlugin plugin : plugins) {
             plugin.runPreLayout();
         }
 
+        benchPreLayout.stop();
+        benchCssAndLayout.start();
     }
 
     @Override
     public void layoutChildren() {
+        benchLayoutChildren.start();
+
         // Size all nodes to full size. Account for margin and border insets.
         final double x = snappedLeftInset();
         final double y = snappedTopInset();
@@ -549,33 +556,33 @@ public abstract class Chart extends Region implements EventSource {
             layoutPluginsChildren();
         }
 
+        benchLayoutChildren.stop();
     }
 
     protected void runPostLayout() {
+        benchCssAndLayout.stop();
+
         // nothing to do
         if (state.isClean() && !hasLocked) {
             return;
         }
-
-        ensureLockedDataSets();
-
-        // Make sure that renderer axes that are not part of
-        // the chart still produce an accurate axis transform.
-        updateStandaloneRendererAxes();
-
-        final long start = ProcessingProfiler.getTimeStamp();
+        benchPostLayout.start();
 
         // Redraw the axes (they internally check dirty bits)
+        benchDrawAxes.start();
         for (Axis axis : axesList) {
             axis.drawAxis();
         }
+        benchDrawAxes.stop();
 
         // Redraw legend icons
         // TODO: only update if the style actually changed
         legend.get().drawLegend();
 
         // Redraw the main canvas
+        benchDrawCanvas.start();
         redrawCanvas();
+        benchDrawCanvas.stop();
 
         // Update other components
         for (Renderer renderer : renderers) {
@@ -587,9 +594,7 @@ public abstract class Chart extends Region implements EventSource {
 
         // Clear bits
         clearStates();
-
-        // TODO: plugins etc., do locking
-        ProcessingProfiler.getTimeDiff(start, "updateCanvas()");
+        benchPostLayout.stop();
     }
 
     protected void ensureLockedDataSets() {
@@ -623,29 +628,6 @@ public abstract class Chart extends Region implements EventSource {
         }
         hasLocked = false;
         lockedDataSets.clear();
-    }
-
-    /**
-     * Update axes that are not part of the SceneGraph and that would
-     * otherwise not have a size. We could alternatively add renderer
-     * axes to the chart, but that would not match previous behavior,
-     * and it is probably a good idea to require it to be explicit.
-     */
-    private void updateStandaloneRendererAxes() {
-        for (Renderer renderer : getRenderers()) {
-            for (Axis axis : renderer.getAxes()) {
-                if (axis instanceof AbstractAxis) {
-                    var axisNode = (AbstractAxis) axis;
-                    if (axisNode.getParent() == null) {
-                        if (axis.getSide().isHorizontal()) {
-                            axisNode.prefWidth(plotArea.getHeight());
-                        } else {
-                            axisNode.prefHeight(plotArea.getWidth());
-                        }
-                    }
-                }
-            }
-        }
     }
 
     protected void forEachDataSet(Consumer<DataSet> action) {
@@ -940,6 +922,9 @@ public abstract class Chart extends Region implements EventSource {
      * to ensure a redraw we manually request a layout. We
      * use an unmanaged node without a layout implementation,
      * so that we don't accidentally do unnecessary work.
+     * <p>
+     * Note that we are not using Platform::requestNextPulse
+     * because it schedules a new one if there already is one.
      */
     private void ensureJavaFxPulse() {
         styleableNodes.requestLayout();
@@ -957,5 +942,26 @@ public abstract class Chart extends Region implements EventSource {
     public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
         return CSS.getCssMetaData();
     }
+
+    @Override
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchPreLayout = recorder.newDuration("chart-runPreLayout");
+        benchCssAndLayout = recorder.newTraceDuration("chart-cssAndLayout").ignoreMissingStart();
+        benchLayoutChildren = recorder.newTraceDuration("chart-layoutChildren");
+        benchPostLayout = recorder.newDuration("chart-runPostLayout");
+        benchLockDataSets = recorder.newDebugDuration("chart-lockDataSets");
+        benchUpdateAxisRange = recorder.newDuration("chart-updateAxisRange");
+        benchDrawAxes = recorder.newDuration("chart-drawAxes");
+        benchDrawCanvas = recorder.newDuration("chart-drawCanvas");
+    }
+
+    private DurationMeasure benchPreLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchCssAndLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchLayoutChildren = DurationMeasure.DISABLED;
+    private DurationMeasure benchPostLayout = DurationMeasure.DISABLED;
+    private DurationMeasure benchLockDataSets = DurationMeasure.DISABLED;
+    private DurationMeasure benchUpdateAxisRange = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawAxes = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawCanvas = DurationMeasure.DISABLED;
 
 }

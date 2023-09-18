@@ -59,8 +59,13 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
         return getThis();
     }
 
+    protected T setColorProp(String key, double r, double g, double b, double a) {
+        return setColorProp(key, (int) Math.round(r * 255.0), (int) Math.round(g * 255.0), (int) Math.round(b * 255.0), a);
+    }
+
     protected T setColorProp(String key, int r, int g, int b, double a) {
-        properties.put(key, String.format("rgba(%d,%d,%d,%s)", r & 0xFF, g & 0xFF, b & 0xFF, english(a)));
+        int o = (int) Math.round(a * 255.0);
+        properties.put(key, String.format("0x%02x%02x%02x%02x", r & 0xFF, g & 0xFF, b & 0xFF, o & 0xFF));
         return getThis();
     }
 

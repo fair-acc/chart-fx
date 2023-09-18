@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Objects;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
+import io.fair_acc.dataset.benchmark.DurationMeasure;
+import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.dataset.benchmark.MeasurementRecorder;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -33,7 +36,7 @@ import io.fair_acc.chartfx.ui.geometry.Side;
 /**
  * @author rstein
  */
-public abstract class AbstractAxis extends AbstractAxisParameter implements Axis {
+public abstract class AbstractAxis extends AbstractAxisParameter implements Axis, Measurable {
     protected static final double MIN_NARROW_FONT_SCALE = 0.7;
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final double MIN_TICK_GAP = 1.0;
@@ -227,8 +230,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * range, caches, etc.
      */
     protected void updateDirtyContent(double length) {
+        benchUpdateDirtyContent.start();
         updateAxisRange(length);
         updateAxisLabel();
+        benchUpdateDirtyContent.stop();
     }
 
     protected void updateAxisRange(double length) {
@@ -407,6 +412,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return isHorizontal ? getHeight() : getWidth(); // secondary dimension
         }
 
+        benchComputePrefSize.start();
+
         // Compute the ticks with correctly placed labels to determine the
         // overlap. The initial estimate is usually correct, so later changes
         // happen very rarely, e.g., at a point where y axes labels switch to
@@ -472,6 +479,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if(getSide() == Side.CENTER_VER) {
             axisLabelOffset = -axisLabelOffset;
         }
+
+        benchComputePrefSize.stop();
 
         return Math.ceil(getSide().isCenter() ? 2 * totalSize : totalSize);
 
@@ -932,6 +941,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (state.isClean()) {
             return;
         }
+        benchDrawAxis.start();
 
         // update labels, tick marks etc.
         updateDirtyContent(getLength());
@@ -951,6 +961,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // everything is updated
         state.clear();
+
+        benchDrawAxis.stop();
 
     }
 
@@ -1215,5 +1227,16 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     public void invalidateRange() {
         invalidateAxisRange.run();
     }
+
+    @Override
+    public void setRecorder(MeasurementRecorder recorder) {
+        benchComputePrefSize = recorder.newDuration("axis-computePrefSize");
+        benchUpdateDirtyContent = recorder.newDuration("axis-updateDirtyContent");
+        benchDrawAxis = recorder.newDuration("axis-drawAxis");
+    }
+
+    private DurationMeasure benchComputePrefSize = DurationMeasure.DISABLED;
+    private DurationMeasure benchUpdateDirtyContent = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawAxis = DurationMeasure.DISABLED;
 
 }

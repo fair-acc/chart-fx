@@ -4,6 +4,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -153,13 +154,13 @@ public class MetaDataRenderer extends AbstractMetaDataRendererParameter<MetaData
     }
 
     @Override
-    public ObservableList<DataSet> getDatasetsCopy() {
-        return FXCollections.observableArrayList();
+    public ObservableList<DataSetNode> getDatasetNodes() {
+        return FXCollections.emptyObservableList();
     }
 
     @Override
-    public ObservableList<DataSetNode> getDatasetNodes() {
-        return FXCollections.emptyObservableList();
+    public void updateAxisRange(Axis axis, AxisRange range) {
+        // not applicable
     }
 
     protected List<DataSet> getDataSetsWithMetaData(List<DataSet> dataSets) {

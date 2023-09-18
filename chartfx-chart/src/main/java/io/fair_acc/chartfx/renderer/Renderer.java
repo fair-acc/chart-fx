@@ -1,6 +1,8 @@
 package io.fair_acc.chartfx.renderer;
 
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.dataset.benchmark.Measurable;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
@@ -10,23 +12,31 @@ import javafx.scene.canvas.Canvas;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.dataset.DataSet;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * -- generic renderer interface --
  *
  * @author braeun
  * @author rstein
  */
-public interface Renderer {
+public interface Renderer extends Measurable {
     /**
-     * @param dataSet the data set for which the representative icon should be generated
+     * @param style the data set node for which the representative icon should be generated
      * @param canvas the canvas in which the representative icon should be drawn
      * @return true if the renderer generates symbols that should be displayed
      */
-    default boolean drawLegendSymbol(DataSetNode dataSet, Canvas canvas) {
-        return false;
+    default boolean drawLegendSymbol(DataSetNode style, Canvas canvas) {
+        // Default to a single line in the dataset color
+        var x0 = 1;
+        var x1 = canvas.getWidth() - 2.0;
+        var y = canvas.getHeight() / 2.0;
+        var gc = canvas.getGraphicsContext2D();
+        gc.save();
+        gc.setLineWidth(style.getLineWidth());
+        gc.setLineDashes(style.getLineDashes());
+        gc.setStroke(style.getLineColor());
+        gc.strokeLine(x0, y, x1, y);
+        gc.restore();
+        return true;
     }
 
     /**
@@ -35,8 +45,6 @@ public interface Renderer {
     ObservableList<Axis> getAxes();
 
     ObservableList<DataSet> getDatasets();
-
-    ObservableList<DataSet> getDatasetsCopy(); // TODO: get rid of this? add getDatasetNodes?
 
     ObservableList<DataSetNode> getDatasetNodes();
 
@@ -79,18 +87,22 @@ public interface Renderer {
     /**
      * Sets up axis mapping and creates any axes that may be needed.
      * Gets called before axis ranges are updated.
+     * <p>
+     * Locally specified axes are prioritized over chart axes. Local
+     * axes that are not part of the chart must be added.
      */
     default void updateAxes() {
         // empty by default
     }
 
     /**
-     * @param axis axis to be checked
-     * @return true if the axis is actively being used by the renderer. Must be called after updateAxes()
+     * Updates the range for the specified axis.
+     * Does nothing if the axis is not used.
+     *
+     * @param axis  axis of the range
+     * @param range auto range for the axis
      */
-    default boolean isUsingAxis(Axis axis) {
-        return getAxes().contains(axis);
-    }
+    void updateAxisRange(Axis axis, AxisRange range);
 
     /**
      * renders the contents to screen
