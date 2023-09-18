@@ -1,6 +1,46 @@
+.chart {
+  -fx-modena-base: #ececec;
+  -fx-modena-background: derive(-fx-modena-base, 26.4%);
+  -fx-chart-grid-bg: -fx-modena-background;
+  -fx-chart-grid-lines-strongest: ladder(-fx-chart-grid-bg, derive(-fx-chart-grid-bg, 40%) 49%, derive(-fx-chart-grid-bg, -40%) 50%);
+  -fx-chart-grid-lines-stronger: ladder(-fx-chart-grid-bg, derive(-fx-chart-grid-bg, 20%) 49%, derive(-fx-chart-grid-bg, -20%) 50%);
+  -fx-chart-grid-lines-normal: ladder(-fx-chart-grid-bg, derive(-fx-chart-grid-bg, 10%) 49%, derive(-fx-chart-grid-bg, -10%) 50%);
+  -fx-chart-grid-lines-weak: ladder(-fx-chart-grid-bg, derive(-fx-chart-grid-bg, 5%) 49%, derive(-fx-chart-grid-bg, -5%) 50%);
+  -fx-chart-axis-label-fg: black;
+  -fx-chart-axis-tick-mark-fg: #c3c3c3;
+  -fx-chart-zoom-rect-bg: dodgerblue;
+  -fx-chart-zoom-rect-border: #002966;
+  -fx-chart-datapoint-bg: #99cccc;
+  -fx-chart-datapoint-border: black;
+  -fx-chart-select-rect-bg: transparent;
+  -fx-chart-select-rect-border: gray;
+  -fx-chart-select-rect-shadow: derive(gray, -20%);
+  -fx-chart-select-marker-bg: transparent;
+  -fx-chart-select-marker-border: lightGreen;
+  -fx-chart-select-marker-shadow: green;
+  -fx-chart-select-marker-edit-bg: transparent;
+  -fx-chart-select-marker-edit-border: red;
+  -fx-chart-select-marker-edit-shadow: red;
+  -fx-chart-range-indicator-label-bg: #f4e242;
+  -fx-chart-range-indicator-label-border: black;
+  -fx-chart-value-indicator-label-bg: #f4e242;
+  -fx-chart-value-indicator-label-border: black;
+  -fx-chart-value-indicator-line-fg: black;
+  -fx-chart-value-indicator-marker-fg: ladder(-fx-chart-grid-bg, derive(-fx-chart-grid-bg, 30%) 49%, derive(-fx-chart-grid-bg, -30%) 50%);
+  -fx-chart-value-indicator-marker-bg: dodgerblue;
+  -fx-chart-value-watch-indicator-label-bg: transparent;
+  -fx-chart-value-watch-indicator-label-border: transparent;
+  -fx-chart-value-watch-indicator-label-fg: white;
+  -fx-chart-value-watch-indicator-line-fg: black;
+  -fx-chart-value-watch-indicator-marker-fg: black;
+  -fx-chart-value-watch-indicator-marker-bg: #416ef4;
+  -fx-chart-value-watch-indicator-rect-bg: transparent;
+  -fx-chart-value-watch-indicator-rect-border: rgba(65, 110, 244, 0.4078431373);
+}
+
 .chart-datapoint-tooltip-label {
-  -fx-background-color: rgb(153, 204, 204);
-  -fx-border-color: black;
+  -fx-background-color: -fx-chart-datapoint-bg;
+  -fx-border-color: -fx-chart-datapoint-border;
   -fx-border-radius: 3;
   -fx-font-size: 12;
   -fx-font-weight: bold;
@@ -12,43 +52,43 @@
 }
 
 .chart-zoom-rect {
-  -fx-fill: dodgerblue;
-  -fx-stroke: #002966;
+  -fx-fill: -fx-chart-zoom-rect-bg;
+  -fx-stroke: -fx-chart-zoom-rect-border;
   -fx-stroke-type: inside;
   -fx-stroke-width: 1;
   -fx-opacity: 0.2;
 }
 
 .chart-select-rect {
-  -fx-fill: transparent;
-  -fx-stroke: gray;
+  -fx-fill: -fx-chart-select-rect-bg;
+  -fx-stroke: -fx-chart-select-rect-border;
   -fx-stroke-width: 1.5;
   -fx-stroke-dash-offset: 6;
   -fx-stroke-dash-array: 12 2 4 2;
   -fx-stroke-line-cap: butt;
-  -fx-effect: dropshadow(three-pass-box, derive(gray, -20%), 10, 0, 4, 4);
+  -fx-effect: dropshadow(three-pass-box, -fx-chart-select-rect-shadow, 10, 0, 4, 4);
 }
 
 .chart-select-marker {
-  -fx-fill: transparent;
-  -fx-stroke: lightGreen;
+  -fx-fill: -fx-chart-select-marker-bg;
+  -fx-stroke: -fx-chart-select-marker-border;
   -fx-stroke-width: 1.5;
   -fx-stroke-dash-offset: 6;
   -fx-stroke-dash-array: 12 2 4 2;
   -fx-stroke-line-cap: butt;
   -fx-opacity: 1;
-  -fx-effect: dropshadow(three-pass-box, green, 5, 0.5, 0, 0);
+  -fx-effect: dropshadow(three-pass-box, -fx-chart-select-marker-shadow, 5, 0.5, 0, 0);
 }
 
 .chart-select-marker:noedit {
-  -fx-fill: transparent;
-  -fx-stroke: red;
+  -fx-fill: -fx-chart-select-marker-edit-bg;
+  -fx-stroke: -fx-chart-select-marker-edit-border;
   -fx-stroke-width: 1.5;
   -fx-stroke-dash-offset: 6;
   -fx-stroke-dash-array: 12 2 4 2;
   -fx-stroke-line-cap: butt;
   -fx-opacity: 1;
-  -fx-effect: dropshadow(three-pass-box, red, 5, 0.5, 0, 0);
+  -fx-effect: dropshadow(three-pass-box, -fx-chart-select-marker-edit-shadow, 5, 0.5, 0, 0);
 }
 
 .chart-series-line {
@@ -56,8 +96,8 @@
 }
 
 .value-indicator-label {
-  -fx-background-color: #f4e242;
-  -fx-border-color: black;
+  -fx-background-color: -fx-chart-value-indicator-label-bg;
+  -fx-border-color: -fx-chart-value-indicator-label-border;
   -fx-border-radius: 2;
   -fx-font-size: 12;
   -fx-font-weight: bold;
@@ -66,8 +106,8 @@
 }
 
 .range-indicator-label {
-  -fx-background-color: #f4e242;
-  -fx-border-color: black;
+  -fx-background-color: -fx-chart-range-indicator-label-bg;
+  -fx-border-color: -fx-chart-range-indicator-label-border;
   -fx-border-radius: 2;
   -fx-font-size: 12;
   -fx-font-weight: bold;
@@ -77,42 +117,42 @@
 
 .value-indicator-line {
   -fx-stroke-width: 1;
-  -fx-stroke: black;
+  -fx-stroke: -fx-chart-value-indicator-line-fg;
   -fx-stroke-dash-array: 8;
 }
 
 .value-indicator-marker {
   -fx-stroke-width: 0.5;
-  -fx-stroke: derive(-fx-background, -30%);
-  -fx-fill: dodgerblue;
+  -fx-stroke: -fx-chart-value-indicator-marker-fg;
+  -fx-fill: -fx-chart-value-indicator-marker-bg;
 }
 
 .value-watch-indicator-label {
-  -fx-background-color: transparent;
-  -fx-border-color: transparent;
+  -fx-background-color: -fx-chart-value-watch-indicator-label-bg;
+  -fx-border-color: -fx-chart-value-watch-indicator-label-border;
   -fx-border-radius: 0;
   -fx-font-size: 11;
   -fx-font-weight: bold;
-  -fx-text-fill: white;
+  -fx-text-fill: -fx-chart-value-watch-indicator-label-fg;
   -fx-text-alignment: center;
   -fx-padding: 2.5 4 1 8;
 }
 
 .value-watch-indicator-line {
   -fx-stroke-width: 1;
-  -fx-stroke: black;
+  -fx-stroke: -fx-chart-value-watch-indicator-line-fg;
   -fx-stroke-dash-array: 8;
 }
 
 .value-watch-indicator-marker {
   -fx-stroke-width: 0.5;
-  -fx-stroke: black;
-  -fx-fill: #416ef4;
+  -fx-stroke: -fx-chart-value-watch-indicator-marker-fg;
+  -fx-fill: -fx-chart-value-watch-indicator-marker-bg;
 }
 
 .range-indicator-rect {
-  -fx-stroke: transparent;
-  -fx-fill: rgba(65, 110, 244, 0.4078431373);
+  -fx-stroke: -fx-chart-value-watch-indicator-rect-bg;
+  -fx-fill: -fx-chart-value-watch-indicator-rect-border;
 }
 
 .chart:palette-misc, .renderer:palette-misc {
@@ -368,7 +408,7 @@
   -fx-font-family: "System";
   -fx-font-smoothing-type: gray;
   -fx-stroke: transparent;
-  -fx-fill: black;
+  -fx-fill: -fx-chart-axis-label-fg;
   -fx-rotate: 0;
 }
 .axis .axis-label {
@@ -382,12 +422,11 @@
   -fx-rotate: -90;
 }
 .axis .axis-tick-label {
-  -fx-fill: black;
   -fx-font-size: 10px;
 }
 .axis .axis-major-tick-mark, .axis .axis-minor-tick-mark {
   visibility: visible;
-  -fx-stroke: #c3c3c3;
+  -fx-stroke: -fx-chart-axis-tick-mark-fg;
   -fx-stroke-width: 1;
 }
 
@@ -395,16 +434,16 @@
   -fx-draw-grid-on-top: true;
 }
 .grid-renderer .chart-major-grid-lines {
-  -fx-stroke: derive(-fx-background, -10%);
+  -fx-stroke: -fx-chart-grid-lines-normal;
   -fx-stroke-dash-array: 4.5, 2.5;
   -fx-stroke-width: 0.5;
   visibility: visible;
 }
 .grid-renderer .chart-major-grid-lines:withMinor {
-  -fx-stroke: derive(-fx-background, -20%);
+  -fx-stroke: -fx-chart-grid-lines-stronger;
 }
 .grid-renderer .chart-minor-grid-lines {
-  -fx-stroke: derive(-fx-background, -5%);
+  -fx-stroke: -fx-chart-grid-lines-weak;
   -fx-stroke-dash-array: 4.5, 2.5;
   -fx-stroke-width: 0.5;
   visibility: hidden;
@@ -424,7 +463,7 @@
 
 .chart-vertical-zero-line,
 .chart-horizontal-zero-line {
-  -fx-stroke: derive(-fx-text-background-color, 40%);
+  -fx-stroke: -fx-chart-grid-lines-strongest;
 }
 
 .chart:financial-classic .dataset.financial {
