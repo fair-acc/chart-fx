@@ -35,7 +35,7 @@ class DataSetStyleParserTest {
         assertEquals(Color.BLUE, parser.getFillColor().orElseThrow());
 
         style = builder.reset().setFill(255,255,0, 1).build();
-        assertEquals("-fx-fill: rgba(255,255,0,1.0);", style);
+        assertEquals("-fx-fill: 0xffff00ff;", style);
         assertTrue(parser.tryParse(style));
         assertEquals(Color.YELLOW, parser.getFillColor().orElseThrow());
 
