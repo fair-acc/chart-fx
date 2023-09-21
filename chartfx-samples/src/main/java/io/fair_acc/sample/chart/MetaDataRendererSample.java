@@ -26,7 +26,6 @@ import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.DataPointTooltip;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.EditDataSet;
-import io.fair_acc.chartfx.plugins.Panner;
 import io.fair_acc.chartfx.plugins.ParameterMeasurements;
 import io.fair_acc.chartfx.plugins.TableViewer;
 import io.fair_acc.chartfx.plugins.XRangeIndicator;
@@ -117,12 +116,10 @@ public class MetaDataRendererSample extends ChartSample {
         getTask(renderer1, renderer2).run();
 
         chart.getPlugins().add(new ParameterMeasurements());
-        final Zoomer zoom = new Zoomer();
-        chart.getPlugins().add(zoom);
+        chart.getPlugins().add(new Zoomer());
         final XRangeIndicator xRange = new XRangeIndicator(xAxis1, 50, 60);
         chart.getPlugins().add(xRange);
         chart.getPlugins().add(new EditAxis());
-        chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new TableViewer());
         chart.getPlugins().add(new EditDataSet());
         chart.getPlugins().add(new DataPointTooltip());

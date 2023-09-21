@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.EditAxis;
-import io.fair_acc.chartfx.plugins.Panner;
 import io.fair_acc.chartfx.plugins.TableViewer;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
@@ -97,7 +96,6 @@ public class ChartPerformanceBenchmark extends AbstractTestApplication {
         renderer.getDatasets().addAll(results1, results2, results3);
         chart.setPrefHeight(800);
         chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new TableViewer());
         return chart;
