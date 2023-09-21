@@ -8,9 +8,16 @@ package io.fair_acc.bench;
 public interface Measurable {
 
     /**
-     * @param recorder records benchmarks
+     * @param recorder records benchmark measurements
      */
-    default void setRecorder(MeasurementRecorder recorder) {
+    void setRecorder(MeasurementRecorder recorder);
+
+    /**
+     * Adds an empty default method for Measurable
+     * classes where the implementation is optional.
+     */
+    public interface EmptyDefault {
+        default void setRecorder(MeasurementRecorder recorder) {};
     }
 
 }

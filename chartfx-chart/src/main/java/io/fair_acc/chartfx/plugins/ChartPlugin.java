@@ -41,7 +41,7 @@ import io.fair_acc.dataset.spi.utils.Tuple;
  * @author braeun - modified to be able to use XYChart class
  * @author rstein - modified to new Chart, XYChart API
  */
-public abstract class ChartPlugin implements Measurable {
+public abstract class ChartPlugin implements Measurable.EmptyDefault {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChartPlugin.class);
     private final ObservableList<Node> chartChildren = FXCollections.observableArrayList();
     private final List<Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>>> mouseEventHandlers = new LinkedList<>();

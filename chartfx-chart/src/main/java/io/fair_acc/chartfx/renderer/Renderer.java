@@ -18,7 +18,7 @@ import io.fair_acc.dataset.DataSet;
  * @author braeun
  * @author rstein
  */
-public interface Renderer extends Measurable {
+public interface Renderer extends Measurable.EmptyDefault {
     /**
      * @param style the data set node for which the representative icon should be generated
      * @param canvas the canvas in which the representative icon should be drawn
