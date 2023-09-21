@@ -24,13 +24,13 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 import io.fair_acc.math.ArrayUtils;
 
 /**
- * package private class implementation (data point caching) required by ErrorDataSetRenderer local screen data point
+ * public class implementation (data point caching) required by ErrorDataSetRenderer local screen data point
  * cache (minimises re-allocation/garbage collection)
  *
  * @author rstein
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyFields" }) // designated purpose of this class
-class CachedDataPoints {
+public class CachedDataPoints {
     private static final double DEG_TO_RAD = Math.PI / 180.0;
 
     protected double[] xValues;
