@@ -20,6 +20,11 @@
 	</description>
 
     <dependencies>
+        <dependency>
+            <groupId>io.fair-acc</groupId>
+            <artifactId>bench</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!-- micro-benchmarking framework -->
         <dependency>
             <groupId>org.openjdk.jmh</groupId>

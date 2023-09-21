@@ -21,6 +21,7 @@
     <modules>
         <module>chartfx-acc</module>
         <module>chartfx-chart</module>
+        <module>chartfx-bench</module>
         <module>chartfx-dataset</module>
         <module>chartfx-math</module>
         <module>chartfx-samples</module>
