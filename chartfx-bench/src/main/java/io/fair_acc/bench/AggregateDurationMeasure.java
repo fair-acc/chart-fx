@@ -1,4 +1,4 @@
-package io.fair_acc.dataset.benchmark;
+package io.fair_acc.bench;
 
 /**
  * A measure that performs some aggregate function on durations, e.g., min / max / sum / mean

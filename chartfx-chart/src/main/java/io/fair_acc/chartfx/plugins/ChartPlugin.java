@@ -3,7 +3,7 @@ package io.fair_acc.chartfx.plugins;
 import java.util.LinkedList;
 import java.util.List;
 
-import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.bench.Measurable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;

@@ -4,8 +4,8 @@ import java.util.List;
 
 import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.ui.css.*;
-import io.fair_acc.dataset.benchmark.DurationMeasure;
-import io.fair_acc.dataset.benchmark.MeasurementRecorder;
+import io.fair_acc.bench.DurationMeasure;
+import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;

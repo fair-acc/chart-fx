@@ -1,4 +1,4 @@
-package io.fair_acc.dataset.benchmark;
+package io.fair_acc.bench;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;

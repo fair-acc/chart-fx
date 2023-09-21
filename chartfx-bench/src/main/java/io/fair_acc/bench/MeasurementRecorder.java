@@ -1,4 +1,4 @@
-package io.fair_acc.dataset.benchmark;
+package io.fair_acc.bench;
 
 import java.util.Locale;
 import java.util.function.Consumer;

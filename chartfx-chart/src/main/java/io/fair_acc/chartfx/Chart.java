@@ -5,9 +5,9 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import io.fair_acc.dataset.benchmark.DurationMeasure;
-import io.fair_acc.dataset.benchmark.Measurable;
-import io.fair_acc.dataset.benchmark.MeasurementRecorder;
+import io.fair_acc.bench.DurationMeasure;
+import io.fair_acc.bench.Measurable;
+import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.ui.layout.ChartPane;

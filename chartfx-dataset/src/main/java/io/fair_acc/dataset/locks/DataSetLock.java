@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.function.Supplier;
 
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.bench.Measurable;
 
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach

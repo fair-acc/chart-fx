@@ -1,4 +1,4 @@
-package io.fair_acc.dataset.benchmark;
+package io.fair_acc.bench;
 
 /**
  * Determines a duration based on the elapsed time between start and stop.

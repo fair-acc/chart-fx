@@ -2,7 +2,7 @@ package io.fair_acc.chartfx.renderer;
 
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
-import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.bench.Measurable;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;

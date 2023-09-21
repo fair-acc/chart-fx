@@ -6,7 +6,7 @@ import java.util.List;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
-import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.bench.Measurable;
 import io.fair_acc.dataset.utils.IndexedStringConsumer;
 
 /**

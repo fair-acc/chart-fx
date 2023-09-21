@@ -6,8 +6,8 @@ import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.benchmark.DurationMeasure;
-import io.fair_acc.dataset.benchmark.MeasurementRecorder;
+import io.fair_acc.bench.DurationMeasure;
+import io.fair_acc.bench.MeasurementRecorder;
 
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach Some implementation recommendation:
