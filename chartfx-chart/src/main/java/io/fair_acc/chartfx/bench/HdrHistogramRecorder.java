@@ -1,4 +1,4 @@
-package io.fair_acc.chartfx.benchmark;
+package io.fair_acc.chartfx.bench;
 
 import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.bench.TimeMeasure;
