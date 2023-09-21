@@ -48,7 +48,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
         });
     }
 
-    private static LiveDisplayRecorder createChart(String title, Consumer<Parent> onChart) {
+    public static LiveDisplayRecorder createChart(String title, Consumer<Parent> onChart) {
         // Top chart w/ time series
         var timeChart = new XYChart(createTimeAxisX(), createValueAxisY());
         timeChart.setTitle("Benchmark: " + title);
@@ -103,7 +103,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
     private static DefaultNumericAxis createValueAxisY() {
         var axis = new DefaultNumericAxis();
         axis.setForceZeroInRange(true);
-        axis.setName("Latency");
+        axis.setName("value");
         axis.setUnit("s");
         axis.setAutoUnitScaling(true);
         return axis;
@@ -111,7 +111,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
 
     private static DefaultNumericAxis createPercentileAxisX() {
         var axis = new PercentileAxis();
-        axis.setName("Percentile");
+        axis.setName("percentile");
         axis.setUnit("%");
         return axis;
     }
