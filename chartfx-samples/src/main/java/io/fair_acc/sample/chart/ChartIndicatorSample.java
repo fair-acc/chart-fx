@@ -25,7 +25,6 @@ import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
 import io.fair_acc.chartfx.plugins.DataPointTooltip;
 import io.fair_acc.chartfx.plugins.EditAxis;
-import io.fair_acc.chartfx.plugins.Panner;
 import io.fair_acc.chartfx.plugins.ParameterMeasurements;
 import io.fair_acc.chartfx.plugins.XRangeIndicator;
 import io.fair_acc.chartfx.plugins.XValueIndicator;
@@ -157,7 +156,6 @@ public class ChartIndicatorSample extends ChartSample {
         chart.getPlugins().add(new EditAxis());
         // chart.getPlugins().add(new CrosshairIndicator());
         chart.getPlugins().add(new DataPointTooltip());
-        chart.getPlugins().add(new Panner());
         final Zoomer zoom = new Zoomer();
         zoom.setSliderVisible(false);
         chart.getPlugins().add(zoom);

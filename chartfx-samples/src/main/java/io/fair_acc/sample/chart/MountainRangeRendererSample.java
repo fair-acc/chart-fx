@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.EditAxis;
-import io.fair_acc.chartfx.plugins.Panner;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.spi.MountainRangeRenderer;
 import io.fair_acc.dataset.DataSet;
@@ -52,7 +51,6 @@ public class MountainRangeRendererSample extends ChartSample {
 
         chart.setLegendVisible(true);
         chart.getPlugins().add(new Zoomer());
-        chart.getPlugins().add(new Panner());
         chart.getPlugins().add(new EditAxis());
 
         final Spinner<Double> mountainRangeOffset = new Spinner<>(0.0, 10.0, mountainRangeRenderer.getMountainRangeOffset(), 0.1);
