@@ -46,7 +46,7 @@ import io.fair_acc.bench.Measurable;
  * @param <D> generics reference, usually to <code>&lt;? extends DataSet&gt;</code>
  */
 @SuppressWarnings({ "PMD.DoNotUseThreads", "PMD.CommentSize" }) // Runnable used as functional interface
-public interface DataSetLock<D extends DataSet> extends Serializable, Measurable {
+public interface DataSetLock<D extends DataSet> extends Serializable, Measurable.EmptyDefault {
 
     /**
      * reentrant read-lock
