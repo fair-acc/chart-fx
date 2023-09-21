@@ -87,8 +87,8 @@ public class CachedDataPoints {
             errorXNeg = ArrayUtils.resizeMin(errorXNeg, dataLength);
             errorXPos = ArrayUtils.resizeMin(errorXPos, dataLength);
         }
-        selected = ArrayUtils.resizeMin(selected,  dataLength);
-        hasStyles = false;  // Styles get updated in boundary condition.
+        selected = ArrayUtils.resizeMin(selected, dataLength);
+        hasStyles = false; // Styles get updated in boundary condition.
         return this;
     }
 
@@ -166,7 +166,7 @@ public class CachedDataPoints {
     }
 
     protected void computeScreenCoordinates(final Axis xAxis, final Axis yAxis, DataSet dataSet, final DataSetNode style,
-                                            final int min, final int max, final ErrorStyle localRendErrorStyle,
+            final int min, final int max, final ErrorStyle localRendErrorStyle,
             final boolean isPolarPlot, final boolean doAllowForNaNs) {
         setBoundaryConditions(xAxis, yAxis, dataSet, style, min, max, localRendErrorStyle, isPolarPlot,
                 doAllowForNaNs);
@@ -200,7 +200,7 @@ public class CachedDataPoints {
     }
 
     protected void computeScreenCoordinatesInParallel(final Axis xAxis, final Axis yAxis, final DataSet dataSet, final DataSetNode style,
-                                                      final int min, final int max, final ErrorStyle localRendErrorStyle,
+            final int min, final int max, final ErrorStyle localRendErrorStyle,
             final boolean isPolarPlot, final boolean doAllowForNaNs) {
         setBoundaryConditions(xAxis, yAxis, dataSet, style, min, max, localRendErrorStyle, isPolarPlot,
                 doAllowForNaNs);
@@ -490,8 +490,8 @@ public class CachedDataPoints {
     }
 
     private void setBoundaryConditions(final Axis xAxis, final Axis yAxis, DataSet dataSet, final DataSetNode style,
-                                       final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
-                                       final boolean doAllowForNaNs) {
+            final int min, final int max, final ErrorStyle rendererErrorStyle, final boolean isPolarPlot,
+            final boolean doAllowForNaNs) {
         indexMin = min;
         indexMax = max;
         polarPlot = isPolarPlot;
@@ -501,12 +501,12 @@ public class CachedDataPoints {
         // set optional styles
         hasStyles = dataSet.hasStyles();
         if (hasStyles) {
-            styles = ArrayUtils.resizeMinNulled(styles, maxDataCount, String[]::new);
+            styles = ArrayUtils.resizeMinNulled(styles, maxDataCount, String[] ::new);
             dataSet.forEachStyle(min, max, styleSetter);
         } else {
             // For now we still need to allocate the array to not break other code
             // (e.g. reducer). TODO: remove unnecessary array
-            styles = ArrayUtils.resizeMin(styles, maxDataCount, String[]::new, false);
+            styles = ArrayUtils.resizeMin(styles, maxDataCount, String[] ::new, false);
         }
 
         computeBoundaryVariables(xAxis, yAxis);
@@ -515,7 +515,7 @@ public class CachedDataPoints {
     private final IndexedStringConsumer styleSetter = (i, style) -> styles[i] = style;
 
     protected void setErrorType(final DataSet dataSet, final ErrorStyle errorStyle) {
-        errorType = ArrayUtils.resizeMinNulled(errorType, dataSet.getDimension(), ErrorType[]::new);
+        errorType = ArrayUtils.resizeMinNulled(errorType, dataSet.getDimension(), ErrorType[] ::new);
         if (dataSet instanceof DataSetError) {
             final DataSetError ds = (DataSetError) dataSet;
             for (int dimIndex = 0; dimIndex < ds.getDimension(); dimIndex++) {
@@ -541,5 +541,4 @@ public class CachedDataPoints {
             }
         }
     }
-
 }
