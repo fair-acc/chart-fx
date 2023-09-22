@@ -21,8 +21,9 @@ public class ThreadEventProcessor implements EventProcessor, Runnable {
     private static final AtomicReference<ThreadEventProcessor> INSTANCE = new AtomicReference<>();
     private static EventProcessor userInstance;
 
-    private final BitState localState = BitState.initDirty(this, ChartBits.DataSetMask);
-    private final BitState stateRoot = BitState.initDirtyMultiThreaded(this, ChartBits.DataSetMask);
+    private final Object changeLock = new Object();
+    private final BitState state = BitState.initDirtyMultiThreaded(this, ChartBits.DataSetMask)
+            .addChangeListener((src, bits) -> notifyChanged());
     private final List<Pair<BitState, Runnable>> actions = new CopyOnWriteArrayList<>();
 
     public static EventProcessor getUserInstance() {
@@ -58,8 +59,8 @@ public class ThreadEventProcessor implements EventProcessor, Runnable {
     public void run() {
         //noinspection InfiniteLoopStatement
         while (true) {
-            localState.setDirty(stateRoot.clear());
-            if (localState.isDirty()) {
+            boolean isDirty = state.clear() != 0;
+            if (isDirty) {
                 for (final var action : actions) {
                     if (action.getLeft().isDirty(ChartBits.DataSetMask)) {
                         action.getLeft().clear();
@@ -69,19 +70,35 @@ public class ThreadEventProcessor implements EventProcessor, Runnable {
                     }
                 }
             }
-            localState.clear();
-            stateRoot.waitForFlag();
             // Todo: add optional rate limiting
+            waitForChanges();
+        }
+    }
+
+    private void notifyChanged() {
+        synchronized (changeLock) {
+            changeLock.notifyAll();
+        }
+    }
+
+    private void waitForChanges() {
+        synchronized (changeLock) {
+            if (state.isClean()) {
+                try {
+                    changeLock.wait();
+                } catch (InterruptedException ignored) {
+                }
+            }
         }
     }
 
     public BitState getBitState() {
-        return stateRoot;
+        return state;
     }
 
     @Override
     public void addAction(final BitState obj, final Runnable action) {
-        obj.addInvalidateListener(stateRoot);
+        obj.addInvalidateListener(state);
         actions.add(Pair.of(obj, action));
     }
 }
