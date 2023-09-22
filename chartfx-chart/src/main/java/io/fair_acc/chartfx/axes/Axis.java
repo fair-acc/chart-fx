@@ -1,6 +1,6 @@
 package io.fair_acc.chartfx.axes;
 
-import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.bench.Measurable;
 import io.fair_acc.chartfx.ui.css.LineStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import javafx.beans.property.BooleanProperty;
@@ -18,7 +18,7 @@ import io.fair_acc.chartfx.axes.spi.TickMark;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.AxisDescription;
 
-public interface Axis extends AxisDescription, Measurable {
+public interface Axis extends AxisDescription, Measurable.EmptyDefault {
     /**
      * This is true when the axis determines its range from the data automatically
      *

@@ -1,4 +1,4 @@
-package io.fair_acc.chartfx.benchmark;
+package io.fair_acc.chartfx.bench;
 
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
@@ -10,8 +10,8 @@ import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.dataset.benchmark.MeasurementRecorder;
-import io.fair_acc.dataset.benchmark.TimeMeasure;
+import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.bench.TimeMeasure;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
@@ -48,7 +48,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
         });
     }
 
-    private static LiveDisplayRecorder createChart(String title, Consumer<Parent> onChart) {
+    public static LiveDisplayRecorder createChart(String title, Consumer<Parent> onChart) {
         // Top chart w/ time series
         var timeChart = new XYChart(createTimeAxisX(), createValueAxisY());
         timeChart.setTitle("Benchmark: " + title);
@@ -103,7 +103,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
     private static DefaultNumericAxis createValueAxisY() {
         var axis = new DefaultNumericAxis();
         axis.setForceZeroInRange(true);
-        axis.setName("Latency");
+        axis.setName("value");
         axis.setUnit("s");
         axis.setAutoUnitScaling(true);
         return axis;
@@ -111,7 +111,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
 
     private static DefaultNumericAxis createPercentileAxisX() {
         var axis = new PercentileAxis();
-        axis.setName("Percentile");
+        axis.setName("percentile");
         axis.setUnit("%");
         return axis;
     }

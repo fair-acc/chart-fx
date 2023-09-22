@@ -6,7 +6,7 @@ import java.util.List;
 import io.fair_acc.dataset.event.EventSource;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
-import io.fair_acc.dataset.benchmark.Measurable;
+import io.fair_acc.bench.Measurable;
 import io.fair_acc.dataset.utils.IndexedStringConsumer;
 
 /**
@@ -16,7 +16,7 @@ import io.fair_acc.dataset.utils.IndexedStringConsumer;
  * @author braeun
  * @author rstein
  */
-public interface DataSet extends EventSource, Serializable, Measurable {
+public interface DataSet extends EventSource, Serializable, Measurable.EmptyDefault {
     int DIM_X = 0;
     int DIM_Y = 1;
     int DIM_Z = 2;

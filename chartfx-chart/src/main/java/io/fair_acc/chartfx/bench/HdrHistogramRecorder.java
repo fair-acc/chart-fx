@@ -1,7 +1,7 @@
-package io.fair_acc.chartfx.benchmark;
+package io.fair_acc.chartfx.bench;
 
-import io.fair_acc.dataset.benchmark.MeasurementRecorder;
-import io.fair_acc.dataset.benchmark.TimeMeasure;
+import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.bench.TimeMeasure;
 import io.fair_acc.dataset.utils.AssertUtils;
 import org.HdrHistogram.Histogram;
 import org.HdrHistogram.HistogramLogWriter;

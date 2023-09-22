@@ -1,4 +1,4 @@
-package io.fair_acc.dataset.benchmark;
+package io.fair_acc.bench;
 
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -84,7 +84,7 @@ public interface MeasurementRecorder {
      */
     public static MeasurementRecorder printRecorder(Consumer<String> log) {
         return (tag, level) -> (TimeMeasure) (unit, time) -> {
-            log.accept(String.format(Locale.ENGLISH, "%s finished in %.2f ms", tag, unit.toMicros(time) * 1E-3));
+            log.accept(String.format(Locale.ENGLISH, "%s finished in %.3f ms", tag, unit.toMicros(time) * 1E-3));
         };
     }
 
@@ -168,5 +168,7 @@ public interface MeasurementRecorder {
     default MeasurementRecorder removePostfix() {
         return (tag, level) -> newTime(tag.substring(tag.lastIndexOf('-') + 1), level);
     }
+
+    public static final MeasurementRecorder DISABLED = (tag, level) -> TimeMeasure.DISABLED;
 
 }

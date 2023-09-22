@@ -1,6 +1,4 @@
-package io.fair_acc.dataset.benchmark;
-
-import io.fair_acc.dataset.utils.AssertUtils;
+package io.fair_acc.bench;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.LongSupplier;
@@ -21,9 +19,16 @@ public class RecordingDurationMeasure implements DurationMeasure {
     }
 
     public RecordingDurationMeasure(TimeUnit clockUnit, LongSupplier clock, TimeMeasure recorder) {
-        this.clock = AssertUtils.notNull("clock", clock);
-        this.clockUnit = AssertUtils.notNull("clockUnit", clockUnit);
-        this.recorder = AssertUtils.notNull("recorder", recorder);
+        this.clock = checkNotNull("clock", clock);
+        this.clockUnit = checkNotNull("clockUnit", clockUnit);
+        this.recorder = checkNotNull("recorder", recorder);
+    }
+
+    private static <T> T checkNotNull(String name, T object) {
+        if (object == null) {
+            throw new NullPointerException(name);
+        }
+        return object;
     }
 
     protected void recordDuration(TimeUnit unit, long duration) {
