@@ -281,7 +281,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         gc.setLineDashes(style.getLineDashes());
         gc.setStroke(style.getLineColor());
 
-        drawPolygon(gc, newX, newY, filled, isVerticalDataSet);
+        drawPolygon(gc, newX, newY, filled, isVerticalDataSet, 2 * nRange + 2);
 
         gc.restore();
 
@@ -440,26 +440,26 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         gc.setLineDashes(style.getLineDashes());
         gc.setStroke(style.getLineColor());
 
-        drawPolygon(gc, newX, newY, filled, isVerticalDataSet);
+        drawPolygon(gc, newX, newY, filled, isVerticalDataSet, 2 * nRange);
         gc.restore();
     }
 
-    protected static void drawPolygon(final GraphicsContext gc, final double[] a, final double[] b, final boolean filled, final boolean isVerticalDataSet) {
+    protected static void drawPolygon(final GraphicsContext gc, final double[] a, final double[] b, final boolean filled, final boolean isVerticalDataSet, final int length) {
         if (filled) {
             // use stroke as fill colour
             gc.setFill(gc.getStroke());
             if (isVerticalDataSet) {
-                gc.fillPolygon(b, a, a.length); // NOPMD NOSONAR - flip on purpose
+                gc.fillPolygon(b, a, length); // NOPMD NOSONAR - flip on purpose
             } else {
-                gc.fillPolygon(a, b, a.length);
+                gc.fillPolygon(a, b, length);
             }
             return;
         }
         // stroke only
         if (isVerticalDataSet) {
-            gc.strokePolyline(b, a, a.length); // NOPMD NOSONAR - flip on purpose
+            gc.strokePolyline(b, a, length); // NOPMD NOSONAR - flip on purpose
         } else {
-            gc.strokePolyline(a, b, a.length);
+            gc.strokePolyline(a, b, length);
         }
     }
 
