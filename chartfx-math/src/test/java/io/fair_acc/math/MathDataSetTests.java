@@ -40,7 +40,7 @@ public class MathDataSetTests {
             System.arraycopy(input, 0, output, 0, length);
         }, -1, rawDataSetRef);
         identityDataSet.getBitState().clear();
-        rawDataSetRef.getBitState().setDirty(ChartBits.DataSetData);
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
         Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_X), identityDataSet.getValues(DataSet.DIM_X));
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
@@ -91,7 +91,7 @@ public class MathDataSetTests {
             return DataSetMath.magnitudeSpectrumDecibel(dataSets);
         }, rawDataSetRef);
         magDataSet.getBitState().clear();
-        rawDataSetRef.getBitState().setDirty(ChartBits.DataSetData);
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
         Awaitility.await().until(() -> magDataSet.getBitState().isDirty());
         assertArrayEquals(magDataSetRef.getValues(DataSet.DIM_Y), magDataSet.getValues(DataSet.DIM_Y));
 
@@ -100,7 +100,7 @@ public class MathDataSetTests {
             return DataSetMath.magnitudeSpectrumDecibel(dataSets);
         }, rawDataSetRef);
         magDataSet2.getBitState().clear();
-        rawDataSetRef.getBitState().setDirty(ChartBits.DataSetData);
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
         Awaitility.await().until(() -> magDataSet2.getBitState().isDirty());
         assertArrayEquals(magDataSetRef.getValues(DataSet.DIM_Y), magDataSet2.getValues(DataSet.DIM_Y));
     }
@@ -120,7 +120,7 @@ public class MathDataSetTests {
             System.arraycopy(input, 0, output, 0, length);
         }, rawDataSetRef);
         identityDataSet.getBitState().clear();
-        rawDataSetRef.getBitState().setDirty(ChartBits.DataSetData);
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
         Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet.getValues(DataSet.DIM_Y));
 
@@ -133,7 +133,7 @@ public class MathDataSetTests {
             System.arraycopy(input, 0, output, 0, length);
         }, rawDataSetRef);
         identityDataSet2.getBitState().clear();
-        rawDataSetRef.getBitState().setDirty(ChartBits.DataSetData);
+        rawDataSetRef.fireInvalidated(ChartBits.DataSetData);
         Awaitility.await().until(() -> identityDataSet2.getBitState().isDirty());
         assertArrayEquals(rawDataSetRef.getValues(DataSet.DIM_Y), identityDataSet2.getValues(DataSet.DIM_Y));
     }

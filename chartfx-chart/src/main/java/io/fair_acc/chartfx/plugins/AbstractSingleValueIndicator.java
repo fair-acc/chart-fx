@@ -56,7 +56,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
     private final DoubleProperty value = new SimpleDoubleProperty(this, "value") {
         @Override
         protected void invalidated() {
-            getBitState().setDirty(ChartBits.ChartPluginState, ChartBits.ChartLayout);
+            fireInvalidated(ChartBits.ChartPluginState, ChartBits.ChartLayout);
         }
     };
 
@@ -66,7 +66,7 @@ public abstract class AbstractSingleValueIndicator extends AbstractValueIndicato
             if (get() < 0 || get() > 1) {
                 throw new IllegalArgumentException("labelPosition must be in rage [0,1]");
             }
-            getBitState().setDirty(ChartBits.ChartPluginState);
+            fireInvalidated(ChartBits.ChartPluginState);
         }
     };
 

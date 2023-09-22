@@ -54,7 +54,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin implements Even
     protected final BooleanProperty editableIndicator = new SimpleBooleanProperty(this, "editableIndicator", true) {
         @Override
         protected void invalidated() {
-            getBitState().setDirty(ChartBits.ChartPlugins);
+            fireInvalidated(ChartBits.ChartPlugins);
         }
     };
 
@@ -62,7 +62,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin implements Even
             "labelHorizontalAnchor", HPos.CENTER) {
         @Override
         protected void invalidated() {
-            getBitState().setDirty(ChartBits.ChartPlugins);
+            fireInvalidated(ChartBits.ChartPlugins);
         }
     };
 
@@ -70,7 +70,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin implements Even
             VPos.CENTER) {
         @Override
         protected void invalidated() {
-            getBitState().setDirty(ChartBits.ChartPlugins);
+            fireInvalidated(ChartBits.ChartPlugins);
         }
     };
 
