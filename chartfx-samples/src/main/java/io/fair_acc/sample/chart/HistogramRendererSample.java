@@ -7,7 +7,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -71,17 +70,16 @@ public class HistogramRendererSample extends ChartSample {
         final HistogramRenderer renderer1 = new HistogramRenderer();
         renderer1.getDatasets().addAll(dataSet2);
         renderer1.setPolyLineStyle(LineStyle.HISTOGRAM_FILLED);
-        chart1.getRenderers().set(0, renderer1);
         final HistogramRenderer renderer2 = new HistogramRenderer();
         renderer2.getDatasets().addAll(dataSet1, dataSet3);
         dataSet1.setStyle("strokeColor:red; strokeWidth:3");
         dataSet3.setStyle("strokeColor:green; strokeWidth:3");
         renderer2.setPolyLineStyle(LineStyle.HISTOGRAM);
-        chart1.getRenderers().add(renderer2);
 
         final MetaDataRenderer metaRenderer = new MetaDataRenderer(chart1);
         metaRenderer.getDatasets().addAll(dataSet2, dataSet1);
-        chart1.getRenderers().add(metaRenderer);
+
+        chart1.getRenderers().setAll(renderer1, renderer2, metaRenderer);
 
         // second chart
         final XYChart chart2 = new XYChart();
@@ -93,7 +91,7 @@ public class HistogramRendererSample extends ChartSample {
         chart2.getRenderers().setAll(new HistogramRenderer());
         final SummingDataSet dataSetSum31 = new SummingDataSet("Sum", dataSet1, dataSet3);
         final SummingDataSet dataSetSum312 = new SummingDataSet("Sum", dataSet1, dataSet2, dataSet3);
-        chart2.getDatasets().addAll(dataSetSum312, dataSetSum31, dataSet3);
+        chart2.getDatasets().addAll(dataSet3, dataSetSum31, dataSetSum312);
 
         HBox.setHgrow(chart1, Priority.ALWAYS);
         HBox.setHgrow(chart2, Priority.ALWAYS);
@@ -107,10 +105,6 @@ public class HistogramRendererSample extends ChartSample {
             }
         }, UPDATE_DELAY, UPDATE_PERIOD);
 
-        primaryStage.setOnCloseRequest(evt -> {
-            timer.cancel();
-            Platform.exit();
-        });
         return root;
     }
 
