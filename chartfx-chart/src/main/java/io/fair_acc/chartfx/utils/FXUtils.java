@@ -260,6 +260,19 @@ public final class FXUtils {
         };
     }
 
+    /**
+     * Binds the managed property to visibility and returns the visibility
+     * property. The effect is similar to removing the node from the SceneGraph
+     * when it is not visible.
+     *
+     * @param node node
+     * @return visibility property
+     */
+    public static BooleanProperty managedVisibilityProperty(Node node) {
+        node.managedProperty().bind(node.visibleProperty());
+        return node.visibleProperty();
+    }
+
     public static ObservableBooleanValue getShowingBinding(Node node) {
         BooleanProperty showing = new SimpleBooleanProperty();
         Runnable update = () -> showing.set(Optional.ofNullable(node.getScene())

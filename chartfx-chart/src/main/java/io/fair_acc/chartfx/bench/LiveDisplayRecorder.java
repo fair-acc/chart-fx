@@ -51,7 +51,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
     public static LiveDisplayRecorder createChart(String title, Consumer<Parent> onChart) {
         // Top chart w/ time series
         var timeChart = new XYChart(createTimeAxisX(), createValueAxisY());
-        timeChart.setTitle("Benchmark: " + title);
+        timeChart.setTitle(title);
         timeChart.getPlugins().addAll(createPlugins());
         timeChart.getLegend().getNode().setVisible(false); // TODO: somehow it still shows up without any datasets?
         timeChart.getLegend().getNode().setManaged(false);
