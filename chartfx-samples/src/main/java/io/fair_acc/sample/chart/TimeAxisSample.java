@@ -27,9 +27,9 @@ public class TimeAxisSample extends ChartSample {
 
         dataSet.clearData();
         final double now = System.currentTimeMillis() / 1000.0 + 1; // N.B. '+1'
-                // to check
-                // for
-                // resolution
+                                                                    // to check
+                                                                    // for
+                                                                    // resolution
         for (int n = 0; n < TimeAxisSample.N_SAMPLES; n++) {
             double t = now + n * 10;
             t *= +1;

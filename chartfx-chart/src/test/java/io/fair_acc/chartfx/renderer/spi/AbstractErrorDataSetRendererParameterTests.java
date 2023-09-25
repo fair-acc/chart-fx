@@ -5,9 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-
 import javafx.scene.canvas.GraphicsContext;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -16,6 +15,7 @@ import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.MaxDataReducer;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 
 /**
@@ -108,7 +108,6 @@ public class AbstractErrorDataSetRendererParameterTests {
      * basic test class, only supports limited getter/setter/property functions
      */
     public static class TestErrorDataSetRendererParameter extends AbstractErrorDataSetRendererParameter<TestErrorDataSetRendererParameter> {
-
         @Override
         protected void render(GraphicsContext gc, DataSet dataSet, DataSetNode style) {
             throw new UnsupportedOperationException();

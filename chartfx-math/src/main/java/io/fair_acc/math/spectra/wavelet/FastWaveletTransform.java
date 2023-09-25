@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
  * This is a very fast implementation of the Fast Wavelet Transform. It uses in-place computations for less memory
  * usage. Data length should be a power of 2 a be at least of length 8. Handles boundaries by assuming periodicity.
  * Ideal for image processing or processing large amount of data. Safety is minimal, so be careful!
- * 
+ *
  * @author Daniel Lemire
  *************************/
 public final class FastWaveletTransform { // NOPMD - nomen est omen
@@ -115,7 +115,7 @@ public final class FastWaveletTransform { // NOPMD - nomen est omen
          * ]*wavelet[5]+data[2]*wavelet[6]+data[3]*wavelet[7]; ans[n-1] =
          * data[n-2]*wavelet[0]+data[n-1]*wavelet[1]+data[0]*wavelet[2] +data[1]*wavelet[3]
          * +data[2]*wavelet[4]+data[3]*wavelet[5]+data[4]*wavelet[6]+data[5]*wavelet[7];
-         * 
+         *
          * ans[half-3] = data[n-6]*scale[0] +data[n-5]*scale[1] +data[n-4]*scale[2] +data[n-3]*scale[3]
          * +data[n-2]*scale[4]+data[n-1]*scale[5]+data[0]*scale[6]+data[1]*scale[7]; ans[half-2] = data[n-4]*scale[0]
          * +data[n-3]*scale[1] +data[n-2]*scale[2] +data[n-1]*scale[3]

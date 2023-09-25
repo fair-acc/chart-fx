@@ -1,7 +1,8 @@
 package io.fair_acc.chartfx.renderer.spi.financial;
 
-import io.fair_acc.chartfx.Chart;
 import javafx.css.PseudoClass;
+
+import io.fair_acc.chartfx.Chart;
 
 /**
  * A port of the string-ified themes to CSS pseudo classes
@@ -36,5 +37,4 @@ public enum FinancialTheme {
 
     private final PseudoClass pseudoClass;
     private static final FinancialTheme[] values = values();
-
 }

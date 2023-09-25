@@ -11,7 +11,7 @@ public class GaussFunction extends AbstractTestFunction<GaussFunction> {
     private final double sigma;
 
     /**
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      */
@@ -46,7 +46,7 @@ public class GaussFunction extends AbstractTestFunction<GaussFunction> {
     }
 
     /**
-     * 
+     *
      * @param x coordinate X
      * @return value of Gaussian function at x (mean = 0, sigma = 1)
      */
@@ -55,7 +55,7 @@ public class GaussFunction extends AbstractTestFunction<GaussFunction> {
     }
 
     /**
-     * 
+     *
      * @param x coordiante x
      * @param mu mean value of Gaussian function
      * @param sigma standard deviation of Gaussian function

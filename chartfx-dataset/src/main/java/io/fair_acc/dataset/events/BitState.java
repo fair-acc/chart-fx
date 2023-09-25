@@ -11,7 +11,6 @@ import java.util.function.IntSupplier;
  * @author ennerf
  */
 public abstract class BitState implements StateListener {
-
     public Runnable onAction(IntSupplier bit0, IntSupplier... more) {
         return onAction(mask(bit0, more));
     }
@@ -36,7 +35,7 @@ public abstract class BitState implements StateListener {
         return obs -> setDirty(bits);
     }
 
-    public static int mask(IntSupplier[] bits){
+    public static int mask(IntSupplier[] bits) {
         int mask = 0;
         for (IntSupplier bit : bits) {
             mask |= bit.getAsInt();
@@ -130,7 +129,7 @@ public abstract class BitState implements StateListener {
      * @return the bits before clearing
      */
     public int clear() {
-       return clear(ALL_BITS);
+        return clear(ALL_BITS);
     }
 
     /**
@@ -167,7 +166,7 @@ public abstract class BitState implements StateListener {
     }
 
     public BitState addChangeListener(StateListener listener) {
-        if(changeListeners == null) {
+        if (changeListeners == null) {
             changeListeners = new ArrayList<>();
         }
         changeListeners.add(listener);
@@ -175,7 +174,7 @@ public abstract class BitState implements StateListener {
     }
 
     public BitState addInvalidateListener(StateListener listener) {
-        if(invalidateListeners == null) {
+        if (invalidateListeners == null) {
             invalidateListeners = new ArrayList<>();
         }
         invalidateListeners.add(listener);
@@ -193,7 +192,7 @@ public abstract class BitState implements StateListener {
     /**
      * @return true if the last occurrence of the listener was removed
      */
-    private static boolean removeListener(List<StateListener> list,  StateListener listener) {
+    private static boolean removeListener(List<StateListener> list, StateListener listener) {
         if (list == null) {
             return false;
         }
@@ -293,11 +292,7 @@ public abstract class BitState implements StateListener {
         var stack = Thread.currentThread().getStackTrace();
         for (int i = from; i < Math.min(stack.length, to); i++) {
             var elem = stack[i];
-            builder.append("\n   [").append(i).append("] ")
-                    .append(elem.getClassName()).append(".").append(elem.getMethodName())
-                    .append("(")
-                    .append(elem.getFileName()).append(":").append(elem.getLineNumber())
-                    .append(")");
+            builder.append("\n   [").append(i).append("] ").append(elem.getClassName()).append(".").append(elem.getMethodName()).append("(").append(elem.getFileName()).append(":").append(elem.getLineNumber()).append(")");
         }
         return builder;
     }
@@ -307,7 +302,6 @@ public abstract class BitState implements StateListener {
     private static final int DEFAULT_MAX_STACK_TRACE = 25;
 
     private static class FilteredListener implements StateListener {
-
         private FilteredListener(int filter, StateListener listener) {
             this.filter = filter;
             this.listener = listener;
@@ -323,7 +317,6 @@ public abstract class BitState implements StateListener {
 
         final int filter;
         final StateListener listener;
-
     }
 
     public Object getSource() {
@@ -358,14 +351,13 @@ public abstract class BitState implements StateListener {
      * An single-threaded implementation that should only be modified by a single thread
      */
     protected static class SingleThreadedBitState extends BitState {
-
         protected SingleThreadedBitState(Object source, int filter, int initial) {
             super(source, filter);
             state = initial;
         }
 
         protected int setDirtyAndGetDelta(int bits) {
-            int delta =  (state ^ bits) & bits;
+            int delta = (state ^ bits) & bits;
             state |= bits;
             return delta;
         }
@@ -383,7 +375,6 @@ public abstract class BitState implements StateListener {
         }
 
         int state;
-
     }
 
     /**
@@ -391,7 +382,6 @@ public abstract class BitState implements StateListener {
      * events are sent on the same thread that sent the original request.
      */
     protected static class MultiThreadedBitState extends BitState {
-
         protected MultiThreadedBitState(Object source, int filter, int initial) {
             super(source, filter);
             state.set(initial);
@@ -456,5 +446,4 @@ public abstract class BitState implements StateListener {
 
     List<StateListener> changeListeners;
     List<StateListener> invalidateListeners = null;
-
 }

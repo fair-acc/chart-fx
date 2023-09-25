@@ -7,7 +7,6 @@ package io.fair_acc.bench;
  * @author ennerf
  */
 public interface DurationMeasure {
-
     /**
      * Called when an action begins. Sets the start timestamp.
      */
@@ -42,5 +41,4 @@ public interface DurationMeasure {
             // no-op
         }
     };
-
 }

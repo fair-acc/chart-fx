@@ -11,18 +11,18 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.CachedDaemonThreadFactory;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
+import io.fair_acc.dataset.utils.CachedDaemonThreadFactory;
 import io.fair_acc.sample.financial.dos.DefaultOHLCV;
 import io.fair_acc.sample.financial.dos.Interval;
 import io.fair_acc.sample.financial.dos.OHLCVItem;

@@ -16,7 +16,7 @@ public class FirFilter { // NOPMD - nomen est omen
     /**
      * calculate 2nd-order filter with Butterworth (rippleP=0) or Chebychev filter response (rippleP&gt;0) N.B.
      * numerically validated against data set examples in Table 20-6 http://www.dspguide.com/ch20/4.htm
-     * 
+     *
      * N.B. subroutine called by #filterSignal method
      *
      * @param cutoffFraction fractional cut-off

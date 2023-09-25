@@ -5,7 +5,7 @@ import javafx.scene.Node;
 
 /**
  * Re-implementation of JavaFX's {@code javafx.geometry.Side} implementation to also include centre axes.
- * 
+ *
  * @author rstein
  *
  */
@@ -41,7 +41,7 @@ public enum Side {
     /**
      * Indicates whether this is horizontal side of a rectangle (returns {@code true} for {@code TOP} and
      * {@code BOTTOM}.
-     * 
+     *
      * @return {@code true} if this represents a horizontal side of a rectangle
      */
     public boolean isHorizontal() {
@@ -50,7 +50,7 @@ public enum Side {
 
     /**
      * Indicates whether this is vertical side of a rectangle (returns {@code true} for {@code LEFT} and {@code RIGHT}.
-     * 
+     *
      * @return {@code true} if this represents a vertical side of a rectangle
      */
     public boolean isVertical() {
@@ -82,5 +82,4 @@ public enum Side {
     private static final PseudoClass CSS_HORIZONTAL = PseudoClass.getPseudoClass("horizontal");
     private static final PseudoClass CSS_VERTICAL = PseudoClass.getPseudoClass("vertical");
     private static final PseudoClass CSS_CENTER = PseudoClass.getPseudoClass("center");
-
 }

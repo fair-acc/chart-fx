@@ -5,16 +5,16 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fair_acc.dataset.AxisDescription;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.GridDataSet;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.dataset.utils.AssertUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.GridDataSet;
 
 /**
  * Allows permutation of the axes of an underlying DataSet, for applications like: - transposed display - reduction of

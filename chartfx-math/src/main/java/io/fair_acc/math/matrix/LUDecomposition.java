@@ -21,14 +21,14 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Array for internal storage of decomposition.
-     * 
+     *
      * @serial internal array storage.
      */
     private double[][] LU;
 
     /**
      * Row and column dimensions, and pivot sign.
-     * 
+     *
      * @serial column dimension.
      * @serial row dimension.
      * @serial pivot sign.
@@ -37,7 +37,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Internal storage of pivot vector.
-     * 
+     *
      * @serial pivot vector.
      */
     private int[] piv;
@@ -48,7 +48,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * LU Decomposition
-     * 
+     *
      * @param A Rectangular matrix Structure to access L, U and piv.
      */
 
@@ -123,18 +123,18 @@ public class LUDecomposition implements java.io.Serializable {
 
     /*
      * ------------------------ Temporary, experimental code. ------------------------ *\
-     * 
+     *
      * \** LU Decomposition, computed by Gaussian elimination. <P> This constructor computes L and U with the
      * "daxpy"-based elimination algorithm used in LINPACK and MATLAB. In Java, we suspect the dot-product, Crout
      * algorithm will be faster. We have temporarily included this constructor until timing experiments confirm this
      * suspicion. <P>
-     * 
+     *
      * @param A Rectangular matrix
-     * 
+     *
      * @param linpackflag Use Gaussian elimination. Actual value ignored.
-     * 
+     *
      * @return Structure to access L, U and piv. \
-     * 
+     *
      * public LUDecomposition (Matrix A, int linpackflag) { // Initialize. LU = A.getArrayCopy(); m =
      * A.getRowDimension(); n = A.getColumnDimension(); piv = new int[m]; for (int i = 0; i < m; i++) { piv[i] = i; }
      * pivsign = 1; // Main loop. for (int k = 0; k < n; k++) { // Find pivot. int p = k; for (int i = k+1; i < m; i++)
@@ -143,7 +143,7 @@ public class LUDecomposition implements java.io.Serializable {
      * piv[k] = t; pivsign = -pivsign; } // Compute multipliers and eliminate k-th column. if (LU[k][k] != 0.0) { for
      * (int i = k+1; i < m; i++) { LU[i][k] /= LU[k][k]; for (int j = k+1; j < n; j++) { LU[i][j] -= LU[i][k]*LU[k][j];
      * } } } } }
-     * 
+     *
      * \* ------------------------ End of temporary code. ------------------------
      */
 
@@ -153,7 +153,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Determinant
-     * 
+     *
      * @return det(A)
      * @exception IllegalArgumentException Matrix must be square
      */
@@ -171,7 +171,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Return pivot permutation vector as a one-dimensional double array
-     * 
+     *
      * @return (double) piv
      */
 
@@ -185,7 +185,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Return lower triangular factor
-     * 
+     *
      * @return L
      */
 
@@ -208,7 +208,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Return pivot permutation vector
-     * 
+     *
      * @return piv
      */
 
@@ -221,7 +221,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Return upper triangular factor
-     * 
+     *
      * @return U
      */
 
@@ -242,7 +242,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Is the matrix nonsingular?
-     * 
+     *
      * @return true if U, and hence A, is nonsingular.
      */
 
@@ -256,7 +256,7 @@ public class LUDecomposition implements java.io.Serializable {
 
     /**
      * Solve A*X = B
-     * 
+     *
      * @param B A Matrix with as many rows as A and any number of columns.
      * @return X so that L*U*X = B(piv,:)
      * @exception IllegalArgumentException Matrix row dimensions must agree.

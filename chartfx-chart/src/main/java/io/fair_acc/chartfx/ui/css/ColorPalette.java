@@ -40,5 +40,4 @@ public enum ColorPalette {
 
     private final PseudoClass pseudoClass;
     private static final ColorPalette[] values = values();
-
 }

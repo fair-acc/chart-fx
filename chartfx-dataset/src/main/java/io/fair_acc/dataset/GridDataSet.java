@@ -2,7 +2,7 @@ package io.fair_acc.dataset;
 
 /**
  * Interface for accessing data on a cartesian grid.
- * 
+ *
  * @author Alexander Krimm
  */
 public interface GridDataSet extends DataSet {
@@ -15,7 +15,7 @@ public interface GridDataSet extends DataSet {
 
     /**
      * Returns the Grid Value along the specified Grid dimension
-     * 
+     *
      * @param dimIndex Dimension Index, smaller than getShape().size
      * @param index Index along the specified dimension, smaller than getShape(dimIndex)
      * @return the value for the specified index on the grid along the specified dimension

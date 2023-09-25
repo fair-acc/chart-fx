@@ -349,7 +349,7 @@ public class WaveletTransform extends WaveletCoefficients {
 
     /**
      * Forward wavelet transform
-     * 
+     *
      * @param s input vector
      */
     public void daubTrans(final double[] s) {
@@ -681,7 +681,7 @@ public class WaveletTransform extends WaveletCoefficients {
 
     /**
      * Inverse wavelet transform
-     * 
+     *
      * @param coef input vector
      */
     public void invDaubTrans(final double[] coef) {
@@ -787,7 +787,7 @@ public class WaveletTransform extends WaveletCoefficients {
      * <p>
      * Note that at the end of the computation the calculation wraps around to the beginning of the signal.
      * </p>
-     * 
+     *
      * @param a input signal, which will be replaced by its output transform
      * @param n length of the signal, and must be a power of 2
      */

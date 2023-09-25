@@ -1,10 +1,10 @@
 package io.fair_acc.dataset.events;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 /**
  * An event processor class which processes dataset events independent of the UI thread of the chart.
@@ -23,7 +23,7 @@ public class ThreadEventProcessor implements EventProcessor, Runnable {
 
     private final Object changeLock = new Object();
     private final BitState state = BitState.initDirtyMultiThreaded(this, ChartBits.DataSetMask)
-            .addChangeListener((src, bits) -> notifyChanged());
+                                           .addChangeListener((src, bits) -> notifyChanged());
     private final List<Pair<BitState, Runnable>> actions = new CopyOnWriteArrayList<>();
 
     public static EventProcessor getUserInstance() {
@@ -57,7 +57,7 @@ public class ThreadEventProcessor implements EventProcessor, Runnable {
 
     @Override
     public void run() {
-        //noinspection InfiniteLoopStatement
+        // noinspection InfiniteLoopStatement
         while (true) {
             boolean isDirty = state.clear() != 0;
             if (isDirty) {
@@ -66,7 +66,8 @@ public class ThreadEventProcessor implements EventProcessor, Runnable {
                         action.getLeft().clear();
                         try {
                             action.getRight().run();
-                        } catch (Exception ignored) {}
+                        } catch (Exception ignored) {
+                        }
                     }
                 }
             }

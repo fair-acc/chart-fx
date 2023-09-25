@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests for the DoubleGridDataSet
- * 
+ *
  * @author Alexander Krimm
  */
 class DoubleGridDataSetTests {
@@ -46,7 +46,7 @@ class DoubleGridDataSetTests {
     void nonPermutableShape() {
         double[] data = new double[] {
             // first slice
-            1, 2, 3, 4, //first row
+            1, 2, 3, 4, // first row
             5, 6, 7, 8, //
             9, 10, 11, 12, //
             // second slice

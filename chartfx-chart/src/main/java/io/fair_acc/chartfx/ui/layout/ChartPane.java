@@ -1,14 +1,15 @@
 package io.fair_acc.chartfx.ui.layout;
 
+import javafx.css.PseudoClass;
+import javafx.scene.Node;
+import javafx.scene.layout.Pane;
+
 import io.fair_acc.chartfx.axes.spi.AbstractAxis;
 import io.fair_acc.chartfx.ui.geometry.Corner;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import io.fair_acc.dataset.utils.AssertUtils;
-import javafx.css.PseudoClass;
-import javafx.scene.Node;
-import javafx.scene.layout.Pane;
 
 /**
  * A 3x3 grid pane that is divided into 4 sides, 4 corners, and a center content area.
@@ -36,7 +37,6 @@ import javafx.scene.layout.Pane;
  * @author ennerf
  */
 public class ChartPane extends Pane {
-
     private static final String CHART_ELEMENT = "chart-pane-element";
 
     /**
@@ -108,9 +108,9 @@ public class ChartPane extends Pane {
         return this;
     }
 
-    public void remove(Node node, Node... more){
+    public void remove(Node node, Node... more) {
         getChildren().remove(node);
-        if(more.length > 0) {
+        if (more.length > 0) {
             getChildren().removeAll(more);
         }
     }
@@ -128,7 +128,7 @@ public class ChartPane extends Pane {
                 continue;
             }
             Object location = getLocation(child);
-            if(location == Side.TOP || location == Side.BOTTOM) {
+            if (location == Side.TOP || location == Side.BOTTOM) {
                 // default to use the previous height or some set minimum
                 var axis = (AbstractAxis) child;
                 sum += Math.max(0, axis.getHeight() > 0 ? axis.getHeight() : axis.getMinHeight());
@@ -142,22 +142,23 @@ public class ChartPane extends Pane {
         double verticalSum = 0;
         double maxHorizontalWidth = 0;
         for (Node child : getChildren()) {
-            if (!child.isManaged()) continue;
+            if (!child.isManaged())
+                continue;
             Object location = getLocation(child);
             if (location == null) {
                 maxHorizontalWidth = Math.max(maxHorizontalWidth, child.minWidth(height));
             } else if (location instanceof Side) {
                 switch ((Side) location) {
-                    case CENTER_HOR:
-                    case CENTER_VER:
-                    case TOP:
-                    case BOTTOM:
-                        maxHorizontalWidth = Math.max(maxHorizontalWidth, child.minWidth(height));
-                        break;
-                    case LEFT:
-                    case RIGHT:
-                        verticalSum += child.minWidth(height);
-                        break;
+                case CENTER_HOR:
+                case CENTER_VER:
+                case TOP:
+                case BOTTOM:
+                    maxHorizontalWidth = Math.max(maxHorizontalWidth, child.minWidth(height));
+                    break;
+                case LEFT:
+                case RIGHT:
+                    verticalSum += child.minWidth(height);
+                    break;
                 }
             }
         }
@@ -169,22 +170,23 @@ public class ChartPane extends Pane {
         double horizontalSum = 0;
         double maxVerticalHeight = 0;
         for (Node child : getChildren()) {
-            if (!child.isManaged()) continue;
+            if (!child.isManaged())
+                continue;
             Object location = getLocation(child);
             if (location == null) {
                 maxVerticalHeight = Math.max(maxVerticalHeight, child.minHeight(width));
             } else if (location instanceof Side) {
                 switch ((Side) location) {
-                    case CENTER_HOR:
-                    case CENTER_VER:
-                    case LEFT:
-                    case RIGHT:
-                        maxVerticalHeight = Math.max(maxVerticalHeight, child.minHeight(width));
-                        break;
-                    case TOP:
-                    case BOTTOM:
-                        horizontalSum += child.minHeight(width);
-                        break;
+                case CENTER_HOR:
+                case CENTER_VER:
+                case LEFT:
+                case RIGHT:
+                    maxVerticalHeight = Math.max(maxVerticalHeight, child.minHeight(width));
+                    break;
+                case TOP:
+                case BOTTOM:
+                    horizontalSum += child.minHeight(width);
+                    break;
                 }
             }
         }
@@ -215,24 +217,25 @@ public class ChartPane extends Pane {
         double rightWidth = 0;
         i = 0;
         for (Node child : getChildren()) {
-            if (!child.isManaged()) continue;
+            if (!child.isManaged())
+                continue;
             Object location = getLocation(child);
             if (location instanceof Side) {
                 switch ((Side) location) {
-                    case LEFT:
-                        prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
-                        cachedPrefSize.set(i, prefSize);
-                        leftWidth += prefSize;
-                        break;
-                    case RIGHT:
-                        prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
-                        cachedPrefSize.set(i, prefSize);
-                        rightWidth += prefSize;
-                        break;
-                    case CENTER_VER:
-                        prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
-                        cachedPrefSize.set(i, prefSize);
-                        break;
+                case LEFT:
+                    prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
+                    cachedPrefSize.set(i, prefSize);
+                    leftWidth += prefSize;
+                    break;
+                case RIGHT:
+                    prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
+                    cachedPrefSize.set(i, prefSize);
+                    rightWidth += prefSize;
+                    break;
+                case CENTER_VER:
+                    prefSize = snapSizeX(getPrefWidth(child, guessedContentHeight));
+                    cachedPrefSize.set(i, prefSize);
+                    break;
                 }
             }
             i++;
@@ -245,24 +248,25 @@ public class ChartPane extends Pane {
         var bottomHeight = 0;
         i = 0;
         for (Node child : getChildren()) {
-            if (!child.isManaged()) continue;
+            if (!child.isManaged())
+                continue;
             Object location = getLocation(child);
             if (location instanceof Side) {
                 switch ((Side) location) {
-                    case TOP:
-                        prefSize = snapSizeY(getPrefHeight(child, contentWidth));
-                        cachedPrefSize.set(i, prefSize);
-                        topHeight += prefSize;
-                        break;
-                    case BOTTOM:
-                        prefSize = snapSizeY(getPrefHeight(child, contentWidth));
-                        cachedPrefSize.set(i, prefSize);
-                        bottomHeight += prefSize;
-                        break;
-                    case CENTER_HOR:
-                        prefSize = snapSizeY(getPrefHeight(child, contentWidth));
-                        cachedPrefSize.set(i, prefSize);
-                        break;
+                case TOP:
+                    prefSize = snapSizeY(getPrefHeight(child, contentWidth));
+                    cachedPrefSize.set(i, prefSize);
+                    topHeight += prefSize;
+                    break;
+                case BOTTOM:
+                    prefSize = snapSizeY(getPrefHeight(child, contentWidth));
+                    cachedPrefSize.set(i, prefSize);
+                    bottomHeight += prefSize;
+                    break;
+                case CENTER_HOR:
+                    prefSize = snapSizeY(getPrefHeight(child, contentWidth));
+                    cachedPrefSize.set(i, prefSize);
+                    break;
                 }
             }
             i++;
@@ -283,7 +287,8 @@ public class ChartPane extends Pane {
         // Layout all children
         i = 0;
         for (Node child : getChildren()) {
-            if (!child.isManaged()) continue;
+            if (!child.isManaged())
+                continue;
             Object location = getLocation(child);
             prefSize = cachedPrefSize.getDouble(i++);
 
@@ -291,50 +296,47 @@ public class ChartPane extends Pane {
                 resizeRelocate(child, xContent, yContent, contentWidth, contentHeight);
             } else if (location instanceof Corner) { // Corner nodes
                 switch ((Corner) location) {
-                    case TOP_LEFT:
-                        resizeRelocate(child, xLeft, yTop, leftWidth, topHeight);
-                        break;
-                    case TOP_RIGHT:
-                        resizeRelocate(child, xRight, yTop, rightWidth, topHeight);
-                        break;
-                    case BOTTOM_LEFT:
-                        resizeRelocate(child, xLeft, yBottom, leftWidth, bottomHeight);
-                        break;
-                    case BOTTOM_RIGHT:
-                        resizeRelocate(child, xRight, yBottom, rightWidth, bottomHeight);
-                        break;
+                case TOP_LEFT:
+                    resizeRelocate(child, xLeft, yTop, leftWidth, topHeight);
+                    break;
+                case TOP_RIGHT:
+                    resizeRelocate(child, xRight, yTop, rightWidth, topHeight);
+                    break;
+                case BOTTOM_LEFT:
+                    resizeRelocate(child, xLeft, yBottom, leftWidth, bottomHeight);
+                    break;
+                case BOTTOM_RIGHT:
+                    resizeRelocate(child, xRight, yBottom, rightWidth, bottomHeight);
+                    break;
                 }
-            } else if (location instanceof Side) {  // Side nodes
+            } else if (location instanceof Side) { // Side nodes
                 switch ((Side) location) {
-                    case TOP:
-                        resizeRelocate(child, xContent, yTop + yOffsetTop, contentWidth, prefSize);
-                        yOffsetTop += prefSize;
-                        break;
-                    case BOTTOM:
-                        resizeRelocate(child, xContent, yBottom + yOffsetBottom, contentWidth, prefSize);
-                        yOffsetBottom += prefSize;
-                        break;
-                    case LEFT:
-                        resizeRelocate(child, xLeft + xOffsetLeft, yContent, prefSize, contentHeight);
-                        xOffsetLeft += prefSize;
-                        break;
-                    case RIGHT:
-                        resizeRelocate(child, xRight + xOffsetRight, yContent, prefSize, contentHeight);
-                        xOffsetRight += prefSize;
-                        break;
-                    case CENTER_HOR:
-                        resizeRelocate(child, xContent, snapSizeY(yContent + contentHeight / 2 - prefSize / 2), contentWidth, prefSize);
-                        break;
-                    case CENTER_VER:
-                        resizeRelocate(child, snapSizeX(xContent + contentWidth / 2 - prefSize / 2), yContent, prefSize, contentHeight);
-                        break;
+                case TOP:
+                    resizeRelocate(child, xContent, yTop + yOffsetTop, contentWidth, prefSize);
+                    yOffsetTop += prefSize;
+                    break;
+                case BOTTOM:
+                    resizeRelocate(child, xContent, yBottom + yOffsetBottom, contentWidth, prefSize);
+                    yOffsetBottom += prefSize;
+                    break;
+                case LEFT:
+                    resizeRelocate(child, xLeft + xOffsetLeft, yContent, prefSize, contentHeight);
+                    xOffsetLeft += prefSize;
+                    break;
+                case RIGHT:
+                    resizeRelocate(child, xRight + xOffsetRight, yContent, prefSize, contentHeight);
+                    xOffsetRight += prefSize;
+                    break;
+                case CENTER_HOR:
+                    resizeRelocate(child, xContent, snapSizeY(yContent + contentHeight / 2 - prefSize / 2), contentWidth, prefSize);
+                    break;
+                case CENTER_VER:
+                    resizeRelocate(child, snapSizeX(xContent + contentWidth / 2 - prefSize / 2), yContent, prefSize, contentHeight);
+                    break;
                 }
             }
-
         }
-
     }
 
     private final DoubleArrayList cachedPrefSize = new DoubleArrayList();
-
 }

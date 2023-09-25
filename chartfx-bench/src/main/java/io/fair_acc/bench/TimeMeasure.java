@@ -11,7 +11,6 @@ import java.util.function.Function;
  */
 @FunctionalInterface
 public interface TimeMeasure {
-
     /**
      * Records a raw time measurement. Useful for recording
      * durations from existing timestamps.
@@ -29,7 +28,7 @@ public interface TimeMeasure {
      * @return wrapped measure
      * @param <T> type of the wrapped measure
      */
-    default <T> T wrap(Function<TimeMeasure, T> enabledFunc, T disabledFallback) {
+    default<T> T wrap(Function<TimeMeasure, T> enabledFunc, T disabledFallback) {
         return enabledFunc.apply(this);
     }
 
@@ -37,7 +36,6 @@ public interface TimeMeasure {
      * A default implementation that does nothing and may be eliminated at runtime
      */
     static final TimeMeasure DISABLED = new TimeMeasure() {
-
         @Override
         public <T> T wrap(Function<TimeMeasure, T> enabledFunc, T disabledFallback) {
             return disabledFallback;
@@ -48,5 +46,4 @@ public interface TimeMeasure {
             // no-op
         }
     };
-
 }

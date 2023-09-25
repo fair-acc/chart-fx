@@ -1,6 +1,5 @@
 package io.fair_acc.sample.chart;
 
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.stage.Stage;
@@ -9,6 +8,7 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
 import io.fair_acc.dataset.spi.DoubleDataSet;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 
 /**
  * Example to illustrate the use and customisation of the LabelledMarkerRenderer
@@ -48,36 +48,36 @@ public class LabelledMarkerSample extends ChartSample {
 
             if (n == 5) {
                 dataSet.addDataStyle(n, style.reset()
-                        .setStroke("blue")
-                        .setFill("blue")
-                        .setStrokeDashPattern(3, 5, 8, 5)
-                        .build());
+                                                .setStroke("blue")
+                                                .setFill("blue")
+                                                .setStrokeDashPattern(3, 5, 8, 5)
+                                                .build());
             }
 
             if (n == 6) {
                 dataSet.addDataStyle(n, style.reset()
-                        .setStroke("0xEE00EE")
-                        .setFill("0xEE00EE")
-                        .setStrokeDashPattern(5, 8, 5, 16)
-                        .build());
+                                                .setStroke("0xEE00EE")
+                                                .setFill("0xEE00EE")
+                                                .setStrokeDashPattern(5, 8, 5, 16)
+                                                .build());
             }
 
             if (n == 7) {
                 dataSet.addDataStyle(n, style.reset()
-                        .setStrokeWidth(3)
-                        .setFont("Serif")
-                        .setFontSize(20)
-                        .setFontItalic(true)
-                        .setFontWeight("bold")
-                        .build());
+                                                .setStrokeWidth(3)
+                                                .setFont("Serif")
+                                                .setFontSize(20)
+                                                .setFontItalic(true)
+                                                .setFontWeight("bold")
+                                                .build());
             }
 
             if (n == 8) {
                 dataSet.addDataStyle(n, style.reset()
-                        .setStrokeWidth(3)
-                        .setFont("monospace")
-                        .setFontItalic(true)
-                        .build());
+                                                .setStrokeWidth(3)
+                                                .setFont("monospace")
+                                                .setFontItalic(true)
+                                                .build());
             }
         }
         chart.getDatasets().add(dataSet);

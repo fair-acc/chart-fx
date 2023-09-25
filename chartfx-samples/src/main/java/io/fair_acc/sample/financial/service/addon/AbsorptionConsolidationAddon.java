@@ -13,19 +13,19 @@ public class AbsorptionConsolidationAddon implements OhlcvConsolidationAddon {
     private final double extremeAbsorptionLevelParam;
 
     /**
-	 * @param searchDynamic
-	 *            - dynamic processing when the bar is painting
-	 * @param absorptionLevel
-	 *            - defines value for volume in the price level which detects
-	 *            price for absorption cluster
-	 * @param absorptionCluster
-	 *            - minimal length of cluster for detection
-	 * @param searchBarPercent
-	 *            - where is accepted the cluster in whole bar in percent (e.g.
-	 *            33% = 1/3 bar from low for bid, and high for ask)
-	 * @param extremeAbsorptionLevelParam
-	 *            - logic for searching extreme bid/ask volumes single clusters
-	 */
+     * @param searchDynamic
+     *            - dynamic processing when the bar is painting
+     * @param absorptionLevel
+     *            - defines value for volume in the price level which detects
+     *            price for absorption cluster
+     * @param absorptionCluster
+     *            - minimal length of cluster for detection
+     * @param searchBarPercent
+     *            - where is accepted the cluster in whole bar in percent (e.g.
+     *            33% = 1/3 bar from low for bid, and high for ask)
+     * @param extremeAbsorptionLevelParam
+     *            - logic for searching extreme bid/ask volumes single clusters
+     */
     public AbsorptionConsolidationAddon(boolean searchDynamic, int absorptionLevel, int absorptionCluster,
             double searchBarPercent, double extremeAbsorptionLevelParam) {
         this.searchDynamic = searchDynamic;

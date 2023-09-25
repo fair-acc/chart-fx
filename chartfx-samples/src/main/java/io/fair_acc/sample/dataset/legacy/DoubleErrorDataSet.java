@@ -4,9 +4,9 @@ import java.util.Arrays;
 
 import io.fair_acc.dataset.*;
 import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.spi.AbstractErrorDataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Implementation of the <code>DataSetError</code> interface which stores x,y, +eyn, -eyn values in separate double
@@ -26,7 +26,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
     protected double[] yErrorsPos;
     protected double[] yErrorsNeg;
     protected int dataMaxIndex; // <= xValues.length, stores the actually used
-            // data array size
+                                // data array size
 
     /**
      * Creates a new instance of <code>DoubleDataSet</code> as copy of another (deep-copy).
@@ -227,7 +227,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * clears all data
-     * 
+     *
      * @return itself (fluent design)
      */
     public DoubleErrorDataSet clearData() {
@@ -294,7 +294,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * remove sub-range of data points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -335,7 +335,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * clear old data and overwrite with data from 'other' data set (deep copy)
-     * 
+     *
      * @param other the other data set
      * @return itself (fluent design)
      */
@@ -448,7 +448,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
-     * 
+     *
      * @param index the index of the data point
      * @param newValue new point coordinates
      * @return itself (fluent design)
@@ -460,7 +460,7 @@ public class DoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorDataSet>
 
     /**
      * replaces point coordinate of existing data point
-     * 
+     *
      * @param index the index of the data point
      * @param x new horizontal coordinate
      * @param y new vertical coordinate

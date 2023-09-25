@@ -21,7 +21,7 @@ public class Histogram2 extends AbstractHistogram implements Histogram2D {
 
     /**
      * Creates 2D histogram with name and ranges [minX, maxX] and [minY, maxY]
-     * 
+     *
      * @param name of the data sets
      * @param nBinsX number of horizontal bins
      * @param minX minimum of horizontal range

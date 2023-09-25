@@ -5,9 +5,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Supplier;
 
-import io.fair_acc.dataset.DataSet;
 import io.fair_acc.bench.DurationMeasure;
 import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.dataset.DataSet;
 
 /**
  * A Simple ReadWriteLock for the DataSet interface and its fluent-design approach Some implementation recommendation:
@@ -189,7 +189,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
     public D readUnLock() {
         if (readerCount.get() == 1 && lastReadStamp.get() != -1) {
             final long lastReadStampLocal = lastReadStamp.get();
-            //noinspection StatementWithEmptyBody
+            // noinspection StatementWithEmptyBody
             if (lastReadStamp.compareAndExchange(lastReadStampLocal, -1L) != lastReadStampLocal) { // NOPMD NOSONAR - for better logic readability (humans)
                 // already unlocked by another thread
             } else {
@@ -211,7 +211,7 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
             // new/not matching existing thread holding lock - need to acquire new lock
             long stamp;
             do {
-                //stamp = stampedLock.tryWriteLock()
+                // stamp = stampedLock.tryWriteLock()
                 stamp = stampedLock.writeLock();
             } while (stamp == 0);
             // acquired lock
@@ -270,5 +270,4 @@ public class DefaultDataSetLock<D extends DataSet> implements DataSetLock<D> {
 
     private DurationMeasure benchReadLock = DurationMeasure.DISABLED;
     private DurationMeasure benchWriteLock = DurationMeasure.DISABLED;
-
 }

@@ -12,7 +12,6 @@ import javafx.scene.input.MouseEvent;
  * @author braeun
  */
 public class MouseEventsHelper {
-
     public static boolean isOnlyCtrlModifierDown(final MouseEvent event) {
         return event.isControlDown() && !event.isAltDown() && !event.isMetaDown() && !event.isShiftDown();
     }
@@ -32,5 +31,4 @@ public class MouseEventsHelper {
     public static boolean modifierKeysUp(final MouseEvent event) {
         return !event.isAltDown() && !event.isControlDown() && !event.isMetaDown() && !event.isShiftDown();
     }
-
 }

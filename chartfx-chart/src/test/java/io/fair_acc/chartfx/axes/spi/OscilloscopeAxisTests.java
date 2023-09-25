@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import io.fair_acc.chartfx.axes.spi.format.DefaultTickUnitSupplier;
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.chartfx.axes.LogAxisType;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
+import io.fair_acc.chartfx.axes.spi.format.DefaultTickUnitSupplier;
 import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * Tests interfaces to OscilloscopeAxis

@@ -184,7 +184,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         if (!super.setMax(max)) {
             return false;
         }
-        if(notifyRangeChanged != null) { // called from parent initializer
+        if (notifyRangeChanged != null) { // called from parent initializer
             notifyRangeChanged.run();
         }
         return true;
@@ -195,7 +195,7 @@ public class DefaultAxisDescription extends DataRange implements AxisDescription
         if (!super.setMin(min)) {
             return false;
         }
-        if(notifyRangeChanged != null) { // called from parent initializer
+        if (notifyRangeChanged != null) { // called from parent initializer
             notifyRangeChanged.run();
         }
         return true;

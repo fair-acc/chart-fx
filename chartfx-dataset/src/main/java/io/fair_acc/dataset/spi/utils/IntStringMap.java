@@ -11,22 +11,36 @@ public class IntStringMap implements Map<Integer, String> {
     private static final String FREE_KEY = "";
     private static final String REMOVED_KEY = "";
 
-    /** Value for the null key (if inserted into a map) */
+    /**
+     * Value for the null key (if inserted into a map)
+     */
     private static final String NULL_VALUE = null; // NOPMD
 
-    /** Keys and values */
+    /**
+     * Keys and values
+     */
     private Object[] data;
     private boolean hasNull;
 
-    /** Fill factor, must be between (0 and 1) */
+    /**
+     * Fill factor, must be between (0 and 1)
+     */
     private final float fillFactor;
-    /** We will resize a map once it reaches this size */
+    /**
+     * We will resize a map once it reaches this size
+     */
     private int threshold;
-    /** Current map size */
+    /**
+     * Current map size
+     */
     private int sizeInternal;
-    /** Mask to calculate the original position */
+    /**
+     * Mask to calculate the original position
+     */
     private int mask;
-    /** Mask to wrap the actual array pointer */
+    /**
+     * Mask to wrap the actual array pointer
+     */
     private int mask2;
 
     public IntStringMap(final int size, final float fillFactor) {
@@ -195,7 +209,6 @@ public class IntStringMap implements Map<Integer, String> {
 
     @Override
     public String remove(final Object key) {
-
         int ptr = getStartIndex(key) << 1;
         Object k = data[ptr];
         if (k.equals(FREE_KEY)) {

@@ -122,7 +122,7 @@ public class CheckedValueField extends VBox {
         maxRange.addListener((ch, o, n) -> dataRangeMax.setText(n.toString()));
 
         // dynamically resize font with measurement display width TODO: reenable fixing the infinite growth bug
-        //widthProperty().addListener(widthChangeListener);
+        // widthProperty().addListener(widthChangeListener);
 
         VBox.setVgrow(this, Priority.SOMETIMES);
     }

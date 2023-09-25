@@ -6,17 +6,17 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import io.fair_acc.sample.financial.service.execution.BasicOrderExecutionService;
-import io.fair_acc.sample.financial.service.execution.ExecutionResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;
+import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import io.fair_acc.sample.financial.dos.OrderExpression;
 import io.fair_acc.sample.financial.dos.Position;
 import io.fair_acc.sample.financial.service.CalendarUtils;
 import io.fair_acc.sample.financial.service.OhlcvChangeListener;
-import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;
-import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
+import io.fair_acc.sample.financial.service.execution.BasicOrderExecutionService;
+import io.fair_acc.sample.financial.service.execution.ExecutionResult;
 
 /**
  * Simple example of trade plan for common execution of backtest market orders.

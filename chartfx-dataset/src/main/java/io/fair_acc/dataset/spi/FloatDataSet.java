@@ -1,21 +1,20 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.spi.utils.MathUtils;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.EditableDataSet;
-
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.fastutil.FloatArrayList;
+import io.fair_acc.dataset.spi.utils.MathUtils;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Implementation of the <code>DataSet</code> interface which stores x,y values in two separate arrays. It provides
  * methods allowing easily manipulate of data points. <br>
  * User provides X and Y coordinates or only Y coordinates. In the former case X coordinates have value of data point
  * index. This version being optimised for native float arrays.
- * 
+ *
  * @see DoubleErrorDataSet for an equivalent implementation with asymmetric errors in Y
  * @author rstein
  */
@@ -226,7 +225,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
 
     /**
      * clear all data points
-     * 
+     *
      * @return itself (fluent design)
      */
     public FloatDataSet clearData() {
@@ -286,7 +285,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
 
     /**
      * removes sub-range of data points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -314,7 +313,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
 
     /**
      * ensures minimum size, enlarges if necessary
-     * 
+     *
      * @param size the actually used array lengths
      * @return itself (fluent design)
      */
@@ -329,7 +328,7 @@ public class FloatDataSet extends AbstractDataSet<FloatDataSet> implements DataS
 
     /**
      * clear old data and overwrite with data from 'other' data set (deep copy)
-     * 
+     *
      * @param other the source data set
      * @param copy true: perform a deep copy (default), false: reuse the other dataset's internal data structures (if applicable)
      * @return itself (fluent design)

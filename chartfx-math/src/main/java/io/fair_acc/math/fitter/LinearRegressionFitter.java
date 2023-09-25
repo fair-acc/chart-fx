@@ -380,12 +380,12 @@ public class LinearRegressionFitter {
 
     /**
      * @return kStandard: standard SVD-type cut<br>
-     * 
+     *
      *         1/lambda_i -&gt; 1/lambda_i<br>
      *         for (|lambda_i/lambda_0| &gt; getSVDCutOff &amp; |1/lambda_i| &gt; 1e-16 1/lambda_i -&gt; 0 <br>
      *         otherwise (numerical stability) Tikhonov type regularisation:<br>
      *         1/lambda_i -&gt; lambda_i/(lambda_i^2+mu^2) for |1/lambda_i| &gt; 1e-16 1/lambda_i<br>
-     * 
+     *
      *         the parameter mu can be read set via function getTikhonovRegularisationParameter, or function
      *         setTikhonovRegularisationParameter
      */
@@ -417,7 +417,9 @@ public class LinearRegressionFitter {
         return isConverged;
     }
 
-    /** @return true: errors are used as fitting weights */
+    /**
+     * @return true: errors are used as fitting weights
+     */
     public synchronized boolean isErrorWeighting() {
         return useErrors;
     }
@@ -456,12 +458,12 @@ public class LinearRegressionFitter {
 
     /**
      * KStandard: standard SVD-type cut<br>
-     * 
+     *
      * 1/lambda_i -&gt; 1/lambda_i<br>
      * for (|lambda_i/lambda_0| &gt; getSVDCutOff &amp; |1/lambda_i| &gt; 1e-16 1/lambda_i -&gt; 0 <br>
      * otherwise (numerical stability) Tikhonov type regularisation:<br>
      * 1/lambda_i -&gt; lambda_i/(lambda_i^2+mu^2) for |1/lambda_i| &gt; 1e-16 1/lambda_i<br>
-     * 
+     *
      * @param method regularisation method to be used
      *
      *        the parameter mu can be read set via function getTikhonovRegularisationParameter, or function
@@ -482,7 +484,7 @@ public class LinearRegressionFitter {
 
     /**
      * Tikhonov regularisation parameter mu, default: <br>
-     * 
+     *
      * 1.0 1/lambda_i -&gt; lambda_i/(lambda_i^2+mu^2) for |1/lambda_i| &gt; 1e-16 1/lambda_i -&gt; 0 (for numerical
      * stability)
      *

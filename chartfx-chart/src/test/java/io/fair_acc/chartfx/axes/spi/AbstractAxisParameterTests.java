@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import static io.fair_acc.dataset.DataSet.DIM_X;
 
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -18,6 +17,7 @@ import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.AxisTransform;
 import io.fair_acc.chartfx.axes.LogAxisType;
 import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * Tests the getter/setter interface of AbstractAxisParameter
@@ -197,9 +197,9 @@ class AbstractAxisParameterTests {
         assertEquals(0.001, axis.getUnitScaling());
 
         assertFalse(axis.isInvertedAxis());
-        axis.invertAxis(true); //TODO: rename function w.r.t. setter
+        axis.invertAxis(true); // TODO: rename function w.r.t. setter
         assertTrue(axis.isInvertedAxis());
-        axis.invertAxis(false); //TODO: rename function w.r.t. setter
+        axis.invertAxis(false); // TODO: rename function w.r.t. setter
 
         axis.setTickUnit(1e6);
         assertEquals("test axis name", axis.getName());

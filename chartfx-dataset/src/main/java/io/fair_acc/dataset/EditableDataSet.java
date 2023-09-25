@@ -14,7 +14,7 @@ public interface EditableDataSet extends DataSet {
     EditableDataSet add(final int index, final double... newValue);
 
     /**
-     * 
+     *
      * @return edit constraints for data set
      */
     EditConstraints getEditConstraints();
@@ -37,7 +37,7 @@ public interface EditableDataSet extends DataSet {
     EditableDataSet set(final int index, final double... newValue);
 
     /**
-     * 
+     *
      * @param constraints new edit constraints
      * @return itself (fluent design)
      */

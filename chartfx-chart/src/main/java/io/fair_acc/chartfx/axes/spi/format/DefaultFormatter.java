@@ -1,15 +1,16 @@
 package io.fair_acc.chartfx.axes.spi.format;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.WeakHashMap;
+
+import javafx.util.StringConverter;
+
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
 import io.fair_acc.chartfx.utils.NumberFormatterImpl;
 import io.fair_acc.chartfx.utils.Schubfach;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
-import javafx.util.StringConverter;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.WeakHashMap;
 
 /**
  * Default number formatter for NumberAxis, this stays in sync with auto-ranging and formats values appropriately. You
@@ -112,7 +113,6 @@ public class DefaultFormatter extends AbstractFormatter {
                 labelCache.clear();
                 oldRangeIndex = rangeIndex;
             }
-
         }
     }
 
@@ -225,8 +225,8 @@ public class DefaultFormatter extends AbstractFormatter {
         // We fix the number of decimal places for a right-aligned
         // display with a consistent comma point.
         final int decimalPlaces = useExponentialForm
-                ? significantDigits - 1 // exponential form:     x.yyyyE0
-                : significantDigits - maxExp; // plain form: (xx)x.yyyy
+                                        ? significantDigits - 1 // exponential form:     x.yyyyE0
+                                        : significantDigits - maxExp; // plain form: (xx)x.yyyy
         formatter.setDecimalPlaces(Math.max(decimalPlaces, 0));
     }
 
@@ -240,5 +240,4 @@ public class DefaultFormatter extends AbstractFormatter {
     public String toString(final Number object) {
         return labelCache.get(formatter, object.doubleValue());
     }
-
 }

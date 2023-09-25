@@ -13,7 +13,7 @@ public class SingleOutlierFunction extends AbstractTestFunction<SingleOutlierFun
     protected static SplittableRandom rnd = new SplittableRandom(System.currentTimeMillis());
 
     /**
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      */
@@ -30,5 +30,4 @@ public class SingleOutlierFunction extends AbstractTestFunction<SingleOutlierFun
         }
         return retVal;
     }
-
 }

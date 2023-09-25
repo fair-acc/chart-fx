@@ -34,7 +34,7 @@ public interface DataSet2D extends DataSet {
     }
 
     /**
-     * Gets the index of the data point closest to the given x coordinate. 
+     * Gets the index of the data point closest to the given x coordinate.
      * If the x coordinate lies outside the range of the data set, the index of the first/last point is returned.
      *
      * @param x the x position of the data point

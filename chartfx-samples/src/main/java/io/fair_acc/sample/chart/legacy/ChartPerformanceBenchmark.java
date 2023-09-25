@@ -3,8 +3,6 @@ package io.fair_acc.sample.chart.legacy;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.sample.chart.legacy.utils.TestChart;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
@@ -19,16 +17,18 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.TableViewer;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.sample.chart.legacy.utils.AbstractTestApplication;
 import io.fair_acc.sample.chart.legacy.utils.ChartTestCase;
 import io.fair_acc.sample.chart.legacy.utils.JavaFXTestChart;
-import io.fair_acc.dataset.spi.DoubleDataSet;
+import io.fair_acc.sample.chart.legacy.utils.TestChart;
 
 public class ChartPerformanceBenchmark extends AbstractTestApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChartPerformanceBenchmark.class);

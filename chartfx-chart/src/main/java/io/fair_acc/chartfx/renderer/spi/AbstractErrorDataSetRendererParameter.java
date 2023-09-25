@@ -2,10 +2,6 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.util.Objects;
 
-import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
-import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -21,6 +17,10 @@ import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.MaxDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.RamanDouglasPeukerDataReducer;
 import io.fair_acc.chartfx.renderer.datareduction.VisvalingamMaheswariWhyattDataReducer;
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
@@ -57,11 +57,11 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     private final BooleanProperty allowNans = css().createBooleanProperty(this, "allowNans", false);
 
     /**
-     * 
+     *
      */
     public AbstractErrorDataSetRendererParameter() {
         super();
-        StyleUtil.addStyles(this,"error-dataset-renderer");
+        StyleUtil.addStyles(this, "error-dataset-renderer");
         PropUtil.runOnChange(this::invalidateCanvas,
                 errorStyle,
                 rendererDataReducer,
@@ -495,5 +495,4 @@ public abstract class AbstractErrorDataSetRendererParameter<R extends AbstractEr
     }
 
     private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(AbstractPointReducingRenderer.getClassCssMetaData());
-
 }

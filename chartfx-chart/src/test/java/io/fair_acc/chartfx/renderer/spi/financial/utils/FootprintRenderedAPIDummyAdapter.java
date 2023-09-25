@@ -5,12 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
-import io.fair_acc.chartfx.renderer.spi.financial.FootprintRenderer;
-import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
-import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.NbColumnColorGroup;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 
+import io.fair_acc.chartfx.renderer.spi.financial.FootprintRenderer;
+import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
+import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.NbColumnColorGroup;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 
 public class FootprintRenderedAPIDummyAdapter implements FootprintRenderer.IFootprintRenderedAPI {

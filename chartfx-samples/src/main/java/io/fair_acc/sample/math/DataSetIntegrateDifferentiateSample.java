@@ -1,22 +1,22 @@
 package io.fair_acc.sample.math;
 
-import io.fair_acc.sample.chart.ChartSample;
+import java.util.Random;
+
 import javafx.application.Application;
 import javafx.scene.Node;
+import javafx.stage.Stage;
 
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.functions.GaussianFunction;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
-import javafx.stage.Stage;
-
-import java.util.Random;
 
 /**
  * Sample to illustrate integral and differentiation of data sets low-pass filter
- * 
+ *
  * @author rstein
  */
 public class DataSetIntegrateDifferentiateSample extends ChartSample {

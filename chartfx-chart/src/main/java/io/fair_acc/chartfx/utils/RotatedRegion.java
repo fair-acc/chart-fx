@@ -1,8 +1,8 @@
 package io.fair_acc.chartfx.utils;
 
-import javafx.scene.Node;
-
 import java.util.function.DoubleUnaryOperator;
+
+import javafx.scene.Node;
 
 /**
  * Utility class for working with rotating regions/controls that are
@@ -14,7 +14,6 @@ import java.util.function.DoubleUnaryOperator;
  * @author ennerf
  */
 public class RotatedRegion {
-
     @FunctionalInterface
     public interface ResizeRelocateMethod {
         void apply(double x, double y, double width, double height);
@@ -28,17 +27,11 @@ public class RotatedRegion {
     }
 
     public double computePrefWidth(double length) {
-        return getRotate() == 0 ? computePrefWidth.applyAsDouble(length) :
-                bounds.setSize(computePrefWidth.applyAsDouble(length), computePrefHeight.applyAsDouble(length))
-                        .rotateCenter(getRotate())
-                        .getWidth();
+        return getRotate() == 0 ? computePrefWidth.applyAsDouble(length) : bounds.setSize(computePrefWidth.applyAsDouble(length), computePrefHeight.applyAsDouble(length)).rotateCenter(getRotate()).getWidth();
     }
 
     public double computePrefHeight(double length) {
-        return getRotate() == 0 ? computePrefHeight.applyAsDouble(length) :
-                bounds.setSize(computePrefWidth.applyAsDouble(length), computePrefHeight.applyAsDouble(length))
-                        .rotateCenter(getRotate())
-                        .getHeight();
+        return getRotate() == 0 ? computePrefHeight.applyAsDouble(length) : bounds.setSize(computePrefWidth.applyAsDouble(length), computePrefHeight.applyAsDouble(length)).rotateCenter(getRotate()).getHeight();
     }
 
     public void resizeRelocate(double x, double y, double width, double height) {
@@ -61,5 +54,4 @@ public class RotatedRegion {
     private final DoubleUnaryOperator computePrefHeight;
     private final ResizeRelocateMethod resizeRelocate;
     private final RotatedBounds bounds = new RotatedBounds();
-
 }

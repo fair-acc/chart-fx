@@ -2,7 +2,6 @@ package io.fair_acc.chartfx.axes.spi;
 
 import java.util.*;
 
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.DoubleProperty;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
@@ -20,6 +19,7 @@ import io.fair_acc.chartfx.axes.spi.transforms.DefaultAxisTransform;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.spi.DataRange;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * Implements an Oscilloscope-like axis with a default of 10 divisions (tick marks) and fixed zero (or offset) screen

@@ -121,7 +121,7 @@ public class DataRange {
 
     /**
      * Empties this DataRange. After calling this method this data range becomes undefined.
-     * 
+     *
      * @return <code>true</code> if the values were valid before
      * @see #isDefined()
      */

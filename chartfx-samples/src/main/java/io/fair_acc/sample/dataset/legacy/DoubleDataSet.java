@@ -3,20 +3,20 @@ package io.fair_acc.sample.dataset.legacy;
 import java.util.Arrays;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.EditableDataSet;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Implementation of the <code>DataSet</code> interface which stores x,y values in two separate arrays. It provides
  * methods allowing easily manipulate of data points. <br>
  * User provides X and Y coordinates or only Y coordinates. In the former case X coordinates have value of data point
  * index. This version being optimised for native double arrays.
- * 
+ *
  * @see DoubleErrorDataSet for an equivalent implementation with asymmetric errors in Y
  * @author rstein
  * @deprecated this is kept for reference/performance comparisons only
@@ -241,7 +241,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     /**
      * clear all data points
-     * 
+     *
      * @return itself (fluent design)
      */
     public DoubleDataSet clearData() {
@@ -291,7 +291,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     /**
      * removes sub-range of data points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -338,7 +338,7 @@ public class DoubleDataSet extends AbstractDataSet<DoubleDataSet> implements Edi
 
     /**
      * clear old data and overwrite with data from 'other' data set (deep copy)
-     * 
+     *
      * @param other the source data set
      * @return itself (fluent design)
      */

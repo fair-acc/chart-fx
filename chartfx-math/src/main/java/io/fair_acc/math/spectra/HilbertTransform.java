@@ -88,7 +88,7 @@ public class HilbertTransform extends Convolution {
 
     /**
      * Hilbert Transform
-     * 
+     *
      * @param data input data
      * @return Hilbert-transformed signal
      */
@@ -132,7 +132,7 @@ public class HilbertTransform extends Convolution {
 
     /**
      * FFT based Hilbert Transform computation is done in Fourier domain
-     * 
+     *
      * @param data input data
      * @return Hilbert-transformed signal
      */
@@ -151,7 +151,7 @@ public class HilbertTransform extends Convolution {
     /**
      * discrete Hilbert transform according to: S. Kak, The discrete Hilbert transform. Proc. IEEE, vol. 58, pp.
      * 585-586, 1970. computation is done in time domain
-     * 
+     *
      * @param data input data
      * @return Hilbert-transformed Signal
      */

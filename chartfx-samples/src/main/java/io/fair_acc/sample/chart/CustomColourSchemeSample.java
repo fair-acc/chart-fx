@@ -1,13 +1,5 @@
 package io.fair_acc.sample.chart;
 
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.plugins.EditAxis;
-import io.fair_acc.chartfx.plugins.Zoomer;
-import io.fair_acc.chartfx.renderer.ErrorStyle;
-import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.chartfx.ui.css.ColorPalette;
-import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
@@ -17,8 +9,18 @@ import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.plugins.EditAxis;
+import io.fair_acc.chartfx.plugins.Zoomer;
+import io.fair_acc.chartfx.renderer.ErrorStyle;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.chartfx.ui.css.ColorPalette;
+import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 
 /**
  * Example illustrating the various colour scheme options

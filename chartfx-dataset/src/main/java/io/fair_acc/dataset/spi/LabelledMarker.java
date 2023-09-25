@@ -10,11 +10,10 @@ package io.fair_acc.dataset.spi;
 
 /**
  * A utility class containing all information about a marker used with a LabbeledMarkerRenderer.
- * 
+ *
  * @author braeun
  */
 public class LabelledMarker {
-
     private static String defaultColor = null;
     private static double defaultLineWidth = 0;
     private static double defaultFontSize = 0;
@@ -27,7 +26,7 @@ public class LabelledMarker {
     private double fontSize = 12.0;
 
     /**
-     * 
+     *
      * @param x new X coordinate
      * @param label marker name
      */
@@ -40,7 +39,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param x new X coordinate
      * @param label marker name
      * @param color maker color
@@ -54,7 +53,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param x new X coordinate
      * @param label marker name
      * @param color maker color
@@ -69,7 +68,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return nomen est omen
      */
     public String getColor() {
@@ -77,7 +76,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return nomen est omen
      */
     public double getFontSize() {
@@ -85,7 +84,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return marker label
      */
     public String getLabel() {
@@ -93,7 +92,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return nomen est omen
      */
     public double getLineWidth() {
@@ -102,7 +101,7 @@ public class LabelledMarker {
 
     /**
      * Gets the style string for the marker.
-     * 
+     *
      * @return the style string
      */
     public String getStyle() {
@@ -123,7 +122,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return horizontal marker position
      */
     public double getX() {
@@ -131,7 +130,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return vertical marker position
      */
     public double getY() {
@@ -139,7 +138,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param color nomen est omen
      */
     public void setColor(final String color) {
@@ -147,7 +146,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param fontSize nomen est omen
      */
     public void setFontSize(final double fontSize) {
@@ -155,7 +154,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param label new maker label string
      */
     public void setLabel(final String label) {
@@ -163,7 +162,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param lineWidth nomen est omen
      */
     public void setLineWidth(final double lineWidth) {
@@ -171,7 +170,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param x new horizontal marker position
      */
     public void setX(final double x) {
@@ -179,7 +178,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param y new vertical marker position
      */
     public void setY(final double y) {
@@ -188,7 +187,7 @@ public class LabelledMarker {
 
     /**
      * shift horizontal marker coordinate by shift parameter 'v'
-     * 
+     *
      * @param v horizontal shift parameter
      */
     public void shift(final double v) {
@@ -196,7 +195,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return default color
      */
     public static String getDefaultColor() {
@@ -204,7 +203,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return nomen est omen
      */
     public static double getDefaultFontSize() {
@@ -212,7 +211,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @return nomen est omen
      */
     public static double getDefaultLineWidth() {
@@ -220,7 +219,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param defaultColor nomen est omen
      */
     public static void setDefaultColor(final String defaultColor) {
@@ -228,7 +227,7 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param defaultFontSize nomen est omen
      */
     public static void setDefaultFontSize(final double defaultFontSize) {
@@ -236,11 +235,10 @@ public class LabelledMarker {
     }
 
     /**
-     * 
+     *
      * @param defaultLineWidth nomen est omen
      */
     public static void setDefaultLineWidth(final double defaultLineWidth) {
         LabelledMarker.defaultLineWidth = defaultLineWidth;
     }
-
 }

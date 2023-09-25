@@ -51,7 +51,7 @@ package io.fair_acc.math.spectra.wavelet;
  * <li><i>Building Your Own Wavelets at Home</i> in
  * <a href="http://www.multires.caltech.edu/teaching/courses/waveletcourse/"> Wavelets in Computer Graphics</a></li>
  * </ul>
- * 
+ *
  * <p>
  * Copyright and Use
  * <p>
@@ -64,11 +64,11 @@ package io.fair_acc.math.spectra.wavelet;
  * code uses it at their own risk. Nor is any support provided by Ian Kaplan and Bear Products International.
  * <p>
  * Please send any bug fixes or suggested source changes to:
- * 
+ *
  * <pre>
      iank@bearcave.com
  * </pre>
- * 
+ *
  * @author Ian Kaplan
  */
 public abstract class Lift {
@@ -85,7 +85,7 @@ public abstract class Lift {
      * average of the input data set in vec[0]. The coefficient bands follow this element in powers of two (e.g., 1, 2,
      * 4, 8...).
      * </p>
-     * 
+     *
      * @param vec input vector
      */
     public void forwardTrans(final double[] vec) {
@@ -106,7 +106,7 @@ public abstract class Lift {
      * inverseTrans is passed the result of an ordered wavelet transform, consisting of an average and a set of wavelet
      * coefficients. The inverse transform is calculated in-place and the result is returned in the argument array.
      * </p>
-     * 
+     *
      * @param vec input vector
      */
     public void inverseTrans(final double[] vec) {
@@ -123,7 +123,7 @@ public abstract class Lift {
      * Merge the odd elements from the second half of the N element region in the array with the even elements in the
      * first half of the N element region. The result will be the combination of the odd and even elements in a region
      * of length N.
-     * 
+     *
      * @param vec input vector
      * @param N size of input vector
      */
@@ -145,7 +145,7 @@ public abstract class Lift {
 
     /**
      * Predict step, to be defined by the subclass
-     * 
+     *
      * @param vec input array
      * @param N size of region to act on (from 0..N-1)
      * @param direction forward or inverse transform
@@ -155,10 +155,10 @@ public abstract class Lift {
     /**
      * Split the <i>vec</i> into even and odd elements, where the even elements are in the first half of the vector and
      * the odd elements are in the second half.
-     * 
+     *
      * @param vec input vector
      * @param N size of input vector
-     * 
+     *
      */
     protected void split(final double[] vec, final int N) {
         int start = 1;
@@ -177,7 +177,7 @@ public abstract class Lift {
 
     /**
      * Update step, to be defined by the subclass
-     * 
+     *
      * @param vec input array
      * @param N size of region to act on (from 0..N-1)
      * @param direction forward or inverse transform

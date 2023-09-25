@@ -1,19 +1,19 @@
 package io.fair_acc.dataset.spi;
 
-import java.util.Map;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.IntToDoubleFunction;
 
-import io.fair_acc.dataset.*;
+import io.fair_acc.bench.DurationMeasure;
 import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.dataset.*;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.dataset.locks.DefaultDataSetLock;
-import io.fair_acc.bench.DurationMeasure;
 import io.fair_acc.dataset.spi.utils.MathUtils;
 import io.fair_acc.dataset.spi.utils.StringHashMapList;
 import io.fair_acc.dataset.utils.AssertUtils;
@@ -758,5 +758,4 @@ public abstract class AbstractDataSet<D extends AbstractStylable<D>> extends Abs
     }
 
     private DurationMeasure benchRecomputeLimitsSingle = DurationMeasure.DISABLED;
-
 }

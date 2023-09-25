@@ -23,10 +23,10 @@ import io.fair_acc.chartfx.plugins.measurements.SimpleMeasurements.MeasurementTy
 import io.fair_acc.dataset.testdata.spi.SineFunction;
 
 /**
-* Tests {@link ChartMeasurementSelector }
-* @author rstein
-*
-*/
+ * Tests {@link ChartMeasurementSelector }
+ * @author rstein
+ *
+ */
 @ExtendWith(ApplicationExtension.class)
 public class ChartMeasurementSelectorTests {
     private ChartMeasurementSelector field;

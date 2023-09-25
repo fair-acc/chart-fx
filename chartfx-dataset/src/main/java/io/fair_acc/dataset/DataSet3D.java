@@ -2,7 +2,7 @@ package io.fair_acc.dataset;
 
 /**
  * A <code>DataSet</code> extension used to represent 3-dimensional data points.
- * This class only contains convenience methods to make 
+ * This class only contains convenience methods to make
  *
  * @author gkruk
  * @author rstein

@@ -10,7 +10,7 @@ public class RandomWalkFunction extends AbstractTestFunction<RandomWalkFunction>
     private static final long serialVersionUID = 5274313670852663800L;
 
     /**
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      */

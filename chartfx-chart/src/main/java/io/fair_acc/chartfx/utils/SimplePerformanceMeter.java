@@ -19,8 +19,8 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Node;
-import javafx.scene.layout.Region;
 import javafx.scene.Scene;
+import javafx.scene.layout.Region;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -116,7 +116,7 @@ public class SimplePerformanceMeter extends Region {
      * typically: alpha ~ Ts /(Ts+T) with
      * <p>
      * 'Ts' being the sampling period, and 'T' the desired IIR time constant
-     * 
+     *
      * @return average factor alpha
      */
     public DoubleProperty averageFactorProperty() {
@@ -248,7 +248,7 @@ public class SimplePerformanceMeter extends Region {
     }
 
     public boolean isSceneDirty() {
-        if ( this.getScene().getRoot() == null) {
+        if (this.getScene().getRoot() == null) {
             return false;
         }
         try {

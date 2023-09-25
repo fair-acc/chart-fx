@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.application.Application;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -31,6 +30,7 @@ import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.LimitedIndexedTreeDataSet;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 public class TimeAxisNonLinearSample extends ChartSample {
@@ -231,7 +231,6 @@ public class TimeAxisNonLinearSample extends ChartSample {
                 upper.add(value);
             }
             upperFormat.updateFormatter(upper, 1.0);
-
         }
 
         @Override

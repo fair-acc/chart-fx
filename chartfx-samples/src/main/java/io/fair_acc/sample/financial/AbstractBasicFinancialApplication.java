@@ -9,11 +9,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Map;
 
-import fxsampler.SampleBase;
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
-import io.fair_acc.sample.chart.ChartSample;
-import io.fair_acc.sample.financial.service.consolidate.OhlcvConsolidationAddon;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -28,6 +23,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.AxisMode;
@@ -38,6 +34,7 @@ import io.fair_acc.chartfx.plugins.DataPointTooltip;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.spi.DefaultDataSet;
@@ -45,12 +42,16 @@ import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcv;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.financial.dos.Interval;
 import io.fair_acc.sample.financial.service.CalendarUtils;
 import io.fair_acc.sample.financial.service.SimpleOhlcvDailyParser;
 import io.fair_acc.sample.financial.service.SimpleOhlcvReplayDataSet;
 import io.fair_acc.sample.financial.service.SimpleOhlcvReplayDataSet.DataInput;
+import io.fair_acc.sample.financial.service.consolidate.OhlcvConsolidationAddon;
 import io.fair_acc.sample.financial.service.period.IntradayPeriod;
+
+import fxsampler.SampleBase;
 
 /**
  * Base class for demonstration of financial charts.
@@ -86,7 +87,7 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
     private boolean timerActivated = false;
 
     //@Override
-    //public void start(final Stage primaryStage) {
+    // public void start(final Stage primaryStage) {
     //    ProcessingProfiler.setVerboseOutputState(true);
     //    ProcessingProfiler.setLoggerOutputState(true);
     //    ProcessingProfiler.setDebugState(false);
@@ -114,13 +115,13 @@ public abstract class AbstractBasicFinancialApplication extends ChartSample {
         // configure shared variables for application sample tests
     }
 
-    //protected void closeDemo(final WindowEvent evt) {
-    //    if (evt.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST) && LOGGER.isInfoEnabled()) {
-    //        LOGGER.atInfo().log("requested demo to shut down");
-    //    }
-    //    stopTimer();
-    //    Platform.exit();
-    //}
+    // protected void closeDemo(final WindowEvent evt) {
+    //     if (evt.getEventType().equals(WindowEvent.WINDOW_CLOSE_REQUEST) && LOGGER.isInfoEnabled()) {
+    //         LOGGER.atInfo().log("requested demo to shut down");
+    //     }
+    //     stopTimer();
+    //     Platform.exit();
+    // }
 
     protected ToolBar getTestToolBar(Chart chart, AbstractFinancialRenderer<?> renderer, boolean replaySupport) {
         ToolBar testVariableToolBar = new ToolBar();

@@ -1,21 +1,27 @@
 package io.fair_acc.chartfx.renderer.spi.financial.service.footprint;
 
-import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeKey;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;
 
 public class FootprintRendererAttributes extends AttributeModel {
-    /** Column coloring group feature active, default true */
+    /**
+     * Column coloring group feature active, default true
+     */
     public static final AttributeKey<Boolean> COLUMN_COLORING_FEATURE_ACTIVE = AttributeKey.create(Boolean.class, "COLUMN_COLORING_FEATURE_ACTIVE");
 
-    /** Draw pullback column, default true */
+    /**
+     * Draw pullback column, default true
+     */
     public static final AttributeKey<Boolean> DRAW_PULLBACK_COLUMN = AttributeKey.create(Boolean.class, "DRAW_PULLBACK_COLUMN");
 
-    /** Draw rectangle of POC of each bar, default true */
+    /**
+     * Draw rectangle of POC of each bar, default true
+     */
     public static final AttributeKey<Boolean> DRAW_POC_RECTANGLE_OF_EACH_BAR = AttributeKey.create(Boolean.class, "DRAW_POC_RECTANGLE_OF_EACH_BAR");
 
     /**
@@ -31,7 +37,9 @@ public class FootprintRendererAttributes extends AttributeModel {
      */
     public static final AttributeKey<Double[]> COLUMN_COLOR_GROUP_THRESHOLDS = AttributeKey.create(Double[].class, "COLUMN_COLOR_GROUP_THRESHOLDS");
 
-    /** Bolding/Plain font bid/ask under defined threshold, 0 means disabled, default 30 */
+    /**
+     * Bolding/Plain font bid/ask under defined threshold, 0 means disabled, default 30
+     */
     public static final AttributeKey<Double> BID_ASK_BOLD_THRESHOLD = AttributeKey.create(Double.class, "BID_ASK_BOLD_THRESHOLD");
 
     /**
@@ -43,11 +51,11 @@ public class FootprintRendererAttributes extends AttributeModel {
     public static final AttributeKey<Font[]> BID_ASK_VOLUME_FONTS = AttributeKey.create(Font[].class, "BID_ASK_VOLUME_FONTS");
 
     /**
-      * Configure Footprint by default values. Good practise is create these defaults and apply your changes to this instance by direct call setAttribute method.
-      *
-      * @param scheme the coloring scheme
-      * @return define default values
-      */
+     * Configure Footprint by default values. Good practise is create these defaults and apply your changes to this instance by direct call setAttribute method.
+     *
+     * @param scheme the coloring scheme
+     * @return define default values
+     */
     public static FootprintRendererAttributes getDefaultValues(FinancialTheme scheme) {
         FootprintRendererAttributes model = new FootprintRendererAttributes();
 

@@ -1,11 +1,7 @@
 package io.fair_acc.chartfx.renderer.spi.financial;
 
-import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
-import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
-import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
-import io.fair_acc.chartfx.ui.css.*;
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.DataSet;
+import java.util.List;
+
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.StringProperty;
@@ -15,7 +11,12 @@ import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import java.util.List;
+import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
+import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
+import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
+import io.fair_acc.chartfx.ui.css.*;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.DataSet;
 
 /**
  * CSS styling node for financial datasets.
@@ -23,7 +24,6 @@ import java.util.List;
  * @author ennerf
  */
 public class FinancialDataSetNode extends DataSetNode {
-
     // The properties can be styled using the standard JavaFX naming convention, e.g.,
     //
     // -fx-shadow-line-width: 2.5; => setShadowLineWidth(2.5)
@@ -277,7 +277,6 @@ public class FinancialDataSetNode extends DataSetNode {
     private static final CssPropertyFactory<DataSetNodeParameter> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
 
     // GENERATED ACCESSOR METHODS -------------------------------
-
 
     public double getShadowLineWidth() {
         return shadowLineWidth.get();

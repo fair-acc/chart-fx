@@ -233,7 +233,7 @@ public class ColorGradientAxis extends DefaultNumericAxis {
      */
     public Color getColor(final double value) {
         final double offset = (value - getRange().getLowerBound())
-                              / (getRange().getUpperBound() - getRange().getLowerBound());
+                            / (getRange().getUpperBound() - getRange().getLowerBound());
 
         double lowerOffset = 0.0;
         double upperOffset = 1.0;
@@ -274,14 +274,14 @@ public class ColorGradientAxis extends DefaultNumericAxis {
     /**
      * Return the color for a value as an integer with the color values in its bytes. For use e.g. with an IntBuffer
      * backed PixelBuffer.
-     * 
+     *
      * @param value z-Value
      * @return integer with one byte each set to alpha, red, green, blue
      */
     public int getIntColor(final double value) {
         final Color color = getColor(value);
         return ((byte) (color.getOpacity() * 255) << 24) + ((byte) (color.getRed() * 255) << 16)
-                + ((byte) (color.getGreen() * 255) << 8) + ((byte) (color.getBlue() * 255));
+      + ((byte) (color.getGreen() * 255) << 8) + ((byte) (color.getBlue() * 255));
     }
 
     public DoubleProperty gradientWidthProperty() {

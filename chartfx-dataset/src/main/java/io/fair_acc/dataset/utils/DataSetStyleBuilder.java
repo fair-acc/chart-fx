@@ -8,7 +8,6 @@ import io.fair_acc.dataset.spi.DataSetBuilder;
  * @author ennerf
  */
 public class DataSetStyleBuilder extends StyleBuilder<DataSetStyleBuilder> {
-
     public static DataSetStyleBuilder instance() {
         return instance.get().reset();
     }
@@ -41,7 +40,6 @@ public class DataSetStyleBuilder extends StyleBuilder<DataSetStyleBuilder> {
     public DataSetStyleBuilder setIntensity(double value) {
         return setDoubleProp(INTENSITY, value);
     }
-
 
     public static final String SHOW_IN_LEGEND = "-fx-show-in-legend";
 
@@ -197,5 +195,4 @@ public class DataSetStyleBuilder extends StyleBuilder<DataSetStyleBuilder> {
     public DataSetStyleBuilder setFontItalic(boolean italic) {
         return setStringProp(FONT_STYLE, italic ? "italic" : "regular");
     }
-
 }

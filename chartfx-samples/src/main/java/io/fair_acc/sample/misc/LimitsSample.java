@@ -1,6 +1,5 @@
 package io.fair_acc.sample.misc;
 
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.scene.Node;
 import javafx.stage.Stage;
 
@@ -13,6 +12,7 @@ import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.HiddenSidesPane;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.math.MathBaseFast;
+import io.fair_acc.sample.chart.ChartSample;
 
 /**
  * Sample to illustrate limits

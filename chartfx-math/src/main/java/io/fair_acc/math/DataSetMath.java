@@ -16,6 +16,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.jetbrains.annotations.NotNull;
+import org.jtransforms.fft.DoubleFFT_1D;
+
 import io.fair_acc.dataset.*;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
@@ -24,9 +27,6 @@ import io.fair_acc.dataset.spi.utils.DoublePointError;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 import io.fair_acc.math.spectra.Apodization;
 import io.fair_acc.math.spectra.SpectrumTools;
-
-import org.jetbrains.annotations.NotNull;
-import org.jtransforms.fft.DoubleFFT_1D;
 
 /**
  * Some math operation on DataSet, DataSetError and Histogram
@@ -83,7 +83,7 @@ public final class DataSetMath { // NOPMD - nomen est omen
 
     // convenience short-hand notation for getting error variables (if defined for dataset)
     private static double error(final DataSet dataSet, final ErrType eType, final int index, final double x,
-                                final boolean interpolate) {
+            final boolean interpolate) {
         if (!(dataSet instanceof DataSetError)) {
             // data set does not have any error definition
             return 0.0;

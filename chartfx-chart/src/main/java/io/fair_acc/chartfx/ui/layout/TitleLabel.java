@@ -1,15 +1,16 @@
 package io.fair_acc.chartfx.ui.layout;
 
-import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
-import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.chartfx.utils.RotatedRegion;
+import java.util.List;
+
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.css.StyleableObjectProperty;
 import javafx.scene.control.Label;
 
-import java.util.List;
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.chartfx.utils.RotatedRegion;
 
 /**
  * A label that has a styleable side and accounts
@@ -18,7 +19,6 @@ import java.util.List;
  * @author ennerf
  */
 public class TitleLabel extends Label {
-
     private static final CssPropertyFactory<TitleLabel> CSS = new CssPropertyFactory<>(Label.getClassCssMetaData());
 
     public TitleLabel() {
@@ -71,5 +71,4 @@ public class TitleLabel extends Label {
             super::computePrefWidth,
             super::computePrefHeight,
             super::resizeRelocate);
-
 }

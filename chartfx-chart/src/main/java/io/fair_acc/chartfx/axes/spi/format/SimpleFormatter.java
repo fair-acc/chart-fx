@@ -3,15 +3,15 @@ package io.fair_acc.chartfx.axes.spi.format;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 
+import javafx.util.StringConverter;
+
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
-import javafx.util.StringConverter;
 
 /**
  * @author rstein
  */
 public class SimpleFormatter extends AbstractFormatter {
-
     private static final TickUnitSupplier DEFAULT_TICK_UNIT_SUPPLIER = new DefaultTickUnitSupplier();
     private final DecimalFormat formatter = new DecimalFormat("0.######");
     private String prefix;

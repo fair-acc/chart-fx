@@ -1,10 +1,11 @@
 package io.fair_acc.sample.math;
 
-import io.fair_acc.sample.chart.ChartSample;
+import java.util.Random;
+
 import javafx.application.Application;
 import javafx.scene.Node;
-
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,13 +16,12 @@ import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.dataset.utils.LimitedQueue;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.functions.SigmoidFunction;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
-
-import java.util.Random;
 
 /**
  * Sample to illustrate averaging over several data sets with an IIR and FIR low-pass filter
- * 
+ *
  * @author rstein
  */
 public class DataSetAverageSample extends ChartSample {

@@ -2,12 +2,12 @@ package io.fair_acc.chartfx.legend;
 
 import java.util.List;
 
-import io.fair_acc.chartfx.renderer.Renderer;
-import io.fair_acc.chartfx.ui.geometry.Side;
 import javafx.scene.Node;
 
-public interface Legend {
+import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.ui.geometry.Side;
 
+public interface Legend {
     Node getNode();
 
     Side getSide();
@@ -36,5 +36,4 @@ public interface Legend {
     void updateLegend(List<Renderer> renderers, boolean forceUpdate);
 
     void drawLegend();
-
 }

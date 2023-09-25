@@ -272,7 +272,7 @@ public class HistogramRendererBarSample extends ChartSample {
             this.addToParameterPane("   Shift Bar (mult. data sets): ", shiftBar);
 
             final Spinner<Number> shiftBarOffset = new Spinner<>(0, 100, histogramRenderer.getShiftBarOffset());
-            shiftBarOffset.valueProperty().addListener((ch, old, value) ->  histogramRenderer.setshiftBarOffset(value.intValue()));
+            shiftBarOffset.valueProperty().addListener((ch, old, value) -> histogramRenderer.setshiftBarOffset(value.intValue()));
             this.addToParameterPane("   Shift Bar Offset (mult. DS): ", shiftBarOffset);
         }
 

@@ -115,7 +115,7 @@ public class DataViewTests {
             case WINDOW_CLOSED:
                 assertEquals(dataView.getVisibleChildren().get(0), dataView.getVisibleChildren().get(1));
                 dataViewWindow.closeButtonAction.run();
-                //testWindowClosedStates();
+                // testWindowClosedStates();
                 break;
             default:
                 break;

@@ -7,12 +7,12 @@ import static io.fair_acc.sample.financial.service.period.IntradayPeriod.Intrada
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import javafx.geometry.HPos;
 import javafx.scene.Node;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
@@ -22,6 +22,7 @@ import io.fair_acc.chartfx.plugins.YWatchValueIndicator;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.CandleStickRenderer;
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import io.fair_acc.chartfx.renderer.spi.financial.PositionFinancialRendererPaintAfterEP;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAware;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -37,7 +38,6 @@ import io.fair_acc.sample.financial.service.order.PositionFinancialDataSet;
 import io.fair_acc.sample.financial.service.period.IntradayPeriod;
 import io.fair_acc.sample.financial.service.plan.MktOrderListTradePlan;
 import io.fair_acc.sample.financial.service.plan.MktOrderListTradePlan.SimMktOrder;
-import javafx.stage.Stage;
 
 /**
  * Tick OHLC/V realtime processing. Demonstration of re-sample data to 2M timeframe.

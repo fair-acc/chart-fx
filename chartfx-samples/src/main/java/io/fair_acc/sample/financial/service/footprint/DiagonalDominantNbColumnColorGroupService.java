@@ -9,7 +9,7 @@ import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.NbColumnColo
 import io.fair_acc.sample.financial.dos.PriceVolumeContainer;
 
 /**
- * Standard calculation of computation by percentage of diagonal dominant bid x ask volumes 
+ * Standard calculation of computation by percentage of diagonal dominant bid x ask volumes
  */
 public class DiagonalDominantNbColumnColorGroupService implements NbColumnColorGroupService {
     private final boolean columnColoringFeatureActive;

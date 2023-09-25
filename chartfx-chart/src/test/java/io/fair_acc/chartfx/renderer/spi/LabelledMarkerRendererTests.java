@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
@@ -26,6 +25,7 @@ import io.fair_acc.chartfx.ui.utils.TestFx;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 
 /**
  * Tests {@link io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer }
@@ -142,36 +142,33 @@ public class LabelledMarkerRendererTests {
             // n == 4 has no label
 
             if (n == 5) {
-                dataSet.addDataStyle(n, style.reset().setLineColor("blue")
-                        .setMarkerColor("blue")
-                        .setStrokeDashPattern(3, 5, 8, 5)
-                        .build());
+                dataSet.addDataStyle(n, style.reset().setLineColor("blue").setMarkerColor("blue").setStrokeDashPattern(3, 5, 8, 5).build());
             }
 
             if (n == 6) {
                 dataSet.addDataStyle(n, style.reset()
-                        .setLineColor("0xEE00EE")
-                        .setMarkerColor("0xEE00EE")
-                        .setStrokeDashPattern(5, 8, 5, 16)
-                        .build());
+                                                .setLineColor("0xEE00EE")
+                                                .setMarkerColor("0xEE00EE")
+                                                .setStrokeDashPattern(5, 8, 5, 16)
+                                                .build());
             }
 
             if (n == 7) {
                 dataSet.addDataStyle(n, style.reset()
-                        .setLineWidth(3)
-                        .setFont("Serif")
-                        .setFontSize(20)
-                        .setFontItalic(true)
-                        .setFontWeight("bold")
-                        .build());
+                                                .setLineWidth(3)
+                                                .setFont("Serif")
+                                                .setFontSize(20)
+                                                .setFontItalic(true)
+                                                .setFontWeight("bold")
+                                                .build());
             }
 
             if (n == 8) {
                 dataSet.addDataStyle(n, style.reset()
-                        .setLineWidth(3)
-                        .setFont("monospace")
-                        .setFontItalic(true)
-                        .build());
+                                                .setLineWidth(3)
+                                                .setFont("monospace")
+                                                .setFontItalic(true)
+                                                .build());
             }
         }
 

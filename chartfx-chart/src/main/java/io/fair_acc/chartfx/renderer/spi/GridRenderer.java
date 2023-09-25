@@ -2,11 +2,6 @@ package io.fair_acc.chartfx.renderer.spi;
 
 import java.util.List;
 
-import io.fair_acc.chartfx.axes.spi.AxisRange;
-import io.fair_acc.chartfx.ui.css.*;
-import io.fair_acc.bench.DurationMeasure;
-import io.fair_acc.bench.MeasurementRecorder;
-import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,12 +15,17 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.text.TextAlignment;
 
+import io.fair_acc.bench.DurationMeasure;
+import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.axes.spi.TickMark;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.utils.DashPatternStyle;
+import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 
 @SuppressWarnings("PMD.GodClass")
@@ -396,5 +396,4 @@ public class GridRenderer extends Parent implements Renderer {
     }
 
     private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
-
 }

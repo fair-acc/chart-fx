@@ -1,15 +1,15 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import io.fair_acc.chartfx.ui.css.TextStyle;
+import java.util.Objects;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.VPos;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 
+import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.geometry.Side;
-
-import java.util.Objects;
 
 /**
  * TickMark represents the label text dimension, its associated tick mark value and position along the axis for each tick.
@@ -19,7 +19,6 @@ import java.util.Objects;
  * @author ennerf
  */
 public class TickMark {
-
     private double tickValue = Double.NaN; // tick mark in data units
     private String text = ""; // the actual label text
     private double height = Double.NaN; // the label height in display units
@@ -44,7 +43,7 @@ public class TickMark {
      */
     public void setValue(double tickValue, String tickMarkLabel) {
         // Get size on demand
-        if(!Objects.equals(tickMarkLabel, text)) {
+        if (!Objects.equals(tickMarkLabel, text)) {
             this.height = -1;
             this.width = -1;
         }
@@ -53,7 +52,7 @@ public class TickMark {
     }
 
     private void updateTextSize() {
-        if(usedStyle != style.getChangeCounter() || height < 0) {
+        if (usedStyle != style.getChangeCounter() || height < 0) {
             if (text == null || text.isEmpty()) {
                 height = 0;
                 width = 0;
@@ -117,7 +116,7 @@ public class TickMark {
      * @param value tick position along the axis in display units
      */
     public void setPosition(final double value) {
-       this.tickPosition = value;
+        this.tickPosition = value;
     }
 
     public boolean isVisible() {
@@ -132,7 +131,7 @@ public class TickMark {
 
     @Deprecated // TODO: update tests
     TickMark(final Side side, final double tickValue, final double tickPosition, final double tickRotation,
-             final String tickMarkLabel) {
+            final String tickMarkLabel) {
         this(new TextStyle());
         setValue(tickValue, tickMarkLabel);
         this.style.setRotate(tickRotation);
@@ -147,5 +146,4 @@ public class TickMark {
     void setValue(double v) {
         this.tickValue = v;
     }
-
 }

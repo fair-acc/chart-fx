@@ -20,7 +20,7 @@ import io.fair_acc.chartfx.utils.WriteFxImage;
 
 /**
  * Small helper routines to generate and fuzzy-compare test images
- * 
+ *
  * @author rstein
  *
  */

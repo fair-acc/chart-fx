@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Based on javafx.base/src/test/java/test/javafx/collections/ObservableListTest.java
- * 
+ *
  * @author Alexander Krimm
  */
 class ObservableDequeTest {

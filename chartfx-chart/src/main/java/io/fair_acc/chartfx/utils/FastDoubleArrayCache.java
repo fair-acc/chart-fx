@@ -9,7 +9,6 @@ import io.fair_acc.math.ArrayUtils;
  * @author ennerf
  */
 public class FastDoubleArrayCache {
-
     public FastDoubleArrayCache(int maxArrays) {
         cache = new double[maxArrays][];
     }
@@ -26,5 +25,4 @@ public class FastDoubleArrayCache {
 
     int lastRequestedSize;
     private final double[][] cache;
-
 }

@@ -1,12 +1,11 @@
 package io.fair_acc.dataset;
 
 /**
- * 
+ *
  * @author rstein
  *
  */
 public interface Histogram1D extends Histogram {
-
     /**
      * Increment bin with abscissa X, Y, and Z by 1. if x is less than the low-edge of the first bin, the Underflow bin
      * is incremented if x is equal to or greater than the upper edge of last bin, the Overflow bin is incremented The
@@ -38,5 +37,4 @@ public interface Histogram1D extends Histogram {
      * @param stepSize step size through arrays x and w
      */
     void fillN(final double[] x, final double[] w, int stepSize);
-
 }

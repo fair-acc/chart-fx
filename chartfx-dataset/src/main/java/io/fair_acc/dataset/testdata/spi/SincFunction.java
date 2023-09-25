@@ -9,7 +9,7 @@ public class SincFunction extends AbstractTestFunction<SincFunction> {
     private static final long serialVersionUID = 8401471155758562066L;
 
     /**
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      */
@@ -28,9 +28,7 @@ public class SincFunction extends AbstractTestFunction<SincFunction> {
             } else {
                 retVal[i] = Math.sin(x) / x;
             }
-
         }
         return retVal;
     }
-
 }

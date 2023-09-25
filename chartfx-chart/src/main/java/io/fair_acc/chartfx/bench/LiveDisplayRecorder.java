@@ -1,5 +1,25 @@
 package io.fair_acc.chartfx.bench;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.IntSupplier;
+
+import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tooltip;
+import javafx.stage.Stage;
+
+import org.kordamp.ikonli.javafx.FontIcon;
+
+import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.bench.TimeMeasure;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
@@ -10,27 +30,9 @@ import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.bench.MeasurementRecorder;
-import io.fair_acc.bench.TimeMeasure;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
-import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tooltip;
-import javafx.stage.Stage;
-import org.kordamp.ikonli.javafx.FontIcon;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.IntSupplier;
 
 /**
  * Recorder that shows measurements in a real-time chart. It currently
@@ -39,7 +41,6 @@ import java.util.function.IntSupplier;
  * @author ennerf
  */
 public class LiveDisplayRecorder implements MeasurementRecorder {
-
     public static LiveDisplayRecorder showInNewStage(String title) {
         return createChart(title, chart -> {
             var stage = new Stage();
@@ -123,7 +124,7 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
         zoomer.setSliderVisible(false);
         zoomer.setAutoZoomEnabled(true);
         var crosshair = new CrosshairIndicator();
-        return new ChartPlugin[]{zoomer/*,crosshair*/};
+        return new ChartPlugin[] { zoomer /*,crosshair*/ };
     }
 
     public LiveDisplayRecorder(AbstractRendererXY<?> timeSeriesRenderer, AbstractRendererXY<?> percentileRenderer) {
@@ -195,5 +196,4 @@ public class LiveDisplayRecorder implements MeasurementRecorder {
     private long nanoStartOffset = System.nanoTime();
 
     private static final int defaultCapacity = 60 /* Hz */ * 60 /* s */;
-
 }

@@ -12,8 +12,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -44,16 +42,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.EditConstraints;
 import io.fair_acc.dataset.EditableDataSet;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * Displays the all visible data sets inside a table on demand. Implements copy-paste functionality into system
  * clip-board and *.csv file export to allow further processing in other applications. Also enables editing of values if
  * the underlying DataSet allows it.
- * 
+ *
  * @author rstein
  * @author akrimm
  */
@@ -134,7 +134,7 @@ public class TableViewer extends ChartPlugin {
     /**
      * The refresh Rate limits minimum amount of time between table updates in milliseconds and defaults to 100ms.
      * Setting this below 20ms is discouraged and will produce warnings.
-     * 
+     *
      * @return The refreshRate property
      */
     public IntegerProperty refreshRateProperty() {
@@ -188,7 +188,7 @@ public class TableViewer extends ChartPlugin {
 
     /**
      * Helper function to initialize the UI elements for the Interactor toolbar.
-     * 
+     *
      * @return HBox node with the toolbar elements
      */
     protected HBox getInteractorBar() {
@@ -271,7 +271,7 @@ public class TableViewer extends ChartPlugin {
      * screen are allocated and new elements are generated onDemand using Cell Factories. Also generates the column
      * Objects for the TableView and subscribes Change Listeners to update the Table whenever the datasets change or new
      * Datasets are added
-     * 
+     *
      * @author akrimm
      */
     protected class DataSetsModel extends ObservableListBase<DataSetsRow> {
@@ -307,7 +307,7 @@ public class TableViewer extends ChartPlugin {
 
             // Cap at max size
             List<DataSet> columnsUpdated = getChart().getAllDatasets().stream().sorted(Comparator.comparing(DataSet::getName)).collect(Collectors.toList());
-            if(columnsUpdated.size() >= MAX_DATASETS_IN_TABLE) {
+            if (columnsUpdated.size() >= MAX_DATASETS_IN_TABLE) {
                 LOGGER.atWarn().addArgument(columnsUpdated.size()).log("Limiting number of DataSets shown in Table, chart has {} DataSets.");
             }
             var cols = FXUtils.sizedList(columns, Math.min(columnsUpdated.size() + 1, MAX_DATASETS_IN_TABLE), DataSetTableColumns::new);
@@ -330,7 +330,6 @@ public class TableViewer extends ChartPlugin {
             } else {
                 table.refresh();
             }
-
         }
 
         /**
@@ -483,7 +482,7 @@ public class TableViewer extends ChartPlugin {
              * Creates a TableColumn with the text set to the provided string, with default comparator. The cell factory
              * and onEditCommit implementation facilitate editing of the DataSet column identified by the ds and type
              * Parameter
-             * 
+             *
              * @param type The field of the data to be shown
              */
             public DataSetTableColumn(final ColumnType type) {
@@ -615,7 +614,7 @@ public class TableViewer extends ChartPlugin {
         /**
          * Columns for a DataSet. Manages the nested subcolumns for the actual data and handles updates of the
          * DataSet.
-         * 
+         *
          * @author akrimm
          */
         protected class DataSetTableColumns extends TableColumn<DataSetsRow, Double> {

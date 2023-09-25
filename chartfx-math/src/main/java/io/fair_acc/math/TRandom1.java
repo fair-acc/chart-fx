@@ -107,7 +107,7 @@ public class TRandom1 extends TRandom {
      * in quality over level 0, now passes the gap test, but still fails spectral test. level 2 (p=97): passes all known
      * tests, but theoretically still defective. level 3 (p=223): DEFAULT VALUE. Any theoretically possible correlations
      * have very small chance of being observed. level 4 (p=389): highest possible luxury, all 24 bits chaotic.
-     * 
+     *
      * @param seed initial seed
      * @param lux initial luxury
      */
@@ -131,7 +131,7 @@ public class TRandom1 extends TRandom {
 
     /**
      * static function returning the table of seeds
-     * 
+     *
      * @param seeds initial seed
      * @param index index of seed table
      */
@@ -145,7 +145,7 @@ public class TRandom1 extends TRandom {
 
     /**
      * return a random number in ]0,1]
-     * 
+     *
      * @param rnd empty seed
      * @return random number in ]0,1]
      */
@@ -205,7 +205,7 @@ public class TRandom1 extends TRandom {
 
     /**
      * return an array of random numbers in ]0,1]
-     * 
+     *
      * @param size size of storage vector
      * @param vect storage vector
      */
@@ -287,7 +287,7 @@ public class TRandom1 extends TRandom {
      * The initialisation is carried out using a Multiplicative Congruential generator using formula constants of
      * L'Ecuyer as described in "A review of pseudorandom number generators" (Fred James) published in Computer Physics
      * Communications 60 (1990) pages 329-344
-     * 
+     *
      * @param seed initial seed
      * @param lux initial luxury
      */
@@ -350,7 +350,7 @@ public class TRandom1 extends TRandom {
 
     /**
      * set seeds
-     * 
+     *
      * @param seeds initial seed
      * @param lux initial luxury
      */

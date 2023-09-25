@@ -3,7 +3,6 @@ package io.fair_acc.sample.chart.legacy.utils;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
@@ -22,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.utils.SimplePerformanceMeter;
+import io.fair_acc.sample.chart.ChartSample;
 
 public abstract class AbstractTestApplication extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractTestApplication.class);

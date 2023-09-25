@@ -1,14 +1,16 @@
 package io.fair_acc.chartfx.events;
 
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.events.EventProcessor;
-import javafx.animation.AnimationTimer;
-import org.apache.commons.lang3.tuple.Pair;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import javafx.animation.AnimationTimer;
+
+import org.apache.commons.lang3.tuple.Pair;
+
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.EventProcessor;
 
 /**
  * An event processor class which processes dataset events un the UI thread of the chart.
@@ -49,7 +51,8 @@ public class FxEventProcessor extends AnimationTimer implements EventProcessor {
                     action.getLeft().clear();
                     try {
                         action.getRight().run();
-                    } catch (Exception ignored) {}
+                    } catch (Exception ignored) {
+                    }
                 }
             }
         }

@@ -9,13 +9,11 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +22,9 @@ import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.testdata.spi.GaussFunction;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import io.fair_acc.math.DataSetMath;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
 
 /**

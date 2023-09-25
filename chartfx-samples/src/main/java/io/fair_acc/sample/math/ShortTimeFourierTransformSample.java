@@ -16,8 +16,8 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +54,7 @@ import io.fair_acc.sample.chart.ChartSample;
  * - move computations out of javaFX application thread
  *
  * TODO: example was not tested after event refactoring (ennerf)
- * 
+ *
  * @author akrimm
  */
 public class ShortTimeFourierTransformSample extends ChartSample {

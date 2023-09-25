@@ -10,7 +10,7 @@ public class CosineFunction extends AbstractTestFunction<CosineFunction> {
     private final boolean useSystemTimeOffset;
 
     /**
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      */
@@ -20,7 +20,7 @@ public class CosineFunction extends AbstractTestFunction<CosineFunction> {
     }
 
     /**
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      * @param useSystemTime true: use system time
@@ -42,5 +42,4 @@ public class CosineFunction extends AbstractTestFunction<CosineFunction> {
         }
         return retVal;
     }
-
 }

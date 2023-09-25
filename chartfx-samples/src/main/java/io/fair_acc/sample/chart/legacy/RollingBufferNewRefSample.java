@@ -2,16 +2,16 @@ package io.fair_acc.sample.chart.legacy;
 
 import java.util.Timer;
 
-import io.fair_acc.sample.chart.RollingBufferSample;
 import javafx.application.Application;
 
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.sample.chart.RollingBufferSample;
 
 /**
  * derived class to benchmark performance of new chart library against JavaFX Chart version
- * 
+ *
  * @author rstein
  *
  */

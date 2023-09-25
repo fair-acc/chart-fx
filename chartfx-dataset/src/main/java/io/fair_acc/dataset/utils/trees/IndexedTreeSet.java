@@ -9,7 +9,7 @@ import java.util.*;
  * A {@link java.util.NavigableSet} implementation based on a {@link IndexedTreeMap}. The elements are ordered using
  * their {@linkplain Comparable natural ordering}, or by a {@link java.util.Comparator} provided at set creation time,
  * depending on which constructor is used.
- * 
+ *
  * <p>
  * This implementation provides guaranteed log(n) time cost for the basic operations ({@code add}, {@code remove} and
  * {@code contains}).
@@ -31,11 +31,11 @@ import java.util.*;
  * Collections.synchronizedSortedSet} method. This is best done at creation time, to prevent accidental unsynchronized
  * access to the set:
  * </p>
- * 
+ *
  * <pre>
  *   SortedSet s = Collections.synchronizedSortedSet(new IndexedTreeSet(...));
  * </pre>
- * 
+ *
  * <p>
  * The iterators returned by this class's {@code iterator} method are <i>fail-fast</i>: if the set is modified at any
  * time after the iterator is created, in any way except through the iterator's own {@code remove} method, the iterator
@@ -50,7 +50,7 @@ import java.util.*;
  * depended on this exception for its correctness: <i>the fail-fast behavior of iterators should be used only to detect
  * bugs.</i>
  * </p>
- * 
+ *
  * This class is a member of the <a href="{@docRoot}/../technotes/guides/collections/index.html"> Java Collections
  * Framework</a>.
  *
@@ -123,7 +123,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
 
     /**
      * Constructs a set backed by the specified navigable map.
-     * 
+     *
      * @param m source map
      */
     IndexedTreeSet(NavigableMap<E, Object> m) {
@@ -245,7 +245,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
     }
 
     /**
-     * 
+     *
      * @throws Exception if something goes wrong ;-)
      */
     public void debug() throws Exception {
@@ -402,7 +402,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
 
     /**
      * Reconstitute the {@code IndexedTreeSet} instance from a stream (that is, deserialize it).
-     * 
+     *
      * @param s output stream
      * @throws java.io.IOException in case of write errors
      * @throws ClassNotFoundException in case of casting errors
@@ -504,7 +504,7 @@ public class IndexedTreeSet<E> extends java.util.AbstractSet<E>
 
     /**
      * Save the state of the {@code IndexedTreeSet} instance to a stream (that is, serialize it).
-     * 
+     *
      * @param s output stream
      * @throws java.io.IOException in case of IO problems
      *

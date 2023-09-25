@@ -2,9 +2,6 @@ package io.fair_acc.sample.chart;
 
 import java.util.Objects;
 
-import io.fair_acc.chartfx.renderer.spi.hexagon.Hexagon;
-import io.fair_acc.chartfx.renderer.spi.hexagon.HexagonMap;
-import io.fair_acc.chartfx.renderer.spi.hexagon.NoPathFoundException;
 import javafx.application.Application;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -17,6 +14,10 @@ import javafx.stage.Stage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.fair_acc.chartfx.renderer.spi.hexagon.Hexagon;
+import io.fair_acc.chartfx.renderer.spi.hexagon.HexagonMap;
+import io.fair_acc.chartfx.renderer.spi.hexagon.NoPathFoundException;
 
 public class HexagonSamples extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(HexagonSamples.class);

@@ -39,7 +39,7 @@ import io.fair_acc.dataset.testdata.spi.CosineFunction;
 
 /**
  * Test the table viewer plugin
- * 
+ *
  * @author Benjamin Peter
  */
 @ExtendWith(ApplicationExtension.class)

@@ -13,7 +13,7 @@ import io.fair_acc.dataset.events.EventSource;
  * axis name and unit [..].setName("voltage", "V", 0.0, 230.0); // for setting the axis name, unit and explicit min/max
  * values [..].setName("intensity", "ppp", 1e9, 1e10, 1e8, 1e11); // or [..].setName("intensity", "ppp",
  * intensityRange); // for an unsorted range list based on which the internal min/max range is updated.
- * 
+ *
  * @author akrimm
  * @author rstein
  */
@@ -47,7 +47,7 @@ public interface AxisDescription extends EventSource, Serializable {
 
     /**
      * Empties this DataRange. After calling this method this data range becomes undefined.
-     * 
+     *
      * @return <code>true</code> if the values were valid before
      * @see #isDefined()
      */
@@ -85,7 +85,7 @@ public interface AxisDescription extends EventSource, Serializable {
 
     /**
      * Determines if axis range is defined - ie. if <code>min</code> and <code>max</code> values are defined.
-     * 
+     *
      * @return <code>true</code> if range is well defined
      */
     boolean isDefined();
@@ -102,7 +102,7 @@ public interface AxisDescription extends EventSource, Serializable {
 
     /**
      * Sets <code>min</code> and <code>max</code> values for this range.
-     * 
+     *
      * @param min new minimum of the range
      * @param max new maximum of the range
      * @return <code>true</code> if the values becomes the new <code>min</code> or <code>max</code>.
@@ -127,7 +127,7 @@ public interface AxisDescription extends EventSource, Serializable {
 
     /**
      * Sets <code>max</code> value for this range.
-     * 
+     *
      * @param max the new max value
      * @return <code>true</code> if the value becomes the new <code>max</code>.
      */
@@ -135,7 +135,7 @@ public interface AxisDescription extends EventSource, Serializable {
 
     /**
      * Sets <code>min</code> value for this range.
-     * 
+     *
      * @param min the new max value
      * @return <code>true</code> if the value becomes the new <code>min</code>.
      */

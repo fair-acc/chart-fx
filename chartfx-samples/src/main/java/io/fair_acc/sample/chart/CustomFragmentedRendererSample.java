@@ -1,6 +1,5 @@
 package io.fair_acc.sample.chart;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.canvas.GraphicsContext;
@@ -13,6 +12,7 @@ import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.dataset.spi.FragmentedDataSet;
@@ -20,7 +20,7 @@ import io.fair_acc.dataset.testdata.spi.CosineFunction;
 
 /**
  * Example illustrating the use of a custom renderer to plot graphs with gaps
- * 
+ *
  * @author akrimm
  */
 public class CustomFragmentedRendererSample extends ChartSample {

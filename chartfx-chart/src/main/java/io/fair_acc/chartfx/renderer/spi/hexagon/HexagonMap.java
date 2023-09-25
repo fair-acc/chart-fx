@@ -76,7 +76,7 @@ public class HexagonMap {
 
     /**
      * Add a Hexagon to the HexagonMap
-     * 
+     *
      * @param hexagon new hexagon
      *
      * @return the same hexagon
@@ -148,7 +148,7 @@ public class HexagonMap {
     /**
      * If the map was created from an Image, this will return the horizontal pixel relation between the image and the
      * generated map
-     * 
+     *
      * @return scaling factor between pixel and grid
      */
     public Optional<Double> getImageMapHorizontalRelation() {
@@ -158,7 +158,7 @@ public class HexagonMap {
     /**
      * If the map was created from an Image, this will return the vertical pixel relation between the image and the
      * generated map
-     * 
+     *
      * @return scaling factor between pixel and grid
      */
     public Optional<Double> getImageMapVerticalRelation() {
@@ -230,7 +230,7 @@ public class HexagonMap {
 
     /**
      * Removes a Hexagon from the HexagonMap
-     * 
+     *
      * @param hexagon to be removed
      */
     public void removeHexagon(final Hexagon hexagon) {
@@ -267,7 +267,7 @@ public class HexagonMap {
 
     /**
      * A callback when the user clicks on a Hexagon
-     * 
+     *
      * @param callback call-back function handler
      */
     public void setOnHexagonClickedCallback(final HexagonCallback callback) {
@@ -276,7 +276,7 @@ public class HexagonMap {
 
     /**
      * A callback when the user moves into a Hexagon
-     * 
+     *
      * @param callback call-back function handler
      */
     public void setOnHexagonEnteredCallback(final HexagonCallback callback) {
@@ -285,7 +285,7 @@ public class HexagonMap {
 
     /**
      * A callback when the user moves out of a Hexagon
-     * 
+     *
      * @param callback call-back function handler
      */
     public void setOnHexagonExitCallback(final HexagonCallback callback) {
@@ -294,7 +294,7 @@ public class HexagonMap {
 
     /**
      * Tells the renderer that you want some space before the HexagonMap is rendered
-     * 
+     *
      * @param left padding margin left
      * @param top padding margin right
      */
@@ -309,7 +309,7 @@ public class HexagonMap {
 
     /**
      * If you want the coordinates rendered on the screen
-     * 
+     *
      * @param b true: render coordinates
      */
     public void setRenderCoordinates(final boolean b) {
@@ -318,7 +318,7 @@ public class HexagonMap {
 
     /**
      * Sets the font used to draw the hexagon positions
-     * 
+     *
      * @param font for rendering the hex positions
      */
     public void setRenderFont(final Font font) {

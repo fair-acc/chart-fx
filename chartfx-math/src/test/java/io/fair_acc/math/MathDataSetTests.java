@@ -7,12 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.math.MathDataSet.DataSetValueFunction;
@@ -179,7 +179,6 @@ public class MathDataSetTests {
         identityDataSet.getBitState().clear();
         rawDataSetRef.fireInvalidated(ChartBits.DataSetDataAdded);
         Awaitility.await().until(() -> identityDataSet.getBitState().isDirty());
-
     }
 
     protected static DoubleDataSet generateSineWaveData(final int nData) {

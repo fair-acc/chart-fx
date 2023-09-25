@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import io.fair_acc.dataset.events.BitState;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -53,6 +52,7 @@ import io.fair_acc.chartfx.utils.MouseUtils;
 import io.fair_acc.chartfx.viewer.DataViewWindow;
 import io.fair_acc.chartfx.viewer.DataViewWindow.WindowDecoration;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.EventSource;
 
 import impl.org.controlsfx.skin.DecorationPane;
@@ -329,7 +329,7 @@ public abstract class AbstractChartMeasurement implements EventSource {
             return;
         }
         final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator) p).collect(Collectors.toList());
-        //TODO: allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.getBitState().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
+        // TODO: allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.getBitState().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
     }
 
     protected void updateSlider() {

@@ -1,45 +1,56 @@
 package io.fair_acc.sample;
 
-import fr.brouillard.oss.cssfx.CSSFX;
-import fxsampler.FXSamplerProject;
-import io.fair_acc.chartfx.Chart;
+import java.util.Objects;
+
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import fxsampler.model.WelcomePage;
+
 import org.scenicview.ScenicView;
 
-import java.util.Objects;
+import io.fair_acc.chartfx.Chart;
+
+import fr.brouillard.oss.cssfx.CSSFX;
+import fxsampler.FXSamplerProject;
+import fxsampler.model.WelcomePage;
 
 public class ChartFxSamplerProject implements FXSamplerProject {
-
-    /** {@inheritDoc} */
-    @Override public String getProjectName() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getProjectName() {
         return "ChartFx";
     }
 
-    /** {@inheritDoc} */
-    @Override public String getSampleBasePackage() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSampleBasePackage() {
         return "io.fair_acc.sample.chart";
     }
 
     ///** {@inheritDoc} */
     //@Override
-    //public String getModuleName() {
+    // public String getModuleName() {
     //    return "io.fair-acc";
     //}
 
-    /** {@inheritDoc} */
-    @Override public WelcomePage getWelcomePage() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WelcomePage getWelcomePage() {
         VBox vBox = new VBox();
         ImageView imgView = new ImageView();
         // imgView.setStyle("-fx-image: url('org/controlsfx/samples/ControlsFX.png');");
         StackPane pane = new StackPane();
         pane.setPrefHeight(207);
-        //pane.setStyle("-fx-background-image: url('org/controlsfx/samples/bar.png');"
-        //        + "-fx-background-repeat: repeat-x;");
+        // pane.setStyle("-fx-background-image: url('org/controlsfx/samples/bar.png');"
+        //         + "-fx-background-repeat: repeat-x;");
         pane.getChildren().add(imgView);
         Label label = new Label();
         label.setWrapText(true);

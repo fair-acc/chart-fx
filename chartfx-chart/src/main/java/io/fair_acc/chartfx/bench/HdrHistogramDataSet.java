@@ -1,14 +1,15 @@
 package io.fair_acc.chartfx.bench;
 
+import org.HdrHistogram.DoubleHistogram;
+import org.HdrHistogram.DoubleHistogramIterationValue;
+import org.HdrHistogram.DoublePercentileIterator;
+
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
-import org.HdrHistogram.DoubleHistogram;
-import org.HdrHistogram.DoubleHistogramIterationValue;
-import org.HdrHistogram.DoublePercentileIterator;
 
 /**
  * Experimental dataSet for storing hdr histogram data
@@ -16,7 +17,6 @@ import org.HdrHistogram.DoublePercentileIterator;
  * @author ennerf
  */
 class HdrHistogramDataSet extends AbstractDataSet<HdrHistogramDataSet> {
-
     public HdrHistogramDataSet(String name) {
         super(name, 2);
         histogram.setAutoResize(true);
@@ -25,12 +25,12 @@ class HdrHistogramDataSet extends AbstractDataSet<HdrHistogramDataSet> {
     @Override
     public double get(int dimIndex, int index) {
         switch (dimIndex) {
-            case DIM_X:
-                return x.getDouble(index);
-            case DIM_Y:
-                return y.getDouble(index);
-            default:
-                return Double.NaN;
+        case DIM_X:
+            return x.getDouble(index);
+        case DIM_Y:
+            return y.getDouble(index);
+        default:
+            return Double.NaN;
         }
     }
 
@@ -51,7 +51,6 @@ class HdrHistogramDataSet extends AbstractDataSet<HdrHistogramDataSet> {
     }
 
     public void convertHistogramToXY() {
-
         // Convert to displayable x/y values
         x.clear();
         y.clear();
@@ -127,5 +126,4 @@ class HdrHistogramDataSet extends AbstractDataSet<HdrHistogramDataSet> {
     protected DoubleArrayList y = new DoubleArrayList(1000);
 
     protected final DoubleHistogram histogram = new DoubleHistogram(2);
-
 }

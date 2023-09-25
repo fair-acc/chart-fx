@@ -4,8 +4,6 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.DefaultProperty;
 import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
@@ -43,6 +41,8 @@ import io.fair_acc.chartfx.ui.BorderedTitledPane;
 import io.fair_acc.chartfx.utils.DragResizerUtil;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.chartfx.utils.MouseUtils;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.events.EventSource;
 
 /**
@@ -112,7 +112,6 @@ public class DataViewWindow extends BorderPane implements EventSource {
 
             super.set(state);
             fireInvalidated(ChartBits.DataViewWindow);
-
         }
     };
 
@@ -220,7 +219,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
         // asked to remove pane
         getParentView().getMinimisedChildren().remove(this);
         getParentView().getVisibleChildren().remove(this);
-        //TODO: investigate why there are duplicates in the list... following is a work-around
+        // TODO: investigate why there are duplicates in the list... following is a work-around
         getParentView().getVisibleChildren().remove(this);
         getParentView().getUndockedChildren().remove(this);
 
@@ -356,7 +355,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     }
 
     /**
-     * 
+     *
      * @return detachableWindow property that controls whether window can be detached by dragging or not
      */
     public BooleanProperty detachableWindowProperty() {
@@ -482,7 +481,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     }
 
     /**
-     * 
+     *
      * @return true: window can be detached by dragging gesture
      */
     public boolean isDetachableWindow() {
@@ -540,7 +539,7 @@ public class DataViewWindow extends BorderPane implements EventSource {
     }
 
     /**
-     * 
+     *
      * @param state true: window can be detached by dragging gesture
      */
     public void setDetachableWindow(final boolean state) {

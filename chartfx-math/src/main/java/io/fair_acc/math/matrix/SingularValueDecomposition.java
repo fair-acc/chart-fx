@@ -27,9 +27,9 @@ public class SingularValueDecomposition {
     private MatrixD feigenVectorsU; // the eigenvector matrix U (m x n)
     private MatrixD feigenVectorsV; // the eigenvector matrix V (n x n)
     private MatrixD fEigenValues; // the diagonal eigenvalue matrix of input
-            // matrix (n x n)
+                                  // matrix (n x n)
     private MatrixD fInverseEigenValues; // pseuodo-inverse diagonal eigenvalue
-            // matrix of input matrix (n x n)
+                                         // matrix of input matrix (n x n)
 
     private double fCut;
 
@@ -306,7 +306,7 @@ public class SingularValueDecomposition {
         }
 
         final MatrixD lambdaMinus1 = new MatrixD(n, n); // inverse eigenvector
-                // matrix w.r.t. R
+                                                        // matrix w.r.t. R
 
         final double eigenValueMax = fEigenValues.get(0, 0);
         for (int i = 0; i < n; i++) {
@@ -350,7 +350,7 @@ public class SingularValueDecomposition {
     }
 
     /**
-     * 
+     *
      * @return arrays with computed singular values
      */
     public double[] getSingularValues() {

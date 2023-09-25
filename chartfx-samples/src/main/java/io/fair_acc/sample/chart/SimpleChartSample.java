@@ -1,6 +1,5 @@
 package io.fair_acc.sample.chart;
 
-import io.fair_acc.chartfx.ui.geometry.Side;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
@@ -11,11 +10,12 @@ import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.CrosshairIndicator;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.Zoomer;
+import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 
 /**
  * Simple example of how to use chart class
- * 
+ *
  * @author rstein
  */
 public class SimpleChartSample extends ChartSample {

@@ -2,15 +2,16 @@ package io.fair_acc.chartfx.axes.spi.format;
 
 import java.util.List;
 
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.axes.AxisLabelFormatter;
-import io.fair_acc.chartfx.axes.TickUnitSupplier;
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.util.StringConverter;
+
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.AxisLabelFormatter;
+import io.fair_acc.chartfx.axes.TickUnitSupplier;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * @author rstein
@@ -109,7 +110,8 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
 
     @Override
     public void updateFormatter(final DoubleArrayList newMajorTickMarks, final double unitScaling) {
-        this.majorTickMarks.setAll(newMajorTickMarks);;
+        this.majorTickMarks.setAll(newMajorTickMarks);
+        ;
         this.unitScaling = unitScaling;
 
         this.rangeMin = +Double.MAX_VALUE;
@@ -126,5 +128,4 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
 
         rangeUpdated();
     }
-
 }

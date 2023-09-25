@@ -1,5 +1,11 @@
 package io.fair_acc.sample.math;
 
+import java.util.Random;
+
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.stage.Stage;
+
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
@@ -7,15 +13,10 @@ import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.functions.GaussianFunction;
 import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.stage.Stage;
-
-import java.util.Random;
 
 /**
  * Sample to illustrate integral with limits filter
- * 
+ *
  * @author rstein
  */
 public class DataSetIntegrationWithLimitsSample extends ChartSample {
@@ -24,7 +25,6 @@ public class DataSetIntegrationWithLimitsSample extends ChartSample {
 
     @Override
     public Node getChartPanel(Stage stage) {
-
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(true);
         chart.getRenderer(0).setErrorStyle(ErrorStyle.ERRORSURFACE);

@@ -79,13 +79,13 @@ class GridCalculationsHelper {
                 if ((!pathInfoSupplier.isBlockingPath(neighbour) || destination.equals(neighbour))
                         && !closedSet.contains(neighbour)) {
                     tentativeGscore = currentHexagon.aStarGscore
-                            + pathInfoSupplier.getMovementCost(currentHexagon, neighbour);
+                                    + pathInfoSupplier.getMovementCost(currentHexagon, neighbour);
 
                     if (!openSet.contains(neighbour) || tentativeGscore < neighbour.aStarGscore) {
                         neighbour.aStarCameFrom = currentHexagon;
                         neighbour.aStarGscore = tentativeGscore;
                         neighbour.aStarFscore = neighbour.aStarGscore
-                                + GridPosition.getDistance(neighbour.position, destination.position);
+                                              + GridPosition.getDistance(neighbour.position, destination.position);
 
                         /*
                          * TODO: Vill få den att generera path som är mer som getLine() så att de inte rör sig kantigt

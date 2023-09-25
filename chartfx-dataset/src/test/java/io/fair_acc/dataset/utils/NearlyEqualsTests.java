@@ -3,9 +3,10 @@ package io.fair_acc.dataset.utils;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.fair_acc.dataset.spi.utils.MathUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import io.fair_acc.dataset.spi.utils.MathUtils;
 
 /**
  * Test suite to demonstrate a good method for comparing floating-point values using an epsilon. Run via JUnit 4.
@@ -21,8 +22,9 @@ import org.junit.jupiter.api.Test;
  * @author Michael Borgwardt
  */
 public class NearlyEqualsTests {
-
-    /** Regular large numbers - generally not problematic */
+    /**
+     * Regular large numbers - generally not problematic
+     */
     @Test
     public void big() {
         Assertions.assertTrue(MathUtils.nearlyEqual(1000000f, 1000001f));
@@ -31,7 +33,9 @@ public class NearlyEqualsTests {
         assertFalse(MathUtils.nearlyEqual(10001f, 10000f));
     }
 
-    /** Negative large numbers */
+    /**
+     * Negative large numbers
+     */
     @Test
     public void bigNeg() {
         assertTrue(MathUtils.nearlyEqual(-1000000f, -1000001f));
@@ -65,7 +69,9 @@ public class NearlyEqualsTests {
         assertFalse(MathUtils.nearlyEqual(Float.NEGATIVE_INFINITY, -Float.MAX_VALUE));
     }
 
-    /** Numbers around 1 */
+    /**
+     * Numbers around 1
+     */
     @Test
     public void mid() {
         assertTrue(MathUtils.nearlyEqual(1.0000001f, 1.0000002f));
@@ -74,7 +80,9 @@ public class NearlyEqualsTests {
         assertFalse(MathUtils.nearlyEqual(1.0001f, 1.0002f));
     }
 
-    /** Numbers around -1 */
+    /**
+     * Numbers around -1
+     */
     @Test
     public void midNeg() {
         assertTrue(MathUtils.nearlyEqual(-1.000001f, -1.000002f));
@@ -107,7 +115,9 @@ public class NearlyEqualsTests {
         assertFalse(MathUtils.nearlyEqual(-Float.MIN_VALUE, Float.NaN));
     }
 
-    /** Comparisons of numbers on opposite sides of 0 */
+    /**
+     * Comparisons of numbers on opposite sides of 0
+     */
     @Test
     public void opposite() {
         assertFalse(MathUtils.nearlyEqual(1.0000001f, -1.0f));
@@ -119,7 +129,9 @@ public class NearlyEqualsTests {
         assertFalse(MathUtils.nearlyEqual(10000 * Float.MIN_VALUE, 10000 * -Float.MIN_VALUE));
     }
 
-    /** Numbers between 1 and 0 */
+    /**
+     * Numbers between 1 and 0
+     */
     @Test
     public void small() {
         assertTrue(MathUtils.nearlyEqual(0.000000001000001f, 0.000000001000002f));
@@ -128,14 +140,18 @@ public class NearlyEqualsTests {
         assertFalse(MathUtils.nearlyEqual(0.000000000001001f, 0.000000000001002f));
     }
 
-    /** Small differences away from zero */
+    /**
+     * Small differences away from zero
+     */
     @Test
     public void smallDiffs() {
         assertTrue(MathUtils.nearlyEqual(0.3f, 0.30000003f));
         assertTrue(MathUtils.nearlyEqual(-0.3f, -0.30000003f));
     }
 
-    /** Numbers between -1 and 0 */
+    /**
+     * Numbers between -1 and 0
+     */
     @Test
     public void smallNeg() {
         assertTrue(MathUtils.nearlyEqual(-0.000000001000001f, -0.000000001000002f));
@@ -163,7 +179,9 @@ public class NearlyEqualsTests {
         assertFalse(MathUtils.nearlyEqual(-Float.MIN_VALUE, 0.000000001f));
     }
 
-    /** Comparisons involving zero */
+    /**
+     * Comparisons involving zero
+     */
     @Test
     public void zero() {
         assertTrue(MathUtils.nearlyEqual(0.0f, 0.0f));

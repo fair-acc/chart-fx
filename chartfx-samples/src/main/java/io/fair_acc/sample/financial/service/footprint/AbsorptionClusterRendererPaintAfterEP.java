@@ -1,6 +1,7 @@
 package io.fair_acc.sample.financial.service.footprint;
 
-import io.fair_acc.chartfx.ui.css.AbstractStyleParser;
+import java.util.function.Consumer;
+
 import javafx.scene.paint.Color;
 
 import io.fair_acc.chartfx.XYChart;
@@ -9,12 +10,11 @@ import io.fair_acc.chartfx.renderer.spi.financial.FootprintRenderer.EpDataAddon;
 import io.fair_acc.chartfx.renderer.spi.financial.service.DataSetAware;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEP;
+import io.fair_acc.chartfx.ui.css.AbstractStyleParser;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.sample.financial.dos.Interval;
 import io.fair_acc.sample.financial.dos.OHLCVItem;
 import io.fair_acc.sample.financial.dos.OHLCVItemExtended;
-
-import java.util.function.Consumer;
 
 /**
  * Find Footprint Bid/Ask Clusters
@@ -26,9 +26,7 @@ public class AbsorptionClusterRendererPaintAfterEP implements RendererPaintAfter
     public static final String DATASET_ABSORPTION_ASK_TRANS_COLOR = "-fx-absorption-ask-trans-color";
     public static final String DATASET_ABSORPTION_BID_TRANS_COLOR = "-fx-absorption-bid-trans-color";
 
-
     private final AbstractStyleParser styleParser = new AbstractStyleParser() {
-
         @Override
         protected void clear() {
             absorptionAskColor = Color.rgb(255, 128, 128);
@@ -40,14 +38,14 @@ public class AbsorptionClusterRendererPaintAfterEP implements RendererPaintAfter
         @Override
         protected boolean parseEntry(String key, String value) {
             switch (key) {
-                case  DATASET_ABSORPTION_ASK_COLOR:
-                    return parseColor(value, v -> absorptionAskColor = v);
-                case  DATASET_ABSORPTION_BID_COLOR:
-                    return parseColor(value, v -> absorptionBidColor = v);
-                case  DATASET_ABSORPTION_ASK_TRANS_COLOR:
-                    return parseColor(value, v -> absorptionAskTransColor = v);
-                case  DATASET_ABSORPTION_BID_TRANS_COLOR:
-                    return parseColor(value, v -> absorptionBidTransColor = v);
+            case DATASET_ABSORPTION_ASK_COLOR:
+                return parseColor(value, v -> absorptionAskColor = v);
+            case DATASET_ABSORPTION_BID_COLOR:
+                return parseColor(value, v -> absorptionBidColor = v);
+            case DATASET_ABSORPTION_ASK_TRANS_COLOR:
+                return parseColor(value, v -> absorptionAskTransColor = v);
+            case DATASET_ABSORPTION_BID_TRANS_COLOR:
+                return parseColor(value, v -> absorptionBidTransColor = v);
             }
             return false;
         }

@@ -32,30 +32,30 @@ public class PriceVolumeContainer {
     }
 
     /**
-   * @param price return DO price volume by required price level
-   * @return provides volume information for specific price
-   */
+     * @param price return DO price volume by required price level
+     * @return provides volume information for specific price
+     */
     public Double[] getPriceVolumeBy(double price) {
         return priceVolumeMap.get(price);
     }
 
     /**
-   * @return provides price volume tree map
-   */
+     * @return provides price volume tree map
+     */
     public TreeMap<Double, Double[]> getCompletedPriceVolumeTreeMap() {
         return priceVolumeMap;
     }
 
     /**
-   * @return provides price volume collection for actual bar
-   */
+     * @return provides price volume collection for actual bar
+     */
     public Collection<Double[]> getCompletedPriceVolume() {
         return priceVolumeMap.values();
     }
 
     /**
-   * Reset PriceVolume instance
-   */
+     * Reset PriceVolume instance
+     */
     public void clear() {
         priceVolumeMap.clear();
         pocVolume = -Double.MAX_VALUE;
@@ -63,15 +63,15 @@ public class PriceVolumeContainer {
     }
 
     /**
-   * @return provides calculated POC price
-   */
+     * @return provides calculated POC price
+     */
     public double getPocPrice() {
         return pocPrice;
     }
 
     /**
-   * @return provides total volume of POS price
-   */
+     * @return provides total volume of POS price
+     */
     public double getPocVolume() {
         return pocVolume;
     }

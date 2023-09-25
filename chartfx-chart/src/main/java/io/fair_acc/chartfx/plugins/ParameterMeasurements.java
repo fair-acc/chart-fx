@@ -1,6 +1,5 @@
 package io.fair_acc.chartfx.plugins;
 
-import io.fair_acc.chartfx.plugins.measurements.TrendingMeasurements;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -14,6 +13,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import io.fair_acc.chartfx.plugins.measurements.AbstractChartMeasurement;
 import io.fair_acc.chartfx.plugins.measurements.DataSetMeasurements;
 import io.fair_acc.chartfx.plugins.measurements.SimpleMeasurements;
+import io.fair_acc.chartfx.plugins.measurements.TrendingMeasurements;
 import io.fair_acc.chartfx.ui.TilingPane.Layout;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.viewer.DataView;

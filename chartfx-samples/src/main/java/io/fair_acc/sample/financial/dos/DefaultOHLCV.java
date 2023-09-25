@@ -2,12 +2,12 @@ package io.fair_acc.sample.financial.dos;
 
 import java.util.*;
 
-import io.fair_acc.sample.financial.service.period.EodPeriod;
-import io.fair_acc.sample.financial.service.period.Period;
 import org.apache.commons.lang3.time.DateUtils;
 
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcv;
+import io.fair_acc.sample.financial.service.period.EodPeriod;
+import io.fair_acc.sample.financial.service.period.Period;
 
 /**
  * Basic example OHLCV domain object implementation for chart samples.
@@ -286,8 +286,8 @@ public class DefaultOHLCV implements IOhlcv {
         @Override
         public String toString() {
             return "OHLCVStateAttributes [consolidated=" + consolidated + ", lowerBound="
-                    + lowerBound + ", upperBound=" + upperBound + ", userUpperBound=" + userUpperBound + ", size=" + size + ", lastValueIndex="
-                    + lastValueIndex + ", minValue=" + minValue + ", maxValue=" + maxValue + "]";
+          + lowerBound + ", upperBound=" + upperBound + ", userUpperBound=" + userUpperBound + ", size=" + size + ", lastValueIndex="
+          + lastValueIndex + ", minValue=" + minValue + ", maxValue=" + maxValue + "]";
         }
     }
 

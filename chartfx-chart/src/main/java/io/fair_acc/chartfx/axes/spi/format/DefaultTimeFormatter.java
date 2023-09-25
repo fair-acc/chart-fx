@@ -6,10 +6,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.axes.TickUnitSupplier;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+
+import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.TickUnitSupplier;
 
 /**
  * @author rstein
@@ -29,7 +30,6 @@ public class DefaultTimeFormatter extends AbstractFormatter {
      */
     public DefaultTimeFormatter() {
         this(null);
-
     }
 
     /**
@@ -59,8 +59,7 @@ public class DefaultTimeFormatter extends AbstractFormatter {
         final int longNanoSeconds = (int) ((timeAbs - longUTCSeconds) * 1e9);
         final LocalDateTime dateTime = LocalDateTime.ofEpochSecond(longUTCSeconds, longNanoSeconds,
                 getTimeZoneOffset());
-        return dateTime.format(DefaultTimeFormatter.HIGHRES_FORMATTER).concat(Long.toString(timeUS % 1000)).concat("us")
-                .replaceAll(" ", System.lineSeparator());
+        return dateTime.format(DefaultTimeFormatter.HIGHRES_FORMATTER).concat(Long.toString(timeUS % 1000)).concat("us").replaceAll(" ", System.lineSeparator());
     }
 
     @Override

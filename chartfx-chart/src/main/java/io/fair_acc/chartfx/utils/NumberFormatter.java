@@ -1,7 +1,6 @@
 package io.fair_acc.chartfx.utils;
 
 public interface NumberFormatter {
-
     int getDecimalPlaces();
 
     boolean isExponentialForm();
@@ -11,5 +10,4 @@ public interface NumberFormatter {
     NumberFormatter setDecimalPlaces(int precision);
 
     String toString(double val);
-
 }

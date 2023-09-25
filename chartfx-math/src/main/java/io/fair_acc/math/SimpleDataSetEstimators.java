@@ -19,7 +19,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     /**
      * Compute centre of mass over full DataSet
-     * 
+     *
      * @param dataSet input dataset
      * @return centre of mass
      */
@@ -29,7 +29,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     /**
      * Computes the centre of mass in a given x range.
-     * 
+     *
      * @param dataSet input dataset
      * @param min min index
      * @param max max index
@@ -42,7 +42,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
 
     /**
      * Computes the centre of mass in a given index range.
-     * 
+     *
      * @param dataSet input dataset
      * @param minIndex min index
      * @param maxIndex max index
@@ -174,7 +174,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * Gets the time from indexMin until the signal reaches 50% of its range.
      * If y(indexMax) &gt; y(indexMin) rising edge is detected, otherwise falling edge.
      * If the range is not finite or zero, returns NaN.
-     * 
+     *
      * @param dataSet DataSet
      * @param indexMin first index to look at (inclusive)
      * @param indexMax last index to look at (exclusive)
@@ -250,20 +250,20 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
                     }
                 }
             } else // last sample was below zero line
-                    if (actual < thresholdMin) {
-                // detected falling edge
-                actualState = 0.0;
-                final double time = dataSet.get(DIM_X, index);
+                if (actual < thresholdMin) {
+                    // detected falling edge
+                    actualState = 0.0;
+                    final double time = dataSet.get(DIM_X, index);
 
-                if (Double.isFinite(startFallingEdge)) {
-                    final double period = time - startFallingEdge;
-                    startFallingEdge = time;
-                    avgPeriod += period;
-                    avgPeriodCount++;
-                } else {
-                    startFallingEdge = time;
+                    if (Double.isFinite(startFallingEdge)) {
+                        final double period = time - startFallingEdge;
+                        startFallingEdge = time;
+                        avgPeriod += period;
+                        avgPeriodCount++;
+                    } else {
+                        startFallingEdge = time;
+                    }
                 }
-            }
         }
         if (avgPeriodCount == 0) {
             return Double.NaN;
@@ -338,8 +338,8 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
         }
 
         final double refinedValue = indexMin
-                                    + SimpleDataSetEstimators.interpolateGaussian(data, data.length, locationMaximum - indexMin)
-                                    - locationMaximum;
+                                  + SimpleDataSetEstimators.interpolateGaussian(data, data.length, locationMaximum - indexMin)
+                                  - locationMaximum;
         final double valX0 = dataSet.get(DIM_X, locationMaximum);
         final double valX1 = dataSet.get(DIM_X, locationMaximum + 1);
         final double diff = valX1 - valX0;
@@ -396,7 +396,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
     /**
      * Returns the range of the y Data of the dataSet between the given indices.
      * This equals the maximum value in the range minus the minimum value.
-     * 
+     *
      * @param dataSet input dataset
      * @param indexMin min index
      * @param indexMax max index
@@ -501,7 +501,7 @@ public final class SimpleDataSetEstimators { // NOPMD name is as is (ie. no Help
      * Returns transmission as the absolute or relative ratio between the signal at the
      * indexMin'th sample and the indexMax'th sample.
      * The result is returned in percent.
-     * 
+     *
      * @param dataSet A dataSet
      * @param indexMin The index to look at for the initial quantitiy
      * @param indexMax The index to look at for the final quantitiy

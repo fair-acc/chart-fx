@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 /**
- * extension of JUnits @Test annotation to indicate that a particular test should be explicitly executed within the JavaFX thread. 
+ * extension of JUnits @Test annotation to indicate that a particular test should be explicitly executed within the JavaFX thread.
  * See also {@link JavaFXInterceptorUtils.SelectiveJavaFxInterceptor }
  * @author rstein
  *

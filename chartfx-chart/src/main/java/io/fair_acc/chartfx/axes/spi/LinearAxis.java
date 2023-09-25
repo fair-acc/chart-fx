@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.*;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
@@ -16,6 +15,7 @@ import io.fair_acc.chartfx.axes.LogAxisType;
 import io.fair_acc.chartfx.axes.TickUnitSupplier;
 import io.fair_acc.chartfx.axes.spi.format.DefaultTickUnitSupplier;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * @author rstein

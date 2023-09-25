@@ -13,7 +13,7 @@ public class GaussFitting { // NOPMD - nomen est omen
 
     /**
      * fit precise Gaussian curve width and location based on peak indication and width estimate
-     * 
+     *
      * @param sliceX horizontal slice
      * @param sliceY vertical slice
      * @param meanEstimate initial mean estimate
@@ -62,7 +62,6 @@ public class GaussFitting { // NOPMD - nomen est omen
         }
 
         for (int i = 0; i < meas.length; i++) {
-
             // pos[i] = (double)i/(double)(meas.length);
             // meas[i] = testdata.valueAt(pos[i]);
 
@@ -178,48 +177,47 @@ public class GaussFitting { // NOPMD - nomen est omen
                 getAreaError());
     }
 
-//    public static int removeSpuriousPeaks(double[] posX, double[] measY, double sigma) {
-//        int npeaks = posX.length;
-//
-//        // quick (since only few peaks) bubble sorting of peaks
-//        for (int i = 0; i < npeaks; i++) {
-//            for (int j = i + 1; j < npeaks; j++) {
-//                if (posX[i] >= posX[j]) {
-//                    double temp;
-//                    temp = posX[i];
-//                    posX[i] = posX[j];
-//                    posX[j] = temp;
-//                    temp = measY[i];
-//                    measY[i] = measY[j];
-//                    measY[j] = temp;
-//                }
-//            }
-//        }
-//
-//        double[] tempPos = new double[npeaks];
-//        double[] tempMeas = new double[npeaks];
-//        int nPeaksReduced = 0;
-//        // simple peak reduction by dropping peaks that are closer than one sigma
-//        double last = -1e99;
-//        for (int i = 0; i < npeaks; i++) {
-//            if (posX[i] - last >= 6 * sigma) {
-//                // keep sample				
-//                tempPos[nPeaksReduced] = posX[i];
-//                tempMeas[nPeaksReduced] = measY[i];
-//                last = posX[i];
-//                nPeaksReduced++;
-//            } else {
-//                // drop sample
-//            }
-//        }
-//        posX = new double[nPeaksReduced];
-//        measY = new double[nPeaksReduced];
-//        for (int i = 0; i < nPeaksReduced; i++) {
-//            posX[i] = tempPos[i];
-//            measY[i] = tempMeas[i];
-//        }
-//
-//        return nPeaksReduced;
-//    }
-
+    //    public static int removeSpuriousPeaks(double[] posX, double[] measY, double sigma) {
+    //        int npeaks = posX.length;
+    //
+    //        // quick (since only few peaks) bubble sorting of peaks
+    //        for (int i = 0; i < npeaks; i++) {
+    //            for (int j = i + 1; j < npeaks; j++) {
+    //                if (posX[i] >= posX[j]) {
+    //                    double temp;
+    //                    temp = posX[i];
+    //                    posX[i] = posX[j];
+    //                    posX[j] = temp;
+    //                    temp = measY[i];
+    //                    measY[i] = measY[j];
+    //                    measY[j] = temp;
+    //                }
+    //            }
+    //        }
+    //
+    //        double[] tempPos = new double[npeaks];
+    //        double[] tempMeas = new double[npeaks];
+    //        int nPeaksReduced = 0;
+    //        // simple peak reduction by dropping peaks that are closer than one sigma
+    //        double last = -1e99;
+    //        for (int i = 0; i < npeaks; i++) {
+    //            if (posX[i] - last >= 6 * sigma) {
+    //                // keep sample
+    //                tempPos[nPeaksReduced] = posX[i];
+    //                tempMeas[nPeaksReduced] = measY[i];
+    //                last = posX[i];
+    //                nPeaksReduced++;
+    //            } else {
+    //                // drop sample
+    //            }
+    //        }
+    //        posX = new double[nPeaksReduced];
+    //        measY = new double[nPeaksReduced];
+    //        for (int i = 0; i < nPeaksReduced; i++) {
+    //            posX[i] = tempPos[i];
+    //            measY[i] = tempMeas[i];
+    //        }
+    //
+    //        return nPeaksReduced;
+    //    }
 }

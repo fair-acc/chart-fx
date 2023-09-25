@@ -1,7 +1,5 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.geometry.Orientation;
@@ -16,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
 import io.fair_acc.dataset.DataSet;
 
 /**
@@ -190,7 +190,6 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
 
     @Override
     protected void render(final GraphicsContext gc, final DataSet dataSet, final DataSetNode style) {
-
         // check for potentially reduced data range we are supposed to plot
         final int indexMin = Math.max(0, dataSet.getIndex(DataSet.DIM_X, xMin));
         final int indexMax = Math.min(dataSet.getIndex(DataSet.DIM_X, xMax) + 1,
@@ -210,7 +209,6 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
             // draw vertical marker
             drawVerticalLabelledMarker(gc, getChart(), dataSet, indexMin, indexMax);
         }
-
     }
 
     protected void setGraphicsContextAttributes(final GraphicsContext gc, final String style) {
@@ -234,9 +232,9 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
         strokeLineWidthMarker = LabelledMarkerRenderer.DEFAULT_GRID_LINE_WIDTH;
         strokeDashPattern = LabelledMarkerRenderer.DEFAULT_GRID_DASH_PATTERM;
 
-        //if (getStyle() != null) {
-        //    parse user-specified marker
-        //}
+        // if (getStyle() != null) {
+        //     parse user-specified marker
+        // }
 
         return getThis();
     }
@@ -246,5 +244,4 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
     }
 
     private static final DataSetStyleParser styleParser = DataSetStyleParser.newInstance();
-
 }

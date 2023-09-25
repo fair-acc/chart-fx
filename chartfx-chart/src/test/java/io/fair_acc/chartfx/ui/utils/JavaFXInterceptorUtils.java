@@ -27,43 +27,43 @@ import io.fair_acc.chartfx.utils.FXUtils;
  */
 public class JavaFXInterceptorUtils {
     /**
-	 * Simple JUnit 5 extension to ensure that {@code @Test} statements are executed in the JavaFX UI thread.
-	 * This is (strictly) necessary when testing setter and/or getter methods of JavaFX classes (ie. Node derived, properties etc).
-	 * <p>
-	 * Example usage:
-	 * <pre><code>
-	 * @ExtendWith(ApplicationExtension.class)
-	 * @ExtendWith(JavaFxInterceptor.class)
-	 * public class SquareButtonTest {
-	 *     @Start
-	 *     public void start(Stage stage) {
-	 *         // usual FX initialisation
-	 *         // ...
-	 *     }
-	 *
-	 *    @TestFx // note: this is equivalent to {@code @Test} when using {@code @ExtendWith(JavaFxInterceptor.class)}
-	 *    public void testJavaFxThreadSafety() {
-	 *        // verifies that this test is indeed executed in the JavaFX thread
-	 *        assertTrue(Platform.isFxApplicationThread());
-	 *
-	 *        // perform the regular JavaFX thread safe assertion tests
-	 *        // ...
-	 *    }
-	 *
-	 *    @Test // also executed in JavaFX thread, for different behaviour use:  {@code @ExtendWith(SelectiveJavaFxInterceptor.class)}
-	 *    public void testNonJavaFx() {
-	 *        // verifies that this test is also executed in the JavaFX thread
-	 *        assertTrue(Platform.isFxApplicationThread());
-	 *
-	 *        // perform regular assertion tests within the JavaFX thread
-	 *        // ...
-	 *    }
-	 * }
-	 *
-	 * </code></pre>
-	 *
-	 * @author rstein
-	 */
+     * Simple JUnit 5 extension to ensure that {@code @Test} statements are executed in the JavaFX UI thread.
+     * This is (strictly) necessary when testing setter and/or getter methods of JavaFX classes (ie. Node derived, properties etc).
+     * <p>
+     * Example usage:
+     * <pre><code>
+     * @ExtendWith(ApplicationExtension.class)
+     * @ExtendWith(JavaFxInterceptor.class)
+     * public class SquareButtonTest {
+     *     @Start
+     *     public void start(Stage stage) {
+     *         // usual FX initialisation
+     *         // ...
+     *     }
+     *
+     *    @TestFx // note: this is equivalent to {@code @Test} when using {@code @ExtendWith(JavaFxInterceptor.class)}
+     *    public void testJavaFxThreadSafety() {
+     *        // verifies that this test is indeed executed in the JavaFX thread
+     *        assertTrue(Platform.isFxApplicationThread());
+     *
+     *        // perform the regular JavaFX thread safe assertion tests
+     *        // ...
+     *    }
+     *
+     *    @Test // also executed in JavaFX thread, for different behaviour use:  {@code @ExtendWith(SelectiveJavaFxInterceptor.class)}
+     *    public void testNonJavaFx() {
+     *        // verifies that this test is also executed in the JavaFX thread
+     *        assertTrue(Platform.isFxApplicationThread());
+     *
+     *        // perform regular assertion tests within the JavaFX thread
+     *        // ...
+     *    }
+     * }
+     *
+     * </code></pre>
+     *
+     * @author rstein
+     */
     public static class JavaFxInterceptor implements InvocationInterceptor {
         @Override
         public void interceptTestMethod(final Invocation<Void> invocation,
@@ -89,43 +89,43 @@ public class JavaFXInterceptorUtils {
     }
 
     /**
-	 * Simple JUnit 5 extension to ensure that {@code @Test} statements are executed in the JavaFX UI thread.
-	 * This is (strictly) necessary when testing setter and/or getter methods of JavaFX classes (ie. Node derived, properties etc).
-	 * <p>
-	 * Example usage:
-	 * <pre><code>
-	 * @ExtendWith(ApplicationExtension.class)
-	 * @ExtendWith(SelectiveJavaFxInterceptor.class)
-	 * public class SquareButtonTest {
-	 *     @Start
-	 *     public void start(Stage stage) {
-	 *         // usual FX initialisation
-	 *         // ...
-	 *     }
-	 *
-	 *    @TestFx // forces execution in JavaFX thread
-	 *    public void testJavaFxThreadSafety() {
-	 *        // verifies that this test is indeed executed in the JavaFX thread
-	 *        assertTrue(Platform.isFxApplicationThread());
-	 *
-	 *        // perform the regular JavaFX thread safe assertion tests
-	 *        // ...
-	 *    }
-	 *
-	 *    @Test // explicitly not executed in JavaFX thread; for different behaviour use:  {@code @ExtendWith(JavaFxInterceptor.class)}
-	 *    public void testNonJavaFx() {
-	 *        // verifies that this test is not executed within the JavaFX thread
-	 *        assertFalse(Platform.isFxApplicationThread());
-	 *
-	 *        // perform the regular non-JavaFX thread-related assertion tests
-	 *        // ...
-	 *    }
-	 * }
-	 *
-	 * </code></pre>
-	 *
-	 * @author rstein
-	 */
+     * Simple JUnit 5 extension to ensure that {@code @Test} statements are executed in the JavaFX UI thread.
+     * This is (strictly) necessary when testing setter and/or getter methods of JavaFX classes (ie. Node derived, properties etc).
+     * <p>
+     * Example usage:
+     * <pre><code>
+     * @ExtendWith(ApplicationExtension.class)
+     * @ExtendWith(SelectiveJavaFxInterceptor.class)
+     * public class SquareButtonTest {
+     *     @Start
+     *     public void start(Stage stage) {
+     *         // usual FX initialisation
+     *         // ...
+     *     }
+     *
+     *    @TestFx // forces execution in JavaFX thread
+     *    public void testJavaFxThreadSafety() {
+     *        // verifies that this test is indeed executed in the JavaFX thread
+     *        assertTrue(Platform.isFxApplicationThread());
+     *
+     *        // perform the regular JavaFX thread safe assertion tests
+     *        // ...
+     *    }
+     *
+     *    @Test // explicitly not executed in JavaFX thread; for different behaviour use:  {@code @ExtendWith(JavaFxInterceptor.class)}
+     *    public void testNonJavaFx() {
+     *        // verifies that this test is not executed within the JavaFX thread
+     *        assertFalse(Platform.isFxApplicationThread());
+     *
+     *        // perform the regular non-JavaFX thread-related assertion tests
+     *        // ...
+     *    }
+     * }
+     *
+     * </code></pre>
+     *
+     * @author rstein
+     */
     public static class SelectiveJavaFxInterceptor implements InvocationInterceptor {
         @Override
         public void interceptTestMethod(final Invocation<Void> invocation,

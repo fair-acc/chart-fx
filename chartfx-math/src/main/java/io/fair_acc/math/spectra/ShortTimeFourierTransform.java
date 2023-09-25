@@ -22,13 +22,13 @@ import io.fair_acc.dataset.utils.DoubleArrayCache;
  * but also low level array based functions.
  * For complex input values, the data can be provided as two separate arrays as well as in the "interleaved"
  * layout used by JTransforms.
- * 
+ *
  * @author Alexander Krimm
  */
 public class ShortTimeFourierTransform {
     /**
      * Applies the apodization function to data in "interleaved" complex array.
-     * 
+     *
      * @param data an array containing [re1, im1, re2, im2 ... ]
      * @param apodization the apodization window function to use
      */
@@ -42,7 +42,7 @@ public class ShortTimeFourierTransform {
 
     /**
      * Does a rounded up division.
-     * 
+     *
      * @param a an integer
      * @param b another integer
      * @return ceil(a/b)

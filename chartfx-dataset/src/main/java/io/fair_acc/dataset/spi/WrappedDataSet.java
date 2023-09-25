@@ -54,7 +54,7 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
     /**
      * Returns the name of the dataset. This will return the name of the wrapped dataset. If no dataset is wrapped, the
      * name of this object is returned.
-     * 
+     *
      * @return name of the dataset
      */
     @Override
@@ -71,7 +71,7 @@ public class WrappedDataSet extends AbstractDataSet<WrappedDataSet> implements D
 
     /**
      * update/overwrite internal data set with content from other data set
-     * 
+     *
      * @param dataset new data set
      */
     public void setDataset(final DataSet dataset) {

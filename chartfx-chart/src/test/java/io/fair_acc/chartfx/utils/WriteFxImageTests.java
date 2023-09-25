@@ -79,7 +79,7 @@ public class WriteFxImageTests {
         originalContext.strokeRect(0, 0, w, h);
         imageOvals = originalCanvas.snapshot(null, null);
 
-        //generate test image with noise data (not very compressible)
+        // generate test image with noise data (not very compressible)
         final Canvas noiseCanvas = new Canvas(600, 333);
         final GraphicsContext noiseContext = noiseCanvas.getGraphicsContext2D();
         byte[] randomArray = new byte[600 * 333 * 4];
@@ -226,7 +226,7 @@ public class WriteFxImageTests {
         try (final InputStream is = new ByteArrayInputStream(pngOutReal.array(), pngOutReal.position(), pngOutReal.limit())) {
             final Image recovered = new Image(is);
             // compare against original
-            //assertImageEqual(testImage, recovered, encodeRGBA);
+            // assertImageEqual(testImage, recovered, encodeRGBA);
             assertImageSimilar(testImage, recovered, /* threshold */ 0.0, encodeRGBA);
         }
     }
@@ -466,7 +466,7 @@ public class WriteFxImageTests {
             }
         }
 
-        //return Stream.of("apple", "banana");
+        // return Stream.of("apple", "banana");
         return Stream.of(argumentList.toArray(new Arguments[0]));
     }
 }

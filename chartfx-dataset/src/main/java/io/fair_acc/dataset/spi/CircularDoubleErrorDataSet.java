@@ -1,13 +1,13 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSet2D;
+import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.CircularBuffer;
 import io.fair_acc.dataset.utils.DoubleCircularBuffer;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.DataSet2D;
-import io.fair_acc.dataset.DataSetError;
 
 /**
  * @author rstein
@@ -210,7 +210,7 @@ public class CircularDoubleErrorDataSet extends AbstractErrorDataSet<CircularDou
 
     /**
      * resets all data
-     * 
+     *
      * @return itself (fluent design)
      */
     public CircularDoubleErrorDataSet reset() {

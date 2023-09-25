@@ -14,7 +14,7 @@ public class RingBuffer<E> {
     private boolean flipped;
 
     /**
-     * 
+     *
      * @param capacity of the buffer
      */
     @SuppressWarnings("unchecked")
@@ -25,7 +25,7 @@ public class RingBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @return number of values that are already stored in buffer
      */
     public int available() {
@@ -37,7 +37,7 @@ public class RingBuffer<E> {
 
     /**
      * add new element
-     * 
+     *
      * @param element new element
      * @return true: if index of write position is below index of read position
      */
@@ -65,7 +65,7 @@ public class RingBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @param newElements new values to be added
      * @param length number of elements to be written
      * @return new index of read position
@@ -116,7 +116,7 @@ public class RingBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @return number of values that can be stored before the buffer is full and rolls over
      */
     public int remainingCapacity() {
@@ -136,7 +136,7 @@ public class RingBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @return value at the head of the buffer
      */
     public E take() {
@@ -160,7 +160,7 @@ public class RingBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @param into container to be written into
      * @param length maximum length to be read
      * @return write position

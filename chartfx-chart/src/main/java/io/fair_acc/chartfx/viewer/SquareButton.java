@@ -72,5 +72,4 @@ public class SquareButton extends Button {
         });
         adjustDimension();
     }
-
 }

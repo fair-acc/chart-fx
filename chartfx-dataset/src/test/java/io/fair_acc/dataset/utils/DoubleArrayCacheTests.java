@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * Tests implementation of {@link DoubleArrayCache} as well as implicitly {@link CacheCollection}.
- * 
+ *
  * @author rstein
  *
  *         N.B. to run manually: javac DoubleArrayCacheTests.java java -Xms256m

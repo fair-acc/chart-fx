@@ -5,8 +5,6 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.ui.geometry.Side;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -20,8 +18,10 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.axes.spi.MetricPrefix;
+import io.fair_acc.chartfx.ui.geometry.Side;
 
 /**
  * Small example of how to use the dynamic/static axis scaling functionality N.B. applies only for axes derived from
@@ -98,10 +98,11 @@ public class AxisRangeScalingSample extends ChartSample {
         // TODO: axes as standalone elements don't get drawn, so we add them to a dummy chart
         Chart chart = new XYChart(new DefaultNumericAxis(), new DefaultNumericAxis());
         Arrays.asList(xAxis1, xAxis2, xAxis3,
-                xAxis4, xAxis5, xAxis6, xAxis7, xAxis8, xAxis9).forEach(axis -> {
-            axis.setSide(Side.BOTTOM);
-            chart.getAxes().add(axis);
-        });
+                      xAxis4, xAxis5, xAxis6, xAxis7, xAxis8, xAxis9)
+                .forEach(axis -> {
+                    axis.setSide(Side.BOTTOM);
+                    chart.getAxes().add(axis);
+                });
 
         final Timer timer = new Timer("sample-update-timer", true);
         final TimerTask task = new TimerTask() {
@@ -119,7 +120,7 @@ public class AxisRangeScalingSample extends ChartSample {
                     final double power = Math.pow(10, counter);
                     xAxis9.maxProperty().set(power);
                     final String text = "actual SI range for dynamic axis: [" + xAxis9.getMin() + " V, "
-                                        + xAxis9.getMax() + " V]";
+                                      + xAxis9.getMax() + " V]";
                     xAxis9Text.setText(text);
                 });
                 if ((counter >= 9) || (counter <= -9)) {

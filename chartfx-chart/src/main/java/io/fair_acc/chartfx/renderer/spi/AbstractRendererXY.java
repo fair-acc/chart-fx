@@ -1,19 +1,20 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import java.security.InvalidParameterException;
+
+import javafx.geometry.Orientation;
+import javafx.scene.canvas.GraphicsContext;
+
+import io.fair_acc.bench.DurationMeasure;
+import io.fair_acc.bench.Measurable;
+import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
-import io.fair_acc.bench.DurationMeasure;
-import io.fair_acc.bench.Measurable;
-import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.AssertUtils;
-import javafx.geometry.Orientation;
-import javafx.scene.canvas.GraphicsContext;
-
-import java.security.InvalidParameterException;
 
 /**
  * Renderer that requires an X and a Y axis
@@ -21,7 +22,6 @@ import java.security.InvalidParameterException;
  * @author ennerf
  */
 public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extends AbstractRenderer<R> implements Measurable {
-
     public AbstractRendererXY() {
         chartProperty().addListener((obs, old, chart) -> requireChartXY(chart));
     }
@@ -37,7 +37,7 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
             return (XYChart) chart;
         }
         throw new InvalidParameterException("must be derivative of XYChart for renderer - "
-                + this.getClass().getSimpleName());
+                                            + this.getClass().getSimpleName());
     }
 
     @Override
@@ -55,7 +55,6 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         benchDrawAll.start();
         updateCachedVariables();
 
-
         // N.B. importance of reverse order: start with last index, so that
         // most(-like) important DataSet is drawn on top of the others
         for (int i = getDatasetNodes().size() - 1; i >= 0; i--) {
@@ -68,7 +67,6 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         }
 
         benchDrawAll.stop();
-
     }
 
     protected abstract void render(GraphicsContext gc, DataSet dataSet, DataSetNode style);
@@ -139,5 +137,4 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
 
     private DurationMeasure benchDrawAll = DurationMeasure.DISABLED;
     private DurationMeasure benchDrawSingle = DurationMeasure.DISABLED;
-
 }

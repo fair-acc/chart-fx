@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import io.fair_acc.dataset.utils.*;
 import javafx.scene.image.PixelFormat;
 import javafx.scene.image.PixelWriter;
 import javafx.scene.image.WritableImage;
@@ -28,6 +27,7 @@ import io.fair_acc.chartfx.utils.WritableImageCache;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
 import io.fair_acc.dataset.spi.DataRange;
+import io.fair_acc.dataset.utils.*;
 
 /**
  * @author rstein
@@ -153,7 +153,7 @@ class ContourDataSetCache extends WritableImageCache {
 
         // compute local Range
         final boolean computeLocalRange = renderer.computeLocalRange()
-                                          && (zAxis.isAutoRanging() || zAxis.isAutoGrowRanging());
+                                       && (zAxis.isAutoRanging() || zAxis.isAutoGrowRanging());
         final DataRange zDataRange = computeLocalRange(reduced, xSize, ySize, computeLocalRange);
         if (zDataRange.isDefined()) {
             zMin = zDataRange.getMin();

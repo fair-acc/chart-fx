@@ -13,7 +13,7 @@ import java.util.List;
  * <p>
  * N.B. this implements only the backing cache of adding, removing, etc. elements. The cache object retrieval should be implemented in the derived class.
  * See for example {@link ByteArrayCache}.
- * 
+ *
  * @author rstein
  *
  * @param <T> generic for object type to be cahced.

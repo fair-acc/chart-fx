@@ -25,7 +25,6 @@ package io.fair_acc.math.filter.iir;
  * Abstract form of the a filter which can have different state variables Direct form I or II is derived from it
  */
 public abstract class DirectFormAbstract {
-
     public static final int DIRECT_FORM_I = 0;
 
     public static final int DIRECT_FORM_II = 1;
@@ -37,5 +36,4 @@ public abstract class DirectFormAbstract {
     public abstract double process1(double in, Biquad s);
 
     public abstract void reset();
-
 }

@@ -6,9 +6,6 @@ import static io.fair_acc.dataset.DataSet.DIM_Y;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
-import io.fair_acc.sample.chart.ChartSample;
-import io.fair_acc.sample.misc.plugins.Snow;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
@@ -46,6 +43,9 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DataSetBuilder;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.TransposedDataSet;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
+import io.fair_acc.sample.chart.ChartSample;
+import io.fair_acc.sample.misc.plugins.Snow;
 
 /**
  * Happy Christmas and a Happy Coding 2020

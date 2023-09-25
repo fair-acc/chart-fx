@@ -18,7 +18,7 @@ class MapGenerator {
 
     /**
      * The image proportions are maintained, therefore only the desired width is specified.
-     * 
+     *
      * @param map global hex map
      * @param image source image
      * @param mapWidthInHexes desired map width in hex grid quantas
@@ -52,7 +52,7 @@ class MapGenerator {
         final int mapHeight = (int) (estimatedHexagonMapHeightInPixels
                                      / map.getGraphicsverticalDistanceBetweenHexagons());
         verticalRelation = imageHeight
-                           / (map.getGraphicsverticalDistanceBetweenHexagons() * mapHeight + map.getGraphicsHexagonHeight() / 2);
+                         / (map.getGraphicsverticalDistanceBetweenHexagons() * mapHeight + map.getGraphicsHexagonHeight() / 2);
         // Not really sure about the last part but it seems to work. And should I make the corresponding correction on
         // the horizontalRelation ?
 

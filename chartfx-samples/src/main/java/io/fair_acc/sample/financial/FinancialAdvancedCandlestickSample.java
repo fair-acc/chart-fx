@@ -2,23 +2,23 @@ package io.fair_acc.sample.financial;
 
 import java.util.Calendar;
 
-import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.AbstractFinancialRenderer;
 import io.fair_acc.chartfx.renderer.spi.financial.CandleStickRenderer;
+import io.fair_acc.chartfx.renderer.spi.financial.FinancialTheme;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeKey;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
-import javafx.stage.Stage;
 
 /**
  * Advanced configuration of Candlestick renderer. Support for PaintBars and extension points.

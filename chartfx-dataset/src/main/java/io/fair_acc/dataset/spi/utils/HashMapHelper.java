@@ -2,14 +2,13 @@ package io.fair_acc.dataset.spi.utils;
 
 /**
  * Common HashMap methods
- * 
+ *
  * taken from FastUtil implementation
  */
 public final class HashMapHelper {
     private static final int INT_PHI = 0x9E3779B9;
 
     private HashMapHelper() {
-
     }
 
     /**
@@ -55,5 +54,4 @@ public final class HashMapHelper {
         final int h = x * INT_PHI;
         return h ^ (h >> 16);
     }
-
 }

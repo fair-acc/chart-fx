@@ -158,6 +158,5 @@ public class ChartAnatomySample extends Application {
         }
 
         final Label label;
-
     }
 }

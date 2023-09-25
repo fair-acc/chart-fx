@@ -4,8 +4,8 @@ import java.lang.ref.Reference;
 
 /**
  * Implements byte-array (byte[]) cache collection to minimise memory re-allocation.
- *  
- * <p> 
+ *
+ * <p>
  * N.B. This is useful to re-use short-lived data storage container to minimise the amount of garbage to be collected. This is used in situation replacing e.g.
  * <pre>
  *  {@code
@@ -22,15 +22,15 @@ import java.lang.ref.Reference;
  *      // ...
  *      private final ByteArrayCache cache = new ByteArrayCache();
  *      // ...
- *      
+ *
  *      public returnValue frequentlyExecutedFunction(...) {
- *          final byte[] storage = cache.getArray(10000); // return previously allocated array (cheap) or allocated new if necessary 
+ *          final byte[] storage = cache.getArray(10000); // return previously allocated array (cheap) or allocated new if necessary
  *          // [...] do short-lived computation on storage
  *          cache.add(storage); // return object to cache
  *      }
  *  }
  * </pre>
- *  
+ *
  * @author rstein
  *
  */

@@ -22,7 +22,7 @@ public class ContinuousWavelet {
     /**
      * Wavelet Scalogram implementation with truncated convolution the assumption is made that the wavelet vanishes for
      * large scales
-     * 
+     *
      * @param data real valued input data
      * @param nQuantx number of bins on the time axis
      * @param nQuanty number of frequency bins of full range
@@ -297,7 +297,7 @@ public class ContinuousWavelet {
      */
     public Complex Morlet(final double x, final double nu) {
         final double val1 = 1.0 / Math.sqrt(MathBase.TWO_PI)
-                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
+                          * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
         final double val2 = MathBase.TWO_PI * nu * x;
         final double re = val1 * Math.sin(val2);
         final double im = val1 * Math.cos(val2);
@@ -315,7 +315,7 @@ public class ContinuousWavelet {
      */
     public void Morlet(final double x, final double nu, final double[] ret) {
         final double val1 = 1.0 / Math.sqrt(MathBase.TWO_PI)
-                            * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
+                          * MathBase.exp(-2 * MathBase.sqr(MathBase.sqr(MathBase.TWO_PI) * x / nu));
         final double val2 = MathBase.TWO_PI * nu * x;
         ret[0] = val1 * Math.cos(val2);
         ret[1] = val1 * Math.sin(val2);
@@ -330,7 +330,7 @@ public class ContinuousWavelet {
      */
     public Complex Paul(final double x, final int m) {
         final double val = Math.pow(2, m) * Math.factorial(m)
-                           / Math.sqrt(MathBase.PI * Math.factorial(2 * m));
+                         / Math.sqrt(MathBase.PI * Math.factorial(2 * m));
         Complex c1 = new Complex(1, 0);
         Complex c2 = new Complex(1, 0);
         for (int i = 0; i < m + 1; i++) {

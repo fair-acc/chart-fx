@@ -141,7 +141,7 @@ public class EEMD {
 
     /**
      * EMD spectrum implementation
-     * 
+     *
      * @param data input data
      * @param nQuantx quantisation in X
      * @param nQuanty quantisation in Y
@@ -258,7 +258,7 @@ public class EEMD {
 
     /**
      * Find all extrema in a double array.
-     * 
+     *
      * @param data double array with the input data
      * @param spmax array double[2][nMaxima] with index and value of all maxima (+ first and last point)
      * @param spmin array double[2][nMaxima] with index and value of all minima (+ first and last point)

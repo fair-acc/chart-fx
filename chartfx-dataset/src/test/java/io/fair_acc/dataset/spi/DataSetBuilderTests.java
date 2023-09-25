@@ -9,14 +9,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.GridDataSet;
 import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.locks.DataSetLock;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 /**
  * Checks for the DataSetBuilder
@@ -332,6 +333,5 @@ class DataSetBuilderTests {
         public DataSet set(final DataSet other, final boolean copy) {
             throw new UnsupportedOperationException("copy setting transposed data set is not implemented");
         }
-
     }
 }

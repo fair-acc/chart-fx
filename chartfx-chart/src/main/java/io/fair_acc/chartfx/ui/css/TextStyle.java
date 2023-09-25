@@ -9,7 +9,6 @@ import javafx.scene.text.Text;
  * @author ennerf
  */
 public class TextStyle extends Text implements StyleUtil.StyleNode {
-
     public TextStyle(String... styles) {
         StyleUtil.styleNode(this, styles);
         StyleUtil.forEachStyleProp(this, StyleUtil.incrementOnChange(changeCounter));
@@ -29,5 +28,4 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
     }
 
     private final LongProperty changeCounter = new SimpleLongProperty(0);
-
 }

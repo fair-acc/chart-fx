@@ -1,6 +1,8 @@
 package io.fair_acc.chartfx.marker;
 
-import io.fair_acc.chartfx.utils.PropUtil;
+import java.util.Arrays;
+import java.util.Objects;
+
 import javafx.beans.value.ObservableObjectValue;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.SnapshotResult;
@@ -10,8 +12,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
-import java.util.Arrays;
-import java.util.Objects;
+import io.fair_acc.chartfx.utils.PropUtil;
 
 /**
  * Experimental marker that caches the result of another marker
@@ -27,7 +28,6 @@ import java.util.Objects;
  * @author ennerf
  */
 public class CachedMarker implements Marker {
-
     public CachedMarker(ObservableObjectValue<Marker> marker) {
         this.marker = marker;
         PropUtil.runOnChange(() -> image = null, marker);
@@ -46,11 +46,11 @@ public class CachedMarker implements Marker {
     private boolean useCachedImage(GraphicsContext target, double size) {
         var gc = canvas.getGraphicsContext2D();
         return image != null
-                && canvas.getWidth() == size * 2
-                && Objects.equals(gc.getFill(), target.getFill())
-                && Objects.equals(gc.getStroke(), target.getStroke())
-                && Objects.equals(gc.getLineWidth(), target.getLineWidth())
-                && Arrays.equals(gc.getLineDashes(), target.getLineDashes());
+     && canvas.getWidth() == size * 2
+     && Objects.equals(gc.getFill(), target.getFill())
+     && Objects.equals(gc.getStroke(), target.getStroke())
+     && Objects.equals(gc.getLineWidth(), target.getLineWidth())
+     && Arrays.equals(gc.getLineDashes(), target.getLineDashes());
     }
 
     private void updateCache(GraphicsContext target, double size) {
@@ -58,7 +58,7 @@ public class CachedMarker implements Marker {
             return;
         }
         isUpdating = true;
-        final double pixels = Math.ceil(size*2);
+        final double pixels = Math.ceil(size * 2);
         canvas.setWidth(pixels);
         canvas.setHeight(pixels);
         var gc = canvas.getGraphicsContext2D();
@@ -83,5 +83,4 @@ public class CachedMarker implements Marker {
     }
     boolean isUpdating = false;
     private final ObservableObjectValue<Marker> marker;
-
 }

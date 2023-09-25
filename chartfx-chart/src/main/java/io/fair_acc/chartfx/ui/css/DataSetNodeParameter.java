@@ -1,9 +1,7 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.marker.DefaultMarker;
-import io.fair_acc.chartfx.marker.Marker;
-import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
-import io.fair_acc.chartfx.utils.PropUtil;
+import java.util.List;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.*;
@@ -14,7 +12,10 @@ import javafx.scene.Parent;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
-import java.util.List;
+import io.fair_acc.chartfx.marker.DefaultMarker;
+import io.fair_acc.chartfx.marker.Marker;
+import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
+import io.fair_acc.chartfx.utils.PropUtil;
 
 /**
  * Holds the styleable parameters of the DataSetNode
@@ -22,7 +23,6 @@ import java.util.List;
  * @author ennerf
  */
 public abstract class DataSetNodeParameter extends Parent implements StyleUtil.StyleNode {
-
     // ======================== State properties ========================
     private final LongProperty changeCounter = new SimpleLongProperty(0);
     private final StringProperty name = new SimpleStringProperty();
@@ -378,5 +378,4 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
     }
 
     private static final CssPropertyFactory<DataSetNodeParameter> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
-
 }

@@ -9,8 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
@@ -31,6 +29,8 @@ import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAw
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.FootprintRendererAttributes;
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.NbColumnColorGroup;
 import io.fair_acc.chartfx.renderer.spi.financial.service.footprint.NbColumnColorGroup.FontColor;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
@@ -237,7 +237,6 @@ public class FootprintRenderer extends AbstractFinancialRenderer<FootprintRender
         if (computeLocalRange()) {
             applyLocalYRange(ds, yAxis, xMin, xMax);
         }
-
     }
 
     private void drawFootprintItem(GraphicsContext gc, Axis yAxis, FinancialDataSetNode style, DataSet ds, int i,

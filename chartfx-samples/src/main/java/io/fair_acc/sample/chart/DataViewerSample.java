@@ -2,8 +2,6 @@ package io.fair_acc.sample.chart;
 
 import java.util.*;
 
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.events.StateListener;
 import javafx.animation.Animation;
 import javafx.animation.RotateTransition;
 import javafx.application.Application;
@@ -50,6 +48,8 @@ import io.fair_acc.chartfx.viewer.DataViewWindow;
 import io.fair_acc.chartfx.viewer.DataViewWindow.WindowDecoration;
 import io.fair_acc.chartfx.viewer.DataViewer;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.StateListener;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.testdata.TestDataSet;
 import io.fair_acc.dataset.testdata.spi.RandomStepFunction;

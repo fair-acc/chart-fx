@@ -12,21 +12,20 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 
-import io.fair_acc.dataset.events.ChartBits;
 import org.jtransforms.fft.FloatFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.AbstractDataSet;
+import io.fair_acc.dataset.spi.fastutil.FloatArrayList;
 import io.fair_acc.dataset.utils.ByteArrayCache;
 import io.fair_acc.dataset.utils.DoubleCircularBuffer;
 import io.fair_acc.math.ArrayUtils;
 import io.fair_acc.math.spectra.Apodization;
 import io.fair_acc.math.spectra.SpectrumTools;
-
-import io.fair_acc.dataset.spi.fastutil.FloatArrayList;
 
 /**
  * DataSet source for testing real-time continuous 2D and 3D type data.

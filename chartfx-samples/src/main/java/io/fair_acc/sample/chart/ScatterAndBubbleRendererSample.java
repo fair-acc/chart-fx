@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.control.Tab;
@@ -35,6 +34,7 @@ import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**

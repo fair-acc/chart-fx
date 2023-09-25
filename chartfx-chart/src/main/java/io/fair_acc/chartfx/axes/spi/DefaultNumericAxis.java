@@ -1,7 +1,5 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -17,6 +15,8 @@ import io.fair_acc.chartfx.axes.TickUnitSupplier;
 import io.fair_acc.chartfx.axes.spi.transforms.DefaultAxisTransform;
 import io.fair_acc.chartfx.axes.spi.transforms.LogarithmicAxisTransform;
 import io.fair_acc.chartfx.axes.spi.transforms.LogarithmicTimeAxisTransform;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * A axis class that plots a range of numbers with major tick marks every "tickUnit". You can use any Number type with

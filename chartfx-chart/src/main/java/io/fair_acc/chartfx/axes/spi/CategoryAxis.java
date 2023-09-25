@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.collections.FXCollections;
@@ -13,7 +11,9 @@ import javafx.collections.ObservableList;
 import javafx.util.StringConverter;
 
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * A axis implementation that will works on string categories where each value as a unique category(tick mark) along the
@@ -68,11 +68,11 @@ public final class CategoryAxis extends DefaultNumericAxis {
         this.setOverlapPolicy(AxisLabelOverlapPolicy.SHIFT_ALT);
         PropUtil.runOnChange(() -> {
             final double range = Math.abs(getMax() - getMin());
-            if (!Double.isFinite(range)) return;
+            if (!Double.isFinite(range))
+                return;
             final double scale = 0.5 / ((int) range);
             autoRangePaddingProperty().set(scale);
         }, minProperty(), maxProperty());
-
     }
 
     /**

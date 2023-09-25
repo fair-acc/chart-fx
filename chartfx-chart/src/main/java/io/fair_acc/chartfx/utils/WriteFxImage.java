@@ -56,7 +56,7 @@ public final class WriteFxImage {
 
     /**
      * copy the given Image to a WritableImage
-     * 
+     *
      * @param image the input image
      * @return clone of image
      */

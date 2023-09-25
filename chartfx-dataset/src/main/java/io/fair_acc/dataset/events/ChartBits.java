@@ -66,5 +66,4 @@ public enum ChartBits implements IntSupplier {
             throw new AssertionError("The int32 based event system can only support 32 different types");
         }
     }
-
 }

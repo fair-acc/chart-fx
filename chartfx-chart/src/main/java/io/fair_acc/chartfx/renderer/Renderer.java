@@ -1,15 +1,15 @@
 package io.fair_acc.chartfx.renderer;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.axes.spi.AxisRange;
-import io.fair_acc.bench.Measurable;
-import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.beans.property.BooleanProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 
+import io.fair_acc.bench.Measurable;
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 
 /**
@@ -142,5 +142,4 @@ public interface Renderer extends Measurable.EmptyDefault {
         // add nothing if not needed
         return null;
     }
-
 }

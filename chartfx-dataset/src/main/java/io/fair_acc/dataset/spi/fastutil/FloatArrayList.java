@@ -50,9 +50,13 @@ import java.util.function.IntConsumer;
  */
 public class FloatArrayList implements RandomAccess, Cloneable, java.io.Serializable {
     private static final long serialVersionUID = -7046029254386353130L;
-    /** The initial default capacity of an array list. */
+    /**
+     * The initial default capacity of an array list.
+     */
     public static final int DEFAULT_INITIAL_CAPACITY = 10;
-    /** The backing array. */
+    /**
+     * The backing array.
+     */
     protected transient float[] a;
     /**
      * The current actual size of the list (never greater than the backing-array
@@ -97,7 +101,9 @@ public class FloatArrayList implements RandomAccess, Cloneable, java.io.Serializ
         else
             a = new float[capacity];
     }
-    /** Creates a new array list with {@link #DEFAULT_INITIAL_CAPACITY} capacity. */
+    /**
+     * Creates a new array list with {@link #DEFAULT_INITIAL_CAPACITY} capacity.
+     */
 
     public FloatArrayList() {
         a = FloatArrays.DEFAULT_EMPTY_ARRAY; // We delay allocation
@@ -475,9 +481,12 @@ public class FloatArrayList implements RandomAccess, Cloneable, java.io.Serializ
         }
 
         public static void ensureOffsetLength(final int arrayLength, final int offset, final int length) {
-            if (offset < 0) throw new ArrayIndexOutOfBoundsException("Offset (" + offset + ") is negative");
-            if (length < 0) throw new IllegalArgumentException("Length (" + length + ") is negative");
-            if (offset + length > arrayLength) throw new ArrayIndexOutOfBoundsException("Last index (" + (offset + length) + ") is greater than array length (" + arrayLength + ")");
+            if (offset < 0)
+                throw new ArrayIndexOutOfBoundsException("Offset (" + offset + ") is negative");
+            if (length < 0)
+                throw new IllegalArgumentException("Length (" + length + ") is negative");
+            if (offset + length > arrayLength)
+                throw new ArrayIndexOutOfBoundsException("Last index (" + (offset + length) + ") is greater than array length (" + arrayLength + ")");
         }
 
         public static float[] ensureCapacity(final float[] array, final int length, final int preserve) {
@@ -489,7 +498,5 @@ public class FloatArrayList implements RandomAccess, Cloneable, java.io.Serializ
             System.arraycopy(array, 0, t, 0, preserve);
             return t;
         }
-
     }
-
 }

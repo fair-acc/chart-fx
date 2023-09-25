@@ -5,19 +5,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import io.fair_acc.bench.DurationMeasure;
-import io.fair_acc.bench.Measurable;
-import io.fair_acc.bench.MeasurementRecorder;
-import io.fair_acc.chartfx.ui.css.*;
-import io.fair_acc.chartfx.ui.layout.TitleLabel;
-import io.fair_acc.chartfx.ui.layout.ChartPane;
-import io.fair_acc.chartfx.ui.layout.FullSizePane;
-import io.fair_acc.chartfx.ui.*;
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.events.EventSource;
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.application.Platform;
@@ -35,6 +22,9 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.layout.*;
 import javafx.util.Duration;
 
+import io.fair_acc.bench.DurationMeasure;
+import io.fair_acc.bench.Measurable;
+import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AbstractAxis;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
@@ -43,9 +33,19 @@ import io.fair_acc.chartfx.legend.spi.DefaultLegend;
 import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
+import io.fair_acc.chartfx.ui.*;
+import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.ui.layout.ChartPane;
+import io.fair_acc.chartfx.ui.layout.FullSizePane;
+import io.fair_acc.chartfx.ui.layout.TitleLabel;
 import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.EventSource;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 
@@ -61,12 +61,11 @@ import io.fair_acc.dataset.utils.NoDuplicatesList;
  * @author hbraeun, rstein, major refactoring, re-implementation and re-design
  */
 public abstract class Chart extends Region implements EventSource, Measurable {
-
     // The chart has two different states, one that includes everything and is only ever on the JavaFX thread, and
     // a thread-safe one that receives dataSet updates and forwards them on the JavaFX thread.
     protected final BitState state = BitState.initDirty(this, BitState.ALL_BITS)
-            .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout())
-            .addChangeListener(ChartBits.KnownMask, (src, bits) -> ensureJavaFxPulse());
+                                             .addChangeListener(ChartBits.ChartLayout, (src, bits) -> super.requestLayout())
+                                             .addChangeListener(ChartBits.KnownMask, (src, bits) -> ensureJavaFxPulse());
 
     // DataSets are the only part that can potentially get updated from different threads, so we use a separate
     // state object that can handle multithreaded updates. The state always represents the current aggregate state
@@ -74,7 +73,7 @@ public abstract class Chart extends Region implements EventSource, Measurable {
     // This creates a race condition where delta bits that are already cleared in the datasets may end up dirtying the
     // chart and trigger an unnecessary redraw. To avoid this issue we ignore the delta and pass the current state.
     protected final BitState dataSetState = BitState.initDirtyMultiThreaded(this, BitState.ALL_BITS)
-            .addChangeListener(FXUtils.runOnFxThread((src, deltaBits) -> state.setDirty(src.getBits())));
+                                                    .addChangeListener(FXUtils.runOnFxThread((src, deltaBits) -> state.setDirty(src.getBits())));
 
     private static final String CHART_CSS = Objects.requireNonNull(Chart.class.getResource("chart.css")).toExternalForm();
     private static final CssPropertyFactory<Chart> CSS = new CssPropertyFactory<>(Region.getClassCssMetaData());
@@ -110,7 +109,7 @@ public abstract class Chart extends Region implements EventSource, Measurable {
 
     // Outer chart elements
     protected final ChartPane measurementPane = StyleUtil.addStyles(new ChartPane(), "chart-measurement-pane");
-    protected final ChartPane titleLegendPane = StyleUtil.addStyles(new ChartPane(),"chart-title-pane", "chart-legend-pane");
+    protected final ChartPane titleLegendPane = StyleUtil.addStyles(new ChartPane(), "chart-title-pane", "chart-legend-pane");
     protected final ChartPane axesAndCanvasPane = StyleUtil.addStyles(new ChartPane(), "chart-content");
 
     // Outer area with hidden toolbars
@@ -122,7 +121,6 @@ public abstract class Chart extends Region implements EventSource, Measurable {
     protected final StyleGroup styleableNodes = new StyleGroup(this, getChildren(), "chart");
 
     protected final TitleLabel titleLabel = StyleUtil.addStyles(new TitleLabel(), "chart-title");
-
 
     // Listeners
     protected final ListChangeListener<Renderer> rendererChangeListener = this::rendererChanged;
@@ -275,7 +273,6 @@ public abstract class Chart extends Region implements EventSource, Measurable {
         measurementPane.addCenter(titleLegendPane);
         menuPane.setContent(measurementPane);
         getChildren().add(menuPane);
-
     }
 
     @Override
@@ -860,7 +857,6 @@ public abstract class Chart extends Region implements EventSource, Measurable {
     protected void rendererChanged(final ListChangeListener.Change<? extends Renderer> change) {
         FXUtils.assertJavaFxThread();
         while (change.next()) {
-
             // handle added renderer
             for (Renderer renderer : change.getAddedSubList()) {
                 for (DataSet dataset : renderer.getDatasets()) {
@@ -883,7 +879,6 @@ public abstract class Chart extends Region implements EventSource, Measurable {
                 styleableNodes.getChildren().remove(renderer.getNode());
                 renderer.setChart(null);
             }
-
         }
 
         updateDataSetIndices();
@@ -891,7 +886,6 @@ public abstract class Chart extends Region implements EventSource, Measurable {
         // reset change to allow derived classes to add additional listeners to renderer changes
         change.reset();
         fireInvalidated(ChartBits.ChartLayout, ChartBits.ChartRenderers, ChartBits.ChartLegend);
-
     }
 
     /**
@@ -964,5 +958,4 @@ public abstract class Chart extends Region implements EventSource, Measurable {
     private DurationMeasure benchUpdateAxisRange = DurationMeasure.DISABLED;
     private DurationMeasure benchDrawAxes = DurationMeasure.DISABLED;
     private DurationMeasure benchDrawCanvas = DurationMeasure.DISABLED;
-
 }

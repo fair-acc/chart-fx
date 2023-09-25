@@ -2,11 +2,12 @@ package io.fair_acc.dataset.spi;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
+
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.EditConstraints;
 import io.fair_acc.dataset.EditableDataSet;
-import org.junit.jupiter.api.Test;
 
 /**
  * Tests the specific data set implementations for adherence to the EditableDataSet interface.

@@ -154,7 +154,7 @@ public class TSpectrum { // NOPMD - nomen est omen
                         if (c > 1) {
                             c = (yb1 - yb2) / c;
                             double d = 0;
-                            //for (int j = b2; j >= b1 && j >= 0; j--) { // LGTM fix
+                            // for (int j = b2; j >= b1 && j >= 0; j--) { // LGTM fix
                             for (int j = b2; j >= b1; j--) { // LGTM fix
                                 b = source[j];
                                 d = d + b - yb2;

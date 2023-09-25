@@ -4,7 +4,7 @@ import java.util.NavigableMap;
 
 /**
  * User: Vitaly Sazanovich Date: 07/02/13 Time: 19:28 Email: Vitaly.Sazanovich@gmail.com
- * 
+ *
  * @param <K> generic key
  * @param <V> generic value
  */
@@ -38,5 +38,4 @@ public interface IndexedNavigableMap<K, V> extends NavigableMap<K, V> {
      * @throws NullPointerException if the specified key is null or does not exist
      */
     int keyIndex(K k);
-
 }

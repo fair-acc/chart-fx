@@ -4,7 +4,7 @@ import java.util.NavigableSet;
 
 /**
  * User: Vitaly Sazanovich Date: 08/02/13 Time: 09:56 Email: Vitaly.Sazanovich@gmail.com
- * 
+ *
  * @param <E> generics reference
  */
 public interface IndexedNavigableSet<E> extends NavigableSet<E> {

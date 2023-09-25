@@ -35,11 +35,11 @@ import java.util.*;
  * {@link java.util.Collections#synchronizedSortedMap Collections.synchronizedSortedMap} method. This is best done at
  * creation time, to prevent accidental unsynchronised access to the map:
  * </p>
- * 
+ *
  * <pre>
  *   SortedMap m = Collections.synchronizedSortedMap(new IndexedTreeMap(...));
  * </pre>
- * 
+ *
  * <p>
  * The iterators returned by the <code>iterator</code> method of the collections returned by all of this class's
  * "collection view methods" are <i>fail-fast</i>: if the map is structurally modified at any time after the iterator is
@@ -177,7 +177,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Intended to be called only from IndexedTreeSet.addAll
-     * 
+     *
      * @param set ???
      * @param defaultVal ???
      */
@@ -363,7 +363,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Compares two keys using the correct comparison method for this IndexedTreeMap.
-     * 
+     *
      * @param k1 object1 to be compared
      * @param k2 object2 to be compared
      * @return true if equal
@@ -421,7 +421,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * for debugging purposes
-     * 
+     *
      * @throws Exception if weight is incorrect
      */
     public void debug() throws Exception {
@@ -436,7 +436,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Delete node p, and then rebalance the tree.
-     * 
+     *
      * @param noteToDelete entry
      */
     private void deleteEntry(final Entry<K, V> noteToDelete) {
@@ -573,7 +573,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * From CLR
-     * 
+     *
      * @param x entry
      */
     private void fixAfterDeletion(Entry<K, V> x) {
@@ -640,7 +640,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * From CLR
-     * 
+     *
      * @param x entry
      */
     private void fixAfterInsertion(Entry<K, V> x) {
@@ -709,11 +709,11 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Returns the value to which the specified key is mapped, or {@code null} if this map contains no mapping for the
      * key.
-     * 
+     *
      * More formally, if this map contains a mapping from a key {@code k} to a value {@code v} such that {@code key}
      * compares equal to {@code k} according to the map's ordering, then this method returns {@code v}; otherwise it
      * returns {@code null}. (There can be at most one such mapping.)
-     * 
+     *
      * A return value of {@code null} does not <i>necessarily</i> indicate that the map contains no mapping for the key;
      * it's also possible that the map explicitly maps the key to {@code null}. The {@link #containsKey containsKey}
      * operation may be used to distinguish these two cases.
@@ -732,7 +732,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
      * Gets the entry corresponding to the specified key; if no such entry exists, returns the entry for the least key
      * greater than the specified key; if no such entry exists (i.e., the greatest key in the Tree is less than the
      * specified key), returns <code>null</code>.
-     * 
+     *
      * @param key key value
      * @return entry
      */
@@ -768,7 +768,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Returns this map's entry for the given key, or <code>null</code> if the map does not contain an entry for the
      * key.
-     * 
+     *
      * @param key key value
      *
      * @return this map's entry for the given key, or <code>null</code> if the map does not contain an entry for the key
@@ -802,7 +802,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Version of getEntry using comparator. Split off from getEntry for performance. (This is not worth doing for most
      * methods, that are less dependent on comparator performance, but is worthwhile here.)
-     * 
+     *
      * @param key key value
      * @return entry
      */
@@ -862,7 +862,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Returns the first Entry in the IndexedTreeMap (according to the IndexedTreeMap's key-sort function). Returns null
      * if the IndexedTreeMap is empty.
-     * 
+     *
      * @return entry
      */
     public final Entry<K, V> getFirstEntry() {
@@ -878,7 +878,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Gets the entry corresponding to the specified key; if no such entry exists, returns the entry for the greatest
      * key less than the specified key; if no such entry exists, returns <code>null</code>.
-     * 
+     *
      * @param key key value
      * @return entry
      */
@@ -914,7 +914,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Gets the entry for the least key greater than the specified key; if no such entry exists, returns the entry for
      * the least key greater than the specified key; if no such entry exists returns <code>null</code>.
-     * 
+     *
      * @param key key value
      * @return entry
      */
@@ -946,7 +946,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Returns the last Entry in the IndexedTreeMap (according to the IndexedTreeMap's key-sort function). Returns null
      * if the IndexedTreeMap is empty.
-     * 
+     *
      * @return entry
      */
     public final Entry<K, V> getLastEntry() {
@@ -962,7 +962,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Returns the entry for the greatest key less than the specified key; if no such entry exists (i.e., the least key
      * in the Tree is greater than the specified key), returns <code>null</code>.
-     * 
+     *
      * @param key key value
      * @return entry
      */
@@ -1279,7 +1279,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Reconstitute the <code>IndexedTreeMap</code> instance from a stream (i.e., deserialize it).
-     * 
+     *
      * @param s entry
      * @throws java.io.IOException in case of write errors
      * @throws ClassNotFoundException in case of class casting errors
@@ -1296,7 +1296,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Intended to be called only from IndexedTreeSet.readObject
-     * 
+     *
      * @param size ???
      * @param s output stream
      * @param defaultVal ???
@@ -1338,7 +1338,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * From CLR
-     * 
+     *
      * @param p entry
      */
     private void rotateLeft(Entry<K, V> p) {
@@ -1377,7 +1377,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * From CLR
-     * 
+     *
      * @param p entry
      */
     private void rotateRight(Entry<K, V> p) {
@@ -1503,7 +1503,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Save the state of the <code>IndexedTreeMap</code> instance to a stream (i.e., serialize it).
-     * 
+     *
      * @param s output stream
      * @throws java.io.IOException in case of write errors
      *
@@ -1528,13 +1528,13 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Balancing operations.
-     * 
+     *
      * <p>
      * Implementations of rebalancings during insertion and deletion are slightly different than the CLR version. Rather
      * than using dummy nilnodes, we use a set of accessors that deal properly with null. They are used to avoid
      * messiness surrounding nullness checks in the main algorithms.
      * </p>
-     * 
+     *
      * @param p entry
      * @param <K> key value type
      * @param <V> value value type
@@ -1550,7 +1550,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
      * produced by buildTree. The remaining nodes are colored RED. (This makes a `nice' set of color assignments wrt
      * future insertions.) This level number is computed by finding the number of splits needed to reach the zeroeth
      * node. (The answer is ~lg(N), but in any case must be computed by same quick O(lg(N)) loop.)
-     * 
+     *
      * @param sz ???
      * @return ???
      */
@@ -1564,7 +1564,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Return SimpleImmutableEntry for entry, or null if null
-     * 
+     *
      * @param e entry to be searched
      * @param <K> key value type
      * @param <V> value value type
@@ -1580,7 +1580,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Returns the key corresponding to the specified Entry.
-     * 
+     *
      * @param e entry to be searched
      * @param <K> key value type
      * @return key
@@ -1596,7 +1596,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Return key for entry, or null if null
-     * 
+     *
      * @param e entry to be searched
      * @param <K> key value type
      * @param <V> value value type
@@ -1616,7 +1616,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Returns the predecessor of the specified Entry, or null if no such.
-     * 
+     *
      * @param t entry
      * @param <K> key value type
      * @param <V> value type
@@ -1654,7 +1654,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Returns the successor of the specified Entry, or null if no such.
-     * 
+     *
      * @param t entry
      * @param <K> key value type
      * @param <V> value type
@@ -1683,7 +1683,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
     /**
      * Test two values for equality. Differs from o1.equals(o2) only in that it copes with <code>null</code> o1
      * properly.
-     * 
+     *
      * @param o1 object1 to be compared
      * @param o2 object2 to be compared
      * @return true if equal
@@ -1921,7 +1921,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Node in the Tree. Doubles as a means to pass key-value pairs back to user (see Map.Entry).
-     * 
+     *
      * @param <K> key value type
      * @param <V> value value type
      */
@@ -1936,7 +1936,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
         /**
          * Make a new cell with given key, value, and parent, and with <code>null</code> child links, and BLACK color.
-         * 
+         *
          * @param key given key to be searched for
          * @param value of given key
          * @param parent of key
@@ -2327,7 +2327,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
         /**
          * Returns the absolute high fence for ascending traversal
-         * 
+         *
          * @return entry
          */
         public final IndexedTreeMap.Entry<K, V> absHighFence() {
@@ -2352,7 +2352,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
         /**
          * Return the absolute low fence for descending traversal
-         * 
+         *
          * @return entry
          */
         public final IndexedTreeMap.Entry<K, V> absLowFence() {
@@ -2672,7 +2672,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
         /**
          * Iterators for SubMaps
-         * 
+         *
          * @param <T> iterator generics type
          */
         protected abstract class SubMapIterator<T> implements Iterator<T> {
@@ -2767,7 +2767,7 @@ public class IndexedTreeMap<K, V> extends AbstractMap<K, V> implements IndexedNa
 
     /**
      * Base class for IndexedTreeMap Iterators
-     * 
+     *
      * @param <T> iterator generics
      */
     protected abstract class PrivateEntryIterator<T> implements Iterator<T> {

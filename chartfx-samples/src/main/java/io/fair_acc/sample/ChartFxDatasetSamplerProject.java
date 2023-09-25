@@ -1,39 +1,48 @@
 package io.fair_acc.sample;
 
-import fxsampler.FXSamplerProject;
-import fxsampler.model.WelcomePage;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-public class ChartFxDatasetSamplerProject implements FXSamplerProject {
+import fxsampler.FXSamplerProject;
+import fxsampler.model.WelcomePage;
 
-    /** {@inheritDoc} */
-    @Override public String getProjectName() {
+public class ChartFxDatasetSamplerProject implements FXSamplerProject {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getProjectName() {
         return "ChartFx - Datasets";
     }
 
-    /** {@inheritDoc} */
-    @Override public String getSampleBasePackage() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getSampleBasePackage() {
         return "io.fair_acc.sample.dataset";
     }
 
     ///** {@inheritDoc} */
     //@Override
-    //public String getModuleName() {
+    // public String getModuleName() {
     //    return "io.fair-acc";
     //}
 
-    /** {@inheritDoc} */
-    @Override public WelcomePage getWelcomePage() {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public WelcomePage getWelcomePage() {
         VBox vBox = new VBox();
         ImageView imgView = new ImageView();
         // imgView.setStyle("-fx-image: url('org/controlsfx/samples/ControlsFX.png');");
         StackPane pane = new StackPane();
         pane.setPrefHeight(207);
-        //pane.setStyle("-fx-background-image: url('org/controlsfx/samples/bar.png');"
-        //        + "-fx-background-repeat: repeat-x;");
+        // pane.setStyle("-fx-background-image: url('org/controlsfx/samples/bar.png');"
+        //         + "-fx-background-repeat: repeat-x;");
         pane.getChildren().add(imgView);
         Label label = new Label();
         label.setWrapText(true);

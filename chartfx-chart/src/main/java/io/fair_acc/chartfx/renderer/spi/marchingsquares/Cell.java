@@ -89,12 +89,16 @@ class Cell {
         }
     }
 
-    /** @return whether this cell is flipped or not. */
+    /**
+     * @return whether this cell is flipped or not.
+     */
     public boolean isFlipped() {
         return flipped;
     }
 
-    /** @return true if this Cell is a Saddle case. Returns false otherwise. */
+    /**
+     * @return true if this Cell is a Saddle case. Returns false otherwise.
+     */
     public boolean isSaddle() {
         return cellNdx == 5 || cellNdx == 10;
     }
@@ -109,7 +113,6 @@ class Cell {
     @Override
     public String toString() {
         return "Cell{index=" + cellNdx + ", flipped? " + flipped + ", left=" + left + ", top=" + top + ", right="
-                + right + ", bottom=" + bottom + '}';
+      + right + ", bottom=" + bottom + '}';
     }
-
 }

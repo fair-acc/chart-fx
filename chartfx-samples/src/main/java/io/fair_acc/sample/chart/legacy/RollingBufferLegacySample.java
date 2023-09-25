@@ -8,8 +8,6 @@ import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.sample.chart.ChartSample;
-import io.fair_acc.sample.chart.RollingBufferSample;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -28,12 +26,14 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 
 import io.fair_acc.chartfx.utils.SimplePerformanceMeter;
+import io.fair_acc.sample.chart.ChartSample;
+import io.fair_acc.sample.chart.RollingBufferSample;
 
 /**
  * RollingBuffer implementation using JavaFX Chart library.
  * <p>
  * This is intended for performance comparison and not part of the library.
- * 
+ *
  * @author rstein
  */
 @Deprecated

@@ -9,7 +9,7 @@ import java.util.TimeZone;
 
 /**
  * Data storage container to store image and other (primarily) binary data
- * 
+ *
  * @author rstein
  */
 @SuppressWarnings("PMD.DataClass") // yes it's a data storage class with no added functionality

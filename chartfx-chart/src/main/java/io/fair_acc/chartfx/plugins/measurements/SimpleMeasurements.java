@@ -9,9 +9,6 @@ import static io.fair_acc.chartfx.plugins.measurements.SimpleMeasurements.Measur
 
 import java.util.Optional;
 
-import io.fair_acc.chartfx.events.FxEventProcessor;
-import io.fair_acc.chartfx.plugins.AbstractSingleValueIndicator;
-import io.fair_acc.dataset.events.BitState;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.ButtonType;
 
@@ -23,10 +20,13 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelFormatter;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.axes.spi.MetricPrefix;
+import io.fair_acc.chartfx.events.FxEventProcessor;
+import io.fair_acc.chartfx.plugins.AbstractSingleValueIndicator;
 import io.fair_acc.chartfx.plugins.ParameterMeasurements;
 import io.fair_acc.chartfx.utils.DragResizerUtil;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.math.SimpleDataSetEstimators;
 
 /**
@@ -53,7 +53,6 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
     public MeasurementType getMeasType() {
         return measType;
     }
-
 
     public void handle() {
         final DataSet ds = getDataSet();
@@ -236,7 +235,7 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         getValueIndicators().addListener((ListChangeListener.Change<? extends AbstractSingleValueIndicator> change) -> {
             while (change.next()) {
                 change.getAddedSubList().forEach(c -> c.valueProperty().addListener(measurementBitState.onPropChange(BitState.ALL_BITS)::set));
-                //change.getRemoved().forEach(c -> c.getBitState().removeInvalidateListener(measurementBitState));
+                // change.getRemoved().forEach(c -> c.getBitState().removeInvalidateListener(measurementBitState));
             }
         });
         FxEventProcessor.getInstance().addAction(measurementBitState, this::handle);
@@ -282,13 +281,13 @@ public class SimpleMeasurements extends AbstractChartMeasurement {
         MARKER_VER(false, INDICATOR, "Marker Y", 1),
         MARKER_DISTANCE_VER(false, INDICATOR, "Marker ∆Y"),
 
-        /** 
-         * horizontal value at indicator 
+        /**
+         * horizontal value at indicator
          */
         VALUE_HOR(false, INDICATOR, "hor. value", 1),
         DISTANCE_HOR(false, INDICATOR, "hor. distance"),
-        /** 
-         * vertical value at indicator 
+        /**
+         * vertical value at indicator
          */
         VALUE_VER(true, INDICATOR, "ver. value", 1),
         DISTANCE_VER(true, INDICATOR, "ver. distance"),

@@ -3,7 +3,7 @@ package io.fair_acc.math.matrix;
 public class MatrixFactory {
     /**
      * Construct a matrix from a copy of a 2-D array.
-     * 
+     *
      * @param A Two-dimensional array of doubles.
      * @return deep copy
      * @exception IllegalArgumentException All rows must have the same length
@@ -24,7 +24,7 @@ public class MatrixFactory {
 
     /**
      * Generate identity matrix
-     * 
+     *
      * @param m Number of rows.
      * @param n Number of colums.
      * @return An m-by-n matrix with ones on the diagonal and zeros elsewhere.
@@ -41,7 +41,7 @@ public class MatrixFactory {
 
     /**
      * Generate matrix with random elements
-     * 
+     *
      * @param m Number of rows.
      * @param n Number of colums.
      * @return An m-by-n matrix with uniformly distributed random elements.

@@ -13,7 +13,6 @@ import javafx.scene.layout.Pane;
  * @author ennerf
  */
 public class FullSizePane extends Pane {
-
     public FullSizePane(Node... children) {
         getChildren().addAll(children);
     }
@@ -54,12 +53,10 @@ public class FullSizePane extends Pane {
             }
 
             if (child.isResizable()) {
-
                 // Resize to cover the full area
                 child.resizeRelocate(x, y, w, h);
 
             } else {
-
                 // Special case Canvas as it is not resizable
                 // by default, but is 99% what we want for plots.
                 if (child instanceof Canvas) {
@@ -69,10 +66,7 @@ public class FullSizePane extends Pane {
 
                 // Relocate
                 child.relocate(x, y);
-
             }
-
         }
     }
-
 }

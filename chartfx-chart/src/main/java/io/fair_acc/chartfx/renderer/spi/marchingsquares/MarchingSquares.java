@@ -244,7 +244,7 @@ public class MarchingSquares {
                 path = new PathGenerator().generalPath(MarchingSquares.contour(data, level));
             } catch (final Exception x) {
                 final String m = "Failed making contour at index #" + ndx + " for level " + level + ": "
-                                 + x.getLocalizedMessage();
+                               + x.getLocalizedMessage();
                 throw new IllegalArgumentException(m, x);
             }
             return new Result(ndx, path);

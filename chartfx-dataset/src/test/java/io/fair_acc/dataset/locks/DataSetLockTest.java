@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.concurrent.TimeUnit;
 
-import io.fair_acc.dataset.spi.DefaultDataSet;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -18,9 +17,11 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.dataset.spi.DefaultDataSet;
+
 /**
  * Tests of DataSetLock
- * 
+ *
  * @author rstein
  * @see DataSetLock
  * @see DefaultDataSetLock

@@ -1,14 +1,13 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.EditableDataSet;
-
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Implementation of the {@code DataSetError} interface which stores x,y, +eyn, and -eyn values in separate double

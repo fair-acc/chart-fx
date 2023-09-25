@@ -11,7 +11,7 @@ public class LimitedQueue<E> extends LinkedList<E> {
     private int limit;
 
     /**
-     * 
+     *
      * @param limit length of queue in terms of number of elements
      */
     public LimitedQueue(final int limit) {
@@ -31,7 +31,7 @@ public class LimitedQueue<E> extends LinkedList<E> {
     }
 
     /**
-     * 
+     *
      * @return length of queue in terms of number of elements
      */
     public int getLimit() {
@@ -39,7 +39,7 @@ public class LimitedQueue<E> extends LinkedList<E> {
     }
 
     /**
-     * 
+     *
      * @param newLimit length of queue in terms of number of elements
      * @return newly set limit (if valid)
      */

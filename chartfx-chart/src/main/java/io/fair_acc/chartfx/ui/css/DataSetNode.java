@@ -1,16 +1,17 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.events.EventSource;
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.AssertUtils;
+import java.util.Objects;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import java.util.Objects;
+import io.fair_acc.chartfx.renderer.spi.AbstractRenderer;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.EventSource;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * A dataset wrapper that lives in the SceneGraph for CSS styling
@@ -18,8 +19,7 @@ import java.util.Objects;
  * @author ennerf
  */
 public class DataSetNode extends DataSetNodeParameter implements EventSource {
-
-    public DataSetNode(AbstractRenderer<?> renderer,  DataSet dataSet) {
+    public DataSetNode(AbstractRenderer<?> renderer, DataSet dataSet) {
         this.renderer = AssertUtils.notNull("renderer", renderer);
         this.dataSet = AssertUtils.notNull("dataSet", dataSet);
 
@@ -70,7 +70,6 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
 
         // Update style info
         if (state.isDirty(ChartBits.DataSetStyle)) {
-
             // Replace user styles with the new classes
             if (!currentUserStyles.equals(dataSet.getStyleClasses())) {
                 getStyleClass().removeAll(currentUserStyles);
@@ -82,7 +81,6 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
             if (!Objects.equals(getStyle(), dataSet.getStyle())) {
                 setStyle(dataSet.getStyle());
             }
-
         }
     }
 
@@ -105,7 +103,6 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
     private final AbstractRenderer<?> renderer;
 
     static class DefaultColorClass {
-
         public static String getForIndex(int index) {
             if (index >= 0 && index < precomputed.length) {
                 return precomputed[index];
@@ -125,5 +122,4 @@ public class DataSetNode extends DataSetNodeParameter implements EventSource {
             }
         }
     }
-
 }

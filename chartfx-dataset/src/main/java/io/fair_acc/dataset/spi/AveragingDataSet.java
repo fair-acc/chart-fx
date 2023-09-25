@@ -8,7 +8,7 @@ import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * TODO: Change to ErrorDataSet and calculate standard deviation.
- * 
+ *
  * @author braeun
  */
 public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implements DataSet {
@@ -102,7 +102,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
 
     /**
      * Gets the fuzzy count.
-     * 
+     *
      * @return fuzzy count
      */
     public int getFuzzyCount() {
@@ -143,7 +143,7 @@ public class AveragingDataSet extends AbstractDataSet<AveragingDataSet> implemen
      * Sets the fuzzy count. The fuzzy count allows for a mismatch in the data count of the datasets added to the
      * average. Datasets will be added if the size difference is less or equal to the fuzzy count. In case of a mismatch
      * in size, the longer dataset will be truncated to the shorter one.
-     * 
+     *
      * @param fuzzyCount the fuzzy count
      */
     public void setFuzzyCount(int fuzzyCount) {

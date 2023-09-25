@@ -12,7 +12,6 @@ import java.util.regex.Pattern;
  * @author ennerf
  */
 public class StyleBuilder<T extends StyleBuilder<T>> {
-
     public T reset() {
         properties.clear();
         return getThis();
@@ -93,7 +92,6 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
         return builder.toString();
     }
 
-
     @SuppressWarnings("unchecked")
     protected T getThis() {
         return (T) this;
@@ -138,5 +136,4 @@ public class StyleBuilder<T extends StyleBuilder<T>> {
 
     private static final Pattern PROPERTY_END_PATTERN = Pattern.compile(";");
     private static final Pattern STYLE_ASSIGNMENT_PATTERN = Pattern.compile("[=:]");
-
 }

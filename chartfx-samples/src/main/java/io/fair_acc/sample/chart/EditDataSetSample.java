@@ -23,7 +23,7 @@ import io.fair_acc.dataset.spi.DoubleDataSet;
 
 /**
  * Simple example of how to edit data sets
- * 
+ *
  * @author rstein
  */
 public class EditDataSetSample extends ChartSample {

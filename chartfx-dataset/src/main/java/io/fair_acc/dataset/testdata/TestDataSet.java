@@ -9,7 +9,6 @@ import io.fair_acc.dataset.DataSet2D;
  * @param <D> generics for fluent design
  */
 public interface TestDataSet<D extends TestDataSet<D>> extends DataSet2D {
-
     /**
      * generate test data set
      *
@@ -28,7 +27,7 @@ public interface TestDataSet<D extends TestDataSet<D>> extends DataSet2D {
 
     /**
      * generate a new set of numbers
-     * 
+     *
      * @return itself (fluent design)
      */
     D update();

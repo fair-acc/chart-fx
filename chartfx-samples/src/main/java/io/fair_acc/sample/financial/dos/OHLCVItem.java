@@ -125,7 +125,7 @@ public class OHLCVItem implements IOhlcvItem {
     @Override
     public String toString() {
         return "OHLCV [timeStamp=" + dateFormat.format(timeStamp) + ", open=" + open + ", high=" + high + ", low=" + low + ", close=" + close + ", volume=" + volume + ", bidVol=" + volumeDown + ", askVol=" + volumeUp + ", openInterest="
-                + openInterest + "]";
+      + openInterest + "]";
     }
 
     public String toStringShort() {

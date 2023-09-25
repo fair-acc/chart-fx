@@ -8,17 +8,17 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.WeakHashMap;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.dataset.events.BitState;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.canvas.GraphicsContext;
 
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
+import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.dataset.locks.DefaultDataSetLock;
 import io.fair_acc.dataset.spi.DefaultAxisDescription;

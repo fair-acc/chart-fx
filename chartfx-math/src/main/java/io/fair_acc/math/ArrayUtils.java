@@ -1,10 +1,10 @@
 package io.fair_acc.math;
 
-import io.fair_acc.dataset.utils.AssertUtils;
-
 import java.util.Arrays;
 import java.util.function.IntFunction;
 import java.util.function.ToIntFunction;
+
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Utility class containing only static functions used to manipulate arrays.
@@ -354,7 +354,7 @@ public final class ArrayUtils {
      * @return a new array if the existing one is not large enough
      */
     public static boolean[] resizeMin(boolean[] array, int minSize) {
-        if(array != null && array.length >= minSize) {
+        if (array != null && array.length >= minSize) {
             return array;
         }
         return new boolean[growSize(minSize, array, arr -> arr.length)];
@@ -366,7 +366,7 @@ public final class ArrayUtils {
      * @return a new array if the existing one is not large enough
      */
     public static double[] resizeMin(double[] array, int minSize) {
-        if(array != null && array.length >= minSize) {
+        if (array != null && array.length >= minSize) {
             return array;
         }
         return new double[growSize(minSize, array, arr -> arr.length)];
@@ -384,7 +384,7 @@ public final class ArrayUtils {
     }
 
     public static int[] resizeMin(int[] array, int minSize) {
-        if(array != null && array.length >= minSize) {
+        if (array != null && array.length >= minSize) {
             return array;
         }
         return new int[growSize(minSize, array, arr -> arr.length)];
@@ -396,11 +396,11 @@ public final class ArrayUtils {
      * @return a new array if the existing one is not large enough
      */
     public static <T> T[] resizeMinNulled(T[] array, int minSize, IntFunction<T[]> constructor) {
-      return resizeMin(array, minSize, constructor, true);
+        return resizeMin(array, minSize, constructor, true);
     }
 
     public static <T> T[] resizeMin(T[] array, int minSize, IntFunction<T[]> constructor, boolean setNull) {
-        if(array != null && array.length >= minSize) {
+        if (array != null && array.length >= minSize) {
             if (setNull) {
                 Arrays.fill(array, 0, minSize, null);
             }
@@ -442,5 +442,4 @@ public final class ArrayUtils {
     public static <T> T[] clearIfLarger(T[] array, int maxSize) {
         return array != null && array.length > maxSize ? null : array;
     }
-
 }

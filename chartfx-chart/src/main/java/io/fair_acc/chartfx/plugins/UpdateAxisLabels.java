@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.events.StateListener;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -15,10 +12,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.StateListener;
 
 /**
  * This plugin updates the labels (name and unit) of all axes according to DataSet Metadata. For now the axes are only
@@ -30,7 +30,6 @@ import io.fair_acc.dataset.DataSet;
  * @author akrimm
  */
 public class UpdateAxisLabels extends ChartPlugin {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAxisLabels.class);
 
     // listener bookkeeping
@@ -114,7 +113,7 @@ public class UpdateAxisLabels extends ChartPlugin {
                 for (int dimIdx = 0; dimIdx < dataSet.getDimension(); dimIdx++) {
                     final int dimIndex = dimIdx;
                     Optional<Axis> oldAxis = renderer.getAxes().stream().filter(axis -> axis.getDimIndex() == dimIndex).findFirst() //
-                            .or(() -> getChart().getAxes().stream().filter(axis -> axis.getDimIndex() == dimIndex).findFirst());
+                                                     .or(() -> getChart().getAxes().stream().filter(axis -> axis.getDimIndex() == dimIndex).findFirst());
                     oldAxis.ifPresent(a -> a.set(dataSet.getAxisDescription(dimIndex).getName(), dataSet.getAxisDescription(dimIndex).getUnit()));
                 }
             } else {

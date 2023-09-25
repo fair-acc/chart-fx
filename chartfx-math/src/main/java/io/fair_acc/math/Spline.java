@@ -2,7 +2,7 @@ package io.fair_acc.math;
 
 /**
  * class implementing natural cubic splines according to: http://en.wikipedia.org/wiki/Spline_(mathematics)
- * 
+ *
  * @author rstein
  */
 public class Spline {
@@ -18,7 +18,7 @@ public class Spline {
 
     /**
      * default constructor
-     * 
+     *
      * @param x array of horizontal coordinates
      * @param y array of vertical coordinates Both arrays are expected to be sorted. The horizontal array should not
      *        contain entries with the same value. The default dimension is derived from the
@@ -93,7 +93,7 @@ public class Spline {
 
     /**
      * returns the cubic-spline interpolated value at x
-     * 
+     *
      * @param x input parameter
      * @return cubic-spline interpolated value at x
      */

@@ -1,6 +1,7 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.utils.PropUtil;
+import javax.swing.event.ChangeListener;
+
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ReadOnlyLongProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -10,7 +11,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.layout.Pane;
 
-import javax.swing.event.ChangeListener;
+import io.fair_acc.chartfx.utils.PropUtil;
 
 /**
  * A hidden node that holds styles. This hides style nodes even
@@ -20,7 +21,6 @@ import javax.swing.event.ChangeListener;
  * @author ennerf
  */
 public class StyleGroup extends Parent {
-
     public StyleGroup(Pane pane, String... paneStyles) {
         this(pane, pane.getChildren(), paneStyles);
     }
@@ -57,5 +57,4 @@ public class StyleGroup extends Parent {
         getChildren().add(style);
         return style;
     }
-
 }

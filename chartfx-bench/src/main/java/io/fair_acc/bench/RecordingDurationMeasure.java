@@ -9,7 +9,6 @@ import java.util.function.LongSupplier;
  * @author ennerf
  */
 public class RecordingDurationMeasure implements DurationMeasure {
-
     public static DurationMeasure newNanoTime(TimeMeasure recorder) {
         return new RecordingDurationMeasure(TimeUnit.NANOSECONDS, System::nanoTime, recorder);
     }
@@ -67,7 +66,6 @@ public class RecordingDurationMeasure implements DurationMeasure {
     protected boolean ignoreMissingStart = false;
 
     public static class Sum extends RecordingDurationMeasure implements AggregateDurationMeasure {
-
         public Sum(TimeUnit clockUnit, LongSupplier clock, TimeMeasure recorder) {
             super(clockUnit, clock, recorder);
         }
@@ -86,7 +84,5 @@ public class RecordingDurationMeasure implements DurationMeasure {
         }
 
         long sum = 0;
-
     }
-
 }

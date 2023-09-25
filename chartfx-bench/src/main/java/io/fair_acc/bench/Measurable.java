@@ -6,7 +6,6 @@ package io.fair_acc.bench;
  * @author ennerf
  */
 public interface Measurable {
-
     /**
      * @param recorder records benchmark measurements
      */
@@ -17,7 +16,6 @@ public interface Measurable {
      * classes where the implementation is optional.
      */
     public interface EmptyDefault {
-        default void setRecorder(MeasurementRecorder recorder) {};
+        default void setRecorder(MeasurementRecorder recorder){};
     }
-
 }

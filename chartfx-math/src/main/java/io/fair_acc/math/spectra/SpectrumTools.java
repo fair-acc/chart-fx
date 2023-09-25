@@ -567,8 +567,8 @@ public class SpectrumTools {
                 return val + MathBase.aTan2(right * MathBase.sin(pin), center + right * MathBase.cos(pin)) / MathBase.PI;
             } else {
                 return val
-                        - MathBase.aTan2(left * MathBase.sin(pin), center + left * MathBase.cos(pin))
-                                  / MathBase.PI;
+              - MathBase.aTan2(left * MathBase.sin(pin), center + left * MathBase.cos(pin))
+                        / MathBase.PI;
             }
         } else {
             return val;

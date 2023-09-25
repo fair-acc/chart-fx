@@ -1,6 +1,5 @@
 package io.fair_acc.math;
 
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -113,11 +112,11 @@ public class MathDataSet extends DoubleErrorDataSet {
 
         registerListener();
         EventProcessor eventProcessor = ThreadEventProcessor.getUserInstance();
-        //eventProcessor.getBitState().addChangeListener(this);
+        // eventProcessor.getBitState().addChangeListener(this);
         eventProcessor.addAction(inputDataSetBitState, this::update);
         // inputDataSetBitState.addChangeListener((source, bits) -> update());
 
-        //update();
+        // update();
     }
 
     public final void triggerUpdate() {
@@ -163,7 +162,7 @@ public class MathDataSet extends DoubleErrorDataSet {
         // operation is in place using the y-array values of 'this'
         dataSetValueFunction.transform(ySourceVector, yDestVector, length);
         this.set(xDestVector, yDestVector, ySourceErrorNeg, ySourceErrorPos, length, false); // N.B zero copy re-use of
-                // existing array
+                                                                                             // existing array
     }
 
     protected void update() {
@@ -181,7 +180,7 @@ public class MathDataSet extends DoubleErrorDataSet {
 
             this.setName(getCompositeDataSetName(transformName, sourceDataSets.toArray(new DataSet[0])));
             // Note: the data bit is already invalidated at the storing data set level
-            //this.getBitState().clear();
+            // this.getBitState().clear();
         });
     }
 

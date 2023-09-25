@@ -1,12 +1,13 @@
 package io.fair_acc.math.matrix;
 
 public abstract class AbstractMatrix implements Matrix {
-
     private static final long serialVersionUID = 4161055769254544900L;
     protected int m; // row dimension
     protected int n; // column dimension
 
-    /** Check if size(A) == size(B) **/
+    /**
+     * Check if size(A) == size(B) *
+     */
     @Override
     public void checkMatrixDimensions(Matrix B) {
         if (B.getRowDimension() != m || B.getColumnDimension() != n) {
@@ -16,7 +17,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     /**
      * Get column dimension.
-     * 
+     *
      * @return n, the number of columns.
      */
     @Override
@@ -26,7 +27,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     /**
      * Get row dimension
-     * 
+     *
      * @return m, the number of rows.
      */
     @Override
@@ -36,7 +37,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     /**
      * One norm
-     * 
+     *
      * @return maximum column sum.
      */
     public double norm1() {
@@ -53,7 +54,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     /**
      * Two norm
-     * 
+     *
      * @return maximum singular value.
      */
     public double norm2() {
@@ -72,7 +73,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     /**
      * Frobenius norm
-     * 
+     *
      * @return sqrt of sum of squares of all elements.
      */
     public double normF() {
@@ -87,7 +88,7 @@ public abstract class AbstractMatrix implements Matrix {
 
     /**
      * Infinity norm
-     * 
+     *
      * @return maximum row sum.
      */
     public double normInf() {
@@ -101,5 +102,4 @@ public abstract class AbstractMatrix implements Matrix {
         }
         return f;
     }
-
 }

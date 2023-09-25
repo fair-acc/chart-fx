@@ -656,7 +656,8 @@ public class SoftKeyHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>
         return (Entry<K, V>[]) new Entry<?, ?>[n];
     }
 
-    /** Transfers all entries from src to dest tables
+    /**
+     * Transfers all entries from src to dest tables
      * @param src source entry
      * @param dest destination entry
      */
@@ -1008,7 +1009,8 @@ public class SoftKeyHashMap<K, V> extends AbstractMap<K, V> implements Map<K, V>
             currentKey = null;
         }
 
-        /** The common parts of next() across different types of iterators
+        /**
+         * The common parts of next() across different types of iterators
          * @return next entry if available
          * @throws ConcurrentModificationException in case of concurrent modification
          * @throws NoSuchElementException if there is no next elements (N.B. should be called only after {@link #hasNext()})

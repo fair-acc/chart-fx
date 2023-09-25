@@ -5,15 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.DataSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import io.fair_acc.dataset.AxisDescription;
+import io.fair_acc.dataset.DataSet;
 
 /**
  * Checks for CircularDoubleDataSet interfaces and constructors.
  * TODO: add tests for Listeners
- * 
+ *
  * @author Alexander Krimm
  */
 class CircularDoubleErrorDataSetTests {

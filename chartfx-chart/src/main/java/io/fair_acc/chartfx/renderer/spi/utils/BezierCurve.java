@@ -6,7 +6,6 @@ package io.fair_acc.chartfx.renderer.spi.utils;
  * @author rstein
  */
 public final class BezierCurve {
-
     private BezierCurve() {
         // private math class
     }
@@ -72,7 +71,7 @@ public final class BezierCurve {
 
         x[0] = rhs[0] / b;
 
-        for (int i = 1; i < n; i++) {// Decomposition and forward substitution.
+        for (int i = 1; i < n; i++) { // Decomposition and forward substitution.
             tmp[i] = 1 / b;
             b = (i < n - 1 ? 4.0 : 3.5) - tmp[i];
             x[i] = (rhs[i] - x[i - 1]) / b;
@@ -82,5 +81,4 @@ public final class BezierCurve {
         }
         return x;
     }
-
 }

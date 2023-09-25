@@ -10,5 +10,4 @@ package io.fair_acc.chartfx.renderer.datareduction;
  *
  */
 public class VisvalingamMaheswariWhyattDataReducer {
-
 }

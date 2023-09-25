@@ -1,16 +1,16 @@
 package io.fair_acc.chartfx.utils;
 
-import io.fair_acc.chartfx.utils.Schubfach.DecomposedDouble;
+import static org.junit.jupiter.api.Assertions.*;
+
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import io.fair_acc.chartfx.utils.Schubfach.DecomposedDouble;
 
 /**
  * @author Florian Enner
  * @since 08 Mär 2023
  */
 class SchubfachTest {
-
     @Test
     void testDecomposition() {
         // Initial normalized decomp
@@ -30,5 +30,4 @@ class SchubfachTest {
         assertEquals(exponent, value.getExponent(), "exponent");
         return value;
     }
-
 }

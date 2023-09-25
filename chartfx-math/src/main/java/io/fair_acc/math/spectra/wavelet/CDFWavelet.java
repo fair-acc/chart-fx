@@ -6,7 +6,7 @@ public class CDFWavelet {
      * replaced by its output transform. n is the length of the signal, and must be a power of 2. The first half part of
      * the output signal contains the approximation coefficients. The second half part contains the detail coefficients
      * (aka. the wavelets coefficients). See also iwt53.
-     * 
+     *
      * @param x input signal, which will be replaced by its output transform
      * @param n length of the signal, and must be a power of 2
      */
@@ -58,10 +58,10 @@ public class CDFWavelet {
 
     /**
      * Cohen-Daubechies-Feauveau forward biorthogonal 9/7 wavelet transform (lifting implementation)
-     * 
+     *
      * The first half part of the output signal contains the approximation coefficients. The second half part contains
      * the detail coefficients (aka. wavelets coefficients).
-     * 
+     *
      * @param x input signal, which will be replaced by its output transform
      * @param n length of the signal, and must be a power of 2
      */
@@ -128,7 +128,7 @@ public class CDFWavelet {
     /**
      * iwt53 - Inverse biorthogonal 5/3 wavelet transform This is the inverse of fwt53 so that iwt53(fwt53(x,n),n)=x for
      * every signal x of length n. See also fwt53.
-     * 
+     *
      * @param x input signal, which will be replaced by its output transform
      * @param n length of the signal, and must be a power of 2
      */
@@ -177,7 +177,7 @@ public class CDFWavelet {
     /**
      * iwt97 - Inverse biorthogonal 9/7 wavelet transform This is the inverse of fwt97 so that iwt97(fwt97(x,n),n)=x for
      * every signal x of length n. See also fwt97.
-     * 
+     *
      * @param x input signal, which will be replaced by its output transform
      * @param n length of the signal, and must be a power of 2
      */
