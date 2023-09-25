@@ -1,13 +1,12 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.EditableDataSet;
-
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Implementation of the {@code DataSet} interface which stores x,y values in two separate arrays. It provides methods

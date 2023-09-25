@@ -1,6 +1,5 @@
 package io.fair_acc.chartfx.ui;
 
-import io.fair_acc.chartfx.ui.geometry.Side;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -8,6 +7,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
+
+import io.fair_acc.chartfx.ui.geometry.Side;
 
 /**
  * @author rstein

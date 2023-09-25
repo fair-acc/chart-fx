@@ -275,7 +275,7 @@ public class Convolution {
         }
 
         final double[] ret = new double[length];
-        for (int i = 0; i<length>> 1; i++) {
+        for (int i = 0; i < length >> 1; i++) {
             ret[i << 1] = 1.0;
         }
         return ret;
@@ -367,8 +367,8 @@ public class Convolution {
         final double C_sigmaPi = MathBase.pow(MathBase.PI, 0.25);
 
         final double val = C_sigmaPi
-                           * (MathBase.exp(-0.5 * MathBase.sqr(MathBase.TWO_PI * (f0 - frequency) * heisenberg))
-                                   - K_sigma * MathBase.exp(-0.5 * MathBase.sqr(MathBase.TWO_PI * frequency * heisenberg)));
+                         * (MathBase.exp(-0.5 * MathBase.sqr(MathBase.TWO_PI * (f0 - frequency) * heisenberg))
+                                 - K_sigma * MathBase.exp(-0.5 * MathBase.sqr(MathBase.TWO_PI * frequency * heisenberg)));
         return val;
     }
 }

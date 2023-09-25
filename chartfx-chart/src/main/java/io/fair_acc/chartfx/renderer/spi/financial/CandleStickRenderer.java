@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Paint;
@@ -16,6 +14,8 @@ import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEP;
 import io.fair_acc.chartfx.renderer.spi.financial.service.RendererPaintAfterEPAware;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;
@@ -230,7 +230,6 @@ public class CandleStickRenderer extends AbstractFinancialRenderer<CandleStickRe
         if (computeLocalRange()) {
             applyLocalYRange(ds, yAxis, xMin, xMax);
         }
-
     }
 
     /**

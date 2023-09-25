@@ -18,7 +18,7 @@ import io.fair_acc.dataset.testdata.spi.TriangleFunction;
 
 /**
  * Test SimpleDataSetEstimators Utility class
- * 
+ *
  * @author Alexander Krimm
  */
 class SimpleDataSetEstimatorsTest {
@@ -77,7 +77,7 @@ class SimpleDataSetEstimatorsTest {
         // simple case
         DataSet dataset = new DataSetBuilder().setValues(DIM_Y, new double[] { 0, 0, 0, 1, 1, 0, 0, 0, 1, 1 }).build();
         assertEquals(0.4, SimpleDataSetEstimators.getDutyCycle(dataset, 0, dataset.getDataCount()));
-        //test hysteresis
+        // test hysteresis
         dataset = new DataSetBuilder().setValues(DIM_Y, new double[] { 0, 0.4, 0.5, 0.6, 0.7, 1.0, 0, 0.3, 0.5, Double.NaN }).build();
         assertEquals(3.0 / (4.0 + 3.0), SimpleDataSetEstimators.getDutyCycle(dataset, 0, dataset.getDataCount()));
         // empty dataSet

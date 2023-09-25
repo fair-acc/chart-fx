@@ -36,8 +36,8 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
 import io.fair_acc.dataset.spi.DimReductionDataSet;
 import io.fair_acc.dataset.spi.DimReductionDataSet.Option;
-import io.fair_acc.sample.math.EMDSample;
 import io.fair_acc.math.spectra.wavelet.ContinuousWavelet;
+import io.fair_acc.sample.math.EMDSample;
 
 public class DimReductionDataSetSample extends ChartSample {
     private static final Logger LOGGER = LoggerFactory.getLogger(DimReductionDataSetSample.class);
@@ -166,7 +166,7 @@ public class DimReductionDataSetSample extends ChartSample {
             double count = 0.0;
 
             for (int j = nboundary; j < tempDataSet.getShape(DataSet.DIM_X) - nboundary; j++) {
-                //val += tempDataSet.get(DataSet.DIM_Z, i * tempDataSet.getDataCount(DataSet.DIM_X) + j);
+                // val += tempDataSet.get(DataSet.DIM_Z, i * tempDataSet.getDataCount(DataSet.DIM_X) + j);
                 count += 1.0;
             }
             magWavelet[i] = count == 0.0 ? Double.NaN : (val / count);

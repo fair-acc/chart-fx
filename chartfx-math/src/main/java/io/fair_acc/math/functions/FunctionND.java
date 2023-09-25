@@ -2,7 +2,7 @@ package io.fair_acc.math.functions;
 
 /**
  * generic n-dimensional function interface
- * 
+ *
  * @author rstein
  */
 public interface FunctionND extends Function {

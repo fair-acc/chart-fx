@@ -16,7 +16,7 @@ import javafx.scene.paint.Color;
 
 /**
  * https://stackoverflow.com/questions/32625212/convert-color-from-css-to-javafx-color-object
- * 
+ *
  * @author Zydar
  */
 public class CssToColorHelper extends Parent {

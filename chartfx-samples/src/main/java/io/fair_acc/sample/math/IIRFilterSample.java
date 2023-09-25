@@ -5,12 +5,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.zip.ZipInputStream;
 
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +17,7 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.filter.iir.Butterworth;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
 
 /**

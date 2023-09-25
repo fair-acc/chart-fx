@@ -9,14 +9,14 @@ import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * Generic DataSet interface tests that (nearly) all DataSets should fulfill.
@@ -73,7 +73,6 @@ class GenericDataSetTests {
             testDataSet.recomputeLimits(plane);
             testDataSetError.recomputeLimits(plane);
         }
-
 
         final AtomicInteger notifyCounter = new AtomicInteger();
         final int bit = BitState.mask(ChartBits.DataSetDataAdded);

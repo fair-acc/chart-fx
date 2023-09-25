@@ -1,27 +1,28 @@
 package io.fair_acc.sample.math;
 
-import io.fair_acc.chartfx.renderer.ErrorStyle;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.math.DataSetMath;
-import io.fair_acc.math.functions.TrigCosineFunction;
-import io.fair_acc.math.functions.TrigSineFunction;
-import io.fair_acc.sample.chart.ChartSample;
-import io.fair_acc.sample.math.utils.DemoChart;
-import io.fair_acc.math.spectra.Apodization;
+import java.util.Random;
+
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.util.Random;
+import io.fair_acc.chartfx.renderer.ErrorStyle;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.math.DataSetMath;
+import io.fair_acc.math.functions.TrigCosineFunction;
+import io.fair_acc.math.functions.TrigSineFunction;
+import io.fair_acc.math.spectra.Apodization;
+import io.fair_acc.sample.chart.ChartSample;
+import io.fair_acc.sample.math.utils.DemoChart;
 
 /**
  * example illustrating the Fast-Fourier transform and math operations directly on DataSet
- * 
+ *
  * N.B. Zoom into the peaks to see the details
- * 
+ *
  * N.B. also works with unequal sampling and ranges of input data
- * 
+ *
  * @author rstein
  */
 public class DataSetSpectrumSample extends ChartSample {
@@ -31,7 +32,6 @@ public class DataSetSpectrumSample extends ChartSample {
 
     @Override
     public Node getChartPanel(Stage stage) {
-
         final DemoChart chart = new DemoChart();
         chart.getRenderer(0).setDrawMarker(false);
         chart.getRenderer(0).setErrorStyle(ErrorStyle.ERRORSURFACE);
@@ -49,7 +49,7 @@ public class DataSetSpectrumSample extends ChartSample {
 
         DataSet dataSet1 = sineFunction.getDataSetEstimate(-10.0, +10.0, N_SAMPLES);
         DataSet dataSet2 = unequalSampling ? cosineFunction.getDataSetEstimate(-8.0, +8.0, N_SAMPLES)
-                : cosineFunction.getDataSetEstimate(-10.0, +10.0, N_SAMPLES);
+                                           : cosineFunction.getDataSetEstimate(-10.0, +10.0, N_SAMPLES);
 
         // test adding of functions
         DataSet dataSet = DataSetMath.addFunction(dataSet1, dataSet2);

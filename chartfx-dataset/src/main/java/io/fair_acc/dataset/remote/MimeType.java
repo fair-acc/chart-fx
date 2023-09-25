@@ -10,7 +10,7 @@ import java.util.Locale;
  * Since the official list is rather and contains types we likely never
  * encounter, we chose the specific sub-selection from:
  * https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
- * 
+ *
  * @author rstein
  *
  */
@@ -148,7 +148,7 @@ public enum MimeType {
 
     /**
      * Case-insensitive mapping between MIME-type string and enumumeration value.
-     * 
+     *
      * @param mimeType the string equivalent mime-type, e.g. "image/png"
      * @return the enumeration equivalent mime-type, e.g. MimeType.PNG or
      *         MimeType.UNKNOWN as fall-back
@@ -170,7 +170,7 @@ public enum MimeType {
 
     /**
      * Case-insensitive mapping between MIME-type string and enumeration value.
-     * 
+     *
      * @param fileName the string equivalent mime-type, e.g. "image/png"
      * @return the enumeration equivalent mime-type, e.g. MimeType.PNG or
      *         MimeType.UNKNOWN as fall-back

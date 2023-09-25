@@ -3,7 +3,6 @@ package io.fair_acc.sample.chart;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.chartfx.plugins.*;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.plugins.*;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox;

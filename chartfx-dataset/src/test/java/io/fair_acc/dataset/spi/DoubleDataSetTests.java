@@ -4,14 +4,15 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 
-import io.fair_acc.dataset.DataSet;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.dataset.DataSet;
+
 /**
  * Checks for DoubleDataSet interfaces and constructors.
- * 
+ *
  * @author rstein
  */
 public class DoubleDataSetTests extends EditableDataSetTests {
@@ -106,8 +107,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
                 "check '" + dsType + "' diff data count at end of adding");
 
         if (testCase <= 1) {
-            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
-            // Min(size + 0.5* size, capacity) ... need to find a work around
+            // TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
+            //  Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
         }
@@ -172,8 +173,8 @@ public class DoubleDataSetTests extends EditableDataSetTests {
                 "check '" + dsType + "' diff data count at end of adding");
 
         if (testCase <= 1) {
-            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
-            // Min(size + 0.5* size, capacity) ... need to find a work around
+            // TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
+            //  Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
         }

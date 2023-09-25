@@ -1,11 +1,11 @@
 package io.fair_acc.chartfx.utils;
 
+import java.util.Objects;
+
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.beans.property.*;
 import javafx.beans.value.*;
-
-import java.util.Objects;
 
 /**
  * Utility class for working with JavaFX properties
@@ -13,7 +13,6 @@ import java.util.Objects;
  * @author ennerf
  */
 public class PropUtil {
-
     public static boolean set(DoubleProperty prop, double value) {
         if (isEqual(prop.get(), value)) {
             return false;
@@ -22,7 +21,7 @@ public class PropUtil {
         return true;
     }
 
-    public static boolean set(StringProperty prop, String value){
+    public static boolean set(StringProperty prop, String value) {
         if (Objects.equals(prop.get(), value)) {
             return false;
         }
@@ -70,7 +69,7 @@ public class PropUtil {
     /**
      * subscribes to property changes without requiring value boxing
      */
-    public static void runOnChange(Runnable action, ObservableValue<?>... conditions){
+    public static void runOnChange(Runnable action, ObservableValue<?>... conditions) {
         for (var condition : conditions) {
             if (condition instanceof ObservableDoubleValue) {
                 var obs = (ObservableDoubleValue) condition;
@@ -134,11 +133,10 @@ public class PropUtil {
         return Double.doubleToLongBits(a) == Double.doubleToLongBits(b); // supports NaN
     }
 
-    public static boolean isNullOrEmpty(String string){
+    public static boolean isNullOrEmpty(String string) {
         return string == null || string.isBlank();
     }
 
     private PropUtil() {
     }
-
 }

@@ -14,7 +14,7 @@ import io.fair_acc.dataset.DataSet;
 
 /**
  * Small static helper routines to ease the reading of the DataSetUtils class
- * 
+ *
  * @author rstein
  */
 public class DataSetUtilsHelper {

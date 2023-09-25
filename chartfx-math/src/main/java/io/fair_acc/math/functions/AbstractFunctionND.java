@@ -32,14 +32,14 @@ public abstract class AbstractFunctionND extends AbstractFunction implements Fun
 
     @Override
     public double[] getValue(final double[] x) {
-
         if (x == null) {
-            throw new InvalidParameterException("getValue(double[], null, int) " + "- input vector is null");
+            throw new InvalidParameterException("getValue(double[], null, int) "
+                                                + "- input vector is null");
         }
 
         if (x.length == getInputDimension()) {
             throw new InvalidParameterException("getValue(double[], double[][], int) "
-                    + "- input vector dimension mismatch " + x.length + " vs. " + getInputDimension());
+                                                + "- input vector dimension mismatch " + x.length + " vs. " + getInputDimension());
         }
 
         final int dim = getOutputDimension();
@@ -67,5 +67,4 @@ public abstract class AbstractFunctionND extends AbstractFunction implements Fun
     public void setErrorEstimateComputation(final boolean state) {
         computeErrorEstimate = true;
     }
-
 }

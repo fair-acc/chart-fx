@@ -1,19 +1,17 @@
 package io.fair_acc.dataset.events;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author ennerf
  */
 class BitStateTest {
-
     @Test
     void compareSingleAndMultiThreaded() {
-
         AtomicInteger counter = new AtomicInteger();
         StateListener listener = (source, bits) -> counter.incrementAndGet();
         var st = BitState.initDirty(this, ChartBits.KnownMask).addChangeListener(listener);
@@ -51,7 +49,5 @@ class BitStateTest {
         st.setDirty(ChartBits.AxisRange, ChartBits.AxisCanvas);
         mt.setDirty(ChartBits.AxisRange, ChartBits.AxisLayout);
         assertEquals(4, counter.get());
-
     }
-
 }

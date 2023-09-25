@@ -11,7 +11,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.collections.ObservableList;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
@@ -21,12 +20,13 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * Simple, uncomplicated reducing line renderer
- * 
+ *
  * @author braeun
  */
 public class ReducingLineRenderer extends AbstractRendererXY<ReducingLineRenderer> implements Renderer {

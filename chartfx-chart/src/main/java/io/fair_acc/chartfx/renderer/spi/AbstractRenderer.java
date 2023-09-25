@@ -1,5 +1,19 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import java.util.*;
+import java.util.function.IntSupplier;
+
+import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableBooleanProperty;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
@@ -14,26 +28,12 @@ import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import io.fair_acc.dataset.utils.NoDuplicatesList;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
-import javafx.beans.property.*;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
-import javafx.css.StyleableBooleanProperty;
-import javafx.geometry.Orientation;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-
-import java.util.*;
-import java.util.function.IntSupplier;
 
 /**
  * @author rstein
  * @param <R> renderer generics
  */
 public abstract class AbstractRenderer<R extends Renderer> extends Parent implements Renderer {
-
     protected final StyleableBooleanProperty showInLegend = css().createBooleanProperty(this, "showInLegend", true);
     protected final StyleableBooleanProperty useGlobalColorIndex = css().createBooleanProperty(this, "useGlobalColorIndex", true);
     protected final IntegerProperty globalIndexOffset = new SimpleIntegerProperty(this, "globalIndexOffset", 0);
@@ -257,7 +257,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
      * @return property
      * @param <T> any type of property
      */
-    protected <T extends Property<?>> T registerCanvasProp(T prop){
+    protected <T extends Property<?>> T registerCanvasProp(T prop) {
         PropUtil.runOnChange(this::invalidateCanvas, prop);
         return prop;
     }
@@ -269,7 +269,7 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     protected void fireInvalidated(IntSupplier bit) {
         var chart = getChart();
         if (chart != null) {
-           chart.fireInvalidated(bit);
+            chart.fireInvalidated(bit);
         }
     }
 
@@ -288,5 +288,4 @@ public abstract class AbstractRenderer<R extends Renderer> extends Parent implem
     }
 
     private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData());
-
 }

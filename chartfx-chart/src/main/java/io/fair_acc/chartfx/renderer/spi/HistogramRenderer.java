@@ -6,10 +6,6 @@ import static io.fair_acc.dataset.DataSet.DIM_Y;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
-import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
-import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -22,6 +18,10 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.utils.BezierCurve;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
+import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.Histogram;
 import io.fair_acc.dataset.spi.LimitedIndexedTreeDataSet;
@@ -113,7 +113,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         if (isAnimate()) {
             timer.start();
         }
-
     }
 
     public BooleanProperty roundedCornerProperty() {
@@ -208,7 +207,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         }
 
         gc.restore();
-
     }
 
     protected void drawHistograms(final GraphicsContext gc, final DataSetNode style, final DataSet dataSet) {
@@ -284,7 +282,6 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         drawPolygon(gc, newX, newY, filled, isVerticalDataSet, 2 * nRange + 2);
 
         gc.restore();
-
     }
 
     protected static void drawPolyLineHistogramBezier(final GraphicsContext gc, final DataSetNode style, final DataSet ds, final Axis xAxis, final Axis yAxis, boolean filled) {
@@ -599,5 +596,4 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
     // The cache can be shared because there can only ever be one renderer accessing it
     // Note: should not be exposed to child classes to guarantee that arrays aren't double used.
     private static final FastDoubleArrayCache SHARED_ARRAYS = new FastDoubleArrayCache(6);
-
 }

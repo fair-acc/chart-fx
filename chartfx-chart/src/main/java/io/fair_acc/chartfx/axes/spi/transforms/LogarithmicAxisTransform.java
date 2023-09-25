@@ -1,12 +1,12 @@
 package io.fair_acc.chartfx.axes.spi.transforms;
 
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.axes.Axis;
-
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 
 /**
  * @author rstein
@@ -121,5 +121,4 @@ public class LogarithmicAxisTransform extends AbstractAxisTransform {
         }
         axis.minProperty().set(val);
     }
-
 }

@@ -28,7 +28,7 @@ import io.fair_acc.dataset.testdata.spi.RandomWalkFunction;
 
 /**
  * Simple example of how to use css to change the appearance of the chart.
- * 
+ *
  * @author akrimm
  */
 public class CssStylingSample extends ChartSample {
@@ -72,13 +72,13 @@ public class CssStylingSample extends ChartSample {
         VBox.setVgrow(hBox, Priority.ALWAYS);
         hBox.getChildren().forEach(child -> HBox.setHgrow(child, Priority.ALWAYS));
 
-        //globalCssBox.valueProperty().addListener((prop, oldVal, newVal) -> {
-        //    if ("none".equals(newVal)) {
-        //        scene.getStylesheets().clear();
-        //    } else {
-        //        scene.getStylesheets().setAll(Objects.requireNonNull(CssStylingSample.class.getResource(newVal), "could not load css file: " + newVal).toExternalForm());
-        //    }
-        //});
+        // globalCssBox.valueProperty().addListener((prop, oldVal, newVal) -> {
+        //     if ("none".equals(newVal)) {
+        //         scene.getStylesheets().clear();
+        //     } else {
+        //         scene.getStylesheets().setAll(Objects.requireNonNull(CssStylingSample.class.getResource(newVal), "could not load css file: " + newVal).toExternalForm());
+        //     }
+        // });
         cssBox.valueProperty().addListener((prop, oldVal, newVal) -> {
             if ("none".equals(newVal)) {
                 chart.getStylesheets().clear();

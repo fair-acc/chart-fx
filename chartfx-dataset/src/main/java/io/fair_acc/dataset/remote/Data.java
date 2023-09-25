@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 /**
  * Simple data storage container for net-based file/data-transfers.
- * 
+ *
  * Please note, this container classes stores direct references.
- * 
+ *
  * @author rstein
  *
  */

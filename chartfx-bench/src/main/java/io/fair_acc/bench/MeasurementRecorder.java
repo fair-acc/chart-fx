@@ -13,7 +13,6 @@ import java.util.function.Predicate;
  */
 @FunctionalInterface
 public interface MeasurementRecorder {
-
     /**
      * @param tag   a descriptive name to disambiguate multiple measures
      * @param level the detail level of the measured value
@@ -194,5 +193,4 @@ public interface MeasurementRecorder {
     }
 
     public static final MeasurementRecorder DISABLED = (tag, level) -> TimeMeasure.DISABLED;
-
 }

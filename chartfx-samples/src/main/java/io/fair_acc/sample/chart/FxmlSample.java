@@ -23,7 +23,7 @@ import io.fair_acc.dataset.testdata.spi.RandomWalkFunction;
 
 /**
  * Example on how to use chart-fx from fxml.
- * 
+ *
  * @author Alexander Krimm
  */
 public class FxmlSample extends ChartSample implements Initializable {

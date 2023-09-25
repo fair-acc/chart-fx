@@ -4,10 +4,10 @@ import io.fair_acc.dataset.DataSet;
 
 /**
  * Redirect to the reference implementation declared as 'default'.
- * 
+ *
  * This implementation should have a good performance and applicability for most use-cases. Presently it is based on
  * the @see DoubleDataSet implementation.
- * 
+ *
  * @see DoubleDataSet for the reference implementation
  * @see DoubleErrorDataSet for an implementation with asymmetric errors in Y
  *

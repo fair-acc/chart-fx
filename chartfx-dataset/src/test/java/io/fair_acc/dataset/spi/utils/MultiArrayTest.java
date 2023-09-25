@@ -74,7 +74,7 @@ class MultiArrayTest {
         final MultiArray<int[]> array = MultiArray.wrap(
                 new int[] {
                         123, 321, 213, // offset
-                        //row 0
+                        // row 0
                         9, 8, // column 0
                         7, 6, // column 1
                         5, 4, // column 2

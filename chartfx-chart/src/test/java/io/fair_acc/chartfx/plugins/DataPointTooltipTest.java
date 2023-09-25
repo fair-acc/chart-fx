@@ -28,7 +28,7 @@ import io.fair_acc.dataset.testdata.spi.CosineFunction;
 
 /**
  * Test the DataPointTooltip Plugin
- * 
+ *
  * @author Alexander Krimm
  */
 @ExtendWith(ApplicationExtension.class)

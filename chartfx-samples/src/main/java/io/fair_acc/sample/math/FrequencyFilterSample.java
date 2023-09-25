@@ -1,16 +1,16 @@
 package io.fair_acc.sample.math;
 
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.filter.FilterType;
 import io.fair_acc.math.filter.fir.FirFilter;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
-import javafx.stage.Stage;
 
 /**
  * Sample to illustrate array-based Butterworth and Chebychev filters

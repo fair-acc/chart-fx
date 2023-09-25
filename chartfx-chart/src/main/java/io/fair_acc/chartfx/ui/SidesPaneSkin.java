@@ -2,7 +2,6 @@ package io.fair_acc.chartfx.ui;
 
 import java.security.InvalidParameterException;
 
-import io.fair_acc.chartfx.ui.geometry.Side;
 import javafx.animation.Animation.Status;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -21,8 +20,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-public class SidesPaneSkin extends SkinBase<SidesPane> {
+import io.fair_acc.chartfx.ui.geometry.Side;
 
+public class SidesPaneSkin extends SkinBase<SidesPane> {
     private final BorderPane borderPane = new BorderPane();
     private final EventHandler<MouseEvent> exitedHandler;
     private boolean mousePressed;
@@ -152,9 +152,9 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
         keyValues[side.ordinal()] = new KeyValue(visibility[side.ordinal()], 0);
 
         final Duration delay = getSkinnable().getAnimationDelay() != null ? getSkinnable().getAnimationDelay()
-                : Duration.millis(300);
+                                                                          : Duration.millis(300);
         final Duration duration = getSkinnable().getAnimationDuration() != null ? getSkinnable().getAnimationDuration()
-                : Duration.millis(200);
+                                                                                : Duration.millis(200);
 
         final KeyFrame keyFrame = new KeyFrame(duration, keyValues);
         hideTimeline[side.ordinal()] = new Timeline(keyFrame);
@@ -168,19 +168,17 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
 
     private boolean isMouseMovedOutsideSides(final MouseEvent event) {
         return !(getSkinnable().getLeft() != null
-                && getSkinnable().getLeft().getBoundsInParent().contains(event.getX(), event.getY()))
-                && (!(getSkinnable().getTop() != null
-                        && getSkinnable().getTop().getBoundsInParent().contains(event.getX(), event.getY()))
-                        && (!(getSkinnable().getRight() != null
-                                && getSkinnable().getRight().getBoundsInParent().contains(event.getX(), event.getY()))
-                                && !(getSkinnable().getBottom() != null && getSkinnable().getBottom()
-                                        .getBoundsInParent().contains(event.getX(), event.getY()))));
+                       && getSkinnable().getLeft().getBoundsInParent().contains(event.getX(), event.getY()))
+     && (!(getSkinnable().getTop() != null
+                 && getSkinnable().getTop().getBoundsInParent().contains(event.getX(), event.getY()))
+             && (!(getSkinnable().getRight() != null
+                         && getSkinnable().getRight().getBoundsInParent().contains(event.getX(), event.getY()))
+                     && !(getSkinnable().getBottom() != null && getSkinnable().getBottom().getBoundsInParent().contains(event.getX(), event.getY()))));
     }
 
     @Override
     protected void layoutChildren(final double contentX, final double contentY, final double contentWidth,
             final double contentHeight) {
-
         /*
          * Layout the BorderPane in a normal way (equals "lay out the content node", the only managed node)
          */
@@ -248,9 +246,9 @@ public class SidesPaneSkin extends SkinBase<SidesPane> {
         keyValues[side.ordinal()] = new KeyValue(visibility[side.ordinal()], 1);
 
         final Duration delay = getSkinnable().getAnimationDelay() != null ? getSkinnable().getAnimationDelay()
-                : Duration.millis(300);
+                                                                          : Duration.millis(300);
         final Duration duration = getSkinnable().getAnimationDuration() != null ? getSkinnable().getAnimationDuration()
-                : Duration.millis(200);
+                                                                                : Duration.millis(200);
 
         final KeyFrame keyFrame = new KeyFrame(duration, keyValues);
         showTimeline[side.ordinal()] = new Timeline(keyFrame);

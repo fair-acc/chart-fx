@@ -11,7 +11,6 @@ import io.fair_acc.dataset.spi.DefaultErrorDataSet;
  * @author rstein
  */
 public interface Function1D extends Function {
-
     /**
      * @param xmin min. x range
      * @param xmax max x range
@@ -21,7 +20,8 @@ public interface Function1D extends Function {
     default DataSet getDataSetEstimate(final double xmin, final double xmax, final int nsamples) {
         if (xmin > xmax || nsamples <= 0) {
             throw new InvalidParameterException("AbstractFunciton1D::getDataSetEstimate(" + xmin + "," + xmax + ","
-                    + nsamples + ") - " + "invalid range");
+                                                + nsamples + ") - "
+                                                + "invalid range");
         }
         final double[] xValues = new double[nsamples];
         final double step = (xmax - xmin) / nsamples;
@@ -52,5 +52,4 @@ public interface Function1D extends Function {
         }
         return y;
     }
-
 }

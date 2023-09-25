@@ -8,17 +8,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.fair_acc.dataset.utils.CacheCollection;
 import javafx.scene.image.WritableImage;
 
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.dataset.utils.CacheCollection;
+
 /**
- * 
+ *
  * Tests implementation of {@link io.fair_acc.chartfx.utils.WritableImageCache} as well as implicitly {@link CacheCollection}.
- * 
+ *
  * @author rstein
  *
  *         N.B. to run manually: javac WritableImageCacheTests.java java -Xms256m -Xmx256m WritableImageCacheTests

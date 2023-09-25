@@ -4,12 +4,12 @@ import java.io.Serializable;
 import java.util.Calendar;
 import java.util.Date;
 
-import io.fair_acc.sample.financial.service.ConcurrentDateFormatAccess;
-import io.fair_acc.sample.financial.service.period.Period;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;
+import io.fair_acc.sample.financial.service.ConcurrentDateFormatAccess;
+import io.fair_acc.sample.financial.service.period.Period;
 
 /**
  * @author afischer

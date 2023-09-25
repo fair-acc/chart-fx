@@ -180,7 +180,7 @@ public class Hexagon extends Polygon {
      * Finds the direction (NORTHWEST, NORTHEAST, EAST, SOUTHEAST, SOUTHWEST or WEST) If target is a neighbour, then it
      * is quite simple. If target is not a neighbour, this returns the direction to the first step on a line to the
      * target.
-     * 
+     *
      * @param target target hexagon
      * @return direction towards target
      */
@@ -190,7 +190,7 @@ public class Hexagon extends Polygon {
 
     /**
      * Calculates the distance (number of hexagons) to the target hexagon
-     * 
+     *
      * @param target destination hex tile
      * @return distance in hex grid coordinates
      */
@@ -220,7 +220,7 @@ public class Hexagon extends Polygon {
 
     /**
      * Returns all Hexagons that are located within a certain distance from here
-     * 
+     *
      * @param radius in hex grid coordinates
      * @return list of all hexagon on the circle radius
      */
@@ -231,7 +231,7 @@ public class Hexagon extends Polygon {
 
     /**
      * Returns all Hexagons that are located a certain distance from here
-     * 
+     *
      * @param radius in hex grid coordinates
      * @return list of all hexagon within the circle
      */
@@ -242,7 +242,7 @@ public class Hexagon extends Polygon {
 
     /**
      * Finds all Hexagons that are on a line between this and destination
-     * 
+     *
      * @param origin source hex tile
      * @param destination target hex tile
      * @return list of hexagon on the path
@@ -266,7 +266,7 @@ public class Hexagon extends Polygon {
 
     /**
      * Finds all neighbours of this Hexagon
-     * 
+     *
      * @return list of all direct neighbours
      */
     public List<Hexagon> getNeighbours() {
@@ -409,7 +409,7 @@ public class Hexagon extends Polygon {
      * This affects the pathfinding calculations. If true, the algorithm will try to find a path around this Hexagon. If
      * you want to have more control over this, you can supply your own class implementing IPathInfoSupplier to the
      * pathfinding method.
-     * 
+     *
      * @param b true: blocking hexagon
      */
     public void setIsBlockingPath(final boolean b) {
@@ -419,7 +419,7 @@ public class Hexagon extends Polygon {
     /**
      * This affects the field of view calculations. If true, the hexagons behind this hexagon cannot be seen (but this
      * hexagon can still be seen).
-     * 
+     *
      * @param b true: opaque hexagon
      */
     public void setIsVisualObstacle(final boolean b) {
@@ -429,7 +429,7 @@ public class Hexagon extends Polygon {
     /**
      * This gives the Hexagon access a HexagonMap without actually adding it to the HexagonMap. It can be useful e.g. if
      * you want to make some calculations before creating another Hexagon.
-     * 
+     *
      * @param map global map reference
      */
     public void setMap(final HexagonMap map) {

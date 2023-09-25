@@ -18,7 +18,6 @@ import io.fair_acc.chartfx.axes.spi.AbstractAxis;
  * @author braeun
  */
 public class MasterSlaveAxisSynchronizer {
-
     private final AbstractAxis master;
     private final ArrayList<AbstractAxis> slaves = new ArrayList<>();
 
@@ -59,5 +58,4 @@ public class MasterSlaveAxisSynchronizer {
             // slave.setTickUnit(master.getTickUnit());
         }
     }
-
 }

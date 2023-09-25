@@ -7,7 +7,6 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import io.fair_acc.chartfx.plugins.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -24,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.axes.spi.format.DefaultTimeFormatter;
+import io.fair_acc.chartfx.plugins.*;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;

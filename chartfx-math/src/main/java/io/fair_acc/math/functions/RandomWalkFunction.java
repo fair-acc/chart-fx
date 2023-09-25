@@ -17,5 +17,4 @@ public class RandomWalkFunction extends AbstractFunction1D implements Function1D
         fstate += fstep * RANDOM.nextGaussian();
         return fstate;
     }
-
 }

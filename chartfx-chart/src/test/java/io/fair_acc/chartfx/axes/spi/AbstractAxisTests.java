@@ -9,8 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -34,6 +32,8 @@ import io.fair_acc.chartfx.axes.LogAxisType;
 import io.fair_acc.chartfx.axes.spi.transforms.DefaultAxisTransform;
 import io.fair_acc.chartfx.legend.spi.DefaultLegend;
 import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(JavaFXInterceptorUtils.SelectiveJavaFxInterceptor.class)
@@ -244,7 +244,7 @@ class AbstractAxisTests {
                 throw new IllegalStateException("majorTickMarks " + tm + " is invisible");
             }
         }));
-        assertArrayEquals(new double[]{-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0},
+        assertArrayEquals(new double[] { -5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0 },
                 majorTickMarks.stream().mapToDouble(TickMark::getValue).toArray());
 
         final List<TickMark> minorTickMarks = axis.computeTickMarks(autoRange, false);
@@ -255,7 +255,7 @@ class AbstractAxisTests {
                 throw new IllegalStateException("minorTickMarks " + tm + " is invisible");
             }
         }));
-        assertArrayEquals(new double[]{-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0},
+        assertArrayEquals(new double[] { -5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0 },
                 majorTickMarks.stream().mapToDouble(TickMark::getValue).toArray());
 
         axis.invertAxis(true);
@@ -266,9 +266,8 @@ class AbstractAxisTests {
                 throw new IllegalStateException("tm " + tm + " is invisible");
             }
         }));
-        assertArrayEquals(new double[]{-5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0},
+        assertArrayEquals(new double[] { -5.0, -4.0, -3.0, -2.0, -1.0, 0.0, 1.0, 2.0, 3.0, 4.0 },
                 majorTickMarks.stream().mapToDouble(TickMark::getValue).toArray());
-
     }
 
     @Test
@@ -312,7 +311,6 @@ class AbstractAxisTests {
         assertEquals(TextAlignment.CENTER, style.getTextAlignment());
         assertEquals(VPos.TOP, style.getTextOrigin());
 
-
         // special non 'n x 90 degree' rotation cases for top/bottom
         axis.getTickLabelStyle().setRotate(45);
 
@@ -332,7 +330,6 @@ class AbstractAxisTests {
         axis.setSide(Side.RIGHT);
         assertEquals(TextAlignment.LEFT, style.getTextAlignment());
         assertEquals(VPos.CENTER, style.getTextOrigin());
-
     }
 
     @Start
@@ -359,7 +356,7 @@ class AbstractAxisTests {
 
         @Override
         public double computePreferredTickUnit(final double axisLength) {
-            //return axisLength / Math.abs(getMax() - getMin()) / 10.0
+            // return axisLength / Math.abs(getMax() - getMin()) / 10.0
             return 0.1; // simplification for testing
         }
 

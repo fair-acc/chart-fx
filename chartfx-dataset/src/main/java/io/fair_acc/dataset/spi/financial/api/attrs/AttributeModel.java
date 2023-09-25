@@ -187,8 +187,8 @@ public class AttributeModel implements Cloneable {
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public synchronized AttributeModel deepCopyAttributes() {
-        //Cloner cloner = new Cloner();
-        //HashMap<AttributeKey<?>, Object> _attributes = (HashMap)cloner.deepClone(attributes);
+        // Cloner cloner = new Cloner();
+        // HashMap<AttributeKey<?>, Object> _attributes = (HashMap)cloner.deepClone(attributes);
         AttributeModel copiedModel = (AttributeModel) clone();
         // clone the included attribute models
         for (AttributeKey attributeKey : new HashSet<>(copiedModel.getAttributes())) {

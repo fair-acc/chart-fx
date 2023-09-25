@@ -5,12 +5,11 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.Random;
 
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +19,13 @@ import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.math.Math;
 import io.fair_acc.math.matrix.MatrixD;
-import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.EEMD;
+import io.fair_acc.sample.chart.ChartSample;
+import io.fair_acc.sample.math.utils.DemoChart;
 
 /**
  * example illustrating EMD-based spectrograms
- * 
+ *
  * @author rstein TODO: some fixes in EMD necessary
  */
 public class EMDSample extends ChartSample {

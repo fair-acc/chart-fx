@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Regression testing for @see ArrayCache
- * 
+ *
  * @author rstein
  */
 public class ArrayCacheTests {

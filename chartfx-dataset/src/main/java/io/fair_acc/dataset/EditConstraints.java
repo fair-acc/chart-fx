@@ -2,7 +2,7 @@ package io.fair_acc.dataset;
 
 /**
  * interface describing possible constraints on data set modifications
- * 
+ *
  * @author rstein
  *
  */
@@ -15,7 +15,7 @@ public interface EditConstraints {
 
     /**
      * Determines if the specified data point can be modified.
-     * 
+     *
      * @param index data point index
      * @return default is true
      */
@@ -33,7 +33,7 @@ public interface EditConstraints {
      * Determines if the specified point can be accepted by the data set. The specified point may be a new point (in
      * this case index should be -1) or existing point. This method can be used e.g. to make sure that the new point
      * doesn't have the same X coordinate as existing point.
-     * 
+     *
      * @param index index of the point being modified or -1 if it is a new point
      * @param newValue coordinate list of the considered point
      * @return <code>true</code> if the point is acceptable by the data set, <code>false</code> otherwise

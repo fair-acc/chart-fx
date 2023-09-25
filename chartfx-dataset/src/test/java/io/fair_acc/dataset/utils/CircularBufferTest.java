@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Test CircularBuffer
- * 
+ *
  * @author Alexander Krimm
  */
 class CircularBufferTest {

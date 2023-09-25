@@ -13,7 +13,6 @@ import io.fair_acc.dataset.utils.DoubleCircularBuffer;
  * @author ennerf
  */
 class CircularDoubleDataSet2D extends AbstractDataSet<CircularDoubleDataSet2D> {
-
     public CircularDoubleDataSet2D(String name, int capacity) {
         super(name, 2);
         x = new DoubleCircularBuffer(capacity);
@@ -23,12 +22,12 @@ class CircularDoubleDataSet2D extends AbstractDataSet<CircularDoubleDataSet2D> {
     @Override
     public double get(int dimIndex, int index) {
         switch (dimIndex) {
-            case DIM_X:
-                return x.get(index);
-            case DIM_Y:
-                return y.get(index);
-            default:
-                return Double.NaN;
+        case DIM_X:
+            return x.get(index);
+        case DIM_Y:
+            return y.get(index);
+        default:
+            return Double.NaN;
         }
     }
 
@@ -61,5 +60,4 @@ class CircularDoubleDataSet2D extends AbstractDataSet<CircularDoubleDataSet2D> {
 
     protected final DoubleCircularBuffer x;
     protected final DoubleCircularBuffer y;
-
 }

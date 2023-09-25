@@ -1,5 +1,10 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import javafx.scene.canvas.GraphicsContext;
+
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.renderer.Renderer;
@@ -9,10 +14,6 @@ import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.EditableDataSet;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
-import javafx.scene.canvas.GraphicsContext;
-
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * Renders the data set with the pre-described
@@ -88,7 +89,6 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
     }
 
     static class HistoryDataSetNode extends DataSetNode {
-
         HistoryDataSetNode(AbstractRenderer<?> renderer, DataSet dataSet, int depth) {
             super(renderer, dataSet);
             this.depth = depth;
@@ -127,9 +127,7 @@ public class HistoryDataSetRenderer extends ErrorDataSetRenderer implements Rend
 
         final int depth;
         final LinkedList<DataSet> history = new LinkedList<>();
-
     }
 
     final int historyDepth;
-
 }

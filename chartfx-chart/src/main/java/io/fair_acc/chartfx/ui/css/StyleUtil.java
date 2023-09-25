@@ -1,7 +1,8 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.chartfx.utils.PropUtil;
+import java.util.List;
+import java.util.function.Consumer;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.LongProperty;
@@ -17,8 +18,8 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.Shape;
 import javafx.scene.text.Text;
 
-import java.util.List;
-import java.util.function.Consumer;
+import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.chartfx.utils.PropUtil;
 
 /**
  * Utility class for styleable nodes
@@ -26,7 +27,6 @@ import java.util.function.Consumer;
  * @author ennerf
  */
 public class StyleUtil {
-
     private StyleUtil() {
     }
 
@@ -38,13 +38,12 @@ public class StyleUtil {
      * invalidate outdated renderings.
      */
     public interface StyleNode {
-
         /**
          * Copies all style parameters except for rotate
          * @param gc target context
          */
         default void copyStyleTo(GraphicsContext gc) {
-            copyStyle((Node)this, gc);
+            copyStyle((Node) this, gc);
         }
 
         default long getChangeCounter() {
@@ -83,7 +82,7 @@ public class StyleUtil {
 
     public static void applyPseudoClass(Node node, PseudoClass clazz, ObservableBooleanValue condition) {
         node.pseudoClassStateChanged(clazz, condition.get());
-        PropUtil.runOnChange(() ->  {
+        PropUtil.runOnChange(() -> {
             // We immediately apply style changes caused by updating the
             // pseudo class to avoid triggering another tick.
             node.pseudoClassStateChanged(clazz, condition.get());
@@ -157,12 +156,11 @@ public class StyleUtil {
         removeEndIf(builder, ", ");
         builder.append(" {");
         forEachStyleProp(style, obs -> {
-            if (!(obs instanceof StyleableProperty<?>)) {
+            if (!(obs instanceof StyleableProperty<?>) ) {
                 return;
             }
             var prop = (StyleableProperty<?>) obs;
-            builder.append("\n  ").append(prop.getCssMetaData().getProperty())
-                    .append(": ").append(prop.getValue()).append(";");
+            builder.append("\n  ").append(prop.getCssMetaData().getProperty()).append(": ").append(prop.getValue()).append(";");
         });
         builder.append("\n}");
         return builder.toString();
@@ -196,7 +194,7 @@ public class StyleUtil {
             } else if (obj instanceof Number) {
                 // Note: single values return a Number and do not
                 // match the generic interface.
-                return new double[]{((Number) obj).doubleValue()};
+                return new double[] { ((Number) obj).doubleValue() };
             }
             var array = (Number[]) obj;
             double[] result = new double[array.length];
@@ -228,5 +226,4 @@ public class StyleUtil {
     }
     // small and only called from JavaFX thread, so we can cache statically
     private static double[] cachedDashArray = new double[2];
-
 }

@@ -16,8 +16,8 @@ public class VolumeIncrementalOhlcvConsolidation extends AbstractIncrementalOhlc
     private final double volumePeriod;
 
     public VolumeIncrementalOhlcvConsolidation(OhlcvTimeframeConsolidation.OhlcvConsolidationComputation consolidationComputation,
-                                               IntradayPeriod period, Interval<Calendar> tt,
-                                               OhlcvConsolidationAddon[] _ohlcvConsolidationAddons) {
+            IntradayPeriod period, Interval<Calendar> tt,
+            OhlcvConsolidationAddon[] _ohlcvConsolidationAddons) {
         super(consolidationComputation, period, tt, _ohlcvConsolidationAddons);
         this.volumePeriod = period.getPeriodValue();
     }

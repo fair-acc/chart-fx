@@ -2,7 +2,7 @@ package io.fair_acc.math.functions;
 
 /**
  * generic function interface
- * 
+ *
  * @author rstein
  */
 public interface Function {
@@ -13,7 +13,7 @@ public interface Function {
 
     /**
      * sets
-     * 
+     *
      * @param id the parameter id
      * @param state true: parameter is fixed, false: parameter is free
      */
@@ -77,14 +77,14 @@ public interface Function {
 
     /**
      * returns whether function is in use by fitting routine &lt;expert function&gt;
-     * 
+     *
      * @return true: function is used within a fitting routine
      */
     boolean isFitterMode();
 
     /**
      * returns whether given parameter is fixed (static) or not
-     * 
+     *
      * @param id parameter id
      * @return true: if parameter is fixed
      */
@@ -92,7 +92,7 @@ public interface Function {
 
     /**
      * sets whether function is in use by fitting routine &lt;expert function&gt;
-     * 
+     *
      * @param state true: function is used within a fitting routine
      */
     void setFitterMode(boolean state);
@@ -104,7 +104,7 @@ public interface Function {
 
     /**
      * sets the name of a by 'id' given parameter
-     * 
+     *
      * @param id the parameter id
      * @param paramName name for the given pararameter 'id'
      */
@@ -112,7 +112,7 @@ public interface Function {
 
     /**
      * sets the range of a by 'id' given parameter N.B. depending on the fitter, the range may be used only as a hint
-     * 
+     *
      * @param id the parameter id
      * @param minRange minimum parameter range
      * @param maxRange maximum parameter range
@@ -121,7 +121,7 @@ public interface Function {
 
     /**
      * sets the value of a by 'id' given parameter
-     * 
+     *
      * @param id the parameter id
      * @param value new value of parameter
      */
@@ -129,7 +129,7 @@ public interface Function {
 
     /**
      * sets the parameter values using an array the array is required to have at most getParameterCount() indices
-     * 
+     *
      * @param value new parameter values
      */
     void setParameterValues(double[] value);

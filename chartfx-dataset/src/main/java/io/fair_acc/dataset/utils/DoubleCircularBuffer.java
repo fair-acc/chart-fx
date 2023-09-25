@@ -12,7 +12,7 @@ public class DoubleCircularBuffer {
     private boolean flipped;
 
     /**
-     * 
+     *
      * @param initalElements adds element the buffer should be initialised with
      * @param capacity maximum capacity of the buffer
      */
@@ -22,7 +22,7 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * 
+     *
      * @param capacity maximum capacity of buffer
      */
     public DoubleCircularBuffer(final int capacity) {
@@ -35,7 +35,7 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * 
+     *
      * @return number of available buffer elements
      */
     public int available() {
@@ -61,7 +61,7 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * 
+     *
      * @return value at head
      */
     public double get() {
@@ -69,7 +69,7 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * 
+     *
      * @param into storage container
      * @param length number of elements to be read
      * @return either into or newly allocated array containing the result
@@ -79,7 +79,7 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * 
+     *
      * @param into storage container
      * @param readPos circular index (wraps around)
      * @param length number of elements to be read
@@ -99,7 +99,7 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * 
+     *
      * @param readPos circular index (wraps around)
      * @return the value
      */
@@ -140,7 +140,7 @@ public class DoubleCircularBuffer {
 
     /**
      * add new element
-     * 
+     *
      * @param element new element
      * @return true
      */
@@ -156,7 +156,7 @@ public class DoubleCircularBuffer {
 
     /**
      * add multiple new elements
-     * 
+     *
      * @param newElements array of new elements
      * @param length number of elements that are to be written from array
      * @return true: write index is smaller than read index
@@ -167,7 +167,7 @@ public class DoubleCircularBuffer {
 
     /**
      * add multiple new elements
-     * 
+     *
      * @param newElements array of new elements
      * @param startIndex 'null'
      * @param length number of elements that are to be written from array
@@ -204,7 +204,7 @@ public class DoubleCircularBuffer {
     }
 
     /**
-     * 
+     *
      * @return number of elements that can be written before buffer wraps-around
      */
     public int remainingCapacity() {

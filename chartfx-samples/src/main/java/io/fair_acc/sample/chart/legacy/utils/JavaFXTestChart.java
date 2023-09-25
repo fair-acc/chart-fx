@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import io.fair_acc.sample.chart.legacy.RollingBufferLegacySample;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
@@ -12,6 +11,7 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 
 import io.fair_acc.dataset.testdata.spi.SineFunction;
+import io.fair_acc.sample.chart.legacy.RollingBufferLegacySample;
 
 public class JavaFXTestChart extends AbstractTestApplication implements ChartTestCase {
     protected int nSamples = MAX_DATA_POINTS_100K;

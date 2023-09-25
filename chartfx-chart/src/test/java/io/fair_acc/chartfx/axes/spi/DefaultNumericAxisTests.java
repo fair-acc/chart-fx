@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.axes.LogAxisType;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * @author rstein

@@ -1,8 +1,5 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
-import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.shape.FillRule;
@@ -15,6 +12,9 @@ import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.renderer.spi.utils.BezierCurve;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
+import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError.ErrorType;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
@@ -155,7 +155,6 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         if (ProcessingProfiler.getDebugState()) {
             timestamp = ProcessingProfiler.getTimeDiff(timestamp, "drawChartComponents()");
         }
-
     }
 
     /**
@@ -685,8 +684,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
     }
 
     protected static void drawPolyLineHistogramFilled(final GraphicsContext gc,
-                                                      final DataSetNode style,
-                                                      final CachedDataPoints points) {
+            final DataSetNode style,
+            final CachedDataPoints points) {
         final int n = points.actualDataCount;
         if (n == 0) {
             return;
@@ -836,5 +835,4 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         SHARED_ARRAYS.trim();
         SHARED_POINTS_CACHE.trim();
     }
-
 }

@@ -13,15 +13,15 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.fair_acc.dataset.AxisDescription;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.DoublePoint;
 import io.fair_acc.dataset.utils.AssertUtils;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.DataSet2D;
 
 /**
  * Minor extension to <code>DefaultDataSet</code> to easier handle labeled markers.
- * 
+ *
  * @author braeun
  */
 public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet> implements DataSet2D {
@@ -130,7 +130,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * remove sub-range of data (marker) points
-     * 
+     *
      * @param fromIndex start index
      * @param toIndex stop index
      * @return itself (fluent design)
@@ -153,7 +153,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * replaces existing data marker with new marker value
-     * 
+     *
      * @param index index of existing point
      * @param marker new marker value
      * @return itself (fluent design)
@@ -172,7 +172,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * replaces existing with new marker values
-     * 
+     *
      * @param markers new marker values
      * @return itself (fluent design)
      */
@@ -183,7 +183,7 @@ public class LabelledMarkerDataSet extends AbstractDataSet<LabelledMarkerDataSet
 
     /**
      * replaces existing with new marker values
-     * 
+     *
      * @param markers new marker values
      * @return itself (fluent design)
      */

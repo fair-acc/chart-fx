@@ -32,7 +32,7 @@ import org.apache.commons.math3.util.FastMath;
 public class ChebyshevI extends Cascade {
     /**
      * Bandpass filter with default topology
-     * 
+     *
      * @param order Filter order
      * @param sampleRate sampling rate
      * @param centerFrequency center frequency
@@ -46,7 +46,7 @@ public class ChebyshevI extends Cascade {
 
     /**
      * Bandpass filter with custom topology
-     * 
+     *
      * @param order Filter order
      * @param sampleRate Sampling rate
      * @param centerFrequency center frequency
@@ -61,7 +61,7 @@ public class ChebyshevI extends Cascade {
 
     /**
      * Band-stop filter with default topology
-     * 
+     *
      * @param order Filter order (actual order is twice)
      * @param sampleRate sampling rate of the system
      * @param centerFrequency centre frequency
@@ -75,7 +75,7 @@ public class ChebyshevI extends Cascade {
 
     /**
      * Band-stop filter with custom topology
-     * 
+     *
      * @param order Filter order (actual order is twice)
      * @param sampleRate Sampling rate of the system
      * @param centerFrequency centre frequency
@@ -90,7 +90,7 @@ public class ChebyshevI extends Cascade {
 
     /**
      * ChebyshevI High-pass filter with default topology
-     * 
+     *
      * @param order The order of the filter
      * @param sampleRate The sampling rate of the system
      * @param cutoffFrequency the cutoff frequency
@@ -103,7 +103,7 @@ public class ChebyshevI extends Cascade {
 
     /**
      * ChebyshevI Low-pass filter and custom filter topology
-     * 
+     *
      * @param order The order of the filter
      * @param sampleRate The sampling rate of the system
      * @param cutoffFrequency The cutoff frequency
@@ -117,7 +117,7 @@ public class ChebyshevI extends Cascade {
 
     /**
      * ChebyshevI Low-pass filter with default topology
-     * 
+     *
      * @param order The order of the filter
      * @param sampleRate The sampling rate of the system
      * @param cutoffFrequency the cutoff frequency
@@ -129,7 +129,7 @@ public class ChebyshevI extends Cascade {
 
     /**
      * ChebyshevI Low-pass filter with custom topology
-     * 
+     *
      * @param order The order of the filter
      * @param sampleRate The sampling rate of the system
      * @param cutoffFrequency The cutoff frequency

@@ -6,7 +6,6 @@ package io.fair_acc.chartfx.axes;
  * @author rstein
  */
 public interface AxisTransform {
-
     /**
      * default backward transform for affine functions: backward(forward(val)) = forward(backward(val)) = val;
      *

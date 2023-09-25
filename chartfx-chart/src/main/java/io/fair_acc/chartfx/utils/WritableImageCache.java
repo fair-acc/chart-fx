@@ -8,8 +8,8 @@ import io.fair_acc.dataset.utils.CacheCollection;
 
 /**
  * Implements WritableImage cache collection to minimise memory re-allocation.
- *  
- * <p> 
+ *
+ * <p>
  * N.B. This is useful to re-use short-lived data storage container to minimise the amount of garbage to be collected. This is used in situation replacing e.g.
  * <pre>
  *  {@code
@@ -26,15 +26,15 @@ import io.fair_acc.dataset.utils.CacheCollection;
  *      // ...
  *      private final WritableImageCache cache = new WritableImageCache();
  *      // ...
- *      
+ *
  *      public returnValue frequentlyExecutedFunction(...) {
- *          final byte[] storage = cache.getImage(width, height); // return previously allocated image (cheap) or allocated new if necessary 
+ *          final byte[] storage = cache.getImage(width, height); // return previously allocated image (cheap) or allocated new if necessary
  *          // [...] do short-lived computation on storage
  *          cache.add(storage); // return object to cache
  *      }
  *  }
  * </pre>
- *  
+ *
  * @author rstein
  *
  */

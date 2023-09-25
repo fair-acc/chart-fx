@@ -11,22 +11,36 @@ public class ObjectObjectMap<K, V> implements Map<K, V> {
     private static final Object FREE_KEY = new Object();
     private static final Object REMOVED_KEY = new Object();
 
-    /** Keys and values */
+    /**
+     * Keys and values
+     */
     private Object[] data;
 
-    /** Value for the null key (if inserted into a map) */
+    /**
+     * Value for the null key (if inserted into a map)
+     */
     private Object nullValue;
     private boolean hasNull;
 
-    /** Fill factor, must be between (0 and 1) */
+    /**
+     * Fill factor, must be between (0 and 1)
+     */
     private final float fillFactor;
-    /** We will resize a map once it reaches this size */
+    /**
+     * We will resize a map once it reaches this size
+     */
     private int threshold;
-    /** Current map size */
+    /**
+     * Current map size
+     */
     private int sizeInternal;
-    /** Mask to calculate the original position */
+    /**
+     * Mask to calculate the original position
+     */
     private int mask;
-    /** Mask to wrap the actual array pointer */
+    /**
+     * Mask to wrap the actual array pointer
+     */
     private int mask2;
 
     public ObjectObjectMap(final int size, final float fillFactor) {

@@ -8,7 +8,6 @@ import java.util.concurrent.TimeUnit;
  * @author ennerf
  */
 public interface MeasurementRecorders {
-
     /**
      * A low-overhead hdr histogram recorder that writes an aggregate histogram to disk once a second.
      * Check <a href="http://hdrhistogram.org/">hdrhistogram.org</a> for more information
@@ -29,5 +28,4 @@ public interface MeasurementRecorders {
     static LiveDisplayRecorder newLiveDisplay(String title) {
         return LiveDisplayRecorder.showInNewStage(title);
     }
-
 }

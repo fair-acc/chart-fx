@@ -3,10 +3,10 @@ package io.fair_acc.dataset;
 import java.io.Serializable;
 import java.util.List;
 
-import io.fair_acc.dataset.events.EventSource;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.bench.Measurable;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.EventSource;
+import io.fair_acc.dataset.locks.DataSetLock;
 import io.fair_acc.dataset.utils.IndexedStringConsumer;
 
 /**
@@ -219,5 +219,4 @@ public interface DataSet extends EventSource, Serializable, Measurable.EmptyDefa
     default DataSet set(final DataSet other) {
         return set(other, true);
     }
-
 }

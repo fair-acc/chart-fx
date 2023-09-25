@@ -92,7 +92,7 @@ public interface DataSetError extends DataSet {
     /**
      * Returns the negative error along the 'dimIndex' axis for all available data points. Please note that errors are
      * assumed to be always positive!
-     * 
+     *
      * @param dimIndex the dimension index (ie. '0' equals 'X', '1' equals 'Y')
      * @return array containing negative 'dimIndex' error
      */

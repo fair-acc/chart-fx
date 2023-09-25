@@ -6,7 +6,6 @@ package io.fair_acc.chartfx.utils;
  * @author ennerf
  */
 public class RotatedBounds {
-
     public RotatedBounds setSize(double width, double height) {
         this.width = width;
         this.height = height;
@@ -65,12 +64,8 @@ public class RotatedBounds {
 
     @Override
     public String toString() {
-        return "RotatedBounds{" +
-                "x=" + x +
-                ", y=" + y +
-                ", width=" + width +
-                ", height=" + height +
-                '}';
+        return "RotatedBounds{"
+      + "x=" + x + ", y=" + y + ", width=" + width + ", height=" + height + '}';
     }
 
     private double x = 0;
@@ -78,5 +73,4 @@ public class RotatedBounds {
     private double width = 0;
     private double height = 0;
     private static final double DEG_TO_RAD = Math.PI / 180.0;
-
 }

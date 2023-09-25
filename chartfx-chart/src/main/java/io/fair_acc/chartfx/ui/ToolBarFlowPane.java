@@ -1,6 +1,5 @@
 package io.fair_acc.chartfx.ui;
 
-import io.fair_acc.chartfx.Chart;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
@@ -16,6 +15,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+
+import io.fair_acc.chartfx.Chart;
 
 /**
  * tool bar for plugins to add their controls (if necessary)

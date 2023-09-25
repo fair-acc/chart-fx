@@ -2,13 +2,13 @@ package io.fair_acc.dataset.spi.financial;
 
 import java.util.Iterator;
 
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModelAware;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcv;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItemAware;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.spi.AbstractDataSet;
 
 /**
  * Dataset Domain Object for encapsulation of IOhlcv API structure.

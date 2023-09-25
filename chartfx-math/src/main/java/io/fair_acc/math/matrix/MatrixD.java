@@ -25,7 +25,7 @@ import io.fair_acc.math.functions.Function1D;
  * like, produce results in five decomposition classes. These decompositions are accessed by the Matrix class to compute
  * solutions of simultaneous linear equations, determinants, inverses and other matrix functions. The five
  * decompositions are:
- * 
+ *
  * <UL>
  * <LI>Cholesky Decomposition of symmetric, positive definite matrices.
  * <LI>LU Decomposition of rectangular matrices.
@@ -35,12 +35,12 @@ import io.fair_acc.math.functions.Function1D;
  * </UL>
  * <DL>
  * <DT><B>Example of use:</B></DT>
- * 
+ *
  * <DD>Solve a linear system A x = b and compute the residual norm, ||b - A x||.
- * 
+ *
  *
  * <PRE>
- * 
+ *
  * double[][] vals = { { 1., 2., 3 }, { 4., 5., 6. }, { 7., 8., 10. } };
  * Matrix A = new Matrix(vals);
  * Matrix b = Matrix.random(3, 1);
@@ -170,7 +170,7 @@ public class MatrixD extends AbstractMatrix {
 
     /**
      * apply user specified function to each matrix element
-     * 
+     *
      * @param func user-supplied function
      */
     public void apply1DFunction(final Function1D func) {

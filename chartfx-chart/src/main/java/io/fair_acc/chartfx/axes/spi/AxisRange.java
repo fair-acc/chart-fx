@@ -28,7 +28,7 @@ public class AxisRange extends DataRange {
 
     public boolean set(final AxisRange range) {
         boolean change = !this.equals(range);
-        if(change) {
+        if (change) {
             super.set(range);
             this.axisLength = range.axisLength;
             this.scale = range.scale;

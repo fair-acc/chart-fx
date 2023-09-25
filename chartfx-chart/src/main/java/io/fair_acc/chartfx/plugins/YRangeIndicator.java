@@ -1,10 +1,10 @@
 package io.fair_acc.chartfx.plugins;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.XYChart;
 import javafx.geometry.BoundingBox;
 import javafx.geometry.Bounds;
 
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 
 /**

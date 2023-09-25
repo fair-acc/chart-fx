@@ -10,13 +10,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import io.fair_acc.dataset.spi.CircularDoubleErrorDataSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.fair_acc.dataset.spi.CircularDoubleErrorDataSet;
 
 /**
  * concurrency stress test for DatasetLock implementation

@@ -34,7 +34,7 @@ public class PaletteQuantizerNeuQuant implements PaletteQuantizer {
     private int parNcycles = 330; // no. of learning cycles
     private int _parCutnetsize; // = ncolors;//
     private int _parMaxnetpos; // = ncolors - 1;
-    //private int _parInitrad; // = ncolors / 8; // for 256 cols, radius starts at 32
+    // private int _parInitrad; // = ncolors / 8; // for 256 cols, radius starts at 32
 
     private int parRadiusbiasshift = 6;
     private int _parRadiusbias; // = 1 << radiusbiasshift;
@@ -134,7 +134,7 @@ public class PaletteQuantizerNeuQuant implements PaletteQuantizer {
 
     @Override
     public int lookup(final int r, final int g, final int b, final int a) {
-        //initGuard();
+        // initGuard();
         if (a < parTransparencyThreshold) {
             return 0; // extra entry: transparent
         }
@@ -498,7 +498,7 @@ public class PaletteQuantizerNeuQuant implements PaletteQuantizer {
                 if (aaa < parTransparencyThreshold) {
                     continue;
                 }
-                final double r = rgbaPixel >> 16 & 0xff; //red
+                final double r = rgbaPixel >> 16 & 0xff; // red
                 final double g = rgbaPixel >> 8 & 0xff; // green
                 final double b = rgbaPixel & 0xff; // blue
 

@@ -14,14 +14,14 @@ package io.fair_acc.dataset;
 public interface Histogram extends DataSet, DataSetMetaData {
     /**
      * Increment bin content by 1. More...
-     * 
+     *
      * @param bin global bin ID
      */
     void addBinContent(int bin);
 
     /**
      * Increment bin content by a weight w. More...
-     * 
+     *
      * @param bin global bin ID
      * @param w weight
      */

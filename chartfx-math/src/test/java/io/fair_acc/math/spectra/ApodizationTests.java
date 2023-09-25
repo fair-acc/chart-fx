@@ -13,7 +13,7 @@ import io.fair_acc.math.spectra.Apodization.ApodizationArrayDescription;
 
 /**
  * Test the apodization class
- * 
+ *
  * @author Alexander Krimm
  */
 class ApodizationTests {

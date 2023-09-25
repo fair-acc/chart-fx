@@ -5,12 +5,12 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 import io.fair_acc.dataset.AxisDescription;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.trees.IndexedNavigableSet;
 import io.fair_acc.dataset.utils.trees.IndexedTreeSet;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.DataSetError;
 
 /**
  * DataSet implementation based on a sorted indexed TreeDataSets. This tree data set is sorted (allows on-the-fly
@@ -182,7 +182,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * remove all data points
-     * 
+     *
      * @return itself (fluent design)
      */
     public LimitedIndexedTreeDataSet clearData() {
@@ -196,7 +196,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * checks X data range and removes old data points if they exceed the maximum data range
-     * 
+     *
      * @see #setMaxLength
      */
     public void expire() {
@@ -205,7 +205,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
 
     /**
      * checks X data range and removes old data points if they exceed the maximum data range
-     * 
+     *
      * @see #setMaxLength
      * @param now actual time stamp to be taken as a 't0' reference
      */

@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 class FormatterTests {
-
     @BeforeAll
     public static void setDefaultLocale() {
         Locale.setDefault(Locale.US);
@@ -46,7 +45,7 @@ class FormatterTests {
             @Override
             public @NotNull Number fromString(final @NotNull String string) {
                 return Double.valueOf(string);
-                //alt: throw new NumberFormatException("not implemented");
+                // alt: throw new NumberFormatException("not implemented");
             }
 
             @Override

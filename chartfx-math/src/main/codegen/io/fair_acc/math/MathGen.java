@@ -1,6 +1,6 @@
 /*************************************************************************
  * Originally Based on CERN's ROOT analysis frame work:
- * 
+ *
  * @see root.cern.ch for details Copyright (C) 1995-2004, Rene Brun and Fons Rademakers. Authors: Rene Brun, Anna
  *      Kreshuk, Eddy Offermann, Fons Rademakers All rights reserved. Java port and extension by: Ralph J. Steinhagen,
  *      CERN, BE-BI, 2009 For the licensing terms see LICENSE. For the list of contributors see $ROOTSYS/README/CREDITS
@@ -21,9 +21,9 @@ public class MathGen extends MathBase {
      * the maximum deviation between a hypothetical distribution function and an experimental distribution with n events
      * NOTE: To compare two experimental distributions with m and n events, use z = sqrt(m*n/(m+n))*dn Accuracy: The
      * function is far too accurate for any imaginable application. Probabilities less than 10^-15 are returned as zero.
-     * However, remember that the formula is only valid for "large" n. Theta function inversion formula is used for {@code z <= 1} 
+     * However, remember that the formula is only valid for "large" n. Theta function inversion formula is used for {@code z <= 1}
      * This function was translated by Rene Brun from PROBKL in CERNLIB.
-     * 
+     *
      * @param z input value
      * @return the computed result
      */
@@ -91,7 +91,7 @@ public class MathGen extends MathBase {
      *
      * NOTE1 A good description of the Kolmogorov test can be seen at:
      * http://www.itl.nist.gov/div898/handbook/eda/section3/eda35g.htm
-     * 
+     *
      * @param na see above
      * @param a see above
      * @param nb see above
@@ -193,7 +193,7 @@ public class MathGen extends MathBase {
      * it is used to store the sorting index and assumed to be &gt;= n. If work=0, local storage is used, either on the
      * stack if n < kWorkMax or on the heap for n &gt;= kWorkMax. Taken from "Numerical Recipes in C++" without the
      * index array implemented by Anna Khreshuk. See also the declarations at the top of this file
-     * 
+     *
      * @param n see above
      * @param a see above
      * @param k see above
@@ -299,7 +299,7 @@ public class MathGen extends MathBase {
 
     /**
      * Computes sample quantiles, corresponding to the given probabilities Parameters:
-     * 
+     *
      * @param x -the data sample
      * @param n - its size
      * @param quantiles - computed quantiles are returned in there
@@ -543,7 +543,7 @@ public class MathGen extends MathBase {
      * than 10^(-r). r can be set by the the user subject to the constraints 2 &lt;= r &lt;= 5. [1] J. Humlicek, JQSRT, 21,
      * 437 (1982). [2] R.J. Wells "Rapid Approximation to the Voigt/Faddeeva Function and its Derivatives" JQSRT 62
      * (1999), pp 29-48. http://www-atm.physics.ox.ac.uk/user/wells/voigt.html
-     * 
+     *
      * @param xx see above
      * @param sigma see above
      * @param lg see above
@@ -719,7 +719,7 @@ public class MathGen extends MathBase {
                 yf = y + y0py0;
                 for (j = 0; j <= 5; j++) {
                     k = k + (c[j] * (mq[j] * mf[j] - y0 * ym[j]) + s[j] * yf * xm[j]) / (mq[j] + y0q)
-                        + (c[j] * (pq[j] * pf[j] - y0 * yp[j]) - s[j] * yf * xp[j]) / (pq[j] + y0q);
+                      + (c[j] * (pq[j] * pf[j] - y0 * yp[j]) - s[j] * yf * xp[j]) / (pq[j] + y0q);
                 }
                 k = y * k + exp(-xq);
             }
@@ -729,10 +729,10 @@ public class MathGen extends MathBase {
     }
 
     /**
-    *  Compute the Integer Order Modified Bessel function I_n(x)
-    *  for n=0,1,2,... and any real x.
-    *
-    *  --- NvE 12-mar-2000 UU-SAP Utrecht
+     *  Compute the Integer Order Modified Bessel function I_n(x)
+     *  for n=0,1,2,... and any real x.
+     *
+     *  --- NvE 12-mar-2000 UU-SAP Utrecht
      */
     public static double besselI(int n, double x) {
         if (n < 0) {
@@ -789,11 +789,11 @@ public class MathGen extends MathBase {
     }
 
     /**
-    *  --- NvE 12-mar-2000 UU-SAP Utrecht
-    *  Parameters of the polynomial approximation
-    *  Compute the modified Bessel function I_0(x) for any real x.
-    *
-    *  --- NvE 12-mar-2000 UU-SAP Utrecht
+     *  --- NvE 12-mar-2000 UU-SAP Utrecht
+     *  Parameters of the polynomial approximation
+     *  Compute the modified Bessel function I_0(x) for any real x.
+     *
+     *  --- NvE 12-mar-2000 UU-SAP Utrecht
      */
     public static double besselI0(double x) {
         // Parameters of the polynomial approximation
@@ -828,23 +828,23 @@ public class MathGen extends MathBase {
         } else {
             y = k1 / ax;
             result = (exp(ax) / sqrt(ax))
-                     * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
+                   * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
         }
         return result;
     }
 
     /**
-    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-    * Applied Mathematics Series vol. 55 (1964), Washington.
-    *
-    * --- NvE 12-mar-2000 UU-SAP Utrecht
-    * Parameters of the polynomial approximation
-    * Compute the modified Bessel function I_1(x) for any real x.
-    *
-    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-    * Applied Mathematics Series vol. 55 (1964), Washington.
-    *
-    * --- NvE 12-mar-2000 UU-SAP Utrecht
+     * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+     * Applied Mathematics Series vol. 55 (1964), Washington.
+     *
+     * --- NvE 12-mar-2000 UU-SAP Utrecht
+     * Parameters of the polynomial approximation
+     * Compute the modified Bessel function I_1(x) for any real x.
+     *
+     * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+     * Applied Mathematics Series vol. 55 (1964), Washington.
+     *
+     * --- NvE 12-mar-2000 UU-SAP Utrecht
      */
     public static double besselI1(double x) {
         // Parameters of the polynomial approximation
@@ -879,7 +879,7 @@ public class MathGen extends MathBase {
         } else {
             y = k1 / ax;
             result = (exp(ax) / sqrt(ax))
-                     * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
+                   * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * (q7 + y * (q8 + y * q9))))))));
             if (x < 0) {
                 result = -result;
             }
@@ -888,7 +888,7 @@ public class MathGen extends MathBase {
     }
 
     /**
-    * Returns the Bessel function J0(x) for any real x.
+     * Returns the Bessel function J0(x) for any real x.
      */
     public static double besselJ0(double x) {
         final double ax;
@@ -939,7 +939,7 @@ public class MathGen extends MathBase {
     }
 
     /**
-    * Returns the Bessel function J1(x) for any real x.
+     * Returns the Bessel function J1(x) for any real x.
      */
     public static double besselJ1(double x) {
         final double ax;
@@ -993,11 +993,11 @@ public class MathGen extends MathBase {
     }
 
     /**
-    * Compute the Integer Order Modified Bessel function K_n(x)
-    * for n=0,1,2,... and positive real x.
-    *
-    * --- NvE 12-mar-2000 UU-SAP Utrecht
-    */
+     * Compute the Integer Order Modified Bessel function K_n(x)
+     * for n=0,1,2,... and positive real x.
+     *
+     * --- NvE 12-mar-2000 UU-SAP Utrecht
+     */
     public static double besselK(int n, double x) {
         if (x <= 0 || n < 0) {
             System.err.println("BesselK(): *K* Invalid argument(s) (n,x) = (" + n + ", " + x + ")");
@@ -1025,13 +1025,13 @@ public class MathGen extends MathBase {
     }
 
     /*
-    * Compute the modified Bessel function K_0(x) for positive real x.
-    *
-    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-    * Applied Mathematics Series vol. 55 (1964), Washington.
-    *
-    * --- NvE 12-mar-2000 UU-SAP Utrecht
-    */
+     * Compute the modified Bessel function K_0(x) for positive real x.
+     *
+     * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+     * Applied Mathematics Series vol. 55 (1964), Washington.
+     *
+     * --- NvE 12-mar-2000 UU-SAP Utrecht
+     */
     public static double besselK0(double x) {
         if (x <= 0) {
             System.err.println("BesselK0(): *K0* Invalid argument x = " + x);
@@ -1060,7 +1060,7 @@ public class MathGen extends MathBase {
         if (x <= 2) {
             y = x * x / 4;
             result = (-log(x / 2.) * besselI0(x))
-                     + (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
+                   + (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
         } else {
             y = 2 / x;
             result = (exp(-x) / sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
@@ -1069,13 +1069,13 @@ public class MathGen extends MathBase {
     }
 
     /**
-    * Compute the modified Bessel function K_1(x) for positive real x.
-    *
-    * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
-    * Applied Mathematics Series vol. 55 (1964), Washington.
-    *
-    * --- NvE 12-mar-2000 UU-SAP Utrecht
-    */
+     * Compute the modified Bessel function K_1(x) for positive real x.
+     *
+     * M.Abramowitz and I.A.Stegun, Handbook of Mathematical Functions,
+     * Applied Mathematics Series vol. 55 (1964), Washington.
+     *
+     * --- NvE 12-mar-2000 UU-SAP Utrecht
+     */
     public static double besselK1(double x) {
         if (x <= 0) {
             System.err.println("BesselK1(): *K1* Invalid argument x = " + x);
@@ -1104,7 +1104,7 @@ public class MathGen extends MathBase {
         if (x <= 2) {
             y = x * x / 4;
             result = (log(x / 2.) * besselI1(x))
-                     + (1. / x) * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
+                   + (1. / x) * (p1 + y * (p2 + y * (p3 + y * (p4 + y * (p5 + y * (p6 + y * p7))))));
         } else {
             y = 2 / x;
             result = (exp(-x) / sqrt(x)) * (q1 + y * (q2 + y * (q3 + y * (q4 + y * (q5 + y * (q6 + y * q7))))));
@@ -1292,7 +1292,7 @@ public class MathGen extends MathBase {
      * BetaDistI). The first argument is the point, where the function will be computed, second and third are the
      * function parameters. Since the Beta distribution is bounded on both sides, it's often used to represent processes
      * with natural lower and upper limits.
-     * 
+     *
      * @param x input value
      * @param p p parameter of beta function
      * @param q q parameter of beta function
@@ -1325,8 +1325,8 @@ public class MathGen extends MathBase {
     }
 
     /**
-    * Calculates the incomplete Beta-function.
-    * -- implementation by Anna Kreshuk
+     * Calculates the incomplete Beta-function.
+     * -- implementation by Anna Kreshuk
      */
     public static double betaIncomplete(double x, double a, double b) {
         if ((x < 0.0) || (x > 1.0)) {
@@ -1364,7 +1364,7 @@ public class MathGen extends MathBase {
      * Binary search in an array of n values to locate value. Array is supposed to be sorted prior to this call. If
      * match is found, function returns position of element. If no match found, function gives nearest element smaller
      * than value.
-     * 
+     *
      * @param array input vector
      * @param length &lt;= data.length elements to be used
      * @param offset starting index in the array
@@ -1419,13 +1419,13 @@ public class MathGen extends MathBase {
     }
 
     /**
-    * Suppose an event occurs with probability _p_ per trial Then the probability P of its occuring _k_ or more times
-    * in _n_ trials is termed a cumulative binomial probability the formula is P = sum_from_j=k_to_n(Binomial(n, j)*
-    * *Power(p, j)*Power(1-p, n-j) For _n_ larger than 12 BetaIncomplete is a much better way
-    * to evaluate the sum than would be the straightforward sum calculation for _n_ smaller than 12 either method is acceptable
-    * ("Numerical Recipes")
-    * --implementation by Anna Kreshuk
-    */
+     * Suppose an event occurs with probability _p_ per trial Then the probability P of its occuring _k_ or more times
+     * in _n_ trials is termed a cumulative binomial probability the formula is P = sum_from_j=k_to_n(Binomial(n, j)*
+     * *Power(p, j)*Power(1-p, n-j) For _n_ larger than 12 BetaIncomplete is a much better way
+     * to evaluate the sum than would be the straightforward sum calculation for _n_ smaller than 12 either method is acceptable
+     * ("Numerical Recipes")
+     * --implementation by Anna Kreshuk
+     */
     public static double binomialI(double p, int n, int k) {
         if (k <= 0) {
             return 1.0;
@@ -1442,7 +1442,7 @@ public class MathGen extends MathBase {
 
     /**
      * Calculate a Breit Wigner function with mean and gamma.
-     * 
+     *
      * @param x input parameter
      * @param mean centre of distribution
      * @param gamma width of distribution
@@ -1460,7 +1460,7 @@ public class MathGen extends MathBase {
      * more accurate an estimate of the mean and standard deviation than does a single point. The formula was taken from
      * "Engineering Statistics Handbook" on site http://www.itl.nist.gov/div898/handbook/eda/section3/eda3663.htm
      * Implementation by Anna Kreshuk.
-     * 
+     *
      * @param x input value
      * @param t the location parameter
      * @param s the scale parameter
@@ -1476,7 +1476,7 @@ public class MathGen extends MathBase {
      * Evaluate the quantiles of the chi-squared probability distribution function. Algorithm AS 91 Appl. Statist.
      * (1975) Vol.24, P.35 implemented by Anna Kreshuk. Incorporates the suggested changes in AS R85 (vol.40(1),
      * pp.233-5, 1991)
-     * 
+     *
      * @param p the probability value, at which the quantile is computed
      * @param ndf number of degrees of freedom
      * @return quantiles of the chi-squared probability distribution
@@ -1561,7 +1561,7 @@ public class MathGen extends MathBase {
 
     /**
      * Calculate weighted correlation coefficient x y data and weights w as double
-     * 
+     *
      * @param x input vector 1
      * @param y input vector 2
      * @param w wheights weight vector
@@ -1584,7 +1584,7 @@ public class MathGen extends MathBase {
 
     /**
      * calculated weighted covariance xx and yy with weights ww
-     * 
+     *
      * @param xx input vector 1
      * @param yy input vector 2
      * @param ww weights
@@ -1630,7 +1630,7 @@ public class MathGen extends MathBase {
     //// codegen: double -> float
     /**
      * Calculate the Cross Product of two vectors:
-     * 
+     *
      * @param v1 input vector1
      * @param v2 input vector2
      * @param out output vector
@@ -1646,7 +1646,7 @@ public class MathGen extends MathBase {
 
     /**
      * The DiLogarithm function Code translated by from CERNLIB DILOG function C332
-     * 
+     *
      * @param x input
      * @return the computed result
      */
@@ -1754,7 +1754,7 @@ public class MathGen extends MathBase {
     /**
      * Computation of the error function erf(x). Erf(x) = (2/sqrt(pi)) Integral(exp(-t^2))dt between 0 and x --- NvE
      * 14-nov-1998 UU-SAP Utrecht
-     * 
+     *
      * @param x input
      * @return the computed result
      */
@@ -1765,7 +1765,7 @@ public class MathGen extends MathBase {
     /**
      * Compute the complementary error function erfc(x). Erfc(x) = (2/sqrt(pi)) Integral(exp(-t^2))dt between x and
      * infinity Nve 14-nov-1998 UU-SAP Utrecht
-     * 
+     *
      * @param x input parameter
      * @return the computed result
      */
@@ -1802,7 +1802,7 @@ public class MathGen extends MathBase {
 
     /**
      * returns the inverse error function
-     * 
+     *
      * @param x must be &lt;-1&lt;x&lt;1
      * @return the computed result
      */
@@ -1856,7 +1856,7 @@ public class MathGen extends MathBase {
 
     /**
      * Compute factorial(n).
-     * 
+     *
      * @param n input parameter
      * @return the computed result
      */
@@ -1914,7 +1914,7 @@ public class MathGen extends MathBase {
     /**
      * Computation of the normal frequency function freq(x). Freq(x) = (1/sqrt(2pi)) Integral(exp(-t^2/2))dt between
      * -infinity and x. Translated from CERNLIB C300 by Rene Brun.
-     * 
+     *
      * @param x input parameter
      * @return the computed result
      */
@@ -2024,7 +2024,7 @@ public class MathGen extends MathBase {
     /**
      * Computation of the incomplete gamma function P(a,x) via its continued fraction representation. --- Nve
      * 14-nov-1998 UU-SAP Utrecht
-     * 
+     *
      * @param a input parameter
      * @param x input parameter
      * @return the computed result
@@ -2072,7 +2072,7 @@ public class MathGen extends MathBase {
     /**
      * Computation of gamma(z) for all z&gt;0. C.Lanczos, SIAM Journal of Numerical Analysis B1 (1964), 86. --- Nve
      * 14-nov-1998 UU-SAP Utrecht
-     * 
+     *
      * @param z input parameter
      * @return gamma(z)
      */
@@ -2090,7 +2090,7 @@ public class MathGen extends MathBase {
      * Functions by Abramowitz and Stegun, formula 6.5.1 on page 260 . Its normalization is such that Gamma(a,+infinity)
      * = 1 . Begin_Latex P(a, x) = #frac{1}{#Gamma(a) } #int_{0}^{x} t^{a-1} e^{-t} dt End_Latex --- Nve 14-nov-1998
      * UU-SAP Utrecht
-     * 
+     *
      * @param a input parameter
      * @param x input parameter
      * @return the computed result
@@ -2133,7 +2133,7 @@ public class MathGen extends MathBase {
     /**
      * Computation of the incomplete gamma function P(a,x) via its series representation. --- Nve 14-nov-1998 UU-SAP
      * Utrecht
-     * 
+     *
      * @param a input parameter
      * @param x input parameter
      * @return the computed result
@@ -2166,7 +2166,7 @@ public class MathGen extends MathBase {
     /**
      * Calculate a Gaussian function with mean and sigma. If norm=true (default is false) the result is divided by
      * sqrt(2*Pi)*sigma.
-     * 
+     *
      * @param x input parameter
      * @param mean centre of distribution
      * @param sigma width of distribution
@@ -2188,7 +2188,7 @@ public class MathGen extends MathBase {
     //// codegen: double -> float, int, long, short
     /**
      * geometric_mean = (\Prod_{i=0}^{n-1} \abs{a[i]})^{1/n}
-     * 
+     *
      * @param a input vector
      * @param offset starting index in the array
      * @param length &lt;= data.length elements to be used
@@ -2240,7 +2240,7 @@ public class MathGen extends MathBase {
     /**
      * Function which returns true if point xp,yp lies inside the polygon defined by the np points in arrays x and y,
      * false otherwise NOTE that the polygon must be a closed polygon (1st and last point must be identical).
-     * 
+     *
      * @param xp test point coordinate x
      * @param yp test point coordinate y
      * @param np number of polygon edges
@@ -2283,7 +2283,7 @@ public class MathGen extends MathBase {
     /**
      * The LANDAU function with mpv(most probable value) and sigma. This function has been adapted from the CERNLIB
      * routine G110 denlan. If norm=true (default is false) the result is divided by sigma
-     * 
+     *
      * @param x input variable
      * @param mpv most probable value
      * @param sigma width of distribution
@@ -2331,25 +2331,25 @@ public class MathGen extends MathBase {
         } else if (v < -1) {
             u = exp(-v - 1);
             den = exp(-u) * sqrt(u) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
-                  / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
+                / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
         } else if (v < 1) {
             den = (p2[0] + (p2[1] + (p2[2] + (p2[3] + p2[4] * v) * v) * v) * v)
-                  / (q2[0] + (q2[1] + (q2[2] + (q2[3] + q2[4] * v) * v) * v) * v);
+                / (q2[0] + (q2[1] + (q2[2] + (q2[3] + q2[4] * v) * v) * v) * v);
         } else if (v < 5) {
             den = (p3[0] + (p3[1] + (p3[2] + (p3[3] + p3[4] * v) * v) * v) * v)
-                  / (q3[0] + (q3[1] + (q3[2] + (q3[3] + q3[4] * v) * v) * v) * v);
+                / (q3[0] + (q3[1] + (q3[2] + (q3[3] + q3[4] * v) * v) * v) * v);
         } else if (v < 12) {
             u = 1 / v;
             den = u * u * (p4[0] + (p4[1] + (p4[2] + (p4[3] + p4[4] * u) * u) * u) * u)
-                  / (q4[0] + (q4[1] + (q4[2] + (q4[3] + q4[4] * u) * u) * u) * u);
+                / (q4[0] + (q4[1] + (q4[2] + (q4[3] + q4[4] * u) * u) * u) * u);
         } else if (v < 50) {
             u = 1 / v;
             den = u * u * (p5[0] + (p5[1] + (p5[2] + (p5[3] + p5[4] * u) * u) * u) * u)
-                  / (q5[0] + (q5[1] + (q5[2] + (q5[3] + q5[4] * u) * u) * u) * u);
+                / (q5[0] + (q5[1] + (q5[2] + (q5[3] + q5[4] * u) * u) * u) * u);
         } else if (v < 300) {
             u = 1 / v;
             den = u * u * (p6[0] + (p6[1] + (p6[2] + (p6[3] + p6[4] * u) * u) * u) * u)
-                  / (q6[0] + (q6[1] + (q6[2] + (q6[3] + q6[4] * u) * u) * u) * u);
+                / (q6[0] + (q6[1] + (q6[2] + (q6[3] + q6[4] * u) * u) * u) * u);
         } else {
             u = 1 / (v - v * log(v) / (v + 1));
             den = u * u * (1 + (a2[0] + a2[1] * u) * u);
@@ -2400,7 +2400,7 @@ public class MathGen extends MathBase {
         } else if (v < -1) {
             u = exp(-v - 1);
             lan = (exp(-u) / sqrt(u)) * (p1[0] + (p1[1] + (p1[2] + (p1[3] + p1[4] * v) * v) * v) * v)
-                  / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
+                / (q1[0] + (q1[1] + (q1[2] + (q1[3] + q1[4] * v) * v) * v) * v);
         } else if (v < 1) {
             lan = (p2[0] + (p2[1] + (p2[2] + p2[3] * v) * v) * v) / (q2[0] + (q2[1] + (q2[2] + q2[3] * v) * v) * v);
         } else if (v < 4) {
@@ -2457,7 +2457,7 @@ public class MathGen extends MathBase {
     /**
      * Computation of ln[gamma(z)] for all z&gt;0. C.Lanczos, SIAM Journal of Numerical Analysis B1 (1964), 86 The
      * accuracy of the result is better than 2e-10. --- Nve 14-nov-1998 UU-SAP Utrecht
-     * 
+     *
      * @param z input paramater
      * @return ln[gamma(z)]
      */
@@ -2528,7 +2528,7 @@ public class MathGen extends MathBase {
      * Computes the density of LogNormal distribution at point x. Variable X has lognormal distribution if Y=Ln(X) has
      * normal distribution. The formula was taken from "Engineering Statistics Handbook" on site
      * http://www.itl.nist.gov/div898/handbook/eda/section3/eda3669.htm Implementation by Anna Kreshuk.
-     * 
+     *
      * @param x input value
      * @param sigma the shape parameter
      * @param theta the location parameter
@@ -2623,7 +2623,7 @@ public class MathGen extends MathBase {
     //// codegen: double -> float
     /**
      * Calculate a normal vector of a plane.
-     * 
+     *
      * @param p1 first 3D points belonged the plane to define it.
      * @param p2 second 3D points belonged the plane to define it.
      * @param p3 third 3D points belonged the plane to define it.
@@ -2651,7 +2651,7 @@ public class MathGen extends MathBase {
      * Normalise a vector v in place. Returns the norm of the original vector. This implementation (thanks Kevin Lynch
      * &lt;krlynch@bu.edu&gt;) is protected against possible overflows. Find the largest element, and divide that one
      * out.
-     * 
+     *
      * @param v input parameter vector
      * @return the computed result
      */
@@ -2700,7 +2700,7 @@ public class MathGen extends MathBase {
 
     /**
      * Normalise a vector 'v' in place.
-     * 
+     *
      * @param v input parameter vector
      * @return the computed result the norm of the original vector.
      */
@@ -2717,7 +2717,7 @@ public class MathGen extends MathBase {
     //// codegen: double -> float
     /**
      * Calculate the Normalized Cross Product of two vectors
-     * 
+     *
      * @param v1 input vector1
      * @param v2 input vector2
      * @param out output vector
@@ -2731,7 +2731,7 @@ public class MathGen extends MathBase {
     /**
      * Computes quantiles for standard normal distribution N(0, 1) at probability p ALGORITHM AS241 APPL. STATIST.
      * (1988) VOL. 37, NO. 3, 477-484.
-     * 
+     *
      * @param p input value
      * @return quantiles for standard normal distribution N(0, 1) at probability p
      */
@@ -2799,7 +2799,7 @@ public class MathGen extends MathBase {
         if (abs(q) < split1) {
             r = konst1 - q * q;
             quantile = q * (((((((a7 * r + a6) * r + a5) * r + a4) * r + a3) * r + a2) * r + a1) * r + a0)
-                       / (((((((b7 * r + b6) * r + b5) * r + b4) * r + b3) * r + b2) * r + b1) * r + 1.);
+                     / (((((((b7 * r + b6) * r + b5) * r + b4) * r + b3) * r + b2) * r + b1) * r + 1.);
         } else {
             if (q < 0) {
                 r = p;
@@ -2814,11 +2814,11 @@ public class MathGen extends MathBase {
                 if (r <= split2) {
                     r -= konst2;
                     quantile = (((((((c7 * r + c6) * r + c5) * r + c4) * r + c3) * r + c2) * r + c1) * r + c0)
-                               / (((((((d7 * r + d6) * r + d5) * r + d4) * r + d3) * r + d2) * r + d1) * r + 1);
+                             / (((((((d7 * r + d6) * r + d5) * r + d4) * r + d3) * r + d2) * r + d1) * r + 1);
                 } else {
                     r -= split2;
                     quantile = (((((((e7 * r + e6) * r + e5) * r + e4) * r + e3) * r + e2) * r + e1) * r + e0)
-                               / (((((((f7 * r + f6) * r + f5) * r + f4) * r + f3) * r + f2) * r + f1) * r + 1);
+                             / (((((((f7 * r + f6) * r + f5) * r + f4) * r + f3) * r + f2) * r + f1) * r + 1);
                 }
                 if (q < 0) {
                     quantile = -quantile;
@@ -2847,7 +2847,7 @@ public class MathGen extends MathBase {
      * Simple recursive algorithm to find the permutations of n natural numbers, not necessarily all distinct adapted
      * from CERNLIB routine PERMU. The input array has to be initialised with a non descending sequence. The method
      * returns false when all combinations are exhausted.
-     * 
+     *
      * @param n size of input vector
      * @param a input vector
      * @return false when all combinations are exhausted
@@ -2894,10 +2894,10 @@ public class MathGen extends MathBase {
      * compute the Poisson distribution function for (x,par) The Poisson PDF is implemented by means of Euler's
      * Gamma-function (for the factorial), so for all integer arguments it is correct. BUT for non-integer values it IS
      * NOT equal to the Poisson distribution.
-     * 
+     *
      * see PoissonI to get a non-smooth function. Note that for large values of par, it is better to call
      * Gaus(x,par,sqrt(par),true) Begin_Html
-     * 
+     *
      * @param x input value
      * @param par input parameter
      * @return the computed result
@@ -2921,7 +2921,7 @@ public class MathGen extends MathBase {
 
     /**
      * compute the Poisson distribution function for (x,par) This is a non-smooth function
-     * 
+     *
      * @param x input value
      * @param par input parameter
      * @return the computed result
@@ -2950,7 +2950,7 @@ public class MathGen extends MathBase {
      * probability that the observed Chi-squared for a correct model should be less than the value chi2. The returned
      * probability corresponds to 1-P(a,x), which denotes the probability that an observed Chi-squared exceeds the value
      * chi2 by chance, even for a correct model. --- NvE 14-nov-1998 UU-SAP Utrecht
-     * 
+     *
      * @param chi2 input
      * @param ndf number of degrees of freedom
      * @return the computed result
@@ -3013,7 +3013,7 @@ public class MathGen extends MathBase {
 
     /**
      * Calculate the sinc = sin(x)/x function if norm ==true then sinc = sinc(pi*x)/(pi*x) is used
-     * 
+     *
      * @param x input parameter
      * @param norm normalisation factor
      * @return the computed result
@@ -3029,7 +3029,7 @@ public class MathGen extends MathBase {
     //// codegen: double -> float, int, long, short
     /**
      * Sorts the input a array
-     * 
+     *
      * @param a the input array
      * @param length &lt;= data.length elements to be used
      * @param down true: ascending , false: descending order
@@ -3309,7 +3309,7 @@ public class MathGen extends MathBase {
      * sqrt(n)) has Student's t-distribution with n-1 degrees of freedom. NOTE that this function's second argument is
      * number of degrees of freedom, not the sample size. As the number of degrees of freedom grows, t-distribution
      * approaches Normal(0,1) distribution. Implementation by Anna Kreshuk.
-     * 
+     *
      * @param T input value
      * @param ndf number of degrees of freedom
      * @return value of the density function for Student's t- distribution
@@ -3330,7 +3330,7 @@ public class MathGen extends MathBase {
      * Calculates the cumulative distribution function of Student's t-distribution second parameter stands for number of
      * degrees of freedom, not for the number of samples if x has Student's t-distribution, the function returns the
      * probability of x being less than T. Implementation by Anna Kreshuk.
-     * 
+     *
      * @param T input value
      * @param ndf number of degrees of freedom
      * @return cumulative distribution function of Student's t-distribution
@@ -3402,8 +3402,8 @@ public class MathGen extends MathBase {
                     }
                 } else {
                     y = ((1. / (((ndf + 6.) / (ndf * y) - 0.089 * d - 0.822) * (ndf + 2.) * 3) + 0.5 / (ndf + 4.)) * y - 1.)
-                                * (ndf + 1.) / (ndf + 2.)
-                        + 1 / y;
+                              * (ndf + 1.) / (ndf + 2.)
+                      + 1 / y;
                 }
                 quantile = sqrt(ndf * y);
             }
@@ -3468,7 +3468,7 @@ public class MathGen extends MathBase {
 
     /**
      * Internal function, called by Vavilov and VavilovSet
-     * 
+     *
      * @param rlam ???
      * @param AC ???
      * @param HC ???
@@ -3557,7 +3557,7 @@ public class MathGen extends MathBase {
 
     /**
      * Internal function, called by Vavilov and VavilovI
-     * 
+     *
      * @param rkappa ???
      * @param beta2 ???
      * @param mode ???
@@ -3700,9 +3700,9 @@ public class MathGen extends MathBase {
             final double wk = 1. / sqrt(rkappa);
 
             AC[0] = (-0.032227 * beta2 - 0.074275) * rkappa + (0.24533 * beta2 + 0.070152) * wk
-                    + (-0.55610 * beta2 - 3.1579);
+                  + (-0.55610 * beta2 - 3.1579);
             AC[8] = (-0.013483 * beta2 - 0.048801) * rkappa + (-1.6921 * beta2 + 8.3656) * wk
-                    + (-0.73275 * beta2 - 3.5226);
+                  + (-0.73275 * beta2 - 3.5226);
             DRK[1] = wk * wk;
             DSIGM[1] = sqrt(rkappa / (1 - 0.5 * beta2));
             for (j = 1; j <= 4; j++) {
@@ -3740,17 +3740,17 @@ public class MathGen extends MathBase {
             q3 = y3 * x;
             pq = x2 * y2;
             AC[1] = W1[1] + W1[2] * x + W1[4] * x3 + W1[5] * y + W1[6] * y2 + W1[7] * y3 + W1[8] * xy + W1[9] * p2
-                    + W1[10] * p3 + W1[11] * q2 + W1[12] * q3 + W1[13] * pq;
+                  + W1[10] * p3 + W1[11] * q2 + W1[12] * q3 + W1[13] * pq;
             AC[2] = W2[1] + W2[2] * x + W2[3] * x2 + W2[4] * x3 + W2[5] * y + W2[6] * y2 + W2[8] * xy + W2[9] * p2
-                    + W2[10] * p3 + W2[11] * q2;
+                  + W2[10] * p3 + W2[11] * q2;
             AC[3] = W3[1] + W3[3] * x2 + W3[4] * x3 + W3[5] * y + W3[6] * y2 + W3[7] * y3 + W3[8] * xy + W3[9] * p2
-                    + W3[10] * p3 + W3[11] * q2 + W3[12] * q3 + W3[13] * pq;
+                  + W3[10] * p3 + W3[11] * q2 + W3[12] * q3 + W3[13] * pq;
             AC[4] = W4[1] + W4[2] * x + W4[3] * x2 + W4[4] * x3 + W4[5] * y + W4[6] * y2 + W4[7] * y3 + W4[8] * xy
-                    + W4[9] * p2 + W4[10] * p3 + W4[11] * q2 + W4[12] * q3 + W4[13] * pq;
+                  + W4[9] * p2 + W4[10] * p3 + W4[11] * q2 + W4[12] * q3 + W4[13] * pq;
             AC[5] = W5[1] + W5[2] * x + W5[4] * x3 + W5[5] * y + W5[6] * y2 + W5[7] * y3 + W5[8] * xy + W5[9] * p2
-                    + W5[10] * p3 + W5[11] * q2 + W5[12] * q3 + W5[13] * pq;
+                  + W5[10] * p3 + W5[11] * q2 + W5[12] * q3 + W5[13] * pq;
             AC[6] = W6[1] + W6[2] * x + W6[3] * x2 + W6[4] * x3 + W6[5] * y + W6[6] * y2 + W6[7] * y3 + W6[8] * xy
-                    + W6[9] * p2 + W6[10] * p3 + W6[11] * q2 + W6[12] * q3 + W6[13] * pq;
+                  + W6[9] * p2 + W6[10] * p3 + W6[11] * q2 + W6[12] * q3 + W6[13] * pq;
             AC[8] = W8[1] + W8[2] * x + W8[3] * x2 + W8[5] * y + W8[6] * y2 + W8[7] * y3 + W8[8] * xy;
             AC[0] = -3.05;
         } else if (rkappa >= 0.12) {
@@ -3771,17 +3771,17 @@ public class MathGen extends MathBase {
             q3 = y3 * x;
             pq = x2 * y2;
             AC[1] = V1[1] + V1[2] * x + V1[3] * x2 + V1[5] * y + V1[6] * y2 + V1[7] * y3 + V1[9] * p2 + V1[10] * p3
-                    + V1[11] * q2 + V1[12] * q3;
+                  + V1[11] * q2 + V1[12] * q3;
             AC[2] = V2[1] + V2[2] * x + V2[3] * x2 + V2[5] * y + V2[6] * y2 + V2[7] * y3 + V2[8] * xy + V2[9] * p2
-                    + V2[11] * q2 + V2[12] * q3;
+                  + V2[11] * q2 + V2[12] * q3;
             AC[3] = V3[1] + V3[2] * x + V3[3] * x2 + V3[4] * x3 + V3[5] * y + V3[6] * y2 + V3[7] * y3 + V3[8] * xy
-                    + V3[9] * p2 + V3[10] * p3 + V3[11] * q2 + V3[12] * q3 + V3[13] * pq;
+                  + V3[9] * p2 + V3[10] * p3 + V3[11] * q2 + V3[12] * q3 + V3[13] * pq;
             AC[4] = V4[1] + V4[2] * x + V4[3] * x2 + V4[4] * x3 + V4[5] * y + V4[6] * y2 + V4[7] * y3 + V4[8] * xy
-                    + V4[9] * p2 + V4[10] * p3 + V4[11] * q2 + V4[12] * q3;
+                  + V4[9] * p2 + V4[10] * p3 + V4[11] * q2 + V4[12] * q3;
             AC[5] = V5[1] + V5[2] * x + V5[3] * x2 + V5[4] * x3 + V5[5] * y + V5[6] * y2 + V5[7] * y3 + V5[8] * xy
-                    + V5[11] * q2 + V5[12] * q3 + V5[13] * pq;
+                  + V5[11] * q2 + V5[12] * q3 + V5[13] * pq;
             AC[6] = V6[1] + V6[2] * x + V6[3] * x2 + V6[4] * x3 + V6[5] * y + V6[6] * y2 + V6[7] * y3 + V6[8] * xy
-                    + V6[9] * p2 + V6[10] * p3 + V6[11] * q2 + V6[12] * q3 + V6[13] * pq;
+                  + V6[9] * p2 + V6[10] * p3 + V6[11] * q2 + V6[12] * q3 + V6[13] * pq;
             AC[7] = V7[1] + V7[2] * x + V7[3] * x2 + V7[5] * y + V7[6] * y2 + V7[7] * y3 + V7[8] * xy + V7[11] * q2;
             AC[8] = V8[1] + V8[2] * x + V8[3] * x2 + V8[5] * y + V8[6] * y2 + V8[7] * y3 + V8[8] * xy + V8[11] * q2;
             AC[0] = -3.04;
@@ -3807,22 +3807,22 @@ public class MathGen extends MathBase {
             pq = x2 * y2;
             if (itype[0] == 3) {
                 AC[1] = U1[1] + U1[2] * x + U1[3] * x2 + U1[5] * y + U1[6] * y2 + U1[7] * y3 + U1[8] * xy + U1[10] * p3
-                        + U1[12] * q3 + U1[13] * pq;
+                      + U1[12] * q3 + U1[13] * pq;
                 AC[2] = U2[1] + U2[2] * x + U2[3] * x2 + U2[5] * y + U2[6] * y2 + U2[7] * y3 + U2[8] * xy + U2[9] * p2
-                        + U2[10] * p3 + U2[12] * q3 + U2[13] * pq;
+                      + U2[10] * p3 + U2[12] * q3 + U2[13] * pq;
                 AC[3] = U3[1] + U3[2] * x + U3[3] * x2 + U3[5] * y + U3[6] * y2 + U3[7] * y3 + U3[8] * xy + U3[9] * p2
-                        + U3[10] * p3 + U3[11] * q2 + U3[12] * q3 + U3[13] * pq;
+                      + U3[10] * p3 + U3[11] * q2 + U3[12] * q3 + U3[13] * pq;
                 AC[4] = U4[1] + U4[2] * x + U4[3] * x2 + U4[4] * x3 + U4[5] * y + U4[6] * y2 + U4[7] * y3 + U4[8] * xy
-                        + U4[9] * p2 + U4[10] * p3 + U4[11] * q2 + U4[12] * q3;
+                      + U4[9] * p2 + U4[10] * p3 + U4[11] * q2 + U4[12] * q3;
                 AC[5] = U5[1] + U5[2] * x + U5[3] * x2 + U5[4] * x3 + U5[5] * y + U5[6] * y2 + U5[7] * y3 + U5[8] * xy
-                        + U5[10] * p3 + U5[11] * q2 + U5[12] * q3 + U5[13] * pq;
+                      + U5[10] * p3 + U5[11] * q2 + U5[12] * q3 + U5[13] * pq;
                 AC[6] = U6[1] + U6[2] * x + U6[3] * x2 + U6[4] * x3 + U6[5] * y + U6[7] * y3 + U6[8] * xy + U6[9] * p2
-                        + U6[10] * p3 + U6[12] * q3 + U6[13] * pq;
+                      + U6[10] * p3 + U6[12] * q3 + U6[13] * pq;
                 AC[7] = U7[1] + U7[2] * x + U7[3] * x2 + U7[4] * x3 + U7[5] * y + U7[6] * y2 + U7[8] * xy;
             }
 
             AC[8] = U8[1] + U8[2] * x + U8[3] * x2 + U8[4] * x3 + U8[5] * y + U8[6] * y2 + U8[7] * y3 + U8[8] * xy
-                    + U8[9] * p2 + U8[10] * p3 + U8[11] * q2 + U8[13] * pq;
+                  + U8[9] * p2 + U8[10] * p3 + U8[11] * q2 + U8[13] * pq;
             AC[0] = -3.03;
         }
 

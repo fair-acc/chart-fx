@@ -8,8 +8,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.layout.ChartPane;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.ObjectProperty;
@@ -43,7 +41,9 @@ import io.fair_acc.chartfx.renderer.spi.hexagon.HexagonMap;
 import io.fair_acc.chartfx.renderer.spi.marchingsquares.GeneralPath;
 import io.fair_acc.chartfx.renderer.spi.marchingsquares.MarchingSquares;
 import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.ui.layout.ChartPane;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
@@ -293,17 +293,20 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
      * TODO: it might be better to have a specialized ColorGradientAxis?
      */
     static class ColorGradientBar extends Rectangle {
-
         ColorGradientBar() {
             colorGradient.addListener(updateListener);
             axis.addListener((obs, old, newValue) -> {
-                if (old != null) old.sideProperty().removeListener(updateListener);
-                if (newValue != null) newValue.sideProperty().addListener(updateListener);
+                if (old != null)
+                    old.sideProperty().removeListener(updateListener);
+                if (newValue != null)
+                    newValue.sideProperty().addListener(updateListener);
             });
             axis.addListener(updateListener);
             axisNode.addListener((obs, old, newValue) -> {
-                if (old != null) old.parentProperty().removeListener(updateListener);
-                if (newValue != null) newValue.parentProperty().addListener(updateListener);
+                if (old != null)
+                    old.parentProperty().removeListener(updateListener);
+                if (newValue != null)
+                    newValue.parentProperty().addListener(updateListener);
             });
         }
 
@@ -333,16 +336,16 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             ChartPane.setSide(this, side);
             int axisIndex = children.indexOf(axisNode.get());
             switch (side) {
-                case BOTTOM:
-                case RIGHT:
-                case CENTER_VER:
-                case CENTER_HOR:
-                    children.add(axisIndex, this);
-                    break;
-                case TOP:
-                case LEFT:
-                    children.add(axisIndex + 1, this);
-                    break;
+            case BOTTOM:
+            case RIGHT:
+            case CENTER_VER:
+            case CENTER_HOR:
+                children.add(axisIndex, this);
+                break;
+            case TOP:
+            case LEFT:
+                children.add(axisIndex + 1, this);
+                break;
             }
 
             // Fill with an appropriate color for the side
@@ -373,8 +376,8 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         }
 
         final ObjectProperty<Axis> axis = new SimpleObjectProperty<>(null);
-        final ObjectBinding<Node> axisNode = Bindings.createObjectBinding(()->{
-            if(axis.get() != null && axis.get() instanceof Node){
+        final ObjectBinding<Node> axisNode = Bindings.createObjectBinding(() -> {
+            if (axis.get() != null && axis.get() instanceof Node) {
                 return (Node) axis.get();
             }
             return null;
@@ -383,7 +386,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         final ObjectProperty<ColorGradient> colorGradient = new SimpleObjectProperty<>(null);
 
         private static final double gradientSize = 20;
-
     }
 
     protected void layoutZAxis(final Axis localZAxis) {
@@ -406,22 +408,22 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
             return;
         }
         switch (getContourType()) {
-            case CONTOUR:
-                drawContour(gc, localCache);
-                break;
-            case CONTOUR_FAST:
-                drawContourFast(gc, axisTransform, localCache);
-                break;
-            case CONTOUR_HEXAGON:
-                drawHexagonMapContour(gc, localCache);
-                break;
-            case HEATMAP_HEXAGON:
-                drawHexagonHeatMap(gc, localCache);
-                break;
-            case HEATMAP:
-            default:
-                drawHeatMap(gc, localCache);
-                break;
+        case CONTOUR:
+            drawContour(gc, localCache);
+            break;
+        case CONTOUR_FAST:
+            drawContourFast(gc, axisTransform, localCache);
+            break;
+        case CONTOUR_HEXAGON:
+            drawHexagonMapContour(gc, localCache);
+            break;
+        case HEATMAP_HEXAGON:
+            drawHexagonHeatMap(gc, localCache);
+            break;
+        case HEATMAP:
+        default:
+            drawHeatMap(gc, localCache);
+            break;
         }
     }
 
@@ -440,7 +442,6 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
         paintCanvas(gc);
         localCache.releaseCachedVariables();
         ProcessingProfiler.getTimeDiff(start, "finished drawing");
-
     }
 
     @Override
@@ -463,9 +464,9 @@ public class ContourDataSetRenderer extends AbstractContourDataSetRendererParame
 
     public static double convolution(final double[][] pixelMatrix) {
         final double gy = pixelMatrix[0][0] * -1 + pixelMatrix[0][1] * -2 + pixelMatrix[0][2] * -1 + pixelMatrix[2][0] + pixelMatrix[2][1] * 2
-                + pixelMatrix[2][2] * 1;
+                        + pixelMatrix[2][2] * 1;
         final double gx = pixelMatrix[0][0] + pixelMatrix[0][2] * -1 + pixelMatrix[1][0] * 2 + pixelMatrix[1][2] * -2 + pixelMatrix[2][0]
-                + pixelMatrix[2][2] * -1;
+                        + pixelMatrix[2][2] * -1;
         return Math.sqrt(Math.pow(gy, 2) + Math.pow(gx, 2));
     }
 

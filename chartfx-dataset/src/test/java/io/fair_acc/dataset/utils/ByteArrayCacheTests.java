@@ -14,9 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ *
  * Tests implementation of {@link ByteArrayCache} as well as implicitly {@link CacheCollection}.
- * 
+ *
  * @author rstein
  *
  *         N.B. to run manually: javac ByteArrayCacheTests.java java -Xms256m

@@ -1,19 +1,21 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.chartfx.ui.layout.ChartPane;
-import io.fair_acc.dataset.utils.AssertUtils;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.function.*;
+
 import javafx.beans.property.Property;
 import javafx.css.*;
 import javafx.css.converter.SizeConverter;
 import javafx.scene.Node;
 import javafx.scene.paint.Paint;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Field;
-import java.util.*;
-import java.util.function.*;
+import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.ui.layout.ChartPane;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Extension of the StylablePropertyFactory. Adds types like [Stylish]DoubleProperties and provides callbacks for changes
@@ -43,7 +45,7 @@ public class CssPropertyFactory<S extends Styleable> {
     /**
      * Create a property factory which also provides the styleableBean properties of the parent class.
      * {@code private static final CssPropertyFactory<MyStyleable> CSS = new CssPropertyFactory<>(Parent.getClassCssMetaData()}
-     * 
+     *
      * @param parentCss List containing all styleableBean properties of the parent class
      */
     public CssPropertyFactory(List<CssMetaData<? extends Styleable, ?>> parentCss) {
@@ -304,7 +306,7 @@ public class CssPropertyFactory<S extends Styleable> {
         BinaryOperator<Side> filter = (old, side) -> {
             AssertUtils.notNull("Side must not be null", side);
             var target = styleableBean.getStyleableNode();
-            if(target == null && styleableBean instanceof Node) {
+            if (target == null && styleableBean instanceof Node) {
                 target = (Node) styleableBean;
             }
             AssertUtils.notNull("Bean does not specify a styleable node", target);

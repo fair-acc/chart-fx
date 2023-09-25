@@ -4,15 +4,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fair_acc.sample.financial.dos.Order;
 import io.fair_acc.sample.financial.dos.Order.OrderStatus;
 import io.fair_acc.sample.financial.dos.OrderExpression.OrderBuySell;
 import io.fair_acc.sample.financial.dos.Position;
 import io.fair_acc.sample.financial.dos.Position.PositionStatus;
 import io.fair_acc.sample.financial.dos.PositionContainer;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author afischer

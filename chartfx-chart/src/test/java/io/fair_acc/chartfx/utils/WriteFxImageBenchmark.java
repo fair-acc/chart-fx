@@ -31,7 +31,7 @@ import ar.com.hjg.pngj.FilterType;
 
 /**
  * Checking the performance of writing a PNG image from a JavaFx Image
- * 
+ *
  * @author Alexander Krimm
  */
 public class WriteFxImageBenchmark {

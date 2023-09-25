@@ -1,15 +1,17 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.dataset.utils.StyleBuilder;
-import javafx.scene.paint.Color;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import javafx.scene.paint.Color;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.fair_acc.dataset.utils.StyleBuilder;
 
 /**
  * Helps with parsing CSS limited to what is supported
@@ -18,7 +20,6 @@ import java.util.function.Function;
  * @author ennerf
  */
 public abstract class AbstractStyleParser {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractStyleParser.class);
 
     /**
@@ -61,10 +62,9 @@ public abstract class AbstractStyleParser {
     }
 
     protected double[] parseDoubleArray(String value) {
-        return parse(value, str -> Arrays.stream(value.split("[\\s+|,?]"))
-                .filter(part -> !part.isBlank()) // note: low priority, couldn't figure out a working regex for " ,  "
-                .mapToDouble(Double::parseDouble)
-                .toArray());
+        return parse(value, str -> Arrays.stream(value.split("[\\s+|,?]")).filter(part -> !part.isBlank()) // note: low priority, couldn't figure out a working regex for " ,  "
+                                           .mapToDouble(Double::parseDouble)
+                                           .toArray());
     }
 
     protected Color parseColor(String value) {
@@ -111,5 +111,4 @@ public abstract class AbstractStyleParser {
     }
 
     private String currentKey;
-
 }

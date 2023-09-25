@@ -4,10 +4,10 @@ import static io.fair_acc.dataset.spi.AbstractHistogram.HistogramOuterBounds.BIN
 
 import java.util.Arrays;
 
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.Histogram;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * @author rstein

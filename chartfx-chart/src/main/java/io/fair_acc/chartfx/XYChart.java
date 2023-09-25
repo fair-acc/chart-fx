@@ -1,13 +1,5 @@
 package io.fair_acc.chartfx;
 
-import io.fair_acc.chartfx.axes.spi.AxisRange;
-import io.fair_acc.chartfx.plugins.ChartPlugin;
-import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.bench.MeasurementRecorder;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.bench.DurationMeasure;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -18,14 +10,22 @@ import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
 import javafx.scene.canvas.GraphicsContext;
 
+import io.fair_acc.bench.DurationMeasure;
+import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.PolarTickStep;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.chartfx.renderer.spi.GridRenderer;
 import io.fair_acc.chartfx.renderer.spi.LabelledMarkerRenderer;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
@@ -204,19 +204,10 @@ public class XYChart extends Chart {
         // Update the axis definitions of all datasets. We do it here, so we can make better
         // use of multi-threading. The datasets are already locked, so we can use a parallel
         // stream without extra synchronization.
-        getRenderers().stream()
-                .flatMap(renderer -> renderer.getDatasetNodes().stream())
-                .filter(DataSetNode::isVisible)
-                .map(DataSetNode::getDataSet)
-                .filter(ds -> ds.getBitState().isDirty(ChartBits.DataSetData, ChartBits.DataSetRange))
-                .distinct()
-                .forEach(dataset -> dataset.getAxisDescriptions().parallelStream()
-                        .filter(axisD -> !axisD.isDefined() || axisD.getBitState().isDirty())
-                        .forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
+        getRenderers().stream().flatMap(renderer -> renderer.getDatasetNodes().stream()).filter(DataSetNode::isVisible).map(DataSetNode::getDataSet).filter(ds -> ds.getBitState().isDirty(ChartBits.DataSetData, ChartBits.DataSetRange)).distinct().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined() || axisD.getBitState().isDirty()).forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
 
         // Update each axis
         for (Axis axis : getAxes()) {
-
             // Determine the current range
             axisRange.clear();
             for (Renderer renderer : getRenderers()) {
@@ -237,9 +228,7 @@ public class XYChart extends Chart {
             if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
                 axis.invalidateRange();
             }
-
         }
-
     }
 
     private final AxisRange axisRange = new AxisRange();
@@ -295,7 +284,6 @@ public class XYChart extends Chart {
             gridRenderer.render();
             benchDrawGrid.stop();
         }
-
     }
 
     /**
@@ -341,5 +329,4 @@ public class XYChart extends Chart {
 
     private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
     private DurationMeasure benchDrawData = DurationMeasure.DISABLED;
-
 }

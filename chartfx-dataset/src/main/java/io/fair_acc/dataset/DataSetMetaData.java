@@ -20,5 +20,4 @@ public interface DataSetMetaData {
     Map<String, String> getMetaInfo();
 
     List<String> getWarningList();
-
 }

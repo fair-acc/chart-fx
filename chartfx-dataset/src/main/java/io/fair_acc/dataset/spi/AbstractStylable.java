@@ -6,7 +6,7 @@ import io.fair_acc.dataset.DataSet;
  * Class to define CSS-based style features N.B. needed for DataSet and rendering styling
  *
  * @author rstein
- * 
+ *
  * @param <D> java generics handling of DataSet for derived classes (needed for fluent design)
  */
 public abstract class AbstractStylable<D extends DataSet> implements DataSet {

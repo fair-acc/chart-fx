@@ -81,7 +81,7 @@ public class IntradayPeriod extends Period {
 
         default:
             return 60 * 1000;
-            //throw new IllegalArgumentException("The method getMillis() is not supported for this type of period: " + this);
+            // throw new IllegalArgumentException("The method getMillis() is not supported for this type of period: " + this);
         }
     }
 

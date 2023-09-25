@@ -5,15 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import io.fair_acc.chartfx.ui.css.DataSetNode;
 import javafx.scene.canvas.Canvas;
-
 import javafx.scene.canvas.GraphicsContext;
+
 import org.junit.jupiter.api.Test;
 
 import io.fair_acc.chartfx.renderer.ContourType;
 import io.fair_acc.chartfx.renderer.datareduction.ReductionType;
 import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 
 /**
@@ -70,7 +70,6 @@ public class AbstractContourDataSetRendererParameterTests {
      * basic test class, only supports limited getter/setter/property functions
      */
     public static class TestContourDataSetRendererParameter extends AbstractContourDataSetRendererParameter<TestContourDataSetRendererParameter> {
-
         @Override
         public boolean drawLegendSymbol(DataSetNode dataSet, Canvas canvas) {
             return super.drawLegendSymbol(dataSet, canvas);

@@ -1,16 +1,17 @@
 package io.fair_acc.chartfx.ui.css;
 
-import io.fair_acc.chartfx.marker.DefaultMarker;
-import io.fair_acc.chartfx.marker.Marker;
-import io.fair_acc.dataset.utils.DataSetStyleBuilder;
+import java.util.Optional;
+import java.util.OptionalDouble;
+
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 
-import java.util.Optional;
-import java.util.OptionalDouble;
+import io.fair_acc.chartfx.marker.DefaultMarker;
+import io.fair_acc.chartfx.marker.Marker;
+import io.fair_acc.dataset.utils.DataSetStyleBuilder;
 
 /**
  * Parser for styles used in the ErrorDataSetRenderer
@@ -18,7 +19,6 @@ import java.util.OptionalDouble;
  * @author ennerf
  */
 public class DataSetStyleParser extends AbstractStyleParser {
-
     public static DataSetStyleParser newInstance() {
         return new DataSetStyleParser();
     }
@@ -29,67 +29,60 @@ public class DataSetStyleParser extends AbstractStyleParser {
     @Override
     protected boolean parseEntry(String key, String value) {
         switch (key) {
+        case DataSetStyleBuilder.VISIBILITY:
+            return isValid(visible = parse(value, str -> {
+                switch (str) {
+                case "visible":
+                    return true;
+                case "hidden":
+                    return false;
+                }
+                return null;
+            }));
 
-            case DataSetStyleBuilder.VISIBILITY:
-                return isValid(visible = parse(value, str -> {
-                    switch (str) {
-                        case "visible":
-                            return true;
-                        case "hidden":
-                            return false;
-                    }
-                    return null;
-                }));
+        case DataSetStyleBuilder.INTENSITY:
+            return isValid(intensity = parseDouble(value));
 
+        case DataSetStyleBuilder.MARKER_TYPE:
+            return isValid(markerType = parse(value, DefaultMarker::get));
+        case DataSetStyleBuilder.MARKER_LINE_WIDTH:
+            return isValid(markerLineWidth = parseDouble(value));
+        case DataSetStyleBuilder.MARKER_SIZE:
+            return isValid(markerSize = parseDouble(value));
+        case DataSetStyleBuilder.MARKER_COLOR:
+            return isValid(markerColor = parseColor(value));
+        case DataSetStyleBuilder.MARKER_LINE_DASHES:
+            return isValid(markerLineDashes = parseDoubleArray(value));
 
-            case DataSetStyleBuilder.INTENSITY:
-                return isValid(intensity = parseDouble(value));
+        case DataSetStyleBuilder.LINE_WIDTH:
+            return isValid(lineWidth = parseDouble(value));
+        case DataSetStyleBuilder.LINE_COLOR:
+            return isValid(lineColor = parseColor(value));
+        case DataSetStyleBuilder.LINE_DASHES:
+            return isValid(lineDashes = parseDoubleArray(value));
 
+        case DataSetStyleBuilder.FILL_COLOR:
+            return isValid(fillColor = parseColor(value));
+        case DataSetStyleBuilder.STROKE_COLOR:
+            return isValid(strokeColor = parseColor(value));
+        case DataSetStyleBuilder.STROKE_WIDTH:
+            return isValid(strokeWidth = parseDouble(value));
+        case DataSetStyleBuilder.STROKE_DASH_PATTERN:
+            return isValid(strokeDashPattern = parseDoubleArray(value));
 
-            case DataSetStyleBuilder.MARKER_TYPE:
-                return isValid(markerType = parse(value, DefaultMarker::get));
-            case DataSetStyleBuilder.MARKER_LINE_WIDTH:
-                return isValid(markerLineWidth = parseDouble(value));
-            case DataSetStyleBuilder.MARKER_SIZE:
-                return isValid(markerSize = parseDouble(value));
-            case DataSetStyleBuilder.MARKER_COLOR:
-                return isValid(markerColor = parseColor(value));
-            case DataSetStyleBuilder.MARKER_LINE_DASHES:
-                return isValid(markerLineDashes = parseDoubleArray(value));
+        case DataSetStyleBuilder.FONT:
+            return isValid(font = parse(value, Font::font));
+        case DataSetStyleBuilder.FONT_WEIGHT:
+            return isValid(fontWeight = parse(value, FontWeight::findByName));
+        case DataSetStyleBuilder.FONT_SIZE:
+            return isValid(fontSize = parseDouble(value));
+        case DataSetStyleBuilder.FONT_STYLE:
+            return isValid(fontStyle = parse(value, FontPosture::findByName));
 
-
-            case DataSetStyleBuilder.LINE_WIDTH:
-                return isValid(lineWidth = parseDouble(value));
-            case DataSetStyleBuilder.LINE_COLOR:
-                return isValid(lineColor = parseColor(value));
-            case DataSetStyleBuilder.LINE_DASHES:
-                return isValid(lineDashes = parseDoubleArray(value));
-
-
-            case DataSetStyleBuilder.FILL_COLOR:
-                return isValid(fillColor = parseColor(value));
-            case DataSetStyleBuilder.STROKE_COLOR:
-                return isValid(strokeColor = parseColor(value));
-            case DataSetStyleBuilder.STROKE_WIDTH:
-                return isValid(strokeWidth = parseDouble(value));
-            case DataSetStyleBuilder.STROKE_DASH_PATTERN:
-                return isValid(strokeDashPattern = parseDoubleArray(value));
-
-
-            case DataSetStyleBuilder.FONT:
-                return isValid(font = parse(value, Font::font));
-            case DataSetStyleBuilder.FONT_WEIGHT:
-                return isValid(fontWeight = parse(value, FontWeight::findByName));
-            case DataSetStyleBuilder.FONT_SIZE:
-                return isValid(fontSize = parseDouble(value));
-            case DataSetStyleBuilder.FONT_STYLE:
-                return isValid(fontStyle = parse(value, FontPosture::findByName));
-
-            default:
-                return false;
+        default:
+            return false;
         }
     }
-
 
     // Generic
     public Optional<Boolean> getVisible() {
@@ -220,11 +213,9 @@ public class DataSetStyleParser extends AbstractStyleParser {
     private double strokeWidth;
     private double[] strokeDashPattern;
 
-
     // Text
     private Font font;
     private FontWeight fontWeight;
     private double fontSize;
     private FontPosture fontStyle;
-
 }

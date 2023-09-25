@@ -102,5 +102,4 @@ public class RamanDouglasPeukerDataReducer implements RendererDataReducer {
         AssertUtils.gtEqThanZero("epsilon", epsilon);
         this.epsilon = epsilon;
     }
-
 }

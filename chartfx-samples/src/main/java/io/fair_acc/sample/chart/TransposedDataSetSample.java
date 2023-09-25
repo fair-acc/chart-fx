@@ -180,9 +180,9 @@ public class TransposedDataSetSample extends ChartSample {
         final double b = (yMax - yMin) / 2.0;
         for (int i = 0; i < nSamples; i++) {
             x[i] = xMin + (a * (Math.sin(i * omega) + 1))
-                   + (pert * Math.sin(i * omega * 0.95) * Math.cos(i * omega * 2));
+                 + (pert * Math.sin(i * omega * 0.95) * Math.cos(i * omega * 2));
             y[i] = yMin + (b * (Math.sin(i * omega * 2) + 1))
-                   + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
+                 + (pert * Math.sin(i * omega * 0.777) * Math.cos(i * omega));
         }
         final DataSet dataSet = new DataSetBuilder().setName("non-sorted 2D DataSet").setValues(DIM_X, x).setValues(DIM_Y, y).build();
         dataSet.getAxisDescription(DIM_X).set("position", "m");

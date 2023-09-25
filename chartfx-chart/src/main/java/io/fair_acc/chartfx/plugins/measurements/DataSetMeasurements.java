@@ -12,7 +12,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import io.fair_acc.dataset.events.StateListener;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -51,6 +50,7 @@ import io.fair_acc.chartfx.utils.DragResizerUtil;
 import io.fair_acc.chartfx.utils.FXUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
+import io.fair_acc.dataset.events.StateListener;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
 import io.fair_acc.math.DataSetMath;
 import io.fair_acc.math.DataSetMath.Filter;
@@ -167,7 +167,6 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
 
         // force MathDataSet update
         mathDataSet.triggerUpdate();
-
     }
 
     @Override
@@ -332,317 +331,317 @@ public class DataSetMeasurements extends AbstractChartMeasurement {
         removeRendererFromOldChart();
     }
 
-protected void transform(final List<DataSet> inputDataSets, final MathDataSet outputDataSet) { // NOPMD - long function by necessity/functionality
-    final long start = System.nanoTime();
-    if ((inputDataSets.isEmpty() || inputDataSets.get(0) == null || inputDataSets.get(0).getDataCount() < 4)) {
-        outputDataSet.clearMetaInfo();
-        outputDataSet.clearData();
-        outputDataSet.getWarningList().add(outputDataSet.getName() + " - insufficient/no source data sets");
-        return;
-    }
-    outputDataSet.clearMetaInfo();
-
-    final DataSet firstDataSet = inputDataSets.get(0);
-    firstDataSet.lock().readLockGuard(() -> {
-        final double newValueMarker1 = requiredNumberOfIndicators >= 1 && !getValueIndicatorsUser().isEmpty() ? getValueIndicatorsUser().get(0).getValue() : DEFAULT_MIN;
-        final double newValueMarker2 = requiredNumberOfIndicators >= 2 && getValueIndicatorsUser().size() >= 2 ? getValueIndicatorsUser().get(1).getValue() : DEFAULT_MAX;
-        final double functionValue = parameterFields.isEmpty() ? 1.0 : parameterFields.get(0).getValue();
-
-        final String name1 = firstDataSet.getName();
-        final String xAxisName = firstDataSet.getAxisDescription(DataSet.DIM_X).getName();
-        final String xAxisUnit = firstDataSet.getAxisDescription(DataSet.DIM_X).getUnit();
-        final String yAxisName = firstDataSet.getAxisDescription(DataSet.DIM_Y).getName();
-        final String yAxisUnit = firstDataSet.getAxisDescription(DataSet.DIM_Y).getUnit();
-
-        final boolean moreThanOne = inputDataSets.size() > 1;
-        final DataSet secondDataSet = moreThanOne ? inputDataSets.get(1) : null;
-        final String name2 = moreThanOne ? secondDataSet.getName() : "";
-
-        FXUtils.runFX(() -> xAxis.set(xAxisName, xAxisUnit));
-        FXUtils.runFX(() -> yAxis.set(yAxisName, yAxisUnit));
-
-        DataSet subRange;
-        switch (measType) {
-        // basic math
-        case ADD_FUNCTIONS:
-            FXUtils.runFX(() -> yAxis.set("∑(" + name1 + " + " + name2 + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.ADD));
-            break;
-        case ADD_VALUE:
-            FXUtils.runFX(() -> yAxis.set("∑(" + name1 + " + " + functionValue + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.ADD));
-            break;
-        case SUBTRACT_FUNCTIONS:
-            FXUtils.runFX(() -> yAxis.set("∆(" + name1 + " - " + name2 + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.SUBTRACT));
-            break;
-        case SUBTRACT_VALUE:
-            FXUtils.runFX(() -> yAxis.set("∆(" + name1 + " - " + functionValue + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.SUBTRACT));
-            break;
-        case MULTIPLY_FUNCTIONS:
-            FXUtils.runFX(() -> yAxis.set("∏(" + name1 + " * " + name2 + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.MULTIPLY));
-            break;
-        case MULTIPLY_VALUE:
-            FXUtils.runFX(() -> yAxis.set("∏(" + name1 + " * " + functionValue + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.MULTIPLY));
-            break;
-        case DIVIDE_FUNCTIONS:
-            FXUtils.runFX(() -> yAxis.set("(" + name1 + " / " + name2 + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.DIVIDE));
-            break;
-        case DIVIDE_VALUE:
-            FXUtils.runFX(() -> yAxis.set("(" + name1 + " / " + functionValue + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.DIVIDE));
-            break;
-        case SUB_RANGE:
-            FXUtils.runFX(() -> yAxis.set("sub-range(" + name1 + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2));
-            break;
-        case ADD_GAUSS_NOISE:
-            FXUtils.runFX(() -> yAxis.set(name1 + " + " + functionValue + " r.m.s. noise", yAxisUnit));
-            outputDataSet.set(DataSetMath.addGaussianNoise(firstDataSet, functionValue));
-            break;
-        case AVG_DATASET_FIR:
-            FXUtils.runFX(() -> yAxis.set("<" + name1 + ", " + inputDataSets.size() + " DataSets>", yAxisUnit));
-            outputDataSet.set(DataSetMath.averageDataSetsFIR(inputDataSets, (int) Math.floor(functionValue)));
-            break;
-        // case AVG_DATASET_IIR:
-        // //TODO: complete this special case implementation
-        // FXUtils.runFX(() -> yAxis.set("quotient(<" + yAxisName + ", " +
-        // inputDataSet.size() + " DataSets)", yAxisUnit));
-        // outputDataSet.set(DataSetMath.averageDataSetsIIR(prevAverage, prevAverage2,
-        // newDataSet, nUpdates)(dataSets, functionValue));
-        // break;
-        //
-        // math functions
-        case SQUARE:
-            FXUtils.runFX(() -> yAxis.set("(" + name1 + ")²", yAxisUnit));
-            Platform.runLater(() -> outputDataSet.set(DataSetMath.sqrFunction(firstDataSet, 0.0))); // runLater needed because the dataset is locked at that moment...
-            break;
-        case SQUARE_FULL:
-            FXUtils.runFX(() -> yAxis.set("(" + name1 + ", " + name2 + ")²", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.SQR));
-            break;
-        case SQUARE_ROOT:
-            FXUtils.runFX(() -> yAxis.set("√(" + name1 + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.sqrtFunction(firstDataSet, 0.0));
-            break;
-        case SQUARE_ROOT_FULL:
-            FXUtils.runFX(() -> yAxis.set("√(" + name1 + ", " + name2 + ")", yAxisUnit));
-            outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.SQRT));
-            break;
-        case INTEGRAL:
-            FXUtils.runFX(() -> yAxis.set("∫(" + name1 + ")d" + xAxisName, xAxisUnit + "*" + yAxisUnit));
-            outputDataSet.set(DataSetMath.integrateFunction(firstDataSet, newValueMarker1, newValueMarker2));
-            break;
-        case INTEGRAL_FULL:
-            FXUtils.runFX(() -> yAxis.set("∫(" + name1 + ")d" + xAxisName, xAxisUnit + "*" + yAxisUnit));
-            outputDataSet.set(DataSetMath.integrateFunction(firstDataSet));
-            break;
-        case DIFFERENTIATE:
-            FXUtils.runFX(() -> yAxis.set("∂(" + name1 + ")/∂" + xAxisName, xAxisUnit + "*" + yAxisUnit));
-            outputDataSet.set(DataSetMath.derivativeFunction(firstDataSet));
-            break;
-        case DIFFERENTIATE_WITH_SCALLING:
-            FXUtils.runFX(() -> yAxis.set("∂(" + name1 + ")/∂" + xAxisName, xAxisUnit + "*" + yAxisUnit));
-            outputDataSet.set(DataSetMath.derivativeFunction(firstDataSet, functionValue));
-            break;
-        case NORMALISE_TO_INTEGRAL:
-            FXUtils.runFX(() -> yAxis.set("normalised(" + name1 + ")", "1"));
-            outputDataSet.set(DataSetMath.normalisedFunction(firstDataSet));
-            break;
-        case NORMALISE_TO_INTEGRAL_VALUE:
-            FXUtils.runFX(() -> yAxis.set("normalised(" + name1 + ")", Double.toString(functionValue)));
-            outputDataSet.set(DataSetMath.normalisedFunction(firstDataSet, functionValue));
-            break;
-
-        // filter routines
-        case FILTER_MEAN:
-            FXUtils.runFX(() -> yAxis.set("<" + name1 + ", " + functionValue + ">", xAxisUnit));
-            outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.MEAN));
-            break;
-        case FILTER_MEDIAN:
-            FXUtils.runFX(() -> yAxis.set("median(" + name1 + ", " + functionValue + ")", xAxisUnit));
-            outputDataSet.set(DataSetMath.filterFunction(firstDataSet, Math.max(3, functionValue), Filter.MEDIAN));
-            break;
-        case FILTER_MIN:
-            FXUtils.runFX(() -> yAxis.set("min(" + name1 + ", " + functionValue + ")", xAxisUnit));
-            outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.MIN));
-            break;
-        case FILTER_MAX:
-            FXUtils.runFX(() -> yAxis.set("max(" + name1 + ", " + functionValue + ")", xAxisUnit));
-            outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.MAX));
-            break;
-        case FILTER_P2P:
-            FXUtils.runFX(() -> yAxis.set("peak-to-peak(" + name1 + ", " + functionValue + ")", xAxisUnit));
-            outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.P2P));
-            break;
-        case FILTER_RMS:
-            FXUtils.runFX(() -> yAxis.set("rms(" + name1 + ", " + functionValue + ")", xAxisUnit));
-            outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.RMS));
-            break;
-        case FILTER_GEOMMEAN:
-            FXUtils.runFX(() -> yAxis.set("geo.-mean(" + name1 + ", " + functionValue + ")", xAxisUnit));
-            outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.GEOMMEAN));
-            break;
-        case FILTER_LOWPASS_IIR:
-            FXUtils.runFX(() -> yAxis.set("IIR-low-pass(" + name1 + ", " + functionValue + ")", xAxisUnit));
-            outputDataSet.set(DataSetMath.iirLowPassFilterFunction(firstDataSet, functionValue));
-            break;
-
-        // DataSet projections
-        case DATASET_SLICE_X:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_X)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeSlice((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1);
-            break;
-        case DATASET_SLICE_Y:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeSlice((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1);
-            break;
-        case DATASET_MEAN_X:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeMean((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
-            break;
-        case DATASET_MEAN_Y:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeMean((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
-            break;
-        case DATASET_MIN_X:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeMin((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
-            break;
-        case DATASET_MIN_Y:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeMin((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
-            break;
-        case DATASET_MAX_X:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeMax((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
-            break;
-        case DATASET_MAX_Y:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeMax((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
-            break;
-        case DATASET_INTEGRAL_X:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeIntegral((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
-            break;
-        case DATASET_INTEGRAL_Y:
-            if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
-                break;
-            }
-            FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
-            FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
-            MultiDimDataSetMath.computeIntegral((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
-            break;
-
-        // Fourier transforms
-        case FFT_DB:
-            FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
-            outputDataSet.set(DataSetMath.magnitudeSpectrumDecibel(firstDataSet));
-            break;
-        case FFT_DB_RANGED:
-            FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
-            subRange = DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2);
-            if (subRange.getDataCount() >= MIN_FFT_BINS) {
-                outputDataSet.set(DataSetMath.magnitudeSpectrumDecibel(subRange));
-            }
-            break;
-        case FFT_NORM_DB:
-            FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
-            outputDataSet.set(DataSetMath.normalisedMagnitudeSpectrumDecibel(firstDataSet));
-            break;
-        case FFT_NORM_DB_RANGED:
-            FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
-            subRange = DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2);
-            if (subRange.getDataCount() >= MIN_FFT_BINS) {
-                outputDataSet.set(DataSetMath.normalisedMagnitudeSpectrumDecibel(subRange));
-            }
-            break;
-        case FFT_LIN:
-            FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", yAxisUnit + "/rtHz"));
-            outputDataSet.set(DataSetMath.magnitudeSpectrum(firstDataSet));
-            break;
-        case FFT_LIN_RANGED:
-            FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "/rtHz"));
-            outputDataSet.set(DataSetMath.magnitudeSpectrum(DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2)));
-            break;
-        case CONVERT_TO_DB:
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB(" + yAxisUnit + ")"));
-            outputDataSet.set(DataSetMath.dbFunction(firstDataSet));
-            break;
-        case CONVERT2_TO_DB:
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB(" + yAxisUnit + ")"));
-            outputDataSet.set(DataSetMath.dbFunction(firstDataSet, secondDataSet));
-            break;
-        case CONVERT_FROM_DB:
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "a.u."));
-            outputDataSet.set(DataSetMath.inversedbFunction(firstDataSet));
-            break;
-        case CONVERT_TO_LOG10:
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "log10"));
-            outputDataSet.set(DataSetMath.log10Function(firstDataSet));
-            break;
-        case CONVERT2_TO_LOG10:
-            FXUtils.runFX(() -> yAxis.set(MAG + name1 + " + " + name2 + ")", "log10"));
-            outputDataSet.set(DataSetMath.log10Function(firstDataSet, secondDataSet));
-            break;
-        default:
-            break;
+    protected void transform(final List<DataSet> inputDataSets, final MathDataSet outputDataSet) { // NOPMD - long function by necessity/functionality
+        final long start = System.nanoTime();
+        if ((inputDataSets.isEmpty() || inputDataSets.get(0) == null || inputDataSets.get(0).getDataCount() < 4)) {
+            outputDataSet.clearMetaInfo();
+            outputDataSet.clearData();
+            outputDataSet.getWarningList().add(outputDataSet.getName() + " - insufficient/no source data sets");
+            return;
         }
-    });
-    final long now = System.nanoTime();
-    final double val = TimeUnit.NANOSECONDS.toMillis(now - start);
-    ProcessingProfiler.getTimeDiff(start, "computation duration of " + measType + " for dataSet" + outputDataSet.getName());
+        outputDataSet.clearMetaInfo();
 
-    FXUtils.runFX(() -> {
-        getValueField().setUnit("ms");
-        getValueField().setValue(val);
-    });
+        final DataSet firstDataSet = inputDataSets.get(0);
+        firstDataSet.lock().readLockGuard(() -> {
+            final double newValueMarker1 = requiredNumberOfIndicators >= 1 && !getValueIndicatorsUser().isEmpty() ? getValueIndicatorsUser().get(0).getValue() : DEFAULT_MIN;
+            final double newValueMarker2 = requiredNumberOfIndicators >= 2 && getValueIndicatorsUser().size() >= 2 ? getValueIndicatorsUser().get(1).getValue() : DEFAULT_MAX;
+            final double functionValue = parameterFields.isEmpty() ? 1.0 : parameterFields.get(0).getValue();
+
+            final String name1 = firstDataSet.getName();
+            final String xAxisName = firstDataSet.getAxisDescription(DataSet.DIM_X).getName();
+            final String xAxisUnit = firstDataSet.getAxisDescription(DataSet.DIM_X).getUnit();
+            final String yAxisName = firstDataSet.getAxisDescription(DataSet.DIM_Y).getName();
+            final String yAxisUnit = firstDataSet.getAxisDescription(DataSet.DIM_Y).getUnit();
+
+            final boolean moreThanOne = inputDataSets.size() > 1;
+            final DataSet secondDataSet = moreThanOne ? inputDataSets.get(1) : null;
+            final String name2 = moreThanOne ? secondDataSet.getName() : "";
+
+            FXUtils.runFX(() -> xAxis.set(xAxisName, xAxisUnit));
+            FXUtils.runFX(() -> yAxis.set(yAxisName, yAxisUnit));
+
+            DataSet subRange;
+            switch (measType) {
+            // basic math
+            case ADD_FUNCTIONS:
+                FXUtils.runFX(() -> yAxis.set("∑(" + name1 + " + " + name2 + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.ADD));
+                break;
+            case ADD_VALUE:
+                FXUtils.runFX(() -> yAxis.set("∑(" + name1 + " + " + functionValue + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.ADD));
+                break;
+            case SUBTRACT_FUNCTIONS:
+                FXUtils.runFX(() -> yAxis.set("∆(" + name1 + " - " + name2 + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.SUBTRACT));
+                break;
+            case SUBTRACT_VALUE:
+                FXUtils.runFX(() -> yAxis.set("∆(" + name1 + " - " + functionValue + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.SUBTRACT));
+                break;
+            case MULTIPLY_FUNCTIONS:
+                FXUtils.runFX(() -> yAxis.set("∏(" + name1 + " * " + name2 + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.MULTIPLY));
+                break;
+            case MULTIPLY_VALUE:
+                FXUtils.runFX(() -> yAxis.set("∏(" + name1 + " * " + functionValue + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.MULTIPLY));
+                break;
+            case DIVIDE_FUNCTIONS:
+                FXUtils.runFX(() -> yAxis.set("(" + name1 + " / " + name2 + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.DIVIDE));
+                break;
+            case DIVIDE_VALUE:
+                FXUtils.runFX(() -> yAxis.set("(" + name1 + " / " + functionValue + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, functionValue, MathOp.DIVIDE));
+                break;
+            case SUB_RANGE:
+                FXUtils.runFX(() -> yAxis.set("sub-range(" + name1 + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2));
+                break;
+            case ADD_GAUSS_NOISE:
+                FXUtils.runFX(() -> yAxis.set(name1 + " + " + functionValue + " r.m.s. noise", yAxisUnit));
+                outputDataSet.set(DataSetMath.addGaussianNoise(firstDataSet, functionValue));
+                break;
+            case AVG_DATASET_FIR:
+                FXUtils.runFX(() -> yAxis.set("<" + name1 + ", " + inputDataSets.size() + " DataSets>", yAxisUnit));
+                outputDataSet.set(DataSetMath.averageDataSetsFIR(inputDataSets, (int) Math.floor(functionValue)));
+                break;
+            // case AVG_DATASET_IIR:
+            // //TODO: complete this special case implementation
+            // FXUtils.runFX(() -> yAxis.set("quotient(<" + yAxisName + ", " +
+            // inputDataSet.size() + " DataSets)", yAxisUnit));
+            // outputDataSet.set(DataSetMath.averageDataSetsIIR(prevAverage, prevAverage2,
+            // newDataSet, nUpdates)(dataSets, functionValue));
+            // break;
+            //
+            // math functions
+            case SQUARE:
+                FXUtils.runFX(() -> yAxis.set("(" + name1 + ")²", yAxisUnit));
+                Platform.runLater(() -> outputDataSet.set(DataSetMath.sqrFunction(firstDataSet, 0.0))); // runLater needed because the dataset is locked at that moment...
+                break;
+            case SQUARE_FULL:
+                FXUtils.runFX(() -> yAxis.set("(" + name1 + ", " + name2 + ")²", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.SQR));
+                break;
+            case SQUARE_ROOT:
+                FXUtils.runFX(() -> yAxis.set("√(" + name1 + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.sqrtFunction(firstDataSet, 0.0));
+                break;
+            case SQUARE_ROOT_FULL:
+                FXUtils.runFX(() -> yAxis.set("√(" + name1 + ", " + name2 + ")", yAxisUnit));
+                outputDataSet.set(DataSetMath.mathFunction(firstDataSet, secondDataSet, MathOp.SQRT));
+                break;
+            case INTEGRAL:
+                FXUtils.runFX(() -> yAxis.set("∫(" + name1 + ")d" + xAxisName, xAxisUnit + "*" + yAxisUnit));
+                outputDataSet.set(DataSetMath.integrateFunction(firstDataSet, newValueMarker1, newValueMarker2));
+                break;
+            case INTEGRAL_FULL:
+                FXUtils.runFX(() -> yAxis.set("∫(" + name1 + ")d" + xAxisName, xAxisUnit + "*" + yAxisUnit));
+                outputDataSet.set(DataSetMath.integrateFunction(firstDataSet));
+                break;
+            case DIFFERENTIATE:
+                FXUtils.runFX(() -> yAxis.set("∂(" + name1 + ")/∂" + xAxisName, xAxisUnit + "*" + yAxisUnit));
+                outputDataSet.set(DataSetMath.derivativeFunction(firstDataSet));
+                break;
+            case DIFFERENTIATE_WITH_SCALLING:
+                FXUtils.runFX(() -> yAxis.set("∂(" + name1 + ")/∂" + xAxisName, xAxisUnit + "*" + yAxisUnit));
+                outputDataSet.set(DataSetMath.derivativeFunction(firstDataSet, functionValue));
+                break;
+            case NORMALISE_TO_INTEGRAL:
+                FXUtils.runFX(() -> yAxis.set("normalised(" + name1 + ")", "1"));
+                outputDataSet.set(DataSetMath.normalisedFunction(firstDataSet));
+                break;
+            case NORMALISE_TO_INTEGRAL_VALUE:
+                FXUtils.runFX(() -> yAxis.set("normalised(" + name1 + ")", Double.toString(functionValue)));
+                outputDataSet.set(DataSetMath.normalisedFunction(firstDataSet, functionValue));
+                break;
+
+            // filter routines
+            case FILTER_MEAN:
+                FXUtils.runFX(() -> yAxis.set("<" + name1 + ", " + functionValue + ">", xAxisUnit));
+                outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.MEAN));
+                break;
+            case FILTER_MEDIAN:
+                FXUtils.runFX(() -> yAxis.set("median(" + name1 + ", " + functionValue + ")", xAxisUnit));
+                outputDataSet.set(DataSetMath.filterFunction(firstDataSet, Math.max(3, functionValue), Filter.MEDIAN));
+                break;
+            case FILTER_MIN:
+                FXUtils.runFX(() -> yAxis.set("min(" + name1 + ", " + functionValue + ")", xAxisUnit));
+                outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.MIN));
+                break;
+            case FILTER_MAX:
+                FXUtils.runFX(() -> yAxis.set("max(" + name1 + ", " + functionValue + ")", xAxisUnit));
+                outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.MAX));
+                break;
+            case FILTER_P2P:
+                FXUtils.runFX(() -> yAxis.set("peak-to-peak(" + name1 + ", " + functionValue + ")", xAxisUnit));
+                outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.P2P));
+                break;
+            case FILTER_RMS:
+                FXUtils.runFX(() -> yAxis.set("rms(" + name1 + ", " + functionValue + ")", xAxisUnit));
+                outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.RMS));
+                break;
+            case FILTER_GEOMMEAN:
+                FXUtils.runFX(() -> yAxis.set("geo.-mean(" + name1 + ", " + functionValue + ")", xAxisUnit));
+                outputDataSet.set(DataSetMath.filterFunction(firstDataSet, functionValue, Filter.GEOMMEAN));
+                break;
+            case FILTER_LOWPASS_IIR:
+                FXUtils.runFX(() -> yAxis.set("IIR-low-pass(" + name1 + ", " + functionValue + ")", xAxisUnit));
+                outputDataSet.set(DataSetMath.iirLowPassFilterFunction(firstDataSet, functionValue));
+                break;
+
+            // DataSet projections
+            case DATASET_SLICE_X:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_X)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeSlice((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1);
+                break;
+            case DATASET_SLICE_Y:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeSlice((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1);
+                break;
+            case DATASET_MEAN_X:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMean((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MEAN_Y:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMean((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MIN_X:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMin((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MIN_Y:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMin((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MAX_X:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMax((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_MAX_Y:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeMax((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_INTEGRAL_X:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeIntegral((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_X, newValueMarker1, newValueMarker2);
+                break;
+            case DATASET_INTEGRAL_Y:
+                if (!(firstDataSet instanceof GridDataSet) || firstDataSet.getDimension() <= 2) {
+                    break;
+                }
+                FXUtils.runFX(() -> xAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Y)));
+                FXUtils.runFX(() -> yAxis.set(firstDataSet.getAxisDescription(DataSet.DIM_Z)));
+                MultiDimDataSetMath.computeIntegral((GridDataSet) firstDataSet, outputDataSet, DataSet.DIM_Y, newValueMarker1, newValueMarker2);
+                break;
+
+            // Fourier transforms
+            case FFT_DB:
+                FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
+                outputDataSet.set(DataSetMath.magnitudeSpectrumDecibel(firstDataSet));
+                break;
+            case FFT_DB_RANGED:
+                FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
+                subRange = DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2);
+                if (subRange.getDataCount() >= MIN_FFT_BINS) {
+                    outputDataSet.set(DataSetMath.magnitudeSpectrumDecibel(subRange));
+                }
+                break;
+            case FFT_NORM_DB:
+                FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
+                outputDataSet.set(DataSetMath.normalisedMagnitudeSpectrumDecibel(firstDataSet));
+                break;
+            case FFT_NORM_DB_RANGED:
+                FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB"));
+                subRange = DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2);
+                if (subRange.getDataCount() >= MIN_FFT_BINS) {
+                    outputDataSet.set(DataSetMath.normalisedMagnitudeSpectrumDecibel(subRange));
+                }
+                break;
+            case FFT_LIN:
+                FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", yAxisUnit + "/rtHz"));
+                outputDataSet.set(DataSetMath.magnitudeSpectrum(firstDataSet));
+                break;
+            case FFT_LIN_RANGED:
+                FXUtils.runFX(() -> xAxis.set(FREQUENCY, "Hz"));
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "/rtHz"));
+                outputDataSet.set(DataSetMath.magnitudeSpectrum(DataSetMath.getSubRange(firstDataSet, newValueMarker1, newValueMarker2)));
+                break;
+            case CONVERT_TO_DB:
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB(" + yAxisUnit + ")"));
+                outputDataSet.set(DataSetMath.dbFunction(firstDataSet));
+                break;
+            case CONVERT2_TO_DB:
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "dB(" + yAxisUnit + ")"));
+                outputDataSet.set(DataSetMath.dbFunction(firstDataSet, secondDataSet));
+                break;
+            case CONVERT_FROM_DB:
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "a.u."));
+                outputDataSet.set(DataSetMath.inversedbFunction(firstDataSet));
+                break;
+            case CONVERT_TO_LOG10:
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + ")", "log10"));
+                outputDataSet.set(DataSetMath.log10Function(firstDataSet));
+                break;
+            case CONVERT2_TO_LOG10:
+                FXUtils.runFX(() -> yAxis.set(MAG + name1 + " + " + name2 + ")", "log10"));
+                outputDataSet.set(DataSetMath.log10Function(firstDataSet, secondDataSet));
+                break;
+            default:
+                break;
+            }
+        });
+        final long now = System.nanoTime();
+        final double val = TimeUnit.NANOSECONDS.toMillis(now - start);
+        ProcessingProfiler.getTimeDiff(start, "computation duration of " + measType + " for dataSet" + outputDataSet.getName());
+
+        FXUtils.runFX(() -> {
+            getValueField().setUnit("ms");
+            getValueField().setValue(val);
+        });
     }
 
     public enum MeasurementCategory {

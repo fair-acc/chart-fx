@@ -4,23 +4,23 @@ import static io.fair_acc.sample.financial.service.StandardTradePlanAttributes.P
 
 import java.util.*;
 
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.sample.financial.service.execution.ExecutionPlatformListener;
-import io.fair_acc.sample.financial.service.execution.OrderEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.renderer.spi.financial.PositionFinancialRendererPaintAfterEP.PositionRendered;
 import io.fair_acc.chartfx.renderer.spi.financial.PositionFinancialRendererPaintAfterEP.PositionRenderedAware;
-import io.fair_acc.sample.financial.dos.Order;
-import io.fair_acc.sample.financial.dos.Position;
-import io.fair_acc.sample.financial.dos.Position.PositionStatus;
-import io.fair_acc.sample.financial.dos.PositionContainer;
 import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.AbstractDataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 import io.fair_acc.dataset.spi.financial.api.attrs.AttributeModel;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
+import io.fair_acc.sample.financial.dos.Order;
+import io.fair_acc.sample.financial.dos.Position;
+import io.fair_acc.sample.financial.dos.Position.PositionStatus;
+import io.fair_acc.sample.financial.dos.PositionContainer;
+import io.fair_acc.sample.financial.service.execution.ExecutionPlatformListener;
+import io.fair_acc.sample.financial.service.execution.OrderEvent;
 
 /**
  *<p>

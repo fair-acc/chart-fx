@@ -18,8 +18,8 @@ public class TimePeriodIncrementalOhlcvConsolidation extends AbstractIncremental
     private final Calendar calTo = Calendar.getInstance(); // TO
 
     public TimePeriodIncrementalOhlcvConsolidation(OhlcvTimeframeConsolidation.OhlcvConsolidationComputation consolidationComputation,
-                                                   IntradayPeriod period, Interval<Calendar> tt,
-                                                   OhlcvConsolidationAddon[] _ohlcvConsolidationAddons) {
+            IntradayPeriod period, Interval<Calendar> tt,
+            OhlcvConsolidationAddon[] _ohlcvConsolidationAddons) {
         super(consolidationComputation, period, tt, _ohlcvConsolidationAddons);
         calFrom.setFirstDayOfWeek(Calendar.SUNDAY); // US style
         calTo.setFirstDayOfWeek(Calendar.SUNDAY); // US style
@@ -69,8 +69,8 @@ public class TimePeriodIncrementalOhlcvConsolidation extends AbstractIncremental
             throw new IllegalArgumentException("This type of Intraday period is not supported!");
         }
         Calendar ttStart = Calendar.getInstance();
-        //note: there is possibility to defined more complex time template which starts day before.
-        //In this case, there is necessary to ttStart calculate by formula and decrease the day from aDate.
+        // note: there is possibility to defined more complex time template which starts day before.
+        // In this case, there is necessary to ttStart calculate by formula and decrease the day from aDate.
         ttStart.setTime(aDate);
         ttStart.set(Calendar.HOUR_OF_DAY, tt == null ? 0 : tt.from.get(Calendar.HOUR_OF_DAY));
         ttStart.set(Calendar.MINUTE, tt == null ? 0 : tt.from.get(Calendar.MINUTE));

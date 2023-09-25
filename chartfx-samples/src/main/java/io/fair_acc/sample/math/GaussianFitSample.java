@@ -1,10 +1,11 @@
 package io.fair_acc.sample.math;
 
-import io.fair_acc.sample.chart.ChartSample;
+import java.util.Random;
+
 import javafx.application.Application;
 import javafx.scene.Node;
-
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,13 +15,12 @@ import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 import io.fair_acc.math.MathBase;
 import io.fair_acc.math.fitter.NonLinearRegressionFitter;
 import io.fair_acc.math.functions.AbstractFunction1D;
+import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
-
-import java.util.Random;
 
 /**
  * example illustrating fitting of a Gaussian Distribution
- * 
+ *
  * @author rstein
  */
 public class GaussianFitSample extends ChartSample {
@@ -57,7 +57,7 @@ public class GaussianFitSample extends ChartSample {
         for (int i = 0; i < xValues.length; i++) {
             final double error = 0.5 * RANDOM.nextGaussian();
             xValues[i] = (i - xValues.length / 2.0) * 30.0 / MAX_POINTS; // equidistant
-                    // sampling
+                                                                         // sampling
 
             final double value = func.getValue(xValues[i]);
             // add some slope and offset to make the fit a bit more tricky

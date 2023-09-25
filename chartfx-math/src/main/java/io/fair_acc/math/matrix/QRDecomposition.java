@@ -12,7 +12,6 @@ package io.fair_acc.math.matrix;
  */
 
 public class QRDecomposition implements java.io.Serializable {
-
     private static final long serialVersionUID = -6447651515739228852L;
     /*
      * ------------------------ Class variables ------------------------
@@ -20,14 +19,14 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * Array for internal storage of decomposition.
-     * 
+     *
      * @serial internal array storage.
      */
     private double[][] QR;
 
     /**
      * Row and column dimensions.
-     * 
+     *
      * @serial column dimension.
      * @serial row dimension.
      */
@@ -35,7 +34,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * Array for internal storage of diagonal of R.
-     * 
+     *
      * @serial diagonal of R.
      */
     private double[] Rdiag;
@@ -46,7 +45,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * QR Decomposition, computed by Householder reflections.
-     * 
+     *
      * @param A Rectangular matrix Structure to access R and the Householder vectors and compute Q.
      */
 
@@ -97,7 +96,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * Return the Householder vectors
-     * 
+     *
      * @return Lower trapezoidal matrix whose columns define the reflections
      */
 
@@ -118,7 +117,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * Generate and return the (economy-sized) orthogonal factor
-     * 
+     *
      * @return Q
      */
 
@@ -148,7 +147,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * Return the upper triangular factor
-     * 
+     *
      * @return R
      */
 
@@ -171,7 +170,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * Is the matrix full rank?
-     * 
+     *
      * @return true if R, and hence A, has full rank.
      */
 
@@ -185,7 +184,7 @@ public class QRDecomposition implements java.io.Serializable {
 
     /**
      * Least squares solution of A*X = B
-     * 
+     *
      * @param B A Matrix with as many rows as A and any number of columns.
      * @return X that minimizes the two norm of Q*R*X-B.
      * @exception IllegalArgumentException Matrix row dimensions must agree.

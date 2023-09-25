@@ -2,12 +2,11 @@ package io.fair_acc.sample.math;
 
 import java.util.Arrays;
 
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
+
 import org.jtransforms.fft.DoubleFFT_1D;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +14,9 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.math.MathBase;
-import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.SpectrumTools;
+import io.fair_acc.sample.chart.ChartSample;
+import io.fair_acc.sample.math.utils.DemoChart;
 
 /**
  * example illustrating the discrete time fourier transform and Fast-Fourier transform and spectral interpolation

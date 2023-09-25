@@ -6,7 +6,6 @@ import java.util.List;
 import io.fair_acc.dataset.spi.utils.DoublePoint;
 
 public class EllipseFunction extends AbstractFunction implements FunctionND {
-
     public EllipseFunction(final String name, final int nparm) {
         super(name, nparm);
     }
@@ -60,5 +59,4 @@ public class EllipseFunction extends AbstractFunction implements FunctionND {
 
         return points;
     }
-
 }

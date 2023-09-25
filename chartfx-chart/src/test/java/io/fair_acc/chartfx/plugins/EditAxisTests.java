@@ -58,7 +58,7 @@ public class EditAxisTests {
         assertEquals(2, plugin.popUpList.size());
 
         chart.getAxes().remove(yAxis);
-        //TODO: check -- removes all axis references but does not leave the remaining axes
+        // TODO: check -- removes all axis references but does not leave the remaining axes
         assertEquals(0, plugin.popUpList.size());
 
         chart.getPlugins().add(plugin);

@@ -1,5 +1,10 @@
 package io.fair_acc.sample.math;
 
+import javafx.application.Application;
+import javafx.scene.Node;
+import javafx.scene.layout.FlowPane;
+import javafx.stage.Stage;
+
 import io.fair_acc.dataset.DataSet2D;
 import io.fair_acc.dataset.spi.DefaultDataSet;
 import io.fair_acc.math.DataSetMath;
@@ -9,14 +14,10 @@ import io.fair_acc.math.filter.iir.ChebyshevI;
 import io.fair_acc.math.filter.iir.ChebyshevII;
 import io.fair_acc.sample.chart.ChartSample;
 import io.fair_acc.sample.math.utils.DemoChart;
-import javafx.application.Application;
-import javafx.scene.Node;
-import javafx.scene.layout.FlowPane;
-import javafx.stage.Stage;
 
 /**
  * Sample to illustrate IIR-based Butterworth and Chebychev filters
- * 
+ *
  * @author rstein
  */
 public class IIRFrequencyFilterSample extends ChartSample {
@@ -65,7 +66,8 @@ public class IIRFrequencyFilterSample extends ChartSample {
     }
 
     private DemoChart getDemoChartBessel(double width) {
-        final String filterType = "Bessel - " + "(" + ORDER + "th-order)";
+        final String filterType = "Bessel - "
+                                + "(" + ORDER + "th-order)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
         DefaultDataSet bandPass = new DefaultDataSet(BAND_PASS);
@@ -102,7 +104,8 @@ public class IIRFrequencyFilterSample extends ChartSample {
     }
 
     private DemoChart getDemoChartButterworth(double width) {
-        final String filterType = "Butterworth - " + "(" + ORDER + "th-order)";
+        final String filterType = "Butterworth - "
+                                + "(" + ORDER + "th-order)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
         DefaultDataSet bandPass = new DefaultDataSet(BAND_PASS);
@@ -139,8 +142,9 @@ public class IIRFrequencyFilterSample extends ChartSample {
     }
 
     private DemoChart getDemoChartChebychevI(double width) {
-        final String filterType = "ChebyshevI - " + "(" + ORDER + "th-order, " + ALLOWED_IN_BAND_RIPPLE_DB
-                + " dB ripple)";
+        final String filterType = "ChebyshevI - "
+                                + "(" + ORDER + "th-order, " + ALLOWED_IN_BAND_RIPPLE_DB
+                                + " dB ripple)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
         DefaultDataSet bandPass = new DefaultDataSet(BAND_PASS);
@@ -179,8 +183,9 @@ public class IIRFrequencyFilterSample extends ChartSample {
     }
 
     private DemoChart getDemoChartChebychevII(double width) {
-        final String filterType = "ChebyshevII - " + "(" + ORDER + "th-order, " + ALLOWED_OUT_OF_BAND_RIPPLE_DB
-                + " dB ripple)";
+        final String filterType = "ChebyshevII - "
+                                + "(" + ORDER + "th-order, " + ALLOWED_OUT_OF_BAND_RIPPLE_DB
+                                + " dB ripple)";
         DefaultDataSet lowPass = new DefaultDataSet(LOW_PASS);
         DefaultDataSet highPass = new DefaultDataSet(HIGH_PASS);
         DefaultDataSet bandPass = new DefaultDataSet(BAND_PASS);

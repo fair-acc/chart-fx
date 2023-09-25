@@ -45,7 +45,7 @@ public class OhlcvTimeframeConsolidation {
             break;
         case H:
             throw new IllegalArgumentException("HOUR timeframe is not allowed for tick data provider.");
-        default: //M, S
+        default: // M, S
             consolidation = new TimePeriodIncrementalOhlcvConsolidation(ohlcvConsolidationComputation, intradayPeriod, tt, _ohlcvConsolidationAddons);
             break;
         }

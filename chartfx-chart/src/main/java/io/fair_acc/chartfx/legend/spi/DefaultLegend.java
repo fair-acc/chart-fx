@@ -3,11 +3,6 @@ package io.fair_acc.chartfx.legend.spi;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
-import io.fair_acc.chartfx.ui.geometry.Side;
-import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -20,6 +15,11 @@ import javafx.scene.layout.FlowPane;
 
 import io.fair_acc.chartfx.legend.Legend;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
+import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.utils.PropUtil;
 
 /**
  * A chart legend that displays a list of items with symbols in a box
@@ -70,8 +70,7 @@ public class DefaultLegend extends FlowPane implements Legend {
         var item = new LegendItem(series);
         item.setOnMouseClicked(event -> series.setVisible(!series.isVisible()));
         PropUtil.initAndRunOnChange(
-                () -> item.pseudoClassStateChanged(disabledClass, !series.isVisible()),
-                series.visibleProperty());
+                () -> item.pseudoClassStateChanged(disabledClass, !series.isVisible()), series.visibleProperty());
         item.visibleProperty().bind(series.getRenderer().showInLegendProperty().and(series.showInLegendProperty()));
         item.managedProperty().bind(item.visibleProperty());
         return item;
@@ -126,7 +125,7 @@ public class DefaultLegend extends FlowPane implements Legend {
                 }
 
                 // New instance
-                if(item == null) {
+                if (item == null) {
                     item = getNewLegendItem(series);
                 }
                 tmpItems.add(item);
@@ -135,7 +134,6 @@ public class DefaultLegend extends FlowPane implements Legend {
 
         // Update all at once
         getItems().setAll(tmpItems);
-
     }
 
     @Override
@@ -174,7 +172,6 @@ public class DefaultLegend extends FlowPane implements Legend {
      * A item to be displayed on a Legend
      */
     public static class LegendItem extends Label {
-
         public LegendItem(DataSetNode series) {
             StyleUtil.addStyles(this, "chart-legend-item");
             textProperty().bind(series.nameProperty());
@@ -206,6 +203,5 @@ public class DefaultLegend extends FlowPane implements Legend {
             return CSS.getCssMetaData();
         }
         private static final CssPropertyFactory<LegendItem> CSS = new CssPropertyFactory<>(Label.getClassCssMetaData());
-
     }
 }

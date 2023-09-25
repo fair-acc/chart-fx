@@ -1,12 +1,12 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import java.util.List;
+
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.DataSet;
-
-import java.util.List;
 
 /**
  * Renderer that uses 3 Axes.
@@ -17,7 +17,6 @@ import java.util.List;
  * @author ennerf
  */
 public abstract class AbstractRendererXYZ<R extends AbstractRendererXYZ<R>> extends AbstractPointReducingRenderer<R> {
-
     @Override
     public void updateAxes() {
         super.updateAxes();
@@ -81,5 +80,4 @@ public abstract class AbstractRendererXYZ<R extends AbstractRendererXYZ<R>> exte
     }
 
     protected Axis zAxis;
-
 }

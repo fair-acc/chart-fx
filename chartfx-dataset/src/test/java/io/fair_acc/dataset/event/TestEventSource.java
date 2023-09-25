@@ -8,7 +8,6 @@ import io.fair_acc.dataset.events.EventSource;
  * @author rstein
  */
 public class TestEventSource implements EventSource {
-
     protected BitState state = BitState.initDirty(this);
 
     @Override

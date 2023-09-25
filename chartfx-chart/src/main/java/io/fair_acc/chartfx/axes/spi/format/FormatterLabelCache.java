@@ -2,10 +2,10 @@ package io.fair_acc.chartfx.axes.spi.format;
 
 import java.util.WeakHashMap;
 
+import javafx.util.StringConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javafx.util.StringConverter;
 
 /**
  * Simple cache to keep recurring results of String formatters

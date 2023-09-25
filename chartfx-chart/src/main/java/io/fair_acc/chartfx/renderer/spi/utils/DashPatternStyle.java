@@ -17,7 +17,7 @@ import javafx.scene.shape.Line;
 /**
  * Workaround for dashed line JavaFX performance bottleneck for strictly horizontal and vertical lines as used in the
  * GridRenderer
- * 
+ *
  * see e.g. option 3 in:
  * https://stackoverflow.com/questions/47102734/performances-issue-when-drawing-dashed-line-in-java/47166129#47166129
  *

@@ -2,8 +2,9 @@ package io.fair_acc.dataset.spi;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.fair_acc.dataset.DataSet;
 import org.junit.jupiter.api.Test;
+
+import io.fair_acc.dataset.DataSet;
 
 class AveragingDataSetTests {
     @Test

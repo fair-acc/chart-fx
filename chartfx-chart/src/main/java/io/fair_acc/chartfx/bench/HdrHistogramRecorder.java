@@ -1,12 +1,5 @@
 package io.fair_acc.chartfx.bench;
 
-import io.fair_acc.bench.MeasurementRecorder;
-import io.fair_acc.bench.TimeMeasure;
-import io.fair_acc.dataset.utils.AssertUtils;
-import org.HdrHistogram.Histogram;
-import org.HdrHistogram.HistogramLogWriter;
-import org.HdrHistogram.SingleWriterRecorder;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,6 +11,14 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.IntSupplier;
 
+import org.HdrHistogram.Histogram;
+import org.HdrHistogram.HistogramLogWriter;
+import org.HdrHistogram.SingleWriterRecorder;
+
+import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.bench.TimeMeasure;
+import io.fair_acc.dataset.utils.AssertUtils;
+
 /**
  * Records measurements in tagged HdrHistograms and
  * writes them to disk. Very low overhead. Measurements
@@ -26,7 +27,6 @@ import java.util.function.IntSupplier;
  * @author ennerf
  */
 public class HdrHistogramRecorder implements MeasurementRecorder, Closeable {
-
     /**
      * Simple measurement recorder that can be quickly added to any class that needs a performance benchmark
      */
@@ -68,7 +68,6 @@ public class HdrHistogramRecorder implements MeasurementRecorder, Closeable {
             return;
         }
         try {
-
             // Get individual histograms (at roughly the same time)
             synchronized (measurements) {
                 for (HdrHistogramMeasure recorder : measurements) {
@@ -116,7 +115,6 @@ public class HdrHistogramRecorder implements MeasurementRecorder, Closeable {
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
     static class HdrHistogramMeasure implements TimeMeasure {
-
         HdrHistogramMeasure(final String tag) {
             this.tag = AssertUtils.notNull("tag", tag);
             this.histogramRecorder = new SingleWriterRecorder(defaultMinValue, defaultMaxValue, numberOfSignificantDigits);
@@ -144,6 +142,5 @@ public class HdrHistogramRecorder implements MeasurementRecorder, Closeable {
         private static final long defaultMinValue = 1;
         private static final long defaultMaxValue = java.util.concurrent.TimeUnit.SECONDS.toMicros(10);
         private static final int numberOfSignificantDigits = 2;
-
     }
 }

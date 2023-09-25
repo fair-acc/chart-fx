@@ -1,14 +1,15 @@
 package io.fair_acc.sample.chart.legacy;
 
-import com.sun.javafx.tk.Toolkit;
-
-import io.fair_acc.sample.chart.RollingBufferSample;
 import javafx.application.Application;
 import javafx.scene.layout.BorderPane;
 
+import com.sun.javafx.tk.Toolkit;
+
+import io.fair_acc.sample.chart.RollingBufferSample;
+
 /**
  * chart-fx stress test for updates at 100 Hz to 1 kHz
- * 
+ *
  * @author rstein
  */
 public class ChartHighUpdateRateSample extends RollingBufferSample {
@@ -25,7 +26,8 @@ public class ChartHighUpdateRateSample extends RollingBufferSample {
         Toolkit.getToolkit().addSceneTkPulseListener(() -> {
             counter = (counter + 1) % 100;
             if (counter == 0) {
-                System.err.println("pulse auto dipole, "+ " auto beam ");
+                System.err.println("pulse auto dipole, "
+                                   + " auto beam ");
             }
         });
 
@@ -35,6 +37,5 @@ public class ChartHighUpdateRateSample extends RollingBufferSample {
 
     public static void main(final String[] args) {
         Application.launch(args);
-
     }
 }

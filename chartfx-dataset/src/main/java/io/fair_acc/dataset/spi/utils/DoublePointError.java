@@ -4,7 +4,6 @@ package io.fair_acc.dataset.spi.utils;
  * @author rstein
  */
 public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
-
     /**
      * default constructor (zero coordinates and errors)
      */
@@ -13,7 +12,7 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     }
 
     /**
-     * 
+     *
      * @param x new X coordinate
      * @param y new Y coordinate
      * @param errorX error of X coordinate
@@ -21,7 +20,6 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
      */
     public DoublePointError(final double x, final double y, final double errorX, final double errorY) {
         this(new DoublePoint(x, errorX), new DoublePoint(y, errorY));
-
     }
 
     /**
@@ -33,7 +31,7 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     }
 
     /**
-     * 
+     *
      * @return assigned error of x coordinate
      */
     public double getErrorX() {
@@ -41,7 +39,7 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     }
 
     /**
-     * 
+     *
      * @return assigned error of y coordinate
      */
     public double getErrorY() {
@@ -49,7 +47,7 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     }
 
     /**
-     * 
+     *
      * @return x coordinate
      */
     public double getX() {
@@ -57,7 +55,7 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     }
 
     /**
-     * 
+     *
      * @return y coordinate
      */
     public double getY() {
@@ -99,5 +97,4 @@ public class DoublePointError extends Tuple<DoublePoint, DoublePoint> {
     public String toString() {
         return "DoublePointError [" + x + ", " + y + "]";
     }
-
 }

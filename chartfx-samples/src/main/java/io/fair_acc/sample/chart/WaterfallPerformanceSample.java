@@ -2,8 +2,6 @@ package io.fair_acc.sample.chart;
 
 import java.util.Timer;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.sample.chart.utils.TestDataSetSource;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -28,6 +26,7 @@ import javafx.stage.WindowEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.plugins.ColormapSelector.ColormapComboBox;
@@ -36,12 +35,13 @@ import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.ContourType;
 import io.fair_acc.chartfx.renderer.datareduction.ReductionType;
 import io.fair_acc.chartfx.renderer.spi.ContourDataSetRenderer;
-import io.fair_acc.sample.chart.utils.TestDataSetSource.DataInput;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox;
 import io.fair_acc.chartfx.ui.ProfilerInfoBox.DebugLevel;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
+import io.fair_acc.sample.chart.utils.TestDataSetSource;
+import io.fair_acc.sample.chart.utils.TestDataSetSource.DataInput;
 
 /**
  * Example and test-case for waterfall-type contour/heatmap-type plots commonly found in spectrum signal analysis.

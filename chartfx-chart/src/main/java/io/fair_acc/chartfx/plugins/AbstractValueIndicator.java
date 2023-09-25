@@ -4,10 +4,6 @@
 
 package io.fair_acc.chartfx.plugins;
 
-import io.fair_acc.dataset.events.EventSource;
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.events.StateListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -28,6 +24,10 @@ import javafx.scene.input.MouseButton;
 
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.events.EventSource;
+import io.fair_acc.dataset.events.StateListener;
 
 /**
  * Base class for plugins indicating a specific value or range of values on a {@link Chart} with an optional

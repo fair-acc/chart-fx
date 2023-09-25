@@ -75,7 +75,7 @@ public class Screenshot extends ChartPlugin {
     /**
      * Gets the pattern property for filename generation.
      * For the pattern syntax see {@link DataSetUtils#getFileName(DataSet, String)}
-     * 
+     *
      * @return The pattern property to generate template filenames
      */
     public StringProperty patternProperty() {
@@ -85,7 +85,7 @@ public class Screenshot extends ChartPlugin {
     /**
      * Sets the pattern for the initial filename.
      * For the pattern syntax see {@link DataSetUtils#getFileName(DataSet, String)}
-     * 
+     *
      * @param pattern A pattern to generate template filenames
      */
     public void setPattern(final String pattern) {
@@ -95,7 +95,7 @@ public class Screenshot extends ChartPlugin {
     /**
      * Gets the pattern for the initial filename.
      * For the pattern syntax see {@link DataSetUtils#getFileName(DataSet, String)}
-     * 
+     *
      * @return The pattern to generate template filenames
      */
     public String getPattern() {
@@ -104,7 +104,7 @@ public class Screenshot extends ChartPlugin {
 
     /**
      * Gets the directory property for saving screenshots.
-     * 
+     *
      * @return the property holding the save directory
      */
     public StringProperty directoryProperty() {
@@ -113,7 +113,7 @@ public class Screenshot extends ChartPlugin {
 
     /**
      * Sets the initial directory for the screenshot safe dialog.
-     * 
+     *
      * @param directory The directory to save screenshots to
      */
     public void setDirectory(final String directory) {
@@ -122,7 +122,7 @@ public class Screenshot extends ChartPlugin {
 
     /**
      * Gets the directory to save screenshots.
-     * 
+     *
      * @return The directory where the screenshots will be saved
      */
     public String getDirectory() {
@@ -189,7 +189,7 @@ public class Screenshot extends ChartPlugin {
 
     /**
      * saves a screenshot to a file that can be chosen with a file opener
-     * 
+     *
      * @param showDialog whether to show the file save dialog or to just save to the filename given by pattern
      */
     public void screenshotToFile(final boolean showDialog) {
@@ -244,7 +244,7 @@ public class Screenshot extends ChartPlugin {
 
     /**
      * Saves a file to a png file
-     * 
+     *
      * @param image the imaga data
      * @param file The file to save to
      */

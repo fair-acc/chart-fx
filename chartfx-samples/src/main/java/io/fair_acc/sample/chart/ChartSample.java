@@ -1,9 +1,10 @@
 package io.fair_acc.sample.chart;
 
-import fxsampler.SampleBase;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+
+import fxsampler.SampleBase;
 
 public abstract class ChartSample extends SampleBase {
     @Override

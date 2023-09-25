@@ -1,18 +1,19 @@
 package io.fair_acc.chartfx.renderer.spi;
 
+import static io.fair_acc.dataset.DataSet.*;
+
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.scene.canvas.GraphicsContext;
+
+import io.fair_acc.bench.AggregateDurationMeasure;
+import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.chartfx.ui.css.DataSetStyleParser;
 import io.fair_acc.chartfx.utils.FastDoubleArrayCache;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.bench.AggregateDurationMeasure;
-import io.fair_acc.bench.MeasurementRecorder;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.scene.canvas.GraphicsContext;
-
-import static io.fair_acc.dataset.DataSet.*;
 
 /**
  * Fast renderer for 2D lines and markers for non-error datasets. Only does basic
@@ -21,7 +22,6 @@ import static io.fair_acc.dataset.DataSet.*;
  * @author ennerf
  */
 public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRenderer> {
-
     private final BooleanProperty assumeSortedData = css().createBooleanProperty(this, "assumeSortedData", true);
     private final BooleanProperty drawMarker = css().createBooleanProperty(this, "drawMarker", true);
     private final ObjectProperty<LineStyle> polyLineStyle = css().createEnumProperty(this, "polyLineStyle",
@@ -33,7 +33,6 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
 
     @Override
     protected void render(GraphicsContext gc, DataSet dataSet, DataSetNode style) {
-
         // check for potentially reduced data range we are supposed to plot
         int indexMin;
         int indexMax; /* indexMax is excluded in the drawing */
@@ -63,8 +62,7 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
 
         // compute local screen coordinates
         double xi, yi, prevX = Double.NaN, prevY = Double.NaN;
-        for (int i = indexMin; i < indexMax; ) {
-
+        for (int i = indexMin; i < indexMax;) {
             benchComputeCoords.start();
 
             // Advance the first valid point
@@ -108,7 +106,6 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
                 xCoords[numCoords] = prevX = x;
                 yCoords[numCoords] = prevY = y;
                 numCoords++;
-
             }
             benchComputeCoords.stop();
 
@@ -117,7 +114,6 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
                 drawMarkers(gc, style, xCoords, yCoords, numCoords);
                 drawPolyLine(gc, style, xCoords, yCoords, numCoords);
             }
-
         }
 
         // Overwrite special data points (draws on top of the other)
@@ -127,7 +123,6 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
         benchComputeCoords.recordResult();
         benchDrawMarker.recordResult();
         benchPolyLine.recordResult();
-
     }
 
     protected void drawMarkers(GraphicsContext gc, DataSetNode style, double[] x, double[] y, int length) {
@@ -267,5 +262,4 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
     public static void trimCache() {
         SHARED_ARRAYS.trim();
     }
-
 }

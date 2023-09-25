@@ -22,12 +22,12 @@ package io.fair_acc.math.spectra.wavelet;
  * The wavelet function is passed two or more samples and calculates a wavelet coefficient. In the case of the Haar
  * wavelet this is
  * </p>
- * 
- * 
+ *
+ *
  * coef<sub>i</sub> = odd<sub>i</sub> - even<sub>i</sub><br>
  * or<br>
  * coef<sub>i</sub> = 0.5 * (odd<sub>i</sub> - even<sub>i</sub>)<br>
- * 
+ *
  * <p>
  * depending on the version of the Haar algorithm used.
  * </p>
@@ -44,7 +44,7 @@ package io.fair_acc.math.spectra.wavelet;
  * case one step of the forward transform can be expressed as the infinite matrix of wavelet coefficients represented
  * below multiplied by the infinite signal vector.
  * </p>
- * 
+ *
  * <p>
  * a<sub>i</sub> = ...h0,h1,h2,h3, 0, 0, 0, 0, 0, 0, 0, ... s<sub>i</sub><br>
  * c<sub>i</sub> = ...g0,g1,g2,g3, 0, 0, 0, 0, 0, 0, 0, ... s<sub>i+1</sub><br>
@@ -54,7 +54,7 @@ package io.fair_acc.math.spectra.wavelet;
  * c<sub>i+2</sub> = ...0, 0, 0, 0, g0,g1,g2,g3, 0, 0, 0, ... s<sub>i+5</sub><br>
  * a<sub>i+3</sub> = ...0, 0, 0, 0, 0, 0, h0,h1,h2,h3, 0, ... s<sub>i+6</sub><br>
  * c<sub>i+3</sub> = ...0, 0, 0, 0, 0, 0, g0,g1,g2,g3, 0, ... s<sub>i+7</sub><br>
- * 
+ *
  * <p>
  * The dot product (inner product) of the infinite vector and a row of the matrix produces either a smoother version of
  * the signal (a<sub>i</sub>) or a wavelet coefficient (c<sub>i</sub>).
@@ -68,7 +68,7 @@ package io.fair_acc.math.spectra.wavelet;
  * The transpose of the forward transform matrix above is used to calculate an inverse transform step. Here the dot
  * product is formed from the result of the forward transform and an inverse transform matrix row.
  * </p>
- * 
+ *
  *
  * s<sub>i</sub> = ...h2,g2,h0,g0, 0, 0, 0, 0, 0, 0, 0, ... a<sub>i</sub><br>
  * s<sub>i+1</sub> = ...h3,g3,h1,g1, 0, 0, 0, 0, 0, 0, 0, ... c<sub>i</sub><br>
@@ -78,17 +78,17 @@ package io.fair_acc.math.spectra.wavelet;
  * s<sub>i+5</sub> = ...0, 0, 0, 0, h3,g3,h1,g1, 0, 0, 0, ... c<sub>i+2</sub><br>
  * s<sub>i+6</sub> = ...0, 0, 0, 0, 0, 0, h2,g2,h0,g0, 0, ... a<sub>i+3</sub><br>
  * s<sub>i+7</sub> = ...0, 0, 0, 0, 0, 0, h3,g3,h1,g1, 0, ... c<sub>i+3</sub><br>
- * 
+ *
  * <p>
  * Using a standard dot product is grossly inefficient since most of the operands are zero. In practice the wavelet
  * coefficient values are moved along the signal vector and a four element dot product is calculated. Expressed in terms
  * of arrays, for the forward transform this would be:
  * </p>
- * 
+ *
  * <p>
  * a<sub>i</sub> = s[i]*h0 + s[i+1]*h1 + s[i+2]*h2 + s[i+3]*h3<br>
  * c<sub>i</sub> = s[i]*g0 + s[i+1]*g1 + s[i+2]*g2 + s[i+3]*g3<br>
- * 
+ *
  * <p>
  * This works fine if we have an infinite data set, since we don't have to worry about shifting the coefficients "off
  * the end" of the signal.
@@ -150,7 +150,7 @@ public class DaubechiesWavelet {
 
     /**
      * Forward Daubechies D4 transform
-     * 
+     *
      * @param s input vector (result replaces original)
      */
     public void daubTrans(final double[] s) {
@@ -163,7 +163,7 @@ public class DaubechiesWavelet {
 
     /**
      * Inverse Daubechies D4 transform
-     * 
+     *
      * @param coef input vector (result replaces original)
      */
     public void invDaubTrans(final double[] coef) {
@@ -204,7 +204,7 @@ public class DaubechiesWavelet {
      * <p>
      * Note that at the end of the computation the calculation wraps around to the beginning of the signal.
      * </p>
-     * 
+     *
      * @param a input vector
      * @param n size of input vector
      */

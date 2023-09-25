@@ -6,7 +6,6 @@ package io.fair_acc.bench;
  * @author ennerf
  */
 public interface AggregateDurationMeasure extends DurationMeasure {
-
     /**
      * Records the measure determined by all start and stop calls. Resets statistics.
      */
@@ -28,5 +27,4 @@ public interface AggregateDurationMeasure extends DurationMeasure {
             // no-op
         }
     };
-
 }

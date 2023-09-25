@@ -1,6 +1,6 @@
 /*************************************************************************
  * Originally Based on CERN's ROOT analysis frame work:
- * 
+ *
  * @see root.cern.ch for details Copyright (C) 1995-2004, Rene Brun and Fons Rademakers. Authors: Rene Brun, Anna
  *      Kreshuk, Eddy Offermann, Fons Rademakers All rights reserved. Java port and extension by: Ralph J. Steinhagen,
  *      CERN, BE-BI, 2009 For the licensing terms see LICENSE. For the list of contributors see $ROOTSYS/README/CREDITS
@@ -130,7 +130,7 @@ public class MathBaseGen {
      */
     public static final double HC = H * C;
     /**
-    * Boltzmann's constant [J K^-1]
+     * Boltzmann's constant [J K^-1]
      */
     public static final double K = 1.3806503e-23;
     /**
@@ -324,7 +324,7 @@ public class MathBaseGen {
 
     /**
      * Return next prime number after x, unless x is a prime in which case x is returned.
-     * 
+     *
      * @param x input
      * @return next prime number greater/equal x
      */

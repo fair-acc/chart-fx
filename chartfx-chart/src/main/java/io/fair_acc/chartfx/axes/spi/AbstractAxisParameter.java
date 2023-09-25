@@ -3,11 +3,6 @@ package io.fair_acc.chartfx.axes.spi;
 import java.util.List;
 import java.util.Objects;
 
-import io.fair_acc.chartfx.ui.css.*;
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.events.BitState;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -20,8 +15,13 @@ import javafx.util.StringConverter;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
+import io.fair_acc.chartfx.ui.css.*;
 import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
 import io.fair_acc.chartfx.ui.geometry.Side;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.events.BitState;
+import io.fair_acc.dataset.events.ChartBits;
+import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 
 /**
  * Class containing the properties, getters and setters for the AbstractNumericAxis class
@@ -31,7 +31,6 @@ import io.fair_acc.chartfx.ui.geometry.Side;
  * @author rstein
  */
 public abstract class AbstractAxisParameter extends Pane implements Axis {
-
     /**
      * Create a auto-ranging AbstractAxisParameter
      */
@@ -58,8 +57,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
 
                 // not really relevant?
                 animationDuration,
-                dimIndex
-        );
+                dimIndex);
         state.addChangeListener(ChartBits.AxisLayout, (src, bits) -> super.requestLayout()); // forward to JavaFX
 
         // Properties that change the placement of ticks
@@ -67,28 +65,22 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         // the axis length. This happens e.g. for an X-axis that displays
         // moving time with the default policy.
         PropUtil.runOnChange(invalidateAxisRange = () -> {
-                    state.setDirty(ChartBits.AxisRange);
-                    if (!isTickMarkVisible() || !isTickLabelsVisible()) {
-                        return;
-                    }
-                    final int rot = Math.abs(((int) getTickLabelRotation()) % 360);
-                    if (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT || getSide() == null
-                            || (getSide().isHorizontal() && !(rot == 0 || rot == 180))
-                            || (getSide().isVertical() && !(rot == 90 || rot == 270))) {
-                        state.setDirty(ChartBits.AxisLayout);
-                    }
-                },
+            state.setDirty(ChartBits.AxisRange);
+            if (!isTickMarkVisible() || !isTickLabelsVisible()) {
+                return;
+            }
+            final int rot = Math.abs(((int) getTickLabelRotation()) % 360);
+            if (getOverlapPolicy() == AxisLabelOverlapPolicy.SHIFT_ALT || getSide() == null
+                    || (getSide().isHorizontal() && !(rot == 0 || rot == 180))
+                    || (getSide().isVertical() && !(rot == 90 || rot == 270))) {
+                state.setDirty(ChartBits.AxisLayout);
+            }
+        },
                 // tick placement
-                autoRanging,
-                autoGrowRanging,
-                autoRangeRounding,
-                autoRangePadding,
+                autoRanging, autoGrowRanging, autoRangeRounding, autoRangePadding,
 
                 // tick labels
-                tickLabelSpacing,
-                maxMajorTickLabelCount,
-                invertAxis
-        );
+                tickLabelSpacing, maxMajorTickLabelCount, invertAxis);
 
         // Properties that require a redraw of the canvas but won't affect the placement of ticks
         PropUtil.runOnChange(invalidateCanvas = state.onAction(ChartBits.AxisCanvas),
@@ -107,16 +99,14 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                 maxProp,
                 length,
                 scale,
-                tickUnit
-        );
+                tickUnit);
 
         // Properties that change the text of the labels without changing the position, e.g., unit scaling
         PropUtil.runOnChange(invalidateAxisLabel = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisLabelText),
                 axisName,
                 unitScaling,
                 autoUnitScaling,
-                axisUnit
-        );
+                axisUnit);
         PropUtil.runOnChange(invalidateTickLabels = state.onAction(ChartBits.AxisCanvas, ChartBits.AxisTickLabelText),
                 tickLabelFormatter,
                 unitScaling,
@@ -138,7 +128,6 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
                 invalidateAxisRange.run();
             } // TODO: don't reset during a set?
         }, tickUnit);
-
     }
 
     protected final BitState state = BitState.initDirty(this, ChartBits.AxisMask);
@@ -278,7 +267,7 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     /**
      * The axis length in pixels
      */
-    private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN) ;
+    private final transient ReadOnlyDoubleWrapper length = PropUtil.createReadOnlyDoubleWrapper(this, "length", Double.NaN);
 
     /**
      * The value for the upper bound of this axis, ie max value. This is automatically set if auto ranging is on.
@@ -1136,5 +1125,4 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
     protected static boolean equalString(final String str1, final String str2) {
         return Objects.equals(str1, str2);
     }
-
 }

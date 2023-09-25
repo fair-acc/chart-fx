@@ -4,8 +4,6 @@
 
 package io.fair_acc.chartfx.plugins;
 
-import io.fair_acc.chartfx.utils.PropUtil;
-import io.fair_acc.dataset.events.ChartBits;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.Cursor;
@@ -14,6 +12,8 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Polygon;
 
 import io.fair_acc.chartfx.axes.Axis;
+import io.fair_acc.chartfx.utils.PropUtil;
+import io.fair_acc.dataset.events.ChartBits;
 
 /**
  * Plugin indicating a specific X or Y value as a line drawn on the plot area, with an optional {@link #textProperty()

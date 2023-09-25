@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests of {@link Data}
- * 
+ *
  * @author rstein
  */
 public class DataTests {
@@ -30,7 +30,7 @@ public class DataTests {
         final byte[] testBytes = new byte[5];
         assertDoesNotThrow(() -> new Data("testExportName", "testMimeType", testBytes, 4));
 
-        //assertThrows(IllegalArgumentException.class, () -> new Data("testExportName", "testMimeType", testBytes, 4));
+        // assertThrows(IllegalArgumentException.class, () -> new Data("testExportName", "testMimeType", testBytes, 4));
 
         assertThrows(IllegalArgumentException.class, () -> new Data(null, "testMimeType", testBytes, 4));
         assertThrows(IllegalArgumentException.class, () -> new Data("", "testMimeType", testBytes, 4));

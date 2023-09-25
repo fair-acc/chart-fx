@@ -2,15 +2,14 @@ package io.fair_acc.sample.dataset;
 
 import java.util.ArrayList;
 
-import io.fair_acc.sample.dataset.legacy.DoubleDataSet;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.fair_acc.dataset.spi.FloatDataSet;
-import io.fair_acc.math.TRandom;
-
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
+import io.fair_acc.dataset.utils.ProcessingProfiler;
+import io.fair_acc.math.TRandom;
+import io.fair_acc.sample.dataset.legacy.DoubleDataSet;
 
 @SuppressWarnings("PMD") // this class tests possible performance bottle-necks
 // not code style/readability

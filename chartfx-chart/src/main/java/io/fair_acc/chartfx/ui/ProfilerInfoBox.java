@@ -19,11 +19,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import io.fair_acc.chartfx.utils.SimplePerformanceMeter;
 
-
 /**
- * Simple JavaFX and Chart Performance metrics indicator. To be added into e.g. a ToolBar 
+ * Simple JavaFX and Chart Performance metrics indicator. To be added into e.g. a ToolBar
  * N.B. these are only indicative
- * 
+ *
  * @author rstein
  */
 public class ProfilerInfoBox extends BreadCrumbBar<VBox> {

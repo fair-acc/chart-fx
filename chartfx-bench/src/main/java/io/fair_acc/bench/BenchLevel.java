@@ -34,5 +34,4 @@ public enum BenchLevel implements IntSupplier {
     }
 
     final int level;
-
 }

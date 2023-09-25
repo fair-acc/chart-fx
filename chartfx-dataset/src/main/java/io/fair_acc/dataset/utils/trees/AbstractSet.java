@@ -52,7 +52,7 @@ public abstract class AbstractSet<E> extends AbstractCollection<E> implements Se
      * set, the two sets have the same size, and every member of the given set is contained in this set. This ensures
      * that the <code>equals</code> method works properly across different implementations of the <code>Set</code>
      * interface.
-     * 
+     *
      * This implementation first checks if the specified object is this set; if so it returns <code>true</code>. Then,
      * it checks if the specified object is a set whose size is identical to the size of this set; if not, it returns
      * false. If so, it returns <code>containsAll((Collection) o)</code>.
@@ -85,7 +85,7 @@ public abstract class AbstractSet<E> extends AbstractCollection<E> implements Se
      * the elements in the set, where the hash code of a <code>null</code> element is defined to be zero. This ensures
      * that <code>s1.equals(s2)</code> implies that <code>s1.hashCode()==s2.hashCode()</code> for any two sets
      * <code>s1</code> and <code>s2</code>, as required by the general contract of {@link Object#hashCode}.
-     * 
+     *
      * This implementation iterates over the set, calling the <code>hashCode</code> method on each element in the set,
      * and adding up the results.
      *
@@ -108,14 +108,14 @@ public abstract class AbstractSet<E> extends AbstractCollection<E> implements Se
      * Removes from this set all of its elements that are contained in the specified collection (optional operation). If
      * the specified collection is also a set, this operation effectively modifies this set so that its value is the
      * <i>asymmetric set difference</i> of the two sets.
-     * 
+     *
      * This implementation determines which is the smaller of this set and the specified collection, by invoking the
      * <code>size</code> method on each. If this set has fewer elements, then the implementation iterates over this set,
      * checking each element returned by the iterator in turn to see if it is contained in the specified collection. If
      * it is so contained, it is removed from this set with the iterator's <code>remove</code> method. If the specified
      * collection has fewer elements, then the implementation iterates over the specified collection, removing from this
      * set each element returned by the iterator, using this set's <code>remove</code> method.
-     * 
+     *
      * Note that this implementation will throw an <code>UnsupportedOperationException</code> if the iterator returned
      * by the <code>iterator</code> method does not implement the <code>remove</code> method.
      *

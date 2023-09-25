@@ -48,9 +48,9 @@ class DataSetEqualityTests {
 
         assertEquals(ds1, ds1);
         assertNotEquals(null, ds1);
-        //noinspection AssertBetweenInconvertibleTypes
+        // noinspection AssertBetweenInconvertibleTypes
         assertNotEquals(ds1, new OneDimDataSet(), "incompatible class type"); // NOPMD NOSONAR
-        //noinspection AssertBetweenInconvertibleTypes
+        // noinspection AssertBetweenInconvertibleTypes
         assertNotEquals("", ds1, "incompatible class type"); // NOPMD NOSONAR
         assertEquals(ds1, ds2);
 

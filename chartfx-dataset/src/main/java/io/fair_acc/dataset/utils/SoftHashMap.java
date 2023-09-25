@@ -35,7 +35,7 @@ import java.util.concurrent.locks.ReentrantLock;
  * A memory-constrained <code>SoftHashMap</code> that stores its <em>values</em> in {@link SoftReference}s.
  *
  * <p>
- * N.B. JDK's {@link WeakHashMap}, which uses {@link java.lang.ref.WeakReference}s for 
+ * N.B. JDK's {@link WeakHashMap}, which uses {@link java.lang.ref.WeakReference}s for
  * its <em>keys</em> rather than for its values. See {@link SoftKeyHashMap}
  * for a {@link WeakHashMap}-similar implementation using SoftReference-ed keys.
  *
@@ -75,7 +75,7 @@ public class SoftHashMap<K, V> implements Map<K, V> {
     /**
      * The FIFO list of strong references (not to be garbage collected), order of last access.
      */
-    private final Queue<V> strongReferences; //guarded by 'strongReferencesLock'
+    private final Queue<V> strongReferences; // guarded by 'strongReferencesLock'
     private final ReentrantLock strongReferencesLock;
 
     /**
@@ -168,7 +168,7 @@ public class SoftHashMap<K, V> implements Map<K, V> {
         return map.containsKey(key);
     }
 
-    //Guarded by the strongReferencesLock in the addToStrongReferences method
+    // Guarded by the strongReferencesLock in the addToStrongReferences method
 
     @Override
     public boolean containsValue(final Object value) {
@@ -203,13 +203,13 @@ public class SoftHashMap<K, V> implements Map<K, V> {
         final SoftValue<V, K> value = map.get(key);
 
         if (value != null) {
-            //unwrap the 'real' value from the SoftReference
+            // unwrap the 'real' value from the SoftReference
             result = value.get();
             if (result == null) {
-                //The wrapped value was garbage collected, so remove this entry from the backing map:
+                // The wrapped value was garbage collected, so remove this entry from the backing map:
                 map.remove(key);
             } else {
-                //Add this value to the beginning of the strong reference queue (FIFO).
+                // Add this value to the beginning of the strong reference queue (FIFO).
                 addToStrongReferences(result);
             }
         }
@@ -311,7 +311,7 @@ public class SoftHashMap<K, V> implements Map<K, V> {
     }
 
     private void trimStrongReferencesIfNecessary() {
-        //trim the strong ref queue if necessary:
+        // trim the strong ref queue if necessary:
         while (strongReferences.size() > retentionSize) {
             strongReferences.poll();
         }

@@ -1,15 +1,14 @@
 package io.fair_acc.chartfx.utils;
 
+import static java.lang.Math.*;
 
-import javafx.util.StringConverter;
+import static io.fair_acc.chartfx.utils.Schubfach.*;
 
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormatSymbols;
 import java.util.Objects;
 
-import static io.fair_acc.chartfx.utils.Schubfach.*;
-import static java.lang.Math.*;
-
+import javafx.util.StringConverter;
 
 public class NumberFormatterImpl extends StringConverter<Number> implements NumberFormatter {
     public final static char DEFAULT_DECIMAL_SEPARATOR = ' ';
@@ -55,18 +54,18 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     @Override
     public String toString(final double val) {
         switch (Schubfach.encodeDouble(val, this::encodeDouble)) {
-            case Schubfach.NON_SPECIAL:
-                return bytesToString();
-            case Schubfach.PLUS_ZERO:
-            case Schubfach.MINUS_ZERO:
-                encodeZero();
-                return length == 1 ? "0" : bytesToString();
-            case Schubfach.PLUS_INF:
-                return "+inf";
-            case Schubfach.MINUS_INF:
-                return "-inf";
-            default:
-                return "NaN";
+        case Schubfach.NON_SPECIAL:
+            return bytesToString();
+        case Schubfach.PLUS_ZERO:
+        case Schubfach.MINUS_ZERO:
+            encodeZero();
+            return length == 1 ? "0" : bytesToString();
+        case Schubfach.PLUS_INF:
+            return "+inf";
+        case Schubfach.MINUS_INF:
+            return "-inf";
+        default:
+            return "NaN";
         }
     }
 
@@ -112,7 +111,6 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
                 toPlainFormatWithLeadingZeros(h, m, l, e);
             }
         }
-
     }
 
     private void toExponentialFormat(int h, int m, int l, int e) {
@@ -294,8 +292,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         For n = 17, m = 8 the table in section 10 of [1] leads to:
          */
         return (int) (multiplyHigh(
-                (long) (a + 1) << 28,
-                193_428_131_138_340_668L) >>> 20) - 1;
+                              (long) (a + 1) << 28,
+                              193_428_131_138_340_668L)
+                       >>> 20)
+      - 1;
     }
 
     private void exponent(int e) {
@@ -362,8 +362,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     byte DOT = '.';
     byte[] EXP = DEFAULT_EXP;
-    private static final byte[] DEFAULT_EXP = new byte[]{'E'};
+    private static final byte[] DEFAULT_EXP = new byte[] { 'E' };
     private static final byte ZERO = (byte) '0';
     private static final byte MINUS = (byte) '-';
-
 }

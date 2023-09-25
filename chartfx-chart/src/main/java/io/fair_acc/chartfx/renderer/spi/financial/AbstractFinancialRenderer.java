@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
-import io.fair_acc.chartfx.ui.css.DataSetNode;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.canvas.GraphicsContext;
@@ -14,8 +11,11 @@ import javafx.scene.paint.Paint;
 
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.renderer.Renderer;
+import io.fair_acc.chartfx.renderer.spi.AbstractRendererXY;
 import io.fair_acc.chartfx.renderer.spi.financial.service.OhlcvRendererEpData;
 import io.fair_acc.chartfx.renderer.spi.financial.service.PaintBarMarker;
+import io.fair_acc.chartfx.ui.css.DataSetNode;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
 
@@ -32,7 +32,6 @@ import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
  */
 @SuppressWarnings({ "PMD.ExcessiveParameterList" })
 public abstract class AbstractFinancialRenderer<R extends AbstractRendererXY<R>> extends AbstractRendererXY<R> implements Renderer {
-
     protected AbstractFinancialRenderer() {
         StyleUtil.addStyles(this, "financial");
     }

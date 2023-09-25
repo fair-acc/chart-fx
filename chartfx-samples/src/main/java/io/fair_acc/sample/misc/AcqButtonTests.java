@@ -1,7 +1,5 @@
 package io.fair_acc.sample.misc;
 
-import io.fair_acc.acc.ui.AcquisitionButtonBar;
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -15,8 +13,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-public class AcqButtonTests extends ChartSample {
+import io.fair_acc.acc.ui.AcquisitionButtonBar;
+import io.fair_acc.sample.chart.ChartSample;
 
+public class AcqButtonTests extends ChartSample {
     public Pane getAcquisitionBarTest(final boolean isPauseEnabled) {
         final VBox root = new VBox();
 
@@ -25,7 +25,7 @@ public class AcqButtonTests extends ChartSample {
         AcquisitionButtonBar acqBar = new AcquisitionButtonBar(isPauseEnabled);
         // overwrite default style with local preference
         acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_small.css").toExternalForm());
-        //acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_medium.css").toExternalForm());
+        // acqBar.getStylesheets().setAll(AcquisitionButtonBar.class.getResource("acq_button_medium.css").toExternalForm());
 
         cbDisabled.setOnAction(evt -> acqBar.setDisable(cbDisabled.isSelected()));
 
@@ -40,7 +40,8 @@ public class AcqButtonTests extends ChartSample {
 
         root.getChildren()
                 .addAll(new Label("AcquisitionButtonBar " + (isPauseEnabled ? "with" : "without")
-                        + " pause button functionality "), new HBox(cbDisabled), acqBar,
+                                  + " pause button functionality "),
+                        new HBox(cbDisabled), acqBar,
                         new VBox(new Label("AcquisitionButtonBar state property values:"), cb1, cb2, cb3, cb4));
 
         return root;
@@ -63,5 +64,4 @@ public class AcqButtonTests extends ChartSample {
     public static void main(String[] args) {
         Application.launch(args);
     }
-
 }

@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import io.fair_acc.chartfx.plugins.BenchPlugin;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
@@ -18,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.plugins.BenchPlugin;
 import io.fair_acc.chartfx.plugins.EditAxis;
 import io.fair_acc.chartfx.plugins.TableViewer;
 import io.fair_acc.chartfx.plugins.Zoomer;

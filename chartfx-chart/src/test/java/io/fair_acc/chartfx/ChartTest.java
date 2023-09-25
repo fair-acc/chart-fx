@@ -2,7 +2,6 @@ package io.fair_acc.chartfx;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import io.fair_acc.chartfx.utils.FXUtils;
 import javafx.collections.ListChangeListener;
 import javafx.scene.control.Label;
 import javafx.scene.paint.Color;
@@ -15,6 +14,7 @@ import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils.SelectiveJavaFxInterceptor;
 import io.fair_acc.chartfx.ui.utils.TestFx;
+import io.fair_acc.chartfx.utils.FXUtils;
 
 @ExtendWith(ApplicationExtension.class)
 @ExtendWith(SelectiveJavaFxInterceptor.class)
@@ -51,6 +51,5 @@ public class ChartTest {
         @Override
         protected void redrawCanvas() {
         }
-
     }
 }

@@ -15,7 +15,7 @@ public class TrigCosineFunction extends AbstractFunction1D implements Function1D
     // @formatter:off
     /**
      * initialise Sine function y = [0]*cos(2*pi*[[1]*t+[2]])
-     * 
+     *
      * parameter order: parameter[0] = amplitude (default: 1.0) parameter[1] = frequency (default: 1.0) parameter[2] =
      * phase (default: 1.0)
      *

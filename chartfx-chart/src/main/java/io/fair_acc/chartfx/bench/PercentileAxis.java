@@ -1,18 +1,18 @@
 package io.fair_acc.chartfx.bench;
 
+import java.util.WeakHashMap;
+
+import javafx.util.StringConverter;
+
 import io.fair_acc.chartfx.axes.AxisLabelOverlapPolicy;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
-import javafx.util.StringConverter;
-
-import java.util.WeakHashMap;
 
 /**
  * @author ennerf
  */
 class PercentileAxis extends DefaultNumericAxis {
-
     PercentileAxis() {
         super("Percentile");
         setUnit(null);
@@ -24,7 +24,6 @@ class PercentileAxis extends DefaultNumericAxis {
         setOverlapPolicy(AxisLabelOverlapPolicy.SKIP_ALT);
 
         setTickLabelFormatter(new StringConverter<Number>() {
-
             @Override
             public String toString(Number object) {
                 return labelCache.computeIfAbsent(object, number -> {
@@ -40,9 +39,7 @@ class PercentileAxis extends DefaultNumericAxis {
             public Number fromString(String string) {
                 throw new IllegalStateException("not implemented");
             }
-
         });
-
     }
 
     protected AxisRange computeRange(final double min, final double max, final double axisLength, final double labelSize) {
@@ -50,7 +47,7 @@ class PercentileAxis extends DefaultNumericAxis {
     }
 
     @Override
-    protected void calculateMajorTickValues(AxisRange axisRange,  DoubleArrayList tickValues) {
+    protected void calculateMajorTickValues(AxisRange axisRange, DoubleArrayList tickValues) {
         precomputeTicks(axisRange.getUpperBound());
         final double min = axisRange.getLowerBound();
         final double max = axisRange.getUpperBound();
@@ -88,7 +85,6 @@ class PercentileAxis extends DefaultNumericAxis {
         majorTicks.add(HdrHistogramDataSet.convertPercentileToX(25));
         double value = 1;
         while (value < maxValue) {
-
             majorTicks.add(value * 2); // --------> 50%
             minorTicks.add(value * 3); // 66.666%
             majorTicks.add(value * 4); // --------> 75%
@@ -101,12 +97,10 @@ class PercentileAxis extends DefaultNumericAxis {
 
             value *= 10;
         }
-
     }
 
     DoubleArrayList majorTicks = new DoubleArrayList();
     DoubleArrayList minorTicks = new DoubleArrayList();
 
     private static WeakHashMap<Number, String> labelCache = new WeakHashMap<>();
-
 }

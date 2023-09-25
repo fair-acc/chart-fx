@@ -8,15 +8,15 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.stream.IntStream;
 
-import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.utils.AssertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.DataSetMetaData;
 import io.fair_acc.dataset.EditableDataSet;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Helps allocating new DataSets in a flexible and efficient way.
@@ -32,7 +32,7 @@ import io.fair_acc.dataset.EditableDataSet;
  * <li>dim:3+, useFloat=false, errors=false: {@link DoubleGridDataSet}
  * <li>All other combinations throw a {@code UnsupportedOperationException}
  * </ul>
- * 
+ *
  * @author Alexander Krimm
  */
 public class DataSetBuilder {
@@ -131,7 +131,7 @@ public class DataSetBuilder {
 
     /**
      * Tries to build a DataSet of the specified type
-     * 
+     *
      * @param <T> The DataSet return type
      * @param clazz type of the return value
      * @return The initialized DataSet of type T
@@ -597,7 +597,7 @@ public class DataSetBuilder {
     /**
      * Convenience function to use data given as nested arrays.
      * Converts the nested array to a linear strided array.
-     * 
+     *
      * @param dimIndex the dim index the data is for.
      * @param values double[][] array with data for the x dimension
      * @return itself for method chaining
@@ -648,7 +648,7 @@ public class DataSetBuilder {
     /**
      * Determines wether an error DataSet should be returned.
      * Note that all setError* functions implicitly set this to true.
-     * 
+     *
      * @param enableErrors whether to build a data set with errors
      * @return itself for method chaining
      */
@@ -671,7 +671,7 @@ public class DataSetBuilder {
      * A value for each dimension can be specified.
      * If the number of dimensions exceeds the given sizes, the last one will be used.
      * This means, that you can use a single value for a data set with the same number of data points in each dimension.
-     * 
+     *
      * @param newInitialCapacity varArgs sizes for the first n dimensions
      * @return itself for method chaining
      */

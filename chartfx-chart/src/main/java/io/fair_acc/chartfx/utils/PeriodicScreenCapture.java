@@ -150,8 +150,8 @@ public class PeriodicScreenCapture implements Observable {
         try {
             final String format = getIsoDateTimeFormatterString();
             final String longFileName = addDateTime && format != null && !format.isEmpty()
-                                                ? path.toFile() + String.format("/%s_%s%s", fileName, getISODate(now, format), FILE_LOGGING_SUFFIX)
-                                                : path.toFile() + "/" + fileName;
+                                              ? path.toFile() + String.format("/%s_%s%s", fileName, getISODate(now, format), FILE_LOGGING_SUFFIX)
+                                              : path.toFile() + "/" + fileName;
             final String tempFileName = longFileName + "_temp.png";
             final File file = new File(tempFileName);
             if (file.getParentFile() != null && file.getParentFile().mkdirs()) {

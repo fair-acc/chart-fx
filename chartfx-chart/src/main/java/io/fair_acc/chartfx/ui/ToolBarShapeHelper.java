@@ -10,9 +10,7 @@ import javafx.scene.shape.Shape;
  * @author rstein
  */
 public final class ToolBarShapeHelper {
-
     private ToolBarShapeHelper() {
-
     }
 
     public static Shape getToolBarShape(final double width, final double height, final double radii) {
@@ -27,7 +25,7 @@ public final class ToolBarShapeHelper {
         path.getElements().add(new MoveTo(centreX - halfWidth - 4 * radii, centreY - halfHeight));
 
         // cubic sweep down
-        path.getElements().add(new CubicCurveTo(//
+        path.getElements().add(new CubicCurveTo( //
                 centreX - halfWidth - 2 * radii, centreY - halfHeight, // first control point
                 centreX - halfWidth - 2 * radii, centreY + halfHeight, // second control point
                 centreX - halfWidth, centreY + halfHeight)); // to coordinate
@@ -35,7 +33,7 @@ public final class ToolBarShapeHelper {
         path.getElements().add(new LineTo(centreX + halfWidth, centreY + halfHeight));
 
         // cubic sweep up
-        path.getElements().add(new CubicCurveTo(//
+        path.getElements().add(new CubicCurveTo( //
                 centreX + halfWidth + 2 * radii, centreY + halfHeight, // first control point
                 centreX + halfWidth + 2 * radii, centreY - halfHeight, // second control point
                 centreX + halfWidth + 4 * radii, centreY - halfHeight)); // to coordinate

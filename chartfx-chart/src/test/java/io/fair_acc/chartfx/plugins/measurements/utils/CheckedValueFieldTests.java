@@ -4,8 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.concurrent.ExecutionException;
 
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
-import io.fair_acc.chartfx.ui.utils.TestFx;
 import javafx.scene.Scene;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
@@ -17,6 +15,9 @@ import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
 import com.sun.prism.paint.Color;
+
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils;
+import io.fair_acc.chartfx.ui.utils.TestFx;
 
 /**
  * Tests {@link CheckedValueField }
@@ -189,7 +190,7 @@ public class CheckedValueFieldTests {
     }
 
     private static KeyEvent getKeyEvent(final KeyCode keyCode) {
-        return new KeyEvent(null, //source
+        return new KeyEvent(null, // source
                 null, // target,
                 KeyEvent.KEY_PRESSED, // EventType
                 null, // character

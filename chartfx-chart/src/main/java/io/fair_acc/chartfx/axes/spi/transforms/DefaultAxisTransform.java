@@ -8,7 +8,6 @@ import io.fair_acc.chartfx.axes.Axis;
  * @author rstein
  */
 public class DefaultAxisTransform extends AbstractAxisTransform {
-
     public DefaultAxisTransform(final Axis axis) {
         super(axis);
     }
@@ -32,5 +31,4 @@ public class DefaultAxisTransform extends AbstractAxisTransform {
     public double getRoundedMinimumRange(final double min) {
         return Math.ceil(min);
     }
-
 }

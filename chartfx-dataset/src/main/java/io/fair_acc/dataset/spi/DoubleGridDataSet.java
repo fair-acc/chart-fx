@@ -250,7 +250,7 @@ public class DoubleGridDataSet extends AbstractGridDataSet<DoubleGridDataSet> im
 
     /**
      * Sets a single value on the grid
-     * 
+     *
      * @param dimIndex Dimension to set value for
      * @param indices grid indices to modify
      * @param value new Value

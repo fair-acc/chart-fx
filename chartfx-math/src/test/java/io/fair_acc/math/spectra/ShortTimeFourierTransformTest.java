@@ -24,7 +24,7 @@ import io.fair_acc.math.spectra.ShortTimeFourierTransform.Padding;
 /**
  * Test the short-time Fourier transform.
  * For now just tests against trigonometric functions and verifies some points of the spectrum.
- * 
+ *
  * @author Alexander Krimm
  */
 class ShortTimeFourierTransformTest {
@@ -138,7 +138,7 @@ class ShortTimeFourierTransformTest {
 
     /**
      * Utility Function to transpose a DataSet
-     * 
+     *
      * @param input A 3 dimensional DataSet
      * @return the transposed array content
      */

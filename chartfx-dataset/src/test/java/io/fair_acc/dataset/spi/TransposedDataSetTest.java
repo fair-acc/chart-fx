@@ -9,11 +9,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import io.fair_acc.dataset.AxisDescription;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.GridDataSet;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 /**
  * @author Alexander Krimm

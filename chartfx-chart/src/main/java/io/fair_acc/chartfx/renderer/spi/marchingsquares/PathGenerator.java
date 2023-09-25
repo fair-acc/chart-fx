@@ -146,7 +146,7 @@ public class PathGenerator {
      * final * @param grid on input the matrix of cells representinfinal ven contour. Note that the process will alter
      * the Cells, so on output the original Grid instance _will_ be modified. In other words this method is NOT
      * idempotent when using the same object references and values.
-     * 
+     *
      * @param grid the grid
      * @param rowIndex row index of the start Cell.
      * @param clumnIndex column index of the start Cell.

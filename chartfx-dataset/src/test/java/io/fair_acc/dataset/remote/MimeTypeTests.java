@@ -11,7 +11,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 /**
  * Tests of {@link MimeType}
- * 
+ *
  * @author rstein
  */
 public class MimeTypeTests {
@@ -22,7 +22,7 @@ public class MimeTypeTests {
         final String mimeTypeName = "'" + mType + "'";
 
         if (MimeType.UNKNOWN.equals(mType)) {
-            //N.B. exception to the rule UNKNONW maps to the default BINARY enum as safe fallback
+            // N.B. exception to the rule UNKNONW maps to the default BINARY enum as safe fallback
             assertEquals(MimeType.BINARY, MimeType.getEnum(mType.toString()), "getEnum: mType = " + mimeTypeName);
         } else {
             assertEquals(mType, MimeType.getEnum(mType.toString()), "getEnum: mType = " + mimeTypeName);

@@ -19,8 +19,8 @@ public class RangeBarsIncrementalOhlcvConsolidation extends AbstractIncrementalO
     private double high;
 
     public RangeBarsIncrementalOhlcvConsolidation(OhlcvTimeframeConsolidation.OhlcvConsolidationComputation consolidationComputation,
-                                                  IntradayPeriod period, double minMoveTick, Interval<Calendar> tt,
-                                                  OhlcvConsolidationAddon[] ohlcvConsolidationAddons) {
+            IntradayPeriod period, double minMoveTick, Interval<Calendar> tt,
+            OhlcvConsolidationAddon[] ohlcvConsolidationAddons) {
         super(consolidationComputation, period, tt, ohlcvConsolidationAddons);
         this.rangeBarsLength = period.getPeriodValue() * minMoveTick;
     }

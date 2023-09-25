@@ -5,7 +5,6 @@ package io.fair_acc.dataset.events;
  */
 @FunctionalInterface
 public interface StateListener {
-
     /**
      * @param source where the update came from
      * @param bits changed or set bits
@@ -22,5 +21,4 @@ public interface StateListener {
     public interface OnChangeSetter {
         public void set(Object observable, Object oldValue, Object newValue);
     }
-
 }

@@ -107,7 +107,7 @@ class SimpleMeasurementsTests {
         assertTrue(field.valueIndicatorSelector.isReuseIndicators());
         assertEquals(2, field.getValueIndicatorsUser().size(), " - number of selected indicators");
         assertDoesNotThrow(field::removeAction);
-        //assertEquals(0, field.getValueIndicators().size(), " - number of total indicators");
+        // assertEquals(0, field.getValueIndicators().size(), " - number of total indicators");
 
         // test other measurement type getter/setter
         for (final MeasurementType type : MeasurementType.values()) {
@@ -195,9 +195,9 @@ class SimpleMeasurementsTests {
 
             // TODO: field.getValueIndicators().forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(1, indicator.getBitState().size(), "error for type = " + type));
             final int nXIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof XValueIndicator).count();
-            //assertEquals(type.isVerticalMeasurement() ? type.getRequiredSelectors() : 0, nXIndicators, "error for type = " + type);
+            // assertEquals(type.isVerticalMeasurement() ? type.getRequiredSelectors() : 0, nXIndicators, "error for type = " + type);
             final int nYIndicators = (int) chart.getPlugins().stream().filter(p -> p instanceof YValueIndicator).count();
-            //assertEquals(type.isVerticalMeasurement() ? 0 : type.getRequiredSelectors(), nYIndicators, "error for type = " + type);
+            // assertEquals(type.isVerticalMeasurement() ? 0 : type.getRequiredSelectors(), nYIndicators, "error for type = " + type);
 
             // check if indicators need to be moved and/or are at their designated positions
             FXUtils.runAndWait(() -> {
@@ -218,11 +218,9 @@ class SimpleMeasurementsTests {
             assertTrue(FXUtils.waitForFxTicks(chart.getScene(), 3, 1000), "wait for handler to update");
 
             if (Double.isNaN(typeResults.get(type))) {
-                Awaitility.waitAtMost(Duration.ofMillis(1000)).pollDelay(Duration.ofMillis(10))
-                        .until(() -> field.getValueField().getValue(), org.hamcrest.Matchers.notANumber());
+                Awaitility.waitAtMost(Duration.ofMillis(1000)).pollDelay(Duration.ofMillis(10)).until(() -> field.getValueField().getValue(), org.hamcrest.Matchers.notANumber());
             } else {
-                Awaitility.waitAtMost(Duration.ofMillis(1000)).pollDelay(Duration.ofMillis(10))
-                        .until(() -> field.getValueField().getValue(), closeTo(typeResults.get(type), 1e-9));
+                Awaitility.waitAtMost(Duration.ofMillis(1000)).pollDelay(Duration.ofMillis(10)).until(() -> field.getValueField().getValue(), closeTo(typeResults.get(type), 1e-9));
             }
 
             final List<AbstractSingleValueIndicator> tmp = new ArrayList<>(field.getValueIndicators());
@@ -231,7 +229,7 @@ class SimpleMeasurementsTests {
             // TODO: tmp.forEach((final AbstractSingleValueIndicator indicator) -> assertEquals(0, indicator.getBitState().size()));
 
             // Assert that there are no Indicators left after removing the measurement
-            //assertEquals(0, chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).count(), "error for type = " + type);
+            // assertEquals(0, chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).count(), "error for type = " + type);
         }
     }
 }

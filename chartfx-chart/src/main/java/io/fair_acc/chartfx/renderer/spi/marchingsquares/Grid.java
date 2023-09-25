@@ -49,5 +49,4 @@ class Grid {
         }
         return str;
     }
-
 }

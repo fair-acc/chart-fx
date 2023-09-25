@@ -9,7 +9,6 @@ import javafx.scene.shape.Line;
  * @author ennerf
  */
 public class LineStyle extends Line implements StyleUtil.StyleNode {
-
     public LineStyle(String... styles) {
         StyleUtil.styleNode(this, styles);
         StyleUtil.forEachStyleProp(this, StyleUtil.incrementOnChange(changeCounter));
@@ -25,5 +24,4 @@ public class LineStyle extends Line implements StyleUtil.StyleNode {
     }
 
     private final LongProperty changeCounter = new SimpleLongProperty(0);
-
 }

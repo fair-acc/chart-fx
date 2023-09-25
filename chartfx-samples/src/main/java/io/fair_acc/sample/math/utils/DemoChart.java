@@ -21,7 +21,7 @@ import io.fair_acc.chartfx.ui.geometry.Side;
 
 /**
  * Short hand extension/configuration of the standard XYChart functionalities to make the samples more readable
- * 
+ *
  * @author rstein
  */
 public class DemoChart extends XYChart {

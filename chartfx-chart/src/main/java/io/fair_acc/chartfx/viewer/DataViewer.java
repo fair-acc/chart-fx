@@ -157,7 +157,7 @@ public class DataViewer extends BorderPane {
     }
 
     /**
-     * 
+     *
      * @return detachableWindow property that controls whether window can be detached by dragging or not
      */
     public BooleanProperty detachableWindowProperty() {
@@ -199,7 +199,7 @@ public class DataViewer extends BorderPane {
     }
 
     /**
-     * 
+     *
      * @return true: window can be detached by dragging gesture
      */
     public boolean isDetachableWindow() {
@@ -220,7 +220,7 @@ public class DataViewer extends BorderPane {
     }
 
     /**
-     * 
+     *
      * @param state true: window can be detached by dragging gesture
      */
     public void setDetachableWindow(final boolean state) {

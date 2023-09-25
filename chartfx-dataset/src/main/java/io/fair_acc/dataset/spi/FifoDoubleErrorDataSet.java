@@ -4,13 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.fair_acc.dataset.AxisDescription;
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSet2D;
+import io.fair_acc.dataset.DataSetError;
 import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.utils.DoublePointError;
 import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.utils.LimitedQueue;
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.DataSet2D;
-import io.fair_acc.dataset.DataSetError;
 
 /**
  * Limited Fifo DoubleErrorDataSet.
@@ -247,7 +247,7 @@ public class FifoDoubleErrorDataSet extends AbstractErrorDataSet<DoubleErrorData
         protected String tag;
 
         protected DataBlob(final double x, final double y, final double errorYNeg, final double errorYPos, final String tag, final String style) {
-            //noinspection SuspiciousNameCombination
+            // noinspection SuspiciousNameCombination
             super(x, y, errorYNeg, errorYPos); // NOPMD NOSONAR - super's x/y error is reinterpreted as +ey -ey in this class
             this.tag = tag;
             this.style = style;

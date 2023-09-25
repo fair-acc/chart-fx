@@ -25,7 +25,7 @@ import io.fair_acc.dataset.utils.ProcessingProfiler;
 /**
  * Reproduces the NPE bug in the table viewer.
  * It seems to trigger <a href="https://bugs.openjdk.java.net/browse/JDK-8217953">JDK-8217953</a>.
- * 
+ *
  * @author Alexander Krimm
  */
 public class ReproduceTableViewerBug extends Application {

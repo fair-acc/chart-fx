@@ -5,7 +5,7 @@ import io.fair_acc.math.Math;
 public class PoissonFunction extends AbstractFunction1D implements Function1D {
     /**
      * initialise Poisson function parameter order: parameter[0] = par (default: 1.0)
-     * 
+     *
      * @param name function name
      */
     public PoissonFunction(final String name) {
@@ -14,7 +14,7 @@ public class PoissonFunction extends AbstractFunction1D implements Function1D {
 
     /**
      * initialise Poisson function parameter order: parameter[0] = par (default: 1.0)
-     * 
+     *
      * @param name function name
      * @param parameter function parameter
      */

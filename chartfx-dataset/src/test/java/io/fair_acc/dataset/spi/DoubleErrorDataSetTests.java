@@ -4,12 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Arrays;
 
-import io.fair_acc.dataset.DataSet;
 import org.junit.jupiter.api.Test;
+
+import io.fair_acc.dataset.DataSet;
 
 /**
  * Checks for DoubleErrorDataSet interfaces and constructors.
- * 
+ *
  * @author rstein
  */
 public class DoubleErrorDataSetTests extends EditableDataSetTests {
@@ -118,8 +119,8 @@ public class DoubleErrorDataSetTests extends EditableDataSetTests {
                 "check '" + dsType + "' diff data count at end of adding");
 
         if (testCase < 3) {
-            //TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
-            // by Min(size + 0.5* size, capacity) ... need to find a work around
+            // TODO capacity increases beyond size due to DoubleArrayList's grow(capacity) implementation that increases the capacity by
+            //  by Min(size + 0.5* size, capacity) ... need to find a work around
             assertEquals(dataSet.getDataCount(), dataSet.getCapacity(),
                     "check '" + dsType + "' capacity data count match , test case = " + testCase);
         }

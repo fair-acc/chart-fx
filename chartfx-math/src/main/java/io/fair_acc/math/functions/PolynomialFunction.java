@@ -1,7 +1,6 @@
 package io.fair_acc.math.functions;
 
 public class PolynomialFunction extends AbstractFunction1D implements Function1D {
-
     public PolynomialFunction(final String name, final double[] parameter) {
         super(name, parameter);
         setParameterNames();
@@ -50,5 +49,4 @@ public class PolynomialFunction extends AbstractFunction1D implements Function1D
 
         func.printParameters(true);
     }
-
 }

@@ -13,11 +13,6 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Map;
 
-import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.DataSetError;
-import io.fair_acc.dataset.spi.DataSetBuilder;
-import io.fair_acc.dataset.spi.DefaultDataSet;
-import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +20,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+
+import io.fair_acc.dataset.DataSet;
+import io.fair_acc.dataset.DataSetError;
+import io.fair_acc.dataset.spi.DataSetBuilder;
+import io.fair_acc.dataset.spi.DefaultDataSet;
+import io.fair_acc.dataset.spi.DoubleErrorDataSet;
 
 /**
  * @author akrimm

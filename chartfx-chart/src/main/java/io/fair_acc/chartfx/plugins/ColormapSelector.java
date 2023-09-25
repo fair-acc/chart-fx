@@ -14,7 +14,7 @@ import javafx.scene.shape.Rectangle;
 import io.fair_acc.chartfx.renderer.spi.utils.ColorGradient;
 
 /**
- * Adds a Dropdown to the toolbar to select different Colormaps. The selected Colormap can be accessed 
+ * Adds a Dropdown to the toolbar to select different Colormaps. The selected Colormap can be accessed
  * from via colormapProperty() and bound to Renderers/Axes.
  *
  * @author Alexander Krimm

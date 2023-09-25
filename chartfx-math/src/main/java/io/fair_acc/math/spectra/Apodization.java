@@ -4,8 +4,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import io.fair_acc.dataset.utils.AssertUtils;
-import io.fair_acc.math.MathBase;
 import io.fair_acc.dataset.utils.Cache;
+import io.fair_acc.math.MathBase;
 
 /**
  * implementation of frequenty used apodization (aka. windowing) functions reference:
@@ -39,7 +39,7 @@ public enum Apodization {
 
     /**
      * Applies the given apodization window to the given array (in-place)
-     * 
+     *
      * @param data input data
      */
     public void apodize(final double[] data) {
@@ -92,7 +92,7 @@ public enum Apodization {
     /**
      * Directly computes a single window value. If the whole window is required multiple times
      * it will be faster to use the cached version {@link #getIndex(int, int)} provides.
-     * 
+     *
      * @param i index within the window
      * @param n length of the window
      * @return value of the apodization function
@@ -153,7 +153,7 @@ public enum Apodization {
 
     /**
      * Returns the window for a
-     * 
+     *
      * @param n window size
      * @return a cached array containing the requested window
      */
@@ -169,7 +169,7 @@ public enum Apodization {
 
     /**
      * Applies the given apodization window to the given array (in-place)
-     * 
+     *
      * @param data input data
      * @param function the apodization function to use
      */
@@ -193,7 +193,7 @@ public enum Apodization {
      * <li>{@link Cache} limits retention time and number of cached entries
      * <li>custom implementation
      * </ul>
-     * 
+     *
      * @param windowCache A map to use as a cache for the apodization windows
      */
     public static void setWindowCache(Map<ApodizationArrayDescription, double[]> windowCache) {

@@ -6,12 +6,11 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Random;
 
-import io.fair_acc.sample.chart.ChartSample;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.VBox;
-
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,9 +20,10 @@ import io.fair_acc.math.ArrayMath;
 import io.fair_acc.math.Math;
 import io.fair_acc.math.MathBase;
 import io.fair_acc.math.functions.RandomWalkFunction;
-import io.fair_acc.sample.math.utils.DemoChart;
 import io.fair_acc.math.spectra.wavelet.CDFWavelet;
 import io.fair_acc.math.spectra.wavelet.FastWaveletTransform;
+import io.fair_acc.sample.chart.ChartSample;
+import io.fair_acc.sample.math.utils.DemoChart;
 
 /**
  * example illustrating a wavelet denoising algorithm

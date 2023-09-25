@@ -6,7 +6,6 @@ import io.fair_acc.chartfx.axes.Axis;
  * @author rstein
  */
 public class LogarithmicTimeAxisTransform extends LogarithmicAxisTransform {
-
     public LogarithmicTimeAxisTransform(final Axis axis) {
         super(axis);
     }

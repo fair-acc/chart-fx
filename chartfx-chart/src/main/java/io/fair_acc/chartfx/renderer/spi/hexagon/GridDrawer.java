@@ -10,7 +10,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
 public class GridDrawer {
-
     private final HexagonMap map;
     private Font font = new Font(13);
 
@@ -51,7 +50,6 @@ public class GridDrawer {
                         callBack.handle(hex);
                     }
                 }
-
             });
             hexagon.addEventFilter(MouseEvent.MOUSE_ENTERED, me -> {
                 final GridPosition pos = ((Hexagon) me.getSource()).position;
@@ -101,7 +99,6 @@ public class GridDrawer {
                 root.getChildren().add(text);
             }
         }
-
     }
 
     public void drawContour(final Canvas canvas) {
@@ -141,5 +138,4 @@ public class GridDrawer {
         final double r = 2.0 / 3.0 * y / hexagonRadius;
         return GridPosition.hexRound(q, r);
     }
-
 }

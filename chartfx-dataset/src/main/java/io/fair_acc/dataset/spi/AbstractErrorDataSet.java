@@ -91,7 +91,7 @@ public abstract class AbstractErrorDataSet<D extends AbstractErrorDataSet<D>> ex
 
     /**
      * sets the error type of the data set for the given dimension index
-     * 
+     *
      * @param dimIndex the dimension for which to set the ErrorType
      * @param errorType error type to be set
      * @return itself (fluent design)

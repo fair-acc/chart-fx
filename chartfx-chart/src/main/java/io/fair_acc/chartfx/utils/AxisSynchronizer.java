@@ -11,9 +11,10 @@ package io.fair_acc.chartfx.utils;
 
 import java.util.ArrayList;
 
-import io.fair_acc.chartfx.axes.Axis;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+
+import io.fair_acc.chartfx.axes.Axis;
 
 /**
  * Synchronizes the axes of different charts. All charts are equal.
@@ -21,7 +22,6 @@ import javafx.beans.value.ObservableValue;
  * @author braeun
  */
 public class AxisSynchronizer {
-
     private boolean updating;
     private final ArrayList<Axis> axes = new ArrayList<>();
     private final ChangeListener<Number> upperBoundChangeListener = this::upperBoundChanged;
@@ -107,5 +107,4 @@ public class AxisSynchronizer {
             updating = false;
         }
     }
-
 }

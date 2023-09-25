@@ -1,12 +1,13 @@
 package io.fair_acc.chartfx.utils;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
+
+import static io.fair_acc.chartfx.utils.NumberFormatterImpl.*;
 
 import java.util.Locale;
 import java.util.function.DoubleFunction;
 
-import static io.fair_acc.chartfx.utils.NumberFormatterImpl.*;
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 /**
  * Test cases based on removed com.ibm.icu.text.DecimalFormat
@@ -15,7 +16,6 @@ import static org.junit.jupiter.api.Assertions.*;
  * @since 07 March 2023
  */
 class NumberFormatterImplTest {
-
     @Test
     void plainFormatGerman() {
         Locale.setDefault(Locale.GERMAN);
@@ -116,5 +116,4 @@ class NumberFormatterImplTest {
         formatter.setDecimalPlaces(decimalPlaces);
         return formatter::toString;
     }
-
 }

@@ -12,7 +12,7 @@ public class RandomStepFunction extends AbstractTestFunction<RandomStepFunction>
     protected static SplittableRandom rnd = new SplittableRandom(System.currentTimeMillis());
 
     /**
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      */
@@ -29,5 +29,4 @@ public class RandomStepFunction extends AbstractTestFunction<RandomStepFunction>
         }
         return retVal;
     }
-
 }

@@ -16,7 +16,7 @@ public class CircularBuffer<E> {
     private boolean flipped;
 
     /**
-     * 
+     *
      * @param initalElements adds element the buffer should be initialised with
      * @param capacity maximum capacity of the buffer
      */
@@ -26,7 +26,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @param capacity maximum capacity of the buffer
      */
     @SuppressWarnings("unchecked")
@@ -40,7 +40,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @return number of available buffer elements
      */
     public int available() {
@@ -67,7 +67,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @return value at head
      */
     public E get() {
@@ -75,7 +75,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @param into storage container
      * @param length number of elements to be read
      * @return either into or newly allocated array containing the result
@@ -85,7 +85,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @param into storage container
      * @param readPos circular index (wraps around)
      * @param length number of elements to be read
@@ -94,8 +94,8 @@ public class CircularBuffer<E> {
     @SuppressWarnings("unchecked")
     public E[] get(final E[] into, final int readPos, final int length) {
         final E[] retVal = into == null || into.length < length
-                                   ? (E[]) Array.newInstance(elements[0].getClass(), length)
-                                   : into;
+                                 ? (E[]) Array.newInstance(elements[0].getClass(), length)
+                                 : into;
         // N.B. actually there seem to be no numerically more efficient implementation
         // since the order of the indices for 'into' need to be reverse order w.r.t. 'elements'
         for (int i = 0; i < length; i++) {
@@ -106,7 +106,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @param readPos circular index (wraps around)
      * @return the value
      */
@@ -146,7 +146,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @param element new element
      * @return true
      */
@@ -161,7 +161,7 @@ public class CircularBuffer<E> {
 
     /**
      * add multiple new elements
-     * 
+     *
      * @param newElements array of new elements
      * @param length number of elements that are to be written from array
      * @return true: write index is smaller than read index
@@ -172,7 +172,7 @@ public class CircularBuffer<E> {
 
     /**
      * add multiple new elements
-     * 
+     *
      * @param newElements array of new elements
      * @param startIndex 'null'
      * @param length number of elements that are to be written from array
@@ -205,7 +205,7 @@ public class CircularBuffer<E> {
     }
 
     /**
-     * 
+     *
      * @return number of available buffer elements that can be written before buffer wraps-around
      */
     public int remainingCapacity() {

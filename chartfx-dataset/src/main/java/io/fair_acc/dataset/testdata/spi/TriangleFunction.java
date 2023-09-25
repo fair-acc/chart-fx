@@ -2,7 +2,7 @@ package io.fair_acc.dataset.testdata.spi;
 
 /**
  * abstract error data set for graphical testing purposes this implementation generates a triangular function
- * 
+ *
  * @author Alexander Krimm
  */
 public class TriangleFunction extends AbstractTestFunction<TriangleFunction> {
@@ -11,7 +11,7 @@ public class TriangleFunction extends AbstractTestFunction<TriangleFunction> {
 
     /**
      * Creates a triangular function which rises from zero to one and back.
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      */
@@ -21,7 +21,7 @@ public class TriangleFunction extends AbstractTestFunction<TriangleFunction> {
 
     /**
      * Creates  a triangular function which rises from offset to offset+1 and back.
-     * 
+     *
      * @param name data set name
      * @param count number of samples
      * @param offset offset to zero

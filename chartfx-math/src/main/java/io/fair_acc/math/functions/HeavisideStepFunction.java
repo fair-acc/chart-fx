@@ -1,13 +1,12 @@
 package io.fair_acc.math.functions;
 
 public class HeavisideStepFunction extends AbstractFunction1D implements Function1D {
-
     /**
-     * 
+     *
      * initialise Heaviside step function
-     * 
+     *
      * parameter order: parameter[0] = location (default: 0.0) parameter[1] = scaling (default: 1.0 (fixed))
-     * 
+     *
      * @param name function name
      */
     public HeavisideStepFunction(String name) {
@@ -15,11 +14,11 @@ public class HeavisideStepFunction extends AbstractFunction1D implements Functio
     }
 
     /**
-     * 
+     *
      * initialise Heaviside step function
-     * 
+     *
      * parameter order: parameter[0] = location (default: 0.0) parameter[1] = scaling (default: 1.0 (fixed))
-     * 
+     *
      * @param name function name
      * @param parameter function parameter
      */

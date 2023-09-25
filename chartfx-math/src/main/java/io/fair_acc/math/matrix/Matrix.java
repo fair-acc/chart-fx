@@ -17,14 +17,14 @@ public interface Matrix extends Cloneable, java.io.Serializable {
 
     /**
      * Get column dimension.
-     * 
+     *
      * @return n, the number of columns.
      */
     int getColumnDimension();
 
     /**
      * Get row dimension
-     * 
+     *
      * @return m, the number of rows.
      */
     int getRowDimension();

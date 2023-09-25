@@ -1,12 +1,11 @@
 package io.fair_acc.dataset.spi;
 
 import io.fair_acc.dataset.AxisDescription;
-import io.fair_acc.dataset.events.ChartBits;
-import io.fair_acc.dataset.utils.AssertUtils;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.EditableDataSet;
-
+import io.fair_acc.dataset.events.ChartBits;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Implementation of the {@code DataSet} interface which stores x,y,... values in nDim separate arrays. It provides
@@ -449,7 +448,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     /**
      * <p>
      * Update the data for a given dimension
-     * 
+     *
      * @param dimIndex dimension index (e.g. DataSet.DIM_X)
      * @param values values for dimension
      * @param copy true: makes an internal copy, false: use the pointer as is (saves memory allocation
@@ -505,7 +504,7 @@ public class MultiDimDoubleDataSet extends AbstractDataSet<MultiDimDoubleDataSet
     /**
      * Sets the values of the DataSet from index onwards.
      * Clears all labels in the overwritten section of data.
-     * 
+     *
      * @param index start index of the data
      * @param values coordinates for the new points
      * @return itself

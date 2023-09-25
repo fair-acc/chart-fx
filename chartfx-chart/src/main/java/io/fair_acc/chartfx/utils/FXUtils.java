@@ -11,9 +11,6 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.dataset.events.StateListener;
-import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -23,10 +20,14 @@ import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-
 import javafx.stage.Window;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.fair_acc.chartfx.Chart;
+import io.fair_acc.dataset.events.StateListener;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Small tool to execute/call JavaFX GUI-related code from potentially non-JavaFX thread (equivalent to old:
@@ -83,8 +84,7 @@ public final class FXUtils {
      */
     public static <R> R runAndWait(final Supplier<R> function) throws Exception {
         try {
-            return Platform.isFxApplicationThread() ? function.get() :
-                    CompletableFuture.supplyAsync(function, Platform::runLater).get();
+            return Platform.isFxApplicationThread() ? function.get() : CompletableFuture.supplyAsync(function, Platform::runLater).get();
         } catch (ExecutionException ex) {
             throw unwrapExecutionException(ex);
         }
@@ -104,8 +104,7 @@ public final class FXUtils {
      */
     public static <T, R> R runAndWait(final T argument, final Function<T, R> function) throws Exception {
         try {
-            return Platform.isFxApplicationThread() ? function.apply(argument) :
-                    CompletableFuture.supplyAsync(() -> function.apply(argument), Platform::runLater).get();
+            return Platform.isFxApplicationThread() ? function.apply(argument) : CompletableFuture.supplyAsync(() -> function.apply(argument), Platform::runLater).get();
         } catch (ExecutionException ex) {
             throw unwrapExecutionException(ex);
         }
@@ -120,7 +119,7 @@ public final class FXUtils {
     }
 
     public static void runFX(final Runnable run) {
-        //FXUtils.keepJavaFxAlive();
+        // FXUtils.keepJavaFxAlive();
         if (Platform.isFxApplicationThread()) {
             run.run();
         } else {
@@ -234,14 +233,14 @@ public final class FXUtils {
 
     public static <T extends Object> List<T> sizedList(List<T> list, int desiredSize, Supplier<T> constructor) {
         int delta = desiredSize - list.size();
-        if(delta == 0) {
+        if (delta == 0) {
             return list;
         }
-        while(delta > 0) {
+        while (delta > 0) {
             list.add(constructor.get());
             delta--;
         }
-        while(delta < 0) {
+        while (delta < 0) {
             list.remove(list.size() - 1);
             delta++;
         }
@@ -275,10 +274,7 @@ public final class FXUtils {
 
     public static ObservableBooleanValue getShowingBinding(Node node) {
         BooleanProperty showing = new SimpleBooleanProperty();
-        Runnable update = () -> showing.set(Optional.ofNullable(node.getScene())
-                        .flatMap(scene -> Optional.ofNullable(scene.getWindow()))
-                        .map(Window::isShowing)
-                        .orElse(false));
+        Runnable update = () -> showing.set(Optional.ofNullable(node.getScene()).flatMap(scene -> Optional.ofNullable(scene.getWindow())).map(Window::isShowing).orElse(false));
         update.run(); // initial value
 
         ChangeListener<Boolean> onShowingChange = (obs, old, value) -> {
@@ -286,14 +282,18 @@ public final class FXUtils {
         };
 
         ChangeListener<Window> onWindowChange = (obs, old, value) -> {
-            if(old != null) old.showingProperty().removeListener(onShowingChange);
-            if(value != null) value.showingProperty().addListener(onShowingChange);
+            if (old != null)
+                old.showingProperty().removeListener(onShowingChange);
+            if (value != null)
+                value.showingProperty().addListener(onShowingChange);
             update.run();
         };
 
         node.sceneProperty().addListener((obs, old, value) -> {
-            if(old != null) old.windowProperty().removeListener(onWindowChange);
-            if(value != null) value.windowProperty().addListener(onWindowChange);
+            if (old != null)
+                old.windowProperty().removeListener(onWindowChange);
+            if (value != null)
+                value.windowProperty().addListener(onWindowChange);
             update.run();
         });
 

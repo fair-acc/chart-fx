@@ -1,9 +1,11 @@
 package io.fair_acc.chartfx.viewer;
 
-import com.sun.javafx.scene.control.ContextMenuContent;
-import io.fair_acc.chartfx.ui.TilingPane.Layout;
-import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils.JavaFxInterceptor;
-import io.fair_acc.chartfx.utils.FXUtils;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.concurrent.ExecutionException;
+
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -16,6 +18,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +26,11 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import java.util.concurrent.ExecutionException;
+import com.sun.javafx.scene.control.ContextMenuContent;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
-import static org.junit.jupiter.api.Assertions.*;
+import io.fair_acc.chartfx.ui.TilingPane.Layout;
+import io.fair_acc.chartfx.ui.utils.JavaFXInterceptorUtils.JavaFxInterceptor;
+import io.fair_acc.chartfx.utils.FXUtils;
 
 /**
  * Tests {@link io.fair_acc.chartfx.viewer.SquareButton }
@@ -149,8 +152,7 @@ public class SquareButtonTest {
         try {
             contextMenu.show(sceneWindow);
             final double expected = field.snapSizeY(
-                    SquareButton.MAX_BUTTON_SIZE + field.getPadding().getTop() + field.getPadding().getBottom()
-            );
+                    SquareButton.MAX_BUTTON_SIZE + field.getPadding().getTop() + field.getPadding().getBottom());
             final double delta = 1 / field.getScene().getWindow().getRenderScaleY();
             assertThat(field.getPrefHeight()).isCloseTo(expected, within(delta));
             contextMenu.hide();
@@ -169,5 +171,4 @@ public class SquareButtonTest {
             root.getChildren().add(field);
         }
     }
-
 }

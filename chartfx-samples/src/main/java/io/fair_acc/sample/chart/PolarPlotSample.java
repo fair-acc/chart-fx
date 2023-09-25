@@ -16,7 +16,7 @@ import io.fair_acc.dataset.spi.DefaultErrorDataSet;
 
 /**
  * small demo to experiment with polar plot geometries
- * 
+ *
  * @author rstein
  */
 public class PolarPlotSample extends ChartSample {

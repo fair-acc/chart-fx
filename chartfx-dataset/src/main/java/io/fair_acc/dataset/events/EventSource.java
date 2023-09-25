@@ -71,7 +71,7 @@ public interface EventSource extends StateListener {
     }
 
     default void fireInvalidated(IntSupplier bit0, IntSupplier bit1, IntSupplier bit2, IntSupplier bit3) {
-        getBitState().setDirty(bit0.getAsInt() | bit1.getAsInt() | bit2.getAsInt()| bit3.getAsInt());
+        getBitState().setDirty(bit0.getAsInt() | bit1.getAsInt() | bit2.getAsInt() | bit3.getAsInt());
     }
 
     /**

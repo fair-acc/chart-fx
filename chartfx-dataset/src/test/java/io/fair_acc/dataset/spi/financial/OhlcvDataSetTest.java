@@ -5,13 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcv;
 import io.fair_acc.dataset.spi.financial.api.ohlcv.IOhlcvItem;
 import io.fair_acc.dataset.spi.financial.utils.FinancialTestUtils;
 import io.fair_acc.dataset.spi.financial.utils.Ohlcv;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 
 public class OhlcvDataSetTest {
     private OhlcvDataSet datasetTested;

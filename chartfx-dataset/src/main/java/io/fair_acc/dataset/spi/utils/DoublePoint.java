@@ -4,7 +4,6 @@ package io.fair_acc.dataset.spi.utils;
  * @author rstein
  */
 public class DoublePoint extends Tuple<Double, Double> {
-
     /**
      * default constructor (zero coordinates)
      */

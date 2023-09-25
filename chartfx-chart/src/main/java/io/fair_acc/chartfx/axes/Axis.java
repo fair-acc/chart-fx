@@ -1,8 +1,5 @@
 package io.fair_acc.chartfx.axes;
 
-import io.fair_acc.bench.Measurable;
-import io.fair_acc.chartfx.ui.css.LineStyle;
-import io.fair_acc.chartfx.ui.css.TextStyle;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
@@ -12,9 +9,12 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.util.StringConverter;
 
+import io.fair_acc.bench.Measurable;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
 import io.fair_acc.chartfx.axes.spi.MetricPrefix;
 import io.fair_acc.chartfx.axes.spi.TickMark;
+import io.fair_acc.chartfx.ui.css.LineStyle;
+import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.geometry.Side;
 import io.fair_acc.dataset.AxisDescription;
 
@@ -362,6 +362,5 @@ public interface Axis extends AxisDescription, Measurable.EmptyDefault {
      * This is needed e.g. when plugins adjust the axes and at the same time need to perform
      * transformations with the modified ranges.
      */
-    default void updateCachedTransforms() {};
-
+    default void updateCachedTransforms(){};
 }

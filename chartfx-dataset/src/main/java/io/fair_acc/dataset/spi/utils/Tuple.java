@@ -10,7 +10,7 @@ public class Tuple<X, Y> {
     protected transient Y y;
 
     /**
-     * 
+     *
      * @param x the x coordinate (usually a Number but may be also a String etc.)
      * @param y the y coordinate (usually a Number but may be also a String etc.)
      */
@@ -20,7 +20,7 @@ public class Tuple<X, Y> {
     }
 
     /**
-     * 
+     *
      * @return the x coordinate
      */
     public X getXValue() {
@@ -28,7 +28,7 @@ public class Tuple<X, Y> {
     }
 
     /**
-     * 
+     *
      * @return the y coordinate
      */
     public Y getYValue() {

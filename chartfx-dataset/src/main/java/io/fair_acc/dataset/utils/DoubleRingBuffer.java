@@ -13,7 +13,7 @@ public class DoubleRingBuffer {
     private boolean flipped;
 
     /**
-     * 
+     *
      * @param capacity maximum capacity of buffer
      */
     public DoubleRingBuffer(final int capacity) {
@@ -23,7 +23,7 @@ public class DoubleRingBuffer {
     }
 
     /**
-     * 
+     *
      * @return number of available buffer elements
      */
     public int available() {
@@ -34,7 +34,7 @@ public class DoubleRingBuffer {
     }
 
     /**
-     * 
+     *
      * @param element new element
      * @return true: read index is above write index
      */
@@ -59,11 +59,10 @@ public class DoubleRingBuffer {
         }
         elements[writePos++] = element;
         return true;
-
     }
 
     /**
-     * 
+     *
      * @param newElements new elements to be added
      * @param length number of elements to be added
      * @return number of elements added
@@ -114,7 +113,7 @@ public class DoubleRingBuffer {
     }
 
     /**
-     * 
+     *
      * @return number of elements that can be written before buffer wraps-around
      */
     public int remainingCapacity() {
@@ -134,7 +133,7 @@ public class DoubleRingBuffer {
     }
 
     /**
-     * 
+     *
      * @return element at head of buffer
      */
     public double take() {
@@ -158,7 +157,7 @@ public class DoubleRingBuffer {
     }
 
     /**
-     * 
+     *
      * @param into storage container
      * @param length how many elements are to be retrieved
      * @return n elements at the head of the buffer
@@ -205,5 +204,4 @@ public class DoubleRingBuffer {
 
         return intoWritePos;
     }
-
 }

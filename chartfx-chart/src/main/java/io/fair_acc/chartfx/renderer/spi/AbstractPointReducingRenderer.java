@@ -1,7 +1,7 @@
 package io.fair_acc.chartfx.renderer.spi;
 
-import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
-import io.fair_acc.chartfx.ui.css.StyleUtil;
+import java.util.List;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
@@ -10,7 +10,8 @@ import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 
-import java.util.List;
+import io.fair_acc.chartfx.ui.css.CssPropertyFactory;
+import io.fair_acc.chartfx.ui.css.StyleUtil;
 
 public abstract class AbstractPointReducingRenderer<R extends AbstractPointReducingRenderer<R>>
         extends AbstractRendererXY<R> {
@@ -166,5 +167,4 @@ public abstract class AbstractPointReducingRenderer<R extends AbstractPointReduc
     }
 
     private static final CssPropertyFactory<AbstractRenderer<?>> CSS = new CssPropertyFactory<>(AbstractPointReducingRenderer.getClassCssMetaData());
-
 }

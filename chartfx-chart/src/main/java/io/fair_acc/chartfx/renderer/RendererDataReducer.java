@@ -5,7 +5,6 @@ package io.fair_acc.chartfx.renderer;
  *         input arrays)
  */
 public interface RendererDataReducer {
-
     /**
      * Internal function to the ErrorDataSetRenderer arrays are cached copies and operations are assumed to be performed
      * in-place (&lt;-&gt; for performance reasons/minimisation of memory allocation)

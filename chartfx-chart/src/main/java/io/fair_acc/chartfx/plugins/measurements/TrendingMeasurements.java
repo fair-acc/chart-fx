@@ -1,5 +1,34 @@
 package io.fair_acc.chartfx.plugins.measurements;
 
+import static io.fair_acc.chartfx.axes.AxisMode.X;
+import static io.fair_acc.chartfx.axes.AxisMode.Y;
+import static io.fair_acc.chartfx.plugins.measurements.TrendingMeasurements.MeasurementCategory.TRENDING;
+
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.layout.GridPane;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
@@ -18,33 +47,6 @@ import io.fair_acc.dataset.events.BitState;
 import io.fair_acc.dataset.events.StateListener;
 import io.fair_acc.dataset.spi.LimitedIndexedTreeDataSet;
 import io.fair_acc.dataset.utils.ProcessingProfiler;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.ObservableList;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
-import static io.fair_acc.chartfx.axes.AxisMode.X;
-import static io.fair_acc.chartfx.axes.AxisMode.Y;
-import static io.fair_acc.chartfx.plugins.measurements.TrendingMeasurements.MeasurementCategory.TRENDING;
 
 public class TrendingMeasurements extends AbstractChartMeasurement {
     private static final Logger LOGGER = LoggerFactory.getLogger(TrendingMeasurements.class);
@@ -195,34 +197,34 @@ public class TrendingMeasurements extends AbstractChartMeasurement {
                 FXUtils.runFX(() -> yAxis.set(yAxisName, yAxisUnit));
 
                 switch (measType) {
-                    case TRENDING_SECONDS:
-                    case TRENDING_TIMEOFDAY_UTC:
-                    case TRENDING_TIMEOFDAY_LOCAL:
-                        trendingDataSet.lock().writeLockGuard(() -> {
-                            final double now = System.currentTimeMillis() / 1000.0;
-                            final double lengthTime = parameterFields.isEmpty() ? 1.0 : Math.max(1.0, parameterFields.get(0).getValue());
-                            final int lengthSamples = parameterFields.isEmpty() ? 1 : (int) Math.max(1.0, parameterFields.get(1).getValue());
-                            if (trendingDataSet.getMaxQueueSize() != lengthSamples) {
-                                trendingDataSet.setMaxQueueSize(lengthSamples);
-                            }
-                            if (trendingDataSet.getMaxLength() != lengthTime) {
-                                trendingDataSet.setMaxLength(lengthTime);
-                            }
+                case TRENDING_SECONDS:
+                case TRENDING_TIMEOFDAY_UTC:
+                case TRENDING_TIMEOFDAY_LOCAL:
+                    trendingDataSet.lock().writeLockGuard(() -> {
+                        final double now = System.currentTimeMillis() / 1000.0;
+                        final double lengthTime = parameterFields.isEmpty() ? 1.0 : Math.max(1.0, parameterFields.get(0).getValue());
+                        final int lengthSamples = parameterFields.isEmpty() ? 1 : (int) Math.max(1.0, parameterFields.get(1).getValue());
+                        if (trendingDataSet.getMaxQueueSize() != lengthSamples) {
+                            trendingDataSet.setMaxQueueSize(lengthSamples);
+                        }
+                        if (trendingDataSet.getMaxLength() != lengthTime) {
+                            trendingDataSet.setMaxLength(lengthTime);
+                        }
 
-                            FXUtils.runFX(() -> {
-                                xAxis.set("time-of-day", (String) null);
-                                yAxis.set(yAxisName, yAxisUnit);
-                            });
-
-                            final AbstractChartMeasurement measurement = measurementSelector.getSelectedChartMeasurement();
-                            if (measurement != null) {
-                                trendingDataSet.setName(measurement.getTitle());
-                                trendingDataSet.add(now, measurement.valueProperty().get());
-                            }
+                        FXUtils.runFX(() -> {
+                            xAxis.set("time-of-day", (String) null);
+                            yAxis.set(yAxisName, yAxisUnit);
                         });
-                        break;
-                    default:
-                        break;
+
+                        final AbstractChartMeasurement measurement = measurementSelector.getSelectedChartMeasurement();
+                        if (measurement != null) {
+                            trendingDataSet.setName(measurement.getTitle());
+                            trendingDataSet.add(now, measurement.valueProperty().get());
+                        }
+                    });
+                    break;
+                default:
+                    break;
                 }
             });
         }
@@ -437,33 +439,33 @@ public class TrendingMeasurements extends AbstractChartMeasurement {
 
             DataSet subRange;
             switch (measType) {
-                // Trending
-                case TRENDING_SECONDS:
-                case TRENDING_TIMEOFDAY_UTC:
-                case TRENDING_TIMEOFDAY_LOCAL:
-                    trendingDataSet.lock().writeLockGuard(() -> {
-                        final double now = System.currentTimeMillis() / 1000.0;
-                        final double lengthTime = parameterFields.isEmpty() ? 1.0 : Math.max(1.0, parameterFields.get(0).getValue());
-                        final int lengthSamples = parameterFields.isEmpty() ? 1 : (int) Math.max(1.0, parameterFields.get(1).getValue());
-                        if (trendingDataSet.getMaxQueueSize() != lengthSamples) {
-                            trendingDataSet.setMaxQueueSize(lengthSamples);
-                        }
-                        if (trendingDataSet.getMaxLength() != lengthTime) {
-                            trendingDataSet.setMaxLength(lengthTime);
-                        }
+            // Trending
+            case TRENDING_SECONDS:
+            case TRENDING_TIMEOFDAY_UTC:
+            case TRENDING_TIMEOFDAY_LOCAL:
+                trendingDataSet.lock().writeLockGuard(() -> {
+                    final double now = System.currentTimeMillis() / 1000.0;
+                    final double lengthTime = parameterFields.isEmpty() ? 1.0 : Math.max(1.0, parameterFields.get(0).getValue());
+                    final int lengthSamples = parameterFields.isEmpty() ? 1 : (int) Math.max(1.0, parameterFields.get(1).getValue());
+                    if (trendingDataSet.getMaxQueueSize() != lengthSamples) {
+                        trendingDataSet.setMaxQueueSize(lengthSamples);
+                    }
+                    if (trendingDataSet.getMaxLength() != lengthTime) {
+                        trendingDataSet.setMaxLength(lengthTime);
+                    }
 
-                        FXUtils.runFX(() -> xAxis.set("time-of-day", (String) null));
-                        FXUtils.runFX(() -> yAxis.set(yAxisName, yAxisUnit));
+                    FXUtils.runFX(() -> xAxis.set("time-of-day", (String) null));
+                    FXUtils.runFX(() -> yAxis.set(yAxisName, yAxisUnit));
 
-                        final AbstractChartMeasurement measurement = measurementSelector.getSelectedChartMeasurement();
-                        if (measurement != null) {
-                            trendingDataSet.setName(measurement.getTitle());
-                            trendingDataSet.add(now, measurement.valueProperty().get());
-                        }
-                    });
-                    break;
-                default:
-                    break;
+                    final AbstractChartMeasurement measurement = measurementSelector.getSelectedChartMeasurement();
+                    if (measurement != null) {
+                        trendingDataSet.setName(measurement.getTitle());
+                        trendingDataSet.add(now, measurement.valueProperty().get());
+                    }
+                });
+                break;
+            default:
+                break;
             }
         });
     }

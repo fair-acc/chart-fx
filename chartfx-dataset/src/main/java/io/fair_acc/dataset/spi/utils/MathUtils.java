@@ -2,7 +2,7 @@ package io.fair_acc.dataset.spi.utils;
 
 /**
  * small helper class from: https://floating-point-gui.de/errors/NearlyEqualsTest.java
- * 
+ *
  * @author Michael Borgwardt
  */
 public final class MathUtils { // NOPMD

@@ -1,6 +1,9 @@
 package io.fair_acc.sample.chart;
 
+import javafx.application.Application;
 import javafx.scene.Node;
+import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,8 +15,6 @@ import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.spi.ErrorDataSetRenderer;
 import io.fair_acc.dataset.spi.DoubleDataSet;
 import io.fair_acc.dataset.spi.DoubleErrorDataSet;
-import javafx.application.Application;
-import javafx.stage.Stage;
 
 /**
  * Test/demo that explicitly allows to draw NaN values in DataSets as well as custom dash-based line-styling

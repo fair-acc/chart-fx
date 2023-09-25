@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * Tests of {@link DataContainer}
- * 
+ *
  * @author rstein
  */
 public class DataContainerTests {
