@@ -22,6 +22,30 @@ public interface MeasurementRecorder {
     TimeMeasure newTime(String tag, IntSupplier level);
 
     /**
+     * @param tag a descriptive name to disambiguate multiple measures
+     * @return an info level time measure
+     */
+    default TimeMeasure newTime(String tag) {
+        return newTime(tag, BenchLevel.Info);
+    }
+
+    /**
+     * @param tag a descriptive name to disambiguate multiple measures
+     * @return a debug level time measure
+     */
+    default TimeMeasure newDebugTime(String tag) {
+        return newTime(tag, BenchLevel.Debug);
+    }
+
+    /**
+     * @param tag a descriptive name to disambiguate multiple measures
+     * @return a trace level time measure
+     */
+    default TimeMeasure newTraceTime(String tag) {
+        return newTime(tag, BenchLevel.Trace);
+    }
+
+    /**
      * @param tag   a descriptive name to disambiguate multiple measures
      * @param level the detail level of the measured value
      * @return a duration measure at the specified level
