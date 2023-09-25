@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Experimental plugin that measures and displays the internal
@@ -33,7 +33,7 @@ public class BenchPlugin extends ChartPlugin {
     private static final String ICON_DISABLE_BENCH = "fa-hourglass-end:" + FONT_SIZE;
     private final BooleanProperty enabled = new SimpleBooleanProperty(false);
     private final HBox buttons = createButtonBar();
-    private Function<MeasurementRecorder, MeasurementRecorder> measurementFilter = rec -> rec
+    private UnaryOperator<MeasurementRecorder> measurementFilter = rec -> rec
             .atLevel(BenchLevel.Info)
             .contains("draw");
 
@@ -70,8 +70,8 @@ public class BenchPlugin extends ChartPlugin {
         });
     }
 
-    public BenchPlugin setFilter(Function<MeasurementRecorder, MeasurementRecorder> filterFunc) {
-        this.measurementFilter = AssertUtils.notNull("Filter", filterFunc);
+    public BenchPlugin setFilter(UnaryOperator<MeasurementRecorder> measurementFilter) {
+        this.measurementFilter = AssertUtils.notNull("MeasurementFilter", measurementFilter);
         return this;
     }
 
