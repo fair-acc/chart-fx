@@ -7,7 +7,7 @@
 [![Coverity Build Status](https://scan.coverity.com/projects/chart-fx/badge.svg)](https://scan.coverity.com/projects/chart-fx)
 
 <p align="center" width="100%">
-    <img t src="docs/banner/banner.svg" alt="ChartFx banner"> 
+    <img t src="docs/banner/banner.svg" alt="ChartFx banner">
 </p>
 
 ChartFx is a scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
@@ -22,19 +22,22 @@ The motivation for the re-design has been presented at [IPAC'19](https://ipac19.
 </figure>
 
 ## Functionalities and Features
+
 The library offers a wide variety of plot types common in the scientific signal processing field, a flexible plugin system as well as online parameter measurements commonly found in lab instrumentation. Some of its features include (see demos for more details):
-*   `DataSet`: basic XY-type datasets, extendable by `DataSetError` to account for measurement uncertainties, `DataSetMetaData`, `EditableDataSet`, `Histogram`, or `DataSet3D` interfaces;
-*   math sub-library: FFTs, Wavelet and other spectral and linear algebra routines, numerically robust integration and differentiation, IIR- & FIR-type filtering, linear regression and non-linear chi-square-type function fitting;
-*   `Chart`: providing Euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
-*   `Axis`: one or multiple axes that are linear, logarithmic, time-series, inverted, dynamic auto-(grow)-ranging, automatic range-based SI and time unit conversion;
-*   `Renderer`: scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, staircase, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
-*   `ChartPlugin`: data zoomer with history, zoom-to-origin, and option to limit this to X and/or Y coordinates, panner, data value and range indicators, cross-hair indicator, data point tool-tip, `DataSet` editing, table view, export to CSV and system clipboard, online axis editing, data set parameter measurement such as rise-time, min, max, rms, etc.
+
+- `DataSet`: basic XY-type datasets, extendable by `DataSetError` to account for measurement uncertainties, `DataSetMetaData`, `EditableDataSet`, `Histogram`, or `DataSet3D` interfaces;
+- math sub-library: FFTs, Wavelet and other spectral and linear algebra routines, numerically robust integration and differentiation, IIR- & FIR-type filtering, linear regression and non-linear chi-square-type function fitting;
+- `Chart`: providing Euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
+- `Axis`: one or multiple axes that are linear, logarithmic, time-series, inverted, dynamic auto-(grow)-ranging, automatic range-based SI and time unit conversion;
+- `Renderer`: scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, staircase, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
+- `ChartPlugin`: data zoomer with history, zoom-to-origin, and option to limit this to X and/or Y coordinates, panner, data value and range indicators, cross-hair indicator, data point tool-tip, `DataSet` editing, table view, export to CSV and system clipboard, online axis editing, data set parameter measurement such as rise-time, min, max, rms, etc.
 
 In order to provide some of the scenegraph-level functionality while using a `Canvas` as graphics backend, the functionality of each module was extended to be readily customized through direct API methods as well as through external CSS-type style sheets.
 
 ## Example Usage
 
 ### Add the library to your project
+
 All chart-fx releases are deployed to maven central, for maven you can add it to your pom.xml like this:
 
 ```Maven POM
@@ -60,8 +63,9 @@ and the algorithms from `chartfx-math` independently without the quite heavy UI 
 
 #### Using the snapshot repository
 
-If you want to try out unreleased features from master or one of the feature branches, there is no need to download the source and build chart-fx yourself. You can just use the `<branchname>-SNAPSHOT` releases  from the sonatype snapshot repository for example by adding the following to your pom.xml if you want to use the current master.
+If you want to try out unreleased features from master or one of the feature branches, there is no need to download the source and build chart-fx yourself. You can just use the `<branchname>-SNAPSHOT` releases from the sonatype snapshot repository for example by adding the following to your pom.xml if you want to use the current master.
 All available snapshot releases can be found in the [sonatype snapshot repository](https://s01.oss.sonatype.org/content/repositories/snapshots/io/fair-acc/).
+
 <details><summary>
 example pom.xml for current master (click to expand)
 </summary>
@@ -88,6 +92,7 @@ example pom.xml for current master (click to expand)
     </repository>
 </repositories>
 ```
+
 </details>
 
 ### Code Example
@@ -146,6 +151,7 @@ public class SimpleChartSample extends Application {
     }
 }
 ```
+
 </details><details><summary>And the corresponding build specification(expand)</summary>
 pom.xml:
 
@@ -168,6 +174,7 @@ pom.xml:
 </dependencies>
 </project>
 ```
+
 </details>
 <details><summary>run with (expand)</summary>
 
@@ -175,9 +182,11 @@ pom.xml:
 mvn compile install
 mvn exec:java
 ```
+
 </details>
 
 ## Examples
+
 The chart-fx samples submodule contains a lot of samples which illustrate the capabilities and usage of the library.
 If you want to try them yourself run:
 
@@ -191,7 +200,7 @@ mvn exec:java
 <tr>
 <td><figure><img src="docs/pics/CategoryAxisSample.png" alt="CategoryAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/CategoryAxisSample.java">CategoryAxisSample.java</a></figcaption></figure></td>
 <td><figure><img src="docs/pics/MultipleAxesSample.png" alt="MultipleAxesSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/MultipleAxesSample.java">MultipleAxesSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/TimeAxisSample.png" alt="TimeAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/TimeAxisSample.java">TimeAxisSample.java</a></figcaption></figure></td>                         
+<td><figure><img src="docs/pics/TimeAxisSample.png" alt="TimeAxisSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/TimeAxisSample.java">TimeAxisSample.java</a></figcaption></figure></td>
 </tr>
 
 <tr>
@@ -202,7 +211,7 @@ mvn exec:java
 
 <tr>
 <td><figure><img src="docs/pics/EditDataSample.png" alt="EditDataSetSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/EditDataSetSample.java">EditDataSetSample.java</a></figcaption></figure></td>
-<td><figure><img src="docs/pics/PolarPlotSample.png" alt="PolarPlotSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/PolarPlotSample.java">PolarPlotSample.java</a></figcaption></figure></td>                
+<td><figure><img src="docs/pics/PolarPlotSample.png" alt="PolarPlotSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/PolarPlotSample.java">PolarPlotSample.java</a></figcaption></figure></td>
 <td><figure><img src="docs/pics/MetaDataRendererSample2.png" alt="EditDataSample" width=300/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/MetaDataRendererSample.java">MetaDataRendererSample.java</a></figcaption></figure></td>
 </tr>
 
@@ -228,18 +237,19 @@ mvn exec:java
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/ChartIndicatorSample.png" alt="ChartIndicatorSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/ChartIndicatorSample.java">ChartIndicatorSample.java</a></figcaption></figure></td>         
+<td colspan=2><figure><img src="docs/pics/ChartIndicatorSample.png" alt="ChartIndicatorSample" width=600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/chart/ChartIndicatorSample.java">ChartIndicatorSample.java</a></figcaption></figure></td>
 <td></td>
 </tr>
 
 <tr>
-<td colspan=2><figure><img src="docs/pics/HistogramRendererTests.png" alt="HistogramRendererTests" width=600/><figcaption><a href="chartfx-chart/src/test/java/io/fair_acc/chartfx/renderer/spi/HistogramRendererTests.java">HistogramRendererTests.java</a></figcaption></figure></td>         
+<td colspan=2><figure><img src="docs/pics/HistogramRendererTests.png" alt="HistogramRendererTests" width=600/><figcaption><a href="chartfx-chart/src/test/java/io/fair_acc/chartfx/renderer/spi/HistogramRendererTests.java">HistogramRendererTests.java</a></figcaption></figure></td>
 <td></td>
 </tr>
 
 </table>
 
 ### Financial related examples
+
 Financial charts are types of charts that visually track various business and financial metrics like liquidity, price movement, expenses, cash flow, and others over a given a period of the time. Financial charts are a great way to express a story about business or financial markets (instruments, financial assets).
 
 The chart-fx samples submodule contains financial charts and toolbox samples.
@@ -267,6 +277,7 @@ mvn exec:java
 <figure><img src="docs/pics/FinancialRealtimeFootprintSample.png" alt="FinancialAdvancedCandlestickSample" width=1600/><figcaption><a href="chartfx-samples/src/main/java/io/fair_acc/sample/financial/FinancialRealtimeFootprintSample.java">FinancialRealtimeFootprintSample.java (FOOTPRINT Tick Replay Real-time processing)</a></figcaption></figure>
 
 ### Math- & Signal-Processing related examples
+
 The math samples can be started by running:
 
 ```bash
@@ -295,6 +306,7 @@ mvn exec:java@math
 </table>
 
 ### Other samples
+
 There are also samples for the dataset and the accelerator UI submodules which will be extended over time as new
 functionality is added.
 
@@ -305,6 +317,7 @@ mvn exec:java@acc-ui
 ```
 
 ## Performance Comparison
+
 Besides the extended functionality outlined above, the ChartFx optimisation goal also included achieving real-time update rates of up to 25 Hz for data sets with a few 10k up to 5 million data points. In order to optimise and compare the performance with other charting libraries, especially those with only reduced functionality, a reduced simple oscilloscope-style test case has been chosen (see `RollingBufferSample` in demos) that displays two curves with independent auto-ranging y-axes, common sliding time-series axis, and without further `ChartPlugin`s. The test-case and direct performance comparison between the ChartFx and JavaFX charting library for update rates at 25 Hz and 2 Hz is shown below.
 
 <table style="width:100%">
@@ -332,17 +345,19 @@ While the ChartFx implementation already achieved a better functionality and a b
 </figure>
 
 ## Some thoughts
+
 While starting out to improve the JDK's JavaFX Chart functionality and performance through initially extending, then gradually replacing bottle-necks, and eventually re-designing and replacing the original implementations, the resulting ChartFx library provides a substantially larger functionality and achieved an about two orders of magnitude performance improvement.
 Nevertheless, improved functionality aside, a direct performance comparison even for the best-case JavaFX scenario (static axes) with other non-JavaFX libraries demonstrated the raw JavaFX graphics performance -- despite the redesign -- being still behind the existing Java Swing-based JDataViewer and most noticeable the Qt Charts implementations. The library will continued to be maintained here at GitHub and further used for existing and future JavaFX-based control room UIs at GSI.
 The gained experience and interfaces will provide a starting point for a planned C++-based counter-part implementation using Qt or another suitable low-level charting library.
 
 ## Working on the source
+
 If you want to work on the chart-fx sourcecode, either to play with the samples or to contribute some improvements to chartFX here are some instructions how to obtain the source and compile it using maven on the command line or using eclipse.
 
 ### Maven on the command line
+
 Just clone the repository and run maven from the top level directory. The `exec:java` target can be used to execute the samples.
 Maven calls java with the corresponding options so that JavaFX is working. Because of the way the project is set up, only classes in the chartfx-samples project can be started this way.
-
 
 ```sh
 git clone
@@ -352,6 +367,7 @@ mvn exec:java
 ```
 
 ### Eclipse
+
 The following has been tested with eclipse-2019-03 and uses the m2e maven plugin. Other versions or IDEs might work similar.
 Import the repository using `Import -> Existing Maven Project`.
 This should import the parent project and the four sub-projects.
@@ -379,10 +395,12 @@ modules available and accessible to chartfx:
 
 As these parameters might change as dependencies get updated and depending on the way your project is set up,
 please check the following resources if you encounter problems with module accessibility:
+
 - [ControlsFX wiki about module visibility problems](https://github.com/controlsfx/controlsfx/wiki/Using-ControlsFX-with-JDK-9-and-above#understanding-exceptions)
 - [Blogpost with a brief explanation about the different parameters and how to use them](https://nipafx.dev/five-command-line-options-hack-java-module-system/)
 
 ### Extending chartfx
+
 If you find yourself missing some feature or not being able to access specific chart internals, the way to go is often to
 implement a custom plugin or renderer.
 
@@ -404,4 +422,5 @@ As a rule of thumb, you need to implement a custom renderer if you need to visua
 to draw something behind the chart itself.
 
 ### Acknowledgements
+
 We express our thanks and gratitude to the JavaFX community, in particular to @GregKrug and Vito Baggiolini at CERN for their valuable insights, discussions and feedback on this topic.

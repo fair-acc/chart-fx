@@ -1,12 +1,16 @@
 package io.fair_acc.sample;
 
+import java.io.InputStream;
 import java.util.Objects;
 
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import org.scenicview.ScenicView;
 
@@ -46,7 +50,11 @@ public class ChartFxSamplerProject implements FXSamplerProject {
     public WelcomePage getWelcomePage() {
         VBox vBox = new VBox();
         ImageView imgView = new ImageView();
-        // imgView.setStyle("-fx-image: url('org/controlsfx/samples/ControlsFX.png');");
+        final InputStream bannerResource = ChartFxSamplerProject.class.getResourceAsStream("banner.png");
+        if (bannerResource != null) {
+            imgView.setImage(new Image(bannerResource));
+        }
+        // imgView.setStyle("-fx-image: url('banner.png');");
         StackPane pane = new StackPane();
         pane.setPrefHeight(207);
         // pane.setStyle("-fx-background-image: url('org/controlsfx/samples/bar.png');"
@@ -57,6 +65,18 @@ public class ChartFxSamplerProject implements FXSamplerProject {
         label.setText("Welcome to ChartFx samples!\nThis library provides a wide array of facilities for high performance scientific plotting.\n\n Explore the available chart controls by clicking on the options to the left.");
         label.setStyle("-fx-font-size: 1.5em; -fx-padding: 20 0 0 5;");
         vBox.setStyle("-fx-padding: 5px; -fx-spacing: 5px");
+
+        // set window icon
+        vBox.sceneProperty().addListener(((obs, o, n) -> {
+            if (n != null) {
+                Window window = n.getWindow();
+                final InputStream iconResource = ChartFxSamplerProject.class.getResourceAsStream("icon.png");
+                if (window instanceof Stage && iconResource != null) {
+                    Stage stage = (Stage) window;
+                    stage.getIcons().add(new Image(iconResource));
+                }
+            }
+        }));
 
         var scenicView = new Button("Show ScenicView");
         scenicView.setOnAction(a -> ScenicView.show(scenicView.getScene()));
