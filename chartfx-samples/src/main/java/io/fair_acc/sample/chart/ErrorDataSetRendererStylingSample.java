@@ -5,6 +5,7 @@ import static io.fair_acc.dataset.DataSet.DIM_X;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import io.fair_acc.chartfx.plugins.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -24,10 +25,6 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.marker.DefaultMarker;
-import io.fair_acc.chartfx.plugins.DataPointTooltip;
-import io.fair_acc.chartfx.plugins.EditAxis;
-import io.fair_acc.chartfx.plugins.TableViewer;
-import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.LineStyle;
 import io.fair_acc.chartfx.renderer.datareduction.DefaultDataReducer;
@@ -451,6 +448,7 @@ public class ErrorDataSetRendererStylingSample extends ChartSample {
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new DataPointTooltip());
         chart.getPlugins().add(new TableViewer());
+        chart.getPlugins().add(new BenchPlugin());
 
         // yAxis.lookup(".axis-label")
         // .setStyle("-fx-label-padding: +10 0 +10 0;");
