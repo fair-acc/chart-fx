@@ -4,6 +4,8 @@ import java.time.ZoneOffset;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import io.fair_acc.bench.BenchLevel;
+import io.fair_acc.chartfx.plugins.BenchPlugin;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -180,6 +182,7 @@ public class RollingBufferSample extends ChartSample {
         chart.getRenderers().set(0, beamIntensityRenderer);
         chart.getRenderers().add(dipoleCurrentRenderer);
         chart.getPlugins().add(new EditAxis());
+        chart.getPlugins().add(new BenchPlugin());
 
         beamIntensityRenderer.getDatasets().add(rollingBufferBeamIntensity);
         dipoleCurrentRenderer.getDatasets().add(rollingBufferDipoleCurrent);

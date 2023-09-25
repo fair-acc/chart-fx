@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
+import io.fair_acc.chartfx.plugins.BenchPlugin;
 import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
@@ -49,6 +50,7 @@ public class ChartPerformanceGraph extends ChartSample {
         chart.getPlugins().add(new Zoomer()); // standard plugin, useful for most cases
         chart.getPlugins().add(new TableViewer());
         chart.getPlugins().add(new EditAxis());
+        chart.getPlugins().add(new BenchPlugin());
         chart.getDatasets().addAll(dataSet1, dataSet2, dataSet3);
 
         return new StackPane(chart);
