@@ -2,12 +2,13 @@
 [![License](https://img.shields.io/badge/License-LGPL%203.0-blue.svg)](https://opensource.org/licenses/LGPL-3.0)
 [![Maven Central](https://img.shields.io/maven-central/v/de.gsi.chart/chartfx-chart/11.svg)](https://search.maven.org/search?q=g:de.gsi.chart+a:chartfx-chart+v:11*)
 
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/1cac6d33dc824411bb56f9c939d02121?branch=master)](https://www.codacy.com/app/GSI/chart-fx?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=fair-acc/chart-fx&amp;utm_campaign=Badge_Grade)
-[![Language grade: Java](https://img.shields.io/lgtm/grade/java/g/fair-acc/chart-fx.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fair-acc/chart-fx/context:java)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
 [![Coverity Build Status](https://scan.coverity.com/projects/chart-fx/badge.svg)](https://scan.coverity.com/projects/chart-fx)
 
-
-# ChartFx
+<p align="center" width="100%">
+    <img t src="docs/banner/banner.svg" alt="ChartFx banner"> 
+</p>
 
 ChartFx is a scientific charting library developed at [GSI](https://www.gsi.de) for FAIR with focus on performance optimised real-time data visualisation at 25 Hz update rates for data sets with a few 10 thousand up to 5 million data points common in digital signal processing applications.
 Based on earlier Swing-based designs used at GSI and CERN, it is a re-write of JavaFX's default [Chart](https://docs.oracle.com/javase/8/javafx/api/javafx/scene/chart/Chart.html) implementation and aims to preserve the feature-rich and extensible functionality of earlier and other similar Swing-based libraries while addressing the performance bottlenecks and API issues.
@@ -24,9 +25,9 @@ The motivation for the re-design has been presented at [IPAC'19](https://ipac19.
 The library offers a wide variety of plot types common in the scientific signal processing field, a flexible plugin system as well as online parameter measurements commonly found in lab instrumentation. Some of its features include (see demos for more details):
 *   `DataSet`: basic XY-type datasets, extendable by `DataSetError` to account for measurement uncertainties, `DataSetMetaData`, `EditableDataSet`, `Histogram`, or `DataSet3D` interfaces;
 *   math sub-library: FFTs, Wavelet and other spectral and linear algebra routines, numerically robust integration and differentiation, IIR- & FIR-type filtering, linear regression and non-linear chi-square-type function fitting;
-*   `Chart`: providing euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
+*   `Chart`: providing Euclidean, polar, or 2D projections of 3D data sets, and a configurable legend;
 *   `Axis`: one or multiple axes that are linear, logarithmic, time-series, inverted, dynamic auto-(grow)-ranging, automatic range-based SI and time unit conversion;
-*   `Renderer`: scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, stair-case, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
+*   `Renderer`: scatter-plot, poly-line, area-plot, error-bar and error-surfaces, vertical bar-plots, Bezier-curve, staircase, 1D/2D histograms, mountain-range display, true contour plots, heatmaps, fading DataSet history, labelled chart range and indicator marker, hexagon-map, meta data (i.e. for indicating common measurement errors, warnings or infos such as over- or under-ranging, device or configuration errors etc.);
 *   `ChartPlugin`: data zoomer with history, zoom-to-origin, and option to limit this to X and/or Y coordinates, panner, data value and range indicators, cross-hair indicator, data point tool-tip, `DataSet` editing, table view, export to CSV and system clipboard, online axis editing, data set parameter measurement such as rise-time, min, max, rms, etc.
 
 In order to provide some of the scenegraph-level functionality while using a `Canvas` as graphics backend, the functionality of each module was extended to be readily customized through direct API methods as well as through external CSS-type style sheets.
