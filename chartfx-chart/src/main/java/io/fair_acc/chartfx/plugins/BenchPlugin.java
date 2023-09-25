@@ -4,14 +4,10 @@ import io.fair_acc.bench.BenchLevel;
 import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.bench.LiveDisplayRecorder;
-import io.fair_acc.chartfx.bench.MeasurementRecorders;
 import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.utils.AssertUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -36,12 +32,12 @@ public class BenchPlugin extends ChartPlugin {
     private static final String ICON_ENABLE_BENCH = "fa-hourglass-start:" + FONT_SIZE;
     private static final String ICON_DISABLE_BENCH = "fa-hourglass-end:" + FONT_SIZE;
     private final BooleanProperty enabled = new SimpleBooleanProperty(false);
-    private final HBox buttons = getButtonBar();
-    private Function<MeasurementRecorder, MeasurementRecorder> filterFunc = rec -> rec
+    private final HBox buttons = createButtonBar();
+    private Function<MeasurementRecorder, MeasurementRecorder> measurementFilter = rec -> rec
             .atLevel(BenchLevel.Info)
             .contains("draw");
 
-    public HBox getButtonBar() {
+    public HBox createButtonBar() {
         final Button enableBench = new Button(null, new FontIcon(ICON_ENABLE_BENCH));
         enableBench.setPadding(new Insets(3, 3, 3, 3));
         enableBench.setTooltip(new Tooltip("displays live benchmark chart"));
@@ -49,14 +45,14 @@ public class BenchPlugin extends ChartPlugin {
         disableBench.setPadding(new Insets(3, 3, 3, 3));
         disableBench.setTooltip(new Tooltip("stops live benchmarks"));
 
-        FXUtils.managedVisibilityProperty(enableBench).bind(enabled.not());
+        FXUtils.bindManagedToVisible(enableBench).bind(enabled.not());
         enableBench.setOnAction(this::enable);
-        FXUtils.managedVisibilityProperty(disableBench).bind(enabled);
+        FXUtils.bindManagedToVisible(disableBench).bind(enabled);
         disableBench.setOnAction(this::disable);
 
-        final HBox buttons = new HBox(enableBench, disableBench);
-        buttons.setPadding(new Insets(1, 1, 1, 1));
-        return buttons;
+        final HBox buttonBar = new HBox(enableBench, disableBench);
+        buttonBar.setPadding(new Insets(1, 1, 1, 1));
+        return buttonBar;
     }
 
     public BenchPlugin() {
@@ -68,14 +64,14 @@ public class BenchPlugin extends ChartPlugin {
                 }
                 enabled.set(false);
             }
-            if (n != null && isAddButtonsToToolBar()){
+            if (n != null && isAddButtonsToToolBar()) {
                 n.getToolBar().getChildren().add(buttons);
             }
         });
     }
 
     public BenchPlugin setFilter(Function<MeasurementRecorder, MeasurementRecorder> filterFunc) {
-        this.filterFunc = AssertUtils.notNull("Filter", filterFunc);
+        this.measurementFilter = AssertUtils.notNull("Filter", filterFunc);
         return this;
     }
 
@@ -83,7 +79,7 @@ public class BenchPlugin extends ChartPlugin {
         if (!enabled.get() && getChart() != null && getChart() instanceof XYChart) {
             XYChart chart = (XYChart) getChart();
             String title = Optional.ofNullable(chart.getTitle())
-                    .filter(string->!string.isEmpty())
+                    .filter(string -> !string.isEmpty())
                     .orElse("Benchmark");
             LiveDisplayRecorder recorder = LiveDisplayRecorder.createChart(title, pane -> {
 
@@ -102,7 +98,7 @@ public class BenchPlugin extends ChartPlugin {
                 stage.show();
 
             });
-            chart.setGlobalRecorder(filterFunc.apply(recorder));
+            chart.setGlobalRecorder(measurementFilter.apply(recorder));
             enabled.set(true);
         }
     }
