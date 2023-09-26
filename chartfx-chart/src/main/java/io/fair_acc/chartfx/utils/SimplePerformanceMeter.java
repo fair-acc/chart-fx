@@ -2,6 +2,8 @@ package io.fair_acc.chartfx.utils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,7 +27,6 @@ import javafx.scene.layout.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sun.javafx.scene.NodeHelper;
 // import com.sun.javafx.perf.PerformanceTracker; // keep for the future in case this becomes public API
 import com.sun.management.OperatingSystemMXBean;
 
@@ -54,7 +55,7 @@ public class SimplePerformanceMeter extends Region {
     private double cpuLoadProcessAvgInternal;
     private double cpuLoadSystemInternal;
     private double cpuLoadSystemAvgInternal = -1;
-    private final Field dirtyRootBits;
+    private final Method isCleanMethod;
     private final Field dirtyNodesSize;
     private final long updateDuration;
     // private final PerformanceTracker fxPerformanceTracker; // keep for the future in case this becomes public
@@ -81,17 +82,19 @@ public class SimplePerformanceMeter extends Region {
             }
         };
 
-        Field field1 = null;
+        Method isDirtyEmpty = null;
         Field field2 = null;
         try {
-            field1 = Node.class.getDeclaredField("dirtyBits");
-            field1.setAccessible(true);
+            isDirtyEmpty = Node.class.getDeclaredMethod("isDirtyEmpty");
+            isDirtyEmpty.setAccessible(true);
             field2 = Scene.class.getDeclaredField("dirtyNodesSize");
             field2.setAccessible(true);
-        } catch (SecurityException | NoSuchFieldException e) {
+        } catch (SecurityException | NoSuchFieldException | NoSuchMethodException e) {
+            // alternate implementation (potential issues with Java Jigsaw (com.sun... dependency):
+            // return !com.sun.javafx.scene.NodeHelper.isDirtyEmpty(this.getScene().getRoot());
             LOGGER.atError().setCause(e).log("cannot access scene root's dirtyBits field");
         }
-        dirtyRootBits = field1;
+        isCleanMethod = isDirtyEmpty;
         dirtyNodesSize = field2;
 
         this.setManaged(false);
@@ -253,17 +256,19 @@ public class SimplePerformanceMeter extends Region {
             return false;
         }
         try {
-            // implementation based on reflection
-            return dirtyNodesSize.getInt(this.getScene()) != 0 || dirtyRootBits.getInt(this.getScene().getRoot()) != 0;
-        } catch (IllegalAccessException | IllegalArgumentException exception) {
-            try {
-                // alternate implementation (potential issues with Java Jigsaw (com.sun... dependency):
-                return !NodeHelper.isDirtyEmpty(this.getScene().getRoot());
-            } catch (Throwable t) {
-                LOGGER.atError().setCause(exception).log("cannot access scene root's dirtyBits field");
-                return true;
-            }
+            return isDirty(getScene()) || isDirty(getScene().getRoot());
+        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException exception) {
+            LOGGER.atError().setCause(exception).log("cannot access scene root's dirtyBits field");
+            return true;
         }
+    }
+
+    private boolean isDirty(Scene scene) throws IllegalAccessException {
+        return dirtyNodesSize.getInt(scene) != 0;
+    }
+
+    private boolean isDirty(Node node) throws InvocationTargetException, IllegalAccessException {
+        return !((Boolean) isCleanMethod.invoke(node));
     }
 
     protected static double computeAverage(final double newValue, final double oldValue, final double alpha) {
