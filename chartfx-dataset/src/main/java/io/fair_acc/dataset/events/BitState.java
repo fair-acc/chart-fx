@@ -1,8 +1,8 @@
 package io.fair_acc.dataset.events;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
@@ -167,7 +167,7 @@ public abstract class BitState implements StateListener {
 
     public BitState addChangeListener(StateListener listener) {
         if (changeListeners == null) {
-            changeListeners = new ArrayList<>();
+            changeListeners = new CopyOnWriteArrayList<>();
         }
         changeListeners.add(listener);
         return this;
@@ -175,7 +175,7 @@ public abstract class BitState implements StateListener {
 
     public BitState addInvalidateListener(StateListener listener) {
         if (invalidateListeners == null) {
-            invalidateListeners = new ArrayList<>();
+            invalidateListeners = new CopyOnWriteArrayList<>();
         }
         invalidateListeners.add(listener);
         return this;
