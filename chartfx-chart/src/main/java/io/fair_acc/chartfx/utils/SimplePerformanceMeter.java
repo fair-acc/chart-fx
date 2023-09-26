@@ -25,6 +25,7 @@ import javafx.scene.layout.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.javafx.scene.NodeHelper;
 // import com.sun.javafx.perf.PerformanceTracker; // keep for the future in case this becomes public API
 import com.sun.management.OperatingSystemMXBean;
 
@@ -252,13 +253,17 @@ public class SimplePerformanceMeter extends Region {
             return false;
         }
         try {
+            // implementation based on reflection
             return dirtyNodesSize.getInt(this.getScene()) != 0 || dirtyRootBits.getInt(this.getScene().getRoot()) != 0;
         } catch (IllegalAccessException | IllegalArgumentException exception) {
-            LOGGER.atError().setCause(exception).log("cannot access scene root's dirtyBits field");
-            return true;
+            try {
+                // alternate implementation (potential issues with Java Jigsaw (com.sun... dependency):
+                return !NodeHelper.isDirtyEmpty(this.getScene().getRoot());
+            } catch (Throwable t) {
+                LOGGER.atError().setCause(exception).log("cannot access scene root's dirtyBits field");
+                return true;
+            }
         }
-        // alternate implementation (potential issues with Java Jigsaw (com.sun... dependency):
-        // return !NodeHelper.isDirtyEmpty(scene.getRoot())
     }
 
     protected static double computeAverage(final double newValue, final double oldValue, final double alpha) {

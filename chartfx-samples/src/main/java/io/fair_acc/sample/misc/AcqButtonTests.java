@@ -58,7 +58,7 @@ public class AcqButtonTests extends ChartSample {
     }
 
     protected static ImageView getIcon(final String iconName) {
-        return new ImageView(new Image(AcqButtonTests.class.getResourceAsStream("./icons/" + iconName)));
+        return new ImageView(new Image(AcqButtonTests.class.getResourceAsStream("icons/" + iconName)));
     }
 
     public static void main(String[] args) {

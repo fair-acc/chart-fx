@@ -208,7 +208,7 @@ public class DimReductionDataSetSample extends ChartSample {
     }
 
     private static double[] readDemoData(int index) {
-        final String fileName = index <= 1 ? "./rawDataCPS2.dat" : "./rawDataLHCInj.dat";
+        final String fileName = index <= 1 ? "rawDataCPS2.dat" : "rawDataLHCInj.dat";
         try {
             try (BufferedReader reader = new BufferedReader(
                          new InputStreamReader(Objects.requireNonNull(EMDSample.class.getResourceAsStream(fileName))))) {
