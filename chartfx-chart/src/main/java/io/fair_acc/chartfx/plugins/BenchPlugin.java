@@ -3,7 +3,6 @@ package io.fair_acc.chartfx.plugins;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
-import io.fair_acc.chartfx.Chart;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
@@ -20,6 +19,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import io.fair_acc.bench.BenchLevel;
 import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.bench.LiveDisplayRecorder;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -96,8 +96,8 @@ public class BenchPlugin extends ChartPlugin {
 
     protected MeasurementRecorder createRecorder(XYChart chart) {
         String title = Optional.ofNullable(chart.getTitle())
-                .filter(string -> !string.isEmpty())
-                .orElse("Benchmark");
+                               .filter(string -> !string.isEmpty())
+                               .orElse("Benchmark");
         return LiveDisplayRecorder.createChart(title, pane -> {
             stage.setScene(new Scene(pane));
             stage.show();
@@ -113,7 +113,6 @@ public class BenchPlugin extends ChartPlugin {
         }
     }
 
-    private static final Runnable NO_OP = () -> {
-    };
+    private static final Runnable NO_OP = () -> {};
     private Runnable resetRecorder = NO_OP;
 }
