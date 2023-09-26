@@ -3,7 +3,7 @@ name: Java CI
 
 on: [push, pull_request]
 env:
-  JAVA_REFERENCE_VERSION: 11
+  JAVA_REFERENCE_VERSION: 17
 
 jobs:
   test:
@@ -11,13 +11,13 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-22.04]
-        java: [11, 17, 19]
+        java: [17, 20]
       fail-fast: false
       max-parallel: 4
     name: Test JDK ${{ matrix.java }}, ${{ matrix.os }}
     environment: coverage # open environment, no critical secrets
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 25
       - name: Set version environment for version string
