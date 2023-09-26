@@ -27,7 +27,6 @@ public interface EventSource extends StateListener {
      * @throws NullPointerException if the listener is null
      */
     default void addListener(StateListener listener) {
-        // TODO: handle multithreaded changes to the listener?
         Objects.requireNonNull(listener, "UpdateListener must not be null");
         getBitState().addChangeListener(listener);
         getBitState().getBits(listener); // initialize to the current state
@@ -48,10 +47,8 @@ public interface EventSource extends StateListener {
      * @throws NullPointerException if the listener is null
      */
     default void removeListener(StateListener listener) {
-        synchronized (getBitState()) {
-            Objects.requireNonNull(listener, "UpdateListener must not be null");
-            getBitState().removeChangeListener(listener);
-        }
+        Objects.requireNonNull(listener, "UpdateListener must not be null");
+        getBitState().removeChangeListener(listener);
     }
 
     default void accept(BitState source, int bits) {

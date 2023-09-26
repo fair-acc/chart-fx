@@ -947,7 +947,7 @@ public abstract class Chart extends Region implements EventSource, Measurable {
         benchLockDataSets = recorder.newDebugDuration("chart-lockDataSets");
         benchUpdateAxisRange = recorder.newDuration("chart-updateAxisRange");
         benchDrawAxes = recorder.newDuration("chart-drawAxes");
-        benchDrawCanvas = recorder.newDuration("chart-drawCanvas");
+        benchDrawCanvas = recorder.newDebugDuration("chart-drawCanvas");
     }
 
     private DurationMeasure benchPreLayout = DurationMeasure.DISABLED;

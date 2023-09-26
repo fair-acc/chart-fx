@@ -35,21 +35,23 @@ public class BenchPlugin extends ChartPlugin {
     private final BooleanProperty enabled = new SimpleBooleanProperty(false);
     private final HBox buttons = createButtonBar();
     private UnaryOperator<MeasurementRecorder> measurementFilter = rec -> rec.atLevel(BenchLevel.Info).contains("draw");
+    private final Stage stage = new Stage();
 
     public HBox createButtonBar() {
-        final Button enableBench = new Button(null, new FontIcon(ICON_ENABLE_BENCH));
-        enableBench.setPadding(new Insets(3, 3, 3, 3));
-        enableBench.setTooltip(new Tooltip("displays live benchmark chart"));
-        final Button disableBench = new Button(null, new FontIcon(ICON_DISABLE_BENCH));
-        disableBench.setPadding(new Insets(3, 3, 3, 3));
-        disableBench.setTooltip(new Tooltip("stops live benchmarks"));
+        final Button enableBtn = new Button(null, new FontIcon(ICON_ENABLE_BENCH));
+        enableBtn.setPadding(new Insets(3, 3, 3, 3));
+        enableBtn.setTooltip(new Tooltip("starts displaying live benchmark stats"));
+        enableBtn.disableProperty().bind(chartProperty().isNull());
+        final Button disableBtn = new Button(null, new FontIcon(ICON_DISABLE_BENCH));
+        disableBtn.setPadding(new Insets(3, 3, 3, 3));
+        disableBtn.setTooltip(new Tooltip("stops displaying live benchmark stats"));
 
-        FXUtils.bindManagedToVisible(enableBench).bind(enabled.not());
-        enableBench.setOnAction(this::enable);
-        FXUtils.bindManagedToVisible(disableBench).bind(enabled);
-        disableBench.setOnAction(this::disable);
+        FXUtils.bindManagedToVisible(enableBtn).bind(enabled.not());
+        enableBtn.setOnAction(this::enable);
+        FXUtils.bindManagedToVisible(disableBtn).bind(enabled);
+        disableBtn.setOnAction(evt -> disable());
 
-        final HBox buttonBar = new HBox(enableBench, disableBench);
+        final HBox buttonBar = new HBox(enableBtn, disableBtn);
         buttonBar.setPadding(new Insets(1, 1, 1, 1));
         return buttonBar;
     }
@@ -65,6 +67,11 @@ public class BenchPlugin extends ChartPlugin {
             }
             if (n != null && isAddButtonsToToolBar()) {
                 n.getToolBar().getChildren().add(buttons);
+            }
+        });
+        stage.showingProperty().addListener((observable, oldValue, showing) -> {
+            if (!showing) {
+                disable();
             }
         });
     }
@@ -83,16 +90,8 @@ public class BenchPlugin extends ChartPlugin {
             LiveDisplayRecorder recorder = LiveDisplayRecorder.createChart(title, pane -> {
                 Scene scene = new Scene(pane);
                 scene.getStylesheets().addAll(chart.getScene().getStylesheets());
-
-                Stage stage = new Stage();
-                stage.initOwner(chart.getScene().getWindow());
                 stage.setScene(scene);
-                stage.showingProperty().addListener((observable, oldValue, showing) -> {
-                    if (!showing) {
-                        chart.setGlobalRecorder(MeasurementRecorder.DISABLED);
-                        disable(event);
-                    }
-                });
+                resetRecorder = () -> chart.setGlobalRecorder(MeasurementRecorder.DISABLED);
                 stage.show();
             });
             chart.setGlobalRecorder(measurementFilter.apply(recorder));
@@ -100,11 +99,15 @@ public class BenchPlugin extends ChartPlugin {
         }
     }
 
-    private void disable(ActionEvent event) {
-        if (enabled.get() && getChart() != null && getChart() instanceof XYChart) {
-            XYChart chart = (XYChart) getChart();
-            chart.setGlobalRecorder(MeasurementRecorder.DISABLED);
+    private void disable() {
+        if (enabled.get()) {
             enabled.set(false);
+            resetRecorder.run();
+            resetRecorder = NO_OP;
+            stage.hide();
         }
     }
+
+    private static final Runnable NO_OP = () -> {};
+    private Runnable resetRecorder = NO_OP;
 }
