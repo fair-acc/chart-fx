@@ -392,7 +392,7 @@ public class GridRenderer extends Parent implements Renderer {
 
     @Override
     public void setRecorder(MeasurementRecorder recorder) {
-        benchDrawGrid = recorder.newDuration("grid-drawGrid");
+        benchDrawGrid = recorder.newDebugDuration("grid-drawGrid");
     }
 
     private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;

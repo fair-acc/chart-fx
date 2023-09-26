@@ -132,7 +132,7 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     @Override
     public void setRecorder(MeasurementRecorder recorder) {
         benchDrawAll = recorder.newDuration("xy-draw-all");
-        benchDrawSingle = recorder.newDuration("xy-draw-single");
+        benchDrawSingle = recorder.newDebugDuration("xy-draw-single");
     }
 
     private DurationMeasure benchDrawAll = DurationMeasure.DISABLED;

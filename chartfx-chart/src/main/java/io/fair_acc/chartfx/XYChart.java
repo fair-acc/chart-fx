@@ -298,8 +298,9 @@ public class XYChart extends Chart {
             } else if (axis == getYAxis()) {
                 axis.setRecorder(recorder.addPrefix("y"));
             } else {
-                axis.setRecorder(recorder.addPrefix("axis" + i++));
+                axis.setRecorder(recorder.addPrefix("axis" + i));
             }
+            i++;
         }
         i = 0;
         gridRenderer.setRecorder(recorder);
@@ -323,8 +324,8 @@ public class XYChart extends Chart {
     @Override
     public void setRecorder(MeasurementRecorder recorder) {
         super.setRecorder(recorder);
-        benchDrawGrid = recorder.newDebugDuration("xychart-drawGrid");
-        benchDrawData = recorder.newDebugDuration("xychart-drawData");
+        benchDrawGrid = recorder.newDuration("xychart-drawGrid");
+        benchDrawData = recorder.newDuration("xychart-drawData");
     }
 
     private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
