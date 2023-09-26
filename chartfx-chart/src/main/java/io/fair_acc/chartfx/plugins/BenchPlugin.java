@@ -5,6 +5,8 @@ import java.util.function.UnaryOperator;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
@@ -17,6 +19,7 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 import io.fair_acc.bench.BenchLevel;
 import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.bench.LiveDisplayRecorder;
 import io.fair_acc.chartfx.utils.FXUtils;
@@ -32,12 +35,12 @@ public class BenchPlugin extends ChartPlugin {
     private static final int FONT_SIZE = 22;
     private static final String ICON_ENABLE_BENCH = "fa-hourglass-start:" + FONT_SIZE;
     private static final String ICON_DISABLE_BENCH = "fa-hourglass-end:" + FONT_SIZE;
-    private final BooleanProperty enabled = new SimpleBooleanProperty(false);
+    protected final BooleanProperty enabled = new SimpleBooleanProperty(false);
     private final HBox buttons = createButtonBar();
     private UnaryOperator<MeasurementRecorder> measurementFilter = rec -> rec.atLevel(BenchLevel.Info).contains("draw");
-    private final Stage stage = new Stage();
+    protected final Stage stage = new Stage();
 
-    public HBox createButtonBar() {
+    protected HBox createButtonBar() {
         final Button enableBtn = new Button(null, new FontIcon(ICON_ENABLE_BENCH));
         enableBtn.setPadding(new Insets(3, 3, 3, 3));
         enableBtn.setTooltip(new Tooltip("starts displaying live benchmark stats"));
@@ -47,7 +50,7 @@ public class BenchPlugin extends ChartPlugin {
         disableBtn.setTooltip(new Tooltip("stops displaying live benchmark stats"));
 
         FXUtils.bindManagedToVisible(enableBtn).bind(enabled.not());
-        enableBtn.setOnAction(this::enable);
+        enableBtn.setOnAction(evt -> enable());
         FXUtils.bindManagedToVisible(disableBtn).bind(enabled);
         disableBtn.setOnAction(evt -> disable());
 
@@ -81,25 +84,27 @@ public class BenchPlugin extends ChartPlugin {
         return this;
     }
 
-    private void enable(ActionEvent event) {
+    public void enable() {
         if (!enabled.get() && getChart() != null && getChart() instanceof XYChart) {
             XYChart chart = (XYChart) getChart();
-            String title = Optional.ofNullable(chart.getTitle())
-                                   .filter(string -> !string.isEmpty())
-                                   .orElse("Benchmark");
-            LiveDisplayRecorder recorder = LiveDisplayRecorder.createChart(title, pane -> {
-                Scene scene = new Scene(pane);
-                scene.getStylesheets().addAll(chart.getScene().getStylesheets());
-                stage.setScene(scene);
-                resetRecorder = () -> chart.setGlobalRecorder(MeasurementRecorder.DISABLED);
-                stage.show();
-            });
+            MeasurementRecorder recorder = createRecorder(chart);
             chart.setGlobalRecorder(measurementFilter.apply(recorder));
+            resetRecorder = () -> chart.setGlobalRecorder(MeasurementRecorder.DISABLED);
             enabled.set(true);
         }
     }
 
-    private void disable() {
+    protected MeasurementRecorder createRecorder(XYChart chart) {
+        String title = Optional.ofNullable(chart.getTitle())
+                               .filter(string -> !string.isEmpty())
+                               .orElse("Benchmark");
+        return LiveDisplayRecorder.createChart(title, pane -> {
+            stage.setScene(new Scene(pane));
+            stage.show();
+        });
+    }
+
+    public void disable() {
         if (enabled.get()) {
             enabled.set(false);
             resetRecorder.run();

@@ -292,18 +292,6 @@ public class XYChart extends Chart {
     public void setGlobalRecorder(MeasurementRecorder recorder) {
         setRecorder(recorder);
         int i = 0;
-        for (Axis axis : getAxes()) {
-            if (axis == getXAxis()) {
-                axis.setRecorder(recorder.addPrefix("x"));
-            } else if (axis == getYAxis()) {
-                axis.setRecorder(recorder.addPrefix("y"));
-            } else {
-                axis.setRecorder(recorder.addPrefix("axis" + i));
-            }
-            i++;
-        }
-        i = 0;
-        gridRenderer.setRecorder(recorder);
         for (var renderer : getRenderers()) {
             var p = recorder.addPrefix("renderer" + i);
             renderer.setRecorder(p);
@@ -315,6 +303,18 @@ public class XYChart extends Chart {
             }
             i++;
         }
+        gridRenderer.setRecorder(recorder);
+        i = 0;
+        for (Axis axis : getAxes()) {
+            if (axis == getXAxis()) {
+                axis.setRecorder(recorder.addPrefix("x"));
+            } else if (axis == getYAxis()) {
+                axis.setRecorder(recorder.addPrefix("y"));
+            } else {
+                axis.setRecorder(recorder.addPrefix("axis" + i));
+            }
+            i++;
+        }
         i = 0;
         for (ChartPlugin plugin : getPlugins()) {
             plugin.setRecorder(recorder.addPrefix("plugin" + i++));
@@ -323,11 +323,11 @@ public class XYChart extends Chart {
 
     @Override
     public void setRecorder(MeasurementRecorder recorder) {
-        super.setRecorder(recorder);
-        benchDrawGrid = recorder.newDuration("xychart-drawGrid");
         benchDrawData = recorder.newDuration("xychart-drawData");
+        benchDrawGrid = recorder.newDuration("xychart-drawGrid");
+        super.setRecorder(recorder);
     }
 
-    private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
     private DurationMeasure benchDrawData = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawGrid = DurationMeasure.DISABLED;
 }
