@@ -1,11 +1,8 @@
 package io.fair_acc.chartfx.plugins;
 
-import io.fair_acc.bench.BenchLevel;
-import io.fair_acc.bench.MeasurementRecorder;
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.bench.LiveDisplayRecorder;
-import io.fair_acc.chartfx.utils.FXUtils;
-import io.fair_acc.dataset.utils.AssertUtils;
+import java.util.Optional;
+import java.util.function.UnaryOperator;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -15,10 +12,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
+
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.util.Optional;
-import java.util.function.UnaryOperator;
+import io.fair_acc.bench.BenchLevel;
+import io.fair_acc.bench.MeasurementRecorder;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.bench.LiveDisplayRecorder;
+import io.fair_acc.chartfx.utils.FXUtils;
+import io.fair_acc.dataset.utils.AssertUtils;
 
 /**
  * Experimental plugin that measures and displays the internal
@@ -83,8 +85,8 @@ public class BenchPlugin extends ChartPlugin {
         if (!enabled.get() && getChart() != null && getChart() instanceof XYChart) {
             XYChart chart = (XYChart) getChart();
             String title = Optional.ofNullable(chart.getTitle())
-                    .filter(string -> !string.isEmpty())
-                    .orElse("Benchmark");
+                                   .filter(string -> !string.isEmpty())
+                                   .orElse("Benchmark");
             LiveDisplayRecorder recorder = LiveDisplayRecorder.createChart(title, pane -> {
                 Scene scene = new Scene(pane);
                 scene.getStylesheets().addAll(chart.getScene().getStylesheets());
@@ -106,8 +108,6 @@ public class BenchPlugin extends ChartPlugin {
         }
     }
 
-    private static final Runnable NO_OP = () -> {
-    };
+    private static final Runnable NO_OP = () -> {};
     private Runnable resetRecorder = NO_OP;
-
 }
