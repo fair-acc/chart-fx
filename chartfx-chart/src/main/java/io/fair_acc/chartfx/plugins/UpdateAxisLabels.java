@@ -27,8 +27,10 @@ import io.fair_acc.dataset.events.StateListener;
  * TODO: revisit this plugin. we should be able to turn this into a single chart listener and an update method (ennerf)
  * TODO: this is using Chart::getDataSets() which doesn't really exist anymore
  *
+ * @deprecated prototype which is not usable yet and has to be adopted to the new layout
  * @author akrimm
  */
+@Deprecated
 public class UpdateAxisLabels extends ChartPlugin {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateAxisLabels.class);
 

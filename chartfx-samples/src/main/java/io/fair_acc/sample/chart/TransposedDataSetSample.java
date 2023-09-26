@@ -156,7 +156,6 @@ public class TransposedDataSetSample extends ChartSample {
         final XYChart chart = new XYChart();
         chart.getPlugins().add(new Zoomer());
         chart.getPlugins().add(new EditAxis());
-        chart.getPlugins().add(new UpdateAxisLabels());
         chart.getXAxis().setAutoRanging(true);
         chart.getYAxis().setAutoRanging(true);
         VBox.setVgrow(chart, Priority.ALWAYS);

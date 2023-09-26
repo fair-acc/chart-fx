@@ -38,7 +38,6 @@ public class EditDataSetSample extends ChartSample {
         chart.getPlugins().add(new EditAxis());
         chart.getPlugins().add(new EditDataSet());
         chart.getPlugins().add(new DataPointTooltip());
-        chart.getPlugins().add(new UpdateAxisLabels());
         root.getChildren().add(chart);
 
         final DoubleDataSet dataSet1 = new DoubleDataSet("data set #1 (full change)");
