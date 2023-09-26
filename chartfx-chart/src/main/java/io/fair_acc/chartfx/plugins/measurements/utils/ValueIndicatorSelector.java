@@ -126,8 +126,7 @@ public class ValueIndicatorSelector extends GridPane {
                 valueIndicators.add((AbstractSingleValueIndicator) newPlugin);
             }
 
-            if (reuseIndicators.isSelected() && valueIndicatorsUser.size() < 2 && !valueIndicatorsUser.contains(newPlugin)) {
-                valueIndicatorsUser.add((AbstractSingleValueIndicator) newPlugin);
+            if (reuseIndicators.isSelected() && valueIndicatorsUser.size() < (indicatorListView.getSelectionModel().getSelectionMode() == SelectionMode.SINGLE ? 1 : 2) && !valueIndicatorsUser.contains(newPlugin)) {
                 indicatorListView.getSelectionModel().select((AbstractSingleValueIndicator) newPlugin);
             }
         }

@@ -3,6 +3,7 @@ package io.fair_acc.chartfx.plugins.measurements;
 import static io.fair_acc.chartfx.axes.AxisMode.X;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,10 +41,7 @@ import org.slf4j.LoggerFactory;
 import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisMode;
-import io.fair_acc.chartfx.plugins.AbstractSingleValueIndicator;
-import io.fair_acc.chartfx.plugins.ParameterMeasurements;
-import io.fair_acc.chartfx.plugins.XValueIndicator;
-import io.fair_acc.chartfx.plugins.YValueIndicator;
+import io.fair_acc.chartfx.plugins.*;
 import io.fair_acc.chartfx.plugins.measurements.utils.CheckedValueField;
 import io.fair_acc.chartfx.plugins.measurements.utils.DataSetSelector;
 import io.fair_acc.chartfx.plugins.measurements.utils.ValueIndicatorSelector;
@@ -301,6 +299,19 @@ public abstract class AbstractChartMeasurement implements EventSource {
     }
 
     protected void removeAction() {
+        // remove unused indicators
+        List<ChartPlugin> toRemove = new ArrayList<>();
+        getValueIndicatorsUser().forEach(ind -> {
+            if (!ind.isAutoRemove()) {
+                return;
+            }
+            boolean used = plugin.getChartMeasurements().stream().anyMatch(measurement -> measurement != this && measurement.getValueIndicatorsUser().contains(ind));
+            if (!used) {
+                toRemove.add(ind);
+            }
+        });
+        plugin.getChart().getPlugins().removeAll(toRemove);
+
         getMeasurementPlugin().getChartMeasurements().remove(this);
         getMeasurementPlugin().getDataView().getChildren().remove(dataViewWindow);
         getMeasurementPlugin().getDataView().getVisibleChildren().remove(dataViewWindow);
@@ -308,7 +319,6 @@ public abstract class AbstractChartMeasurement implements EventSource {
         getValueIndicatorsUser().removeListener(valueIndicatorsUserChangeListener);
 
         removeSliderChangeListener();
-        cleanUpSuperfluousIndicators();
     }
 
     protected void removeSliderChangeListener() {
@@ -323,15 +333,6 @@ public abstract class AbstractChartMeasurement implements EventSource {
         });
     }
 
-    protected void cleanUpSuperfluousIndicators() {
-        final Chart chart = getMeasurementPlugin().getChart();
-        if (chart == null) {
-            return;
-        }
-        final List<AbstractSingleValueIndicator> allIndicators = chart.getPlugins().stream().filter(p -> p instanceof AbstractSingleValueIndicator).map(p -> (AbstractSingleValueIndicator) p).collect(Collectors.toList());
-        // TODO: allIndicators.stream().filter((final AbstractSingleValueIndicator indicator) -> indicator.isAutoRemove() && indicator.getBitState().isEmpty()).forEach((final AbstractSingleValueIndicator indicator) -> getMeasurementPlugin().getChart().getPlugins().remove(indicator));
-    }
-
     protected void updateSlider() {
         if (!valueIndicatorSelector.isReuseIndicators()) {
             getValueIndicatorsUser().clear();
@@ -340,7 +341,6 @@ public abstract class AbstractChartMeasurement implements EventSource {
         for (int i = 0; i < requiredNumberOfIndicators; i++) {
             updateSlider(i);
         }
-        cleanUpSuperfluousIndicators();
     }
 
     protected AbstractSingleValueIndicator updateSlider(final int requestedIndex) {
