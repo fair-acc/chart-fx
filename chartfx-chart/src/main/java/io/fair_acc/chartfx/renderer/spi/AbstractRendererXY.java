@@ -60,9 +60,9 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         for (int i = getDatasetNodes().size() - 1; i >= 0; i--) {
             var dataSetNode = getDatasetNodes().get(i);
             if (dataSetNode.isVisible()) {
-                benchDrawSingle.start();
+                benchDrawOne.start();
                 render(getChart().getCanvas().getGraphicsContext2D(), dataSetNode.getDataSet(), dataSetNode);
-                benchDrawSingle.stop();
+                benchDrawOne.stop();
             }
         }
 
@@ -131,10 +131,11 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
 
     @Override
     public void setRecorder(MeasurementRecorder recorder) {
-        benchDrawAll = recorder.newDuration("xy-draw-all");
-        benchDrawSingle = recorder.newDebugDuration("xy-draw-single");
+        benchDrawAll = recorder.newDuration("xy-drawAll");
+        benchDrawOne = recorder.newTraceDuration("xy-drawOne");
     }
 
     private DurationMeasure benchDrawAll = DurationMeasure.DISABLED;
-    private DurationMeasure benchDrawSingle = DurationMeasure.DISABLED;
+    private DurationMeasure benchDrawOne = DurationMeasure.DISABLED;
+
 }

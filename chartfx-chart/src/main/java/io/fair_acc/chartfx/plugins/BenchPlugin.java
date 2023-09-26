@@ -39,6 +39,7 @@ public class BenchPlugin extends ChartPlugin {
         final Button enableBtn = new Button(null, new FontIcon(ICON_ENABLE_BENCH));
         enableBtn.setPadding(new Insets(3, 3, 3, 3));
         enableBtn.setTooltip(new Tooltip("starts displaying live benchmark stats"));
+        enableBtn.disableProperty().bind(chartProperty().isNull());
         final Button disableBtn = new Button(null, new FontIcon(ICON_DISABLE_BENCH));
         disableBtn.setPadding(new Insets(3, 3, 3, 3));
         disableBtn.setTooltip(new Tooltip("stops displaying live benchmark stats"));
