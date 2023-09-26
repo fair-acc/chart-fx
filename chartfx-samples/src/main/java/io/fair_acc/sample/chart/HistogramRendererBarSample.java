@@ -111,8 +111,7 @@ public class HistogramRendererBarSample extends ChartSample {
     }
 
     private void loadDemoData(final String fileName) {
-        try (BufferedReader csvReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(this.getClass().getResourceAsStream(fileName))))){
-
+        try (BufferedReader csvReader = new BufferedReader(new InputStreamReader(Objects.requireNonNull(this.getClass().getResourceAsStream(fileName))))) {
             // skip first row
             String row = csvReader.readLine();
             // country,age,men 1980 [%],men 2000  [%],men 2050 [%],women 1980 [%],women 2000 [%],women 2050 [%],men 1980,men 2000,men 2050,women 1980,women 2000,women 2050

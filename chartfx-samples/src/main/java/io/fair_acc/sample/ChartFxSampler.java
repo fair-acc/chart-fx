@@ -1,17 +1,16 @@
 package io.fair_acc.sample;
 
-import fxsampler.FXSampler;
-
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Optional;
 
-public class ChartFxSampler {
+import fxsampler.FXSampler;
 
+public class ChartFxSampler {
     private static boolean debug = Optional.ofNullable(System.getenv("chartfx.debug"))
-            .map(Boolean::parseBoolean)
-            .orElse(false);
+                                           .map(Boolean::parseBoolean)
+                                           .orElse(false);
 
     public static void main(String[] args) {
         if (debug) {

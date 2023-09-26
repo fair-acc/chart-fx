@@ -14,7 +14,6 @@ import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
-import com.sun.javafx.scene.NodeHelper;
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ReadOnlyDoubleProperty;
@@ -26,6 +25,7 @@ import javafx.scene.layout.Region;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sun.javafx.scene.NodeHelper;
 // import com.sun.javafx.perf.PerformanceTracker; // keep for the future in case this becomes public API
 import com.sun.management.OperatingSystemMXBean;
 
