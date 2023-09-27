@@ -1,5 +1,6 @@
 package io.fair_acc.chartfx;
 
+import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -228,7 +229,23 @@ public class XYChart extends Chart {
             if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
                 axis.invalidateRange();
             }
+
+            // Feature for backwards compatibility: Category axes that do not have
+            // their categories set copy the categories of the first dataset of the
+            // first renderer that is using this axis.
+            if (axis instanceof CategoryAxis catAxis) {
+                for (Renderer renderer : getRenderers()) {
+                    if (renderer.isUsingAxis(axis)) {
+                        if (!renderer.getDatasets().isEmpty()) {
+                            catAxis.updateCategories(renderer.getDatasets().get(0));
+                        }
+                        break;
+                    }
+                }
+            }
+
         }
+
     }
 
     private final AxisRange axisRange = new AxisRange();

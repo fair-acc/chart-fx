@@ -87,6 +87,11 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         }
     }
 
+    @Override
+    public boolean isUsingAxis(Axis axis) {
+        return axis == xAxis || axis == yAxis;
+    }
+
     protected Axis ensureAxisInChart(Axis axis) {
         if (axis != null && !getChart().getAxes().contains(axis)) {
             getChart().getAxes().add(axis);
