@@ -12,6 +12,7 @@ import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
+import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
 import io.fair_acc.dataset.utils.AssertUtils;
@@ -85,6 +86,22 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         if (yAxis == null) {
             yAxis = chart.getYAxis();
         }
+
+        // Update category axes (TODO: remove this API?)
+        if (!getDatasets().isEmpty()) {
+            var ds = getDatasets().get(0);
+            if (xAxis instanceof CategoryAxis xCat) {
+                xCat.updateCategories(ds);
+            }
+            if (yAxis instanceof CategoryAxis yCat) {
+                yCat.updateCategories(ds);
+            }
+        }
+    }
+
+    @Override
+    public boolean isUsingAxis(Axis axis) {
+        return axis == xAxis || axis == yAxis;
     }
 
     protected Axis ensureAxisInChart(Axis axis) {
