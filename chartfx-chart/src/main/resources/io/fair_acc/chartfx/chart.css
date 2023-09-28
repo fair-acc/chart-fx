@@ -293,6 +293,9 @@
   -fx-marker-line-width: 0.5;
   -fx-line-color: -color-dataset;
   -fx-line-width: 1;
+  -fx-line-miter-limit: 1;
+  -fx-line-cap: butt;
+  -fx-line-join: bevel;
 }
 .dataset.default-color0 {
   -color-dataset: -color-dataset-1;

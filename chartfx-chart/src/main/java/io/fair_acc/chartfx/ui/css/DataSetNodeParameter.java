@@ -9,6 +9,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.css.*;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 
@@ -16,6 +17,8 @@ import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
 import io.fair_acc.chartfx.utils.PropUtil;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.StrokeLineJoin;
 
 /**
  * Holds the styleable parameters of the DataSetNode
@@ -61,6 +64,9 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
     private final ObjectBinding<Paint> lineFillPattern = hatchFillPattern(intensifiedLineColor);
     private final ObjectProperty<Number[]> lineDashArray = addOnChange(css().createNumberArrayProperty(this, "lineDashArray", null));
     private final ObjectBinding<double[]> lineDashes = StyleUtil.toUnboxedDoubleArray(lineDashArray);
+    private final DoubleProperty lineMiterLimit = addOnChange(css().createDoubleProperty(this, "lineMiterLimit", 1d));
+    private final ObjectProperty<StrokeLineJoin> lineJoin = addOnChange(css().createEnumProperty(this, "lineJoin", StrokeLineJoin.BEVEL, true, StrokeLineJoin.class));
+    private final ObjectProperty<StrokeLineCap> lineCap = addOnChange(css().createEnumProperty(this, "lineCap", StrokeLineCap.BUTT, true, StrokeLineCap.class));
 
     // ======================== Overriden accessors ========================
 
@@ -320,7 +326,57 @@ public abstract class DataSetNodeParameter extends Parent implements StyleUtil.S
         return lineDashes;
     }
 
+    public double getLineMiterLimit() {
+        return lineMiterLimit.get();
+    }
+
+    public DoubleProperty lineMiterLimitProperty() {
+        return lineMiterLimit;
+    }
+
+    public void setLineMiterLimit(double lineMiterLimit) {
+        this.lineMiterLimit.set(lineMiterLimit);
+    }
+
+    public StrokeLineJoin getLineJoin() {
+        return lineJoin.get();
+    }
+
+    public ObjectProperty<StrokeLineJoin> lineJoinProperty() {
+        return lineJoin;
+    }
+
+    public void setLineJoin(StrokeLineJoin lineJoin) {
+        this.lineJoin.set(lineJoin);
+    }
+
+    public StrokeLineCap getLineCap() {
+        return lineCap.get();
+    }
+
+    public ObjectProperty<StrokeLineCap> lineCapProperty() {
+        return lineCap;
+    }
+
+    public void setLineCap(StrokeLineCap lineCap) {
+        this.lineCap.set(lineCap);
+    }
+
     // ======================== Utility methods ========================
+
+    /**
+     * Sets all styles that apply to a gc.strokeLine() call.
+     *
+     * @param gc target context
+     */
+    public void applyLineStrokeStyle(GraphicsContext gc) {
+        gc.setMiterLimit(getLineMiterLimit());
+        gc.setLineJoin(getLineJoin());
+        gc.setLineCap(getLineCap());
+        gc.setLineWidth(getLineWidth());
+        gc.setLineDashes(getLineDashes());
+        gc.setStroke(getLineColor());
+    }
 
     protected ObjectBinding<Paint> intensifiedColor(ObservableValue<Paint> base) {
         return Bindings.createObjectBinding(() -> getIntensifiedColor(base.getValue()), base, intensity);

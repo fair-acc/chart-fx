@@ -55,10 +55,8 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
         int numCoords;
 
         gc.save();
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
-        gc.setFill(style.getLineColor());
+        style.applyLineStrokeStyle(gc);
+        gc.setFill(style.getMarkerColor());
 
         // compute local screen coordinates
         double xi, yi, prevX = Double.NaN, prevY = Double.NaN;
