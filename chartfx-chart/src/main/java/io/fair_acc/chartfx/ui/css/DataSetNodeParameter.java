@@ -12,13 +12,13 @@ import javafx.scene.Parent;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
+import javafx.scene.shape.StrokeLineCap;
+import javafx.scene.shape.StrokeLineJoin;
 
 import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.spi.utils.FillPatternStyleHelper;
 import io.fair_acc.chartfx.utils.PropUtil;
-import javafx.scene.shape.StrokeLineCap;
-import javafx.scene.shape.StrokeLineJoin;
 
 /**
  * Holds the styleable parameters of the DataSetNode
