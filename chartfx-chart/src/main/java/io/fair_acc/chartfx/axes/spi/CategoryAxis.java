@@ -157,7 +157,7 @@ public final class CategoryAxis extends DefaultNumericAxis {
      * @return true is categories were modified, false otherwise
      */
     public boolean updateCategories(final DataSet dataSet) {
-        if (dataSet == null || forceAxisCategories) {
+        if (dataSet == null || !dataSet.hasDataLabels() || forceAxisCategories) {
             return false;
         }
 

@@ -14,7 +14,6 @@ import io.fair_acc.bench.DurationMeasure;
 import io.fair_acc.bench.MeasurementRecorder;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.spi.AxisRange;
-import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.plugins.ChartPlugin;
 import io.fair_acc.chartfx.renderer.PolarTickStep;
 import io.fair_acc.chartfx.renderer.Renderer;
@@ -228,20 +227,6 @@ public class XYChart extends Chart {
             // Trigger a redraw
             if (changed && (axis.isAutoRanging() || axis.isAutoGrowRanging())) {
                 axis.invalidateRange();
-            }
-
-            // Feature for backwards compatibility: Category axes that do not have
-            // their categories set copy the categories of the first dataset of the
-            // first renderer that is using this axis.
-            if (axis instanceof CategoryAxis catAxis) {
-                for (Renderer renderer : getRenderers()) {
-                    if (renderer.isUsingAxis(axis)) {
-                        if (!renderer.getDatasets().isEmpty()) {
-                            catAxis.updateCategories(renderer.getDatasets().get(0));
-                        }
-                        break;
-                    }
-                }
             }
         }
     }
