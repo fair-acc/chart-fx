@@ -162,10 +162,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         final boolean isHistogram = ds instanceof Histogram;
 
         gc.save();
-
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
+        style.applyLineStrokeStyle(gc);
         gc.setFill(style.getLineColor());
 
         for (int i = 0; i < nRange; i++) {
@@ -275,9 +272,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         newY[2 * (nRange + 1) - 1] = axisMin;
 
         gc.save();
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
+        style.applyLineStrokeStyle(gc);
 
         drawPolygon(gc, newX, newY, filled, isVerticalDataSet, 2 * nRange + 2);
 
@@ -315,9 +310,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         BezierCurve.calcCurveControlPoints(xValues, yValues, xCp1, yCp1, xCp2, yCp2, nRange);
 
         gc.save();
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
+        style.applyLineStrokeStyle(gc);
 
         gc.beginPath();
         for (int i = 0; i < nRange - 1; i++) {
@@ -387,9 +380,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
             gc.setFill(style.getLineColor());
             gc.fill();
         } else {
-            gc.setLineWidth(style.getLineWidth());
-            gc.setLineDashes(style.getLineDashes());
-            gc.setStroke(style.getLineColor());
+            style.applyLineStrokeStyle(gc);
             gc.stroke();
         }
 
@@ -433,9 +424,7 @@ public class HistogramRenderer extends AbstractErrorDataSetRendererParameter<His
         newY[2 * nRange - 1] = newY[2 * (nRange - 1)];
 
         gc.save();
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
+        style.applyLineStrokeStyle(gc);
 
         drawPolygon(gc, newX, newY, filled, isVerticalDataSet, 2 * nRange);
         gc.restore();

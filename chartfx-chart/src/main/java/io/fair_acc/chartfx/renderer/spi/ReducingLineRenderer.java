@@ -7,22 +7,11 @@ package io.fair_acc.chartfx.renderer.spi;
 import static io.fair_acc.dataset.DataSet.DIM_X;
 import static io.fair_acc.dataset.DataSet.DIM_Y;
 
-import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
-
-import javafx.collections.ObservableList;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 
-import io.fair_acc.chartfx.Chart;
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.axes.spi.CategoryAxis;
 import io.fair_acc.chartfx.renderer.Renderer;
 import io.fair_acc.chartfx.ui.css.DataSetNode;
 import io.fair_acc.dataset.DataSet;
-import io.fair_acc.dataset.utils.ProcessingProfiler;
 
 /**
  * Simple, uncomplicated reducing line renderer
@@ -55,9 +44,7 @@ public class ReducingLineRenderer extends AbstractRendererXY<ReducingLineRendere
     @Override
     protected void render(GraphicsContext gc, DataSet ds, DataSetNode style) {
         gc.save();
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
+        style.applyLineStrokeStyle(gc);
 
         if (ds.getDataCount() > 0) {
             final int indexMin = Math.max(0, ds.getIndex(DIM_X, xMin));

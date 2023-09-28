@@ -270,6 +270,9 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
   -fx-line-color: -color-dataset;
   -fx-line-width: 1.0; // 0 to disable
   -fx-line-dash-array: null;
+  -fx-line-miter-limit: 1.0;
+  -fx-line-cap: butt;
+  -fx-line-join: bevel;
 
 }
 

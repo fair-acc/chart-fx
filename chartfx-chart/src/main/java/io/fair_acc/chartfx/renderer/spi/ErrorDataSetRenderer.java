@@ -7,7 +7,6 @@ import javafx.scene.shape.FillRule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.fair_acc.chartfx.marker.DefaultMarker;
 import io.fair_acc.chartfx.marker.Marker;
 import io.fair_acc.chartfx.renderer.ErrorStyle;
 import io.fair_acc.chartfx.renderer.Renderer;
@@ -621,9 +620,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         newY[length - 1] = points.yZero;
 
         gc.save();
-        gc.setStroke(style.getLineColor());
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
+        style.applyLineStrokeStyle(gc);
 
         for (int i = 0; i < length - 1; i++) {
             final double x1 = newX[i];
@@ -654,11 +651,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 points.actualDataCount);
 
         gc.save();
-
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
-        gc.setFill(gc.getStroke());
+        style.applyLineStrokeStyle(gc);
 
         gc.beginPath();
         for (int i = 0; i < n - 1; i++) {
@@ -724,11 +717,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
 
     protected static void drawPolyLineLine(final GraphicsContext gc, final DataSetNode style, final CachedDataPoints points) {
         gc.save();
-
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
-        gc.setStroke(style.getLineColor());
-        gc.setFill(gc.getStroke());
+        style.applyLineStrokeStyle(gc);
 
         if (points.allowForNaNs) {
             gc.beginPath();
@@ -798,11 +787,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         newY[length - 1] = points.yValues[n - 1];
 
         gc.save();
-
-        gc.setStroke(style.getLineColor());
-        gc.setFill(gc.getStroke());
-        gc.setLineWidth(style.getLineWidth());
-        gc.setLineDashes(style.getLineDashes());
+        style.applyLineStrokeStyle(gc);
 
         // gc.strokePolyline(newX, newY, 2*n);
 
