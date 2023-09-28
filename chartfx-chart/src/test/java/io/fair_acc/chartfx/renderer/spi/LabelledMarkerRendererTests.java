@@ -147,8 +147,8 @@ public class LabelledMarkerRendererTests {
 
             if (n == 6) {
                 dataSet.addDataStyle(n, style.reset()
-                                                .setLineColor("0xEE00EE")
-                                                .setMarkerColor("0xEE00EE")
+                                                .setLineColor("#EE00EE")
+                                                .setMarkerColor("#EE00EE")
                                                 .setStrokeDashPattern(5, 8, 5, 16)
                                                 .build());
             }

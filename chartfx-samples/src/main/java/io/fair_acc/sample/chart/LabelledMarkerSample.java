@@ -56,8 +56,8 @@ public class LabelledMarkerSample extends ChartSample {
 
             if (n == 6) {
                 dataSet.addDataStyle(n, style.reset()
-                                                .setStroke("0xEE00EE")
-                                                .setFill("0xEE00EE")
+                                                .setStroke("#EE00EE")
+                                                .setFill("#EE00EE")
                                                 .setStrokeDashPattern(5, 8, 5, 16)
                                                 .build());
             }

@@ -36,7 +36,7 @@ class DataSetStyleParserTest {
         assertEquals(Color.BLUE, parser.getFillColor().orElseThrow());
 
         style = builder.reset().setFill(255, 255, 0, 1).build();
-        assertEquals("-fx-fill: 0xffff00ff;", style);
+        assertEquals("-fx-fill: #ffff00ff;", style);
         assertTrue(parser.tryParse(style));
         assertEquals(Color.YELLOW, parser.getFillColor().orElseThrow());
 
@@ -69,8 +69,8 @@ class DataSetStyleParserTest {
                         .setLineWidth(3)
                         .setFont("monospace")
                         .setFontItalic(true)
-                        .setStroke("0xEE00EE")
-                        .setFill("0xEE00EE")
+                        .setStroke("#EE00EE")
+                        .setFill("#EE00EE")
                         .setLineDashes(5, 8, 5, 16)
                         .setFill("blue")
                         .setLineDashes(3, 5, 8, 5)
@@ -83,7 +83,7 @@ class DataSetStyleParserTest {
                              + "-fx-line-width: 3.0;\n"
                              + "-fx-font: monospace;\n"
                              + "-fx-font-weight: bold;\n"
-                             + "-fx-stroke: 0xEE00EE;",
+                             + "-fx-stroke: #EE00EE;",
                 style);
         assertTrue(parser.tryParse(style));
         assertArrayEquals(new double[] { 3, 5, 8, 5 }, parser.getLineDashes().orElseThrow());
