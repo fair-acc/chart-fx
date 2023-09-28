@@ -38,11 +38,6 @@ public abstract class AbstractRendererXYZ<R extends AbstractRendererXYZ<R>> exte
     }
 
     @Override
-    public boolean isUsingAxis(Axis axis) {
-        return super.isUsingAxis(axis) || axis == zAxis;
-    }
-
-    @Override
     public void updateAxisRange(Axis axis, AxisRange range) {
         super.updateAxisRange(axis, range);
         if (axis == zAxis) {

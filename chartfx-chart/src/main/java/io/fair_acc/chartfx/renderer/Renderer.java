@@ -96,17 +96,6 @@ public interface Renderer extends Measurable.EmptyDefault {
     }
 
     /**
-     * Checks whether a renderer is actively using a given axis. The
-     * result is only valid after updateAxes has been called.
-     * <p>
-     * @param axis axis to be checked
-     * @return true if the renderer is actively using the given axis
-     */
-    default boolean isUsingAxis(Axis axis) {
-        return getAxes().contains(axis);
-    }
-
-    /**
      * Updates the range for the specified axis.
      * Does nothing if the axis is not used.
      *

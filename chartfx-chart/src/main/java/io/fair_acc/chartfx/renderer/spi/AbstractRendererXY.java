@@ -87,21 +87,14 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
             yAxis = chart.getYAxis();
         }
 
-        // Update category axes (TODO: remove this API?)
-        if (!getDatasets().isEmpty()) {
-            var ds = getDatasets().get(0);
-            if (xAxis instanceof CategoryAxis xCat) {
-                xCat.updateCategories(ds);
-            }
-            if (yAxis instanceof CategoryAxis yCat) {
-                yCat.updateCategories(ds);
-            }
+        // For backwards compatibility: A CategoryAxis without explicitly set
+        // categories copies the labels of the first dataset that is using it.
+        if (xAxis instanceof CategoryAxis axis && !getDatasets().isEmpty()) {
+            axis.updateCategories(getDatasets().get(0));
         }
-    }
-
-    @Override
-    public boolean isUsingAxis(Axis axis) {
-        return axis == xAxis || axis == yAxis;
+        if (yAxis instanceof CategoryAxis axis && !getDatasets().isEmpty()) {
+            axis.updateCategories(getDatasets().get(0));
+        }
     }
 
     protected Axis ensureAxisInChart(Axis axis) {
