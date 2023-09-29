@@ -98,6 +98,7 @@ public class RotatedAxisLabelSample extends ChartSample {
 
     private static DefaultNumericAxis getSynchedAxis(DefaultNumericAxis orig, String newAxisName) {
         final DefaultNumericAxis axis = new DefaultNumericAxis(newAxisName);
+        axis.setAutoRanging(false);
         axis.minProperty().bind(orig.minProperty());
         axis.maxProperty().bind(orig.maxProperty());
         axis.getTickLabelStyle().setRotate(orig.getTickLabelStyle().getRotate());
