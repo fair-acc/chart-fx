@@ -161,6 +161,33 @@ public class DataSetStyleParser extends AbstractStyleParser {
         return optional(fontStyle);
     }
 
+    public Optional<Font> getFontFull() {
+        if (font == null && Double.isNaN(fontSize) && fontStyle == null && fontWeight == null) {
+            return Optional.empty();
+        } else if (fontWeight == null && fontStyle == null && Double.isNaN(fontSize)) {
+            return Optional.of(font);
+        } else if (fontWeight == null && fontStyle == null) {
+            return Optional.of(Font.font( //
+                    font == null ? null : font.getName(), //
+                    Double.isNaN(fontSize) ? -1 : fontSize)); //
+        } else if (fontWeight == null) {
+            return Optional.of(Font.font( //
+                    font == null ? null : font.getName(), //
+                    fontStyle, //
+                    Double.isNaN(fontSize) ? -1 : fontSize)); //
+        } else if (fontStyle == null) {
+            return Optional.of(Font.font( //
+                    font == null ? null : font.getName(), //
+                    fontWeight, //
+                    Double.isNaN(fontSize) ? -1 : fontSize)); //
+        } else {
+            return Optional.of(Font.font( //
+                    font == null ? null : font.getName(), //
+                    fontWeight, fontStyle, //
+                    Double.isNaN(fontSize) ? -1 : fontSize)); //
+        }
+    }
+
     protected void clear() {
         // Generic
         visible = null;

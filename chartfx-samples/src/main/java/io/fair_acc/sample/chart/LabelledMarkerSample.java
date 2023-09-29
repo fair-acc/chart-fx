@@ -41,30 +41,30 @@ public class LabelledMarkerSample extends ChartSample {
             // n=0..2 -> default style
 
             if (n == 3) {
-                dataSet.addDataStyle(n, style.reset().setStroke("red").build());
+                dataSet.addDataStyle(n, style.reset().setLineColor("red").build());
             }
 
             // n == 4 has no label
 
             if (n == 5) {
                 dataSet.addDataStyle(n, style.reset()
-                                                .setStroke("blue")
-                                                .setFill("blue")
-                                                .setStrokeDashPattern(3, 5, 8, 5)
+                                                .setLineColor("blue")
+                                                .setMarkerColor("blue")
+                                                .setLineDashes(3, 5, 8, 5)
                                                 .build());
             }
 
             if (n == 6) {
                 dataSet.addDataStyle(n, style.reset()
-                                                .setStroke("#EE00EE")
-                                                .setFill("#EE00EE")
-                                                .setStrokeDashPattern(5, 8, 5, 16)
+                                                .setLineColor("#EE00EE")
+                                                .setMarkerColor("#EE00EE")
+                                                .setLineDashes(5, 8, 5, 16)
                                                 .build());
             }
 
             if (n == 7) {
                 dataSet.addDataStyle(n, style.reset()
-                                                .setStrokeWidth(3)
+                                                .setLineWidth(3)
                                                 .setFont("Serif")
                                                 .setFontSize(20)
                                                 .setFontItalic(true)
@@ -74,7 +74,7 @@ public class LabelledMarkerSample extends ChartSample {
 
             if (n == 8) {
                 dataSet.addDataStyle(n, style.reset()
-                                                .setStrokeWidth(3)
+                                                .setLineWidth(3)
                                                 .setFont("monospace")
                                                 .setFontItalic(true)
                                                 .build());
