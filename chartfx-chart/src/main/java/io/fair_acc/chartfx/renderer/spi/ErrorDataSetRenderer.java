@@ -417,8 +417,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
                 count++;
             } else if (count != 0) {
                 // remove zeros and plot intermediate segment
-                compactVector(xValuesSurface, count);
-                compactVector(yValuesSurface, count);
+                compactVector(xValuesSurface, nPolygoneEdges, count);
+                compactVector(yValuesSurface, nPolygoneEdges, count);
 
                 gc.fillPolygon(xValuesSurface, yValuesSurface, 2 * count);
                 count = 0;
@@ -427,8 +427,8 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         if (count > 0) {
             // swap y coordinates at mid-point
             // remove zeros and plot intermediate segment
-            compactVector(xValuesSurface, count);
-            compactVector(yValuesSurface, count);
+            compactVector(xValuesSurface, nPolygoneEdges, count);
+            compactVector(yValuesSurface, nPolygoneEdges, count);
             if (count > 4) {
                 final double yTmp = yValuesSurface[count - 1];
                 yValuesSurface[count - 1] = yValuesSurface[count];
@@ -802,9 +802,9 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         gc.restore();
     }
 
-    private static void compactVector(final double[] input, final int stopIndex) {
+    private static void compactVector(final double[] input, final int inputLength, final int stopIndex) {
         if (stopIndex >= 0) {
-            System.arraycopy(input, input.length - stopIndex, input, stopIndex, stopIndex);
+            System.arraycopy(input, inputLength - stopIndex, input, stopIndex, stopIndex);
         }
     }
 
