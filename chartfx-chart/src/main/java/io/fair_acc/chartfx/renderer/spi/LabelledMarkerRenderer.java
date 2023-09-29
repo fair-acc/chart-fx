@@ -219,7 +219,7 @@ public class LabelledMarkerRenderer extends AbstractRendererXY<LabelledMarkerRen
         styleParser.getLineWidth().ifPresent(gc::setLineWidth);
         styleParser.getLineDashes().ifPresent(gc::setLineDashes);
         styleParser.getMarkerColor().ifPresent(gc::setFill);
-        styleParser.getFont().ifPresent(gc::setFont);
+        styleParser.getFontFull().ifPresent(gc::setFont);
     }
 
     public final LabelledMarkerRenderer updateCSS() {
