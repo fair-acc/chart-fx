@@ -1,6 +1,6 @@
 [![Join the chat at https://gitter.im/fair-acc/chart](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fair-acc/chart?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![License](https://img.shields.io/badge/License-LGPL%203.0-blue.svg)](https://opensource.org/licenses/LGPL-3.0)
-[![Maven Central](https://img.shields.io/maven-central/v/de.gsi.chart/chartfx-chart/11.svg)](https://search.maven.org/search?q=g:de.gsi.chart+a:chartfx-chart+v:11*)
+[![Maven Central](https://img.shields.io/maven-central/v/io.fair_acc/chartfx/11.svg)](https://search.maven.org/search?q=g:io.fair-acc+a:chartfx+v:11*)
 
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
@@ -43,9 +43,9 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
 ```Maven POM
 <dependencies>
   <dependency>
-    <groupId>de.gsi.chart</groupId>
-    <artifactId>chartfx-chart</artifactId>
-    <version>11.2.7</version>
+    <groupId>io.fair-acc</groupId>
+    <artifactId>chartfx</artifactId>
+    <version>11.3.0</version>
   </dependency>
 </dependencies>
 ```
@@ -53,13 +53,13 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
 or your build.gradle like this:
 
 ```gradle
-implementation 'de.gsi.chart:chartfx-chart:11.2.7'
+implementation 'io.fair-acc:chartfx-chart:11.3.0'
 ```
 
-To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=g:de.gsi.chart%20a:chartfx-chart&core=gav).
+To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=io.fair-acc%20a:chartfx&core=gav).
 
-While most users will need the `chartfx-chart` artifact it is also possible to use the data containers from `chartfx-dataset`
-and the algorithms from `chartfx-math` independently without the quite heavy UI dependencies.
+While most users will need the `io.fair-acc:chartfx` artifact it is also possible to use the data containers from `io.fair-acc:dataset`
+and the algorithms from `io.fair-acc:math` independently without the quite heavy UI dependencies.
 
 #### Using the snapshot repository
 
@@ -73,10 +73,10 @@ example pom.xml for current master (click to expand)
 ```xml
 <dependencies>
     <dependency>
-        <groupId>io.fair-acc</groupId>
+        <groupId>io.fair-acc.chartfx</groupId>
         <artifactId>chartfx</artifactId>
-        <version>master-SNAPSHOT</version>
-        <!-- <version>master-20200320.180638-78</version> pin to a specific snapshot build-->
+        <version>main-SNAPSHOT</version>
+        <!-- <version>main-20200320.180638-78</version> pin to a specific snapshot build-->
     </dependency>
 </dependencies>
 <repositories>
@@ -141,10 +141,6 @@ public class SimpleChartSample extends Application {
         dataSet2.set(xValues, yValues2);
 
         final Scene scene = new Scene(root, 800, 600);
-        primaryStage.setTitle(this.getClass().getSimpleName());
-        primaryStage.setScene(scene);
-        primaryStage.setOnCloseRequest(evt -> System.exit(0));
-        primaryStage.show();
     }
     public static void main(final String[] args) {
         Application.launch(args);
@@ -162,14 +158,14 @@ pom.xml:
 <name>chart-fx Sample</name>
 <dependencies>
   <dependency>
-    <groupId>io.fair_acc</groupId>
+    <groupId>io.fair-acc</groupId>
     <artifactId>chartfx</artifactId>
     <version>11.3.0</version>
   </dependency>
   <dependency>
     <groupId>org.slf4j</groupId>
     <artifactId>slf4j-simple</artifactId>
-    <version>2.0.0-alpha0</version>
+    <version>2.0.9</version>
   </dependency>
 </dependencies>
 </project>
