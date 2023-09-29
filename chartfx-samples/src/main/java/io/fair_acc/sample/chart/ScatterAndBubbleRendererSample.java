@@ -107,16 +107,18 @@ public class ScatterAndBubbleRendererSample extends ChartSample {
             bubbleDataSet2a.add(gdp, lifeExpectancyWomen.get(country), country);
             bubbleDataSet2b.add(gdp, lifeExpectancyMen.get(country), country);
             // N.B. markerSize is in pixel regardless of the xAxis or yAxis scale
-            String markerSize = "markerSize=" + 40 * Math.sqrt(population.get(country) / maxPopulation) + "; index="
-                              + count + ";";
+            String markerSize = DataSetStyleBuilder.instance() //
+                                        .setMarkerSize(40 * Math.sqrt(population.get(country) / maxPopulation)) //
+                                        .setColorIndex(count) //
+                                        .build();
             bubbleDataSet2a.addDataStyle(count, markerSize);
             bubbleDataSet2b.addDataStyle(count, markerSize);
             if ("FRA".equals(country)) {
-                bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=darkblue; markerType=circle2;");
-                bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=darkred; markerType=circle2;");
+                bubbleDataSet2a.addDataStyle(count, markerSize + DataSetStyleBuilder.instance().setMarkerColor("darkblue").setMarkerType("circle2").build());
+                bubbleDataSet2b.addDataStyle(count, markerSize + DataSetStyleBuilder.instance().setMarkerColor("darkred").setMarkerType("circle2").build());
             } else if ("JPN".equals(country)) {
-                bubbleDataSet2a.addDataStyle(count, markerSize + "markerColor=green; markerType=diamond;");
-                bubbleDataSet2b.addDataStyle(count, markerSize + "markerColor=lightgreen; markerType=diamond;");
+                bubbleDataSet2a.addDataStyle(count, markerSize + DataSetStyleBuilder.instance().setMarkerColor("green").setMarkerType("diamond").build());
+                bubbleDataSet2b.addDataStyle(count, markerSize + DataSetStyleBuilder.instance().setMarkerColor("lightgreen").setMarkerType("diamond").build());
             }
             // for more marker types see DefaultMarker
 
