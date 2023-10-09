@@ -20,6 +20,7 @@ import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisMode;
+import io.fair_acc.chartfx.plugins.MouseEventsHelper;
 import io.fair_acc.chartfx.plugins.Zoomer;
 import io.fair_acc.chartfx.plugins.Zoomer.ZoomState;
 import io.fair_acc.dataset.DataSet;
@@ -68,13 +69,20 @@ public class ZoomerSample extends ChartSample {
         registerZoomerChangeListener(zoomer3, chart3.getTitle());
         chart3.getPlugins().add(zoomer3);
 
-        // chart with x-only zoom
+        // chart with y-only zoom
         final Chart chart4 = getTestChart("y-only zoom", testDataSet);
         Zoomer zoomer4 = new Zoomer(AxisMode.Y);
         registerZoomerChangeListener(zoomer4, chart4.getTitle());
         chart4.getPlugins().add(zoomer4);
 
-        root.getChildren().addAll(chart1, chart2, chart3, chart4, label);
+        // chart with control + LMB pan
+        final Chart chart5 = getTestChart("control + primary (left) button to pan", testDataSet);
+        Zoomer zoomer5 = new Zoomer();
+        zoomer5.setPanMouseFilter(event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event) && MouseEventsHelper.isOnlyCtrlModifierDown(event));
+        registerZoomerChangeListener(zoomer5, chart5.getTitle());
+        chart5.getPlugins().add(zoomer5);
+        
+        root.getChildren().addAll(chart1, chart2, chart3, chart4, chart5, label);
 
         return root;
     }
