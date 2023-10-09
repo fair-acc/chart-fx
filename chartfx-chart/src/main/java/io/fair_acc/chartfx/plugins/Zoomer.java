@@ -84,8 +84,9 @@ public class Zoomer extends ChartPlugin {
     private static final String ICON_ZOOM_V = "fa-arrows-v:" + FONT_SIZE;
 
     /**
-     * Default pan mouse filter passing on left mouse button with {@link MouseEvent#isControlDown() control key down}.
+     * Default pan mouse filter passing on middle mouse button {@link MouseEventsHelper#isOnlyMiddleButtonDown()}.
      */
+    @Deprecated
     public static final Predicate<MouseEvent> DEFAULT_MOUSE_FILTER = MouseEventsHelper::isOnlyMiddleButtonDown;
     private double panShiftX;
     private double panShiftY;
@@ -94,27 +95,7 @@ public class Zoomer extends ChartPlugin {
     private final BooleanProperty autoZoomEnable = new SimpleBooleanProperty(this, "enableAutoZoom", false);
     private final IntegerProperty autoZoomThreshold = new SimpleIntegerProperty(this, "autoZoomThreshold",
             DEFAULT_AUTO_ZOOM_THRESHOLD);
-    private final EventHandler<MouseEvent> panStartHandler = event -> {
-        if (isPannerEnabled() && DEFAULT_MOUSE_FILTER.test(event)) {
-            panStarted(event);
-            event.consume();
-        }
-    };
-
-    private final EventHandler<MouseEvent> panDragHandler = event -> {
-        if (panOngoing()) {
-            panDragged(event);
-            event.consume();
-        }
-    };
-
-    private final EventHandler<MouseEvent> panEndHandler = event -> {
-        if (panOngoing()) {
-            panEnded();
-            event.consume();
-        }
-    };
-
+    
     /**
      * Default zoom-in mouse filter passing on left mouse button (only).
      */
@@ -124,6 +105,11 @@ public class Zoomer extends ChartPlugin {
      * Default zoom-out mouse filter passing on right mouse button (only).
      */
     public final Predicate<MouseEvent> defaultZoomOutMouseFilter = event -> MouseEventsHelper.isOnlySecondaryButtonDown(event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
+
+    /**
+     * Default pan mouse filter passing on middle mouse button (only).
+     */
+    public final Predicate<MouseEvent> defaultPanMouseFilter = event -> MouseEventsHelper.isOnlyMiddleButtonDown(event) && MouseEventsHelper.modifierKeysUp(event) && isMouseEventWithinCanvas(event);
 
     /**
      * Default zoom-origin mouse filter passing on right mouse button with {@link MouseEvent#isControlDown() control key
@@ -138,6 +124,7 @@ public class Zoomer extends ChartPlugin {
 
     private Predicate<MouseEvent> zoomInMouseFilter = defaultZoomInMouseFilter;
     private Predicate<MouseEvent> zoomOutMouseFilter = defaultZoomOutMouseFilter;
+    private Predicate<MouseEvent> panMouseFilter = defaultPanMouseFilter;
     private Predicate<MouseEvent> zoomOriginMouseFilter = defaultZoomOriginFilter;
     private Predicate<ScrollEvent> zoomScrollFilter = defaultScrollFilter;
 
@@ -223,6 +210,27 @@ public class Zoomer extends ChartPlugin {
             if (zoomOutPerformed) {
                 event.consume();
             }
+        }
+    };
+
+    private final EventHandler<MouseEvent> panStartHandler = event -> {
+        if (isPannerEnabled() && (panMouseFilter == null || panMouseFilter.test(event))) {
+            panStarted(event);
+            event.consume();
+        }
+    };
+
+    private final EventHandler<MouseEvent> panDragHandler = event -> {
+        if (panOngoing()) {
+            panDragged(event);
+            event.consume();
+        }
+    };
+
+    private final EventHandler<MouseEvent> panEndHandler = event -> {
+        if (panOngoing()) {
+            panEnded();
+            event.consume();
         }
     };
 
@@ -463,6 +471,16 @@ public class Zoomer extends ChartPlugin {
     }
 
     /**
+     * Returns pan mouse filter.
+     *
+     * @return pan mouse filter
+     * @see #setPanMouseFilter(Predicate)
+     */
+    public Predicate<MouseEvent> getPanMouseFilter() {
+        return panMouseFilter;
+    }
+
+    /**
      * Returns zoom-scroll filter.
      *
      * @return predicate of filter
@@ -647,6 +665,17 @@ public class Zoomer extends ChartPlugin {
      */
     public void setZoomOutMouseFilter(final Predicate<MouseEvent> zoomOutMouseFilter) {
         this.zoomOutMouseFilter = zoomOutMouseFilter;
+    }
+
+    /**
+     * Sets filter on {@link MouseEvent#MOUSE_CLICKED MOUSE_CLICKED} events that should start pan operation.
+     *
+     * @param panMouseFilter the filter to accept pan mouse event. If {@code null} then any MOUSE_CLICKED event
+     *            will start pan operation. By default it's set to {@link #defaultPanMouseFilter}.
+     * @see #getPanMouseFilter()
+     */
+    public void setPanMouseFilter(final Predicate<MouseEvent> panMouseFilter) {
+        this.panMouseFilter = panMouseFilter;
     }
 
     /**
