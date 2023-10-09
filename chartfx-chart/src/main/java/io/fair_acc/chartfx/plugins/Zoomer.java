@@ -95,7 +95,7 @@ public class Zoomer extends ChartPlugin {
     private final BooleanProperty autoZoomEnable = new SimpleBooleanProperty(this, "enableAutoZoom", false);
     private final IntegerProperty autoZoomThreshold = new SimpleIntegerProperty(this, "autoZoomThreshold",
             DEFAULT_AUTO_ZOOM_THRESHOLD);
-    
+
     /**
      * Default zoom-in mouse filter passing on left mouse button (only).
      */

@@ -81,7 +81,7 @@ public class ZoomerSample extends ChartSample {
         zoomer5.setPanMouseFilter(event -> MouseEventsHelper.isOnlyPrimaryButtonDown(event) && MouseEventsHelper.isOnlyCtrlModifierDown(event));
         registerZoomerChangeListener(zoomer5, chart5.getTitle());
         chart5.getPlugins().add(zoomer5);
-        
+
         root.getChildren().addAll(chart1, chart2, chart3, chart4, chart5, label);
 
         return root;
