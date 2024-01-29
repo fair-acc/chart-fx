@@ -447,7 +447,7 @@ public class LimitedIndexedTreeDataSet extends AbstractErrorDataSet<LimitedIndex
                 final double x = xValues[i];
                 final double y = yValues[i];
                 final double dx = xErrors[i];
-                final double dy = yValues[i];
+                final double dy = yErrors[i];
                 getAxisDescription(DIM_X).add(x - dx);
                 getAxisDescription(DIM_X).add(x + dx);
                 getAxisDescription(DIM_Y).add(y - dy);
