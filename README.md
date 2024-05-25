@@ -45,7 +45,7 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
   <dependency>
     <groupId>io.fair-acc</groupId>
     <artifactId>chartfx</artifactId>
-    <version>11.3.0</version>
+    <version>11.3.1</version>
   </dependency>
 </dependencies>
 ```
@@ -53,7 +53,7 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
 or your build.gradle like this:
 
 ```gradle
-implementation 'io.fair-acc:chartfx-chart:11.3.0'
+implementation 'io.fair-acc:chartfx:11.3.1'
 ```
 
 To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=io.fair-acc%20a:chartfx&core=gav).
