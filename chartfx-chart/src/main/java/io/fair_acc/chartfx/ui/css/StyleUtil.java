@@ -202,7 +202,7 @@ public class StyleUtil {
                 result[i] = array[i] == null ? 0 : array[i].doubleValue();
             }
             return result;
-        });
+        }, source);
     }
 
     public static void copyLineDashes(final GraphicsContext gc, Shape style) {
