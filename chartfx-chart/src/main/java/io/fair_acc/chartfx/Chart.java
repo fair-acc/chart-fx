@@ -833,7 +833,7 @@ public abstract class Chart extends Region implements EventSource, Measurable {
     protected void pluginRemoved(final ChartPlugin plugin) {
         plugin.setChart(null);
         final Group group = pluginGroups.remove(plugin);
-        Bindings.unbindContent(group, plugin.getChartChildren());
+        Bindings.unbindContent(group.getChildren(), plugin.getChartChildren());
         group.getChildren().clear();
         pluginsArea.getChildren().remove(group);
     }
