@@ -32,7 +32,6 @@ import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.dataset.spi.utils.Tuple;
 
-
 /**
  * Represents an add-on to a Chart that can either annotate/decorate the chart or perform some interactions with it.
  * <p>

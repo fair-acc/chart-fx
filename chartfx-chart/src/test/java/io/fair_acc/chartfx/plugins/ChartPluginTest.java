@@ -1,28 +1,28 @@
 package io.fair_acc.chartfx.plugins;
 
-import io.fair_acc.chartfx.XYChart;
-import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
-import io.fair_acc.chartfx.utils.FXUtils;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.testfx.api.FxRobot;
 import org.testfx.framework.junit5.ApplicationExtension;
 import org.testfx.framework.junit5.Start;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import io.fair_acc.chartfx.XYChart;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
+import io.fair_acc.chartfx.utils.FXUtils;
 
 @ExtendWith(ApplicationExtension.class)
 public class ChartPluginTest {
-
     static class TestChartPlugin extends ChartPlugin {
-
         public TestChartPlugin() {
             registerInputEventHandler(MouseEvent.MOUSE_CLICKED, this::handle);
         }
@@ -32,7 +32,6 @@ public class ChartPluginTest {
         private void handle(MouseEvent mouseEvent) {
             clicked = true;
         }
-
     }
 
     private XYChart chart;
@@ -69,5 +68,4 @@ public class ChartPluginTest {
         robot.moveTo(label).clickOn(MouseButton.PRIMARY).interrupt();
         assertFalse(testChartPlugin.clicked);
     }
-
 }
