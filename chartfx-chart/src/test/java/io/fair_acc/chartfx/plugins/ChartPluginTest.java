@@ -50,7 +50,7 @@ class ChartPluginTest {
     }
 
     @Test
-    public void testSceneListenerIsRemoved(FxRobot robot) {
+    void testSceneListenerIsRemoved(FxRobot robot) {
         assertNotNull(chart);
         assertEquals(0, chart.getPlugins().size());
         final TestChartPlugin testChartPlugin = new TestChartPlugin();
