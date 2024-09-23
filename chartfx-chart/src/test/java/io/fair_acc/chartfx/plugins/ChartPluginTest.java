@@ -21,7 +21,7 @@ import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.utils.FXUtils;
 
 @ExtendWith(ApplicationExtension.class)
-public class ChartPluginTest {
+class ChartPluginTest {
     static class TestChartPlugin extends ChartPlugin {
         public TestChartPlugin() {
             registerInputEventHandler(MouseEvent.MOUSE_CLICKED, this::handle);
