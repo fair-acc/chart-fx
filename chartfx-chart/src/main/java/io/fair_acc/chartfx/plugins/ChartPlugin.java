@@ -1,18 +1,22 @@
 package io.fair_acc.chartfx.plugins;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.input.InputEvent;
 import javafx.scene.input.MouseEvent;
@@ -27,6 +31,7 @@ import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.dataset.spi.utils.Tuple;
+
 
 /**
  * Represents an add-on to a Chart that can either annotate/decorate the chart or perform some interactions with it.
@@ -45,6 +50,7 @@ public abstract class ChartPlugin implements Measurable.EmptyDefault {
     private static final Logger LOGGER = LoggerFactory.getLogger(ChartPlugin.class);
     private final ObservableList<Node> chartChildren = FXCollections.observableArrayList();
     private final List<Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>>> mouseEventHandlers = new LinkedList<>();
+    private final Map<Node, ChangeListener<? super Scene>> sceneChangeListeners = new HashMap<>();
 
     /**
      * The associated {@link Chart}. Initialised when the plug-in is added to the Chart, set to {@code null} when
@@ -90,19 +96,29 @@ public abstract class ChartPlugin implements Measurable.EmptyDefault {
             final EventType<T> type = (EventType<T>) pair.getKey();
             final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
             node.addEventHandler(type, handler);
-            node.sceneProperty().addListener((ch, o, n) -> {
-                if (o == n) {
-                    return;
-                }
-                if (o != null) {
+        }
+        ChangeListener<? super Scene> sceneListener = (ch, o, n) -> {
+            if (o == n) {
+                return;
+            }
+            if (o != null) {
+                for (final Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>> pair : mouseEventHandlers) {
+                    final EventType<T> type = (EventType<T>) pair.getKey();
+                    final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
                     o.removeEventHandler(type, handler);
                 }
+            }
 
-                if (n != null) {
+            if (n != null) {
+                for (final Pair<EventType<? extends InputEvent>, EventHandler<? extends InputEvent>> pair : mouseEventHandlers) {
+                    final EventType<T> type = (EventType<T>) pair.getKey();
+                    final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
                     n.addEventHandler(type, handler);
                 }
-            });
-        }
+            }
+        };
+        sceneChangeListeners.put(node, sceneListener);
+        node.sceneProperty().addListener(sceneListener);
     }
 
     /**
@@ -230,9 +246,11 @@ public abstract class ChartPlugin implements Measurable.EmptyDefault {
             final EventHandler<T> handler = (EventHandler<T>) pair.getValue();
             node.removeEventHandler(type, handler);
             if (node.getScene() != null) {
-                node.getScene().removeEventFilter(type, handler);
+                node.getScene().removeEventHandler(type, handler);
             }
         }
+        node.sceneProperty().removeListener(sceneChangeListeners.get(node));
+        sceneChangeListeners.put(node, null);
     }
 
     /**
