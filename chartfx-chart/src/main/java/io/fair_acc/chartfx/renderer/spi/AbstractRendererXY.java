@@ -122,7 +122,8 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     }
 
     protected void updateAxisRange(DataSet dataSet, AxisRange range, int dim) {
-        if (dataSet.getDataCount() == 0) return;
+        if (dataSet.getDataCount() == 0)
+            return;
         var dsRange = dataSet.getAxisDescription(dim);
         if (!dsRange.isDefined()) {
             dataSet.recomputeLimits(dim);
