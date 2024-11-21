@@ -1,18 +1,24 @@
 package io.fair_acc.chartfx.utils;
 
-import static java.lang.Math.*;
+import static io.fair_acc.chartfx.utils.Schubfach.H_DOUBLE;
+import static io.fair_acc.chartfx.utils.Schubfach.getDecimalLength;
+import static io.fair_acc.chartfx.utils.Schubfach.getNormalizationScale;
+import static java.lang.Math.multiplyHigh;
 
-import static io.fair_acc.chartfx.utils.Schubfach.*;
-
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.Objects;
 
 import javafx.util.StringConverter;
 
 public class NumberFormatterImpl extends StringConverter<Number> implements NumberFormatter {
-    public final static char DEFAULT_DECIMAL_SEPARATOR = ' ';
-
+    
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    
     public NumberFormatterImpl() {
         super();
         setDecimalFormatSymbols(DecimalFormatSymbols.getInstance());
@@ -38,6 +44,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     public boolean isExponentialForm() {
         return isExponentialForm;
     }
+    
+    public final char getExponentialSeparator() {
+        return CHARSET.decode(ByteBuffer.wrap(exponentialSeparator)).get();
+    }
 
     @Override
     public NumberFormatter setExponentialForm(final boolean state) {
@@ -49,6 +59,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     public NumberFormatter setDecimalPlaces(final int decimalPlaces) {
         this.decimalPlaces = Math.max(ALL_DIGITS, decimalPlaces);
         return this;
+    }
+    
+    public final void setExponentialSeparator(char separator) {
+        exponentialSeparator = charToBytes(separator);
     }
 
     @Override
@@ -123,6 +137,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             append8Digits(m);
             lowDigits(l);
         }
+        append(exponentialSeparator);
         exponent(e - 1);
     }
 
@@ -277,8 +292,11 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             length--;
         }
         // remove trailing comma
-        if (bytes[length - 1] == DOT) {
-            length--;
+        if (length >= DOT.length && 
+                Arrays.equals(
+                        bytes,  (length - DOT.length), length - DOT.length + 1, 
+                        DOT, 0, DOT.length)) {
+            length -= DOT.length;
         }
     }
 
@@ -318,7 +336,11 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     private String bytesToString() {
-        return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
+        return new String(bytes, 0, length, CHARSET);
+    }
+    
+    private static byte[] charToBytes(char c) {
+        return CHARSET.encode(CharBuffer.wrap(new char[] { c })).array();
     }
 
     static final int ALL_DIGITS = -1;
@@ -346,6 +368,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     int length = 0;
 
     boolean isExponentialForm = false;
+    private byte[] exponentialSeparator = {};
 
     // Used for left-to-tight digit extraction.
     private static final int MASK_28 = (1 << 28) - 1;
@@ -355,14 +378,14 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         if (exp.length() > MAX_EXP_LENGTH) {
             throw new IllegalArgumentException("Exponent separator can't be longer than " + MAX_EXP_LENGTH);
         }
-        this.EXP = Objects.equals(exp, "E") ? DEFAULT_EXP : exp.getBytes(StandardCharsets.ISO_8859_1);
-        this.DOT = (byte) symbols.getDecimalSeparator();
+        this.EXP = Objects.equals(exp, "E") ? DEFAULT_EXP : exp.getBytes(CHARSET);
+        this.DOT = charToBytes(symbols.getDecimalSeparator());
         return this;
     }
 
-    byte DOT = '.';
+    byte[] DOT = charToBytes('.');
     byte[] EXP = DEFAULT_EXP;
-    private static final byte[] DEFAULT_EXP = new byte[] { 'E' };
+    private static final byte[] DEFAULT_EXP = charToBytes('E');
     private static final byte ZERO = (byte) '0';
     private static final byte MINUS = (byte) '-';
 }
