@@ -12,12 +12,15 @@ import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormatSymbols;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import javafx.util.StringConverter;
 
 public class NumberFormatterImpl extends StringConverter<Number> implements NumberFormatter {
     
     private static final Charset CHARSET = StandardCharsets.UTF_8;
+    
+    private static final Pattern UNICODE_WHITESPACE_PATTERN = Pattern.compile("(?U)\\s");
     
     public NumberFormatterImpl() {
         super();
@@ -32,7 +35,12 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     @Override
     public Number fromString(final String string) {
-        return Double.parseDouble(string);
+        if (exponentialSeparator.length == 0) {
+            return Double.parseDouble(string);
+        }
+        
+        String cleanedString = UNICODE_WHITESPACE_PATTERN.matcher(string).replaceAll("");
+        return Double.parseDouble(cleanedString);
     }
 
     @Override
@@ -61,6 +69,12 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         return this;
     }
     
+    /**
+     * Sets the separator to use between decimal places and exponential e.g. {@code 1_HERE_E-10}. This <em>can</em> break the
+     * functionality of {@link #fromString(String)} if a non-whitespace character is used. Default: none. 
+     * 
+     * @param separator Character to use
+     */
     public final void setExponentialSeparator(char separator) {
         exponentialSeparator = charToBytes(separator);
     }
