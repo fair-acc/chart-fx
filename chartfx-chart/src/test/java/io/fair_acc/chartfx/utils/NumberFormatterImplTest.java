@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static io.fair_acc.chartfx.utils.NumberFormatterImpl.*;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.DoubleFunction;
 
 import org.junit.jupiter.api.Test;
@@ -109,11 +110,26 @@ class NumberFormatterImplTest {
         assertEquals("0.01", formatter.apply(0.010000000000000004));
         assertEquals("0.00", formatter.apply(0.001000000000000004));
     }
-
-    private static DoubleFunction<String> createFormatter(boolean exponentialForm, int decimalPlaces) {
+    
+    @Test
+    void exponentialSeparator() {
+        Locale.setDefault(Locale.US);
+        var formatter = createFormatter(true, 5, Optional.of('\u202F'));
+        assertEquals("2.10000\u202FE0", formatter.apply(2.1));
+        assertEquals("1.00000\u202FE1", formatter.apply(10));
+        assertEquals("1.23457\u202FE14", formatter.apply(123.456789E12));
+        assertEquals("1.23457\u202FE-10", formatter.apply(123.456789E-12));
+    }
+    
+    private static DoubleFunction<String> createFormatter(boolean exponentialForm, int decimalPlaces, Optional<Character> exponentialSeparator) {
         var formatter = new NumberFormatterImpl();
         formatter.setExponentialForm(exponentialForm);
         formatter.setDecimalPlaces(decimalPlaces);
+        exponentialSeparator.ifPresent(sep -> formatter.setExponentialSeparator(sep));
         return formatter::toString;
+    }
+
+    private static DoubleFunction<String> createFormatter(boolean exponentialForm, int decimalPlaces) {
+        return createFormatter(exponentialForm, decimalPlaces, Optional.empty());
     }
 }
