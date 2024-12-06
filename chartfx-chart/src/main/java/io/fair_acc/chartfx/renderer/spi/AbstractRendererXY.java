@@ -74,6 +74,9 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
 
     @Override
     public void updateAxes() {
+        final var xAxisBefore = xAxis;
+        final var yAxisBefore = yAxis;
+
         // Default to explicitly set axes
         xAxis = ensureAxisInChart(getFirstAxis(Orientation.HORIZONTAL));
         yAxis = ensureAxisInChart(getFirstAxis(Orientation.VERTICAL));
@@ -94,6 +97,10 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
         }
         if (yAxis instanceof CategoryAxis axis && !getDatasets().isEmpty()) {
             axis.updateCategories(getDatasets().get(0));
+        }
+
+        if (xAxisBefore != xAxis || yAxisBefore != yAxis) {
+            getAxes().setAll(xAxis, yAxis);
         }
     }
 
@@ -122,6 +129,8 @@ public abstract class AbstractRendererXY<R extends AbstractRendererXY<R>> extend
     }
 
     protected void updateAxisRange(DataSet dataSet, AxisRange range, int dim) {
+        if (dataSet.getDataCount() == 0)
+            return;
         var dsRange = dataSet.getAxisDescription(dim);
         if (!dsRange.isDefined()) {
             dataSet.recomputeLimits(dim);
