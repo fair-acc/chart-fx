@@ -1081,17 +1081,22 @@ public abstract class AbstractAxisParameter extends Pane implements Axis {
         if (state.isClean(ChartBits.AxisLabelText)) {
             return;
         }
-        String unit = getUnit();
-        String prefix = MetricPrefix.getShortPrefix(getUnitScaling());
+        getAxisLabel().setText(generateAxisLabelText());
+        state.clear(ChartBits.AxisLabelText);
+    }
 
-        if (unit == null && PropUtil.isNullOrEmpty(prefix)) {
-            getAxisLabel().setText(getName());
+    /* visible for testing */ protected String generateAxisLabelText() {
+        String unit = getUnit();
+        String unitPrefix = MetricPrefix.getShortPrefix(getUnitScaling());
+
+        if (PropUtil.isNullOrEmpty(unit) && PropUtil.isNullOrEmpty(unitPrefix)) {
+            return getName();
         } else {
             unit = (unit == null) ? "" : unit;
-            prefix = (prefix == null) ? "" : prefix;
-            getAxisLabel().setText(getName() + " [" + prefix + unit + "]");
+            unitPrefix = (unitPrefix == null) ? "" : unitPrefix;
+            String namePart = PropUtil.isNullOrEmpty(getName()) ? "" : getName() + " ";
+            return namePart + "[" + unitPrefix + unit + "]";
         }
-        state.clear(ChartBits.AxisLabelText);
     }
 
     protected void updateScaleAndUnitPrefix() {
