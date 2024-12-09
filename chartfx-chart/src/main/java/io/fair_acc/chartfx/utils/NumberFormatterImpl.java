@@ -144,10 +144,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     private void toExponentialFormat(int h, int m, int l, int e) {
         appendDigit(h);
         if (decimalPlaces > 0) {
-            append(DOT);
+            append(dot);
             appendNDigits(m, l, decimalPlaces);
         } else if (decimalPlaces == ALL_DIGITS) {
-            append(DOT);
+            append(dot);
             append8Digits(m);
             lowDigits(l);
         }
@@ -168,7 +168,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         if (decimalPlaces == 0) {
             return;
         }
-        append(DOT);
+        append(dot);
         if (decimalPlaces == ALL_DIGITS) {
             for (; i <= 8; ++i) {
                 t = 10 * y;
@@ -193,7 +193,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         if (decimalPlaces == 0) {
             return;
         }
-        append(DOT);
+        append(dot);
         int spaceLeft = bytes.length - length;
         if (decimalPlaces == ALL_DIGITS) {
             for (; e < 0 && spaceLeft > 0; ++e) {
@@ -222,13 +222,13 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         length = 0;
         append(ZERO);
         if (decimalPlaces > 0) {
-            append(DOT);
+            append(dot);
             for (int i = 0; i < decimalPlaces; i++) {
                 append(ZERO);
             }
         }
         if (isExponentialForm) {
-            append(EXP);
+            append(exp);
             append(ZERO);
         }
     }
@@ -306,11 +306,11 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             length--;
         }
         // remove trailing comma
-        if (length >= DOT.length && 
+        if (length >= dot.length && 
                 Arrays.equals(
-                        bytes,  (length - DOT.length), length - DOT.length + 1, 
-                        DOT, 0, DOT.length)) {
-            length -= DOT.length;
+                        bytes,  (length - dot.length), length - dot.length + 1, 
+                        dot, 0, dot.length)) {
+            length -= dot.length;
         }
     }
 
@@ -331,7 +331,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     private void exponent(int e) {
-        append(EXP);
+        append(exp);
         if (e < 0) {
             append(MINUS);
             e = -e;
@@ -388,17 +388,17 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     private static final int MASK_28 = (1 << 28) - 1;
 
     public NumberFormatterImpl setDecimalFormatSymbols(DecimalFormatSymbols symbols) {
-        String exp = symbols.getExponentSeparator();
-        if (exp.length() > MAX_EXP_LENGTH) {
+        String expString = symbols.getExponentSeparator();
+        if (expString.length() > MAX_EXP_LENGTH) {
             throw new IllegalArgumentException("Exponent separator can't be longer than " + MAX_EXP_LENGTH);
         }
-        this.EXP = Objects.equals(exp, "E") ? DEFAULT_EXP : exp.getBytes(CHARSET);
-        this.DOT = charToBytes(symbols.getDecimalSeparator());
+        this.exp = Objects.equals(expString, "E") ? DEFAULT_EXP : expString.getBytes(CHARSET);
+        this.dot = charToBytes(symbols.getDecimalSeparator());
         return this;
     }
 
-    byte[] DOT = charToBytes('.');
-    byte[] EXP = DEFAULT_EXP;
+    byte[] dot = charToBytes('.');
+    byte[] exp = DEFAULT_EXP;
     private static final byte[] DEFAULT_EXP = charToBytes('E');
     private static final byte ZERO = (byte) '0';
     private static final byte MINUS = (byte) '-';
