@@ -98,7 +98,7 @@ public class DefaultNumericAxisTests {
     
     @ParameterizedTest
     @MethodSource("testAxisLabelTextProvider")
-    void testAxisLabelText(String expected, String name, String unit, double unitScaling) throws Exception {
+    void testAxisLabelText(String expected, String name, String unit, double unitScaling) {
         final DefaultNumericAxis axis = new DefaultNumericAxis(name, unit);
         axis.setUnitScaling(unitScaling);
         assertEquals(expected, axis.generateAxisLabelText());
