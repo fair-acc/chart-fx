@@ -9,7 +9,7 @@ import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
 class DefaultFormatterTest {
 
     @Test
-    void formatAndParsingWorks() throws Exception {
+    void formatAndParsingWorks() {
         DefaultFormatter formatter = new DefaultFormatter();
         formatter.updateFormatter(DoubleArrayList.wrap(new double[]{1e-5, 10}), 1.);
         
@@ -22,7 +22,7 @@ class DefaultFormatterTest {
     }
     
     @Test
-    void formatAndParsingWorksWithExponentialSeparator() throws Exception {
+    void formatAndParsingWorksWithExponentialSeparator() {
         DefaultFormatter formatter = new DefaultFormatter() {
             {
                 formatter.setExponentialSeparator('\u202F');
