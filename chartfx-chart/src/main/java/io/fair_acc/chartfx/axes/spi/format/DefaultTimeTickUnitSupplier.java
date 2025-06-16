@@ -29,11 +29,11 @@ public class DefaultTimeTickUnitSupplier implements TickUnitSupplier {
         30.000, // 30 seconds
         60.000, // 1 minute
         900.000, // 15 minutes
-        180.000, // 30 minutes
+        1800.000, // 30 minutes
         3600.000, // 1 hour
         5400.000, // 1.5 hours
         7200.000, // 2 hours
-        900.000, // 2.5 hours
+        9000.000, // 2.5 hours
         10800.000, // 3 hours
         12600.000, // 3.5 hours
         14400.000, // 4 hours
