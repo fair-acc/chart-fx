@@ -1,39 +1,50 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.chart.NumberAxis;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import io.fair_acc.chartfx.axes.Axis;
-import io.fair_acc.chartfx.axes.AxisTransform;
-import io.fair_acc.chartfx.axes.LogAxisType;
-import io.fair_acc.chartfx.axes.TickUnitSupplier;
+import io.fair_acc.chartfx.axes.*;
 import io.fair_acc.chartfx.axes.spi.transforms.DefaultAxisTransform;
 import io.fair_acc.chartfx.axes.spi.transforms.LogarithmicAxisTransform;
 import io.fair_acc.chartfx.axes.spi.transforms.LogarithmicTimeAxisTransform;
 import io.fair_acc.chartfx.utils.PropUtil;
 import io.fair_acc.dataset.spi.fastutil.DoubleArrayList;
+import io.fair_acc.dataset.spi.financial.OhlcvDataSet;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.awt.*;
+import java.util.Date;
 
 /**
- * A axis class that plots a range of numbers with major tick marks every "tickUnit". You can use any Number type with
- * this axis, Long, Double, BigDecimal etc.
+ * A axis class that plots a range of dates with major tick marks every TODO:"tickUnit".
+ * To be consistent with the library, it was decided to use Date instead of the more modern LocalDateTime.
  * <p>
- * Compared to the {@link NumberAxis}, this one has a few additional features:
+ * Compared to the {@link DefaultNumericAxis} this one changes
  * <ul>
- * <li>Re-calculates tick unit also when the {@link #autoRangingProperty() auto-ranging} is off</li>
- * <li>Supports configuration of {@link #autoRangePaddingProperty() auto-range padding}</li>
- * <li>Supports configuration of {@link #autoRangeRoundingProperty() auto-range rounding}</li>
- * <li>Supports custom {@code tickUnitSupplierProperty} tick unit suppliers</li>
+ * <li>{@link #getDisplayPositionImpl(double)}, and</li>
+ * <li>{@link #getValueForDisplayImpl(double)} using the index to</li>
+ * <li>{@link #ohlcvDataSet} instead of the milli-seconds from timestamp</li>
+ * <li>And overridden {@link #calculateNewScale(double, double, double)}</li>
+ *
+ * It was decided to replicate {@link DefaultNumericAxis} instead of extending it because
+ * {@link #getDisplayPositionImpl(double)} and {@link #getValueForDisplayImpl(double)}
+ * were private and cannot be overridden.
+ *
+ * It was also decided to use {@link OhlcvDataSet} instead of {@link List<Date>} to reuse
+ * the retrieve dates using double as indices.
+ *
+ * For situations when an {@link OhlcvDataSet} might have missing datetime item will need
+ * to be handle separately.
+ *
+ * TODO: 1. Handle log time scale?  Not sure has any practical value or not. Gaps may not
+ *          be relevant if really needed.
  * </ul>
  *
- * @author rstein
+ * @author lacgit
  */
-public class DefaultNumericAxis extends AbstractAxis implements Axis {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultNumericAxis.class);
+public class DefaultFinancialAxis extends AbstractAxis implements Axis {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFinancialAxis.class);
     public static final double DEFAULT_LOG_MIN_VALUE = 1e-6;
     private static final int DEFAULT_RANGE_LENGTH = 2;
     private double offset;
@@ -53,7 +64,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         logAxis.addListener((bean, oldVal, newVal) -> {
             isLogAxis = newVal;
             if (isLogAxis) {
-                if (DefaultNumericAxis.this.isTimeAxis()) {
+                if (DefaultFinancialAxis.this.isTimeAxis()) {
                     axisTransform = logTimeTransform;
                     setMinorTickCount(0);
                 } else {
@@ -62,12 +73,12 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                 }
                 if (getMin() <= 0) {
                     isUpdating = true;
-                    setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+                    setMin(DefaultFinancialAxis.DEFAULT_LOG_MIN_VALUE);
                     isUpdating = false;
                 }
             } else {
                 axisTransform = linearTransform;
-                if (DefaultNumericAxis.this.isTimeAxis()) {
+                if (DefaultFinancialAxis.this.isTimeAxis()) {
                     setMinorTickCount(0);
                 } else {
                     setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
@@ -78,10 +89,12 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         });
     }
 
+    private OhlcvDataSet ohlcvDataSet;
+
     /**
      * Creates an {@link #autoRangingProperty() auto-ranging} Axis.
      */
-    public DefaultNumericAxis() {
+    public DefaultFinancialAxis() {
         this("axis label", 0.0, 0.0, 5.0);
     }
 
@@ -93,7 +106,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      * @param upperBound the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit the tick unit, i.e. space between tick marks
      */
-    public DefaultNumericAxis(final double lowerBound, final double upperBound, final double tickUnit) {
+    public DefaultFinancialAxis(final double lowerBound, final double upperBound, final double tickUnit) {
         this(null, lowerBound, upperBound, tickUnit);
     }
 
@@ -102,7 +115,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      *
      * @param axisLabel the axis {@link #nameProperty() label}
      */
-    public DefaultNumericAxis(final String axisLabel) {
+    public DefaultFinancialAxis(final String axisLabel) {
         this(axisLabel, 0.0, 0.0, 5.0);
     }
 
@@ -115,8 +128,8 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      * @param upperBound the {@link #maxProperty() upper bound} of the axis
      * @param tickUnit the tick unit, i.e. space between tick marks
      */
-    public DefaultNumericAxis(final String axisLabel, final double lowerBound, final double upperBound,
-            final double tickUnit) {
+    public DefaultFinancialAxis(final String axisLabel, final double lowerBound, final double upperBound,
+								final double tickUnit) {
         super(lowerBound, upperBound);
         this.setName(axisLabel);
         if (lowerBound >= upperBound) {
@@ -124,6 +137,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         }
         setTickUnit(tickUnit);
         setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
+        setOverlapPolicy(AxisLabelOverlapPolicy.DO_NOTHING);
 
         isUpdating = false;
     }
@@ -134,8 +148,9 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
      * @param axisLabel the axis {@link #nameProperty() label}
      * @param unit the unit of the axis axis {@link #unitProperty() label}
      */
-    public DefaultNumericAxis(final String axisLabel, final String unit) {
+    public DefaultFinancialAxis(final String axisLabel, final String unit, final OhlcvDataSet ohlcvDataSet) {
         this(axisLabel, 0.0, 0.0, 5.0);
+        this.ohlcvDataSet = ohlcvDataSet;
         setUnit(unit);
     }
 
@@ -229,6 +244,18 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         return getValueForDisplayImpl(displayPosition);
     }
 
+    @Override
+    protected double calculateNewScale(final double length, final double lowerBound, final double upperBound) {
+        double dLowIndex = ohlcvDataSet.getXIndex(lowerBound);
+        double dUpIndex = ohlcvDataSet.getXIndex(upperBound);
+        final double range = dUpIndex - dLowIndex;
+        final double scale = (range == 0) ? length : length / range;
+        if (scale == 0) {
+            return -1; // covers inf range input
+        }
+        return getSide().isVertical() ? -scale : scale;
+    }
+
     /**
      * Get the display position of the zero line along this axis.
      *
@@ -244,7 +271,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return Double.NaN;
         }
 
-        return getDisplayPosition(0);
+        return getDisplayPosition(cache.localCurrentLowerBound);
     }
 
     /**
@@ -366,9 +393,11 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return valueLogOffset * cache.logScaleLengthInv;
         }
 
+        double  dIndex = ohlcvDataSet.getXIndex(value);
+
         // default case: linear axis computation (dependent variables are being cached for performance reasons)
         // return cache.localOffset + (value - cache.localCurrentLowerBound) * cache.localScale;
-        return cache.localOffset2 + value * cache.localScale;
+        return cache.localOffset2 + dIndex * cache.localScale;
     }
 
     private double getValueForDisplayImpl(final double displayPosition) {
@@ -380,7 +409,14 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return axisTransform.backward(cache.lowerBoundLog + displayPosition / cache.axisLength * cache.logScaleLength);
         }
 
-        return cache.localCurrentLowerBound + (displayPosition - cache.localOffset) / cache.localScale;
+        int index = (int)(cache.localCurrentLowerIndex + ((displayPosition - cache.localOffset) / cache.localScale));
+        if  (index<0) {
+            index = 0;
+        }
+        if  (index>=ohlcvDataSet.getDataCount()) {
+            index = ohlcvDataSet.getDataCount()-1;
+        }
+        return ohlcvDataSet.getItem(index).getTimeStamp().getTime()/1000.0;
     }
 
     @Override
@@ -388,19 +424,19 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             final double labelSize) {
         double min = minValue > 0 && isForceZeroInRange() ? 0 : minValue;
         if (isLogAxis && minValue <= 0) {
-            min = DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE;
+            min = DefaultFinancialAxis.DEFAULT_LOG_MIN_VALUE;
             isUpdating = true;
             // TODO: check w.r.t. inverted axis (lower <-> upper bound exchange)
-            setMin(DefaultNumericAxis.DEFAULT_LOG_MIN_VALUE);
+            setMin(DefaultFinancialAxis.DEFAULT_LOG_MIN_VALUE);
             isUpdating = false;
         }
         final double max = maxValue < 0 && isForceZeroInRange() ? 0 : maxValue;
-        final double padding = DefaultNumericAxis.getEffectiveRange(min, max) * getAutoRangePadding();
+        final double padding = DefaultFinancialAxis.getEffectiveRange(min, max) * getAutoRangePadding();
         final double paddingScale = 1.0 + getAutoRangePadding();
         final double paddedMin = isLogAxis ? minValue / paddingScale
-                                           : DefaultNumericAxis.clampBoundToZero(min - padding, min);
+                                           : DefaultFinancialAxis.clampBoundToZero(min - padding, min);
         final double paddedMax = isLogAxis ? maxValue * paddingScale
-                                           : DefaultNumericAxis.clampBoundToZero(max + padding, max);
+                                           : DefaultFinancialAxis.clampBoundToZero(max + padding, max);
 
         return computeRange(paddedMin, paddedMax, length, labelSize);
     }
@@ -425,7 +461,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return;
         }
 
-        final double firstTick = DefaultNumericAxis.computeFirstMajorTick(axisRange.getLowerBound(),
+        final double firstTick = DefaultFinancialAxis.computeFirstMajorTick(axisRange.getLowerBound(),
                 axisRange.getTickUnit());
         if (firstTick + axisRange.getTickUnit() == firstTick) {
             if (LOGGER.isDebugEnabled()) {
@@ -473,7 +509,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                 majorTickCount++;
             }
         } else {
-            final double firstMajorTick = DefaultNumericAxis.computeFirstMajorTick(lowerBound, majorUnit);
+            final double firstMajorTick = DefaultFinancialAxis.computeFirstMajorTick(lowerBound, majorUnit);
             final double minorUnit = majorUnit / getMinorTickCount();
             int majorTickCount = 0;
             for (double majorTick = firstMajorTick - majorUnit; (majorTick < upperBound && majorTickCount <= maxTickCount); majorTick += majorUnit) {
@@ -513,7 +549,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
         if (maxValue - minValue == 0) {
             final double padding = getAutoRangePadding() < 0 ? 0.0 : getAutoRangePadding();
-            final double paddedRange = DefaultNumericAxis.getEffectiveRange(minValue, maxValue) * padding;
+            final double paddedRange = DefaultFinancialAxis.getEffectiveRange(minValue, maxValue) * padding;
             minValue = minValue - paddedRange / 2;
             maxValue = maxValue + paddedRange / 2;
         }
@@ -564,7 +600,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
     protected static double getEffectiveRange(final double min, final double max) {
         double effectiveRange = max - min;
         if (effectiveRange == 0) {
-            effectiveRange = min == 0 ? DefaultNumericAxis.DEFAULT_RANGE_LENGTH : Math.abs(min);
+            effectiveRange = min == 0 ? DefaultFinancialAxis.DEFAULT_RANGE_LENGTH : Math.abs(min);
         }
         return effectiveRange;
     }
@@ -573,6 +609,8 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         protected double localScale;
         protected double localCurrentLowerBound;
         protected double localCurrentUpperBound;
+        protected double localCurrentLowerIndex;
+        protected double localCurrentUpperIndex;
         protected double localOffset;
         protected double localOffset2;
         protected double upperBoundLog;
@@ -584,8 +622,10 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
         private void updateCachedAxisVariables() {
             axisLength = getLength();
-            localCurrentLowerBound = DefaultNumericAxis.super.getMin();
-            localCurrentUpperBound = DefaultNumericAxis.super.getMax();
+            localCurrentLowerBound = DefaultFinancialAxis.super.getMin();
+            localCurrentUpperBound = DefaultFinancialAxis.super.getMax();
+            localCurrentLowerIndex = ohlcvDataSet.getXIndex(localCurrentLowerBound);
+            localCurrentUpperIndex = ohlcvDataSet.getXIndex(localCurrentUpperBound);
 
             upperBoundLog = axisTransform.forward(getMax());
             lowerBoundLog = axisTransform.forward(getMin());
@@ -594,9 +634,11 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             logScaleLengthInv = 1.0 / logScaleLength;
 
             localScale = scaleProperty().get();
-            final double zero = DefaultNumericAxis.super.getDisplayPosition(0);
-            localOffset = zero + localCurrentLowerBound * localScale;
-            localOffset2 = localOffset - cache.localCurrentLowerBound * cache.localScale;
+            //  zero position of dates is the first date in the array.
+            //  scaling and offsets etc needs to be based on indices instead of time.
+            final double zero = (0 - localCurrentLowerIndex) * localScale;
+            localOffset = zero + localCurrentLowerIndex * localScale;
+            localOffset2 = localOffset - cache.localCurrentLowerIndex * cache.localScale;
 
             if (getSide() != null) {
                 isVerticalAxis = getSide().isVertical();
