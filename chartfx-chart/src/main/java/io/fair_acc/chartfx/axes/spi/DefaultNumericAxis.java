@@ -425,7 +425,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
             return;
         }
 
-        final double firstTick = DefaultNumericAxis.computeFistMajorTick(axisRange.getLowerBound(),
+        final double firstTick = DefaultNumericAxis.computeFirstMajorTick(axisRange.getLowerBound(),
                 axisRange.getTickUnit());
         if (firstTick + axisRange.getTickUnit() == firstTick) {
             if (LOGGER.isDebugEnabled()) {
@@ -473,7 +473,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                 majorTickCount++;
             }
         } else {
-            final double firstMajorTick = DefaultNumericAxis.computeFistMajorTick(lowerBound, majorUnit);
+            final double firstMajorTick = DefaultNumericAxis.computeFirstMajorTick(lowerBound, majorUnit);
             final double minorUnit = majorUnit / getMinorTickCount();
             int majorTickCount = 0;
             for (double majorTick = firstMajorTick - majorUnit; (majorTick < upperBound && majorTickCount <= maxTickCount); majorTick += majorUnit) {
@@ -543,7 +543,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
         cache.updateCachedAxisVariables();
     }
 
-    private static double computeFistMajorTick(final double lowerBound, final double tickUnit) {
+    private static double computeFirstMajorTick(final double lowerBound, final double tickUnit) {
         return Math.ceil(lowerBound / tickUnit) * tickUnit;
     }
 
