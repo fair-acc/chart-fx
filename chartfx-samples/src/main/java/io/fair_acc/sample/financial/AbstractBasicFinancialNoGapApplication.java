@@ -138,9 +138,7 @@ public abstract class AbstractBasicFinancialNoGapApplication extends ChartSample
             // repetitively generate new data
             periodicTimer = new Button("replay");
             periodicTimer.setTooltip(new Tooltip("replay instrument data in realtime"));
-            periodicTimer.setOnAction(evt -> {
-                pauseResumeTimer();
-            });
+            periodicTimer.setOnAction(evt -> pauseResumeTimer());
 
             updatePeriod.valueProperty().addListener((ch, o, n) -> updateTimer());
             updatePeriod.setEditable(true);
@@ -218,8 +216,7 @@ public abstract class AbstractBasicFinancialNoGapApplication extends ChartSample
         xAxis1.setAxisLabelFormatter(new DefaultTimeFormatter());
 
         // set localised time offset
-        if (xAxis1.isTimeAxis() && xAxis1.getAxisLabelFormatter() instanceof DefaultTimeFormatter) {
-            final DefaultTimeFormatter axisFormatter = (DefaultTimeFormatter) xAxis1.getAxisLabelFormatter();
+        if (xAxis1.isTimeAxis() && xAxis1.getAxisLabelFormatter() instanceof DefaultTimeFormatter axisFormatter) {
             axisFormatter.setTimeZoneOffset(ZoneOffset.ofHoursMinutes(zoneOffsetHr, 0));
         }
 
@@ -349,17 +346,15 @@ public abstract class AbstractBasicFinancialNoGapApplication extends ChartSample
     }
 
     private void startTimer() {
-        if (ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
-            SimpleOhlcvReplayDataSet realtimeDataSet = (SimpleOhlcvReplayDataSet) ohlcvDataSet;
+        if (ohlcvDataSet instanceof SimpleOhlcvReplayDataSet realtimeDataSet) {
             realtimeDataSet.setUpdatePeriod(updatePeriod.getValue());
             timerActivated = true;
         }
     }
 
     private void stopTimer() {
-        if (timerActivated && ohlcvDataSet instanceof SimpleOhlcvReplayDataSet) {
+        if (timerActivated && ohlcvDataSet instanceof SimpleOhlcvReplayDataSet realtimeDataSet) {
             timerActivated = false;
-            SimpleOhlcvReplayDataSet realtimeDataSet = (SimpleOhlcvReplayDataSet) ohlcvDataSet;
             realtimeDataSet.stop();
         }
     }

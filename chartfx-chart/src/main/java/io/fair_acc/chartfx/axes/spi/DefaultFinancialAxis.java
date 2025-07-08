@@ -17,14 +17,14 @@ import java.awt.*;
 import java.util.Date;
 
 /**
- * A axis class that plots a range of dates with major tick marks every TODO:"tickUnit".
+ * An axis class that plots a range of dates with major tick marks every "tickUnit".
  * To be consistent with the library, it was decided to use Date instead of the more modern LocalDateTime.
  * <p>
  * Compared to the {@link DefaultNumericAxis} this one changes
  * <ul>
  * <li>{@link #getDisplayPositionImpl(double)}, and</li>
  * <li>{@link #getValueForDisplayImpl(double)} using the index to</li>
- * <li>{@link #ohlcvDataSet} instead of the milli-seconds from timestamp</li>
+ * <li>{@link #ohlcvDataSet} instead of the millisecond from timestamp</li>
  * <li>And overridden {@link #calculateNewScale(double, double, double)}</li>
  *
  * It was decided to replicate {@link DefaultNumericAxis} instead of extending it because
@@ -166,10 +166,7 @@ public class DefaultFinancialAxis extends AbstractAxis implements Axis {
         final double labelSize = getTickLabelFont().getSize() * 2;
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
         final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMajorTickLabelCount()), 2);
-        double rawTickUnit = (getMax() - getMin()) / numOfTickMarks;
-        if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
-            rawTickUnit = 1e-3; // TODO: remove this hack (eventually) ;-)
-        }
+        double rawTickUnit = calculateRawTickUnitFromRange(getMin(), getMax(), numOfTickMarks);
         return computeTickUnit(rawTickUnit);
     }
 
@@ -369,12 +366,11 @@ public class DefaultFinancialAxis extends AbstractAxis implements Axis {
         final int numOfFittingLabels = (int) Math.floor(axisLength / labelSize);
         final int numOfTickMarks = Math.max(Math.min(numOfFittingLabels, getMaxMajorTickLabelCount()), 2);
 
-        double rawTickUnit = (max - min) / numOfTickMarks;
-        if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
-            rawTickUnit = 1e-3; // TODO: remove hack
-        }
+        double rawTickUnit = calculateRawTickUnitFromRange(min, max, numOfTickMarks);
 
-        // double tickUnitRounded = Double.MIN_VALUE; // TODO check if not '-Double.MAX_VALUE'
+        // practically not relevant to financial time
+        // check if not '-Double.MAX_VALUE'
+        // double tickUnitRounded = Double.MIN_VALUE;
         final double tickUnitRounded = computeTickUnit(rawTickUnit);
         final boolean round = (isAutoRanging() || isAutoGrowRanging()) && isAutoRangeRounding();
         final double minRounded = round ? axisTransform.getRoundedMinimumRange(min) : min;
@@ -530,7 +526,6 @@ public class DefaultFinancialAxis extends AbstractAxis implements Axis {
                 majorTickCount++;
             }
         }
-        return;
     }
 
     @Override
@@ -603,6 +598,15 @@ public class DefaultFinancialAxis extends AbstractAxis implements Axis {
             effectiveRange = min == 0 ? DefaultFinancialAxis.DEFAULT_RANGE_LENGTH : Math.abs(min);
         }
         return effectiveRange;
+    }
+
+    protected static double calculateRawTickUnitFromRange(double min, double max, int numOfTickMarks) {
+        double rawTickUnit = (max - min) / numOfTickMarks;
+        if (rawTickUnit == 0 || Double.isNaN(rawTickUnit)) {
+            //  practically for financial time, use millisecond as the minimal tick unit
+            rawTickUnit = 1e-3;
+        }
+        return rawTickUnit;
     }
 
     protected class Cache {
