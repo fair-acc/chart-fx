@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -71,12 +70,13 @@ public class OhlcvTooltip extends AbstractDataFormattingPlugin {
         label.setWrapText(true);
         label.setMinWidth(0);
         label.setManaged(false);
-        setXValueFormatter(new StringConverter<Number>() {
+        setXValueFormatter(new StringConverter<>() {
             private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MMM-dd HH:mm:ss");
+
             @Override
             public String toString(Number number) {
                 if (number == null) return "";
-                return dateFormat.format(new Date(number.longValue()*1000));
+                return dateFormat.format(new Date(number.longValue() * 1000));
             }
 
             @Override
@@ -84,7 +84,7 @@ public class OhlcvTooltip extends AbstractDataFormattingPlugin {
                 return null;
             }
         });
-        setYValueFormatter(new StringConverter<Number>() {
+        setYValueFormatter(new StringConverter<>() {
             @Override
             public String toString(Number number) {
                 return String.format("%,d%n", number.intValue());
@@ -120,17 +120,16 @@ public class OhlcvTooltip extends AbstractDataFormattingPlugin {
 
     protected Optional<DataPoint> findNearestDataPointWithinPickingDistance(final Point2D mouseLocation) {
         final Chart chart = getChart();
-        if (!(chart instanceof XYChart)) {
+        if (!(chart instanceof XYChart xyChart)) {
             return Optional.empty();
         }
 
-        final XYChart xyChart = (XYChart) chart;
         final ObservableList<DataSet> xyChartDatasets = xyChart.getDatasets();
         return xyChart.getRenderers().stream() // for all renderers
                 .flatMap(renderer -> Stream.of(renderer.getDatasets(), xyChartDatasets) //
                                              .flatMap(List::stream) // combine global and renderer specific Datasets
                                              .flatMap(dataset -> getPointsCloseToCursor(dataset, renderer, mouseLocation))) // get points in range of cursor
-                .reduce((p1, p2) -> p1.distanceFromMouse <= p2.distanceFromMouse ? p1 : p2); // find closest point, tie-breaking in favor of earlier data sets to match rendering order
+                .reduce((p1, p2) -> p1.distanceFromMouse <= p2.distanceFromMouse ? p1 : p2); // find the closest point, tie-breaking in favor of earlier data sets to match rendering order
     }
 
     protected Stream<DataPoint> getPointsCloseToCursor(final DataSet dataset, final Renderer renderer, final Point2D mouseLocation) {
@@ -141,8 +140,9 @@ public class OhlcvTooltip extends AbstractDataFormattingPlugin {
             return Stream.empty(); // ignore this renderer because there are no valid axes available
         }
 
+        //  This is targeted for OhlcvDataSet
         if (dataset instanceof GridDataSet) {
-            return Stream.empty(); // TODO: correct impl for grid data sets
+            return Stream.empty(); // Not relevantTODO: correct impl for grid data sets
         }
 
         return dataset.lock().readLockGuard(() -> {
@@ -162,7 +162,7 @@ public class OhlcvTooltip extends AbstractDataFormattingPlugin {
                     .mapToObj(i -> getDataPointFromDataSet(renderer, dataset, xAxis, yAxis, mouseLocation, i)) // get points with distance to mouse
                     .filter(p -> p.distanceFromMouse <= getPickingDistance()) // filter out points which are too far away
                     .map(dataPoint -> dataPoint.withFormattedLabel(formatLabel(dataPoint)))
-                    .collect(Collectors.toList()) // Realize list so that calculations are done within the data set lock
+                    .toList() // Realize list so that calculations are done within the data set lock
                     .stream();
         });
     }
@@ -224,7 +224,7 @@ public class OhlcvTooltip extends AbstractDataFormattingPlugin {
 
     /**
      * Distance of the mouse cursor from the data point (expressed in display units) that should trigger showing the
-     * tool tip. By default initialized to {@value #DEFAULT_PICKING_DISTANCE}.
+     * tool tip. By default, initialized to {@value #DEFAULT_PICKING_DISTANCE}.
      *
      * @return the picking distance property
      */
