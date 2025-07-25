@@ -1231,7 +1231,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * Allow user to control turn on/off the tick mark label while keeping the tick mark visible.
      * This can be useful if we would like to stack up a series of small charts with the same x-axis
      * This hope to get the UI tighter.
-     * @param value
+     * @param value turn on/off to draw tick mark label
      */
     public void setDrawTickMarkLabel(boolean value) {
         drawTickMarkLabel = value;
