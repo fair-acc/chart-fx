@@ -166,7 +166,7 @@ public class ErrorDataSetRenderer extends AbstractErrorDataSetRendererParameter<
         }
 
         final int xOffset = Math.max(style.getGlobalIndex(), 0);
-        final int minRequiredWidth = Math.max(getDashSize(), points.minDistanceX);
+        final int minRequiredWidth = Math.max(getDashSize(), points.getMinXDistance());
 
         final double barWPercentage = getBarWidthPercentage();
         final double dynBarWidth = minRequiredWidth * barWPercentage / 100;
