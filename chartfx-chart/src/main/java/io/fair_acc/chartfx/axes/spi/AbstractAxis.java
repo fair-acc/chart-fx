@@ -131,24 +131,32 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         drawAxisPre();
 
         final double axisLength = getLength();
-        if (isTickLabelRendered()) {
+        if (hasValidRange()) {
             final var majorTicks = getTickMarks();
             final var minorTicks = getMinorTickMarks();
 
-            // Ignore minor ticks if there isn't enough space
-            if (isMinorTickVisible() && getMinorTickLength() > 0) {
-                double minRequiredLength = majorTicks.size() * (getMajorTickStyle().getStrokeWidth() + MIN_TICK_GAP)
-                                         + minorTicks.size() * (getMinorTickStyle().getStrokeWidth() + MIN_TICK_GAP);
-                if (axisLength > minRequiredLength) {
-                    drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
+            // Tick marks
+            if (isTickMarkVisible()) {
+                // Ignore minor ticks if there isn't enough space
+                if (isMinorTickVisible() && getMinorTickLength() > 0) {
+                    double minRequiredLength = majorTicks.size() * (getMajorTickStyle().getStrokeWidth() + MIN_TICK_GAP)
+                                               + minorTicks.size() * (getMinorTickStyle().getStrokeWidth() + MIN_TICK_GAP);
+                    if (axisLength > minRequiredLength) {
+                        drawTickMarks(gc, axisLength, axisWidth, axisHeight, minorTicks, getMinorTickLength(), getMinorTickStyle());
+                    }
                 }
+
+                // draw major tick-mark over minor tick-marks so that the visible (long) line
+                // along the axis with the style of the major-tick is visible
+                drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
             }
 
-            // draw major tick-mark over minor tick-marks so that the visible (long) line
-            // along the axis with the style of the major-tick is visible
-            applyOverlapPolicy(majorTickMarks);
-            drawTickMarks(gc, axisLength, axisWidth, axisHeight, majorTicks, getTickLength(), getMajorTickStyle());
-            drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
+            // Tick labels
+            if (isTickLabelsVisible()) {
+                applyOverlapPolicy(majorTickMarks);
+                drawTickLabels(gc, axisWidth, axisHeight, majorTicks, getTickLength());
+            }
+
         }
 
         // draw axis title and dominant line
@@ -427,11 +435,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         labelOverlap = false;
 
         // Tick marks or just the main line
-        final double tickSize = isTickMarkVisible() ? getTickLength() : getMajorTickStyle().getStrokeWidth();
+        final double tickSize = hasValidRange() && isTickMarkVisible() ? getTickLength() : getMajorTickStyle().getStrokeWidth();
 
         // Optional tick mark labels
         double tickLabelSize = 0;
-        if (isTickLabelRendered()) {
+        if (hasValidRange() && isTickLabelsVisible()) {
             // Figure out maximum sizes
             for (TickMark tickMark : getTickMarks()) {
                 maxLabelHeight = Math.max(maxLabelHeight, tickMark.getHeight());
@@ -541,10 +549,15 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return 0;
     }
 
-    private boolean isTickLabelRendered() {
-        return isTickMarkVisible() && isTickLabelsVisible() && Double.isFinite(getMin()) && Double.isFinite(getMax());
+    private boolean hasValidRange() {
+        return Double.isFinite(getMin()) && Double.isFinite(getMax());
     }
 
+    /**
+     * applies tick label visibility depending on whether there is enough space
+     *
+     * @param tickMarks input ticks
+     */
     private void applyOverlapPolicy(List<TickMark> tickMarks) {
         if (tickMarks.isEmpty()) {
             return;
@@ -857,7 +870,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected void drawTickMarks(final GraphicsContext gc, final double axisLength, final double axisWidth,
             final double axisHeight, final ObservableList<TickMark> tickMarks, final double tickLength,
             final LineStyle tickStyle) {
-        if (tickLength <= 0) {
+        if (!tickStyle.isVisible() || tickLength <= 0) {
             return;
         }
 
