@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static io.fair_acc.chartfx.utils.NumberFormatterImpl.*;
 
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.DoubleFunction;
 
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,15 @@ class NumberFormatterImplTest {
         assertEquals("1.23456789E2", formatter.apply(123.456789));
         assertEquals("1.23456789E14", formatter.apply(123.456789E12));
         assertEquals("1.23456789E-10", formatter.apply(123.456789E-12));
+    }
+    
+    @Test
+    void exponentialFormatParsing() {
+        Locale.setDefault(Locale.US);
+        var formatter = createFormatterImpl(true, ALL_DIGITS, Optional.empty());
+        assertEquals(0., formatter.fromString("0E0"));
+        assertEquals(2.1,formatter.fromString("2.1E0"));
+        assertEquals(123.456789E-12, formatter.fromString("1.23456789E-10"));
     }
 
     @Test
@@ -109,11 +119,40 @@ class NumberFormatterImplTest {
         assertEquals("0.01", formatter.apply(0.010000000000000004));
         assertEquals("0.00", formatter.apply(0.001000000000000004));
     }
-
-    private static DoubleFunction<String> createFormatter(boolean exponentialForm, int decimalPlaces) {
+    
+    @Test
+    void exponentialSeparator() {
+        Locale.setDefault(Locale.US);
+        var formatter = createFormatterImpl(true, 5, Optional.of('\u202F'));
+        assertEquals("2.10000\u202FE0", formatter.toString(2.1));
+        assertEquals("1.00000\u202FE1", formatter.toString(10));
+        assertEquals("1.23457\u202FE14", formatter.toString(123.456789E12));
+        assertEquals("1.23457\u202FE-10", formatter.toString(123.456789E-12));
+    }
+    
+    @Test
+    void exponentialSeparatorParsing() {
+        Locale.setDefault(Locale.US);
+        var formatter = createFormatterImpl(true, 5, Optional.of('\u202F'));
+        assertEquals(2.1, formatter.fromString("2.10000\u202FE0"));
+        assertEquals(10., formatter.fromString("1.00000\u202FE1"));
+        assertEquals(1.23457E14, formatter.fromString("1.23457\u202FE14"));
+        assertEquals(1.23457E-10, formatter.fromString("1.23457\u202FE-10"));
+    }
+    
+    private static NumberFormatterImpl createFormatterImpl(
+            boolean exponentialForm,
+            int decimalPlaces,
+            Optional<Character> exponentialSeparator) {
         var formatter = new NumberFormatterImpl();
         formatter.setExponentialForm(exponentialForm);
         formatter.setDecimalPlaces(decimalPlaces);
+        exponentialSeparator.ifPresent(sep -> formatter.setExponentialSeparator(sep));
+        return formatter;
+    }
+
+    private static DoubleFunction<String> createFormatter(boolean exponentialForm, int decimalPlaces) {
+        var formatter = createFormatterImpl(exponentialForm, decimalPlaces, Optional.empty());
         return formatter::toString;
     }
 }
