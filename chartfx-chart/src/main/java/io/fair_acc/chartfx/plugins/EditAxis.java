@@ -13,6 +13,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ListChangeListener.Change;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -80,6 +81,9 @@ public class EditAxis extends ChartPlugin {
         }
     };
 
+    // Store stable reference to handler so that it can be removed
+    private final ListChangeListener<? super Axis> axisChangeListener = this::axesChangedHandler;
+
     /**
      * Creates a new instance of EditAxis with animation disabled and with {@link #axisModeProperty() editMode}
      * initialized to {@link AxisMode#XY}.
@@ -128,7 +132,11 @@ public class EditAxis extends ChartPlugin {
             return;
         }
         newChart.getAxes().forEach(axis -> popUpList.add(new MyPopOver(axis, axis.getSide().isHorizontal())));
-        newChart.getAxes().addListener(this::axesChangedHandler);
+
+        /* This method is potentially called multiple times, make sure listener is only present once (contains check
+         * is not available) */
+        newChart.getAxes().removeListener(axisChangeListener);
+        newChart.getAxes().addListener(axisChangeListener);
     }
 
     private void axesChangedHandler(@SuppressWarnings("unused") Change<? extends Axis> ch) { // parameter for EventHandler api
@@ -189,7 +197,8 @@ public class EditAxis extends ChartPlugin {
         if (oldChart == null) {
             return;
         }
-        oldChart.getAxes().removeListener(this::axesChangedHandler);
+        // remove listener using a stable identity
+        oldChart.getAxes().removeListener(axisChangeListener);
     }
 
     /**
