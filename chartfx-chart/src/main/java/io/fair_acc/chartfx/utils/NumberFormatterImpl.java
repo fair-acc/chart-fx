@@ -1,18 +1,27 @@
 package io.fair_acc.chartfx.utils;
 
-import static java.lang.Math.*;
+import static io.fair_acc.chartfx.utils.Schubfach.H_DOUBLE;
+import static io.fair_acc.chartfx.utils.Schubfach.getDecimalLength;
+import static io.fair_acc.chartfx.utils.Schubfach.getNormalizationScale;
+import static java.lang.Math.multiplyHigh;
 
-import static io.fair_acc.chartfx.utils.Schubfach.*;
-
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormatSymbols;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 import javafx.util.StringConverter;
 
 public class NumberFormatterImpl extends StringConverter<Number> implements NumberFormatter {
-    public final static char DEFAULT_DECIMAL_SEPARATOR = ' ';
-
+    
+    private static final Charset CHARSET = StandardCharsets.UTF_8;
+    
+    private static final Pattern UNICODE_WHITESPACE_PATTERN = Pattern.compile("(?U)\\s");
+    
     public NumberFormatterImpl() {
         super();
         setDecimalFormatSymbols(DecimalFormatSymbols.getInstance());
@@ -26,7 +35,12 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     @Override
     public Number fromString(final String string) {
-        return Double.parseDouble(string);
+        if (exponentialSeparator.length == 0) {
+            return Double.parseDouble(string);
+        }
+        
+        String cleanedString = UNICODE_WHITESPACE_PATTERN.matcher(string).replaceAll("");
+        return Double.parseDouble(cleanedString);
     }
 
     @Override
@@ -37,6 +51,10 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     @Override
     public boolean isExponentialForm() {
         return isExponentialForm;
+    }
+    
+    public final char getExponentialSeparator() {
+        return CHARSET.decode(ByteBuffer.wrap(exponentialSeparator)).get();
     }
 
     @Override
@@ -49,6 +67,16 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     public NumberFormatter setDecimalPlaces(final int decimalPlaces) {
         this.decimalPlaces = Math.max(ALL_DIGITS, decimalPlaces);
         return this;
+    }
+    
+    /**
+     * Sets the separator to use between decimal places and exponential e.g. {@code 1_HERE_E-10}. This <em>can</em> break the
+     * functionality of {@link #fromString(String)} if a non-whitespace character is used. Default: none. 
+     * 
+     * @param separator Character to use
+     */
+    public final void setExponentialSeparator(char separator) {
+        exponentialSeparator = charToBytes(separator);
     }
 
     @Override
@@ -116,13 +144,14 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     private void toExponentialFormat(int h, int m, int l, int e) {
         appendDigit(h);
         if (decimalPlaces > 0) {
-            append(DOT);
+            append(dot);
             appendNDigits(m, l, decimalPlaces);
         } else if (decimalPlaces == ALL_DIGITS) {
-            append(DOT);
+            append(dot);
             append8Digits(m);
             lowDigits(l);
         }
+        append(exponentialSeparator);
         exponent(e - 1);
     }
 
@@ -139,7 +168,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         if (decimalPlaces == 0) {
             return;
         }
-        append(DOT);
+        append(dot);
         if (decimalPlaces == ALL_DIGITS) {
             for (; i <= 8; ++i) {
                 t = 10 * y;
@@ -164,7 +193,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         if (decimalPlaces == 0) {
             return;
         }
-        append(DOT);
+        append(dot);
         int spaceLeft = bytes.length - length;
         if (decimalPlaces == ALL_DIGITS) {
             for (; e < 0 && spaceLeft > 0; ++e) {
@@ -193,13 +222,13 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         length = 0;
         append(ZERO);
         if (decimalPlaces > 0) {
-            append(DOT);
+            append(dot);
             for (int i = 0; i < decimalPlaces; i++) {
                 append(ZERO);
             }
         }
         if (isExponentialForm) {
-            append(EXP);
+            append(exp);
             append(ZERO);
         }
     }
@@ -277,8 +306,11 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
             length--;
         }
         // remove trailing comma
-        if (bytes[length - 1] == DOT) {
-            length--;
+        if (length >= dot.length && 
+                Arrays.equals(
+                        bytes,  (length - dot.length), length - dot.length + 1, 
+                        dot, 0, dot.length)) {
+            length -= dot.length;
         }
     }
 
@@ -299,7 +331,7 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     private void exponent(int e) {
-        append(EXP);
+        append(exp);
         if (e < 0) {
             append(MINUS);
             e = -e;
@@ -318,7 +350,11 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     }
 
     private String bytesToString() {
-        return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
+        return new String(bytes, 0, length, CHARSET);
+    }
+    
+    private static byte[] charToBytes(char c) {
+        return CHARSET.encode(CharBuffer.wrap(new char[] { c })).array();
     }
 
     static final int ALL_DIGITS = -1;
@@ -346,23 +382,24 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
     int length = 0;
 
     boolean isExponentialForm = false;
+    private byte[] exponentialSeparator = {};
 
     // Used for left-to-tight digit extraction.
     private static final int MASK_28 = (1 << 28) - 1;
 
     public NumberFormatterImpl setDecimalFormatSymbols(DecimalFormatSymbols symbols) {
-        String exp = symbols.getExponentSeparator();
-        if (exp.length() > MAX_EXP_LENGTH) {
+        String expString = symbols.getExponentSeparator();
+        if (expString.length() > MAX_EXP_LENGTH) {
             throw new IllegalArgumentException("Exponent separator can't be longer than " + MAX_EXP_LENGTH);
         }
-        this.EXP = Objects.equals(exp, "E") ? DEFAULT_EXP : exp.getBytes(StandardCharsets.ISO_8859_1);
-        this.DOT = (byte) symbols.getDecimalSeparator();
+        this.exp = Objects.equals(expString, "E") ? DEFAULT_EXP : expString.getBytes(CHARSET);
+        this.dot = charToBytes(symbols.getDecimalSeparator());
         return this;
     }
 
-    byte DOT = '.';
-    byte[] EXP = DEFAULT_EXP;
-    private static final byte[] DEFAULT_EXP = new byte[] { 'E' };
+    byte[] dot = charToBytes('.');
+    byte[] exp = DEFAULT_EXP;
+    private static final byte[] DEFAULT_EXP = charToBytes('E');
     private static final byte ZERO = (byte) '0';
     private static final byte MINUS = (byte) '-';
 }
