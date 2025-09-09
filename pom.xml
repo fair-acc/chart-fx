@@ -43,7 +43,7 @@
         <chartfx.controlsfx.version>11.1.2</chartfx.controlsfx.version>
         <chartfx.ikonli.version>12.3.1</chartfx.ikonli.version>
         <chartfx.javafxsvg.version>1.3.0</chartfx.javafxsvg.version>
-        <version.commons-lang3>3.13.0</version.commons-lang3>
+        <version.commons-lang3>3.18.0</version.commons-lang3>
 
         <chartfx.slf4j.version>2.0.9</chartfx.slf4j.version>
         <chartfx.junit.jupiter.version>5.10.0</chartfx.junit.jupiter.version>
