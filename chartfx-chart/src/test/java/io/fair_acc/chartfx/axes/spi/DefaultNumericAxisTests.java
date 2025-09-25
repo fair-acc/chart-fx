@@ -1,12 +1,14 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.ThrowingSupplier;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,5 +94,26 @@ public class DefaultNumericAxisTests {
         axis.updateCachedTransforms();
         tickValues.clear();
         axis.calculateMinorTickValues(tickValues);
+    }
+    
+    @ParameterizedTest
+    @MethodSource("testAxisLabelTextProvider")
+    void testAxisLabelText(String expected, String name, String unit, double unitScaling) {
+        final DefaultNumericAxis axis = new DefaultNumericAxis(name, unit);
+        axis.setUnitScaling(unitScaling);
+        assertEquals(expected, axis.generateAxisLabelText());
+    }
+    
+    private static Stream<Arguments> testAxisLabelTextProvider() { // NOPMD -- is used in annotation /not detected by PMD
+        return Stream.of(
+                Arguments.arguments("axis name [axis unit]", "axis name", "axis unit", 1.),
+                Arguments.arguments("DeviceA [V]", "DeviceA", "V", 1.),
+                Arguments.arguments("DeviceA [mV]", "DeviceA", "V", 0.001),
+                Arguments.arguments("axis name", "axis name", null, 1.),
+                Arguments.arguments("[V]", "", "V", 1.),
+                Arguments.arguments("[V]", null, "V", 1.),
+                Arguments.arguments("", "", "", 1.),
+                Arguments.arguments(null, null, null, 1.)
+                );
     }
 }
