@@ -45,6 +45,7 @@ import io.fair_acc.chartfx.Chart;
 import io.fair_acc.chartfx.XYChart;
 import io.fair_acc.chartfx.axes.Axis;
 import io.fair_acc.chartfx.axes.AxisMode;
+import io.fair_acc.chartfx.axes.spi.DefaultNumericAxis;
 import io.fair_acc.chartfx.ui.ObservableDeque;
 import io.fair_acc.chartfx.ui.geometry.Side;
 
@@ -893,8 +894,18 @@ public class Zoomer extends ChartPlugin {
                 final double offset = (side.isHorizontal() ? oldMouseX : oldMouseY) - (side.isHorizontal() ? newMouseX : newMouseY);
                 axis.setAutoRanging(false);
                 // shift bounds
-                final double newMin = axis.getValueForDisplay(0 + offset);
-                final double newMax = axis.getValueForDisplay(axis.getLength() + offset);
+                final double newDisplayPositionMin;
+                final double newDisplayPositionMax;
+                if (axis.isInvertedAxis()) {
+                    newDisplayPositionMin = axis.getLength() + offset;
+                    newDisplayPositionMax = 0 + offset;
+                } else {
+                    newDisplayPositionMin = 0 + offset;
+                    newDisplayPositionMax = axis.getLength() + offset;
+                }
+                
+                final double newMin = axis.getValueForDisplay(newDisplayPositionMin);
+                final double newMax = axis.getValueForDisplay(newDisplayPositionMax);
                 if (side.isHorizontal()) {
                     axis.set(newMin, newMax);
                 } else {
@@ -1200,9 +1211,20 @@ public class Zoomer extends ChartPlugin {
             maxDisplay = (1 - scaling) * mousePos;
             minDisplay = mousePos + scaling * (max - mousePos);
         }
-        final double newMin = axis.getValueForDisplay(minDisplay);
-        final double newMax = axis.getValueForDisplay(maxDisplay);
-
+        
+        final double minDisplayWithInverted;
+        final double maxDisplayWithInverted;
+        if (axis.isInvertedAxis()) {
+            minDisplayWithInverted = maxDisplay;
+            maxDisplayWithInverted = minDisplay;
+        } else {
+            minDisplayWithInverted = minDisplay;
+            maxDisplayWithInverted = maxDisplay;
+        }
+        
+        final double newMin = axis.getValueForDisplay(minDisplayWithInverted);
+        final double newMax = axis.getValueForDisplay(maxDisplayWithInverted);
+        
         axis.set(newMin, newMax);
         axis.updateCachedTransforms();
 
