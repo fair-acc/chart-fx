@@ -1333,8 +1333,9 @@ public class Zoomer extends ChartPlugin {
             setPrefWidth(-1);
             setMaxWidth(Double.MAX_VALUE);
 
-            xAxis.invertAxisProperty().bindBidirectional(invertedSlide);
             invertedSlide.addListener((ch, o, n) -> setRotate(Boolean.TRUE.equals(n) ? 180 : 0));
+            invertedSlide.set(xAxis.isInvertedAxis());
+            invertedSlide.bind(xAxis.invertAxisProperty());
 
             xAxis.autoRangingProperty().addListener(sliderResetHandler);
             xAxis.autoGrowRangingProperty().addListener(sliderResetHandler);
