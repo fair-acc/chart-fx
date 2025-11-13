@@ -604,8 +604,6 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
 
             logScaleLengthInv = axisLength / logScaleLength;
             offset = axisLength;
-
-            offset = isVerticalAxis ? getHeight() : getWidth();
         }
     }
 }
