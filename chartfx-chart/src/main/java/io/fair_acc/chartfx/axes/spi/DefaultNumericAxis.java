@@ -58,7 +58,7 @@ public class DefaultNumericAxis extends AbstractAxis implements Axis {
                     setMinorTickCount(0);
                 } else {
                     axisTransform = logTransform;
-                    setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT);
+                    setMinorTickCount(AbstractAxisParameter.DEFAULT_MINOR_TICK_COUNT - 1);
                 }
                 if (getMin() <= 0) {
                     isUpdating = true;
