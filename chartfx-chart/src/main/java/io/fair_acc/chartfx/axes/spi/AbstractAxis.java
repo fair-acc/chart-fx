@@ -1165,9 +1165,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return;
         }
 
-        gc.save();
-        gc.translate(x, y); // translate before applying any rotation
-
+        // translate before applying any rotation
+        gc.translate(x, y);
         if (tickMark.getRotation() != 0) {
             gc.rotate(tickMark.getRotation());
         }
@@ -1182,7 +1181,17 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             gc.strokeText(tickMark.getText(), 0, 0);
         }
 
-        gc.restore();
+        if (scaleFont != 1.0) {
+            final double inverse = 1 / scaleFont;
+            gc.scale(inverse, inverse);
+        }
+
+        // reverse the transform manually to avoid pushing extra state
+        if (tickMark.getRotation() != 0) {
+            gc.rotate(-tickMark.getRotation());
+        }
+        gc.translate(-x, -y);
+
     }
 
     /**
