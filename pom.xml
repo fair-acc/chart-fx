@@ -364,6 +364,20 @@
 
     <profiles>
         <profile>
+            <id>disable-javadoc-on-jdk25</id>
+            <activation>
+                <jdk>[25,)</jdk> <!-- >= jdk25 -->
+            </activation>
+            <properties>
+                <!--
+                javadoc25 got really strict and crashes on 'samples', but the error message
+                does not say why. It's unlikely that we need javadoc for non-release builds,
+                so we can just disable it until we know the cause.
+                  -->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+            </properties>
+        </profile>
+        <profile>
             <id>releaseGithub</id>
             <activation>
                 <property>
