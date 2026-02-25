@@ -1,8 +1,8 @@
 package io.fair_acc.dataset.events;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
@@ -149,6 +149,15 @@ public abstract class BitState implements StateListener {
         return clear(bit0.getAsInt() | bit1.getAsInt() | mask(bits));
     }
 
+    protected void notifyListeners(List<StateListener> list, int delta) {
+        if (list != null) {
+            final int size = list.size();
+            for (int i = 0; i < size; i++) {
+                list.get(i).accept(this, delta);
+            }
+        }
+    }
+
     public BitState addChangeListener(IntSupplier bit, StateListener listener) {
         return addChangeListener(bit.getAsInt(), listener);
     }
@@ -166,33 +175,69 @@ public abstract class BitState implements StateListener {
     }
 
     public BitState addChangeListener(StateListener listener) {
-        if (changeListeners == null) {
-            changeListeners = new CopyOnWriteArrayList<>();
+        synchronized (changeListenersLock) {
+            changeListeners = newListWithAddedElement(changeListeners, listener);
         }
-        changeListeners.add(listener);
         return this;
     }
 
     public BitState addInvalidateListener(StateListener listener) {
-        if (invalidateListeners == null) {
-            invalidateListeners = new CopyOnWriteArrayList<>();
+        synchronized (changeListenersLock) {
+            invalidateListeners = newListWithAddedElement(invalidateListeners, listener);
         }
-        invalidateListeners.add(listener);
         return this;
     }
 
     public boolean removeChangeListener(StateListener listener) {
-        return removeListener(changeListeners, listener);
+        synchronized (changeListenersLock) {
+            List<StateListener> next = newListWithRemovedElement(changeListeners, listener);
+            if (next != null) {
+                this.changeListeners = next;
+                return true;
+            }
+            return false;
+        }
     }
 
     public boolean removeInvalidateListener(StateListener listener) {
-        return removeListener(invalidateListeners, listener);
+        synchronized (changeListenersLock) {
+            List<StateListener> next = newListWithRemovedElement(invalidateListeners, listener);
+            if (next != null) {
+                this.invalidateListeners = next;
+                return true;
+            }
+            return false;
+        }
+    }
+
+    protected static List<StateListener> newListWithAddedElement(List<StateListener> original, StateListener elementToBeAdded) {
+        if (original == null || original.isEmpty()) {
+            return Collections.singletonList(elementToBeAdded);
+        } else {
+            List<StateListener> list = new ArrayList<>(original.size() + 1);
+            list.addAll(original);
+            list.add(elementToBeAdded);
+            return list;
+        }
+    }
+
+    /**
+     * @return null if the elementToBeRemoved was not in the original list
+     */
+    protected static List<StateListener> newListWithRemovedElement(List<StateListener> original, StateListener elementToBeRemoved) {
+        if (original != null && !original.isEmpty()) {
+            List<StateListener> list = new ArrayList<>(original);
+            if (removeListener(list, elementToBeRemoved)) {
+                return list;
+            }
+        }
+        return null;
     }
 
     /**
      * @return true if the last occurrence of the listener was removed
      */
-    private static boolean removeListener(List<StateListener> list, StateListener listener) {
+    protected static boolean removeListener(List<StateListener> list, StateListener listener) {
         if (list == null) {
             return false;
         }
@@ -205,15 +250,7 @@ public abstract class BitState implements StateListener {
         return false;
     }
 
-    private void notifyListeners(List<StateListener> list, int delta) {
-        if (list != null) {
-            for (StateListener onChangeListener : list) {
-                onChangeListener.accept(this, delta);
-            }
-        }
-    }
-
-    private static boolean isEqual(StateListener internal, StateListener listener) {
+    protected static boolean isEqual(StateListener internal, StateListener listener) {
         if (internal == listener) {
             return true;
         }
@@ -301,7 +338,7 @@ public abstract class BitState implements StateListener {
     private static final int DEFAULT_MIN_STACK_TRACE = 6;
     private static final int DEFAULT_MAX_STACK_TRACE = 25;
 
-    private static class FilteredListener implements StateListener {
+    public static class FilteredListener implements StateListener {
         private FilteredListener(int filter, StateListener listener) {
             this.filter = filter;
             this.listener = listener;
@@ -350,7 +387,7 @@ public abstract class BitState implements StateListener {
     /**
      * An single-threaded implementation that should only be modified by a single thread
      */
-    protected static class SingleThreadedBitState extends BitState {
+    public static class SingleThreadedBitState extends BitState {
         protected SingleThreadedBitState(Object source, int filter, int initial) {
             super(source, filter);
             state = initial;
@@ -381,7 +418,7 @@ public abstract class BitState implements StateListener {
      * An implementation that can be written to by multiple threads. The change
      * events are sent on the same thread that sent the original request.
      */
-    protected static class MultiThreadedBitState extends BitState {
+    public static class MultiThreadedBitState extends BitState {
         protected MultiThreadedBitState(Object source, int filter, int initial) {
             super(source, filter);
             state.set(initial);
@@ -427,12 +464,12 @@ public abstract class BitState implements StateListener {
 
     @Deprecated // for backwards compatibility
     public List<StateListener> getChangeListeners() {
-        return changeListeners == null ? Collections.emptyList() : changeListeners;
+        return changeListeners;
     }
 
     @Deprecated // for backwards compatibility
     public List<StateListener> getInvalidationListeners() {
-        return invalidateListeners == null ? Collections.emptyList() : invalidateListeners;
+        return invalidateListeners;
     }
 
     @Override
@@ -444,6 +481,13 @@ public abstract class BitState implements StateListener {
     final int filter;
     public static final int ALL_BITS = ~0;
 
-    List<StateListener> changeListeners;
-    List<StateListener> invalidateListeners = null;
+    /**
+     * CopyOnWriteArrayList iterators keep a reference to the active array, which can
+     * result in a lot of extra allocations. Here we use a custom version that allows
+     * safe list iteration without locks or allocations.
+     */
+    protected final Object changeListenersLock = new Object();
+    protected volatile List<StateListener> changeListeners = Collections.emptyList();
+    protected volatile List<StateListener> invalidateListeners = Collections.emptyList();
+
 }
