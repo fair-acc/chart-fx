@@ -101,6 +101,17 @@
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <additionalOptions>
+                        <option>--add-exports=javafx.graphics/com.sun.javafx.tk=${project.moduleName}</option>
+                        <option>--add-exports=javafx.controls/com.sun.javafx.scene.control.skin=${project.moduleName}</option>
+                        <option>--add-exports=org.controlsfx.controls/impl.org.controlsfx.skin=${project.moduleName}</option>
+                    </additionalOptions>
+                </configuration>
+            </plugin>
             <plugin> <!-- Converts Sass files to CSS -->
                 <groupId>us.hebi.sass</groupId>
                 <artifactId>sass-cli-maven-plugin</artifactId>

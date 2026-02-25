@@ -150,12 +150,13 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.1</version> <!-- use old version to ignore module system errors -->
+                    <version>3.6.3</version>
                     <configuration>
+                        <source>17</source>
                         <links>
                             <link>https://openjfx.io/javadoc/12/</link>
                         </links>
-                        <doclint>none</doclint> <!-- TODO: fix javadoc errors -->
+                        <doclint>none</doclint> <!-- Prevents minor HTML errors from breaking the build -->
                     </configuration>
                     <executions>
                         <execution>
