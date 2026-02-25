@@ -280,4 +280,20 @@ public class ObservableDeque<E> extends ObservableListBase<E> implements Deque<E
     public Iterator<E> descendingIterator() {
         return deque.descendingIterator();
     }
+
+    /**
+     * Unsupported: we need to override this method because of a name clash between
+     * java.util.List and java.util.Deque. Both define a method called reversed() but with
+     * different return types. This method was introduced in Java 21. Read more about it here:
+     * https://inside.java/2023/05/12/quality-heads-up/
+     */
+    public ObservableDeque<E> reversed() {
+        /*
+         * Throw an exception. A better solution would be a complete implementation
+         * of a reversed observable deque. However, that is quite a bit of work and if not needed
+         * then why do it. To see an example for this approach, see LinkedList.reversed().
+         */
+        throw new UnsupportedOperationException("reversed() not supported");
+    }
+
 }
