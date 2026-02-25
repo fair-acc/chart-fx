@@ -1,15 +1,10 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import java.util.Objects;
-
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.geometry.VPos;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-
+import io.fair_acc.chartfx.fxinternals.FxFontMetrics;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.geometry.Side;
+
+import java.util.Objects;
 
 /**
  * TickMark represents the label text dimension, its associated tick mark value and position along the axis for each tick.
@@ -19,14 +14,14 @@ import io.fair_acc.chartfx.ui.geometry.Side;
  * @author ennerf
  */
 public class TickMark {
-    private double tickValue = Double.NaN; // tick mark in data units
-    private String text = ""; // the actual label text
-    private double height = Double.NaN; // the label height in display units
-    private double width = Double.NaN; // the label width in display units
+    protected double tickValue = Double.NaN; // tick mark in data units
+    protected String text = ""; // the actual label text
+    protected double height = Double.NaN; // the label height in display units
+    protected double width = Double.NaN; // the label width in display units
 
-    private double tickPosition = Double.NaN; // tick position along axis in display units
-    private boolean visible = true; // whether the tick mark should be displayed
-    private final TextStyle style;
+    protected double tickPosition = Double.NaN; // tick position along axis in display units
+    protected boolean visible = true; // whether the tick mark should be displayed
+    protected final TextStyle style;
     private long usedStyle = -1;
 
     /**
@@ -38,7 +33,8 @@ public class TickMark {
 
     /**
      * Updates a tick mark
-     * @param tickValue numeric value of tick
+     *
+     * @param tickValue     numeric value of tick
      * @param tickMarkLabel string label associated with tick
      */
     public void setValue(double tickValue, String tickMarkLabel) {
@@ -51,20 +47,42 @@ public class TickMark {
         this.text = tickMarkLabel;
     }
 
-    private void updateTextSize() {
+    protected void updateTextSize() {
         if (usedStyle != style.getChangeCounter() || height < 0) {
             if (text == null || text.isEmpty()) {
                 height = 0;
                 width = 0;
             } else {
-                // N.B. important: usage of getBoundsInParent() which also takes into
-                // account text rotations
-                style.setText(text);
-                var bounds = style.getBoundsInParent();
-                height = bounds.getHeight();
-                width = bounds.getWidth();
+                updateBounds();
             }
             usedStyle = style.getChangeCounter();
+        }
+    }
+
+    protected void updateBounds() {
+        // N.B. important: usage of getBoundsInParent() which also takes into account text rotations.
+        //
+        // Checking text bounds via a node is incredibly wasteful, so we try to use an internal API
+        // that is available with appropriate jvm flags. The two results can differ by tiny amounts
+        // as the width may depend on the actual character sequence (e.g. 4 followed by 3), but in
+        // initial tests the diff was usually below 1px. This should not matter in practice.
+        if (FxFontMetrics.isAvailable()) {
+            this.height = FxFontMetrics.getLineHeight(style.getFont());
+            this.width = FxFontMetrics.getWidth(style.getFont(), text);
+            if (getRotation() != 0) {
+                var rad = Math.toRadians(getRotation());
+                var sin = Math.sin(rad);
+                var cos = Math.cos(rad);
+                var w = width;
+                var h = height;
+                this.width = (w * cos) + (h * sin) + 0.5; // account for AA
+                this.height = (w * sin) + (h * cos) + 0.5; // account for AA
+            }
+        } else {
+            style.setText(text);
+            var bounds = style.getBoundsInParent();
+            height = bounds.getHeight();
+            width = bounds.getWidth();
         }
     }
 
@@ -129,9 +147,10 @@ public class TickMark {
 
     // ------- deprecated methods for backwards compatibility with unit tests -------
 
-    @Deprecated // TODO: update tests
+    @Deprecated
+        // TODO: update tests
     TickMark(final Side side, final double tickValue, final double tickPosition, final double tickRotation,
-            final String tickMarkLabel) {
+             final String tickMarkLabel) {
         this(new TextStyle());
         setValue(tickValue, tickMarkLabel);
         this.style.setRotate(tickRotation);

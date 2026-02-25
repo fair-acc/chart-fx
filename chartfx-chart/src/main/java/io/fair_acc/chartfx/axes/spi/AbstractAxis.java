@@ -681,7 +681,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // Update the existing mark objects
-        List<TickMark> marks = FXUtils.sizedList(getTickMarks(), newTickValues.size(), () -> new TickMark(getTickLabelStyle()));
+        List<TickMark> marks = FXUtils.sizedList(getTickMarks(), newTickValues.size(), this::createTickMark);
         int i = 0;
         for (var mark : marks) {
             var tick = newTickValues.getDouble(i++);
@@ -705,7 +705,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // Update
-        List<TickMark> marks = FXUtils.sizedList(getMinorTickMarks(), newTickValues.size(), () -> new TickMark(getTickLabelStyle()));
+        List<TickMark> marks = FXUtils.sizedList(getMinorTickMarks(), newTickValues.size(), this::createTickMark);
         int i = 0;
         for (var mark : marks) {
             mark.setValue(newTickValues.getDouble(i++), "");
@@ -713,6 +713,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         oldTickValues.setAll(newTickValues);
         tickMarksUpdated();
+    }
+
+    protected TickMark createTickMark() {
+        return new TickMark(getTickLabelStyle());
     }
 
     protected void updateTickMarkPositions(List<TickMark> tickMarks) {
@@ -972,7 +976,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return getSide().isHorizontal() ? tmpTickMark.getWidth() : tmpTickMark.getHeight();
     }
 
-    private final TickMark tmpTickMark = new TickMark(getTickLabelStyle());
+    private final TickMark tmpTickMark = createTickMark();
 
     protected void updateAxisLabelAlignment() {
         // TODO: maybe set this via CSS?
