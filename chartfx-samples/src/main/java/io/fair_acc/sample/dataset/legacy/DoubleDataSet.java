@@ -17,7 +17,7 @@ import io.fair_acc.dataset.utils.AssertUtils;
  * User provides X and Y coordinates or only Y coordinates. In the former case X coordinates have value of data point
  * index. This version being optimised for native double arrays.
  *
- * @see DoubleErrorDataSet for an equivalent implementation with asymmetric errors in Y
+ * Check {@link DoubleErrorDataSet} for an equivalent implementation with asymmetric errors in Y
  * @author rstein
  * @deprecated this is kept for reference/performance comparisons only
  */

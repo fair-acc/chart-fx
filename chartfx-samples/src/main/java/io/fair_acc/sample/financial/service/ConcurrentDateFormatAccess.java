@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * @see SimpleDateFormat is not thread safe. For parallel processing of data streams is necessary to use threadlocal processing.
+ * Note: {@link SimpleDateFormat} is not thread safe. For parallel processing of data streams is necessary to use threadlocal processing.
  */
 public class ConcurrentDateFormatAccess {
     private final String simpleDateFormatString;
