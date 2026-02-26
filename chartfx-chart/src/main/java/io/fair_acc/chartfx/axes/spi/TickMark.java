@@ -16,6 +16,7 @@ import java.util.Objects;
 public class TickMark {
     protected double tickValue = Double.NaN; // tick mark in data units
     protected String text = ""; // the actual label text
+    protected int numLines = 1; // support multi-line labels
     protected double height = Double.NaN; // the label height in display units
     protected double width = Double.NaN; // the label width in display units
 
@@ -43,6 +44,10 @@ public class TickMark {
             this.height = -1;
             this.width = -1;
         }
+        numLines = 1;
+        for (int i = 0; i < tickMarkLabel.length(); i++) {
+            if(tickMarkLabel.charAt(i) == '\n') numLines++;
+        }
         this.tickValue = tickValue;
         this.text = tickMarkLabel;
     }
@@ -66,7 +71,7 @@ public class TickMark {
         // tests the diff was generally within 1px, so this should not matter in practice.
         final double w, h;
         if (FxFontMetrics.isAvailable()) {
-            h = FxFontMetrics.getLineHeight(style.getFont());
+            h = FxFontMetrics.getLineHeight(style.getFont()) * numLines;
             w = FxFontMetrics.getWidth(style.getFont(), text);
         } else {
             style.setText(text);
