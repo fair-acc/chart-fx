@@ -98,9 +98,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // set default axis title/label alignment
         PropUtil.initAndRunOnChange(this::updateAxisLabelAlignment,
                 sideProperty());
-        PropUtil.initAndRunOnChange(this::updateTickLabelAlignment,
-                sideProperty(),
-                getTickLabelStyle().rotateProperty());
     }
 
     protected AbstractAxis(final double lowerBound, final double upperBound) {
@@ -843,6 +840,8 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         // use the same style for all tick marks
         gc.save();
         getTickLabelStyle().copyStyleTo(gc);
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setTextBaseline(VPos.CENTER);
 
         // draw the labels
         final boolean isHorizontal = getSide().isHorizontal();
@@ -862,9 +861,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             double position = tickMark.getPosition();
             double coord = isEven ? evenCoord : oddCoord;
             if (isHorizontal) {
-                drawTickMarkLabel(gc, position, coord, scaleFont, tickMark);
+                drawTickMarkLabel(gc, getSide(), position, coord, scaleFont, tickMark);
             } else {
-                drawTickMarkLabel(gc, coord, position, scaleFont, tickMark);
+                drawTickMarkLabel(gc, getSide(), coord, position, scaleFont, tickMark);
             }
         }
 
@@ -1016,77 +1015,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
-     * Sets the alignment for rotated label, i.e., determines whether to write
-     * bottom-left to top-right or top-left to bottom-right. Depends on the side
-     * and the angle of rotation.
-     */
-    protected void updateTickLabelAlignment() {
-        // TODO: set partly through CSS?
-        // normalise rotation to [-360, +360]
-        final int rotation = ((int) getTickLabelRotation() % 360);
-        var style = getTickLabelStyle();
-        var alignment = style.getTextAlignment();
-        var origin = style.getTextOrigin();
-        switch (getSide()) {
-        case TOP:
-            alignment = TextAlignment.CENTER;
-            origin = VPos.BOTTOM;
-            // special alignment treatment if axes labels are to be rotated
-            if ((rotation != 0) && ((rotation % 90) == 0)) {
-                alignment = TextAlignment.LEFT;
-                origin = VPos.CENTER;
-            } else if ((rotation % 90) != 0) {
-                // pivoting point to left-bottom label corner
-                alignment = TextAlignment.LEFT;
-                origin = VPos.BOTTOM;
-            }
-            break;
-        case BOTTOM:
-        case CENTER_HOR:
-            alignment = TextAlignment.CENTER;
-            origin = VPos.TOP;
-            // special alignment treatment if axes labels are to be rotated
-            if ((rotation != 0) && ((rotation % 90) == 0)) {
-                alignment = TextAlignment.LEFT;
-                origin = VPos.CENTER;
-            } else if ((rotation % 90) != 0) {
-                // pivoting point to left-top label corner
-                alignment = TextAlignment.LEFT;
-                origin = VPos.TOP;
-            }
-            break;
-        case LEFT:
-            alignment = TextAlignment.RIGHT;
-            origin = VPos.CENTER;
-            // special alignment treatment if axes labels are to be rotated
-            if ((rotation != 0) && ((rotation % 90) == 0)) {
-                alignment = TextAlignment.CENTER;
-                origin = VPos.BOTTOM;
-            }
-            break;
-        case RIGHT:
-        case CENTER_VER:
-            alignment = TextAlignment.LEFT;
-            origin = VPos.CENTER;
-            // special alignment treatment if axes labels are to be rotated
-            if ((rotation != 0) && ((rotation % 90) == 0)) {
-                alignment = TextAlignment.CENTER;
-                origin = VPos.TOP;
-            }
-            break;
-        default:
-        }
-
-        // Update values
-        if (alignment != style.getTextAlignment()) {
-            style.setTextAlignment(alignment);
-        }
-        if (origin != style.getTextOrigin()) {
-            style.setTextOrigin(origin);
-        }
-    }
-
-    /**
      * This is used to check if any given animation should run. It returns true if animation is enabled and the node is
      * visible and in a scene.
      *
@@ -1159,14 +1087,36 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         gc.restore();
     }
 
-    protected static void drawTickMarkLabel(final GraphicsContext gc, final double x, final double y,
+    protected static void drawTickMarkLabel(final GraphicsContext gc, Side side, final double x, final double y,
             final double scaleFont, final TickMark tickMark) {
         if (PropUtil.isNullOrEmpty(tickMark.getText())) {
             return;
         }
 
+        // The x/y position is aligned for all labels and is the closest point of the label
+        // to the ticks. To draw all rotations correctly, we first move to the label center,
+        // rotate, and render the text 'centered'.
+        double centerX = x;
+        double centerY = y;
+        switch (side) {
+            case TOP:
+                centerY -= tickMark.getHeight() / 2;
+                break;
+            case BOTTOM:
+            case CENTER_HOR:
+                centerY += tickMark.getHeight() / 2;
+                break;
+            case LEFT:
+                centerX -= tickMark.getWidth() / 2;
+                break;
+            case RIGHT:
+            case CENTER_VER:
+                centerX += tickMark.getWidth() / 2;
+                break;
+        }
+
         // translate before applying any rotation
-        gc.translate(x, y);
+        gc.translate(centerX, centerY);
         if (tickMark.getRotation() != 0) {
             gc.rotate(tickMark.getRotation());
         }
@@ -1190,7 +1140,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         if (tickMark.getRotation() != 0) {
             gc.rotate(-tickMark.getRotation());
         }
-        gc.translate(-x, -y);
+        gc.translate(-centerX, -centerY);
 
     }
 

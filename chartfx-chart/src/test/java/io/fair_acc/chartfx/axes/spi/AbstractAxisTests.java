@@ -92,8 +92,8 @@ class AbstractAxisTests {
         assertDoesNotThrow(axis::forceRedraw);
         assertDoesNotThrow(() -> axis.drawAxis(gc, 100, 100));
         assertDoesNotThrow(() -> axis.drawAxis(null, 100, 100));
-        assertDoesNotThrow(() -> AbstractAxis.drawTickMarkLabel(gc, 10, 10, 1.0, new TickMark(Side.BOTTOM, 1.0, 1.0, 0.0, "label")));
-        assertDoesNotThrow(() -> AbstractAxis.drawTickMarkLabel(gc, 10, 10, 0.9, new TickMark(Side.BOTTOM, 1.0, 1.0, 90.0, "label")));
+        assertDoesNotThrow(() -> AbstractAxis.drawTickMarkLabel(gc, Side.BOTTOM, 10, 10, 1.0, new TickMark(Side.BOTTOM, 1.0, 1.0, 0.0, "label")));
+        assertDoesNotThrow(() -> AbstractAxis.drawTickMarkLabel(gc, Side.BOTTOM, 10, 10, 0.9, new TickMark(Side.BOTTOM, 1.0, 1.0, 90.0, "label")));
         axis.getMajorTickStyle().setVisible(false);
         axis.getMinorTickStyle().setVisible(false);
         assertDoesNotThrow(() -> axis.drawAxis(gc, 100, 100));
