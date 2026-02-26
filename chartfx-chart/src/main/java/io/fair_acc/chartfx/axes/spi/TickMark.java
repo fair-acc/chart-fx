@@ -60,31 +60,54 @@ public class TickMark {
     }
 
     protected void updateBounds() {
-        // N.B. important: usage of getBoundsInParent() which also takes into account text rotations.
-        //
         // Checking text bounds via a node is incredibly wasteful, so we try to use an internal API
         // that is available with appropriate jvm flags. The two results can differ by tiny amounts
-        // as the width may depend on the actual character sequence (e.g. 4 followed by 3), but in
-        // initial tests the diff was usually below 1px. This should not matter in practice.
+        // as the width may depend on the actual character sequence (e.g. 4 followed by 3). In our
+        // tests the diff was generally within 1px, so this should not matter in practice.
+        final double w, h;
         if (FxFontMetrics.isAvailable()) {
-            this.height = FxFontMetrics.getLineHeight(style.getFont());
-            this.width = FxFontMetrics.getWidth(style.getFont(), text);
-            if (getRotation() != 0) {
-                var rad = Math.toRadians(getRotation());
-                var sin = Math.sin(rad);
-                var cos = Math.cos(rad);
-                var w = width;
-                var h = height;
-                this.width = (w * cos) + (h * sin) + 0.5; // account for AA
-                this.height = (w * sin) + (h * cos) + 0.5; // account for AA
-            }
+            h = FxFontMetrics.getLineHeight(style.getFont());
+            w = FxFontMetrics.getWidth(style.getFont(), text);
         } else {
             style.setText(text);
-            var bounds = style.getBoundsInParent();
-            height = bounds.getHeight();
-            width = bounds.getWidth();
+            var bounds = style.getLayoutBounds();
+            h = bounds.getHeight();
+            w = bounds.getWidth();
         }
+
+        // Account for rotation
+        if (getRotation() == 0) {
+            this.width = w;
+            this.height = h;
+        } else {
+            var rad = Math.toRadians(getRotation());
+            var sin = Math.abs(Math.sin(rad));
+            var cos = Math.abs(Math.cos(rad));
+            this.height = (w * sin) + (h * cos);
+            this.width = (w * cos) + (h * sin);
+        }
+
+        if (DEBUG) {
+            // Note: getBoundsInParent() takes into account the rotation,
+            // but it's a more expensive call.
+            style.setText(text);
+            var parent = style.getBoundsInParent();
+            var hp = parent.getHeight();
+            var wp = parent.getWidth();
+
+            System.out.printf("[Label dimensions] Text: '%s' | Rotation: %.1f°%n" +
+                              "  Manual:  W: %8.4f | H: %8.4f%n" +
+                              "  Layout:  W: %8.4f | H: %8.4f%n" +
+                              "  Delta:   W: %8.4f | H: %8.4f%n",
+                    text, getRotation(),
+                    width, height,
+                    wp, hp,
+                    Math.abs(width - wp), Math.abs(height - hp));
+        }
+
     }
+
+    private static final boolean DEBUG = false;
 
     /**
      * @return the style applied to this tickmark
