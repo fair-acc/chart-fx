@@ -137,6 +137,18 @@ public class PropUtil {
         return string == null || string.isBlank();
     }
 
+    public static boolean isEqual(CharSequence a, CharSequence b) {
+        if (a == b) return true;
+        if (a == null || b == null) return false;
+        if (a.isEmpty() != b.isEmpty()) return false;
+        if (a.length() != b.length()) return false;
+        final int n = a.length();
+        for (int i = 0; i < n; i++) {
+            if (a.charAt(i) != b.charAt(i)) return false;
+        }
+        return true;
+    }
+
     private PropUtil() {
     }
 }

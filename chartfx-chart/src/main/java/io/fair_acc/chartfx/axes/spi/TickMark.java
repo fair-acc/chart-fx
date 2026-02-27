@@ -1,7 +1,7 @@
 package io.fair_acc.chartfx.axes.spi;
 
-import io.fair_acc.chartfx.fxinternals.FxFontMetrics;
 import io.fair_acc.chartfx.ui.css.TextStyle;
+import io.fair_acc.chartfx.ui.css.TextStyle.TextBounds;
 import io.fair_acc.chartfx.ui.geometry.Side;
 
 import java.util.Objects;
@@ -16,9 +16,7 @@ import java.util.Objects;
 public class TickMark {
     protected double tickValue = Double.NaN; // tick mark in data units
     protected String text = ""; // the actual label text
-    protected int numLines = 1; // support multi-line labels
-    protected double height = Double.NaN; // the label height in display units
-    protected double width = Double.NaN; // the label width in display units
+    protected final TextBounds bounds = new TextBounds();
 
     protected double tickPosition = Double.NaN; // tick position along axis in display units
     protected boolean visible = true; // whether the tick mark should be displayed
@@ -41,78 +39,18 @@ public class TickMark {
     public void setValue(double tickValue, String tickMarkLabel) {
         // Get size on demand
         if (!Objects.equals(tickMarkLabel, text)) {
-            this.height = -1;
-            this.width = -1;
-        }
-        numLines = 1;
-        for (int i = 0; i < tickMarkLabel.length(); i++) {
-            if(tickMarkLabel.charAt(i) == '\n') numLines++;
+            bounds.set(-1, -1);
         }
         this.tickValue = tickValue;
         this.text = tickMarkLabel;
     }
 
-    protected void updateTextSize() {
-        if (usedStyle != style.getChangeCounter() || height < 0) {
-            if (text == null || text.isEmpty()) {
-                height = 0;
-                width = 0;
-            } else {
-                updateBounds();
-            }
+    protected void updateBounds() {
+        if (usedStyle != style.getChangeCounter() || bounds.getHeight() < 0) {
+            style.computeTextBounds(text, bounds);
             usedStyle = style.getChangeCounter();
         }
     }
-
-    protected void updateBounds() {
-        // Checking text bounds via a node is incredibly wasteful, so we try to use an internal API
-        // that is available with appropriate jvm flags. The two results can differ by tiny amounts
-        // as the width may depend on the actual character sequence (e.g. 4 followed by 3). In our
-        // tests the diff was generally within 1px, so this should not matter in practice.
-        final double w, h;
-        if (FxFontMetrics.isAvailable()) {
-            h = FxFontMetrics.getLineHeight(style.getFont()) * numLines;
-            w = FxFontMetrics.getWidth(style.getFont(), text);
-        } else {
-            style.setText(text);
-            var bounds = style.getLayoutBounds();
-            h = bounds.getHeight();
-            w = bounds.getWidth();
-        }
-
-        // Account for rotation
-        if (getRotation() == 0) {
-            this.width = w;
-            this.height = h;
-        } else {
-            var rad = Math.toRadians(getRotation());
-            var sin = Math.abs(Math.sin(rad));
-            var cos = Math.abs(Math.cos(rad));
-            this.height = (w * sin) + (h * cos);
-            this.width = (w * cos) + (h * sin);
-        }
-
-        if (DEBUG) {
-            // Note: getBoundsInParent() takes into account the rotation,
-            // but it's a more expensive call.
-            style.setText(text);
-            var parent = style.getBoundsInParent();
-            var hp = parent.getHeight();
-            var wp = parent.getWidth();
-
-            System.out.printf("[Label dimensions] Text: '%s' | Rotation: %.1f°%n" +
-                              "  Manual:  W: %8.4f | H: %8.4f%n" +
-                              "  Layout:  W: %8.4f | H: %8.4f%n" +
-                              "  Delta:   W: %8.4f | H: %8.4f%n",
-                    text, getRotation(),
-                    width, height,
-                    wp, hp,
-                    Math.abs(width - wp), Math.abs(height - hp));
-        }
-
-    }
-
-    private static final boolean DEBUG = false;
 
     /**
      * @return the style applied to this tickmark
@@ -139,16 +77,16 @@ public class TickMark {
      * @return the height of the tick mark including rotation etc.
      */
     public double getHeight() {
-        updateTextSize();
-        return height;
+        updateBounds();
+        return bounds.getHeight();
     }
 
     /**
      * @return the width of the tick mark including rotation etc.
      */
     public double getWidth() {
-        updateTextSize();
-        return width;
+        updateBounds();
+        return bounds.getWidth();
     }
 
     /**

@@ -1,8 +1,8 @@
 package io.fair_acc.chartfx.axes.spi;
 
 import java.util.List;
-import java.util.Objects;
 
+import io.fair_acc.chartfx.ui.css.TextStyle.TextBounds;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -11,8 +11,6 @@ import javafx.scene.CacheHint;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.layout.Pane;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
 
@@ -41,6 +39,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     protected static final double MAX_NARROW_FONT_SCALE = 1.0;
     protected static final double MIN_TICK_GAP = 1.0;
     private final transient Canvas canvas = new ResizableCanvas();
+    protected final transient TextBounds bounds = new TextBounds();
     private boolean drawAxisLabel;
     private boolean shiftLabels;
     protected boolean labelOverlap;
@@ -374,7 +373,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final var side = getSide();
         if ((side == null) || side.isVertical()) {
             // default axis size for uninitalised axis
-            return Math.max(getAxisLabel().getBoundsInParent().getHeight(), 150);
+            return Math.max(getAxisLabel().getCachedBoundsInParent().getHeight(), 150);
         }
         return computePrefSize(width);
     }
@@ -390,7 +389,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         final var side = getSide();
         if ((side == null) || side.isHorizontal()) {
             // default axis size for uninitalised axis
-            return Math.max(getAxisLabel().getBoundsInParent().getWidth(), 150);
+            return Math.max(getAxisLabel().getCachedBoundsInParent().getWidth(), 150);
         }
         return computePrefSize(height);
     }
@@ -522,9 +521,9 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     private double getAxisLabelSize() {
-        final Text axisLabel = getAxisLabel();
+        final var axisLabel = getAxisLabel();
         if (axisLabel.isVisible() && !PropUtil.isNullOrEmpty(axisLabel.getText())) {
-            var bounds = axisLabel.getBoundsInParent();
+            var bounds = axisLabel.getCachedBoundsInParent();
             return getSide().isHorizontal() ? bounds.getHeight() : bounds.getWidth();
         }
         return 0;
@@ -774,7 +773,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         // Offset the label such that the bounding box touches the coordinate
-        var labelBounds = axisLabel.getBoundsInParent(); // TODO: move to TextStyle
+        var labelBounds = axisLabel.getCachedBoundsInParent();
         double halfX = labelBounds.getWidth() / 2;
         double halfY = labelBounds.getHeight() / 2;
         switch (side) {
@@ -1063,9 +1062,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         gc.save();
         gc.translate(x, y);
-        if (label.getRotate() != 0) {
-            gc.rotate(label.getRotate());
-        }
         label.copyStyleTo(gc);
 
         // The text alignment is used for the location on the axis, but
@@ -1073,11 +1069,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
 
-        gc.fillText(label.getText(), 0, 0);
-
-        if (!Objects.equals(gc.getStroke(), Color.TRANSPARENT)) {
-            gc.strokeText(label.getText(), 0, 0);
-        }
+        label.renderText(gc, label.getText());
 
         gc.restore();
     }
@@ -1112,29 +1104,18 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
         // translate before applying any rotation
         gc.translate(centerX, centerY);
-        if (tickMark.getRotation() != 0) {
-            gc.rotate(tickMark.getRotation());
-        }
 
         if (scaleFont != 1.0) {
             gc.scale(scaleFont, scaleFont);
         }
 
-        gc.fillText(tickMark.getText(), 0, 0);
-
-        if (!Objects.equals(gc.getStroke(), Color.TRANSPARENT)) {
-            gc.strokeText(tickMark.getText(), 0, 0);
-        }
+        tickMark.getStyle().renderText(gc, tickMark.getText());
 
         if (scaleFont != 1.0) {
             final double inverse = 1 / scaleFont;
             gc.scale(inverse, inverse);
         }
 
-        // reverse the transform manually to avoid pushing extra state
-        if (tickMark.getRotation() != 0) {
-            gc.rotate(-tickMark.getRotation());
-        }
         gc.translate(-centerX, -centerY);
 
     }
