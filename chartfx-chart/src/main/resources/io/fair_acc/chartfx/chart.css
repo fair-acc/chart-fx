@@ -372,17 +372,18 @@
   -fx-font-smoothing-type: gray;
   -fx-stroke: transparent;
   -fx-fill: black;
+  -fx-text-alignment: center;
+  -fx-text-origin: center;
   -fx-rotate: 0;
 }
 .axis .axis-label {
-  -fx-text-alignment: CENTER;
   -fx-font-size: 12px;
-}
-.axis:center .axis-label {
-  -fx-text-alignment: RIGHT;
 }
 .axis:vertical .axis-label {
   -fx-rotate: -90;
+}
+.axis:center .axis-label {
+  -fx-text-alignment: right;
 }
 .axis .axis-tick-label {
   -fx-font-size: 10px;

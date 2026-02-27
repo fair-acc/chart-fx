@@ -94,10 +94,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             canvas.setCacheHint(CacheHint.QUALITY);
         }
         getChildren().add(canvas);
-
-        // set default axis title/label alignment
-        PropUtil.initAndRunOnChange(this::updateAxisLabelAlignment,
-                sideProperty());
     }
 
     protected AbstractAxis(final double lowerBound, final double upperBound) {
@@ -477,9 +473,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         axisLabelOffset = oddLabelsOffset + tickLabelSize + axisLabelGap + extraLabelOffset;
         final double totalSize = axisLabelOffset + axisLabelSize + getAxisLabelGap();
 
-        // Render label on the other side
+        // Render label on the other side. There are no tick mark labels,
+        // so we can get closer.
         if (getSide() == Side.CENTER_VER) {
-            axisLabelOffset = -axisLabelOffset;
+            axisLabelOffset = -evenLabelsOffset;
         }
 
         benchComputePrefSize.stop();
@@ -769,10 +766,10 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         double coord = getCanvasCoordinate(axisWidth, axisHeight, axisLabelOffset);
         if (getSide().isHorizontal()) {
             double x = labelPosition * axisWidth + labelGap;
-            drawAxisLabel(gc, x, coord, axisLabel);
+            drawAxisLabel(gc, getSide(), x, coord, axisLabel);
         } else {
             double y = (1.0 - labelPosition) * axisHeight + labelGap;
-            drawAxisLabel(gc, coord, y, axisLabel);
+            drawAxisLabel(gc, getSide(), coord, y, axisLabel);
         }
     }
 
@@ -977,43 +974,6 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     private final TickMark tmpTickMark = createTickMark();
 
-    protected void updateAxisLabelAlignment() {
-        // TODO: maybe set this via CSS?
-        var label = getAxisLabel();
-        switch (getSide()) {
-        case LEFT:
-            label.setTextAlignment(TextAlignment.CENTER);
-            label.setTextOrigin(VPos.BASELINE);
-            label.setRotate(-90);
-            break;
-        case RIGHT:
-            label.setTextAlignment(TextAlignment.CENTER);
-            label.setTextOrigin(VPos.TOP);
-            label.setRotate(-90);
-            break;
-        case TOP:
-            label.setTextAlignment(TextAlignment.CENTER);
-            label.setTextOrigin(VPos.BOTTOM);
-            label.setRotate(0);
-            break;
-        case BOTTOM:
-            label.setTextAlignment(TextAlignment.CENTER);
-            label.setTextOrigin(VPos.TOP);
-            label.setRotate(0);
-            break;
-        case CENTER_VER:
-            label.setTextAlignment(TextAlignment.RIGHT);
-            label.setTextOrigin(VPos.TOP);
-            label.setRotate(-90);
-            break;
-        case CENTER_HOR:
-            label.setTextAlignment(TextAlignment.RIGHT);
-            label.setTextOrigin(VPos.TOP);
-            label.setRotate(0);
-            break;
-        }
-    }
-
     /**
      * This is used to check if any given animation should run. It returns true if animation is enabled and the node is
      * visible and in a scene.
@@ -1067,17 +1027,50 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return available < required;
     }
 
-    protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final TextStyle label) {
+    protected static void drawAxisLabel(final GraphicsContext gc, Side side, final double x, final double y, final TextStyle label) {
         if (PropUtil.isNullOrEmpty(label.getText())) {
             return;
         }
 
+        // We move to the center of the label, rotate, and draw 'centered' there.
+        // That makes sure that labels always get drawn with a correct offset, no
+        // matter the orientation.
+        var bounds = label.getBoundsInParent(); // TODO: move to TextStyle
+        double centerX = x;
+        double centerY = y;
+        switch (side) {
+            case TOP:
+                centerY -= bounds.getHeight() / 2;
+                break;
+            case BOTTOM:
+                centerY += bounds.getHeight() / 2;
+                break;
+            case LEFT:
+                centerX -= bounds.getWidth() / 2;
+                break;
+            case RIGHT:
+                centerX += bounds.getWidth() / 2;
+                break;
+            case CENTER_HOR:
+            case CENTER_VER:
+                centerX -= bounds.getWidth() / 2;
+                centerY += bounds.getHeight() / 2;
+                break;
+        }
+
         gc.save();
-        gc.translate(x, y);
+        gc.translate(centerX, centerY);
         if (label.getRotate() != 0) {
             gc.rotate(label.getRotate());
         }
         label.copyStyleTo(gc);
+
+        // The text alignment is used for the location on the axis,
+        // but the text itself is always rendered 'centered' at that
+        // location
+        gc.setTextAlign(TextAlignment.CENTER);
+        gc.setTextBaseline(VPos.CENTER);
+
         gc.fillText(label.getText(), 0, 0);
 
         if (!Objects.equals(gc.getStroke(), Color.TRANSPARENT)) {

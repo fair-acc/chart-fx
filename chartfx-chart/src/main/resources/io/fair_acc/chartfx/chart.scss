@@ -311,24 +311,24 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     -fx-font-smoothing-type: gray; // gray | lcd
     -fx-stroke: transparent;
     -fx-fill: black;
+    -fx-text-alignment: center;
+    -fx-text-origin: center;
     -fx-rotate: 0;
   }
 
   .axis-label {
-    -fx-text-alignment: CENTER;
     -fx-font-size: 12px;
-  }
-
-  &:center .axis-label {
-    -fx-text-alignment: RIGHT;
   }
 
   &:vertical .axis-label {
     -fx-rotate: -90;
   }
 
+  &:center .axis-label {
+    -fx-text-alignment: right;
+  }
+
   .axis-tick-label {
-    -fx-text-alignment: $null;
     -fx-font-size: 10px;
   }
 
