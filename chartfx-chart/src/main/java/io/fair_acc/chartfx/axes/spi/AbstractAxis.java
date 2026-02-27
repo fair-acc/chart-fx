@@ -738,39 +738,68 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
             return;
         }
 
-        // relative positioning of the label based on the text alignment
-        // TODO: why tickLabelGap instead of axisLabelGap?
-        final double labelPosition;
-        double labelGap;
+        // The text alignment is used for the location of the label inside the axis
+        // vertical axes: LEFT->rendered left, RIGHT->rendered right
+        // horizontal axes: LEFT->rendered on bottom, RIGHT->rendered on TOP
+        final double relativeLoc;
+        final double offsetDirection;
         switch (axisLabel.getTextAlignment()) {
-        case LEFT:
-            labelPosition = 0.0;
-            labelGap = +getTickLabelGap();
-            break;
-        case RIGHT:
-            labelPosition = 1.0;
-            labelGap = -getTickLabelGap();
-            break;
-        case CENTER:
-        case JUSTIFY:
-        default:
-            labelPosition = 0.5;
-            labelGap = 0.0;
-            break;
+            case LEFT:
+                relativeLoc = 0.0;
+                offsetDirection = 1;
+                break;
+            case RIGHT:
+                relativeLoc = 1.0;
+                offsetDirection = -1;
+                break;
+            case CENTER:
+            case JUSTIFY:
+            default:
+                relativeLoc = getAxisCenterPosition();
+                offsetDirection = 0.0;
+                break;
         }
 
-        // reverse in case a label is drawn on the other side
-        labelGap *= Math.signum(axisLabelOffset);
-
-        // draw on determined coordinates
+        // Find the corresponding x/y coordinate on the axis
+        double x = 0;
+        double y = 0;
         double coord = getCanvasCoordinate(axisWidth, axisHeight, axisLabelOffset);
-        if (getSide().isHorizontal()) {
-            double x = labelPosition * axisWidth + labelGap;
-            drawAxisLabel(gc, getSide(), x, coord, axisLabel);
+        final var side = getSide();
+        if (side.isHorizontal()) {
+            x = relativeLoc * axisWidth + offsetDirection * getAxisLabelGap();
+            y = coord;
         } else {
-            double y = (1.0 - labelPosition) * axisHeight + labelGap;
-            drawAxisLabel(gc, getSide(), coord, y, axisLabel);
+            x = coord;
+            y = (1 - relativeLoc) * axisHeight - offsetDirection * getAxisLabelGap();
         }
+
+        // Offset the label such that the bounding box touches the coordinate
+        var labelBounds = axisLabel.getBoundsInParent(); // TODO: move to TextStyle
+        double halfX = labelBounds.getWidth() / 2;
+        double halfY = labelBounds.getHeight() / 2;
+        switch (side) {
+            case TOP:
+                x += offsetDirection * halfX;
+                y -= halfY;
+                break;
+            case CENTER_HOR:
+            case BOTTOM:
+                x += offsetDirection * halfX;
+                y += halfY;
+                break;
+            case LEFT:
+            case CENTER_VER:
+                x -= halfX;
+                y -= offsetDirection * halfY;
+                break;
+            case RIGHT:
+                x += halfX;
+                y -= offsetDirection * halfY;
+                break;
+        }
+
+        drawAxisLabel(gc, x, y, axisLabel);
+
     }
 
     protected void drawAxisLine(final GraphicsContext gc, final double axisLength, final double axisWidth,
@@ -1027,47 +1056,20 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         return available < required;
     }
 
-    protected static void drawAxisLabel(final GraphicsContext gc, Side side, final double x, final double y, final TextStyle label) {
+    protected static void drawAxisLabel(final GraphicsContext gc, final double x, final double y, final TextStyle label) {
         if (PropUtil.isNullOrEmpty(label.getText())) {
             return;
         }
 
-        // We move to the center of the label, rotate, and draw 'centered' there.
-        // That makes sure that labels always get drawn with a correct offset, no
-        // matter the orientation.
-        var bounds = label.getBoundsInParent(); // TODO: move to TextStyle
-        double centerX = x;
-        double centerY = y;
-        switch (side) {
-            case TOP:
-                centerY -= bounds.getHeight() / 2;
-                break;
-            case BOTTOM:
-                centerY += bounds.getHeight() / 2;
-                break;
-            case LEFT:
-                centerX -= bounds.getWidth() / 2;
-                break;
-            case RIGHT:
-                centerX += bounds.getWidth() / 2;
-                break;
-            case CENTER_HOR:
-            case CENTER_VER:
-                centerX -= bounds.getWidth() / 2;
-                centerY += bounds.getHeight() / 2;
-                break;
-        }
-
         gc.save();
-        gc.translate(centerX, centerY);
+        gc.translate(x, y);
         if (label.getRotate() != 0) {
             gc.rotate(label.getRotate());
         }
         label.copyStyleTo(gc);
 
-        // The text alignment is used for the location on the axis,
-        // but the text itself is always rendered 'centered' at that
-        // location
+        // The text alignment is used for the location on the axis, but
+        // the text itself is always rendered 'centered' at that location
         gc.setTextAlign(TextAlignment.CENTER);
         gc.setTextBaseline(VPos.CENTER);
 
