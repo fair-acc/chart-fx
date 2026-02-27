@@ -1061,7 +1061,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         }
 
         gc.save();
-        gc.translate(x, y);
+        gc.translate(Math.round(x), Math.round(y)); // pixel alignment in case of texture rendering
         label.copyStyleTo(gc);
 
         // The text alignment is used for the location on the axis, but
@@ -1101,6 +1101,11 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
                 centerX += tickMark.getWidth() / 2;
                 break;
         }
+
+        // we want to align with the pixel boundary in case
+        // we render via textures
+        centerX = Math.round(centerX);
+        centerY = Math.round(centerY);
 
         // translate before applying any rotation
         gc.translate(centerX, centerY);

@@ -1,10 +1,9 @@
 package io.fair_acc.chartfx.ui.css;
 
+import io.fair_acc.chartfx.axes.spi.GlyphAtlas;
 import io.fair_acc.chartfx.fxinternals.FxFontMetrics;
 import io.fair_acc.chartfx.utils.PropUtil;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.ReadOnlyLongProperty;
-import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.*;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -18,7 +17,9 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
 
     public TextStyle(String... styles) {
         StyleUtil.styleNode(this, styles);
-        StyleUtil.forEachStyleProp(this, StyleUtil.incrementOnChange(changeCounter));
+        var incrementCounter = StyleUtil.incrementOnChange(changeCounter);
+        StyleUtil.forEachStyleProp(this, incrementCounter);
+        incrementCounter.accept(glyphAtlasEnabled);
         changeCounter.addListener(observable -> boundsValid = false);
         textProperty().addListener(observable -> boundsValid = false);
     }
@@ -70,7 +71,10 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
         // tests the diff was generally within 1px, so this should not matter in practice.
         var text = result.toString();
         final double w, h;
-        if (FxFontMetrics.isAvailable()) {
+        if (isGlyphAtlasEnabled() && getGlyphAtlas().computeLayoutBounds(chars, result)) {
+            w = result.getWidth();
+            h = result.getHeight();
+        } else if (FxFontMetrics.isAvailable()) {
             h = FxFontMetrics.getLineHeight(getFont()) * countLines(chars);
             w = FxFontMetrics.getWidth(getFont(), chars);
         } else {
@@ -125,14 +129,24 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
             gc.rotate(getRotate());
         }
 
+        renderTextRotated(gc, text);
+
+        if (getRotate() != 0) {
+            gc.rotate(-getRotate());
+        }
+    }
+
+    private void renderTextRotated(GraphicsContext gc, CharSequence text) {
+        // Optional fast path using copied images
+        if (isGlyphAtlasEnabled() && getGlyphAtlas().tryFillText(gc, text, 0, 0)) {
+            return;
+        }
+
+        // Fallback using standard text rendering
         String string = text.toString();
         gc.fillText(string, 0, 0);
         if (!Objects.equals(gc.getStroke(), Color.TRANSPARENT)) {
             gc.strokeText(string, 0, 0);
-        }
-
-        if (getRotate() != 0) {
-            gc.rotate(-getRotate());
         }
     }
 
@@ -169,5 +183,26 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
         return changeCounter;
     }
 
+    protected GlyphAtlas getGlyphAtlas() {
+        if(glyphAtlas == null) {
+            glyphAtlas = new GlyphAtlas(this);
+        }
+        return glyphAtlas;
+    }
+
+    public boolean isGlyphAtlasEnabled() {
+        return glyphAtlasEnabled.get();
+    }
+
+    public void setGlyphAtlasEnabled(boolean glyphAtlasEnabled) {
+        this.glyphAtlasEnabled.set(glyphAtlasEnabled);
+    }
+
+    public BooleanProperty glyphAtlasEnabledProperty() {
+        return glyphAtlasEnabled;
+    }
+
     private final LongProperty changeCounter = new SimpleLongProperty(0);
+    protected final BooleanProperty glyphAtlasEnabled = new SimpleBooleanProperty(false);
+    protected GlyphAtlas glyphAtlas;
 }

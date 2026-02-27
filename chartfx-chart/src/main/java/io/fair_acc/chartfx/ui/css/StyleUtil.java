@@ -181,7 +181,7 @@ public class StyleUtil {
         return true;
     }
 
-    static Consumer<ObservableValue<?>> incrementOnChange(LongProperty counter) {
+    public static Consumer<ObservableValue<?>> incrementOnChange(LongProperty counter) {
         ChangeListener<Object> listener = (obs, old, value) -> counter.set(counter.get() + 1);
         return prop -> prop.addListener(listener);
     }
