@@ -143,7 +143,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         while (change.next()) {
             if (change.wasAdded()) {
                 for (DataSet dataSet : change.getAddedSubList()) {
-                    var dataSetListener = FXUtils.runOnFxThread((src, bits) -> dataSetChange(dataSet, renderer));
+                    var dataSetListener = FXUtils.runOnFxThread(() -> dataSetChange(dataSet, renderer));
                     dataSet.getBitState().addChangeListener(ChartBits.DataSetName, dataSetListener);
                     dataSetListeners.put(dataSet, dataSetListener);
                 }
@@ -186,7 +186,7 @@ public class UpdateAxisLabels extends ChartPlugin {
         renderersListeners.put(renderer, rendererListener);
 
         dataSets.forEach((DataSet dataSet) -> {
-            var dataSetListener = FXUtils.runOnFxThread((src, bits) -> dataSetChange(dataSet, renderer));
+            var dataSetListener = FXUtils.runOnFxThread(() -> dataSetChange(dataSet, renderer));
             dataSet.getBitState().addChangeListener(ChartBits.DataSetName, dataSetListener);
             dataSetListeners.put(dataSet, dataSetListener);
         });

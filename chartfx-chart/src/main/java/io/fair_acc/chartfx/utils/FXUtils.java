@@ -247,6 +247,22 @@ public final class FXUtils {
         return list;
     }
 
+    /**
+     * @return listener without state (zero allocation)
+     */
+    public static StateListener runOnFxThread(final Runnable action) {
+        return (src, bits) -> {
+            if (Platform.isFxApplicationThread()) {
+                action.run();
+            } else {
+                Platform.runLater(action);
+            }
+        };
+    }
+
+    /**
+     * @return listener with state (creates a capturing lambda when not on FXAT)
+     */
     public static StateListener runOnFxThread(StateListener listener) {
         return (src, bits) -> {
             if (Platform.isFxApplicationThread()) {
