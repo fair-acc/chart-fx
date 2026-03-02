@@ -314,6 +314,7 @@ $null: null; // null gets removed from Sass. Maybe create a placeholder and repl
     -fx-text-alignment: center;
     -fx-text-origin: center;
     -fx-rotate: 0;
+    -fx-glyph-cache-enabled: false;
   }
 
   .axis-label {

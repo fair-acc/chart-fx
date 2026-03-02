@@ -375,6 +375,7 @@
   -fx-text-alignment: center;
   -fx-text-origin: center;
   -fx-rotate: 0;
+  -fx-glyph-cache-enabled: false;
 }
 .axis .axis-label {
   -fx-font-size: 12px;

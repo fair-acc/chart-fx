@@ -4,10 +4,13 @@ import io.fair_acc.chartfx.axes.spi.GlyphAtlas;
 import io.fair_acc.chartfx.fxinternals.FxFontMetrics;
 import io.fair_acc.chartfx.utils.PropUtil;
 import javafx.beans.property.*;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -19,7 +22,7 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
         StyleUtil.styleNode(this, styles);
         var incrementCounter = StyleUtil.incrementOnChange(changeCounter);
         StyleUtil.forEachStyleProp(this, incrementCounter);
-        incrementCounter.accept(glyphAtlasEnabled);
+        incrementCounter.accept(glyphCacheEnabled);
         changeCounter.addListener(observable -> boundsValid = false);
         textProperty().addListener(observable -> boundsValid = false);
     }
@@ -72,10 +75,10 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
         // tests the diff was generally within 1px, so this should not matter in practice.
         var text = chars.toString();
         final double w, h;
-        if (isGlyphAtlasEnabled() && getGlyphAtlas().computeLayoutBounds(chars, result)) {
+        if (!hasStrokeEffect() && isGlyphCacheEnabled() && getGlyphAtlas().computeLayoutBounds(chars, result)) {
             w = result.getWidth();
             h = result.getHeight();
-        } else if (FxFontMetrics.isAvailable()) {
+        } else if (!hasStrokeEffect() && FxFontMetrics.isAvailable()) {
             h = FxFontMetrics.getLineHeight(getFont()) * countLines(chars);
             w = FxFontMetrics.getWidth(getFont(), chars);
         } else {
@@ -139,14 +142,14 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
 
     private void renderTextRotated(GraphicsContext gc, CharSequence text) {
         // Optional fast path using copied images
-        if (isGlyphAtlasEnabled() && getGlyphAtlas().tryFillText(gc, text, 0, 0)) {
+        if (!hasStrokeEffect() && isGlyphCacheEnabled() && getGlyphAtlas().tryFillText(gc, text, 0, 0)) {
             return;
         }
 
         // Fallback using standard text rendering
         String string = text.toString();
         gc.fillText(string, 0, 0);
-        if (!Objects.equals(gc.getStroke(), Color.TRANSPARENT)) {
+        if (hasStrokeEffect()) {
             gc.strokeText(string, 0, 0);
         }
     }
@@ -185,25 +188,44 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
     }
 
     protected GlyphAtlas getGlyphAtlas() {
-        if(glyphAtlas == null) {
+        if (glyphAtlas == null) {
             glyphAtlas = new GlyphAtlas(this);
         }
         return glyphAtlas;
     }
 
-    public boolean isGlyphAtlasEnabled() {
-        return glyphAtlasEnabled.get();
+    protected boolean hasStrokeEffect() {
+        return getStroke() != null && !Objects.equals(getStroke(), Color.TRANSPARENT) && getStrokeWidth() > 0;
     }
 
-    public void setGlyphAtlasEnabled(boolean glyphAtlasEnabled) {
-        this.glyphAtlasEnabled.set(glyphAtlasEnabled);
+    public boolean isGlyphCacheEnabled() {
+        return glyphCacheEnabled.get();
     }
 
-    public BooleanProperty glyphAtlasEnabledProperty() {
-        return glyphAtlasEnabled;
+    public void setGlyphCacheEnabled(boolean glyphCacheEnabled) {
+        this.glyphCacheEnabled.set(glyphCacheEnabled);
+    }
+
+    public BooleanProperty glyphCacheEnabledProperty() {
+        return glyphCacheEnabled;
     }
 
     private final LongProperty changeCounter = new SimpleLongProperty(0);
-    protected final BooleanProperty glyphAtlasEnabled = new SimpleBooleanProperty(false);
     protected GlyphAtlas glyphAtlas;
+
+    /**
+     * @return The CssMetaData associated with this class, which may include the CssMetaData of its super classes.
+     */
+    public static List<CssMetaData<? extends Styleable, ?>> getClassCssMetaData() {
+        return CSS.getCssMetaData();
+    }
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return getClassCssMetaData();
+    }
+
+    private static final CssPropertyFactory<TextStyle> CSS = new CssPropertyFactory<>(Text.getClassCssMetaData());
+    protected final BooleanProperty glyphCacheEnabled = CSS.createBooleanProperty(this, "glyphCacheEnabled", false);
+
 }
