@@ -196,6 +196,36 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
     }
 
     /**
+     * Get the string label name for a tick mark with the given value
+     *
+     * @param value The value to format into a tick label string
+     * @return A formatted string for the given value
+     */
+    @Override
+    public CharSequence getTickMarkChars(final double value) {
+        // convert value according to scale factor
+        final double scaledValue = value / getUnitScaling();
+
+        // use specific tick label formatter
+        final StringConverter<Number> formatter = getTickLabelFormatter();
+        if (formatter instanceof DefaultFormatter defaultFormatter) {
+            return defaultFormatter.toChars(scaledValue, chars);
+        } else if (formatter != null) {
+            return formatter.toString(scaledValue);
+        }
+
+        // use AxisLabelFormatter based implementation
+        final var labelFormatter = getAxisLabelFormatter();
+        if (labelFormatter instanceof DefaultFormatter defaultFormatter) {
+            return defaultFormatter.toChars(scaledValue, chars);
+        }
+        return labelFormatter.toString(scaledValue);
+
+    }
+
+    final StringBuilder chars = new StringBuilder();
+
+    /**
      * Get the display position of the zero line along this axis.
      *
      * @return display position or Double.NaN if zero is not in current range;
@@ -678,7 +708,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
         int i = 0;
         for (var mark : marks) {
             var tick = newTickValues.getDouble(i++);
-            mark.setValue(tick, isTickLabelsVisible() ? getTickMarkLabel(tick) : "");
+            mark.setValue(tick, isTickLabelsVisible() ? getTickMarkChars(tick) : "");
         }
 
         oldTickValues.setAll(newTickValues);
@@ -996,7 +1026,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
 
     protected double measureTickMarkLength(final double major) {
         // N.B. this is a known performance hot-spot -> start optimisation here
-        tmpTickMark.setValue(major, getTickMarkLabel(major));
+        tmpTickMark.setValue(major, getTickMarkChars(major));
         return getSide().isHorizontal() ? tmpTickMark.getWidth() : tmpTickMark.getHeight();
     }
 

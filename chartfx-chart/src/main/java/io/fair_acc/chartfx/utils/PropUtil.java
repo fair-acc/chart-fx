@@ -137,6 +137,10 @@ public class PropUtil {
         return string == null || string.isBlank();
     }
 
+    public static boolean isNullOrEmpty(CharSequence chars) {
+        return chars == null || chars.isEmpty();
+    }
+
     public static boolean isEqual(CharSequence a, CharSequence b) {
         if (a == b) return true;
         if (a == null || b == null) return false;

@@ -3,8 +3,7 @@ package io.fair_acc.chartfx.axes.spi;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle.TextBounds;
 import io.fair_acc.chartfx.ui.geometry.Side;
-
-import java.util.Objects;
+import io.fair_acc.chartfx.utils.PropUtil;
 
 /**
  * TickMark represents the label text dimension, its associated tick mark value and position along the axis for each tick.
@@ -21,6 +20,7 @@ public class TickMark {
     protected double tickPosition = Double.NaN; // tick position along axis in display units
     protected boolean visible = true; // whether the tick mark should be displayed
     protected final TextStyle style;
+    protected final StringBuilder chars =  new StringBuilder();
     private long usedStyle = -1;
 
     /**
@@ -36,18 +36,24 @@ public class TickMark {
      * @param tickValue     numeric value of tick
      * @param tickMarkLabel string label associated with tick
      */
-    public void setValue(double tickValue, String tickMarkLabel) {
+    public void setValue(double tickValue, CharSequence tickMarkLabel) {
         // Get size on demand
-        if (!Objects.equals(tickMarkLabel, text)) {
+        if (!PropUtil.isEqual(tickMarkLabel, chars)) {
             bounds.set(-1, -1);
         }
         this.tickValue = tickValue;
-        this.text = tickMarkLabel;
+        chars.setLength(0);
+        if (tickMarkLabel instanceof String str) {
+            text = str;
+        } else {
+            chars.append(tickMarkLabel);
+            text = null;
+        }
     }
 
     protected void updateBounds() {
         if (usedStyle != style.getChangeCounter() || bounds.getHeight() < 0) {
-            style.computeTextBounds(text, bounds);
+            style.computeTextBounds(getText(), bounds);
             usedStyle = style.getChangeCounter();
         }
     }
@@ -69,8 +75,8 @@ public class TickMark {
     /**
      * @return tick mark label text
      */
-    public String getText() {
-        return text;
+    public CharSequence getText() {
+        return text != null ? text : chars;
     }
 
     /**

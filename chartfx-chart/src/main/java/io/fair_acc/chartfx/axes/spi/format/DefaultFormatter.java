@@ -230,6 +230,10 @@ public class DefaultFormatter extends AbstractFormatter {
         formatter.setDecimalPlaces(Math.max(decimalPlaces, 0));
     }
 
+    public CharSequence toChars(double number, StringBuilder store) {
+        return formatter.toChars(number, store);
+    }
+
     /**
      * Converts the object provided into its string form. Format of the returned string is defined by this converter.
      *

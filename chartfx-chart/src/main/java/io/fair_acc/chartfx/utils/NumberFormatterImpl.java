@@ -51,6 +51,23 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
         return this;
     }
 
+    public CharSequence toChars(final double val, StringBuilder store) {
+        switch (Schubfach.encodeDouble(val, this::encodeDouble)) {
+            case Schubfach.NON_SPECIAL:
+                return copyBytes(store);
+            case Schubfach.PLUS_ZERO:
+            case Schubfach.MINUS_ZERO:
+                encodeZero();
+                return length == 1 ? "0" : copyBytes(store);
+            case Schubfach.PLUS_INF:
+                return "+inf";
+            case Schubfach.MINUS_INF:
+                return "-inf";
+            default:
+                return "NaN";
+        }
+    }
+
     @Override
     public String toString(final double val) {
         switch (Schubfach.encodeDouble(val, this::encodeDouble)) {
@@ -319,6 +336,15 @@ public class NumberFormatterImpl extends StringConverter<Number> implements Numb
 
     private String bytesToString() {
         return new String(bytes, 0, length, StandardCharsets.ISO_8859_1);
+    }
+
+    private StringBuilder copyBytes(StringBuilder store) {
+        store.setLength(0);
+        final int n = length;
+        for (int i = 0; i < n; i++) {
+            store.append((char) bytes[i]);
+        }
+        return store;
     }
 
     static final int ALL_DIGITS = -1;

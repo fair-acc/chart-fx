@@ -41,6 +41,7 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
 
         protected double width = Double.NaN;
         protected double height = Double.NaN;
+
     }
 
     private final TextBounds bounds = new TextBounds();
@@ -69,7 +70,7 @@ public class TextStyle extends Text implements StyleUtil.StyleNode {
         // that is available with appropriate jvm flags. The two results can differ by tiny amounts
         // as the width may depend on the actual character sequence (e.g. 4 followed by 3). In our
         // tests the diff was generally within 1px, so this should not matter in practice.
-        var text = result.toString();
+        var text = chars.toString();
         final double w, h;
         if (isGlyphAtlasEnabled() && getGlyphAtlas().computeLayoutBounds(chars, result)) {
             w = result.getWidth();

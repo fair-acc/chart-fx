@@ -154,6 +154,14 @@ public interface Axis extends AxisDescription, Measurable.EmptyDefault {
      */
     String getTickMarkLabel(double value);
 
+    /**
+     * @param value The value to format into a tick label string
+     * @return A formatted char sequence that is only valid until the next call
+     */
+    default CharSequence getTickMarkChars(double value) {
+        return getTickMarkLabel(value);
+    }
+
     ObservableList<TickMark> getTickMarks();
 
     double getTickUnit();

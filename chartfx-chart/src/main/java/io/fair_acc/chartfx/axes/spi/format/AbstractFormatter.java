@@ -111,7 +111,6 @@ public abstract class AbstractFormatter extends StringConverter<Number> implemen
     @Override
     public void updateFormatter(final DoubleArrayList newMajorTickMarks, final double unitScaling) {
         this.majorTickMarks.setAll(newMajorTickMarks);
-        ;
         this.unitScaling = unitScaling;
 
         this.rangeMin = +Double.MAX_VALUE;
