@@ -4,20 +4,17 @@ import io.fair_acc.chartfx.ui.css.StyleUtil;
 import io.fair_acc.chartfx.ui.css.TextStyle;
 import io.fair_acc.chartfx.ui.css.TextStyle.TextBounds;
 import io.fair_acc.chartfx.utils.PropUtil;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.css.StyleOrigin;
 import javafx.geometry.VPos;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
@@ -36,7 +33,10 @@ public class GlyphAtlas {
 
     public GlyphAtlas(TextStyle style) {
         this.style = style;
-        PropUtil.initAndRunOnChange(() -> needsScaling.set(style.getRotate() % 90 != 0), style.rotateProperty());
+
+        // TODO: do more tests to see whether it's actually worth scaling up for rotations
+        // PropUtil.initAndRunOnChange(() -> needsScaling.set(style.getRotate() % 90 != 0), style.rotateProperty());
+
         var listener = StyleUtil.incrementOnChange(invalidCounter);
         listener.accept(needsScaling);
         listener.accept(style.fontProperty());
@@ -124,9 +124,12 @@ public class GlyphAtlas {
         double currentX = minPadding;
         double maxHeight = 0;
 
-        // A 1 to 1 pixel mapping is best, but we need more
-        // resolution for subpixel operations
-        final double scale = (screenScale == 1 && style.getRotate() == 0) ? 1 : 2 * screenScale;
+        // A 1 to 1 pixel mapping is best, but higher resolution may help with rotations and subpixel ops
+        final double canvasScale = needsScaling.get() ? 2 : 1;
+        final double xRenderScale = Screen.getPrimary().getOutputScaleX(); // logical to screen coords
+        final double yRenderScale = Screen.getPrimary().getOutputScaleY();
+        final double xImageScale = xRenderScale * canvasScale; // logical to image coords
+        final double yImageScale = yRenderScale * canvasScale;
 
         // Determine char sizes
         for (char c = MIN_CHAR; c <= MAX_CHAR; c++) {
@@ -155,11 +158,13 @@ public class GlyphAtlas {
         double height = padToAlignment(2 * minPadding + maxHeight);
 
         // Create atlas
-        var canvas = new Canvas(scale * currentX, scale * height);
+        var canvasWidth = canvasScale * currentX;
+        var canvasHeight = canvasScale * height;
+        var canvas = new Canvas(canvasWidth, canvasHeight);
         var gc = canvas.getGraphicsContext2D();
         style.copyStyleTo(gc);
         gc.setTextAlign(TextAlignment.RIGHT);
-        gc.scale(scale, scale); // better quality than scaling the snapshot
+        gc.scale(canvasScale, canvasScale); // requests a larger font -> better quality than scaling bitmap
         gc.setTextAlign(TextAlignment.LEFT);
         gc.setTextBaseline(VPos.TOP);
 
@@ -170,25 +175,41 @@ public class GlyphAtlas {
                 // Note: might look odd, but enable at will
                 gc.strokeText(String.valueOf(c), coords.atlasX, coords.atlasY);
             }
-            coords.atlasX = Math.floor(coords.atlasX * scale);
-            coords.atlasY = Math.floor(coords.atlasY * scale);
-            coords.atlasW = coords.atlasW * scale;
-            coords.atlasH = coords.atlasH * scale;
+            coords.atlasX = Math.floor(coords.atlasX * xImageScale);
+            coords.atlasY = Math.floor(coords.atlasY * yImageScale);
+            coords.atlasW = coords.atlasW * xImageScale;
+            coords.atlasH = coords.atlasH * yImageScale;
         }
 
+        // Snapshots default to rendering logical pixels into physical pixels,
+        // so we need to scale the input to actually get a copy of screen pixels.
+
         SnapshotParameters params = new SnapshotParameters();
+        params.setTransform(Transform.scale(xRenderScale, yRenderScale));
         params.setFill(Color.TRANSPARENT);
+        params.setDepthBuffer(false);
+
+        // Do the snapshot
+        atlas = new WritableImage((int) Math.ceil(canvasWidth * xRenderScale), (int) Math.ceil(canvasHeight * yRenderScale));
         atlas = canvas.snapshot(params, null);
 
         if (showDebug) {
+            System.out.println("GlyphAtlas: " +
+                               canvas.getWidth() + "x" + canvas.getHeight() + " -> "
+                               + atlas.getWidth() + "x" + atlas.getHeight());
 
             var showCanvas = new Stage();
             showCanvas.setScene(new Scene(new VBox(canvas)));
             showCanvas.setTitle(canvas.getWidth() + "x" + canvas.getHeight());
             showCanvas.show();
 
+            // The image looks blurry when double-scaled-up, so we need to counter one scaling
             var showImage = new Stage();
-            showImage.setScene(new Scene(new VBox(new ImageView(atlas))));
+            var view = new ImageView(atlas);
+            view.setFitHeight(canvas.getHeight());
+            view.setFitWidth(canvas.getWidth());
+            var root = new VBox(view);
+            showImage.setScene(new Scene(root));
             showImage.setTitle(atlas.getWidth() + "x" + atlas.getHeight());
             showImage.show();
 
@@ -206,12 +227,11 @@ public class GlyphAtlas {
     protected final TextStyle style;
     protected boolean valid = false;
 
-    private Image atlas;
+    private WritableImage atlas;
     private final GlyphRegion[] glyphMap = new GlyphRegion[128];
     private final TextBounds bounds = new TextBounds();
     private static final int MIN_CHAR = 32;
     private static final int MAX_CHAR = 126;
-    private final double screenScale = Screen.getPrimary().getOutputScaleX();
     private final double minPadding = 8;
     private static final double alignment = 8;
     private final BooleanProperty needsScaling = new SimpleBooleanProperty(this, "needsScaling", false);
