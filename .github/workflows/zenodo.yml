@@ -1,0 +1,81 @@
+name: Zenodo Archive
+on:
+  release:
+    types: [published]
+
+jobs:
+  zenodo:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download release archive
+        run: |
+          tag="${{ github.event.release.tag_name }}"
+          curl -sL "https://github.com/${{ github.repository }}/archive/refs/tags/${tag}.tar.gz" -o "${tag}.tar.gz"
+          echo "ARCHIVE=${tag}.tar.gz" >> "$GITHUB_ENV"
+          echo "VERSION=${tag}" >> "$GITHUB_ENV"
+
+      - name: Upload to Zenodo
+        env:
+          ZENODO_TOKEN: ${{ secrets.ZENODO_TOKEN }}
+          CONCEPT_RECID: "19008622"
+        run: |
+          set -euo pipefail
+
+          # Find latest deposit for this concept
+          LATEST_ID=$(curl -sf -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            "https://zenodo.org/api/deposit/depositions?q=conceptrecid:${CONCEPT_RECID}&sort=mostrecent&size=1" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)[0]['id'])")
+
+          # Create new version
+          DRAFT_URL=$(curl -sf -X POST -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            "https://zenodo.org/api/deposit/depositions/${LATEST_ID}/actions/newversion" \
+            | python3 -c "import sys,json; print(json.load(sys.stdin)['links']['latest_draft'])")
+
+          DEPOSIT=$(curl -sf -H "Authorization: Bearer ${ZENODO_TOKEN}" "${DRAFT_URL}")
+          DEPOSIT_ID=$(echo "${DEPOSIT}" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+          BUCKET_URL=$(echo "${DEPOSIT}" | python3 -c "import sys,json; print(json.load(sys.stdin)['links']['bucket'])")
+
+          # Remove old files
+          for FID in $(echo "${DEPOSIT}" | python3 -c "import sys,json; [print(f['id']) for f in json.load(sys.stdin).get('files',[])]"); do
+            curl -sf -X DELETE -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+              "https://zenodo.org/api/deposit/depositions/${DEPOSIT_ID}/files/${FID}"
+          done
+
+          # Upload archive
+          curl -sf -X PUT -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary @"${ARCHIVE}" \
+            "${BUCKET_URL}/${ARCHIVE}" > /dev/null
+
+          # Update metadata
+          METADATA=$(python3 -c "
+          import json
+          with open('.zenodo.json') as f:
+              m = json.load(f)
+          meta = {
+              'title': m['title'] + ' v${VERSION}',
+              'description': m['description'],
+              'upload_type': 'software',
+              'access_right': 'open',
+              'license': 'LGPL-3.0-only',
+              'version': '${VERSION}'.lstrip('v'),
+              'creators': m['creators'],
+              'keywords': m.get('keywords', []),
+          }
+          if 'related_identifiers' in m:
+              meta['related_identifiers'] = m['related_identifiers']
+          print(json.dumps({'metadata': meta}))
+          ")
+
+          curl -sf -X PUT -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "${METADATA}" \
+            "https://zenodo.org/api/deposit/depositions/${DEPOSIT_ID}" > /dev/null
+
+          # Publish
+          RESULT=$(curl -sf -X POST -H "Authorization: Bearer ${ZENODO_TOKEN}" \
+            "https://zenodo.org/api/deposit/depositions/${DEPOSIT_ID}/actions/publish")
+          DOI=$(echo "${RESULT}" | python3 -c "import sys,json; print(json.load(sys.stdin).get('doi','unknown'))")
+          echo "Published: DOI ${DOI}"

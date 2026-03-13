@@ -4,6 +4,10 @@ message: "If you use this software, please cite it using the metadata from this 
 type: software
 license: LGPL-3.0-only
 repository-code: "https://github.com/fair-acc/chart-fx"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.19008622"
+    description: "Zenodo concept DOI (all versions)"
 keywords:
   - scientific charting
   - JavaFX
@@ -18,6 +22,17 @@ authors:
     given-names: Alexander
     affiliation: "GSI Helmholtzzentrum für Schwerionenforschung"
     orcid: "https://orcid.org/0000-0003-0804-756X"
+  - family-names: Braeuning
+    given-names: Harald
+    affiliation: "GSI Helmholtzzentrum für Schwerionenforschung"
+  - family-names: Enner
+    given-names: Florian
+    affiliation: "HEBI Robotics"
+  - family-names: Peter
+    given-names: Benjamin
+    affiliation: "GSI Helmholtzzentrum für Schwerionenforschung"
+  - family-names: Fischer
+    given-names: Tonda
   - family-names: Niedermayer
     given-names: Philipp
     affiliation: "GSI Helmholtzzentrum für Schwerionenforschung"

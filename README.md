@@ -1,6 +1,7 @@
 [![Join the chat at https://gitter.im/fair-acc/chart](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fair-acc/chart?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![License](https://img.shields.io/badge/License-LGPL%203.0-blue.svg)](https://opensource.org/licenses/LGPL-3.0)
 [![Maven Central](https://img.shields.io/maven-central/v/io.fair_acc/chartfx/11.svg)](https://search.maven.org/search?q=g:io.fair-acc+a:chartfx+v:11*)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19008622.svg)](https://doi.org/10.5281/zenodo.19008622)
 
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
