@@ -1,0 +1,38 @@
+{
+  "title": "chart-fx",
+  "description": "chart-fx — a high-performance scientific charting library for JavaFX.",
+  "license": {
+    "id": "LGPL-3.0-only"
+  },
+  "upload_type": "software",
+  "creators": [
+    {
+      "name": "Steinhagen, Ralph J.",
+      "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung / FAIR",
+      "orcid": "0009-0009-8537-7029"
+    },
+    {
+      "name": "Krimm, Alexander",
+      "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung",
+      "orcid": "0000-0003-0804-756X"
+    },
+    {
+      "name": "Niedermayer, Philipp",
+      "affiliation": "GSI Helmholtzzentrum für Schwerionenforschung",
+      "orcid": "0000-0002-4722-6619"
+    }
+  ],
+  "keywords": [
+    "scientific charting",
+    "JavaFX",
+    "data visualisation",
+    "real-time plotting"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/fair-acc/chart-fx",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
