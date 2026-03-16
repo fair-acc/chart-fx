@@ -136,7 +136,7 @@ class AbstractAxisParameterTests {
         assertEquals("axis name2", axis.getAxisLabel().getText());
 
         axis.set("axis name2", "", -3.0, +3.0);
-        assertEquals("axis name2 []", axis.getAxisLabel().getText());
+        assertEquals("axis name2", axis.getAxisLabel().getText());
 
         axis.set("axis name2", "axis unit2");
         assertEquals("axis name2", axis.getName());

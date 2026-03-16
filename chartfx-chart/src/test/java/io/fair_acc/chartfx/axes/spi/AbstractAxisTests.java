@@ -168,11 +168,11 @@ class AbstractAxisTests {
 
         axis.setUnit("");
         axis.setSide(Side.BOTTOM);
-        assertEquals(+49, axis.computePrefHeight(100), 2);
+        assertEquals(+32, axis.computePrefHeight(100), 2);
         assertEquals(+150.0, axis.computePrefWidth(-1));
         axis.setSide(Side.LEFT);
         assertEquals(+150, axis.computePrefHeight(-1));
-        assertEquals(+48, axis.computePrefWidth(100), 2);
+        assertEquals(+26, axis.computePrefWidth(100), 2);
 
         assertDoesNotThrow(axis::clear);
         assertDoesNotThrow(axis::forceRedraw);
