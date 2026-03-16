@@ -19,8 +19,7 @@ import org.slf4j.LoggerFactory;
  * "Variable", "${project_classpath}", but there is no way to add the current projects dependencies to the classpath,
  * yet.
  *
- * @see <a href="https://stackoverflow.com/a/55300492" target="_top"> Stackoverflow: How to add JavaFX runtime to
- *      Eclipse in Java11 (2b) </a>
+ * See <a href="https://stackoverflow.com/a/55300492">Stackoverflow: How to add JavaFX runtime to Eclipse in Java11 (2b)</a>
  * @author akrimm
  */
 public class LaunchJFX { // NOMEN EST OMEN

@@ -76,6 +76,16 @@
     <build>
         <plugins>
             <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <additionalOptions>
+                        <option>--add-exports=javafx.graphics/com.sun.javafx.scene=${project.moduleName}</option>
+                        <option>--add-exports=javafx.graphics/com.sun.javafx.tk=${project.moduleName}</option>
+                    </additionalOptions>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
                 <configuration>

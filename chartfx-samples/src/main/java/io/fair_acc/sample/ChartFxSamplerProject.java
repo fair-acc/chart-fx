@@ -21,31 +21,22 @@ import fxsampler.FXSamplerProject;
 import fxsampler.model.WelcomePage;
 
 public class ChartFxSamplerProject implements FXSamplerProject {
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
     public String getProjectName() {
         return "ChartFx";
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getSampleBasePackage() {
         return "io.fair_acc.sample.chart";
     }
 
-    ///** {@inheritDoc} */
     //@Override
     // public String getModuleName() {
     //    return "io.fair-acc";
     //}
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public WelcomePage getWelcomePage() {
         VBox vBox = new VBox();

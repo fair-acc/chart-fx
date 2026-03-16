@@ -150,12 +150,13 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.0.1</version> <!-- use old version to ignore module system errors -->
+                    <version>3.6.3</version>
                     <configuration>
+                        <source>17</source>
                         <links>
                             <link>https://openjfx.io/javadoc/12/</link>
                         </links>
-                        <doclint>none</doclint> <!-- TODO: fix javadoc errors -->
+                        <doclint>none</doclint> <!-- Prevents minor HTML errors from breaking the build -->
                     </configuration>
                     <executions>
                         <execution>
@@ -362,6 +363,20 @@
     </dependencies>
 
     <profiles>
+        <profile>
+            <id>disable-javadoc-on-jdk25</id>
+            <activation>
+                <jdk>[25,)</jdk> <!-- >= jdk25 -->
+            </activation>
+            <properties>
+                <!--
+                javadoc25 got really strict and crashes on 'samples', but the error message
+                does not say why. It's unlikely that we need javadoc for non-release builds,
+                so we can just disable it until we know the cause.
+                  -->
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+            </properties>
+        </profile>
         <profile>
             <id>releaseGithub</id>
             <activation>

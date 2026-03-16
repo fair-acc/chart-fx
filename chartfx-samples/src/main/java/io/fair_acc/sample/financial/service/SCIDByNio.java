@@ -288,9 +288,7 @@ public class SCIDByNio implements AutoCloseable {
     }
 
     /**
-     * Thanks to @see
-     * http://svn.codehaus.org/groovy/modules/scriptom/branches/SCRIPTOM
-     * -1.5.4-ANT/src/com/jacob/com/DateUtilities.java
+     * Thanks to <a href="http://svn.codehaus.org/groovy/modules/scriptom/branches/SCRIPTOM-1.5.4-ANT/src/com/jacob/com/DateUtilities.java">DateUtilities.java</a>
      *
      * @param comTime time in windows time for convert to java format
      * @return java format of windows format with usage of specific timezone
