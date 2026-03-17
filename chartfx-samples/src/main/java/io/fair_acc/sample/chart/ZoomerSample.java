@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javafx.application.Application;
 import javafx.collections.ListChangeListener;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ContentDisplay;
@@ -82,7 +83,15 @@ public class ZoomerSample extends ChartSample {
         registerZoomerChangeListener(zoomer5, chart5.getTitle());
         chart5.getPlugins().add(zoomer5);
 
-        root.getChildren().addAll(chart1, chart2, chart3, chart4, chart5, label);
+        // chart with inverted axes
+        final Chart chart6 = getTestChart("inverted axes", testDataSet);
+        chart6.getFirstAxis(Orientation.HORIZONTAL).invertAxis(true);
+        chart6.getFirstAxis(Orientation.VERTICAL).invertAxis(true);
+        final Zoomer zoomer6 = new Zoomer();
+        registerZoomerChangeListener(zoomer6, chart6.getTitle());
+        chart6.getPlugins().add(zoomer6);
+
+        root.getChildren().addAll(chart1, chart2, chart3, chart4, chart5, chart6, label);
 
         return root;
     }
