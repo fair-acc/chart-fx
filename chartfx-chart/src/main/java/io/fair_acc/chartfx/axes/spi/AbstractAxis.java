@@ -1160,7 +1160,7 @@ public abstract class AbstractAxis extends AbstractAxisParameter implements Axis
      * @return coordinate that is snapped to pixel (for a 'crisper' display)
      */
     protected static double snap(final double coordinate) {
-        return Math.round(coordinate) + 0.5; // center of a pixel, so 1px lines render exact. TODO: depend on line width?
+        return (int) coordinate + 0.5; // center of a pixel, so 1px lines render exact. TODO: depend on line width?
     }
 
     /*
