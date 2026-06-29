@@ -254,7 +254,7 @@
                 <version>${chartfx.surefire.version}</version>
                 <configuration>
                     <!-- Jacoco prepare-agent builds some command-line params without which jacoco will not instrument. Hence it is important to add those command-line params here (${argLine} holds those params) -->
-                    <argLine>${argLine} -Duser.language=en -Duser.country=US -Xms256m -Xmx2048m -XX:G1HeapRegionSize=32m -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw</argLine>
+                    <argLine>${argLine} -Duser.language=en -Duser.country=US -Xms256m -Xmx4096m -XX:G1HeapRegionSize=32m -Djava.awt.headless=true -Dtestfx.robot=glass -Dtestfx.headless=true -Dprism.order=sw</argLine>
                     <forkCount>1</forkCount>
                     <rerunFailingTestsCount>3</rerunFailingTestsCount>
                     <runOrder>random</runOrder>

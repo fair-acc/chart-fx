@@ -89,6 +89,7 @@ public class CachedDataPoints {
         }
         selected = ArrayUtils.resizeMin(selected, dataLength);
         hasStyles = false; // Styles get updated in boundary condition.
+        minDistanceX = Integer.MAX_VALUE;
         return this;
     }
 

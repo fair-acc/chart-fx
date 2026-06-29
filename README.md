@@ -1,6 +1,7 @@
 [![Join the chat at https://gitter.im/fair-acc/chart](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/fair-acc/chart?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![License](https://img.shields.io/badge/License-LGPL%203.0-blue.svg)](https://opensource.org/licenses/LGPL-3.0)
 [![Maven Central](https://img.shields.io/maven-central/v/io.fair_acc/chartfx/11.svg)](https://search.maven.org/search?q=g:io.fair-acc+a:chartfx+v:11*)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.19008622.svg)](https://doi.org/10.5281/zenodo.19008622)
 
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=fair-acc_chart-fx&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=fair-acc_chart-fx)
@@ -55,7 +56,7 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
   <dependency>
     <groupId>io.fair-acc</groupId>
     <artifactId>chartfx</artifactId>
-    <version>11.3.0</version>
+    <version>11.3.1</version>
   </dependency>
 </dependencies>
 ```
@@ -63,7 +64,7 @@ All chart-fx releases are deployed to maven central, for maven you can add it to
 or your build.gradle like this:
 
 ```gradle
-implementation 'io.fair-acc:chartfx-chart:11.3.0'
+implementation 'io.fair-acc:chartfx:11.3.1'
 ```
 
 To use different build systems or library versions, have a look at the snippets on [maven central](https://search.maven.org/search?q=io.fair-acc%20a:chartfx&core=gav).

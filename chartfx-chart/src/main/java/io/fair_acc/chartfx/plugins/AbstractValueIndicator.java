@@ -103,7 +103,7 @@ public abstract class AbstractValueIndicator extends ChartPlugin implements Even
         });
         // mouse handler to edit the indicator on right click
         label.setOnMouseClicked(evt -> {
-            if (evt.getButton().equals(MouseButton.SECONDARY)) {
+            if (evt.getButton().equals(MouseButton.SECONDARY) && isEditable()) {
                 label.setVisible(false);
                 getChartChildren().add(labelEdit);
                 labelEdit.requestFocus();

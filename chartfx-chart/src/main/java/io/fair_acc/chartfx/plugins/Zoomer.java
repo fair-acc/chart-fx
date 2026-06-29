@@ -794,11 +794,11 @@ public class Zoomer extends ChartPlugin {
             double dataMin;
             double dataMax;
             if (axis.getSide().isVertical()) {
-                dataMin = axis.getValueForDisplay(minPlotCoordinate.getY());
-                dataMax = axis.getValueForDisplay(maxPlotCoordinate.getY());
+                dataMin = axis.getValueForDisplay(Math.max(0, Math.min(axis.getHeight(), minPlotCoordinate.getY())));
+                dataMax = axis.getValueForDisplay(Math.max(0, Math.min(axis.getHeight(), maxPlotCoordinate.getY())));
             } else {
-                dataMin = axis.getValueForDisplay(minPlotCoordinate.getX());
-                dataMax = axis.getValueForDisplay(maxPlotCoordinate.getX());
+                dataMin = axis.getValueForDisplay(Math.max(0, Math.min(axis.getWidth(), minPlotCoordinate.getX())));
+                dataMax = axis.getValueForDisplay(Math.max(0, Math.min(axis.getWidth(), maxPlotCoordinate.getX())));
             }
             switch (getAxisMode()) {
             case X:
