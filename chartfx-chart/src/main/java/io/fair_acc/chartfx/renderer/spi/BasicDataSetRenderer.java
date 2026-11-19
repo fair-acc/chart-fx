@@ -82,7 +82,7 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
                 break;
             }
 
-            // Build contiguous non-nan segments, so we can use the more efficient strokePolyLine
+            // Build contiguous non-nan segments
             while (i < indexMax) {
                 xi = dataSet.get(DIM_X, i);
                 yi = dataSet.get(DIM_Y, i);
@@ -141,9 +141,14 @@ public class BasicDataSetRenderer extends AbstractRendererXY<BasicDataSetRendere
             return;
         }
         benchPolyLine.start();
-        if (length > 1) {
-            // solid and dashed line
-            gc.strokePolyline(x, y, length);
+        if (length > 1 && gc.getLineDashes() != null) {
+            // dashed lines rendered as individual lines that go through the fast path
+            DashedLineStroker.strokeDashedLine(gc, xAxis.getLength(), yAxis.getLength(), x, y, length);
+        } else if (length > 1) {
+            // solid line, individual lines render on the GPU while polylines go through the software rasterizer
+            for (int i = 1; i < length; i++) {
+                gc.strokeLine(x[i - 1], y[i - 1], x[i], y[i]);
+            }
         } else {
             // corner case for a single point that would be skipped by strokePolyLine
             gc.strokeLine(x[0], y[0], x[0], y[0]);
