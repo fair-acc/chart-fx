@@ -201,10 +201,17 @@ public class XYChart extends Chart {
 
     @Override
     public void updateAxisRange() {
-        // Update the axis definitions of all datasets. We do it here, so we can make better
-        // use of multi-threading. The datasets are already locked, so we can use a parallel
-        // stream without extra synchronization.
-        getRenderers().stream().flatMap(renderer -> renderer.getDatasetNodes().stream()).filter(DataSetNode::isVisible).map(DataSetNode::getDataSet).filter(ds -> ds.getBitState().isDirty(ChartBits.DataSetData, ChartBits.DataSetRange)).distinct().forEach(dataset -> dataset.getAxisDescriptions().parallelStream().filter(axisD -> !axisD.isDefined() || axisD.getBitState().isDirty()).forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
+        // Update the axis definitions of all datasets. A sequential stream because forking a parallel
+        // one for the few axes per dataset costs more than the work (ForkJoinPool wakeups on every pulse).
+        getRenderers().stream()
+                .flatMap(renderer -> renderer.getDatasetNodes().stream())
+                .filter(DataSetNode::isVisible)
+                .map(DataSetNode::getDataSet)
+                .filter(ds -> ds.getBitState().isDirty(ChartBits.DataSetData, ChartBits.DataSetRange)).distinct()
+                .forEach(dataset ->
+                        dataset.getAxisDescriptions().stream()
+                                .filter(axisD -> !axisD.isDefined() || axisD.getBitState().isDirty())
+                                .forEach(axisDescription -> dataset.recomputeLimits(axisDescription.getDimIndex())));
 
         // Update each axis
         for (Axis axis : getAxes()) {
